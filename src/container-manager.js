@@ -1,12 +1,9 @@
-const Docker = require('dockerode');
-
-const ContainerRegistry = require('./container-registry');
 const GenericContainer = require('./containers/generic-container');
 
 class ContainerManager {
-  constructor() {
-    this.docker = new Docker();
-    this.containerRegistry = new ContainerRegistry({ containers: [] });
+  constructor({ docker, containerRegistry }) {
+    this.docker = docker;
+    this.containerRegistry = containerRegistry;
   }
 
   newGenericContainer({ image }) {
