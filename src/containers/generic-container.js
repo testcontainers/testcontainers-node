@@ -7,20 +7,22 @@ class GenericContainer {
   }
 
   async start () {
-    const { docker, image } = this
-    const containerOpts = { Image: image, Tty: true, Cmd: [] }
-    const container = await docker.createContainer(containerOpts)
-    await container.start()
-    log('started container', image, container.id)
-    this.container = container
+    this.container = await this._createContainer()
+    await this.container.start()
+    log('started container', this.image, this.container.id)
     return this.container.inspect()
   }
 
   async stop () {
-    const { container } = this
-    await container.stop()
-    await container.remove()
-    log('stopped container', container.id)
+    await this.container.stop()
+    await this.container.remove()
+    log('stopped container', this.container.id)
+  }
+
+  async _createContainer () {
+    const { docker, image } = this
+    const containerOpts = { Image: image, Tty: true, Cmd: [] }
+    return docker.createContainer(containerOpts)
   }
 }
 

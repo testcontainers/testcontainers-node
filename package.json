@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "test": "DEBUG=testcontainers:* jest",
-    "lint": "eslint ./src"
+    "lint": "eslint src"
   },
   "dependencies": {
     "debug": "^3.1.0",
