@@ -5,22 +5,20 @@ throwaway instances of common databases, Selenium web browsers, or anything else
 
 ## Usage
 
-```
-const containerManager = require('testcontainers')
+```javascript
+const testContainers = require('testcontainers')
 
 describe('TestSubject', () => {
-  let mongo
-  let redis
-
+  let mongo, redis
   let testSubject
 
   before(async () => {
-    mongo = await containerManager.startContainer({ image: 'mongo' })
-    redis = await containerManager.startContainer({ image: 'redis:alpine' })
+    mongo = await testContainers.startContainer({ image: 'mongo' })
+    redis = await testContainers.startContainer({ image: 'redis:alpine' })
   })
 
   after(async () => {
-    await containerManager.stopContainers()
+    await testContainers.stopContainers()
   })
 
   beforeEach(() => {
