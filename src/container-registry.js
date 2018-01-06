@@ -10,6 +10,13 @@ class ContainerRegistry {
     this.containers = [...this.containers, container]
   }
 
+  unregisterContainer (container) {
+    log('unregistering container')
+    this.containers = this.containers.filter(
+      registeredContainer => registeredContainer !== container
+    )
+  }
+
   getContainers () {
     return this.containers
   }

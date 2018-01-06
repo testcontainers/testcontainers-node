@@ -21,9 +21,10 @@ class ContainerManager {
 
   async stopContainers () {
     log('stopping containers')
-    await Promise.all(
-      this.containerRegistry.getContainers().map(container => container.stop())
-    )
+    await Promise.all(this.containerRegistry.getContainers().map(container => {
+      container.stop()
+      this.containerRegistry.unregisterContainer(container)
+    }))
   }
 }
 

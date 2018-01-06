@@ -11,6 +11,7 @@ describe('ContainerManager', () => {
     mockImageManager = { pull: jest.fn(), exists: jest.fn() }
     mockContainerRegistry = {
       registerContainer: jest.fn(),
+      unregisterContainer: jest.fn(),
       getContainers: jest.fn()
     }
 
@@ -70,5 +71,6 @@ describe('ContainerManager', () => {
     await containerManager.stopContainers()
 
     expect(container.stop).toHaveBeenCalled()
+    expect(mockContainerRegistry.unregisterContainer).toHaveBeenCalled()
   })
 })
