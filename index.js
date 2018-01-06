@@ -9,8 +9,8 @@ const ContainerManager = require('./src/container-manager');
   const containerManager = new ContainerManager({ docker, containerRegistry });
 
   try {
-    const container = await containerManager.newGenericContainer({ image: 'mysql' }).start();
-    console.log(container);
+    const container = await containerManager.startContainer({ image: 'mysql' });
+    console.log('container config', container);
     await containerManager.stopContainers();
   } catch (e) {
     console.error(e);

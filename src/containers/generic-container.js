@@ -17,6 +17,7 @@ class GenericContainer {
   async stop() {
     const { container } = this;
     await container.stop();
+    await container.remove();
     console.log('stopped container', container.id);
   }
 }
