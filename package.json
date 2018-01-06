@@ -1,14 +1,16 @@
 {
   "name": "testcontainers",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "keywords": [
-    "docker", "container", "test"
+    "docker",
+    "container",
+    "test"
   ],
   "main": "index.js",
   "license": "MIT",
-  "repository" : {
-    "type" : "git",
-    "url" : "https://github.com/cristianrgreco/testcontainers-node"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cristianrgreco/testcontainers-node"
   },
   "scripts": {
     "test": "cross-env DEBUG=testcontainers:* jest",
