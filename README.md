@@ -24,7 +24,7 @@ describe('TestSubject', () => {
 
   beforeEach(() => {
     testSubject = new TestSubject({ 
-      mongoConfig: { host: mongo.host, port: mongo.port } ,
+      mongoConfig: { host: mongo.host, port: mongo.port },
       redisConfig: { host: redis.host, port: redis.port } 
     })
   })
