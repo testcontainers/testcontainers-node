@@ -1,5 +1,5 @@
 const log = require('debug')('testcontainers:ContainerManager')
-const GenericContainer = require('./containers/generic-container')
+const GenericContainer = require('./generic-container')
 
 class ContainerManager {
   constructor ({ docker, imageManager, containerRegistry }) {
@@ -21,9 +21,7 @@ class ContainerManager {
 
   async stopContainers () {
     log('stopping containers')
-    await Promise.all(
-      this.containerRegistry.getContainers().map(container => container.stop())
-    )
+    await Promise.all(this.containerRegistry.getContainers().map(container => container.stop()))
   }
 }
 
