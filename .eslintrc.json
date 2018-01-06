@@ -1,6 +1,11 @@
 {
-  "extends": "standard",
+  "extends": [
+    "standard"
+  ],
   "env": {
     "jest": true
+  },
+  "rules": {
+    "max-len": 2
   }
 }

@@ -10,12 +10,16 @@ describe('ImageManager', () => {
   })
 
   it('should return true if an image exists', async () => {
-    mockDocker.listImages.mockReturnValueOnce([ { RepoTags: [ 'image:latest' ] } ])
+    mockDocker.listImages.mockReturnValueOnce(
+      [ { RepoTags: [ 'image:latest' ] } ]
+    )
     expect(await imageManager.exists('image')).toBe(true)
   })
 
   it('should return false if an image does not exist', async () => {
-    mockDocker.listImages.mockReturnValueOnce([ { RepoTags: [ 'image:latest' ] } ])
+    mockDocker.listImages.mockReturnValueOnce([
+      { RepoTags: [ 'image:latest' ] }
+    ])
     expect(await imageManager.exists('anotherImage')).toBe(false)
   })
 
@@ -24,7 +28,9 @@ describe('ImageManager', () => {
       pipe: jest.fn(),
       once: jest.fn((key, callback) => key === 'end' && callback())
     }
-    mockDocker.pull.mockImplementation((image, callback) => callback(null, mockStream))
+    mockDocker.pull.mockImplementation(
+      (image, callback) => callback(null, mockStream)
+    )
 
     await imageManager.pull('image')
 

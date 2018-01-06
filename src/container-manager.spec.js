@@ -21,8 +21,13 @@ describe('ContainerManager', () => {
     })
 
     const mockInspect = { Config: { id: '1' } }
-    const mockContainer = { start: jest.fn(), inspect: jest.fn(() => mockInspect) }
-    mockDocker.createContainer.mockReturnValueOnce(Promise.resolve(mockContainer))
+    const mockContainer = {
+      start: jest.fn(),
+      inspect: jest.fn(() => mockInspect)
+    }
+    mockDocker.createContainer.mockReturnValueOnce(
+      Promise.resolve(mockContainer)
+    )
   })
 
   it('should start a container', async () => {
@@ -38,14 +43,16 @@ describe('ContainerManager', () => {
   it('should pull the image if it does not exist', async () => {
     mockImageManager.exists.mockReturnValueOnce(Promise.resolve(false))
 
-    const container = await containerManager.startContainer({ image: 'image:alpine' })
+    const container = await containerManager.startContainer(
+      { image: 'image:alpine' }
+    )
 
     expect(container).toEqual({ id: '1' })
     expect(mockImageManager.pull).toHaveBeenCalledWith('image:alpine')
     expect(mockContainerRegistry.registerContainer).toHaveBeenCalled()
   })
 
-  it('should pull the latest image version if one is not specified', async () => {
+  it('should pull the latest image if version is not specified', async () => {
     mockImageManager.exists.mockReturnValueOnce(Promise.resolve(false))
 
     const container = await containerManager.startContainer({ image: 'image' })
