@@ -4,6 +4,10 @@
 
 [![Build Status](https://travis-ci.org/cristianrgreco/testcontainers-node.svg?branch=master)](https://travis-ci.org/cristianrgreco/testcontainers-node)
 
+## Install
+
+`npm install testcontainers --save-dev`
+
 ## Usage
 
 ```javascript
