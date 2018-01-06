@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "debug": "^3.1.0",
+    "dev-null": "^0.1.1",
     "dockerode": "^2.5.3"
   },
   "devDependencies": {

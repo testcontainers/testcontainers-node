@@ -1,3 +1,4 @@
+const devnull = require('dev-null')
 const log = require('debug')('testcontainers:ImageManager')
 
 class ImageManager {
@@ -19,7 +20,7 @@ class ImageManager {
         if (err) {
           reject(err)
         }
-        stream.pipe(process.stdout)
+        stream.pipe(devnull())
         stream.once('end', resolve)
       })
     })
