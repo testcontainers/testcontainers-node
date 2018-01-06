@@ -1,3 +1,5 @@
+const log = require('debug')('testcontainers:GenericContainer')
+
 class GenericContainer {
   constructor ({ docker, image }) {
     this.docker = docker
@@ -9,7 +11,7 @@ class GenericContainer {
     const containerOpts = { Image: image, Tty: true, Cmd: [] }
     const container = await docker.createContainer(containerOpts)
     await container.start()
-    console.log('started container', image, container.id)
+    log('started container', image, container.id)
     this.container = container
     return this.container.inspect()
   }
@@ -18,7 +20,7 @@ class GenericContainer {
     const { container } = this
     await container.stop()
     await container.remove()
-    console.log('stopped container', container.id)
+    log('stopped container', container.id)
   }
 }
 
