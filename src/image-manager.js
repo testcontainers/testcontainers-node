@@ -15,7 +15,7 @@ class ImageManager {
 
   async pull (image) {
     log('pulling image', image)
-    await new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       this.docker.pull(image, (err, stream) => {
         if (err) {
           reject(err)

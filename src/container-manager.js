@@ -1,5 +1,6 @@
 const log = require('debug')('testcontainers:ContainerManager')
 const GenericContainer = require('./generic-container')
+const { parseName } = require('./image-name')
 
 class ContainerManager {
   constructor ({ docker, imageManager, containerRegistry }) {
@@ -11,8 +12,8 @@ class ContainerManager {
   async startContainer ({ image }) {
     log('starting container', image)
     if (!await this.imageManager.exists(image)) {
-      const finalImage = image.indexOf(':') !== -1 ? image : `${image}:latest`
-      await this.imageManager.pull(finalImage)
+      const { name, version } = parseName(image)
+      await this.imageManager.pull(`${name}:${version}`)
     }
     const container = new GenericContainer({ docker: this.docker, image })
     this.containerRegistry.registerContainer(container)

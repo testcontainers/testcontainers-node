@@ -53,16 +53,6 @@ describe('ContainerManager', () => {
     expect(mockContainerRegistry.registerContainer).toHaveBeenCalled()
   })
 
-  it('should pull the latest image if version is not specified', async () => {
-    mockImageManager.exists.mockReturnValueOnce(Promise.resolve(false))
-
-    const container = await containerManager.startContainer({ image: 'image' })
-
-    expect(container).toEqual({ id: '1' })
-    expect(mockImageManager.pull).toHaveBeenCalledWith('image:latest')
-    expect(mockContainerRegistry.registerContainer).toHaveBeenCalled()
-  })
-
   it('should stop all containers', async () => {
     const container = { stop: jest.fn(() => Promise.resolve()) }
     const containers = [container]
