@@ -1,0 +1,20 @@
+{
+  "defaultSeverity": "error",
+  "extends": [
+    "tslint:recommended"
+  ],
+  "jsRules": {},
+  "rules": {
+    "interface-name": false,
+    "object-literal-sort-keys": false,
+    "trailing-comma": false,
+    "no-empty-interface": false,
+    "max-classes-per-file": false,
+    "interface-over-type-literal": false,
+    "max-line-length": false
+  },
+  "rulesDirectory": [],
+  "linterOptions": {
+    "exclude": ["./lib/*"]
+  }
+}

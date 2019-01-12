@@ -6,31 +6,23 @@
 
 ## Install
 
-`npm install testcontainers --save-dev`
+```bash
+npm install testcontainers --save-dev
+```
 
 ## Usage
 
 ```javascript
-const testContainers = require('testcontainers')
+import { GenericContainer } from 'testcontainers';
 
-describe('TestSubject', () => {
-  let mongo, redis
-  let testSubject
-
-  before(async () => {
-    mongo = await testContainers.startContainer({ image: 'mongo' })
-    redis = await testContainers.startContainer({ image: 'redis:alpine' })
-  })
-
-  after(async () => {
-    await testContainers.stopContainers()
-  })
-
-  beforeEach(() => {
-    testSubject = new TestSubject({ 
-      mongoConfig: { host: mongo.host, port: mongo.port },
-      redisConfig: { host: redis.host, port: redis.port } 
-    })
-  })
-})
+test("should return 200 from Docker container over HTTP", async () => {
+    const container = await new GenericContainer("tutum/hello-world")
+        .withExposedPorts(80)
+        .start();
+        
+    const response = await fetch(`http://localhost:${container.getMappedPort(80)}`);
+    expect(response.status).toBe(200);
+    
+    await container.stop();
+});
 ```
