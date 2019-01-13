@@ -15,7 +15,7 @@ npm install testcontainers --save-dev
 ```javascript
 import { GenericContainer } from 'testcontainers';
 
-test("should return 200 from Docker container over HTTP", async () => {
+it("returns 200 from Docker container over HTTP", async () => {
     const container = await new GenericContainer("tutum/hello-world")
         .withExposedPorts(80)
         .start();
