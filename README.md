@@ -7,7 +7,7 @@
 ## Install
 
 ```bash
-npm install testcontainers --save-dev
+npm i -D testcontainers
 ```
 
 ## Usage
@@ -15,14 +15,16 @@ npm install testcontainers --save-dev
 ```javascript
 import { GenericContainer } from 'testcontainers';
 
-it("returns 200 from docker container over http", async () => {
-    const container = await new GenericContainer("tutum/hello-world")
-        .withExposedPorts(80)
-        .start();
+describe("Example", () => {
+    it("should return 200 from docker container over http", async () => {
+        const container = await new GenericContainer("tutum/hello-world")
+            .withExposedPorts(80)
+            .start();
+           
+        const response = await fetch(`http://localhost:${container.getMappedPort(80)}`);
+        expect(response.status).toBe(200);
         
-    const response = await fetch(`http://localhost:${container.getMappedPort(80)}`);
-    expect(response.status).toBe(200);
-    
-    await container.stop();
+        await container.stop();
+    }); 
 });
 ```
