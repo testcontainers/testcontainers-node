@@ -7,12 +7,12 @@ export class GenericContainer implements TestContainer {
     private readonly dockerClient: DockerClient = new DockerodeClient();
     private readonly ports: number[] = [];
 
-    constructor(private readonly image: string) {}
+    constructor(private readonly image: string, private readonly tag: string = "latest") {}
 
     public async start(): Promise<StartedTestContainer> {
-        await this.dockerClient.pull(this.image);
+        await this.dockerClient.pull(this.repoTag());
         const portBindings = await new PortBindings().bind(this.ports);
-        const container = await this.dockerClient.create(this.image, portBindings);
+        const container = await this.dockerClient.create(this.repoTag(), portBindings);
         await this.dockerClient.start(container);
         return new StartedGenericContainer(container, portBindings);
     }
@@ -20,6 +20,10 @@ export class GenericContainer implements TestContainer {
     public withExposedPorts(...ports: number[]): TestContainer {
         this.ports.push(...ports);
         return this;
+    }
+
+    private repoTag(): string {
+        return `${this.image}:${this.tag}`;
     }
 }
 
