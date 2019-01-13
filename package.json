@@ -1,10 +1,12 @@
 {
   "name": "testcontainers-node",
   "author": "Cristian Greco",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["./dist/*"],
+  "files": [
+    "./dist/*"
+  ],
   "keywords": [
     "docker",
     "testcontainers"
