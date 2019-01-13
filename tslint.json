@@ -1,18 +1,16 @@
 {
   "defaultSeverity": "error",
   "extends": [
-    "tslint:recommended"
+    "tslint:recommended",
+    "tslint-config-prettier"
   ],
   "jsRules": {},
   "rules": {
     "interface-name": false,
-    "object-literal-sort-keys": false,
-    "trailing-comma": false,
-    "no-empty-interface": false,
-    "max-classes-per-file": false,
     "interface-over-type-literal": false,
-    "max-line-length": false,
-    "arrow-parens": false
+    "max-classes-per-file": false,
+    "no-empty-interface": false,
+    "object-literal-sort-keys": false
   },
   "rulesDirectory": [],
   "linterOptions": {
