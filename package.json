@@ -1,5 +1,5 @@
 {
-  "name": "testcontainers-node",
+  "name": "testcontainers",
   "author": "Cristian Greco",
   "version": "1.0.4",
   "main": "./dist/index.js",
