@@ -13,18 +13,18 @@ npm i -D testcontainers
 ## Usage
 
 ```javascript
-import { GenericContainer } from 'testcontainers';
+import fetch from "node-fetch";
+import { GenericContainer } from "testcontainers";
 
-describe("Example", () => {
-    it("should return 200 from docker container over http", async () => {
-        const container = await new GenericContainer("tutum/hello-world")
-            .withExposedPorts(80)
-            .start();
-           
-        const response = await fetch(`http://localhost:${container.getMappedPort(80)}`);
-        expect(response.status).toBe(200);
-        
-        await container.stop();
-    }); 
-});
+test("should return 200 from docker container over http", async () => {
+    const container = await new GenericContainer("tutum/hello-world")
+        .withExposedPorts(80)
+        .start();
+       
+    const url = `http://localhost:${container.getMappedPort(80)}`;
+    const response = await fetch(url);
+    expect(response.status).toBe(200);
+    
+    await container.stop();
+}); 
 ```
