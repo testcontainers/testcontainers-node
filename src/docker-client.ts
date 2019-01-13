@@ -1,3 +1,4 @@
+import devNull from "dev-null";
 import Dockerode, { Container } from "dockerode";
 import log from "./logger";
 import { StartedPortBindings } from "./port-bindings";
@@ -19,7 +20,7 @@ export class DockerodeClient implements DockerClient {
                 if (err) {
                     return reject(err);
                 }
-                stream.pipe(process.stdout);
+                stream.pipe(devNull());
                 stream.on("end", resolve);
             });
         });
