@@ -6,6 +6,7 @@ describe("GenericContainer", () => {
         const container = await new GenericContainer("tutum/hello-world").withExposedPorts(80).start();
         const testUrl = `http://localhost:${container.getMappedPort(80)}`;
 
+        await new Promise(resolve => setTimeout(resolve, 3000));
         const containerResponse = await fetch(testUrl);
         expect(containerResponse.status).toBe(200);
 
