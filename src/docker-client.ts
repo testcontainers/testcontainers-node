@@ -10,7 +10,7 @@ export interface DockerClient {
 }
 
 export class DockerodeClient implements DockerClient {
-    constructor(private dockerode: Dockerode = new Dockerode()) {}
+    constructor(private readonly dockerode: Dockerode = new Dockerode()) {}
 
     public pull(image: string): Promise<void> {
         return new Promise((resolve, reject) => {

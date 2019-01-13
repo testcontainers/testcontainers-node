@@ -15,6 +15,10 @@ describe("PortBindings", () => {
         expect(portBindings.getMappedPort(2)).toBe(2000);
     });
 
+    it("should throw if unbound port mapping requested", async () => {
+        expect(() => portBindings.getMappedPort(3)).toThrow();
+    });
+
     it("should get exposed ports", async () => {
         expect(portBindings.getExposedPorts()).toEqual({ 1: {}, 2: {} });
     });

@@ -1,6 +1,6 @@
 import { StartedTestContainer, TestContainer } from "./test-container";
 export declare class GenericContainer implements TestContainer {
-    private image;
+    private readonly image;
     private readonly dockerClient;
     private readonly ports;
     constructor(image: string);

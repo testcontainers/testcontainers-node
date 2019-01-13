@@ -5,41 +5,46 @@ type ContainerExposedPorts = { [port: string]: {} };
 type ContainerPortBindings = PortMap;
 
 export class PortBindings {
-    constructor(private socketClient: SocketClient = new RandomSocketClient()) {}
+    constructor(private readonly socketClient: SocketClient = new RandomSocketClient()) {}
 
     public async bind(ports: number[]): Promise<StartedPortBindings> {
-        const result = new Map<number, number>();
+        const portBindings = await this.createPortBindings(ports);
+        return new StartedPortBindings(portBindings);
+    }
+
+    private async createPortBindings(ports: number[]): Promise<Map<number, number>> {
+        const portBindings = new Map<number, number>();
         for (const port of ports) {
-            result.set(port, await this.socketClient.getPort());
+            portBindings.set(port, await this.socketClient.getPort());
         }
-        return new StartedPortBindings(result);
+        return portBindings;
     }
 }
 
 export class StartedPortBindings {
-    constructor(private portBindings: Map<number, number>) {}
+    constructor(private readonly portBindings: Map<number, number>) {}
 
     public getMappedPort(port: number): number {
-        const result = this.portBindings.get(port);
-        if (!result) {
-            throw new Error();
+        const mappedPort = this.portBindings.get(port);
+        if (!mappedPort) {
+            throw new Error(`No port mapping found for "${port}". Did you forget to bind it?`);
         }
-        return result;
+        return mappedPort;
     }
 
     public getExposedPorts(): ContainerExposedPorts {
-        const result: ContainerExposedPorts = {};
+        const exposedPorts: ContainerExposedPorts = {};
         for (const [k] of this.portBindings) {
-            result[k.toString()] = {};
+            exposedPorts[k.toString()] = {};
         }
-        return result;
+        return exposedPorts;
     }
 
     public getPortBindings(): ContainerPortBindings {
-        const result: ContainerPortBindings = {};
+        const portBindings: ContainerPortBindings = {};
         for (const [k, v] of this.portBindings) {
-            result[k.toString()] = [{ HostPort: v.toString() }];
+            portBindings[k.toString()] = [{ HostPort: v.toString() }];
         }
-        return result;
+        return portBindings;
     }
 }

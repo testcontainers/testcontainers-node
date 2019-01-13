@@ -7,7 +7,7 @@ export class GenericContainer implements TestContainer {
     private readonly dockerClient: DockerClient = new DockerodeClient();
     private readonly ports: number[] = [];
 
-    constructor(private image: string) {}
+    constructor(private readonly image: string) {}
 
     public async start(): Promise<StartedTestContainer> {
         await this.dockerClient.pull(this.image);
@@ -24,7 +24,7 @@ export class GenericContainer implements TestContainer {
 }
 
 class StartedGenericContainer implements StartedTestContainer {
-    constructor(private container: Container, private portBindings: StartedPortBindings) {}
+    constructor(private readonly container: Container, private readonly portBindings: StartedPortBindings) {}
 
     public async stop(): Promise<StoppedTestContainer> {
         await this.container.stop();

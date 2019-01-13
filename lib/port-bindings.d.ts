@@ -5,12 +5,13 @@ declare type ContainerExposedPorts = {
 };
 declare type ContainerPortBindings = PortMap;
 export declare class PortBindings {
-    private socketClient;
+    private readonly socketClient;
     constructor(socketClient?: SocketClient);
     bind(ports: number[]): Promise<StartedPortBindings>;
+    private createPortBindings;
 }
 export declare class StartedPortBindings {
-    private portBindings;
+    private readonly portBindings;
     constructor(portBindings: Map<number, number>);
     getMappedPort(port: number): number;
     getExposedPorts(): ContainerExposedPorts;
