@@ -2,8 +2,8 @@
   "name": "testcontainers-node",
   "author": "Cristian Greco",
   "version": "1.0.1",
-  "main": "./lib/index.js",
-  "types": "./lib/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "keywords": [
     "docker",
     "testcontainers"
@@ -19,7 +19,7 @@
     "url": "https://github.com/cristianrgreco/testcontainers-node/issues"
   },
   "scripts": {
-    "build": "rm -r ./lib && tsc -d",
+    "build": "rm -rf ./dist && tsc",
     "test": "jest",
     "lint": "tslint --fix src/**/*.ts",
     "format": "prettier --write src/**/*.ts"
@@ -47,7 +47,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run lint && npm run format && npm run build && git add lib"
+      "pre-commit": "npm run lint && npm run format && npm run build"
     }
   }
 }
