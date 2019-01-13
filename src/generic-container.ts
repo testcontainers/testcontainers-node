@@ -1,18 +1,22 @@
 import { Container } from "dockerode";
 import { DockerClient, DockerodeClient } from "./docker-client";
 import { BoundPortBindings, PortBindings } from "./port-bindings";
+import { RepoTag } from "./repo-tag";
 import { StartedTestContainer, StoppedTestContainer, TestContainer } from "./test-container";
 
 export class GenericContainer implements TestContainer {
+    private readonly repoTag: RepoTag;
     private readonly dockerClient: DockerClient = new DockerodeClient();
     private readonly ports: number[] = [];
 
-    constructor(private readonly image: string, private readonly tag: string = "latest") {}
+    constructor(readonly image: string, readonly tag: string = "latest") {
+        this.repoTag = new RepoTag(image, tag);
+    }
 
     public async start(): Promise<StartedTestContainer> {
-        await this.dockerClient.pull(this.repoTag());
+        await this.dockerClient.pull(this.repoTag);
         const portBindings = await new PortBindings().bind(this.ports);
-        const container = await this.dockerClient.create(this.repoTag(), portBindings);
+        const container = await this.dockerClient.create(this.repoTag, portBindings);
         await this.dockerClient.start(container);
         return new StartedGenericContainer(container, portBindings);
     }
@@ -20,10 +24,6 @@ export class GenericContainer implements TestContainer {
     public withExposedPorts(...ports: number[]): TestContainer {
         this.ports.push(...ports);
         return this;
-    }
-
-    private repoTag(): string {
-        return `${this.image}:${this.tag}`;
     }
 }
 

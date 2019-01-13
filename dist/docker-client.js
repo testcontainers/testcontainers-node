@@ -10,10 +10,10 @@ class DockerodeClient {
     constructor(dockerode = new dockerode_1.default()) {
         this.dockerode = dockerode;
     }
-    pull(image) {
+    pull(repoTag) {
         return new Promise((resolve, reject) => {
-            logger_1.default.info(`Pulling image: ${image}`);
-            this.dockerode.pull(image, {}, (err, stream) => {
+            logger_1.default.info(`Pulling image: ${repoTag.toString()}`);
+            this.dockerode.pull(repoTag.toString(), {}, (err, stream) => {
                 if (err) {
                     return reject(err);
                 }
@@ -22,10 +22,10 @@ class DockerodeClient {
             });
         });
     }
-    create(image, portBindings) {
-        logger_1.default.info(`Creating container for image: ${image}`);
+    create(repoTag, portBindings) {
+        logger_1.default.info(`Creating container for image: ${repoTag.toString()}`);
         return this.dockerode.createContainer({
-            Image: image,
+            Image: repoTag.toString(),
             ExposedPorts: portBindings.getExposedPorts(),
             HostConfig: {
                 PortBindings: portBindings.getPortBindings()

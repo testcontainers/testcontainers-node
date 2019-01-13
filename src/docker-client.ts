@@ -2,21 +2,22 @@ import devNull from "dev-null";
 import Dockerode, { Container } from "dockerode";
 import log from "./logger";
 import { BoundPortBindings } from "./port-bindings";
+import { RepoTag } from "./repo-tag";
 
 export interface DockerClient {
-    pull(image: string): Promise<void>;
-    create(image: string, portBindings: BoundPortBindings): Promise<Container>;
+    pull(repoTag: RepoTag): Promise<void>;
+    create(repoTag: RepoTag, portBindings: BoundPortBindings): Promise<Container>;
     start(container: Container): Promise<void>;
 }
 
 export class DockerodeClient implements DockerClient {
     constructor(private readonly dockerode: Dockerode = new Dockerode()) {}
 
-    public pull(image: string): Promise<void> {
+    public pull(repoTag: RepoTag): Promise<void> {
         return new Promise((resolve, reject) => {
-            log.info(`Pulling image: ${image}`);
+            log.info(`Pulling image: ${repoTag.toString()}`);
 
-            this.dockerode.pull(image, {}, (err, stream) => {
+            this.dockerode.pull(repoTag.toString(), {}, (err, stream) => {
                 if (err) {
                     return reject(err);
                 }
@@ -26,11 +27,11 @@ export class DockerodeClient implements DockerClient {
         });
     }
 
-    public create(image: string, portBindings: BoundPortBindings): Promise<Container> {
-        log.info(`Creating container for image: ${image}`);
+    public create(repoTag: RepoTag, portBindings: BoundPortBindings): Promise<Container> {
+        log.info(`Creating container for image: ${repoTag.toString()}`);
 
         return this.dockerode.createContainer({
-            Image: image,
+            Image: repoTag.toString(),
             ExposedPorts: portBindings.getExposedPorts(),
             HostConfig: {
                 PortBindings: portBindings.getPortBindings()
