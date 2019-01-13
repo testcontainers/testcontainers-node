@@ -10,6 +10,5 @@ describe("GenericContainer", () => {
         expect(containerResponse.status).toBe(200);
 
         await container.stop();
-        await expect(fetch(testUrl)).rejects;
     }, 10000);
 });
