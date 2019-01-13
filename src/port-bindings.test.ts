@@ -1,9 +1,9 @@
-import { PortBindings, StartedPortBindings } from "./port-bindings";
+import { BoundPortBindings, PortBindings } from "./port-bindings";
 import { FixedSocketClient, SocketClient } from "./socket-client";
 
 describe("PortBindings", () => {
     let socketClient: SocketClient;
-    let portBindings: StartedPortBindings;
+    let portBindings: BoundPortBindings;
 
     beforeEach(async () => {
         socketClient = new FixedSocketClient([1000, 2000]);

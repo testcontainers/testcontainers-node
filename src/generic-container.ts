@@ -1,6 +1,6 @@
 import { Container } from "dockerode";
 import { DockerClient, DockerodeClient } from "./docker-client";
-import { PortBindings, StartedPortBindings } from "./port-bindings";
+import { BoundPortBindings, PortBindings } from "./port-bindings";
 import { StartedTestContainer, StoppedTestContainer, TestContainer } from "./test-container";
 
 export class GenericContainer implements TestContainer {
@@ -24,7 +24,7 @@ export class GenericContainer implements TestContainer {
 }
 
 class StartedGenericContainer implements StartedTestContainer {
-    constructor(private readonly container: Container, private readonly portBindings: StartedPortBindings) {}
+    constructor(private readonly container: Container, private readonly portBindings: BoundPortBindings) {}
 
     public async stop(): Promise<StoppedTestContainer> {
         await this.container.stop();

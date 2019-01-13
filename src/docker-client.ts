@@ -1,11 +1,11 @@
 import devNull from "dev-null";
 import Dockerode, { Container } from "dockerode";
 import log from "./logger";
-import { StartedPortBindings } from "./port-bindings";
+import { BoundPortBindings } from "./port-bindings";
 
 export interface DockerClient {
     pull(image: string): Promise<void>;
-    create(image: string, portBindings: StartedPortBindings): Promise<Container>;
+    create(image: string, portBindings: BoundPortBindings): Promise<Container>;
     start(container: Container): Promise<void>;
 }
 
@@ -26,7 +26,7 @@ export class DockerodeClient implements DockerClient {
         });
     }
 
-    public create(image: string, portBindings: StartedPortBindings): Promise<Dockerode.Container> {
+    public create(image: string, portBindings: BoundPortBindings): Promise<Container> {
         log.info(`Creating container for image: ${image}`);
 
         return this.dockerode.createContainer({
@@ -38,7 +38,7 @@ export class DockerodeClient implements DockerClient {
         });
     }
 
-    public start(container: Dockerode.Container): Promise<void> {
+    public start(container: Container): Promise<void> {
         log.info(`Starting container with ID: ${container.id}`);
         return container.start();
     }

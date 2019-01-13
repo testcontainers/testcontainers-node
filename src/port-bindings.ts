@@ -7,9 +7,9 @@ type ContainerPortBindings = PortMap;
 export class PortBindings {
     constructor(private readonly socketClient: SocketClient = new RandomSocketClient()) {}
 
-    public async bind(ports: number[]): Promise<StartedPortBindings> {
+    public async bind(ports: number[]): Promise<BoundPortBindings> {
         const portBindings = await this.createPortBindings(ports);
-        return new StartedPortBindings(portBindings);
+        return new BoundPortBindings(portBindings);
     }
 
     private async createPortBindings(ports: number[]): Promise<Map<number, number>> {
@@ -21,7 +21,7 @@ export class PortBindings {
     }
 }
 
-export class StartedPortBindings {
+export class BoundPortBindings {
     constructor(private readonly portBindings: Map<number, number>) {}
 
     public getMappedPort(port: number): number {

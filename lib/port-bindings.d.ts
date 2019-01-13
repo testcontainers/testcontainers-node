@@ -7,10 +7,10 @@ declare type ContainerPortBindings = PortMap;
 export declare class PortBindings {
     private readonly socketClient;
     constructor(socketClient?: SocketClient);
-    bind(ports: number[]): Promise<StartedPortBindings>;
+    bind(ports: number[]): Promise<BoundPortBindings>;
     private createPortBindings;
 }
-export declare class StartedPortBindings {
+export declare class BoundPortBindings {
     private readonly portBindings;
     constructor(portBindings: Map<number, number>);
     getMappedPort(port: number): number;
