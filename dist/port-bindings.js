@@ -9,28 +9,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const socket_client_1 = require("./socket-client");
-class PortMap {
-    constructor() {
-        this.portMap = new Map();
-    }
-    getMapping(port) {
-        return this.portMap.get(port);
-    }
-    setMapping(key, value) {
-        this.portMap.set(key, value);
-    }
-    iterator() {
-        return this.portMap;
-    }
-}
-class PortBindings {
+class PortBinder {
     constructor(socketClient = new socket_client_1.RandomSocketClient()) {
         this.socketClient = socketClient;
     }
     bind(ports) {
         return __awaiter(this, void 0, void 0, function* () {
             const portMap = yield this.createPortMap(ports);
-            return new BoundPortBindings(portMap);
+            return new DockerodePortBindings(portMap);
         });
     }
     createPortMap(ports) {
@@ -43,8 +29,8 @@ class PortBindings {
         });
     }
 }
-exports.PortBindings = PortBindings;
-class BoundPortBindings {
+exports.PortBinder = PortBinder;
+class DockerodePortBindings {
     constructor(portMap) {
         this.portMap = portMap;
     }
@@ -70,4 +56,35 @@ class BoundPortBindings {
         return portBindings;
     }
 }
-exports.BoundPortBindings = BoundPortBindings;
+class FakePortBindings {
+    constructor(portMap, containerExposedPorts, containerPortBindings) {
+        this.portMap = portMap;
+        this.containerExposedPorts = containerExposedPorts;
+        this.containerPortBindings = containerPortBindings;
+    }
+    getMappedPort(port) {
+        return this.portMap.getMapping(port);
+    }
+    getExposedPorts() {
+        return this.containerExposedPorts;
+    }
+    getPortBindings() {
+        return this.containerPortBindings;
+    }
+}
+exports.FakePortBindings = FakePortBindings;
+class PortMap {
+    constructor() {
+        this.portMap = new Map();
+    }
+    getMapping(port) {
+        return this.portMap.get(port);
+    }
+    setMapping(key, value) {
+        this.portMap.set(key, value);
+    }
+    iterator() {
+        return this.portMap;
+    }
+}
+exports.PortMap = PortMap;

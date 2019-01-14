@@ -9,11 +9,9 @@
     "interface-name": false,
     "interface-over-type-literal": false,
     "max-classes-per-file": false,
+    "no-empty": false,
     "no-empty-interface": false,
     "object-literal-sort-keys": false
   },
-  "rulesDirectory": [],
-  "linterOptions": {
-    "exclude": ["./lib/*"]
-  }
+  "rulesDirectory": []
 }

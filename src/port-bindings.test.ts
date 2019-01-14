@@ -1,13 +1,13 @@
-import { BoundPortBindings, PortBindings } from "./port-bindings";
+import { PortBinder, PortBindings } from "./port-bindings";
 import { FixedSocketClient, SocketClient } from "./socket-client";
 
 describe("PortBindings", () => {
     let socketClient: SocketClient;
-    let portBindings: BoundPortBindings;
+    let portBindings: PortBindings;
 
     beforeEach(async () => {
         socketClient = new FixedSocketClient([1000, 2000]);
-        portBindings = await new PortBindings(socketClient).bind([1, 2]);
+        portBindings = await new PortBinder(socketClient).bind([1, 2]);
     });
 
     it("should get mapped port", async () => {

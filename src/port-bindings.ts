@@ -2,31 +2,12 @@ import { PortMap as DockerodePortMap } from "dockerode";
 import { Port, PortString } from "./port";
 import { RandomSocketClient, SocketClient } from "./socket-client";
 
-type ContainerExposedPorts = { [port in PortString]: {} };
-type ContainerPortBindings = DockerodePortMap;
-
-class PortMap {
-    private readonly portMap = new Map<Port, Port>();
-
-    public getMapping(port: Port): Port | undefined {
-        return this.portMap.get(port);
-    }
-
-    public setMapping(key: Port, value: Port): void {
-        this.portMap.set(key, value);
-    }
-
-    public iterator(): Iterable<[Port, Port]> {
-        return this.portMap;
-    }
-}
-
-export class PortBindings {
+export class PortBinder {
     constructor(private readonly socketClient: SocketClient = new RandomSocketClient()) {}
 
-    public async bind(ports: Port[]): Promise<BoundPortBindings> {
+    public async bind(ports: Port[]): Promise<PortBindings> {
         const portMap = await this.createPortMap(ports);
-        return new BoundPortBindings(portMap);
+        return new DockerodePortBindings(portMap);
     }
 
     private async createPortMap(ports: Port[]): Promise<PortMap> {
@@ -38,7 +19,13 @@ export class PortBindings {
     }
 }
 
-export class BoundPortBindings {
+export interface PortBindings {
+    getMappedPort(port: Port): Port;
+    getExposedPorts(): ContainerExposedPorts;
+    getPortBindings(): ContainerPortBindings;
+}
+
+class DockerodePortBindings implements PortBindings {
     constructor(private readonly portMap: PortMap) {}
 
     public getMappedPort(port: Port): Port {
@@ -65,3 +52,43 @@ export class BoundPortBindings {
         return portBindings;
     }
 }
+
+export class FakePortBindings implements PortBindings {
+    constructor(
+        private readonly portMap: PortMap,
+        private readonly containerExposedPorts: ContainerExposedPorts,
+        private readonly containerPortBindings: ContainerPortBindings
+    ) {}
+
+    public getMappedPort(port: Port): Port {
+        return this.portMap.getMapping(port)!;
+    }
+
+    public getExposedPorts(): ContainerExposedPorts {
+        return this.containerExposedPorts;
+    }
+
+    public getPortBindings(): ContainerPortBindings {
+        return this.containerPortBindings;
+    }
+}
+
+export class PortMap {
+    private readonly portMap = new Map<Port, Port>();
+
+    public getMapping(port: Port): Port | undefined {
+        return this.portMap.get(port);
+    }
+
+    public setMapping(key: Port, value: Port): void {
+        this.portMap.set(key, value);
+    }
+
+    public iterator(): Iterable<[Port, Port]> {
+        return this.portMap;
+    }
+}
+
+type ContainerExposedPorts = { [port in PortString]: {} };
+
+type ContainerPortBindings = DockerodePortMap;
