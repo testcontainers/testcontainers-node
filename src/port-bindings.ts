@@ -2,41 +2,41 @@ import { Port } from "./port";
 import { PortClient, RandomPortClient } from "./port-client";
 
 export class PortBinder {
-    constructor(private readonly portClient: PortClient = new RandomPortClient()) {}
+  constructor(private readonly portClient: PortClient = new RandomPortClient()) {}
 
-    public async bind(ports: Port[]): Promise<PortBindings> {
-        const portBindings = new PortBindings();
+  public async bind(ports: Port[]): Promise<PortBindings> {
+    const portBindings = new PortBindings();
 
-        for (const port of ports) {
-            portBindings.setBinding(port, await this.portClient.getPort());
-        }
-
-        return portBindings;
+    for (const port of ports) {
+      portBindings.setBinding(port, await this.portClient.getPort());
     }
+
+    return portBindings;
+  }
 }
 
 export class PortBindings {
-    private readonly ports = new Map<Port, Port>();
+  private readonly ports = new Map<Port, Port>();
 
-    public getBinding(port: Port): Port {
-        const binding = this.ports.get(port);
+  public getBinding(port: Port): Port {
+    const binding = this.ports.get(port);
 
-        if (!binding) {
-            throw new Error(`No port binding found for :${port}`);
-        }
-
-        return binding;
+    if (!binding) {
+      throw new Error(`No port binding found for :${port}`);
     }
 
-    public setBinding(key: Port, value: Port): void {
-        this.ports.set(key, value);
-    }
+    return binding;
+  }
 
-    public getHostPorts(): Port[] {
-        return Array.from(this.ports.values());
-    }
+  public setBinding(key: Port, value: Port): void {
+    this.ports.set(key, value);
+  }
 
-    public iterator(): Iterable<[Port, Port]> {
-        return this.ports;
-    }
+  public getHostPorts(): Port[] {
+    return Array.from(this.ports.values());
+  }
+
+  public iterator(): Iterable<[Port, Port]> {
+    return this.ports;
+  }
 }
