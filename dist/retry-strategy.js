@@ -16,3 +16,20 @@ class AbstractRetryStrategy {
         });
     }
 }
+class SimpleRetryStrategy extends AbstractRetryStrategy {
+    constructor(timeout) {
+        super();
+        this.timeout = timeout;
+    }
+    retry(fn) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const result = yield fn();
+            if (result !== undefined) {
+                return result;
+            }
+            yield this.wait(this.timeout);
+            return this.retry(fn);
+        });
+    }
+}
+exports.SimpleRetryStrategy = SimpleRetryStrategy;

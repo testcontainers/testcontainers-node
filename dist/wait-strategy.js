@@ -15,6 +15,7 @@ const node_duration_1 = require("node-duration");
 const clock_1 = require("./clock");
 const logger_1 = __importDefault(require("./logger"));
 const port_check_client_1 = require("./port-check-client");
+const retry_strategy_1 = require("./retry-strategy");
 class AbstractWaitStrategy {
     constructor() {
         this.startupTimeout = new node_duration_1.Duration(10000, node_duration_1.TemporalUnit.MILLISECONDS);
@@ -43,15 +44,15 @@ class HostPortWaitStrategy extends AbstractWaitStrategy {
     }
     waitForPort(port, startTime) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (!(yield this.portCheckClient.isFree(port))) {
-                return true;
-            }
-            const nowTime = this.clock.getTime();
-            if (this.hasStartupTimeoutElapsed(startTime, nowTime)) {
-                return false;
-            }
-            yield new Promise(resolve => setTimeout(resolve, 100));
-            return this.waitForPort(port, startTime);
+            const retryStrategy = new retry_strategy_1.SimpleRetryStrategy(new node_duration_1.Duration(100, node_duration_1.TemporalUnit.MILLISECONDS));
+            return retryStrategy.retry(() => __awaiter(this, void 0, void 0, function* () {
+                if (!(yield this.portCheckClient.isFree(port))) {
+                    return true;
+                }
+                if (this.hasStartupTimeoutElapsed(startTime, this.clock.getTime())) {
+                    return false;
+                }
+            }));
         });
     }
     hasStartupTimeoutElapsed(startTime, endTime) {
