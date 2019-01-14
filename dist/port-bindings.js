@@ -9,33 +9,47 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const socket_client_1 = require("./socket-client");
+class PortMap {
+    constructor() {
+        this.portMap = new Map();
+    }
+    getMapping(port) {
+        return this.portMap.get(port);
+    }
+    setMapping(key, value) {
+        this.portMap.set(key, value);
+    }
+    iterator() {
+        return this.portMap;
+    }
+}
 class PortBindings {
     constructor(socketClient = new socket_client_1.RandomSocketClient()) {
         this.socketClient = socketClient;
     }
     bind(ports) {
         return __awaiter(this, void 0, void 0, function* () {
-            const portBindings = yield this.createPortBindings(ports);
-            return new BoundPortBindings(portBindings);
+            const portMap = yield this.createPortMap(ports);
+            return new BoundPortBindings(portMap);
         });
     }
-    createPortBindings(ports) {
+    createPortMap(ports) {
         return __awaiter(this, void 0, void 0, function* () {
-            const portBindings = new Map();
+            const portMap = new PortMap();
             for (const port of ports) {
-                portBindings.set(port, yield this.socketClient.getPort());
+                portMap.setMapping(port, yield this.socketClient.getPort());
             }
-            return portBindings;
+            return portMap;
         });
     }
 }
 exports.PortBindings = PortBindings;
 class BoundPortBindings {
-    constructor(portBindings) {
-        this.portBindings = portBindings;
+    constructor(portMap) {
+        this.portMap = portMap;
     }
     getMappedPort(port) {
-        const mappedPort = this.portBindings.get(port);
+        const mappedPort = this.portMap.getMapping(port);
         if (!mappedPort) {
             throw new Error(`No port mapping found for "${port}". Did you forget to bind it?`);
         }
@@ -43,15 +57,15 @@ class BoundPortBindings {
     }
     getExposedPorts() {
         const exposedPorts = {};
-        for (const [k] of this.portBindings) {
-            exposedPorts[k.toString()] = {};
+        for (const [containerPort] of this.portMap.iterator()) {
+            exposedPorts[containerPort.toString()] = {};
         }
         return exposedPorts;
     }
     getPortBindings() {
         const portBindings = {};
-        for (const [k, v] of this.portBindings) {
-            portBindings[k.toString()] = [{ HostPort: v.toString() }];
+        for (const [containerPort, hostPort] of this.portMap.iterator()) {
+            portBindings[containerPort.toString()] = [{ HostPort: hostPort.toString() }];
         }
         return portBindings;
     }

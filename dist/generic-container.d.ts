@@ -1,3 +1,4 @@
+import { Port } from "./port";
 import { StartedTestContainer, TestContainer } from "./test-container";
 export declare class GenericContainer implements TestContainer {
     readonly image: string;
@@ -7,5 +8,5 @@ export declare class GenericContainer implements TestContainer {
     private readonly ports;
     constructor(image: string, tag?: string);
     start(): Promise<StartedTestContainer>;
-    withExposedPorts(...ports: number[]): TestContainer;
+    withExposedPorts(...ports: Port[]): TestContainer;
 }

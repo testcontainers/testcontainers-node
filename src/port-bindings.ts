@@ -1,31 +1,48 @@
-import { PortMap } from "dockerode";
+import { PortMap as DockerodePortMap } from "dockerode";
+import { Port, PortString } from "./port";
 import { RandomSocketClient, SocketClient } from "./socket-client";
 
-type ContainerExposedPorts = { [port: string]: {} };
-type ContainerPortBindings = PortMap;
+type ContainerExposedPorts = { [port in PortString]: {} };
+type ContainerPortBindings = DockerodePortMap;
+
+class PortMap {
+    private readonly portMap = new Map<Port, Port>();
+
+    public getMapping(port: Port): Port | undefined {
+        return this.portMap.get(port);
+    }
+
+    public setMapping(key: Port, value: Port): void {
+        this.portMap.set(key, value);
+    }
+
+    public iterator(): Iterable<[Port, Port]> {
+        return this.portMap;
+    }
+}
 
 export class PortBindings {
     constructor(private readonly socketClient: SocketClient = new RandomSocketClient()) {}
 
-    public async bind(ports: number[]): Promise<BoundPortBindings> {
-        const portBindings = await this.createPortBindings(ports);
-        return new BoundPortBindings(portBindings);
+    public async bind(ports: Port[]): Promise<BoundPortBindings> {
+        const portMap = await this.createPortMap(ports);
+        return new BoundPortBindings(portMap);
     }
 
-    private async createPortBindings(ports: number[]): Promise<Map<number, number>> {
-        const portBindings = new Map<number, number>();
+    private async createPortMap(ports: Port[]): Promise<PortMap> {
+        const portMap = new PortMap();
         for (const port of ports) {
-            portBindings.set(port, await this.socketClient.getPort());
+            portMap.setMapping(port, await this.socketClient.getPort());
         }
-        return portBindings;
+        return portMap;
     }
 }
 
 export class BoundPortBindings {
-    constructor(private readonly portBindings: Map<number, number>) {}
+    constructor(private readonly portMap: PortMap) {}
 
-    public getMappedPort(port: number): number {
-        const mappedPort = this.portBindings.get(port);
+    public getMappedPort(port: Port): Port {
+        const mappedPort = this.portMap.getMapping(port);
         if (!mappedPort) {
             throw new Error(`No port mapping found for "${port}". Did you forget to bind it?`);
         }
@@ -34,16 +51,16 @@ export class BoundPortBindings {
 
     public getExposedPorts(): ContainerExposedPorts {
         const exposedPorts: ContainerExposedPorts = {};
-        for (const [k] of this.portBindings) {
-            exposedPorts[k.toString()] = {};
+        for (const [containerPort] of this.portMap.iterator()) {
+            exposedPorts[containerPort.toString()] = {};
         }
         return exposedPorts;
     }
 
     public getPortBindings(): ContainerPortBindings {
         const portBindings: ContainerPortBindings = {};
-        for (const [k, v] of this.portBindings) {
-            portBindings[k.toString()] = [{ HostPort: v.toString() }];
+        for (const [containerPort, hostPort] of this.portMap.iterator()) {
+            portBindings[containerPort.toString()] = [{ HostPort: hostPort.toString() }];
         }
         return portBindings;
     }

@@ -1,5 +1,6 @@
 import { Container } from "dockerode";
 import { DockerClient, DockerodeClient } from "./docker-client";
+import { Port } from "./port";
 import { BoundPortBindings, PortBindings } from "./port-bindings";
 import { RepoTag } from "./repo-tag";
 import { StartedTestContainer, StoppedTestContainer, TestContainer } from "./test-container";
@@ -7,7 +8,7 @@ import { StartedTestContainer, StoppedTestContainer, TestContainer } from "./tes
 export class GenericContainer implements TestContainer {
     private readonly repoTag: RepoTag;
     private readonly dockerClient: DockerClient = new DockerodeClient();
-    private readonly ports: number[] = [];
+    private readonly ports: Port[] = [];
 
     constructor(readonly image: string, readonly tag: string = "latest") {
         this.repoTag = new RepoTag(image, tag);
@@ -21,7 +22,7 @@ export class GenericContainer implements TestContainer {
         return new StartedGenericContainer(container, portBindings);
     }
 
-    public withExposedPorts(...ports: number[]): TestContainer {
+    public withExposedPorts(...ports: Port[]): TestContainer {
         this.ports.push(...ports);
         return this;
     }
@@ -36,7 +37,7 @@ class StartedGenericContainer implements StartedTestContainer {
         return new StoppedGenericContainer();
     }
 
-    public getMappedPort(port: number): number {
+    public getMappedPort(port: Port): Port {
         return this.portBindings.getMappedPort(port);
     }
 }

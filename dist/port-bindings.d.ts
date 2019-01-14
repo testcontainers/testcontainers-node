@@ -1,19 +1,26 @@
-import { PortMap } from "dockerode";
+import { PortMap as DockerodePortMap } from "dockerode";
+import { Port, PortString } from "./port";
 import { SocketClient } from "./socket-client";
 declare type ContainerExposedPorts = {
-    [port: string]: {};
+    [port in PortString]: {};
 };
-declare type ContainerPortBindings = PortMap;
+declare type ContainerPortBindings = DockerodePortMap;
+declare class PortMap {
+    private readonly portMap;
+    getMapping(port: Port): Port | undefined;
+    setMapping(key: Port, value: Port): void;
+    iterator(): Iterable<[Port, Port]>;
+}
 export declare class PortBindings {
     private readonly socketClient;
     constructor(socketClient?: SocketClient);
-    bind(ports: number[]): Promise<BoundPortBindings>;
-    private createPortBindings;
+    bind(ports: Port[]): Promise<BoundPortBindings>;
+    private createPortMap;
 }
 export declare class BoundPortBindings {
-    private readonly portBindings;
-    constructor(portBindings: Map<number, number>);
-    getMappedPort(port: number): number;
+    private readonly portMap;
+    constructor(portMap: PortMap);
+    getMappedPort(port: Port): Port;
     getExposedPorts(): ContainerExposedPorts;
     getPortBindings(): ContainerPortBindings;
 }

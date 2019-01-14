@@ -15,7 +15,7 @@ export class DockerodeClient implements DockerClient {
 
     public pull(repoTag: RepoTag): Promise<void> {
         return new Promise((resolve, reject) => {
-            log.info(`Pulling image: ${repoTag.toString()}`);
+            log.info(`Pulling image: ${repoTag}`);
 
             this.dockerode.pull(repoTag.toString(), {}, (err, stream) => {
                 if (err) {
@@ -28,7 +28,7 @@ export class DockerodeClient implements DockerClient {
     }
 
     public create(repoTag: RepoTag, portBindings: BoundPortBindings): Promise<Container> {
-        log.info(`Creating container for image: ${repoTag.toString()}`);
+        log.info(`Creating container for image: ${repoTag}`);
 
         return this.dockerode.createContainer({
             Image: repoTag.toString(),

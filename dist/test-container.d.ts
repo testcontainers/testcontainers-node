@@ -1,10 +1,11 @@
+import { Port } from "./port";
 export interface TestContainer {
     start(): Promise<StartedTestContainer>;
-    withExposedPorts(...ports: number[]): TestContainer;
+    withExposedPorts(...ports: Port[]): TestContainer;
 }
 export interface StartedTestContainer {
     stop(): Promise<StoppedTestContainer>;
-    getMappedPort(port: number): number;
+    getMappedPort(port: Port): Port;
 }
 export interface StoppedTestContainer {
 }
