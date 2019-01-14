@@ -28,3 +28,11 @@ test("should return 200 from docker container over http", async () => {
     await container.stop();
 }); 
 ```
+
+## To Do
+
+- Make `PortBindings` a POJO. The logic for getting Dockerode-specific 
+exposed ports and port bindings should happen in the `DockerodeClient`.
+The result is that `ContainerState` doesn't need any logic in processing
+Dockerode-specific port syntax into something usable.
+- Support auth so that images may be pulled from private repositories. 

@@ -1,9 +1,9 @@
 import { PortMap as DockerodePortMap } from "dockerode";
 import { Port, PortString } from "./port";
-import { SocketClient } from "./socket-client";
+import { PortClient } from "./port-client";
 export declare class PortBinder {
-    private readonly socketClient;
-    constructor(socketClient?: SocketClient);
+    private readonly portClient;
+    constructor(portClient?: PortClient);
     bind(ports: Port[]): Promise<PortBindings>;
     private createPortMap;
 }

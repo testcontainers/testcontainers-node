@@ -1,9 +1,9 @@
 import { PortMap as DockerodePortMap } from "dockerode";
 import { Port, PortString } from "./port";
-import { RandomSocketClient, SocketClient } from "./socket-client";
+import { PortClient, RandomPortClient } from "./port-client";
 
 export class PortBinder {
-    constructor(private readonly socketClient: SocketClient = new RandomSocketClient()) {}
+    constructor(private readonly portClient: PortClient = new RandomPortClient()) {}
 
     public async bind(ports: Port[]): Promise<PortBindings> {
         const portMap = await this.createPortMap(ports);
@@ -13,7 +13,7 @@ export class PortBinder {
     private async createPortMap(ports: Port[]): Promise<PortMap> {
         const portMap = new PortMap();
         for (const port of ports) {
-            portMap.setMapping(port, await this.socketClient.getPort());
+            portMap.setMapping(port, await this.portClient.getPort());
         }
         return portMap;
     }
@@ -31,7 +31,7 @@ class DockerodePortBindings implements PortBindings {
     public getMappedPort(port: Port): Port {
         const mappedPort = this.portMap.getMapping(port);
         if (!mappedPort) {
-            throw new Error(`No port mapping found for "${port}". Did you forget to bind it?`);
+            throw new Error(`No port mapping found for :${port}. Did you forget to bind it?`);
         }
         return mappedPort;
     }

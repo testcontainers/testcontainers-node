@@ -8,10 +8,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const socket_client_1 = require("./socket-client");
+const port_client_1 = require("./port-client");
 class PortBinder {
-    constructor(socketClient = new socket_client_1.RandomSocketClient()) {
-        this.socketClient = socketClient;
+    constructor(portClient = new port_client_1.RandomPortClient()) {
+        this.portClient = portClient;
     }
     bind(ports) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -23,7 +23,7 @@ class PortBinder {
         return __awaiter(this, void 0, void 0, function* () {
             const portMap = new PortMap();
             for (const port of ports) {
-                portMap.setMapping(port, yield this.socketClient.getPort());
+                portMap.setMapping(port, yield this.portClient.getPort());
             }
             return portMap;
         });
@@ -37,7 +37,7 @@ class DockerodePortBindings {
     getMappedPort(port) {
         const mappedPort = this.portMap.getMapping(port);
         if (!mappedPort) {
-            throw new Error(`No port mapping found for "${port}". Did you forget to bind it?`);
+            throw new Error(`No port mapping found for :${port}. Did you forget to bind it?`);
         }
         return mappedPort;
     }

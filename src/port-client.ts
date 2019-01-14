@@ -1,17 +1,17 @@
 import getRandomPort from "get-port";
 import { Port } from "./port";
 
-export interface SocketClient {
+export interface PortClient {
     getPort(): Promise<Port>;
 }
 
-export class RandomSocketClient implements SocketClient {
+export class RandomPortClient implements PortClient {
     public getPort(): Promise<Port> {
         return getRandomPort();
     }
 }
 
-export class FixedSocketClient implements SocketClient {
+export class FixedPortClient implements PortClient {
     private portIndex = 0;
 
     constructor(private readonly ports: Port[]) {}

@@ -1,11 +1,11 @@
 import { Port } from "./port";
-export interface SocketClient {
+export interface PortClient {
     getPort(): Promise<Port>;
 }
-export declare class RandomSocketClient implements SocketClient {
+export declare class RandomPortClient implements PortClient {
     getPort(): Promise<Port>;
 }
-export declare class FixedSocketClient implements SocketClient {
+export declare class FixedPortClient implements PortClient {
     private readonly ports;
     private portIndex;
     constructor(ports: Port[]);

@@ -10,5 +10,5 @@ describe("GenericContainer", () => {
         expect(containerResponse.status).toBe(200);
 
         await container.stop();
-    }, 10000);
+    }, 10_000);
 });
