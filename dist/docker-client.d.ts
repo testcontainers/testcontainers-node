@@ -12,4 +12,6 @@ export declare class DockerodeClient implements DockerClient {
     pull(repoTag: RepoTag): Promise<void>;
     create(repoTag: RepoTag, portBindings: PortBindings): Promise<Container>;
     start(container: Container): Promise<void>;
+    private getExposedPorts;
+    private getPortBindings;
 }

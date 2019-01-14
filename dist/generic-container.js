@@ -56,7 +56,7 @@ class StartedGenericContainer {
         });
     }
     getMappedPort(port) {
-        return this.portBindings.getMappedPort(port);
+        return this.portBindings.getBinding(port);
     }
 }
 class StoppedGenericContainer {

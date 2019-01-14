@@ -15,76 +15,34 @@ class PortBinder {
     }
     bind(ports) {
         return __awaiter(this, void 0, void 0, function* () {
-            const portMap = yield this.createPortMap(ports);
-            return new DockerodePortBindings(portMap);
-        });
-    }
-    createPortMap(ports) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const portMap = new PortMap();
+            const portBindings = new PortBindings();
             for (const port of ports) {
-                portMap.setMapping(port, yield this.portClient.getPort());
+                portBindings.setBinding(port, yield this.portClient.getPort());
             }
-            return portMap;
+            return portBindings;
         });
     }
 }
 exports.PortBinder = PortBinder;
-class DockerodePortBindings {
-    constructor(portMap) {
-        this.portMap = portMap;
-    }
-    getMappedPort(port) {
-        const mappedPort = this.portMap.getMapping(port);
-        if (!mappedPort) {
-            throw new Error(`No port mapping found for :${port}. Did you forget to bind it?`);
-        }
-        return mappedPort;
-    }
-    getExposedPorts() {
-        const exposedPorts = {};
-        for (const [containerPort] of this.portMap.iterator()) {
-            exposedPorts[containerPort.toString()] = {};
-        }
-        return exposedPorts;
-    }
-    getPortBindings() {
-        const portBindings = {};
-        for (const [containerPort, hostPort] of this.portMap.iterator()) {
-            portBindings[containerPort.toString()] = [{ HostPort: hostPort.toString() }];
-        }
-        return portBindings;
-    }
-}
-class FakePortBindings {
-    constructor(portMap, containerExposedPorts, containerPortBindings) {
-        this.portMap = portMap;
-        this.containerExposedPorts = containerExposedPorts;
-        this.containerPortBindings = containerPortBindings;
-    }
-    getMappedPort(port) {
-        return this.portMap.getMapping(port);
-    }
-    getExposedPorts() {
-        return this.containerExposedPorts;
-    }
-    getPortBindings() {
-        return this.containerPortBindings;
-    }
-}
-exports.FakePortBindings = FakePortBindings;
-class PortMap {
+class PortBindings {
     constructor() {
-        this.portMap = new Map();
+        this.ports = new Map();
     }
-    getMapping(port) {
-        return this.portMap.get(port);
+    getBinding(port) {
+        const binding = this.ports.get(port);
+        if (!binding) {
+            throw new Error(`No port binding found for :${port}`);
+        }
+        return binding;
     }
-    setMapping(key, value) {
-        this.portMap.set(key, value);
+    setBinding(key, value) {
+        this.ports.set(key, value);
+    }
+    getHostPorts() {
+        return Array.from(this.ports.values());
     }
     iterator() {
-        return this.portMap;
+        return this.ports;
     }
 }
-exports.PortMap = PortMap;
+exports.PortBindings = PortBindings;

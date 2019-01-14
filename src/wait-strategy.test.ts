@@ -1,7 +1,7 @@
 import { Duration, TemporalUnit } from "node-duration";
 import { ChainedClock } from "./clock";
 import { ContainerState } from "./container-state";
-import { FakePortBindings, PortMap } from "./port-bindings";
+import { PortBindings } from "./port-bindings";
 import { BusyPortCheckClient, FreePortCheckClient } from "./port-check-client";
 import { HostPortWaitStrategy } from "./wait-strategy";
 
@@ -25,12 +25,8 @@ describe("WaitStrategy", () => {
     });
 
     function createContainerState(): ContainerState {
-        const portMap = new PortMap();
-        portMap.setMapping(1, 1000);
-
-        const containerExposedPorts = { 1: {} };
-        const containerPortBindings = { 1: [{ HostPort: "1000" }] };
-        const portBindings = new FakePortBindings(portMap, containerExposedPorts, containerPortBindings);
+        const portBindings = new PortBindings();
+        portBindings.setBinding(1, 1000);
 
         return new ContainerState(portBindings);
     }

@@ -26,15 +26,29 @@ class DockerodeClient {
         logger_1.default.info(`Creating container for image: ${repoTag}`);
         return this.dockerode.createContainer({
             Image: repoTag.toString(),
-            ExposedPorts: portBindings.getExposedPorts(),
+            ExposedPorts: this.getExposedPorts(portBindings),
             HostConfig: {
-                PortBindings: portBindings.getPortBindings()
+                PortBindings: this.getPortBindings(portBindings)
             }
         });
     }
     start(container) {
         logger_1.default.info(`Starting container with ID: ${container.id}`);
         return container.start();
+    }
+    getExposedPorts(portBindings) {
+        const dockerodeExposedPorts = {};
+        for (const [internalPort] of portBindings.iterator()) {
+            dockerodeExposedPorts[internalPort.toString()] = {};
+        }
+        return dockerodeExposedPorts;
+    }
+    getPortBindings(portBindings) {
+        const dockerodePortBindings = {};
+        for (const [internalPort, hostPort] of portBindings.iterator()) {
+            dockerodePortBindings[internalPort.toString()] = [{ HostPort: hostPort.toString() }];
+        }
+        return dockerodePortBindings;
     }
 }
 exports.DockerodeClient = DockerodeClient;

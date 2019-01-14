@@ -50,7 +50,7 @@ class StartedGenericContainer implements StartedTestContainer {
     }
 
     public getMappedPort(port: Port): Port {
-        return this.portBindings.getMappedPort(port);
+        return this.portBindings.getBinding(port);
     }
 }
 
