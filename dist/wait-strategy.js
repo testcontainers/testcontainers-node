@@ -34,10 +34,16 @@ class HostPortWaitStrategy extends AbstractWaitStrategy {
     waitUntilReady(containerState) {
         return __awaiter(this, void 0, void 0, function* () {
             const startTime = this.clock.getTime();
+            yield this.hostPortCheck(containerState, startTime);
+        });
+    }
+    hostPortCheck(containerState, startTime) {
+        return __awaiter(this, void 0, void 0, function* () {
             for (const hostPort of containerState.getHostPorts()) {
-                logger_1.default.info(`Waiting for port :${hostPort}`);
+                logger_1.default.info(`Waiting for host port :${hostPort}`);
                 if (!(yield this.waitForPort(hostPort, startTime))) {
-                    throw new Error(`Port :${hostPort} not bound after ${this.startupTimeout.get(node_duration_1.TemporalUnit.MILLISECONDS)}ms`);
+                    const timeout = `${this.startupTimeout.get(node_duration_1.TemporalUnit.MILLISECONDS)}`;
+                    throw new Error(`Port :${hostPort} not bound after ${timeout}ms`);
                 }
             }
         });

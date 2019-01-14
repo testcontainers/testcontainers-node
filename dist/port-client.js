@@ -10,13 +10,3 @@ class RandomPortClient {
     }
 }
 exports.RandomPortClient = RandomPortClient;
-class FixedPortClient {
-    constructor(ports) {
-        this.ports = ports;
-        this.portIndex = 0;
-    }
-    getPort() {
-        return Promise.resolve(this.ports[this.portIndex++]);
-    }
-}
-exports.FixedPortClient = FixedPortClient;

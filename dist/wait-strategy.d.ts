@@ -16,6 +16,7 @@ export declare class HostPortWaitStrategy extends AbstractWaitStrategy {
     private readonly clock;
     constructor(portCheckClient?: PortCheckClient, clock?: Clock);
     waitUntilReady(containerState: ContainerState): Promise<void>;
+    private hostPortCheck;
     private waitForPort;
     private hasStartupTimeoutElapsed;
 }

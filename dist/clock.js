@@ -6,7 +6,7 @@ class SystemClock {
     }
 }
 exports.SystemClock = SystemClock;
-class ChainedClock {
+class RotatingClock {
     constructor(times) {
         this.times = times;
         this.timeIndex = 0;
@@ -15,4 +15,4 @@ class ChainedClock {
         return this.times[this.timeIndex++];
     }
 }
-exports.ChainedClock = ChainedClock;
+exports.RotatingClock = RotatingClock;

@@ -5,7 +5,7 @@ export interface Clock {
 export declare class SystemClock implements Clock {
     getTime(): Time;
 }
-export declare class ChainedClock implements Clock {
+export declare class RotatingClock implements Clock {
     private readonly times;
     private timeIndex;
     constructor(times: Time[]);

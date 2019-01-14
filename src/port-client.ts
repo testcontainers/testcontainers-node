@@ -10,13 +10,3 @@ export class RandomPortClient implements PortClient {
         return getRandomPort();
     }
 }
-
-export class FixedPortClient implements PortClient {
-    private portIndex = 0;
-
-    constructor(private readonly ports: Port[]) {}
-
-    public getPort(): Promise<Port> {
-        return Promise.resolve(this.ports[this.portIndex++]);
-    }
-}

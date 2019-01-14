@@ -1,9 +1,11 @@
 import devNull from "dev-null";
-import Dockerode, { Container, PortMap as DockerodePortMap } from "dockerode";
+import Dockerode, { Container, PortMap as DockerodePortBindings } from "dockerode";
 import log from "./logger";
 import { PortString } from "./port";
 import { PortBindings } from "./port-bindings";
 import { RepoTag } from "./repo-tag";
+
+type DockerodeExposedPorts = { [port in PortString]: {} };
 
 export interface DockerClient {
     pull(repoTag: RepoTag): Promise<void>;
@@ -61,7 +63,3 @@ export class DockerodeClient implements DockerClient {
         return dockerodePortBindings;
     }
 }
-
-type DockerodeExposedPorts = { [port in PortString]: {} };
-
-type DockerodePortBindings = DockerodePortMap;

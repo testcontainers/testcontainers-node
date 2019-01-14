@@ -10,7 +10,7 @@ export class SystemClock implements Clock {
     }
 }
 
-export class ChainedClock implements Clock {
+export class RotatingClock implements Clock {
     private timeIndex = 0;
 
     constructor(private readonly times: Time[]) {}

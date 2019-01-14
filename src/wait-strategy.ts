@@ -1,4 +1,5 @@
 import { Duration, TemporalUnit } from "node-duration";
+import { start } from "repl";
 import { Clock, SystemClock, Time } from "./clock";
 import { ContainerState } from "./container-state";
 import log from "./logger";
@@ -32,14 +33,16 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
 
     public async waitUntilReady(containerState: ContainerState): Promise<void> {
         const startTime = this.clock.getTime();
+        await this.hostPortCheck(containerState, startTime);
+    }
 
+    private async hostPortCheck(containerState: ContainerState, startTime: Time): Promise<void> {
         for (const hostPort of containerState.getHostPorts()) {
-            log.info(`Waiting for port :${hostPort}`);
+            log.info(`Waiting for host port :${hostPort}`);
 
             if (!(await this.waitForPort(hostPort, startTime))) {
-                throw new Error(
-                    `Port :${hostPort} not bound after ${this.startupTimeout.get(TemporalUnit.MILLISECONDS)}ms`
-                );
+                const timeout = `${this.startupTimeout.get(TemporalUnit.MILLISECONDS)}`;
+                throw new Error(`Port :${hostPort} not bound after ${timeout}ms`);
             }
         }
     }
