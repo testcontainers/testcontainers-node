@@ -2,7 +2,7 @@ import { Container } from "dockerode";
 import { DockerClient, DockerodeClient } from "./docker-client";
 import { Port } from "./port";
 import { BoundPortBindings, PortBindings } from "./port-bindings";
-import { RepoTag } from "./repo-tag";
+import { Image, RepoTag, Tag } from "./repo-tag";
 import { StartedTestContainer, StoppedTestContainer, TestContainer } from "./test-container";
 
 export class GenericContainer implements TestContainer {
@@ -10,7 +10,7 @@ export class GenericContainer implements TestContainer {
     private readonly dockerClient: DockerClient = new DockerodeClient();
     private readonly ports: Port[] = [];
 
-    constructor(readonly image: string, readonly tag: string = "latest") {
+    constructor(readonly image: Image, readonly tag: Tag = "latest") {
         this.repoTag = new RepoTag(image, tag);
     }
 
