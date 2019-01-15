@@ -1,5 +1,4 @@
 import { Duration } from "node-duration";
-import { Clock } from "./clock";
 import { ContainerState } from "./container-state";
 import { DockerClient } from "./docker-client";
 import { PortCheck } from "./port-check";
@@ -16,11 +15,10 @@ export declare class HostPortWaitStrategy extends AbstractWaitStrategy {
     private readonly dockerClient;
     private readonly hostPortCheck;
     private readonly internalPortCheck;
-    private readonly clock;
-    constructor(dockerClient: DockerClient, hostPortCheck: PortCheck, internalPortCheck: PortCheck, clock?: Clock);
+    constructor(dockerClient: DockerClient, hostPortCheck: PortCheck, internalPortCheck: PortCheck);
     waitUntilReady(containerState: ContainerState): Promise<void>;
-    private doHostPortCheck;
-    private doInternalPortCheck;
-    private hasStartupTimeoutElapsed;
+    private waitForHostPorts;
+    private waitForInternalPorts;
+    private waitForPort;
 }
 export {};

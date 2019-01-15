@@ -83,22 +83,3 @@ class DockerodeClient {
     }
 }
 exports.DockerodeClient = DockerodeClient;
-class FakeDockerClient {
-    constructor(container, execResult) {
-        this.container = container;
-        this.execResult = execResult;
-    }
-    pull(repoTag) {
-        return Promise.resolve();
-    }
-    create(repoTag, portBindings) {
-        return Promise.resolve(this.container);
-    }
-    start(container) {
-        return Promise.resolve();
-    }
-    exec(container, command) {
-        return Promise.resolve(this.execResult);
-    }
-}
-exports.FakeDockerClient = FakeDockerClient;

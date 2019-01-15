@@ -24,13 +24,4 @@ export declare class DockerodeClient implements DockerClient {
     private getExposedPorts;
     private getPortBindings;
 }
-export declare class FakeDockerClient implements DockerClient {
-    private readonly container;
-    private readonly execResult;
-    constructor(container: Container, execResult: ExecResult);
-    pull(repoTag: RepoTag): Promise<void>;
-    create(repoTag: RepoTag, portBindings: PortBindings): Promise<Container>;
-    start(container: Container): Promise<void>;
-    exec(container: Container, command: Command[]): Promise<ExecResult>;
-}
 export {};

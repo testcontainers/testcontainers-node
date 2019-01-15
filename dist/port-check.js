@@ -18,15 +18,15 @@ class HostPortCheck {
                     .setTimeout(1000)
                     .on("error", () => {
                     socket.destroy();
-                    resolve(true);
+                    resolve(false);
                 })
                     .on("timeout", () => {
                     socket.destroy();
-                    resolve(true);
+                    resolve(false);
                 })
                     .connect(port, () => {
                     socket.end();
-                    resolve(false);
+                    resolve(true);
                 });
             });
         });

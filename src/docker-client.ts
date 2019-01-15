@@ -93,23 +93,3 @@ export class DockerodeClient implements DockerClient {
     return dockerodePortBindings;
   }
 }
-
-export class FakeDockerClient implements DockerClient {
-  constructor(private readonly container: Container, private readonly execResult: ExecResult) {}
-
-  public pull(repoTag: RepoTag): Promise<void> {
-    return Promise.resolve();
-  }
-
-  public create(repoTag: RepoTag, portBindings: PortBindings): Promise<Container> {
-    return Promise.resolve(this.container);
-  }
-
-  public start(container: Container): Promise<void> {
-    return Promise.resolve();
-  }
-
-  public exec(container: Container, command: Command[]): Promise<ExecResult> {
-    return Promise.resolve(this.execResult);
-  }
-}
