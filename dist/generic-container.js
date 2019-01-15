@@ -8,9 +8,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const node_duration_1 = require("node-duration");
 const container_state_1 = require("./container-state");
 const docker_client_1 = require("./docker-client");
 const port_bindings_1 = require("./port-bindings");
+const port_check_1 = require("./port-check");
 const repo_tag_1 = require("./repo-tag");
 const wait_strategy_1 = require("./wait-strategy");
 class GenericContainer {
@@ -19,7 +21,7 @@ class GenericContainer {
         this.tag = tag;
         this.dockerClient = new docker_client_1.DockerodeClient();
         this.ports = [];
-        this.waitStrategy = new wait_strategy_1.HostPortWaitStrategy(this.dockerClient);
+        this.startupTimeout = new node_duration_1.Duration(10000, node_duration_1.TemporalUnit.MILLISECONDS);
         this.repoTag = new repo_tag_1.RepoTag(image, tag);
     }
     start() {
@@ -29,7 +31,10 @@ class GenericContainer {
             const container = yield this.dockerClient.create(this.repoTag, portBindings);
             yield this.dockerClient.start(container);
             const containerState = new container_state_1.ContainerState(portBindings);
-            yield this.waitStrategy.waitUntilReady(container, containerState);
+            const hostPortCheck = new port_check_1.HostPortCheck();
+            const internalPortCheck = new port_check_1.InternalPortCheck(container, this.dockerClient);
+            const waitStrategy = new wait_strategy_1.HostPortWaitStrategy(this.dockerClient, hostPortCheck, internalPortCheck);
+            yield waitStrategy.waitUntilReady(containerState);
             return new StartedGenericContainer(container, portBindings);
         });
     }
@@ -38,7 +43,7 @@ class GenericContainer {
         return this;
     }
     withStartupTimeout(startupTimeout) {
-        this.waitStrategy = this.waitStrategy.withStartupTimeout(startupTimeout);
+        this.startupTimeout = startupTimeout;
         return this;
     }
 }

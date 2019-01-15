@@ -1,20 +1,19 @@
-import { Container } from "dockerode";
 import { Duration, TemporalUnit } from "node-duration";
 import { Clock, SystemClock, Time } from "./clock";
 import { ContainerState } from "./container-state";
 import { DockerClient } from "./docker-client";
 import log from "./logger";
-import { PortCheckClient, SystemPortCheckClient } from "./port-check-client";
+import { PortCheck } from "./port-check";
 
 export interface WaitStrategy {
-  waitUntilReady(container: Container, containerState: ContainerState): Promise<void>;
+  waitUntilReady(containerState: ContainerState): Promise<void>;
   withStartupTimeout(startupTimeout: Duration): WaitStrategy;
 }
 
 abstract class AbstractWaitStrategy implements WaitStrategy {
   protected startupTimeout = new Duration(10_000, TemporalUnit.MILLISECONDS);
 
-  public abstract waitUntilReady(container: Container, containerState: ContainerState): Promise<void>;
+  public abstract waitUntilReady(containerState: ContainerState): Promise<void>;
 
   public withStartupTimeout(startupTimeout: Duration): WaitStrategy {
     this.startupTimeout = startupTimeout;
@@ -25,17 +24,18 @@ abstract class AbstractWaitStrategy implements WaitStrategy {
 export class HostPortWaitStrategy extends AbstractWaitStrategy {
   constructor(
     private readonly dockerClient: DockerClient,
-    private readonly portCheckClient: PortCheckClient = new SystemPortCheckClient(),
+    private readonly hostPortCheck: PortCheck,
+    private readonly internalPortCheck: PortCheck,
     private readonly clock: Clock = new SystemClock()
   ) {
     super();
   }
 
-  public async waitUntilReady(container: Container, containerState: ContainerState): Promise<void> {
-    await Promise.all([this.hostPortCheck(containerState), this.internalPortCheck(container, containerState)]);
+  public async waitUntilReady(containerState: ContainerState): Promise<void> {
+    await Promise.all([this.doHostPortCheck(containerState), this.doInternalPortCheck(containerState)]);
   }
 
-  private async hostPortCheck(containerState: ContainerState): Promise<void> {
+  private async doHostPortCheck(containerState: ContainerState): Promise<void> {
     const startTime = this.clock.getTime();
     const hostPorts = containerState.getHostPorts();
 
@@ -50,7 +50,7 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
         throw new Error(`Port :${hostPort} not bound after ${timeout}ms`);
       }
 
-      if (!(await this.portCheckClient.isFree(hostPort))) {
+      if (this.hostPortCheck.isBound(hostPort)) {
         hostPortIndex++;
       }
 
@@ -58,7 +58,7 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
     }
   }
 
-  private async internalPortCheck(container: Container, containerState: ContainerState): Promise<void> {
+  private async doInternalPortCheck(containerState: ContainerState): Promise<void> {
     const startTime = this.clock.getTime();
     const internalPorts = containerState.getInternalPorts();
 
@@ -73,15 +73,7 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
         throw new Error(`Port :${internalPort} not bound after ${timeout}ms`);
       }
 
-      const commands = [
-        ["/bin/sh", "-c", `cat /proc/net/tcp | awk '{print $2}' | grep -i :${internalPort.toString(16)}`],
-        ["/bin/sh", "-c", `cat /proc/net/tcp6 | awk '{print $2}' | grep -i :${internalPort.toString(16)}`],
-        ["/bin/sh", "-c", `nc -vz -w 1 localhost ${internalPort}`],
-        ["/bin/sh", "-c", `</dev/tcp/localhost/${internalPort}`]
-      ];
-      const results = await Promise.all(commands.map(command => this.dockerClient.exec(container, command)));
-
-      if (results.some(result => result.exitCode === 0)) {
+      if (this.internalPortCheck.isBound(internalPort)) {
         internalPortIndex++;
       }
 

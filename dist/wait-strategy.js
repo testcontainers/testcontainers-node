@@ -14,7 +14,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const node_duration_1 = require("node-duration");
 const clock_1 = require("./clock");
 const logger_1 = __importDefault(require("./logger"));
-const port_check_client_1 = require("./port-check-client");
 class AbstractWaitStrategy {
     constructor() {
         this.startupTimeout = new node_duration_1.Duration(10000, node_duration_1.TemporalUnit.MILLISECONDS);
@@ -25,18 +24,19 @@ class AbstractWaitStrategy {
     }
 }
 class HostPortWaitStrategy extends AbstractWaitStrategy {
-    constructor(dockerClient, portCheckClient = new port_check_client_1.SystemPortCheckClient(), clock = new clock_1.SystemClock()) {
+    constructor(dockerClient, hostPortCheck, internalPortCheck, clock = new clock_1.SystemClock()) {
         super();
         this.dockerClient = dockerClient;
-        this.portCheckClient = portCheckClient;
+        this.hostPortCheck = hostPortCheck;
+        this.internalPortCheck = internalPortCheck;
         this.clock = clock;
     }
-    waitUntilReady(container, containerState) {
+    waitUntilReady(containerState) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield Promise.all([this.hostPortCheck(containerState), this.internalPortCheck(container, containerState)]);
+            yield Promise.all([this.doHostPortCheck(containerState), this.doInternalPortCheck(containerState)]);
         });
     }
-    hostPortCheck(containerState) {
+    doHostPortCheck(containerState) {
         return __awaiter(this, void 0, void 0, function* () {
             const startTime = this.clock.getTime();
             const hostPorts = containerState.getHostPorts();
@@ -48,14 +48,14 @@ class HostPortWaitStrategy extends AbstractWaitStrategy {
                     const timeout = this.startupTimeout.get(node_duration_1.TemporalUnit.MILLISECONDS);
                     throw new Error(`Port :${hostPort} not bound after ${timeout}ms`);
                 }
-                if (!(yield this.portCheckClient.isFree(hostPort))) {
+                if (this.hostPortCheck.isBound(hostPort)) {
                     hostPortIndex++;
                 }
                 yield new Promise(resolve => setTimeout(resolve, 100));
             }
         });
     }
-    internalPortCheck(container, containerState) {
+    doInternalPortCheck(containerState) {
         return __awaiter(this, void 0, void 0, function* () {
             const startTime = this.clock.getTime();
             const internalPorts = containerState.getInternalPorts();
@@ -67,14 +67,7 @@ class HostPortWaitStrategy extends AbstractWaitStrategy {
                     const timeout = this.startupTimeout.get(node_duration_1.TemporalUnit.MILLISECONDS);
                     throw new Error(`Port :${internalPort} not bound after ${timeout}ms`);
                 }
-                const commands = [
-                    ["/bin/sh", "-c", `cat /proc/net/tcp | awk '{print $2}' | grep -i :${internalPort.toString(16)}`],
-                    ["/bin/sh", "-c", `cat /proc/net/tcp6 | awk '{print $2}' | grep -i :${internalPort.toString(16)}`],
-                    ["/bin/sh", "-c", `nc -vz -w 1 localhost ${internalPort}`],
-                    ["/bin/sh", "-c", `</dev/tcp/localhost/${internalPort}`]
-                ];
-                const results = yield Promise.all(commands.map(command => this.dockerClient.exec(container, command)));
-                if (results.some(result => result.exitCode === 0)) {
+                if (this.internalPortCheck.isBound(internalPort)) {
                     internalPortIndex++;
                 }
                 yield new Promise(resolve => setTimeout(resolve, 100));

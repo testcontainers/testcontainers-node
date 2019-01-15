@@ -1,19 +1,20 @@
 import { Container } from "dockerode";
-import { Duration } from "node-duration";
+import { Duration, TemporalUnit } from "node-duration";
 import { ContainerState } from "./container-state";
 import { DockerClient, DockerodeClient } from "./docker-client";
 import { Port } from "./port";
 import { PortBinder, PortBindings } from "./port-bindings";
+import { HostPortCheck, InternalPortCheck } from "./port-check";
 import { Image, RepoTag, Tag } from "./repo-tag";
 import { StartedTestContainer, StoppedTestContainer, TestContainer } from "./test-container";
-import { HostPortWaitStrategy, WaitStrategy } from "./wait-strategy";
+import { HostPortWaitStrategy } from "./wait-strategy";
 
 export class GenericContainer implements TestContainer {
   private readonly repoTag: RepoTag;
   private readonly dockerClient: DockerClient = new DockerodeClient();
 
   private ports: Port[] = [];
-  private waitStrategy: WaitStrategy = new HostPortWaitStrategy(this.dockerClient);
+  private startupTimeout: Duration = new Duration(10_000, TemporalUnit.MILLISECONDS);
 
   constructor(readonly image: Image, readonly tag: Tag = "latest") {
     this.repoTag = new RepoTag(image, tag);
@@ -25,7 +26,12 @@ export class GenericContainer implements TestContainer {
     const container = await this.dockerClient.create(this.repoTag, portBindings);
     await this.dockerClient.start(container);
     const containerState = new ContainerState(portBindings);
-    await this.waitStrategy.waitUntilReady(container, containerState);
+
+    const hostPortCheck = new HostPortCheck();
+    const internalPortCheck = new InternalPortCheck(container, this.dockerClient);
+    const waitStrategy = new HostPortWaitStrategy(this.dockerClient, hostPortCheck, internalPortCheck);
+    await waitStrategy.waitUntilReady(containerState);
+
     return new StartedGenericContainer(container, portBindings);
   }
 
@@ -35,7 +41,7 @@ export class GenericContainer implements TestContainer {
   }
 
   public withStartupTimeout(startupTimeout: Duration): TestContainer {
-    this.waitStrategy = this.waitStrategy.withStartupTimeout(startupTimeout);
+    this.startupTimeout = startupTimeout;
     return this;
   }
 }

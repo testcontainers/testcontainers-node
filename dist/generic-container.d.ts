@@ -8,7 +8,7 @@ export declare class GenericContainer implements TestContainer {
     private readonly repoTag;
     private readonly dockerClient;
     private ports;
-    private waitStrategy;
+    private startupTimeout;
     constructor(image: Image, tag?: Tag);
     start(): Promise<StartedTestContainer>;
     withExposedPorts(...ports: Port[]): TestContainer;
