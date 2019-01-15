@@ -5,12 +5,14 @@ describe("PortBindings", () => {
   it("should return a binding", () => {
     const portBindings = new PortBindings();
     portBindings.setBinding(1, 1000);
+
     expect(portBindings.getBinding(1)).toBe(1000);
   });
 
   it("should return host ports", () => {
     const portBindings = new PortBindings();
     portBindings.setBinding(1, 1000);
+
     expect(portBindings.getHostPorts()).toEqual([1000]);
   });
 
