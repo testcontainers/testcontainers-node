@@ -7,7 +7,9 @@ import { PortBindings } from "./port-bindings";
 import { RepoTag } from "./repo-tag";
 
 type Command = string;
-type ExecResult = { output: string; exitCode: number };
+type ExitCode = number;
+type ExecOutput = string;
+type ExecResult = { output: ExecOutput; exitCode: ExitCode };
 type DockerodeExposedPorts = { [port in PortString]: {} };
 
 export interface DockerClient {
@@ -50,13 +52,11 @@ export class DockerodeClient implements DockerClient {
   public async exec(container: Container, command: Command[]): Promise<ExecResult> {
     log.debug(`Executing command "${command.join(" ")}" on container with ID: ${container.id}`);
 
-    const options = {
+    const exec = await container.exec({
       Cmd: command,
       AttachStdout: true,
       AttachStderr: true
-    };
-
-    const exec = await container.exec(options);
+    });
 
     return new Promise((resolve, reject) => {
       exec.start((startErr: Error, stream: Stream) => {
@@ -66,7 +66,7 @@ export class DockerodeClient implements DockerClient {
         stream.on("end", () => {
           const output = Buffer.concat(chunks).toString();
 
-          exec.inspect((inspectErr: Error, data: { Running: boolean; ExitCode: number }) => {
+          exec.inspect((inspectErr: Error, data: { Running: boolean; ExitCode: ExitCode }) => {
             if (inspectErr) {
               return reject(inspectErr);
             }

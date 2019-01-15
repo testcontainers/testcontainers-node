@@ -2,9 +2,11 @@ import Dockerode, { Container } from "dockerode";
 import { PortBindings } from "./port-bindings";
 import { RepoTag } from "./repo-tag";
 declare type Command = string;
+declare type ExitCode = number;
+declare type ExecOutput = string;
 declare type ExecResult = {
-    output: string;
-    exitCode: number;
+    output: ExecOutput;
+    exitCode: ExitCode;
 };
 export interface DockerClient {
     pull(repoTag: RepoTag): Promise<void>;

@@ -45,12 +45,11 @@ class DockerodeClient {
     exec(container, command) {
         return __awaiter(this, void 0, void 0, function* () {
             logger_1.default.debug(`Executing command "${command.join(" ")}" on container with ID: ${container.id}`);
-            const options = {
+            const exec = yield container.exec({
                 Cmd: command,
                 AttachStdout: true,
                 AttachStderr: true
-            };
-            const exec = yield container.exec(options);
+            });
             return new Promise((resolve, reject) => {
                 exec.start((startErr, stream) => {
                     const chunks = [];
