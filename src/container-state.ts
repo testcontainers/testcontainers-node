@@ -7,4 +7,8 @@ export class ContainerState {
   public getHostPorts(): Port[] {
     return this.portBindings.getHostPorts();
   }
+
+  public getInternalPorts(): Port[] {
+    return this.portBindings.getInternalPorts();
+  }
 }

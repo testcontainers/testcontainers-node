@@ -15,7 +15,6 @@ const node_duration_1 = require("node-duration");
 const clock_1 = require("./clock");
 const logger_1 = __importDefault(require("./logger"));
 const port_check_client_1 = require("./port-check-client");
-const retry_strategy_1 = require("./retry-strategy");
 class AbstractWaitStrategy {
     constructor() {
         this.startupTimeout = new node_duration_1.Duration(10000, node_duration_1.TemporalUnit.MILLISECONDS);
@@ -26,43 +25,64 @@ class AbstractWaitStrategy {
     }
 }
 class HostPortWaitStrategy extends AbstractWaitStrategy {
-    constructor(portCheckClient = new port_check_client_1.SystemPortCheckClient(), clock = new clock_1.SystemClock()) {
+    constructor(dockerClient, portCheckClient = new port_check_client_1.SystemPortCheckClient(), clock = new clock_1.SystemClock()) {
         super();
+        this.dockerClient = dockerClient;
         this.portCheckClient = portCheckClient;
         this.clock = clock;
     }
-    waitUntilReady(containerState) {
+    waitUntilReady(container, containerState) {
         return __awaiter(this, void 0, void 0, function* () {
-            const startTime = this.clock.getTime();
-            yield this.hostPortCheck(containerState, startTime);
+            yield Promise.all([this.hostPortCheck(containerState), this.internalPortCheck(container, containerState)]);
         });
     }
-    hostPortCheck(containerState, startTime) {
+    hostPortCheck(containerState) {
         return __awaiter(this, void 0, void 0, function* () {
-            for (const hostPort of containerState.getHostPorts()) {
+            const startTime = this.clock.getTime();
+            const hostPorts = containerState.getHostPorts();
+            let hostPortIndex = 0;
+            while (hostPortIndex < hostPorts.length) {
+                const hostPort = hostPorts[hostPortIndex];
                 logger_1.default.info(`Waiting for host port :${hostPort}`);
-                if (!(yield this.waitForPort(hostPort, startTime))) {
-                    const timeout = `${this.startupTimeout.get(node_duration_1.TemporalUnit.MILLISECONDS)}`;
+                if (this.hasStartupTimeoutElapsed(startTime)) {
+                    const timeout = this.startupTimeout.get(node_duration_1.TemporalUnit.MILLISECONDS);
                     throw new Error(`Port :${hostPort} not bound after ${timeout}ms`);
                 }
+                if (!(yield this.portCheckClient.isFree(hostPort))) {
+                    hostPortIndex++;
+                }
+                yield new Promise(resolve => setTimeout(resolve, 100));
             }
         });
     }
-    waitForPort(port, startTime) {
+    internalPortCheck(container, containerState) {
         return __awaiter(this, void 0, void 0, function* () {
-            const retryStrategy = new retry_strategy_1.SimpleRetryStrategy(new node_duration_1.Duration(100, node_duration_1.TemporalUnit.MILLISECONDS));
-            return retryStrategy.retry(() => __awaiter(this, void 0, void 0, function* () {
-                if (!(yield this.portCheckClient.isFree(port))) {
-                    return true;
+            const startTime = this.clock.getTime();
+            const internalPorts = containerState.getInternalPorts();
+            let internalPortIndex = 0;
+            while (internalPortIndex < internalPorts.length) {
+                const internalPort = internalPorts[internalPortIndex];
+                logger_1.default.info(`Waiting for internal port :${internalPort}`);
+                if (this.hasStartupTimeoutElapsed(startTime)) {
+                    const timeout = this.startupTimeout.get(node_duration_1.TemporalUnit.MILLISECONDS);
+                    throw new Error(`Port :${internalPort} not bound after ${timeout}ms`);
                 }
-                if (this.hasStartupTimeoutElapsed(startTime, this.clock.getTime())) {
-                    return false;
+                const commands = [
+                    ["/bin/sh", "-c", `cat /proc/net/tcp | awk '{print $2}' | grep -i :${internalPort.toString(16)}`],
+                    ["/bin/sh", "-c", `cat /proc/net/tcp6 | awk '{print $2}' | grep -i :${internalPort.toString(16)}`],
+                    ["/bin/sh", "-c", `nc -vz -w 1 localhost ${internalPort}`],
+                    ["/bin/sh", "-c", `</dev/tcp/localhost/${internalPort}`]
+                ];
+                const results = yield Promise.all(commands.map(command => this.dockerClient.exec(container, command)));
+                if (results.some(result => result.exitCode === 0)) {
+                    internalPortIndex++;
                 }
-            }));
+                yield new Promise(resolve => setTimeout(resolve, 100));
+            }
         });
     }
-    hasStartupTimeoutElapsed(startTime, endTime) {
-        return endTime - startTime > this.startupTimeout.get(node_duration_1.TemporalUnit.MILLISECONDS);
+    hasStartupTimeoutElapsed(startTime) {
+        return this.clock.getTime() - startTime > this.startupTimeout.get(node_duration_1.TemporalUnit.MILLISECONDS);
     }
 }
 exports.HostPortWaitStrategy = HostPortWaitStrategy;

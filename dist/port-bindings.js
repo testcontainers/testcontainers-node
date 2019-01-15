@@ -41,6 +41,9 @@ class PortBindings {
     getHostPorts() {
         return Array.from(this.ports.values());
     }
+    getInternalPorts() {
+        return Array.from(this.ports.keys());
+    }
     iterator() {
         return this.ports;
     }

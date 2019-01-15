@@ -19,7 +19,7 @@ class GenericContainer {
         this.tag = tag;
         this.dockerClient = new docker_client_1.DockerodeClient();
         this.ports = [];
-        this.waitStrategy = new wait_strategy_1.HostPortWaitStrategy();
+        this.waitStrategy = new wait_strategy_1.HostPortWaitStrategy(this.dockerClient);
         this.repoTag = new repo_tag_1.RepoTag(image, tag);
     }
     start() {
@@ -29,7 +29,7 @@ class GenericContainer {
             const container = yield this.dockerClient.create(this.repoTag, portBindings);
             yield this.dockerClient.start(container);
             const containerState = new container_state_1.ContainerState(portBindings);
-            yield this.waitStrategy.waitUntilReady(containerState);
+            yield this.waitStrategy.waitUntilReady(container, containerState);
             return new StartedGenericContainer(container, portBindings);
         });
     }

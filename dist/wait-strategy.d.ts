@@ -1,23 +1,26 @@
+import { Container } from "dockerode";
 import { Duration } from "node-duration";
 import { Clock } from "./clock";
 import { ContainerState } from "./container-state";
+import { DockerClient } from "./docker-client";
 import { PortCheckClient } from "./port-check-client";
 export interface WaitStrategy {
-    waitUntilReady(containerState: ContainerState): Promise<void>;
+    waitUntilReady(container: Container, containerState: ContainerState): Promise<void>;
     withStartupTimeout(startupTimeout: Duration): WaitStrategy;
 }
 declare abstract class AbstractWaitStrategy implements WaitStrategy {
     protected startupTimeout: Duration;
-    abstract waitUntilReady(containerState: ContainerState): Promise<void>;
+    abstract waitUntilReady(container: Container, containerState: ContainerState): Promise<void>;
     withStartupTimeout(startupTimeout: Duration): WaitStrategy;
 }
 export declare class HostPortWaitStrategy extends AbstractWaitStrategy {
+    private readonly dockerClient;
     private readonly portCheckClient;
     private readonly clock;
-    constructor(portCheckClient?: PortCheckClient, clock?: Clock);
-    waitUntilReady(containerState: ContainerState): Promise<void>;
+    constructor(dockerClient: DockerClient, portCheckClient?: PortCheckClient, clock?: Clock);
+    waitUntilReady(container: Container, containerState: ContainerState): Promise<void>;
     private hostPortCheck;
-    private waitForPort;
+    private internalPortCheck;
     private hasStartupTimeoutElapsed;
 }
 export {};

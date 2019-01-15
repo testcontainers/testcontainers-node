@@ -1,21 +1,20 @@
+import { Container } from "dockerode";
 import { Duration, TemporalUnit } from "node-duration";
-import { start } from "repl";
 import { Clock, SystemClock, Time } from "./clock";
 import { ContainerState } from "./container-state";
+import { DockerClient } from "./docker-client";
 import log from "./logger";
-import { Port } from "./port";
 import { PortCheckClient, SystemPortCheckClient } from "./port-check-client";
-import { SimpleRetryStrategy } from "./retry-strategy";
 
 export interface WaitStrategy {
-  waitUntilReady(containerState: ContainerState): Promise<void>;
+  waitUntilReady(container: Container, containerState: ContainerState): Promise<void>;
   withStartupTimeout(startupTimeout: Duration): WaitStrategy;
 }
 
 abstract class AbstractWaitStrategy implements WaitStrategy {
   protected startupTimeout = new Duration(10_000, TemporalUnit.MILLISECONDS);
 
-  public abstract waitUntilReady(containerState: ContainerState): Promise<void>;
+  public abstract waitUntilReady(container: Container, containerState: ContainerState): Promise<void>;
 
   public withStartupTimeout(startupTimeout: Duration): WaitStrategy {
     this.startupTimeout = startupTimeout;
@@ -25,42 +24,72 @@ abstract class AbstractWaitStrategy implements WaitStrategy {
 
 export class HostPortWaitStrategy extends AbstractWaitStrategy {
   constructor(
+    private readonly dockerClient: DockerClient,
     private readonly portCheckClient: PortCheckClient = new SystemPortCheckClient(),
     private readonly clock: Clock = new SystemClock()
   ) {
     super();
   }
 
-  public async waitUntilReady(containerState: ContainerState): Promise<void> {
-    const startTime = this.clock.getTime();
-    await this.hostPortCheck(containerState, startTime);
+  public async waitUntilReady(container: Container, containerState: ContainerState): Promise<void> {
+    await Promise.all([this.hostPortCheck(containerState), this.internalPortCheck(container, containerState)]);
   }
 
-  private async hostPortCheck(containerState: ContainerState, startTime: Time): Promise<void> {
-    for (const hostPort of containerState.getHostPorts()) {
+  private async hostPortCheck(containerState: ContainerState): Promise<void> {
+    const startTime = this.clock.getTime();
+    const hostPorts = containerState.getHostPorts();
+
+    let hostPortIndex = 0;
+
+    while (hostPortIndex < hostPorts.length) {
+      const hostPort = hostPorts[hostPortIndex];
       log.info(`Waiting for host port :${hostPort}`);
 
-      if (!(await this.waitForPort(hostPort, startTime))) {
-        const timeout = `${this.startupTimeout.get(TemporalUnit.MILLISECONDS)}`;
+      if (this.hasStartupTimeoutElapsed(startTime)) {
+        const timeout = this.startupTimeout.get(TemporalUnit.MILLISECONDS);
         throw new Error(`Port :${hostPort} not bound after ${timeout}ms`);
       }
+
+      if (!(await this.portCheckClient.isFree(hostPort))) {
+        hostPortIndex++;
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 100));
     }
   }
 
-  private async waitForPort(port: Port, startTime: Time): Promise<boolean | undefined> {
-    const retryStrategy = new SimpleRetryStrategy<boolean>(new Duration(100, TemporalUnit.MILLISECONDS));
+  private async internalPortCheck(container: Container, containerState: ContainerState): Promise<void> {
+    const startTime = this.clock.getTime();
+    const internalPorts = containerState.getInternalPorts();
 
-    return retryStrategy.retry(async () => {
-      if (!(await this.portCheckClient.isFree(port))) {
-        return true;
+    let internalPortIndex = 0;
+
+    while (internalPortIndex < internalPorts.length) {
+      const internalPort = internalPorts[internalPortIndex];
+      log.info(`Waiting for internal port :${internalPort}`);
+
+      if (this.hasStartupTimeoutElapsed(startTime)) {
+        const timeout = this.startupTimeout.get(TemporalUnit.MILLISECONDS);
+        throw new Error(`Port :${internalPort} not bound after ${timeout}ms`);
       }
-      if (this.hasStartupTimeoutElapsed(startTime, this.clock.getTime())) {
-        return false;
+
+      const commands = [
+        ["/bin/sh", "-c", `cat /proc/net/tcp | awk '{print $2}' | grep -i :${internalPort.toString(16)}`],
+        ["/bin/sh", "-c", `cat /proc/net/tcp6 | awk '{print $2}' | grep -i :${internalPort.toString(16)}`],
+        ["/bin/sh", "-c", `nc -vz -w 1 localhost ${internalPort}`],
+        ["/bin/sh", "-c", `</dev/tcp/localhost/${internalPort}`]
+      ];
+      const results = await Promise.all(commands.map(command => this.dockerClient.exec(container, command)));
+
+      if (results.some(result => result.exitCode === 0)) {
+        internalPortIndex++;
       }
-    });
+
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
   }
 
-  private hasStartupTimeoutElapsed(startTime: Time, endTime: Time): boolean {
-    return endTime - startTime > this.startupTimeout.get(TemporalUnit.MILLISECONDS);
+  private hasStartupTimeoutElapsed(startTime: Time): boolean {
+    return this.clock.getTime() - startTime > this.startupTimeout.get(TemporalUnit.MILLISECONDS);
   }
 }

@@ -16,6 +16,13 @@ describe("PortBindings", () => {
     expect(portBindings.getHostPorts()).toEqual([1000]);
   });
 
+  it("should return internal ports", () => {
+    const portBindings = new PortBindings();
+    portBindings.setBinding(1, 1000);
+
+    expect(portBindings.getInternalPorts()).toEqual([1]);
+  });
+
   it("should return an iterator for all bindings", () => {
     const portBindings = new PortBindings();
     portBindings.setBinding(1, 1000);

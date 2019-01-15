@@ -4,4 +4,5 @@ export declare class ContainerState {
     private readonly portBindings;
     constructor(portBindings: PortBindings);
     getHostPorts(): Port[];
+    getInternalPorts(): Port[];
 }

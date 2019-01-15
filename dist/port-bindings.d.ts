@@ -10,5 +10,6 @@ export declare class PortBindings {
     getBinding(port: Port): Port;
     setBinding(key: Port, value: Port): void;
     getHostPorts(): Port[];
+    getInternalPorts(): Port[];
     iterator(): Iterable<[Port, Port]>;
 }

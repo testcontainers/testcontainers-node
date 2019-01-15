@@ -13,7 +13,7 @@ export class GenericContainer implements TestContainer {
   private readonly dockerClient: DockerClient = new DockerodeClient();
 
   private ports: Port[] = [];
-  private waitStrategy: WaitStrategy = new HostPortWaitStrategy();
+  private waitStrategy: WaitStrategy = new HostPortWaitStrategy(this.dockerClient);
 
   constructor(readonly image: Image, readonly tag: Tag = "latest") {
     this.repoTag = new RepoTag(image, tag);
@@ -25,7 +25,7 @@ export class GenericContainer implements TestContainer {
     const container = await this.dockerClient.create(this.repoTag, portBindings);
     await this.dockerClient.start(container);
     const containerState = new ContainerState(portBindings);
-    await this.waitStrategy.waitUntilReady(containerState);
+    await this.waitStrategy.waitUntilReady(container, containerState);
     return new StartedGenericContainer(container, portBindings);
   }
 

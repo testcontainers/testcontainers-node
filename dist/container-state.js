@@ -7,5 +7,8 @@ class ContainerState {
     getHostPorts() {
         return this.portBindings.getHostPorts();
     }
+    getInternalPorts() {
+        return this.portBindings.getInternalPorts();
+    }
 }
 exports.ContainerState = ContainerState;

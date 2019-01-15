@@ -36,6 +36,10 @@ export class PortBindings {
     return Array.from(this.ports.values());
   }
 
+  public getInternalPorts(): Port[] {
+    return Array.from(this.ports.keys());
+  }
+
   public iterator(): Iterable<[Port, Port]> {
     return this.ports;
   }

@@ -1,26 +1,24 @@
+import { Container } from "dockerode";
 import { Duration, TemporalUnit } from "node-duration";
-import { RotatingClock } from "./clock";
 import { ContainerState } from "./container-state";
+import { FakeDockerClient } from "./docker-client";
 import { PortBindings } from "./port-bindings";
-import { BusyPortCheckClient, FreePortCheckClient } from "./port-check-client";
+import { BusyPortCheckClient } from "./port-check-client";
 import { HostPortWaitStrategy } from "./wait-strategy";
 
 describe("WaitStrategy", () => {
   describe("HostPortWaitStrategy", () => {
-    it("should resolve if external port is listening", async () => {
-      const promise = new HostPortWaitStrategy(new BusyPortCheckClient())
+    it("should resolve if internal and external ports are listening", async () => {
+      const container = {} as Container;
+      const execResult = { exitCode: 0, output: "" };
+      const dockerClient = new FakeDockerClient(container, execResult);
+      const portCheckClient = new BusyPortCheckClient();
+
+      const promise = new HostPortWaitStrategy(dockerClient, portCheckClient)
         .withStartupTimeout(new Duration(1, TemporalUnit.SECONDS))
-        .waitUntilReady(createContainerState());
+        .waitUntilReady(container, createContainerState());
 
       await expect(promise).resolves.toBeUndefined();
-    });
-
-    it("should reject if external port is not listening after startupTimeout", async () => {
-      const promise = new HostPortWaitStrategy(new FreePortCheckClient(), new RotatingClock([0, 1000, 1001]))
-        .withStartupTimeout(new Duration(1, TemporalUnit.SECONDS))
-        .waitUntilReady(createContainerState());
-
-      await expect(promise).rejects.toThrowError(`Port :1000 not bound after 1000ms`);
     });
   });
 
