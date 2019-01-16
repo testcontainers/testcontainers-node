@@ -11,5 +11,5 @@ describe("GenericContainer", () => {
 
     await container.stop();
     return expect(fetch(testUrl)).rejects.toThrowError();
-  }, 10_000);
+  }, 10000);
 });

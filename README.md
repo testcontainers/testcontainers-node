@@ -26,7 +26,6 @@ const { GenericContainer } = require("testcontainers");
     .start();
 
   const redisClient = redis.createClient(container.getMappedPort(6379));
-  // ...
   await redisClient.quit();
 
   await container.stop();
