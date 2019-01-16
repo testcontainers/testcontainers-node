@@ -67,8 +67,8 @@ class DockerodeClient {
         return __awaiter(this, void 0, void 0, function* () {
             const images = yield this.dockerode.listImages();
             return images.reduce((repoTags, image) => {
-                const imageRepoTags = image.RepoTags.map(imageInfoRepoTag => {
-                    const [imageName, tag] = imageInfoRepoTag.split(":");
+                const imageRepoTags = image.RepoTags.map(imageRepoTag => {
+                    const [imageName, tag] = imageRepoTag.split(":");
                     return new repo_tag_1.RepoTag(imageName, tag);
                 });
                 return [...repoTags, ...imageRepoTags];

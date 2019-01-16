@@ -38,12 +38,6 @@ class PortBindings {
     setBinding(key, value) {
         this.ports.set(key, value);
     }
-    getHostPorts() {
-        return Array.from(this.ports.values());
-    }
-    getInternalPorts() {
-        return Array.from(this.ports.keys());
-    }
     iterator() {
         return this.ports;
     }
