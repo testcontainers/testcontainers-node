@@ -1,15 +1,17 @@
 import devNull from "dev-null";
-import Dockerode, { Container, PortMap as DockerodePortBindings } from "dockerode";
-import { Stream } from "stream";
+import Dockerode, { PortMap as DockerodePortBindings } from "dockerode";
+import streamToArray from "stream-to-array";
+import { Container, DockerodeContainer } from "./container";
 import { DebugLogger, Logger } from "./logger";
 import { PortString } from "./port";
 import { PortBindings } from "./port-bindings";
 import { RepoTag } from "./repo-tag";
 
-type Command = string;
-type ExitCode = number;
-type ExecOutput = string;
-type ExecResult = { output: ExecOutput; exitCode: ExitCode };
+export type Command = string;
+export type ExitCode = number;
+
+type StreamOutput = string;
+type ExecResult = { output: StreamOutput; exitCode: ExitCode };
 type DockerodeExposedPorts = { [port in PortString]: {} };
 
 export interface DockerClient {
@@ -35,49 +37,39 @@ export class DockerodeClient implements DockerClient {
     });
   }
 
-  public create(repoTag: RepoTag, portBindings: PortBindings): Promise<Container> {
+  public async create(repoTag: RepoTag, portBindings: PortBindings): Promise<Container> {
     this.log.info(`Creating container for image: ${repoTag}`);
 
-    return this.dockerode.createContainer({
+    const dockerodeContainer = await this.dockerode.createContainer({
       Image: repoTag.toString(),
       ExposedPorts: this.getExposedPorts(portBindings),
       HostConfig: {
         PortBindings: this.getPortBindings(portBindings)
       }
     });
+
+    return new DockerodeContainer(dockerodeContainer);
   }
 
   public start(container: Container): Promise<void> {
-    this.log.info(`Starting container with ID: ${container.id}`);
+    this.log.info(`Starting container with ID: ${container.getId()}`);
     return container.start();
   }
 
   public async exec(container: Container, command: Command[]): Promise<ExecResult> {
-    this.log.debug(`Executing command "${command.join(" ")}" on container with ID: ${container.id}`);
+    this.log.debug(`Executing command "${command.join(" ")}" on container with ID: ${container.getId()}`);
 
     const exec = await container.exec({
-      Cmd: command,
-      AttachStdout: true,
-      AttachStderr: true
+      cmd: command,
+      attachStdout: true,
+      attachStderr: true
     });
 
-    return new Promise((resolve, reject) => {
-      exec.start((startErr: Error, stream: Stream) => {
-        const chunks: Buffer[] = [];
+    const stream = await exec.start();
+    const output = Buffer.concat(await streamToArray(stream)).toString();
+    const { exitCode } = await exec.inspect();
 
-        stream.on("data", chunk => chunks.push(chunk));
-        stream.on("end", () => {
-          const output = Buffer.concat(chunks).toString();
-
-          exec.inspect((inspectErr: Error, data: { Running: boolean; ExitCode: ExitCode }) => {
-            if (inspectErr) {
-              return reject(inspectErr);
-            }
-            return resolve({ output, exitCode: data.ExitCode });
-          });
-        });
-      });
-    });
+    return { output, exitCode };
   }
 
   private getExposedPorts(portBindings: PortBindings): DockerodeExposedPorts {

@@ -13,6 +13,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const dev_null_1 = __importDefault(require("dev-null"));
 const dockerode_1 = __importDefault(require("dockerode"));
+const stream_to_array_1 = __importDefault(require("stream-to-array"));
+const container_1 = require("./container");
 const logger_1 = require("./logger");
 class DockerodeClient {
     constructor(dockerode = new dockerode_1.default(), log = new logger_1.DebugLogger()) {
@@ -30,42 +32,34 @@ class DockerodeClient {
         });
     }
     create(repoTag, portBindings) {
-        this.log.info(`Creating container for image: ${repoTag}`);
-        return this.dockerode.createContainer({
-            Image: repoTag.toString(),
-            ExposedPorts: this.getExposedPorts(portBindings),
-            HostConfig: {
-                PortBindings: this.getPortBindings(portBindings)
-            }
+        return __awaiter(this, void 0, void 0, function* () {
+            this.log.info(`Creating container for image: ${repoTag}`);
+            const dockerodeContainer = yield this.dockerode.createContainer({
+                Image: repoTag.toString(),
+                ExposedPorts: this.getExposedPorts(portBindings),
+                HostConfig: {
+                    PortBindings: this.getPortBindings(portBindings)
+                }
+            });
+            return new container_1.DockerodeContainer(dockerodeContainer);
         });
     }
     start(container) {
-        this.log.info(`Starting container with ID: ${container.id}`);
+        this.log.info(`Starting container with ID: ${container.getId()}`);
         return container.start();
     }
     exec(container, command) {
         return __awaiter(this, void 0, void 0, function* () {
-            this.log.debug(`Executing command "${command.join(" ")}" on container with ID: ${container.id}`);
+            this.log.debug(`Executing command "${command.join(" ")}" on container with ID: ${container.getId()}`);
             const exec = yield container.exec({
-                Cmd: command,
-                AttachStdout: true,
-                AttachStderr: true
+                cmd: command,
+                attachStdout: true,
+                attachStderr: true
             });
-            return new Promise((resolve, reject) => {
-                exec.start((startErr, stream) => {
-                    const chunks = [];
-                    stream.on("data", chunk => chunks.push(chunk));
-                    stream.on("end", () => {
-                        const output = Buffer.concat(chunks).toString();
-                        exec.inspect((inspectErr, data) => {
-                            if (inspectErr) {
-                                return reject(inspectErr);
-                            }
-                            return resolve({ output, exitCode: data.ExitCode });
-                        });
-                    });
-                });
-            });
+            const stream = yield exec.start();
+            const output = Buffer.concat(yield stream_to_array_1.default(stream)).toString();
+            const { exitCode } = yield exec.inspect();
+            return { output, exitCode };
         });
     }
     getExposedPorts(portBindings) {

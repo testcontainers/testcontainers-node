@@ -1,5 +1,5 @@
-import { Container } from "dockerode";
 import { Duration, TemporalUnit } from "node-duration";
+import { Container } from "./container";
 import { ContainerState } from "./container-state";
 import { DockerClient, DockerodeClient } from "./docker-client";
 import { Port } from "./port";

@@ -33,8 +33,6 @@ test("should return 200 from docker container over http", async () => {
 
 ## TODO
 
-- Replace winston with debug and add instructions on how to debug
-in the README
-- Remove usages of Dockerode from DockerClient interface.
-Create own Container interface which can have a Dockerode
-specific implementation
+- Do not re-pull image if already exists
+- Ensure that InternalPortCheck works without explicitly exposing ports
+- Extract stream consumption logic to own module

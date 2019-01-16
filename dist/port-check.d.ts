@@ -1,4 +1,4 @@
-import { Container } from "dockerode";
+import { Container } from "./container";
 import { DockerClient } from "./docker-client";
 import { Port } from "./port";
 export interface PortCheck {

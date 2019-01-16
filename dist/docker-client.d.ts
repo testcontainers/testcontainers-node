@@ -1,12 +1,13 @@
-import Dockerode, { Container } from "dockerode";
+import Dockerode from "dockerode";
+import { Container } from "./container";
 import { Logger } from "./logger";
 import { PortBindings } from "./port-bindings";
 import { RepoTag } from "./repo-tag";
-declare type Command = string;
-declare type ExitCode = number;
-declare type ExecOutput = string;
+export declare type Command = string;
+export declare type ExitCode = number;
+declare type StreamOutput = string;
 declare type ExecResult = {
-    output: ExecOutput;
+    output: StreamOutput;
     exitCode: ExitCode;
 };
 export interface DockerClient {
