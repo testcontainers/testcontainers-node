@@ -36,5 +36,7 @@ export declare class DockerodeContainer implements Container {
     remove(): Promise<void>;
     exec(options: ExecOptions): Promise<Exec>;
     inspect(): Promise<InspectResult>;
+    private getInternalPorts;
+    private getHostPorts;
 }
 export {};

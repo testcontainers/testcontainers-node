@@ -1,4 +1,4 @@
-import dockerode from "dockerode";
+import dockerode, { ContainerInspectInfo } from "dockerode";
 import { Command, ExitCode } from "./docker-client";
 import { Port } from "./port";
 
@@ -58,14 +58,20 @@ export class DockerodeContainer implements Container {
 
   public async inspect(): Promise<InspectResult> {
     const inspectResult = await this.container.inspect();
+    return {
+      hostPorts: this.getHostPorts(inspectResult),
+      internalPorts: this.getInternalPorts(inspectResult)
+    };
+  }
 
-    const ports = inspectResult.NetworkSettings.Ports;
-    const internalPorts = Object.keys(ports).map(port => Number(port.split("/")[0]));
-    const hostPorts = Object.values(ports)
+  private getInternalPorts(inspectInfo: ContainerInspectInfo): Port[] {
+    return Object.keys(inspectInfo.NetworkSettings.Ports).map(port => Number(port.split("/")[0]));
+  }
+
+  private getHostPorts(inspectInfo: ContainerInspectInfo): Port[] {
+    return Object.values(inspectInfo.NetworkSettings.Ports)
       .filter(portsArray => portsArray !== null)
       .map(portsArray => Number(portsArray[0].HostPort));
-
-    return { internalPorts, hostPorts };
   }
 }
 
