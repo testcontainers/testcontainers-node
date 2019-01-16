@@ -28,7 +28,8 @@ export class GenericContainer implements TestContainer {
     const portBindings = await new PortBinder().bind(this.ports);
     const container = await this.dockerClient.create(this.repoTag, portBindings);
     await this.dockerClient.start(container);
-    const containerState = new ContainerState(portBindings);
+    const inspectResult = await container.inspect();
+    const containerState = new ContainerState(inspectResult);
     await this.waitForContainer(container, containerState);
 
     return new StartedGenericContainer(container, portBindings);
@@ -45,7 +46,7 @@ export class GenericContainer implements TestContainer {
   }
 
   private async hasRepoTagLocally(): Promise<boolean> {
-    const repoTags = await this.dockerClient.getRepoTags();
+    const repoTags = await this.dockerClient.fetchRepoTags();
     return repoTags.some(repoTag => repoTag.equals(this.repoTag));
   }
 

@@ -1,14 +1,14 @@
+import { InspectResult } from "./container";
 import { Port } from "./port";
-import { PortBindings } from "./port-bindings";
 
 export class ContainerState {
-  constructor(private readonly portBindings: PortBindings) {}
+  constructor(private readonly inspectResult: InspectResult) {}
 
   public getHostPorts(): Port[] {
-    return this.portBindings.getHostPorts();
+    return this.inspectResult.hostPorts;
   }
 
   public getInternalPorts(): Port[] {
-    return this.portBindings.getInternalPorts();
+    return this.inspectResult.internalPorts;
   }
 }

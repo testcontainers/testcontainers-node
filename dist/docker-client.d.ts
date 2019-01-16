@@ -15,7 +15,7 @@ export interface DockerClient {
     create(repoTag: RepoTag, portBindings: PortBindings): Promise<Container>;
     start(container: Container): Promise<void>;
     exec(container: Container, command: Command[]): Promise<ExecResult>;
-    getRepoTags(): Promise<RepoTag[]>;
+    fetchRepoTags(): Promise<RepoTag[]>;
 }
 export declare class DockerodeClient implements DockerClient {
     private readonly dockerode;
@@ -25,7 +25,7 @@ export declare class DockerodeClient implements DockerClient {
     create(repoTag: RepoTag, portBindings: PortBindings): Promise<Container>;
     start(container: Container): Promise<void>;
     exec(container: Container, command: Command[]): Promise<ExecResult>;
-    getRepoTags(): Promise<RepoTag[]>;
+    fetchRepoTags(): Promise<RepoTag[]>;
     private getExposedPorts;
     private getPortBindings;
 }

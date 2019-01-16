@@ -1,18 +1,23 @@
 /// <reference types="node" />
 import dockerode from "dockerode";
 import { Command, ExitCode } from "./docker-client";
+import { Port } from "./port";
 declare type Id = string;
+export declare type InspectResult = {
+    internalPorts: Port[];
+    hostPorts: Port[];
+};
 declare type ExecOptions = {
     cmd: Command[];
     attachStdout: true;
     attachStderr: true;
 };
-declare type InspectResult = {
+declare type ExecInspectResult = {
     exitCode: ExitCode;
 };
 interface Exec {
     start(): Promise<NodeJS.ReadableStream>;
-    inspect(): Promise<InspectResult>;
+    inspect(): Promise<ExecInspectResult>;
 }
 export interface Container {
     getId(): Id;
@@ -20,6 +25,7 @@ export interface Container {
     stop(): Promise<void>;
     remove(): Promise<void>;
     exec(options: ExecOptions): Promise<Exec>;
+    inspect(): Promise<InspectResult>;
 }
 export declare class DockerodeContainer implements Container {
     private readonly container;
@@ -29,5 +35,6 @@ export declare class DockerodeContainer implements Container {
     stop(): Promise<void>;
     remove(): Promise<void>;
     exec(options: ExecOptions): Promise<Exec>;
+    inspect(): Promise<InspectResult>;
 }
 export {};

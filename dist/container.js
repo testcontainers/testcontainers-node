@@ -29,6 +29,17 @@ class DockerodeContainer {
             return new DockerodeExec(yield this.container.exec(options));
         });
     }
+    inspect() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const inspectResult = yield this.container.inspect();
+            const ports = inspectResult.NetworkSettings.Ports;
+            const internalPorts = Object.keys(ports).map(port => Number(port.split("/")[0]));
+            const hostPorts = Object.values(ports)
+                .filter(portsArray => portsArray !== null)
+                .map(portsArray => Number(portsArray[0].HostPort));
+            return { internalPorts, hostPorts };
+        });
+    }
 }
 exports.DockerodeContainer = DockerodeContainer;
 class DockerodeExec {

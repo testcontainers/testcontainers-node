@@ -1,14 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 class ContainerState {
-    constructor(portBindings) {
-        this.portBindings = portBindings;
+    constructor(inspectResult) {
+        this.inspectResult = inspectResult;
     }
     getHostPorts() {
-        return this.portBindings.getHostPorts();
+        return this.inspectResult.hostPorts;
     }
     getInternalPorts() {
-        return this.portBindings.getInternalPorts();
+        return this.inspectResult.internalPorts;
     }
 }
 exports.ContainerState = ContainerState;

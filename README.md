@@ -31,7 +31,3 @@ const { GenericContainer } = require("testcontainers");
   await container.stop();
 })();
 ```
-
-## To Do
-
-- Ensure that InternalPortCheck works without explicitly exposing ports

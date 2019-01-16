@@ -63,7 +63,7 @@ class DockerodeClient {
             return { output, exitCode };
         });
     }
-    getRepoTags() {
+    fetchRepoTags() {
         return __awaiter(this, void 0, void 0, function* () {
             const images = yield this.dockerode.listImages();
             return images.reduce((repoTags, image) => {

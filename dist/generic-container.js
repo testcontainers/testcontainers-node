@@ -32,7 +32,8 @@ class GenericContainer {
             const portBindings = yield new port_bindings_1.PortBinder().bind(this.ports);
             const container = yield this.dockerClient.create(this.repoTag, portBindings);
             yield this.dockerClient.start(container);
-            const containerState = new container_state_1.ContainerState(portBindings);
+            const inspectResult = yield container.inspect();
+            const containerState = new container_state_1.ContainerState(inspectResult);
             yield this.waitForContainer(container, containerState);
             return new StartedGenericContainer(container, portBindings);
         });
@@ -47,7 +48,7 @@ class GenericContainer {
     }
     hasRepoTagLocally() {
         return __awaiter(this, void 0, void 0, function* () {
-            const repoTags = yield this.dockerClient.getRepoTags();
+            const repoTags = yield this.dockerClient.fetchRepoTags();
             return repoTags.some(repoTag => repoTag.equals(this.repoTag));
         });
     }

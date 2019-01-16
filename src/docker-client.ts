@@ -19,7 +19,7 @@ export interface DockerClient {
   create(repoTag: RepoTag, portBindings: PortBindings): Promise<Container>;
   start(container: Container): Promise<void>;
   exec(container: Container, command: Command[]): Promise<ExecResult>;
-  getRepoTags(): Promise<RepoTag[]>;
+  fetchRepoTags(): Promise<RepoTag[]>;
 }
 
 export class DockerodeClient implements DockerClient {
@@ -73,7 +73,7 @@ export class DockerodeClient implements DockerClient {
     return { output, exitCode };
   }
 
-  public async getRepoTags(): Promise<RepoTag[]> {
+  public async fetchRepoTags(): Promise<RepoTag[]> {
     const images = await this.dockerode.listImages();
 
     return images.reduce((repoTags: RepoTag[], image) => {

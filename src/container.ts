@@ -1,7 +1,13 @@
 import dockerode from "dockerode";
 import { Command, ExitCode } from "./docker-client";
+import { Port } from "./port";
 
 type Id = string;
+
+export type InspectResult = {
+  internalPorts: Port[];
+  hostPorts: Port[];
+};
 
 type ExecOptions = {
   cmd: Command[];
@@ -9,13 +15,13 @@ type ExecOptions = {
   attachStderr: true;
 };
 
-type InspectResult = {
+type ExecInspectResult = {
   exitCode: ExitCode;
 };
 
 interface Exec {
   start(): Promise<NodeJS.ReadableStream>;
-  inspect(): Promise<InspectResult>;
+  inspect(): Promise<ExecInspectResult>;
 }
 
 export interface Container {
@@ -24,6 +30,7 @@ export interface Container {
   stop(): Promise<void>;
   remove(): Promise<void>;
   exec(options: ExecOptions): Promise<Exec>;
+  inspect(): Promise<InspectResult>;
 }
 
 export class DockerodeContainer implements Container {
@@ -48,6 +55,18 @@ export class DockerodeContainer implements Container {
   public async exec(options: ExecOptions): Promise<Exec> {
     return new DockerodeExec(await this.container.exec(options));
   }
+
+  public async inspect(): Promise<InspectResult> {
+    const inspectResult = await this.container.inspect();
+
+    const ports = inspectResult.NetworkSettings.Ports;
+    const internalPorts = Object.keys(ports).map(port => Number(port.split("/")[0]));
+    const hostPorts = Object.values(ports)
+      .filter(portsArray => portsArray !== null)
+      .map(portsArray => Number(portsArray[0].HostPort));
+
+    return { internalPorts, hostPorts };
+  }
 }
 
 class DockerodeExec implements Exec {
@@ -64,7 +83,7 @@ class DockerodeExec implements Exec {
     });
   }
 
-  public async inspect(): Promise<InspectResult> {
+  public async inspect(): Promise<ExecInspectResult> {
     const inspectResult = await this.exec.inspect();
     return { exitCode: inspectResult.ExitCode };
   }
