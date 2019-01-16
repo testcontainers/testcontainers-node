@@ -1,7 +1,7 @@
 import devNull from "dev-null";
 import Dockerode, { Container, PortMap as DockerodePortBindings } from "dockerode";
 import { Stream } from "stream";
-import log from "./logger";
+import { DebugLogger, Logger } from "./logger";
 import { PortString } from "./port";
 import { PortBindings } from "./port-bindings";
 import { RepoTag } from "./repo-tag";
@@ -20,10 +20,13 @@ export interface DockerClient {
 }
 
 export class DockerodeClient implements DockerClient {
-  constructor(private readonly dockerode: Dockerode = new Dockerode()) {}
+  constructor(
+    private readonly dockerode: Dockerode = new Dockerode(),
+    private readonly log: Logger = new DebugLogger()
+  ) {}
 
   public async pull(repoTag: RepoTag): Promise<void> {
-    log.info(`Pulling image: ${repoTag}`);
+    this.log.info(`Pulling image: ${repoTag}`);
 
     return new Promise(async resolve => {
       const stream = await this.dockerode.pull(repoTag.toString(), {});
@@ -33,7 +36,7 @@ export class DockerodeClient implements DockerClient {
   }
 
   public create(repoTag: RepoTag, portBindings: PortBindings): Promise<Container> {
-    log.info(`Creating container for image: ${repoTag}`);
+    this.log.info(`Creating container for image: ${repoTag}`);
 
     return this.dockerode.createContainer({
       Image: repoTag.toString(),
@@ -45,12 +48,12 @@ export class DockerodeClient implements DockerClient {
   }
 
   public start(container: Container): Promise<void> {
-    log.info(`Starting container with ID: ${container.id}`);
+    this.log.info(`Starting container with ID: ${container.id}`);
     return container.start();
   }
 
   public async exec(container: Container, command: Command[]): Promise<ExecResult> {
-    log.debug(`Executing command "${command.join(" ")}" on container with ID: ${container.id}`);
+    this.log.debug(`Executing command "${command.join(" ")}" on container with ID: ${container.id}`);
 
     const exec = await container.exec({
       Cmd: command,

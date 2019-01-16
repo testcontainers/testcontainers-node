@@ -1,9 +1,34 @@
-import winston from "winston";
+import debug, { IDebugger } from "debug";
 
-const logger = winston.createLogger({
-  level: "debug",
-  format: winston.format.simple(),
-  transports: [new winston.transports.Console()]
-});
+type Message = string;
 
-export default logger;
+export interface Logger {
+  debug(message: Message): void;
+  info(message: Message): void;
+  warn(message: Message): void;
+  error(message: Message): void;
+}
+
+export class DebugLogger implements Logger {
+  private readonly logger: IDebugger;
+
+  constructor() {
+    this.logger = debug("testcontainers");
+  }
+
+  public debug(message: Message): void {
+    this.logger(message);
+  }
+
+  public info(message: Message): void {
+    this.logger(message);
+  }
+
+  public warn(message: Message): void {
+    this.logger(message);
+  }
+
+  public error(message: Message): void {
+    this.logger(message);
+  }
+}

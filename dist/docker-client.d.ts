@@ -1,4 +1,5 @@
 import Dockerode, { Container } from "dockerode";
+import { Logger } from "./logger";
 import { PortBindings } from "./port-bindings";
 import { RepoTag } from "./repo-tag";
 declare type Command = string;
@@ -16,7 +17,8 @@ export interface DockerClient {
 }
 export declare class DockerodeClient implements DockerClient {
     private readonly dockerode;
-    constructor(dockerode?: Dockerode);
+    private readonly log;
+    constructor(dockerode?: Dockerode, log?: Logger);
     pull(repoTag: RepoTag): Promise<void>;
     create(repoTag: RepoTag, portBindings: PortBindings): Promise<Container>;
     start(container: Container): Promise<void>;

@@ -13,14 +13,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const dev_null_1 = __importDefault(require("dev-null"));
 const dockerode_1 = __importDefault(require("dockerode"));
-const logger_1 = __importDefault(require("./logger"));
+const logger_1 = require("./logger");
 class DockerodeClient {
-    constructor(dockerode = new dockerode_1.default()) {
+    constructor(dockerode = new dockerode_1.default(), log = new logger_1.DebugLogger()) {
         this.dockerode = dockerode;
+        this.log = log;
     }
     pull(repoTag) {
         return __awaiter(this, void 0, void 0, function* () {
-            logger_1.default.info(`Pulling image: ${repoTag}`);
+            this.log.info(`Pulling image: ${repoTag}`);
             return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
                 const stream = yield this.dockerode.pull(repoTag.toString(), {});
                 stream.pipe(dev_null_1.default());
@@ -29,7 +30,7 @@ class DockerodeClient {
         });
     }
     create(repoTag, portBindings) {
-        logger_1.default.info(`Creating container for image: ${repoTag}`);
+        this.log.info(`Creating container for image: ${repoTag}`);
         return this.dockerode.createContainer({
             Image: repoTag.toString(),
             ExposedPorts: this.getExposedPorts(portBindings),
@@ -39,12 +40,12 @@ class DockerodeClient {
         });
     }
     start(container) {
-        logger_1.default.info(`Starting container with ID: ${container.id}`);
+        this.log.info(`Starting container with ID: ${container.id}`);
         return container.start();
     }
     exec(container, command) {
         return __awaiter(this, void 0, void 0, function* () {
-            logger_1.default.debug(`Executing command "${command.join(" ")}" on container with ID: ${container.id}`);
+            this.log.debug(`Executing command "${command.join(" ")}" on container with ID: ${container.id}`);
             const exec = yield container.exec({
                 Cmd: command,
                 AttachStdout: true,

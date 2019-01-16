@@ -1,7 +1,7 @@
 import { Duration, TemporalUnit } from "node-duration";
 import { ContainerState } from "./container-state";
 import { DockerClient } from "./docker-client";
-import log from "./logger";
+import { DebugLogger, Logger } from "./logger";
 import { Port } from "./port";
 import { PortCheck } from "./port-check";
 import { IntervalRetryStrategy } from "./retry-strategy";
@@ -26,7 +26,8 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
   constructor(
     private readonly dockerClient: DockerClient,
     private readonly hostPortCheck: PortCheck,
-    private readonly internalPortCheck: PortCheck
+    private readonly internalPortCheck: PortCheck,
+    private readonly log: Logger = new DebugLogger()
   ) {
     super();
   }
@@ -37,14 +38,14 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
 
   private async waitForHostPorts(containerState: ContainerState): Promise<void> {
     for (const hostPort of containerState.getHostPorts()) {
-      log.debug(`Waiting for host port :${hostPort}`);
+      this.log.debug(`Waiting for host port :${hostPort}`);
       await this.waitForPort(hostPort, this.hostPortCheck);
     }
   }
 
   private async waitForInternalPorts(containerState: ContainerState): Promise<void> {
     for (const internalPort of containerState.getInternalPorts()) {
-      log.debug(`Waiting for internal port :${internalPort}`);
+      this.log.debug(`Waiting for internal port :${internalPort}`);
       await this.waitForPort(internalPort, this.internalPortCheck);
     }
   }

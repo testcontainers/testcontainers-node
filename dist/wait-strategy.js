@@ -7,12 +7,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_duration_1 = require("node-duration");
-const logger_1 = __importDefault(require("./logger"));
+const logger_1 = require("./logger");
 const retry_strategy_1 = require("./retry-strategy");
 class AbstractWaitStrategy {
     constructor() {
@@ -24,11 +21,12 @@ class AbstractWaitStrategy {
     }
 }
 class HostPortWaitStrategy extends AbstractWaitStrategy {
-    constructor(dockerClient, hostPortCheck, internalPortCheck) {
+    constructor(dockerClient, hostPortCheck, internalPortCheck, log = new logger_1.DebugLogger()) {
         super();
         this.dockerClient = dockerClient;
         this.hostPortCheck = hostPortCheck;
         this.internalPortCheck = internalPortCheck;
+        this.log = log;
     }
     waitUntilReady(containerState) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -38,7 +36,7 @@ class HostPortWaitStrategy extends AbstractWaitStrategy {
     waitForHostPorts(containerState) {
         return __awaiter(this, void 0, void 0, function* () {
             for (const hostPort of containerState.getHostPorts()) {
-                logger_1.default.debug(`Waiting for host port :${hostPort}`);
+                this.log.debug(`Waiting for host port :${hostPort}`);
                 yield this.waitForPort(hostPort, this.hostPortCheck);
             }
         });
@@ -46,7 +44,7 @@ class HostPortWaitStrategy extends AbstractWaitStrategy {
     waitForInternalPorts(containerState) {
         return __awaiter(this, void 0, void 0, function* () {
             for (const internalPort of containerState.getInternalPorts()) {
-                logger_1.default.debug(`Waiting for internal port :${internalPort}`);
+                this.log.debug(`Waiting for internal port :${internalPort}`);
                 yield this.waitForPort(internalPort, this.internalPortCheck);
             }
         });
