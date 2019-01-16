@@ -14,23 +14,25 @@ npm i -D testcontainers
 
 Run your app with the `DEBUG=testcontainers` env variable set to see debug output.
 
-```javascript
-import fetch from "node-fetch";
-import { GenericContainer } from "testcontainers";
+## Example
 
-test("should return 200 from docker container over http", async () => {
-    const container = await new GenericContainer("tutum/hello-world")
-        .withExposedPorts(80)
-        .start();
-       
-    const url = `http://localhost:${container.getMappedPort(80)}`;
-    const response = await fetch(url);
-    expect(response.status).toBe(200);
-    
-    await container.stop();
-}); 
+```javascript
+const redis = require("async-redis");
+const { GenericContainer } = require("testcontainers");
+
+(async () => {
+  const container = await new GenericContainer("redis")
+    .withExposedPorts(6379)
+    .start();
+
+  const redisClient = redis.createClient(container.getMappedPort(6379));
+  // ...
+  await redisClient.quit();
+
+  await container.stop();
+})();
 ```
 
-## TODO
+## To Do
 
 - Ensure that InternalPortCheck works without explicitly exposing ports
