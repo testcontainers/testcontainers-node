@@ -26,7 +26,10 @@ class GenericContainer {
     }
     start() {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.dockerClient.pull(this.repoTag);
+            const repoTags = yield this.dockerClient.getRepoTags();
+            if (repoTags.every(repoTag => !repoTag.isEqual(this.repoTag))) {
+                yield this.dockerClient.pull(this.repoTag);
+            }
             const portBindings = yield new port_bindings_1.PortBinder().bind(this.ports);
             const container = yield this.dockerClient.create(this.repoTag, portBindings);
             yield this.dockerClient.start(container);

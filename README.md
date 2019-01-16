@@ -33,6 +33,4 @@ test("should return 200 from docker container over http", async () => {
 
 ## TODO
 
-- Do not re-pull image if already exists
 - Ensure that InternalPortCheck works without explicitly exposing ports
-- Extract stream consumption logic to own module

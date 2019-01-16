@@ -16,6 +16,7 @@ const dockerode_1 = __importDefault(require("dockerode"));
 const stream_to_array_1 = __importDefault(require("stream-to-array"));
 const container_1 = require("./container");
 const logger_1 = require("./logger");
+const repo_tag_1 = require("./repo-tag");
 class DockerodeClient {
     constructor(dockerode = new dockerode_1.default(), log = new logger_1.DebugLogger()) {
         this.dockerode = dockerode;
@@ -60,6 +61,18 @@ class DockerodeClient {
             const output = Buffer.concat(yield stream_to_array_1.default(stream)).toString();
             const { exitCode } = yield exec.inspect();
             return { output, exitCode };
+        });
+    }
+    getRepoTags() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const images = yield this.dockerode.listImages();
+            return images.reduce((repoTags, image) => {
+                const imageRepoTags = image.RepoTags.map(imageInfoRepoTag => {
+                    const [imageName, tag] = imageInfoRepoTag.split(":");
+                    return new repo_tag_1.RepoTag(imageName, tag);
+                });
+                return [...repoTags, ...imageRepoTags];
+            }, []);
         });
     }
     getExposedPorts(portBindings) {

@@ -21,7 +21,11 @@ export class GenericContainer implements TestContainer {
   }
 
   public async start(): Promise<StartedTestContainer> {
-    await this.dockerClient.pull(this.repoTag);
+    const repoTags = await this.dockerClient.getRepoTags();
+    if (repoTags.every(repoTag => !repoTag.isEqual(this.repoTag))) {
+      await this.dockerClient.pull(this.repoTag);
+    }
+
     const portBindings = await new PortBinder().bind(this.ports);
     const container = await this.dockerClient.create(this.repoTag, portBindings);
     await this.dockerClient.start(container);
