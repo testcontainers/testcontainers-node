@@ -5,7 +5,7 @@ class RepoTag {
         this.image = image;
         this.tag = tag;
     }
-    isEqual(repoTag) {
+    equals(repoTag) {
         return this.image === repoTag.image && this.tag === repoTag.tag;
     }
     toString() {

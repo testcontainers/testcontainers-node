@@ -26,18 +26,14 @@ class GenericContainer {
     }
     start() {
         return __awaiter(this, void 0, void 0, function* () {
-            const repoTags = yield this.dockerClient.getRepoTags();
-            if (repoTags.every(repoTag => !repoTag.isEqual(this.repoTag))) {
+            if (!(yield this.hasRepoTagLocally())) {
                 yield this.dockerClient.pull(this.repoTag);
             }
             const portBindings = yield new port_bindings_1.PortBinder().bind(this.ports);
             const container = yield this.dockerClient.create(this.repoTag, portBindings);
             yield this.dockerClient.start(container);
             const containerState = new container_state_1.ContainerState(portBindings);
-            const hostPortCheck = new port_check_1.HostPortCheck();
-            const internalPortCheck = new port_check_1.InternalPortCheck(container, this.dockerClient);
-            const waitStrategy = new wait_strategy_1.HostPortWaitStrategy(this.dockerClient, hostPortCheck, internalPortCheck);
-            yield waitStrategy.waitUntilReady(containerState);
+            yield this.waitForContainer(container, containerState);
             return new StartedGenericContainer(container, portBindings);
         });
     }
@@ -48,6 +44,20 @@ class GenericContainer {
     withStartupTimeout(startupTimeout) {
         this.startupTimeout = startupTimeout;
         return this;
+    }
+    hasRepoTagLocally() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const repoTags = yield this.dockerClient.getRepoTags();
+            return repoTags.some(repoTag => repoTag.equals(this.repoTag));
+        });
+    }
+    waitForContainer(container, containerState) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const hostPortCheck = new port_check_1.HostPortCheck();
+            const internalPortCheck = new port_check_1.InternalPortCheck(container, this.dockerClient);
+            const waitStrategy = new wait_strategy_1.HostPortWaitStrategy(this.dockerClient, hostPortCheck, internalPortCheck);
+            yield waitStrategy.waitUntilReady(containerState);
+        });
     }
 }
 exports.GenericContainer = GenericContainer;

@@ -21,8 +21,7 @@ export class GenericContainer implements TestContainer {
   }
 
   public async start(): Promise<StartedTestContainer> {
-    const repoTags = await this.dockerClient.getRepoTags();
-    if (repoTags.every(repoTag => !repoTag.isEqual(this.repoTag))) {
+    if (!(await this.hasRepoTagLocally())) {
       await this.dockerClient.pull(this.repoTag);
     }
 
@@ -30,11 +29,7 @@ export class GenericContainer implements TestContainer {
     const container = await this.dockerClient.create(this.repoTag, portBindings);
     await this.dockerClient.start(container);
     const containerState = new ContainerState(portBindings);
-
-    const hostPortCheck = new HostPortCheck();
-    const internalPortCheck = new InternalPortCheck(container, this.dockerClient);
-    const waitStrategy = new HostPortWaitStrategy(this.dockerClient, hostPortCheck, internalPortCheck);
-    await waitStrategy.waitUntilReady(containerState);
+    await this.waitForContainer(container, containerState);
 
     return new StartedGenericContainer(container, portBindings);
   }
@@ -47,6 +42,18 @@ export class GenericContainer implements TestContainer {
   public withStartupTimeout(startupTimeout: Duration): TestContainer {
     this.startupTimeout = startupTimeout;
     return this;
+  }
+
+  private async hasRepoTagLocally(): Promise<boolean> {
+    const repoTags = await this.dockerClient.getRepoTags();
+    return repoTags.some(repoTag => repoTag.equals(this.repoTag));
+  }
+
+  private async waitForContainer(container: Container, containerState: ContainerState): Promise<void> {
+    const hostPortCheck = new HostPortCheck();
+    const internalPortCheck = new InternalPortCheck(container, this.dockerClient);
+    const waitStrategy = new HostPortWaitStrategy(this.dockerClient, hostPortCheck, internalPortCheck);
+    await waitStrategy.waitUntilReady(containerState);
   }
 }
 

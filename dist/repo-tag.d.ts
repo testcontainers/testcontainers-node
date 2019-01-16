@@ -4,6 +4,6 @@ export declare class RepoTag {
     private readonly image;
     private readonly tag;
     constructor(image: Image, tag: Tag);
-    isEqual(repoTag: RepoTag): boolean;
+    equals(repoTag: RepoTag): boolean;
     toString(): string;
 }

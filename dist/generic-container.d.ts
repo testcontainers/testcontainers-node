@@ -13,4 +13,6 @@ export declare class GenericContainer implements TestContainer {
     start(): Promise<StartedTestContainer>;
     withExposedPorts(...ports: Port[]): TestContainer;
     withStartupTimeout(startupTimeout: Duration): TestContainer;
+    private hasRepoTagLocally;
+    private waitForContainer;
 }
