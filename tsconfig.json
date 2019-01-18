@@ -9,8 +9,8 @@
     "lib": ["es2017"]
   },
   "exclude": [
-    "node_modules",
     "dist",
+    "node_modules",
     "src/**/*.test.ts"
   ]
 }
