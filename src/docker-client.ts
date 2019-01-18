@@ -1,4 +1,3 @@
-import devNull from "dev-null";
 import Dockerode, { PortMap as DockerodePortBindings } from "dockerode";
 import streamToArray from "stream-to-array";
 import { Container, DockerodeContainer } from "./container";
@@ -30,12 +29,8 @@ export class DockerodeClient implements DockerClient {
 
   public async pull(repoTag: RepoTag): Promise<void> {
     this.log.info(`Pulling image: ${repoTag}`);
-
-    return new Promise(async resolve => {
-      const stream = await this.dockerode.pull(repoTag.toString(), {});
-      stream.pipe(devNull());
-      stream.on("end", resolve);
-    });
+    const stream = await this.dockerode.pull(repoTag.toString(), {});
+    await streamToArray(stream);
   }
 
   public async create(repoTag: RepoTag, portBindings: PortBindings): Promise<Container> {

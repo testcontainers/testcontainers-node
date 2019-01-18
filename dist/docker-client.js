@@ -11,7 +11,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const dev_null_1 = __importDefault(require("dev-null"));
 const dockerode_1 = __importDefault(require("dockerode"));
 const stream_to_array_1 = __importDefault(require("stream-to-array"));
 const container_1 = require("./container");
@@ -25,11 +24,8 @@ class DockerodeClient {
     pull(repoTag) {
         return __awaiter(this, void 0, void 0, function* () {
             this.log.info(`Pulling image: ${repoTag}`);
-            return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
-                const stream = yield this.dockerode.pull(repoTag.toString(), {});
-                stream.pipe(dev_null_1.default());
-                stream.on("end", resolve);
-            }));
+            const stream = yield this.dockerode.pull(repoTag.toString(), {});
+            yield stream_to_array_1.default(stream);
         });
     }
     create(repoTag, portBindings) {
