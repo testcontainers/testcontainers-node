@@ -11,7 +11,7 @@
   "files": [
     "dist"
   ],
-  "description": "TestContainers is a NodeJS library that supports tests, providing lightweight, throwaway instances of common databases, Selenium web browsers, or anything else that can run in a Docker container.",
+  "description": "Testcontainers is a NodeJS library that supports tests, providing lightweight, throwaway instances of common databases, Selenium web browsers, or anything else that can run in a Docker container.",
   "license": "MIT",
   "homepage": "https://github.com/cristianrgreco/testcontainers-node#readme",
   "repository": {
