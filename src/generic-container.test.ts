@@ -1,18 +1,32 @@
 import fetch from "node-fetch";
 import { GenericContainer } from "./generic-container";
+import { StartedTestContainer } from "./test-container";
 
 describe("GenericContainer", () => {
-  it("should start and stop a container", async () => {
-    const container = await new GenericContainer("tutum/hello-world")
-      .withEnv("key", "value")
-      .withExposedPorts(80)
+  let container: StartedTestContainer;
+  let url: string;
+
+  beforeAll(async () => {
+    container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.7")
+      .withEnv("customKey", "customValue")
+      .withExposedPorts(8080)
       .start();
-
-    const testUrl = `http://localhost:${container.getMappedPort(80)}`;
-    const containerResponse = await fetch(testUrl);
-    expect(containerResponse.status).toBe(200);
-
-    await container.stop();
-    return expect(fetch(testUrl)).rejects.toThrowError();
+    url = `http://localhost:${container.getMappedPort(8080)}`;
   }, 10000);
+
+  afterAll(async () => {
+    await container.stop();
+    await expect(fetch(url)).rejects.toThrowError();
+  });
+
+  it("should expose ports", async () => {
+    const response = await fetch(`${url}/hello-world`);
+    expect(response.status).toBe(200);
+  });
+
+  it("should set environment variables", async () => {
+    const response = await fetch(`${url}/env`);
+    const responseBody = await response.json();
+    expect(responseBody.customKey).toBe("customValue");
+  });
 });

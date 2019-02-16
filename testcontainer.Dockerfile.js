@@ -1,0 +1,16 @@
+const express = require("express");
+
+process.on('SIGINT', () => process.exit());
+
+const app = express();
+const port = 8080;
+
+app.get("/hello-world", (req, res) => {
+    res.status(200).send("hello-world");
+});
+
+app.get("/env", (req, res) => {
+    res.status(200).json(process.env);
+});
+
+app.listen(port, () => console.log(`Listening on port ${port}`));
