@@ -9,7 +9,7 @@ export interface Logger {
   error(message: Message): void;
 }
 
-export class DebugLogger implements Logger {
+class DebugLogger implements Logger {
   private readonly logger: IDebugger;
 
   constructor() {
@@ -32,3 +32,5 @@ export class DebugLogger implements Logger {
     this.logger(message);
   }
 }
+
+export default new DebugLogger();
