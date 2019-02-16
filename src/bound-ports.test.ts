@@ -1,5 +1,4 @@
-import { BoundPorts, PortBinder } from "./bound-ports";
-import { FixedPortClient } from "./port-client";
+import { BoundPorts } from "./bound-ports";
 
 describe("BoundPorts", () => {
   it("should return a binding", () => {
@@ -17,17 +16,5 @@ describe("BoundPorts", () => {
       expect(internalPort).toBe(1);
       expect(hostPort).toBe(1000);
     }
-  });
-
-  describe("PortBinder", () => {
-    it("should bind each port to the host", async () => {
-      const portClient = new FixedPortClient([1000, 2000]);
-      const portBinder = new PortBinder(portClient);
-
-      const boundPorts = await portBinder.bind([1, 2]);
-
-      expect(boundPorts.getBinding(1)).toBe(1000);
-      expect(boundPorts.getBinding(2)).toBe(2000);
-    });
   });
 });

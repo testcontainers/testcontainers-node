@@ -1,9 +1,10 @@
 import { Duration, TemporalUnit } from "node-duration";
-import { BoundPorts, PortBinder } from "./bound-ports";
+import { BoundPorts } from "./bound-ports";
 import { Container } from "./container";
 import { ContainerState } from "./container-state";
 import { DockerClient, DockerodeClient, Environment, EnvironmentKey, EnvironmentValue } from "./docker-client";
 import { Port } from "./port";
+import { PortBinder } from "./port-binder";
 import { HostPortCheck, InternalPortCheck } from "./port-check";
 import { Image, RepoTag, Tag } from "./repo-tag";
 import { StartedTestContainer, StoppedTestContainer, TestContainer } from "./test-container";
