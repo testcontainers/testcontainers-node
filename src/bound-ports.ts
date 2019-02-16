@@ -4,18 +4,18 @@ import { PortClient, RandomPortClient } from "./port-client";
 export class PortBinder {
   constructor(private readonly portClient: PortClient = new RandomPortClient()) {}
 
-  public async bind(ports: Port[]): Promise<PortBindings> {
-    const portBindings = new PortBindings();
+  public async bind(ports: Port[]): Promise<BoundPorts> {
+    const boundPorts = new BoundPorts();
 
     for (const port of ports) {
-      portBindings.setBinding(port, await this.portClient.getPort());
+      boundPorts.setBinding(port, await this.portClient.getPort());
     }
 
-    return portBindings;
+    return boundPorts;
   }
 }
 
-export class PortBindings {
+export class BoundPorts {
   private readonly ports = new Map<Port, Port>();
 
   public getBinding(port: Port): Port {

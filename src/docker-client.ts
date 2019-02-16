@@ -1,9 +1,9 @@
 import Dockerode, { PortMap as DockerodePortBindings } from "dockerode";
 import streamToArray from "stream-to-array";
+import { BoundPorts } from "./bound-ports";
 import { Container, DockerodeContainer } from "./container";
 import { DebugLogger, Logger } from "./logger";
 import { PortString } from "./port";
-import { PortBindings } from "./port-bindings";
 import { RepoTag } from "./repo-tag";
 
 export type Command = string;
@@ -15,7 +15,7 @@ type DockerodeExposedPorts = { [port in PortString]: {} };
 
 export interface DockerClient {
   pull(repoTag: RepoTag): Promise<void>;
-  create(repoTag: RepoTag, portBindings: PortBindings): Promise<Container>;
+  create(repoTag: RepoTag, boundPorts: BoundPorts): Promise<Container>;
   start(container: Container): Promise<void>;
   exec(container: Container, command: Command[]): Promise<ExecResult>;
   fetchRepoTags(): Promise<RepoTag[]>;
@@ -33,14 +33,14 @@ export class DockerodeClient implements DockerClient {
     await streamToArray(stream);
   }
 
-  public async create(repoTag: RepoTag, portBindings: PortBindings): Promise<Container> {
+  public async create(repoTag: RepoTag, boundPorts: BoundPorts): Promise<Container> {
     this.log.info(`Creating container for image: ${repoTag}`);
 
     const dockerodeContainer = await this.dockerode.createContainer({
       Image: repoTag.toString(),
-      ExposedPorts: this.getExposedPorts(portBindings),
+      ExposedPorts: this.getExposedPorts(boundPorts),
       HostConfig: {
-        PortBindings: this.getPortBindings(portBindings)
+        PortBindings: this.getPortBindings(boundPorts)
       }
     });
 
@@ -80,17 +80,17 @@ export class DockerodeClient implements DockerClient {
     }, []);
   }
 
-  private getExposedPorts(portBindings: PortBindings): DockerodeExposedPorts {
+  private getExposedPorts(boundPorts: BoundPorts): DockerodeExposedPorts {
     const dockerodeExposedPorts: DockerodeExposedPorts = {};
-    for (const [internalPort] of portBindings.iterator()) {
+    for (const [internalPort] of boundPorts.iterator()) {
       dockerodeExposedPorts[internalPort.toString()] = {};
     }
     return dockerodeExposedPorts;
   }
 
-  private getPortBindings(portBindings: PortBindings): DockerodePortBindings {
+  private getPortBindings(boundPorts: BoundPorts): DockerodePortBindings {
     const dockerodePortBindings: DockerodePortBindings = {};
-    for (const [internalPort, hostPort] of portBindings.iterator()) {
+    for (const [internalPort, hostPort] of boundPorts.iterator()) {
       dockerodePortBindings[internalPort.toString()] = [{ HostPort: hostPort.toString() }];
     }
     return dockerodePortBindings;

@@ -1,9 +1,9 @@
 import { Duration, TemporalUnit } from "node-duration";
+import { BoundPorts, PortBinder } from "./bound-ports";
 import { Container } from "./container";
 import { ContainerState } from "./container-state";
 import { DockerClient, DockerodeClient } from "./docker-client";
 import { Port } from "./port";
-import { PortBinder, PortBindings } from "./port-bindings";
 import { HostPortCheck, InternalPortCheck } from "./port-check";
 import { Image, RepoTag, Tag } from "./repo-tag";
 import { StartedTestContainer, StoppedTestContainer, TestContainer } from "./test-container";
@@ -25,14 +25,14 @@ export class GenericContainer implements TestContainer {
       await this.dockerClient.pull(this.repoTag);
     }
 
-    const portBindings = await new PortBinder().bind(this.ports);
-    const container = await this.dockerClient.create(this.repoTag, portBindings);
+    const boundPorts = await new PortBinder().bind(this.ports);
+    const container = await this.dockerClient.create(this.repoTag, boundPorts);
     await this.dockerClient.start(container);
     const inspectResult = await container.inspect();
     const containerState = new ContainerState(inspectResult);
     await this.waitForContainer(container, containerState);
 
-    return new StartedGenericContainer(container, portBindings);
+    return new StartedGenericContainer(container, boundPorts);
   }
 
   public withExposedPorts(...ports: Port[]): TestContainer {
@@ -59,7 +59,7 @@ export class GenericContainer implements TestContainer {
 }
 
 class StartedGenericContainer implements StartedTestContainer {
-  constructor(private readonly container: Container, private readonly portBindings: PortBindings) {}
+  constructor(private readonly container: Container, private readonly boundPorts: BoundPorts) {}
 
   public async stop(): Promise<StoppedTestContainer> {
     await this.container.stop();
@@ -68,7 +68,7 @@ class StartedGenericContainer implements StartedTestContainer {
   }
 
   public getMappedPort(port: Port): Port {
-    return this.portBindings.getBinding(port);
+    return this.boundPorts.getBinding(port);
   }
 }
 
