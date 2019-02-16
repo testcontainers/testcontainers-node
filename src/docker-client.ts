@@ -9,13 +9,18 @@ import { RepoTag } from "./repo-tag";
 export type Command = string;
 export type ExitCode = number;
 
+export type EnvironmentKey = string;
+export type EnvironmentValue = string;
+export type Environment = { [key in EnvironmentKey]: EnvironmentValue };
+type DockerodeEnvironment = string[];
+
 type StreamOutput = string;
 type ExecResult = { output: StreamOutput; exitCode: ExitCode };
 type DockerodeExposedPorts = { [port in PortString]: {} };
 
 export interface DockerClient {
   pull(repoTag: RepoTag): Promise<void>;
-  create(repoTag: RepoTag, boundPorts: BoundPorts): Promise<Container>;
+  create(repoTag: RepoTag, environment: Environment, boundPorts: BoundPorts): Promise<Container>;
   start(container: Container): Promise<void>;
   exec(container: Container, command: Command[]): Promise<ExecResult>;
   fetchRepoTags(): Promise<RepoTag[]>;
@@ -33,11 +38,12 @@ export class DockerodeClient implements DockerClient {
     await streamToArray(stream);
   }
 
-  public async create(repoTag: RepoTag, boundPorts: BoundPorts): Promise<Container> {
+  public async create(repoTag: RepoTag, environment: Environment, boundPorts: BoundPorts): Promise<Container> {
     this.log.info(`Creating container for image: ${repoTag}`);
 
     const dockerodeContainer = await this.dockerode.createContainer({
       Image: repoTag.toString(),
+      Env: this.getEnvironment(environment),
       ExposedPorts: this.getExposedPorts(boundPorts),
       HostConfig: {
         PortBindings: this.getPortBindings(boundPorts)
@@ -78,6 +84,15 @@ export class DockerodeClient implements DockerClient {
       });
       return [...repoTags, ...imageRepoTags];
     }, []);
+  }
+
+  private getEnvironment(environment: Environment): DockerodeEnvironment {
+    return Object.entries(environment).reduce(
+      (dockerodeEnvironment, [key, value]) => {
+        return [...dockerodeEnvironment, `${key}=${value}`];
+      },
+      [] as DockerodeEnvironment
+    );
   }
 
   private getExposedPorts(boundPorts: BoundPorts): DockerodeExposedPorts {

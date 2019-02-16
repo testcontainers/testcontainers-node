@@ -2,7 +2,7 @@ import { Duration, TemporalUnit } from "node-duration";
 import { BoundPorts, PortBinder } from "./bound-ports";
 import { Container } from "./container";
 import { ContainerState } from "./container-state";
-import { DockerClient, DockerodeClient } from "./docker-client";
+import { DockerClient, DockerodeClient, Environment, EnvironmentKey, EnvironmentValue } from "./docker-client";
 import { Port } from "./port";
 import { HostPortCheck, InternalPortCheck } from "./port-check";
 import { Image, RepoTag, Tag } from "./repo-tag";
@@ -14,6 +14,7 @@ export class GenericContainer implements TestContainer {
   private readonly dockerClient: DockerClient = new DockerodeClient();
 
   private ports: Port[] = [];
+  private environment: Environment = {};
   private startupTimeout: Duration = new Duration(10_000, TemporalUnit.MILLISECONDS);
 
   constructor(readonly image: Image, readonly tag: Tag = "latest") {
@@ -26,13 +27,18 @@ export class GenericContainer implements TestContainer {
     }
 
     const boundPorts = await new PortBinder().bind(this.ports);
-    const container = await this.dockerClient.create(this.repoTag, boundPorts);
+    const container = await this.dockerClient.create(this.repoTag, this.environment, boundPorts);
     await this.dockerClient.start(container);
     const inspectResult = await container.inspect();
     const containerState = new ContainerState(inspectResult);
     await this.waitForContainer(container, containerState);
 
     return new StartedGenericContainer(container, boundPorts);
+  }
+
+  public withEnv(key: EnvironmentKey, value: EnvironmentValue): TestContainer {
+    this.environment[key] = value;
+    return this;
   }
 
   public withExposedPorts(...ports: Port[]): TestContainer {
