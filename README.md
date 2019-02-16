@@ -22,6 +22,7 @@ const { GenericContainer } = require("testcontainers");
 
 (async () => {
   const container = await new GenericContainer("redis")
+    .withEnv("KEY", "VALUE")
     .withExposedPorts(6379)
     .start();
 

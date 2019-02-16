@@ -9,9 +9,9 @@ import { RepoTag } from "./repo-tag";
 export type Command = string;
 export type ExitCode = number;
 
-export type EnvironmentKey = string;
-export type EnvironmentValue = string;
-export type Environment = { [key in EnvironmentKey]: EnvironmentValue };
+export type EnvKey = string;
+export type EnvValue = string;
+export type Env = { [key in EnvKey]: EnvValue };
 type DockerodeEnvironment = string[];
 
 type StreamOutput = string;
@@ -20,7 +20,7 @@ type DockerodeExposedPorts = { [port in PortString]: {} };
 
 export interface DockerClient {
   pull(repoTag: RepoTag): Promise<void>;
-  create(repoTag: RepoTag, environment: Environment, boundPorts: BoundPorts): Promise<Container>;
+  create(repoTag: RepoTag, env: Env, boundPorts: BoundPorts): Promise<Container>;
   start(container: Container): Promise<void>;
   exec(container: Container, command: Command[]): Promise<ExecResult>;
   fetchRepoTags(): Promise<RepoTag[]>;
@@ -35,12 +35,12 @@ export class DockerodeClient implements DockerClient {
     await streamToArray(stream);
   }
 
-  public async create(repoTag: RepoTag, environment: Environment, boundPorts: BoundPorts): Promise<Container> {
+  public async create(repoTag: RepoTag, env: Env, boundPorts: BoundPorts): Promise<Container> {
     log.info(`Creating container for image: ${repoTag}`);
 
     const dockerodeContainer = await this.dockerode.createContainer({
       Image: repoTag.toString(),
-      Env: this.getEnvironment(environment),
+      Env: this.getEnv(env),
       ExposedPorts: this.getExposedPorts(boundPorts),
       HostConfig: {
         PortBindings: this.getPortBindings(boundPorts)
@@ -83,8 +83,8 @@ export class DockerodeClient implements DockerClient {
     }, []);
   }
 
-  private getEnvironment(environment: Environment): DockerodeEnvironment {
-    return Object.entries(environment).reduce(
+  private getEnv(env: Env): DockerodeEnvironment {
+    return Object.entries(env).reduce(
       (dockerodeEnvironment, [key, value]) => {
         return [...dockerodeEnvironment, `${key}=${value}`];
       },

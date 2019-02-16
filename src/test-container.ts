@@ -1,10 +1,10 @@
 import { Duration } from "node-duration";
-import { EnvironmentKey, EnvironmentValue } from "./docker-client";
+import { EnvKey, EnvValue } from "./docker-client";
 import { Port } from "./port";
 
 export interface TestContainer {
   start(): Promise<StartedTestContainer>;
-  withEnv(key: EnvironmentKey, value: EnvironmentValue): TestContainer;
+  withEnv(key: EnvKey, value: EnvValue): TestContainer;
   withExposedPorts(...ports: Port[]): TestContainer;
   withStartupTimeout(startupTimeout: Duration): TestContainer;
 }
