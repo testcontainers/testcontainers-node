@@ -75,12 +75,19 @@ export class DockerodeClient implements DockerClient {
     const images = await this.dockerode.listImages();
 
     return images.reduce((repoTags: RepoTag[], image) => {
+      if (this.isDanglingImage(image)) {
+        return repoTags;
+      }
       const imageRepoTags = image.RepoTags.map(imageRepoTag => {
         const [imageName, tag] = imageRepoTag.split(":");
         return new RepoTag(imageName, tag);
       });
       return [...repoTags, ...imageRepoTags];
     }, []);
+  }
+
+  private isDanglingImage(image: Dockerode.ImageInfo) {
+    return image.RepoTags === null;
   }
 
   private getEnv(env: Env): DockerodeEnvironment {
