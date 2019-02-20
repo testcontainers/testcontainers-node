@@ -75,6 +75,9 @@ export class DockerodeClient implements DockerClient {
     const images = await this.dockerode.listImages();
 
     return images.reduce((repoTags: RepoTag[], image) => {
+      if (!image.RepoTags) {
+        return repoTags;
+      }
       const imageRepoTags = image.RepoTags.map(imageRepoTag => {
         const [imageName, tag] = imageRepoTag.split(":");
         return new RepoTag(imageName, tag);
