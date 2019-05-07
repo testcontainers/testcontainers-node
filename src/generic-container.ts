@@ -61,7 +61,7 @@ export class GenericContainer implements TestContainer {
     const hostPortCheck = new HostPortCheck();
     const internalPortCheck = new InternalPortCheck(container, this.dockerClient);
     const waitStrategy = new HostPortWaitStrategy(this.dockerClient, hostPortCheck, internalPortCheck);
-    await waitStrategy.waitUntilReady(containerState);
+    await waitStrategy.withStartupTimeout(this.startupTimeout).waitUntilReady(containerState);
   }
 }
 
