@@ -53,7 +53,13 @@ export class DockerodeContainer implements Container {
   }
 
   public async exec(options: ExecOptions): Promise<Exec> {
-    return new DockerodeExec(await this.container.exec(options));
+    return new DockerodeExec(
+      await this.container.exec({
+        Cmd: options.cmd,
+        AttachStdout: options.attachStdout,
+        AttachStderr: options.attachStderr
+      })
+    );
   }
 
   public async inspect(): Promise<InspectResult> {

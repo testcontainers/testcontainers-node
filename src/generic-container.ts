@@ -16,7 +16,7 @@ export class GenericContainer implements TestContainer {
 
   private env: Env = {};
   private ports: Port[] = [];
-  private startupTimeout: Duration = new Duration(10_000, TemporalUnit.MILLISECONDS);
+  private startupTimeout: Duration = new Duration(30_000, TemporalUnit.MILLISECONDS);
 
   constructor(readonly image: Image, readonly tag: Tag = "latest") {
     this.repoTag = new RepoTag(image, tag);

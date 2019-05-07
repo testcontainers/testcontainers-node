@@ -12,7 +12,7 @@ describe("GenericContainer", () => {
       .withExposedPorts(8080)
       .start();
     url = `http://localhost:${container.getMappedPort(8080)}`;
-  }, 10000);
+  }, 30000);
 
   afterAll(async () => {
     await container.stop();

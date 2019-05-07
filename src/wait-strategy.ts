@@ -12,7 +12,7 @@ export interface WaitStrategy {
 }
 
 abstract class AbstractWaitStrategy implements WaitStrategy {
-  protected startupTimeout = new Duration(10_000, TemporalUnit.MILLISECONDS);
+  protected startupTimeout = new Duration(30_000, TemporalUnit.MILLISECONDS);
 
   public abstract waitUntilReady(containerState: ContainerState): Promise<void>;
 

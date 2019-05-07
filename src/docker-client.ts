@@ -56,8 +56,6 @@ export class DockerodeClient implements DockerClient {
   }
 
   public async exec(container: Container, command: Command[]): Promise<ExecResult> {
-    log.debug(`Executing command "${command.join(" ")}" on container with ID: ${container.getId()}`);
-
     const exec = await container.exec({
       cmd: command,
       attachStdout: true,

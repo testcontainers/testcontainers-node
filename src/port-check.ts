@@ -36,11 +36,11 @@ export class InternalPortCheck implements PortCheck {
   constructor(private readonly container: Container, private readonly dockerClient: DockerClient) {}
 
   public async isBound(port: Port): Promise<boolean> {
+    const portHex = port.toString(16).padStart(4, "0");
     const commands = [
-      ["/bin/sh", "-c", `cat /proc/net/tcp | awk '{print $2}' | grep -i :${port.toString(16)}`],
-      ["/bin/sh", "-c", `cat /proc/net/tcp6 | awk '{print $2}' | grep -i :${port.toString(16)}`],
+      ["/bin/sh", "-c", `cat /proc/net/tcp{,6} | awk '{print $2}' | grep -i :${portHex}`],
       ["/bin/sh", "-c", `nc -vz -w 1 localhost ${port}`],
-      ["/bin/sh", "-c", `</dev/tcp/localhost/${port}`]
+      ["/bin/bash", "-c", `</dev/tcp/localhost/${port}`]
     ];
     const commandResults = await Promise.all(commands.map(command => this.dockerClient.exec(this.container, command)));
     return commandResults.some(result => result.exitCode === 0);
