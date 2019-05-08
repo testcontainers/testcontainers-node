@@ -27,7 +27,15 @@ export interface DockerClient {
 }
 
 export class DockerodeClient implements DockerClient {
-  constructor(private readonly dockerode: Dockerode = new Dockerode()) {}
+  private readonly dockerode: Dockerode;
+
+  constructor() {
+    if (process.env.DOCKER_HOST) {
+      this.dockerode = new Dockerode({ socketPath: process.env.DOCKER_HOST });
+    } else {
+      this.dockerode = new Dockerode();
+    }
+  }
 
   public async pull(repoTag: RepoTag): Promise<void> {
     log.info(`Pulling image: ${repoTag}`);
