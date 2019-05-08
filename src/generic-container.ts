@@ -32,7 +32,7 @@ export class GenericContainer implements TestContainer {
     await this.dockerClient.start(container);
     const inspectResult = await container.inspect();
     const containerState = new ContainerState(inspectResult);
-    await this.waitForContainer(container, containerState);
+    await this.waitForContainer(container, containerState, boundPorts);
 
     return new StartedGenericContainer(container, boundPorts);
   }
@@ -57,11 +57,15 @@ export class GenericContainer implements TestContainer {
     return repoTags.some(repoTag => repoTag.equals(this.repoTag));
   }
 
-  private async waitForContainer(container: Container, containerState: ContainerState): Promise<void> {
+  private async waitForContainer(
+    container: Container,
+    containerState: ContainerState,
+    boundPorts: BoundPorts
+  ): Promise<void> {
     const hostPortCheck = new HostPortCheck();
     const internalPortCheck = new InternalPortCheck(container, this.dockerClient);
     const waitStrategy = new HostPortWaitStrategy(this.dockerClient, hostPortCheck, internalPortCheck);
-    await waitStrategy.withStartupTimeout(this.startupTimeout).waitUntilReady(containerState);
+    await waitStrategy.withStartupTimeout(this.startupTimeout).waitUntilReady(containerState, boundPorts);
   }
 }
 

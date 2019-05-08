@@ -1,4 +1,5 @@
 import { Duration, TemporalUnit } from "node-duration";
+import { BoundPorts } from "./bound-ports";
 import { ContainerState } from "./container-state";
 import { DockerClient } from "./docker-client";
 import log from "./logger";
@@ -7,14 +8,14 @@ import { PortCheck } from "./port-check";
 import { IntervalRetryStrategy } from "./retry-strategy";
 
 export interface WaitStrategy {
-  waitUntilReady(containerState: ContainerState): Promise<void>;
+  waitUntilReady(containerState: ContainerState, boundPorts: BoundPorts): Promise<void>;
   withStartupTimeout(startupTimeout: Duration): WaitStrategy;
 }
 
 abstract class AbstractWaitStrategy implements WaitStrategy {
   protected startupTimeout = new Duration(30_000, TemporalUnit.MILLISECONDS);
 
-  public abstract waitUntilReady(containerState: ContainerState): Promise<void>;
+  public abstract waitUntilReady(containerState: ContainerState, boundPorts: BoundPorts): Promise<void>;
 
   public withStartupTimeout(startupTimeout: Duration): WaitStrategy {
     this.startupTimeout = startupTimeout;
@@ -31,8 +32,8 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
     super();
   }
 
-  public async waitUntilReady(containerState: ContainerState): Promise<void> {
-    await Promise.all([this.waitForHostPorts(containerState), this.waitForInternalPorts(containerState)]);
+  public async waitUntilReady(containerState: ContainerState, boundPorts: BoundPorts): Promise<void> {
+    await Promise.all([this.waitForHostPorts(containerState), this.waitForInternalPorts(boundPorts)]);
   }
 
   private async waitForHostPorts(containerState: ContainerState): Promise<void> {
@@ -42,8 +43,8 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
     }
   }
 
-  private async waitForInternalPorts(containerState: ContainerState): Promise<void> {
-    for (const internalPort of containerState.getInternalPorts()) {
+  private async waitForInternalPorts(boundPorts: BoundPorts): Promise<void> {
+    for (const [internalPort] of boundPorts.iterator()) {
       log.debug(`Waiting for internal port :${internalPort}`);
       await this.waitForPort(internalPort, this.internalPortCheck);
     }
