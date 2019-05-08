@@ -1,5 +1,6 @@
 import Dockerode, { PortMap as DockerodePortBindings } from "dockerode";
 import streamToArray from "stream-to-array";
+import url from "url";
 import { BoundPorts } from "./bound-ports";
 import { Container, DockerodeContainer } from "./container";
 import log from "./logger";
@@ -27,14 +28,10 @@ export interface DockerClient {
 }
 
 export class DockerodeClient implements DockerClient {
-  private readonly dockerode: Dockerode;
+  private readonly dockerode: Dockerode = this.initialiseDockerode();
 
   constructor() {
-    if (process.env.DOCKER_HOST) {
-      this.dockerode = new Dockerode({ socketPath: process.env.DOCKER_HOST });
-    } else {
-      this.dockerode = new Dockerode();
-    }
+    this.dockerode = this.initialiseDockerode();
   }
 
   public async pull(repoTag: RepoTag): Promise<void> {
@@ -92,6 +89,15 @@ export class DockerodeClient implements DockerClient {
       });
       return [...repoTags, ...imageRepoTags];
     }, []);
+  }
+
+  private initialiseDockerode(): Dockerode {
+    if (process.env.DOCKER_HOST) {
+      const { hostname, port } = url.parse(process.env.DOCKER_HOST);
+      return new Dockerode({ host: hostname, port });
+    }
+
+    return new Dockerode();
   }
 
   private isDanglingImage(image: Dockerode.ImageInfo) {
