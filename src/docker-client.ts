@@ -28,7 +28,7 @@ export interface DockerClient {
 }
 
 export class DockerodeClient implements DockerClient {
-  private readonly dockerode: Dockerode = this.initialiseDockerode();
+  private readonly dockerode: Dockerode;
 
   constructor() {
     this.dockerode = this.initialiseDockerode();
