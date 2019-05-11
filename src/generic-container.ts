@@ -2,7 +2,8 @@ import { Duration, TemporalUnit } from "node-duration";
 import { BoundPorts } from "./bound-ports";
 import { Container } from "./container";
 import { ContainerState } from "./container-state";
-import { DockerClient, DockerodeClient, Env, EnvKey, EnvValue } from "./docker-client";
+import { DockerClient, Env, EnvKey, EnvValue } from "./docker-client";
+import { DockerClientFactory, DockerodeClientFactory } from "./docker-client-factory";
 import log from "./logger";
 import { Port } from "./port";
 import { PortBinder } from "./port-binder";
@@ -13,14 +14,19 @@ import { HostPortWaitStrategy } from "./wait-strategy";
 
 export class GenericContainer implements TestContainer {
   private readonly repoTag: RepoTag;
-  private readonly dockerClient: DockerClient = new DockerodeClient();
+  private readonly dockerClient: DockerClient;
 
   private env: Env = {};
   private ports: Port[] = [];
   private startupTimeout: Duration = new Duration(30_000, TemporalUnit.MILLISECONDS);
 
-  constructor(readonly image: Image, readonly tag: Tag = "latest") {
+  constructor(
+    readonly image: Image,
+    readonly tag: Tag = "latest",
+    readonly dockerClientFactory: DockerClientFactory = new DockerodeClientFactory()
+  ) {
     this.repoTag = new RepoTag(image, tag);
+    this.dockerClient = dockerClientFactory.getClient();
   }
 
   public async start(): Promise<StartedTestContainer> {

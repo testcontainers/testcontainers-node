@@ -1,8 +1,8 @@
 import Dockerode, { PortMap as DockerodePortBindings } from "dockerode";
 import streamToArray from "stream-to-array";
-import url from "url";
 import { BoundPorts } from "./bound-ports";
 import { Container, DockerodeContainer } from "./container";
+import { Host } from "./docker-client-factory";
 import log from "./logger";
 import { PortString } from "./port";
 import { RepoTag } from "./repo-tag";
@@ -15,7 +15,6 @@ export type EnvValue = string;
 export type Env = { [key in EnvKey]: EnvValue };
 type DockerodeEnvironment = string[];
 
-type Hostname = string;
 type StreamOutput = string;
 type ExecResult = { output: StreamOutput; exitCode: ExitCode };
 type DockerodeExposedPorts = { [port in PortString]: {} };
@@ -26,28 +25,11 @@ export interface DockerClient {
   start(container: Container): Promise<void>;
   exec(container: Container, command: Command[]): Promise<ExecResult>;
   fetchRepoTags(): Promise<RepoTag[]>;
-  getHostname(): Hostname;
+  getHost(): Host;
 }
 
 export class DockerodeClient implements DockerClient {
-  private readonly dockerode: Dockerode;
-  private readonly hostname: Hostname;
-
-  constructor() {
-    if (process.env.DOCKER_HOST) {
-      const { hostname, port } = url.parse(process.env.DOCKER_HOST);
-      if (!hostname || !port) {
-        throw new Error(`Invalid format for DOCKER_HOST, found: ${process.env.DOCKER_HOST}`);
-      }
-      log.info(`Using Docker configuration with DOCKER_HOST: ${process.env.DOCKER_HOST}`);
-      this.hostname = hostname;
-      this.dockerode = new Dockerode({ host: hostname, port });
-    } else {
-      log.info("Using default Docker configuration");
-      this.hostname = "localhost";
-      this.dockerode = new Dockerode();
-    }
-  }
+  constructor(private readonly host: Host, private readonly dockerode: Dockerode) {}
 
   public async pull(repoTag: RepoTag): Promise<void> {
     log.info(`Pulling image: ${repoTag}`);
@@ -104,8 +86,8 @@ export class DockerodeClient implements DockerClient {
     }, []);
   }
 
-  public getHostname(): Hostname {
-    return this.hostname;
+  public getHost(): Host {
+    return this.host;
   }
 
   private isDanglingImage(image: Dockerode.ImageInfo) {

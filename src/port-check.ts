@@ -11,7 +11,7 @@ export class HostPortCheck implements PortCheck {
   constructor(private readonly dockerClient: DockerClient) {}
 
   public async isBound(port: Port): Promise<boolean> {
-    const hostname = this.dockerClient.getHostname();
+    const host = this.dockerClient.getHost();
 
     return new Promise(resolve => {
       const socket = new Socket();
@@ -27,7 +27,7 @@ export class HostPortCheck implements PortCheck {
         })
         .connect(
           port,
-          hostname,
+          host,
           () => {
             socket.end();
             resolve(true);

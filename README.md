@@ -16,6 +16,13 @@ npm i -D testcontainers
 
 Run your app with the `DEBUG=testcontainers` env variable set to see debug output.
 
+The following environment variables are supported:
+
+| Key | Example value | Behaviour |
+| --- | --- | --- |
+| `DOCKER_HOST` | `tcp://docker:2375` | Override the Docker host, useful for DIND in CI environments |
+
+
 ## Example
 
 ```javascript
