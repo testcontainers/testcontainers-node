@@ -2,7 +2,7 @@ import fetch from "node-fetch";
 import { GenericContainer } from "./generic-container";
 
 describe("GenericContainer", () => {
-  jest.setTimeout(30000);
+  jest.setTimeout(45000);
 
   it("should wait until container is ready", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.7")

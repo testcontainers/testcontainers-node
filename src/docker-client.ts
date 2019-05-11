@@ -39,10 +39,12 @@ export class DockerodeClient implements DockerClient {
       if (!hostname || !port) {
         throw new Error(`Invalid format for DOCKER_HOST, found: ${process.env.DOCKER_HOST}`);
       }
+      log.info(`Using DOCKER_HOST: ${process.env.DOCKER_HOST}`);
       this.hostname = hostname;
       this.dockerode = new Dockerode({ host: hostname, port });
     } else {
-      this.hostname = 'localhost';
+      log.info("Using default settings");
+      this.hostname = "localhost";
       this.dockerode = new Dockerode();
     }
   }
@@ -74,8 +76,6 @@ export class DockerodeClient implements DockerClient {
   }
 
   public async exec(container: Container, command: Command[]): Promise<ExecResult> {
-    log.debug(`Executing command "${command.join(" ")}" on container with ID: ${container.getId()}`);
-
     const exec = await container.exec({
       cmd: command,
       attachStdout: true,
