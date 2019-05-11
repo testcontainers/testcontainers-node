@@ -15,6 +15,7 @@ export type EnvValue = string;
 export type Env = { [key in EnvKey]: EnvValue };
 type DockerodeEnvironment = string[];
 
+type Hostname = string;
 type StreamOutput = string;
 type ExecResult = { output: StreamOutput; exitCode: ExitCode };
 type DockerodeExposedPorts = { [port in PortString]: {} };
@@ -25,13 +26,25 @@ export interface DockerClient {
   start(container: Container): Promise<void>;
   exec(container: Container, command: Command[]): Promise<ExecResult>;
   fetchRepoTags(): Promise<RepoTag[]>;
+  getHostname(): Hostname;
 }
 
 export class DockerodeClient implements DockerClient {
   private readonly dockerode: Dockerode;
+  private readonly hostname: Hostname;
 
   constructor() {
-    this.dockerode = this.initialiseDockerode();
+    if (process.env.DOCKER_HOST) {
+      const { hostname, port } = url.parse(process.env.DOCKER_HOST);
+      if (!hostname || !port) {
+        throw new Error(`Invalid format for DOCKER_HOST, found: ${process.env.DOCKER_HOST}`);
+      }
+      this.hostname = hostname;
+      this.dockerode = new Dockerode({ host: hostname, port });
+    } else {
+      this.hostname = 'localhost';
+      this.dockerode = new Dockerode();
+    }
   }
 
   public async pull(repoTag: RepoTag): Promise<void> {
@@ -91,13 +104,8 @@ export class DockerodeClient implements DockerClient {
     }, []);
   }
 
-  private initialiseDockerode(): Dockerode {
-    if (process.env.DOCKER_HOST) {
-      const { hostname, port } = url.parse(process.env.DOCKER_HOST);
-      return new Dockerode({ host: hostname, port });
-    }
-
-    return new Dockerode();
+  public getHostname(): Hostname {
+    return this.hostname;
   }
 
   private isDanglingImage(image: Dockerode.ImageInfo) {

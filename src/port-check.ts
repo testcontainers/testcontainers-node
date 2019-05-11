@@ -8,7 +8,11 @@ export interface PortCheck {
 }
 
 export class HostPortCheck implements PortCheck {
+  constructor(private readonly dockerClient: DockerClient) {}
+
   public async isBound(port: Port): Promise<boolean> {
+    const hostname = this.dockerClient.getHostname();
+
     return new Promise(resolve => {
       const socket = new Socket();
       socket
@@ -23,6 +27,7 @@ export class HostPortCheck implements PortCheck {
         })
         .connect(
           port,
+          hostname,
           () => {
             socket.end();
             resolve(true);
