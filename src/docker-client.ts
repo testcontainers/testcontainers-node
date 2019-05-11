@@ -39,11 +39,11 @@ export class DockerodeClient implements DockerClient {
       if (!hostname || !port) {
         throw new Error(`Invalid format for DOCKER_HOST, found: ${process.env.DOCKER_HOST}`);
       }
-      log.info(`Using DOCKER_HOST: ${process.env.DOCKER_HOST}`);
+      log.info(`Using Docker configuration with DOCKER_HOST: ${process.env.DOCKER_HOST}`);
       this.hostname = hostname;
       this.dockerode = new Dockerode({ host: hostname, port });
     } else {
-      log.info("Using default settings");
+      log.info("Using default Docker configuration");
       this.hostname = "localhost";
       this.dockerode = new Dockerode();
     }

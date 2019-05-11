@@ -3,6 +3,7 @@ import { BoundPorts } from "./bound-ports";
 import { Container } from "./container";
 import { ContainerState } from "./container-state";
 import { DockerClient, DockerodeClient, Env, EnvKey, EnvValue } from "./docker-client";
+import log from "./logger";
 import { Port } from "./port";
 import { PortBinder } from "./port-binder";
 import { HostPortCheck, InternalPortCheck } from "./port-check";
@@ -62,10 +63,12 @@ export class GenericContainer implements TestContainer {
     containerState: ContainerState,
     boundPorts: BoundPorts
   ): Promise<void> {
+    log.debug("Starting container health checks");
     const hostPortCheck = new HostPortCheck(this.dockerClient);
     const internalPortCheck = new InternalPortCheck(container, this.dockerClient);
     const waitStrategy = new HostPortWaitStrategy(this.dockerClient, hostPortCheck, internalPortCheck);
     await waitStrategy.withStartupTimeout(this.startupTimeout).waitUntilReady(containerState, boundPorts);
+    log.debug("Container health checks complete");
   }
 }
 

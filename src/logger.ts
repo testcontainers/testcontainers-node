@@ -17,19 +17,19 @@ class DebugLogger implements Logger {
   }
 
   public debug(message: Message): void {
-    this.logger(message);
+    this.logger(`DEBUG: ${message}`);
   }
 
   public info(message: Message): void {
-    this.logger(message);
+    this.logger(`INFO: ${message}`);
   }
 
   public warn(message: Message): void {
-    this.logger(message);
+    this.logger(`WARN: ${message}`);
   }
 
   public error(message: Message): void {
-    this.logger(message);
+    this.logger(`ERROR: ${message}`);
   }
 }
 
