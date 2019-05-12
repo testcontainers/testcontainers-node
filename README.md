@@ -14,7 +14,7 @@ npm i -D testcontainers
 
 ## Usage
 
-Run your app with the `DEBUG=testcontainers` env variable set to see debug output.
+Run your app with the `DEBUG=testcontainers` environment variable set to see debug output.
 
 The following environment variables are supported:
 

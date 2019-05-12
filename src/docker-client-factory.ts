@@ -45,7 +45,7 @@ export class DockerodeClientFactory implements DockerClientFactory {
   }
 
   private fromDockerHost(dockerHost: string) {
-    log.info(`Using Docker configuration with DOCKER_HOST: ${process.env.DOCKER_HOST}`);
+    log.info(`Using Docker configuration from DOCKER_HOST: ${process.env.DOCKER_HOST}`);
 
     const { hostname: host, port } = url.parse(dockerHost);
     if (!host || !port) {
