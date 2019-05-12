@@ -2,7 +2,7 @@ import { Duration, TemporalUnit } from "node-duration";
 import { BoundPorts } from "./bound-ports";
 import { Container } from "./container";
 import { ContainerState } from "./container-state";
-import { DockerClient, Env, EnvKey, EnvValue } from "./docker-client";
+import { BuildContext, BuildSource, DockerClient, Env, EnvKey, EnvValue } from "./docker-client";
 import { DockerClientFactory, DockerodeClientFactory, Host } from "./docker-client-factory";
 import log from "./logger";
 import { Port } from "./port";
@@ -13,6 +13,20 @@ import { StartedTestContainer, StoppedTestContainer, TestContainer } from "./tes
 import { HostPortWaitStrategy } from "./wait-strategy";
 
 export class GenericContainer implements TestContainer {
+  public static async fromDockerfile(
+    image: Image,
+    tag: Tag,
+    context: BuildContext,
+    src: BuildSource,
+    dockerClientFactory = new DockerodeClientFactory()
+  ): Promise<GenericContainer> {
+    const dockerClient = dockerClientFactory.getClient();
+    const repoTag = new RepoTag(image, tag);
+    await dockerClient.buildImage(repoTag, context, src);
+    const container = new GenericContainer(image, tag);
+    return Promise.resolve(container);
+  }
+
   private readonly repoTag: RepoTag;
   private readonly dockerClient: DockerClient;
 

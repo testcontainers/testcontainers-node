@@ -1,4 +1,5 @@
 import fetch from "node-fetch";
+import path from "path";
 import { GenericContainer } from "./generic-container";
 
 describe("GenericContainer", () => {
@@ -29,6 +30,20 @@ describe("GenericContainer", () => {
     expect(responseBody.customKey).toBe("customValue");
 
     await container.stop();
+  });
+
+  it("should work for a Dockerfile", async () => {
+    const context = path.resolve(__dirname, "..", "docker");
+    const src = ["Dockerfile", "index.js"];
+    const container = await GenericContainer.fromDockerfile("custom-testcontainer", "1.0.0", context, src);
+    const startedContainer = await container.withExposedPorts(8080).start();
+
+    const url = `http://${startedContainer.getContainerIpAddress()}:${startedContainer.getMappedPort(8080)}`;
+    const response = await fetch(`${url}/hello-world`);
+    expect(response.status).toBe(200);
+
+    await startedContainer.stop();
+    await expect(fetch(url)).rejects.toThrowError();
   });
 
   it("should work for mysql", async () => {
