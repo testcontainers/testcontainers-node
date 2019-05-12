@@ -45,11 +45,11 @@ export class DockerodeClientFactory implements DockerClientFactory {
   }
 
   private fromDockerHost(dockerHost: string) {
-    log.info(`Using Docker configuration from DOCKER_HOST: ${process.env.DOCKER_HOST}`);
+    log.info(`Using Docker configuration from DOCKER_HOST: ${dockerHost}`);
 
     const { hostname: host, port } = url.parse(dockerHost);
     if (!host || !port) {
-      throw new Error(`Invalid format for DOCKER_HOST, found: ${process.env.DOCKER_HOST}`);
+      throw new Error(`Invalid format for DOCKER_HOST, found: ${dockerHost}`);
     }
 
     const dockerode = new Dockerode({ host, port });
