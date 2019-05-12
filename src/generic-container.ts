@@ -18,11 +18,10 @@ export class GenericContainer implements TestContainer {
     tag: Tag,
     context: BuildContext,
     src: BuildSource,
-    dockerClientFactory = new DockerodeClientFactory()
+    dockerClientFactory: DockerClientFactory = new DockerodeClientFactory()
   ): Promise<GenericContainer> {
     const dockerClient = dockerClientFactory.getClient();
-    const repoTag = new RepoTag(image, tag);
-    await dockerClient.buildImage(repoTag, context, src);
+    await dockerClient.buildImage(new RepoTag(image, tag), context, src);
     const container = new GenericContainer(image, tag);
     return Promise.resolve(container);
   }
