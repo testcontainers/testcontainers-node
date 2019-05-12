@@ -1,6 +1,7 @@
 import { Socket } from "net";
 import { Container } from "./container";
 import { DockerClient } from "./docker-client";
+import { Host } from "./docker-client-factory";
 import { Port } from "./port";
 
 export interface PortCheck {
@@ -8,11 +9,9 @@ export interface PortCheck {
 }
 
 export class HostPortCheck implements PortCheck {
-  constructor(private readonly dockerClient: DockerClient) {}
+  constructor(private readonly host: Host) {}
 
   public async isBound(port: Port): Promise<boolean> {
-    const host = this.dockerClient.getHost();
-
     return new Promise(resolve => {
       const socket = new Socket();
       socket
@@ -27,7 +26,7 @@ export class HostPortCheck implements PortCheck {
         })
         .connect(
           port,
-          host,
+          this.host,
           () => {
             socket.end();
             resolve(true);

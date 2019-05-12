@@ -70,7 +70,7 @@ export class GenericContainer implements TestContainer {
     boundPorts: BoundPorts
   ): Promise<void> {
     log.debug("Starting container health checks");
-    const hostPortCheck = new HostPortCheck(this.dockerClient);
+    const hostPortCheck = new HostPortCheck(this.dockerClient.getHost());
     const internalPortCheck = new InternalPortCheck(container, this.dockerClient);
     const waitStrategy = new HostPortWaitStrategy(this.dockerClient, hostPortCheck, internalPortCheck);
     await waitStrategy.withStartupTimeout(this.startupTimeout).waitUntilReady(containerState, boundPorts);
