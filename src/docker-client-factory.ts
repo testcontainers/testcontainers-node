@@ -39,7 +39,7 @@ export class DockerodeClientFactory implements DockerClientFactory {
 
     const host = "localhost";
     const dockerode = new Dockerode();
-    const client = new DockerodeClient(this.host, dockerode);
+    const client = new DockerodeClient(host, dockerode);
 
     return { host, client };
   }

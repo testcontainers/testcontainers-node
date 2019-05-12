@@ -3,7 +3,7 @@ import { BoundPorts } from "./bound-ports";
 import { Container } from "./container";
 import { ContainerState } from "./container-state";
 import { DockerClient, Env, EnvKey, EnvValue } from "./docker-client";
-import { DockerClientFactory, DockerodeClientFactory } from "./docker-client-factory";
+import { DockerClientFactory, DockerodeClientFactory, Host } from "./docker-client-factory";
 import log from "./logger";
 import { Port } from "./port";
 import { PortBinder } from "./port-binder";
@@ -41,7 +41,7 @@ export class GenericContainer implements TestContainer {
     const containerState = new ContainerState(inspectResult);
     await this.waitForContainer(container, containerState, boundPorts);
 
-    return new StartedGenericContainer(container, boundPorts);
+    return new StartedGenericContainer(container, this.dockerClient.getHost(), boundPorts);
   }
 
   public withEnv(key: EnvKey, value: EnvValue): TestContainer {
@@ -79,12 +79,20 @@ export class GenericContainer implements TestContainer {
 }
 
 class StartedGenericContainer implements StartedTestContainer {
-  constructor(private readonly container: Container, private readonly boundPorts: BoundPorts) {}
+  constructor(
+    private readonly container: Container,
+    private readonly host: Host,
+    private readonly boundPorts: BoundPorts
+  ) {}
 
   public async stop(): Promise<StoppedTestContainer> {
     await this.container.stop();
     await this.container.remove();
     return new StoppedGenericContainer();
+  }
+
+  public getContainerIpAddress(): Host {
+    return this.host;
   }
 
   public getMappedPort(port: Port): Port {

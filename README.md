@@ -35,7 +35,10 @@ const { GenericContainer } = require("testcontainers");
     .withExposedPorts(6379)
     .start();
 
-  const redisClient = redis.createClient(container.getMappedPort(6379));
+  const redisClient = redis.createClient(
+      container.getMappedPort(6379),
+      container.getContainerIpAddress(),
+  );
   await redisClient.quit();
 
   await container.stop();

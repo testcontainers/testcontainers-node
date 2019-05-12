@@ -9,7 +9,7 @@ describe("GenericContainer", () => {
       .withExposedPorts(8080)
       .start();
 
-    const url = `http://localhost:${container.getMappedPort(8080)}`;
+    const url = `http://${container.getContainerIpAddress()}:${container.getMappedPort(8080)}`;
     const response = await fetch(`${url}/hello-world`);
     expect(response.status).toBe(200);
 
@@ -23,7 +23,7 @@ describe("GenericContainer", () => {
       .withExposedPorts(8080)
       .start();
 
-    const url = `http://localhost:${container.getMappedPort(8080)}`;
+    const url = `http://${container.getContainerIpAddress()}:${container.getMappedPort(8080)}`;
     const response = await fetch(`${url}/env`);
     const responseBody = await response.json();
     expect(responseBody.customKey).toBe("customValue");
