@@ -57,6 +57,7 @@ const { GenericContainer } = require("testcontainers");
   const src = ["Dockerfile", "index.js"];
   const imageName = "my-custom-image";
   const tag = "1.0.0";
+  
   const container = await GenericContainer.fromDockerfile(imageName, tag, context, src);
   
   const startedContainer = await container
