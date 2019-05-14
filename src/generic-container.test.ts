@@ -45,4 +45,14 @@ describe("GenericContainer", () => {
 
     await container.stop();
   });
+
+  it("should allow passing in custom parameters for mysql", async () => {
+    const container = await new GenericContainer("mysql")
+      .withCmd(["--port=3307"])
+      .withEnv("MYSQL_ROOT_PASSWORD", "my-root-pw")
+      .withExposedPorts(3307)
+      .start();
+
+    await container.stop();
+  });
 });
