@@ -100,7 +100,7 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
           }
         })
         .on("end", () => {
-          reject("stream is at an end");
+          reject();
         });
     });
   }
