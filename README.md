@@ -62,7 +62,7 @@ const container = await new GenericContainer("redis")
 ### Log output Wait Strategy
 
 In some situations a container's log output is a simple way to determine if it is ready or not. For example, we can 
-wait for a `Ready' message in the container's logs as follows:
+wait for a `Ready` message in the container's logs as follows:
 
 ```javascript
 const container = await new GenericContainer("redis")
