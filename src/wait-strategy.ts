@@ -1,5 +1,6 @@
 import { Duration, TemporalUnit } from "node-duration";
 import { BoundPorts } from "./bound-ports";
+import { Container } from "./container";
 import { ContainerState } from "./container-state";
 import { DockerClient } from "./docker-client";
 import log from "./logger";
@@ -8,14 +9,18 @@ import { PortCheck } from "./port-check";
 import { IntervalRetryStrategy } from "./retry-strategy";
 
 export interface WaitStrategy {
-  waitUntilReady(containerState: ContainerState, boundPorts: BoundPorts): Promise<void>;
+  waitUntilReady(container: Container, containerState: ContainerState, boundPorts: BoundPorts): Promise<void>;
   withStartupTimeout(startupTimeout: Duration): WaitStrategy;
 }
 
 abstract class AbstractWaitStrategy implements WaitStrategy {
   protected startupTimeout = new Duration(30_000, TemporalUnit.MILLISECONDS);
 
-  public abstract waitUntilReady(containerState: ContainerState, boundPorts: BoundPorts): Promise<void>;
+  public abstract waitUntilReady(
+    container: Container,
+    containerState: ContainerState,
+    boundPorts: BoundPorts
+  ): Promise<void>;
 
   public withStartupTimeout(startupTimeout: Duration): WaitStrategy {
     this.startupTimeout = startupTimeout;
@@ -32,7 +37,11 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
     super();
   }
 
-  public async waitUntilReady(containerState: ContainerState, boundPorts: BoundPorts): Promise<void> {
+  public async waitUntilReady(
+    container: Container,
+    containerState: ContainerState,
+    boundPorts: BoundPorts
+  ): Promise<void> {
     await Promise.all([this.waitForHostPorts(containerState), this.waitForInternalPorts(boundPorts)]);
   }
 
@@ -62,5 +71,37 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
       },
       this.startupTimeout
     );
+  }
+}
+
+export type Log = string;
+
+export class LogWaitStrategy extends AbstractWaitStrategy {
+  constructor(private readonly message: Log) {
+    super();
+  }
+
+  public async waitUntilReady(
+    container: Container,
+    containerState: ContainerState,
+    boundPorts: BoundPorts
+  ): Promise<void> {
+    return new Promise(async (resolve, reject) => {
+      const stream = await container.logs();
+      stream
+        .on("data", chunk => {
+          if (chunk.toString().includes(this.message)) {
+            resolve();
+          }
+        })
+        .on("err", chunk => {
+          if (chunk.toString().includes(this.message)) {
+            resolve();
+          }
+        })
+        .on("end", () => {
+          reject("stream is at an end");
+        });
+    });
   }
 }
