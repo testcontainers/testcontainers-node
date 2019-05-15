@@ -81,11 +81,7 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
     super();
   }
 
-  public async waitUntilReady(
-    container: Container,
-    containerState: ContainerState,
-    boundPorts: BoundPorts
-  ): Promise<void> {
+  public async waitUntilReady(container: Container): Promise<void> {
     return new Promise(async (resolve, reject) => {
       const stream = await container.logs();
       stream
