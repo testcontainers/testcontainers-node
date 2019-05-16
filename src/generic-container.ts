@@ -2,7 +2,7 @@ import { Duration, TemporalUnit } from "node-duration";
 import { BoundPorts } from "./bound-ports";
 import { Container } from "./container";
 import { ContainerState } from "./container-state";
-import { DockerClient, Env, EnvKey, EnvValue } from "./docker-client";
+import { Command, DockerClient, Env, EnvKey, EnvValue } from "./docker-client";
 import { DockerClientFactory, DockerodeClientFactory, Host } from "./docker-client-factory";
 import log from "./logger";
 import { Port } from "./port";
@@ -10,7 +10,6 @@ import { PortBinder } from "./port-binder";
 import { HostPortCheck, InternalPortCheck } from "./port-check";
 import { Image, RepoTag, Tag } from "./repo-tag";
 import { StartedTestContainer, StoppedTestContainer, TestContainer } from "./test-container";
-import { Wait } from "./wait";
 import { HostPortWaitStrategy, WaitStrategy } from "./wait-strategy";
 
 export class GenericContainer implements TestContainer {
@@ -19,6 +18,7 @@ export class GenericContainer implements TestContainer {
 
   private env: Env = {};
   private ports: Port[] = [];
+  private cmd: Command[] = [];
   private waitStrategy?: WaitStrategy;
   private startupTimeout: Duration = new Duration(60_000, TemporalUnit.MILLISECONDS);
 
@@ -37,13 +37,18 @@ export class GenericContainer implements TestContainer {
     }
 
     const boundPorts = await new PortBinder().bind(this.ports);
-    const container = await this.dockerClient.create(this.repoTag, this.env, boundPorts);
+    const container = await this.dockerClient.create(this.repoTag, this.env, boundPorts, this.cmd);
     await this.dockerClient.start(container);
     const inspectResult = await container.inspect();
     const containerState = new ContainerState(inspectResult);
     await this.waitForContainer(container, containerState, boundPorts);
 
     return new StartedGenericContainer(container, this.dockerClient.getHost(), boundPorts);
+  }
+
+  public withCmd(cmd: Command[]) {
+    this.cmd = cmd;
+    return this;
   }
 
   public withEnv(key: EnvKey, value: EnvValue): TestContainer {
