@@ -50,6 +50,7 @@ Ordinarily Testcontainers will wait for up to 60 seconds for the container's map
 If the default 60s timeout is not sufficient, it can be altered with the `withStartupTimeout()` method:
 
 ```javascript
+const { GenericContainer } = require("testcontainers");
 const { Duration, TemporalUnit } = require("node-duration");
 
 const container = await new GenericContainer("redis")
