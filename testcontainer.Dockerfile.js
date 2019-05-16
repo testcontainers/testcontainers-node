@@ -11,4 +11,8 @@ app.get("/env", (req, res) => {
   res.status(200).json(process.env);
 });
 
+app.get("/cmd", (req, res) => {
+  res.status(200).json(process.argv);
+});
+
 app.listen(port, () => console.log(`Listening on port ${port}`));
