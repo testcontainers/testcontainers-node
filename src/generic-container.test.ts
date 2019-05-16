@@ -1,12 +1,27 @@
 import fetch from "node-fetch";
 import { GenericContainer } from "./generic-container";
+import { Wait } from "./wait";
 
 describe("GenericContainer", () => {
   jest.setTimeout(45000);
 
-  it("should wait until container is ready", async () => {
+  it("should wait for port", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.7")
       .withExposedPorts(8080)
+      .start();
+
+    const url = `http://${container.getContainerIpAddress()}:${container.getMappedPort(8080)}`;
+    const response = await fetch(`${url}/hello-world`);
+    expect(response.status).toBe(200);
+
+    await container.stop();
+    await expect(fetch(url)).rejects.toThrowError();
+  });
+
+  it("should wait for log", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.7")
+      .withExposedPorts(8080)
+      .withWaitStrategy(Wait.forLogMessage("Listening on port 8080"))
       .start();
 
     const url = `http://${container.getContainerIpAddress()}:${container.getMappedPort(8080)}`;

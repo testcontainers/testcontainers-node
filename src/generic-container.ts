@@ -10,7 +10,7 @@ import { PortBinder } from "./port-binder";
 import { HostPortCheck, InternalPortCheck } from "./port-check";
 import { Image, RepoTag, Tag } from "./repo-tag";
 import { StartedTestContainer, StoppedTestContainer, TestContainer } from "./test-container";
-import { HostPortWaitStrategy } from "./wait-strategy";
+import { HostPortWaitStrategy, WaitStrategy } from "./wait-strategy";
 
 export class GenericContainer implements TestContainer {
   private readonly repoTag: RepoTag;
@@ -18,8 +18,9 @@ export class GenericContainer implements TestContainer {
 
   private env: Env = {};
   private ports: Port[] = [];
-  private startupTimeout: Duration = new Duration(30_000, TemporalUnit.MILLISECONDS);
   private cmd: Command[] = [];
+  private waitStrategy?: WaitStrategy;
+  private startupTimeout: Duration = new Duration(60_000, TemporalUnit.MILLISECONDS);
 
   constructor(
     readonly image: Image,
@@ -65,6 +66,11 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
+  public withWaitStrategy(waitStrategy: WaitStrategy): TestContainer {
+    this.waitStrategy = waitStrategy;
+    return this;
+  }
+
   private async hasRepoTagLocally(): Promise<boolean> {
     const repoTags = await this.dockerClient.fetchRepoTags();
     return repoTags.some(repoTag => repoTag.equals(this.repoTag));
@@ -76,11 +82,18 @@ export class GenericContainer implements TestContainer {
     boundPorts: BoundPorts
   ): Promise<void> {
     log.debug("Starting container health checks");
+    const waitStrategy = this.getWaitStrategy(container);
+    await waitStrategy.withStartupTimeout(this.startupTimeout).waitUntilReady(container, containerState, boundPorts);
+    log.debug("Container health checks complete");
+  }
+
+  private getWaitStrategy(container: Container): WaitStrategy {
+    if (this.waitStrategy) {
+      return this.waitStrategy;
+    }
     const hostPortCheck = new HostPortCheck(this.dockerClient.getHost());
     const internalPortCheck = new InternalPortCheck(container, this.dockerClient);
-    const waitStrategy = new HostPortWaitStrategy(this.dockerClient, hostPortCheck, internalPortCheck);
-    await waitStrategy.withStartupTimeout(this.startupTimeout).waitUntilReady(containerState, boundPorts);
-    log.debug("Container health checks complete");
+    return new HostPortWaitStrategy(this.dockerClient, hostPortCheck, internalPortCheck);
   }
 }
 

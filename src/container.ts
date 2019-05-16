@@ -1,3 +1,4 @@
+import byline from "byline";
 import dockerode, { ContainerInspectInfo } from "dockerode";
 import { Command, ExitCode } from "./docker-client";
 import { Port } from "./port";
@@ -30,6 +31,7 @@ export interface Container {
   stop(): Promise<void>;
   remove(): Promise<void>;
   exec(options: ExecOptions): Promise<Exec>;
+  logs(): Promise<NodeJS.ReadableStream>;
   inspect(): Promise<InspectResult>;
 }
 
@@ -60,6 +62,28 @@ export class DockerodeContainer implements Container {
         AttachStderr: options.attachStderr
       })
     );
+  }
+
+  public logs(): Promise<NodeJS.ReadableStream> {
+    return new Promise((resolve, reject) => {
+      const options = {
+        follow: true,
+        stdout: true,
+        stderr: true
+      };
+
+      this.container.logs(options, (err, stream) => {
+        if (err) {
+          reject(err);
+        } else {
+          if (!stream) {
+            reject(new Error("Log stream is undefined"));
+          } else {
+            resolve(byline(stream));
+          }
+        }
+      });
+    });
   }
 
   public async inspect(): Promise<InspectResult> {
