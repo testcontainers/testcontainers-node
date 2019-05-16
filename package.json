@@ -30,6 +30,7 @@
     "format": "prettier --write package.json testcontainer.Dockerfile.js src/**/*.ts"
   },
   "dependencies": {
+    "byline": "^5.0.0",
     "debug": "^4.1.1",
     "dockerode": "^2.5.8",
     "get-port": "^4.1.0",
@@ -37,6 +38,7 @@
     "stream-to-array": "^2.3.0"
   },
   "devDependencies": {
+    "@types/byline": "^4.2.31",
     "@types/debug": "0.0.31",
     "@types/dockerode": "^2.5.10",
     "@types/get-port": "^4.0.1",

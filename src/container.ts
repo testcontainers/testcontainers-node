@@ -1,3 +1,4 @@
+import byline from 'byline';
 import dockerode, { ContainerInspectInfo } from "dockerode";
 import { Command, ExitCode } from "./docker-client";
 import { Port } from "./port";
@@ -75,7 +76,11 @@ export class DockerodeContainer implements Container {
         if (err) {
           reject(err);
         } else {
-          resolve(stream);
+          if (!stream) {
+            reject(new Error('Log stream is undefined'));
+          } else {
+            resolve(byline(stream));
+          }
         }
       });
     });
