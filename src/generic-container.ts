@@ -2,7 +2,7 @@ import { Duration, TemporalUnit } from "node-duration";
 import { BoundPorts } from "./bound-ports";
 import { Container } from "./container";
 import { ContainerState } from "./container-state";
-import { Command, DockerClient, Env, EnvKey, EnvValue } from "./docker-client";
+import { BuildContext, Command, DockerClient, Env, EnvKey, EnvValue } from "./docker-client";
 import { DockerClientFactory, DockerodeClientFactory, Host } from "./docker-client-factory";
 import log from "./logger";
 import { Port } from "./port";
@@ -10,9 +10,24 @@ import { PortBinder } from "./port-binder";
 import { HostPortCheck, InternalPortCheck } from "./port-check";
 import { Image, RepoTag, Tag } from "./repo-tag";
 import { StartedTestContainer, StoppedTestContainer, TestContainer } from "./test-container";
+import { RandomUuid, Uuid } from "./uuid";
 import { HostPortWaitStrategy, WaitStrategy } from "./wait-strategy";
 
 export class GenericContainer implements TestContainer {
+  public static async fromDockerfile(
+    context: BuildContext,
+    uuid: Uuid = new RandomUuid(),
+    dockerClientFactory: DockerClientFactory = new DockerodeClientFactory()
+  ): Promise<GenericContainer> {
+    const image = uuid.nextUuid();
+    const tag = uuid.nextUuid();
+    const repoTag = new RepoTag(image, tag);
+    const dockerClient = dockerClientFactory.getClient();
+    await dockerClient.buildImage(repoTag, context);
+    const container = new GenericContainer(image, tag);
+    return Promise.resolve(container);
+  }
+
   private readonly repoTag: RepoTag;
   private readonly dockerClient: DockerClient;
 

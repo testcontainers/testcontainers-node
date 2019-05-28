@@ -23,7 +23,9 @@ The following environment variables are supported:
 | `DOCKER_HOST` | `tcp://docker:2375` | Override the Docker host, useful for DIND in CI environments |
 
 
-## Example
+## Examples
+
+Using a pre-built Docker image:
 
 ```javascript
 const redis = require("async-redis");
@@ -41,6 +43,26 @@ const { GenericContainer } = require("testcontainers");
   await redisClient.quit();
 
   await container.stop();
+})();
+```
+
+Building and using your own Docker image:
+
+```javascript
+const path = require('path');
+const { GenericContainer } = require("testcontainers");
+
+(async () => {
+  const buildContext = path.resolve(__dirname, "my-dir");
+  
+  const container = await GenericContainer.fromDockerfile(buildContext);
+  
+  const startedContainer = await container
+      .withEnv("KEY", "VALUE")
+      .withExposedPorts(8080)
+      .start();
+
+  await startedContainer.stop();
 })();
 ```
 
