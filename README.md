@@ -49,15 +49,13 @@ const { GenericContainer } = require("testcontainers");
 Building and using your own Docker image:
 
 ```javascript
+const path = require('path');
 const { GenericContainer } = require("testcontainers");
 
 (async () => {
-  const context = "/src";
-  const src = ["Dockerfile", "index.js"];
-  const imageName = "my-custom-image";
-  const tag = "1.0.0";
+  const context = path.resolve(__dirname, "my-dir");
   
-  const container = await GenericContainer.fromDockerfile(imageName, tag, context, src);
+  const container = await GenericContainer.fromDockerfile(context);
   
   const startedContainer = await container
       .withEnv("KEY", "VALUE")

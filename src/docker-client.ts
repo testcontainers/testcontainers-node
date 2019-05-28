@@ -1,5 +1,6 @@
 import Dockerode, { PortMap as DockerodePortBindings } from "dockerode";
 import streamToArray from "stream-to-array";
+import tar from "tar-fs";
 import { BoundPorts } from "./bound-ports";
 import { Container, DockerodeContainer } from "./container";
 import { Host } from "./docker-client-factory";
@@ -16,7 +17,6 @@ export type Env = { [key in EnvKey]: EnvValue };
 type DockerodeEnvironment = string[];
 
 export type BuildContext = string;
-export type BuildSource = string[];
 
 type StreamOutput = string;
 type ExecResult = { output: StreamOutput; exitCode: ExitCode };
@@ -27,7 +27,7 @@ export interface DockerClient {
   create(repoTag: RepoTag, env: Env, boundPorts: BoundPorts, cmd: Command[]): Promise<Container>;
   start(container: Container): Promise<void>;
   exec(container: Container, command: Command[]): Promise<ExecResult>;
-  buildImage(repoTag: RepoTag, context: BuildContext, src: BuildSource): Promise<void>;
+  buildImage(repoTag: RepoTag, context: BuildContext): Promise<void>;
   fetchRepoTags(): Promise<RepoTag[]>;
   getHost(): Host;
 }
@@ -76,10 +76,11 @@ export class DockerodeClient implements DockerClient {
     return { output, exitCode };
   }
 
-  public async buildImage(repoTag: RepoTag, context: BuildContext, src: BuildSource): Promise<void> {
+  public async buildImage(repoTag: RepoTag, context: BuildContext): Promise<void> {
     log.info(`Building image '${repoTag.toString()}' with context '${context}'`);
 
-    const stream = await this.dockerode.buildImage({ context, src }, { t: repoTag.toString() });
+    const tarStream = tar.pack(context);
+    const stream = await this.dockerode.buildImage(tarStream, { t: repoTag.toString() });
     await streamToArray(stream);
   }
 

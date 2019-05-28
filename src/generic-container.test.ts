@@ -63,8 +63,7 @@ describe("GenericContainer", () => {
 
   it("should work for a Dockerfile", async () => {
     const context = path.resolve(__dirname, "..", "docker");
-    const src = ["Dockerfile", "index.js"];
-    const container = await GenericContainer.fromDockerfile("custom-testcontainer", "1.0.0", context, src);
+    const container = await GenericContainer.fromDockerfile(context);
     const startedContainer = await container.withExposedPorts(8080).start();
 
     const url = `http://${startedContainer.getContainerIpAddress()}:${startedContainer.getMappedPort(8080)}`;
