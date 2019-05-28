@@ -1,12 +1,13 @@
 import fetch from "node-fetch";
 import path from "path";
 import { GenericContainer } from "./generic-container";
+import { Wait } from "./wait";
 
 describe("GenericContainer", () => {
   jest.setTimeout(45000);
 
-  it("should wait until container is ready", async () => {
-    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.7")
+  it("should wait for port", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.10")
       .withExposedPorts(8080)
       .start();
 
@@ -18,8 +19,22 @@ describe("GenericContainer", () => {
     await expect(fetch(url)).rejects.toThrowError();
   });
 
+  it("should wait for log", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.10")
+      .withExposedPorts(8080)
+      .withWaitStrategy(Wait.forLogMessage("Listening on port 8080"))
+      .start();
+
+    const url = `http://${container.getContainerIpAddress()}:${container.getMappedPort(8080)}`;
+    const response = await fetch(`${url}/hello-world`);
+    expect(response.status).toBe(200);
+
+    await container.stop();
+    await expect(fetch(url)).rejects.toThrowError();
+  });
+
   it("should set environment variables", async () => {
-    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.7")
+    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.10")
       .withEnv("customKey", "customValue")
       .withExposedPorts(8080)
       .start();
@@ -28,6 +43,20 @@ describe("GenericContainer", () => {
     const response = await fetch(`${url}/env`);
     const responseBody = await response.json();
     expect(responseBody.customKey).toBe("customValue");
+
+    await container.stop();
+  });
+
+  it("should set command", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.10")
+      .withCmd(["node", "testcontainer.Dockerfile.js", "one", "two", "three"])
+      .withExposedPorts(8080)
+      .start();
+
+    const url = `http://${container.getContainerIpAddress()}:${container.getMappedPort(8080)}`;
+    const response = await fetch(`${url}/cmd`);
+    const responseBody = await response.json();
+    expect(responseBody).toEqual(["/usr/local/bin/node", "/testcontainer.Dockerfile.js", "one", "two", "three"]);
 
     await container.stop();
   });

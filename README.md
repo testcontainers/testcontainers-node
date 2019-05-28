@@ -33,7 +33,6 @@ const { GenericContainer } = require("testcontainers");
 
 (async () => {
   const container = await new GenericContainer("redis")
-      .withEnv("KEY", "VALUE")
       .withExposedPorts(6379)
       .start();
 
@@ -67,4 +66,33 @@ const { GenericContainer } = require("testcontainers");
 
   await startedContainer.stop();
 })();
+```
+
+## Wait Strategies
+
+Ordinarily Testcontainers will wait for up to 60 seconds for the container's mapped network ports to start listening. 
+If the default 60s timeout is not sufficient, it can be altered with the `withStartupTimeout()` method:
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+const { Duration, TemporalUnit } = require("node-duration");
+
+const container = await new GenericContainer("redis")
+    .withExposedPorts(6379)
+    .withStartupTimeout(new Duration(100, TemporalUnit.SECONDS))
+    .start();
+```
+
+### Log output Wait Strategy
+
+In some situations a container's log output is a simple way to determine if it is ready or not. For example, we can 
+wait for a `Ready` message in the container's logs as follows:
+
+```javascript
+const { GenericContainer, Wait } = require("testcontainers");
+
+const container = await new GenericContainer("redis")
+    .withExposedPorts(6379)
+    .withWaitStrategy(Wait.forLogMessage("Ready to accept connections"))
+    .start();
 ```
