@@ -53,9 +53,9 @@ const path = require('path');
 const { GenericContainer } = require("testcontainers");
 
 (async () => {
-  const context = path.resolve(__dirname, "my-dir");
+  const buildContext = path.resolve(__dirname, "my-dir");
   
-  const container = await GenericContainer.fromDockerfile(context);
+  const container = await GenericContainer.fromDockerfile(buildContext);
   
   const startedContainer = await container
       .withEnv("KEY", "VALUE")
