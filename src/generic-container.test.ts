@@ -61,7 +61,7 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
-  it("should work for a Dockerfile", async () => {
+  it("should build and start from a Dockerfile", async () => {
     const context = path.resolve(__dirname, "..", "docker");
     const container = await GenericContainer.fromDockerfile(context);
     const startedContainer = await container.withExposedPorts(8080).start();
