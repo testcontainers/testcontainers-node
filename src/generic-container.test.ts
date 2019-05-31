@@ -1,5 +1,8 @@
+import Dockerode = require("dockerode");
 import fetch from "node-fetch";
 import path from "path";
+// @ts-ignore
+import uuid from 'uuid';
 import { GenericContainer } from "./generic-container";
 import { Wait } from "./wait";
 
@@ -17,6 +20,39 @@ describe("GenericContainer", () => {
 
     await container.stop();
     await expect(fetch(url)).rejects.toThrowError();
+  });
+
+  it("should be assigned to network and reachable by name", async () => {
+
+    const dockerode = new Dockerode();
+
+    const networkName = 'test-network-' + uuid.v4();
+    await dockerode.createNetwork({ name: networkName, Attachable: true });
+
+    const targetContainerName = "cristianrgreco-testcontainer";
+
+    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.11")
+      .withName(targetContainerName)
+      .withNetwork(networkName)
+      .withExposedPorts(8080)
+      .start();
+
+    const curl = await new GenericContainer('byrnedo/alpine-curl')
+      .withCmd([`http://${targetContainerName}:8080`])
+      .withNetwork(networkName)
+      .start();
+
+    const runningCurl = dockerode.getContainer(curl.getId());
+    await runningCurl.wait();
+
+    const curlInspectInfo = await runningCurl.inspect();
+    const exitCode = curlInspectInfo.State.ExitCode;
+
+    expect(exitCode).toBe(0);
+
+    await container.stop();
+    await dockerode.pruneContainers();
+    await dockerode.pruneNetworks();
   });
 
   it("should wait for log", async () => {

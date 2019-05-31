@@ -10,9 +10,13 @@ export interface TestContainer {
   withExposedPorts(...ports: Port[]): TestContainer;
   withWaitStrategy(waitStrategy: WaitStrategy): TestContainer;
   withStartupTimeout(startupTimeout: Duration): TestContainer;
+  withName(name: string): TestContainer;
+  withNetwork(network: string): TestContainer;
+  withHostname(hostname: string): TestContainer;
 }
 
 export interface StartedTestContainer {
+  getId(): string;
   stop(): Promise<StoppedTestContainer>;
   getContainerIpAddress(): Host;
   getMappedPort(port: Port): Port;

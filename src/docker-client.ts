@@ -24,16 +24,23 @@ type DockerodeExposedPorts = { [port in PortString]: {} };
 
 export interface DockerClient {
   pull(repoTag: RepoTag): Promise<void>;
-  create(repoTag: RepoTag, env: Env, boundPorts: BoundPorts, cmd: Command[]): Promise<Container>;
+
+  create(repoTag: RepoTag, env: Env, boundPorts: BoundPorts, cmd: Command[], name?: string, network?: string, hostname?: string): Promise<Container>;
+
   start(container: Container): Promise<void>;
+
   exec(container: Container, command: Command[]): Promise<ExecResult>;
+
   buildImage(repoTag: RepoTag, context: BuildContext): Promise<void>;
+
   fetchRepoTags(): Promise<RepoTag[]>;
+
   getHost(): Host;
 }
 
 export class DockerodeClient implements DockerClient {
-  constructor(private readonly host: Host, private readonly dockerode: Dockerode) {}
+  constructor(private readonly host: Host, private readonly dockerode: Dockerode) {
+  }
 
   public async pull(repoTag: RepoTag): Promise<void> {
     log.info(`Pulling image: ${repoTag}`);
@@ -41,16 +48,19 @@ export class DockerodeClient implements DockerClient {
     await streamToArray(stream);
   }
 
-  public async create(repoTag: RepoTag, env: Env, boundPorts: BoundPorts, cmd: Command[]): Promise<Container> {
+  public async create(repoTag: RepoTag, env: Env, boundPorts: BoundPorts, cmd: Command[], name?: string, network?: string, hostname?: string): Promise<Container> {
     log.info(`Creating container for image: ${repoTag}`);
 
     const dockerodeContainer = await this.dockerode.createContainer({
+      name,
+      Hostname: hostname,
       Image: repoTag.toString(),
       Env: this.getEnv(env),
       ExposedPorts: this.getExposedPorts(boundPorts),
       Cmd: cmd,
       HostConfig: {
-        PortBindings: this.getPortBindings(boundPorts)
+        PortBindings: this.getPortBindings(boundPorts),
+        NetworkMode: network
       }
     });
 

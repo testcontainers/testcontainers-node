@@ -14,6 +14,7 @@ import { RandomUuid, Uuid } from "./uuid";
 import { HostPortWaitStrategy, WaitStrategy } from "./wait-strategy";
 
 export class GenericContainer implements TestContainer {
+
   public static async fromDockerfile(
     context: BuildContext,
     uuid: Uuid = new RandomUuid(),
@@ -36,6 +37,9 @@ export class GenericContainer implements TestContainer {
   private cmd: Command[] = [];
   private waitStrategy?: WaitStrategy;
   private startupTimeout: Duration = new Duration(60_000, TemporalUnit.MILLISECONDS);
+  private name?: string;
+  private hostName?: string;
+  private network?: string;
 
   constructor(
     readonly image: Image,
@@ -52,7 +56,7 @@ export class GenericContainer implements TestContainer {
     }
 
     const boundPorts = await new PortBinder().bind(this.ports);
-    const container = await this.dockerClient.create(this.repoTag, this.env, boundPorts, this.cmd);
+    const container = await this.dockerClient.create(this.repoTag, this.env, boundPorts, this.cmd, this.name, this.network, this.hostName);
     await this.dockerClient.start(container);
     const inspectResult = await container.inspect();
     const containerState = new ContainerState(inspectResult);
@@ -83,6 +87,21 @@ export class GenericContainer implements TestContainer {
 
   public withWaitStrategy(waitStrategy: WaitStrategy): TestContainer {
     this.waitStrategy = waitStrategy;
+    return this;
+  }
+
+  public withName(name: string): TestContainer {
+    this.name = name;
+    return this;
+  }
+
+  public withNetwork(network: string): TestContainer {
+    this.network = network;
+    return this;
+  }
+
+  public withHostname(hostname: string): TestContainer {
+    this.hostName = hostname;
     return this;
   }
 
@@ -118,6 +137,10 @@ class StartedGenericContainer implements StartedTestContainer {
     private readonly host: Host,
     private readonly boundPorts: BoundPorts
   ) {}
+
+  public getId(): string {
+    return this.container.getId();
+  }
 
   public async stop(): Promise<StoppedTestContainer> {
     await this.container.stop();
