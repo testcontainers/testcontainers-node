@@ -4,7 +4,7 @@ import { GenericContainer } from "./generic-container";
 import { Wait } from "./wait";
 
 describe("GenericContainer", () => {
-  jest.setTimeout(45000);
+  jest.setTimeout(120000);
 
   it("should wait for port", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.11")
