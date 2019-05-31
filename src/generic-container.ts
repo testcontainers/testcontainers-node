@@ -14,7 +14,6 @@ import { RandomUuid, Uuid } from "./uuid";
 import { HostPortWaitStrategy, WaitStrategy } from "./wait-strategy";
 
 export class GenericContainer implements TestContainer {
-
   public static async fromDockerfile(
     context: BuildContext,
     uuid: Uuid = new RandomUuid(),
