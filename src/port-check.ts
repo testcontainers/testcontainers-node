@@ -24,14 +24,10 @@ export class HostPortCheck implements PortCheck {
           socket.destroy();
           resolve(false);
         })
-        .connect(
-          port,
-          this.host,
-          () => {
-            socket.end();
-            resolve(true);
-          }
-        );
+        .connect(port, this.host, () => {
+          socket.end();
+          resolve(true);
+        });
     });
   }
 }
