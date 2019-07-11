@@ -1,5 +1,6 @@
 import Dockerode from "dockerode";
 import { Writable } from "stream";
+import streamToArray from "stream-to-array";
 import url from "url";
 import { DockerClient, DockerodeClient } from "./docker-client";
 import { FileHelper, RealFileHelper } from "./file-helper";
@@ -58,6 +59,7 @@ export class DockerodeClientFactory implements DockerClientFactory {
 
     const host: Promise<Host> = new Promise(async resolve => {
       const stream = new AsStringStream();
+      await streamToArray(await dockerode.pull("alpine:3.5", {}));
       await dockerode.run("alpine:3.5", ["sh", "-c", "ip route|awk '/default/ { print $3 }'"], stream);
       const output = stream.asString();
 
