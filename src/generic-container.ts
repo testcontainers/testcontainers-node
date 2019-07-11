@@ -22,14 +22,14 @@ export class GenericContainer implements TestContainer {
     const image = uuid.nextUuid();
     const tag = uuid.nextUuid();
     const repoTag = new RepoTag(image, tag);
-    const dockerClient = dockerClientFactory.getClient();
+    const dockerClient = await dockerClientFactory.getClient();
     await dockerClient.buildImage(repoTag, context);
     const container = new GenericContainer(image, tag);
     return Promise.resolve(container);
   }
 
   private readonly repoTag: RepoTag;
-  private readonly dockerClient: DockerClient;
+  private readonly dockerClientPromise: Promise<DockerClient>;
 
   private env: Env = {};
   private ports: Port[] = [];
@@ -43,22 +43,24 @@ export class GenericContainer implements TestContainer {
     readonly dockerClientFactory: DockerClientFactory = new DockerodeClientFactory()
   ) {
     this.repoTag = new RepoTag(image, tag);
-    this.dockerClient = dockerClientFactory.getClient();
+    this.dockerClientPromise = dockerClientFactory.getClient();
   }
 
   public async start(): Promise<StartedTestContainer> {
+    const dockerClient = await this.dockerClientPromise;
+
     if (!(await this.hasRepoTagLocally())) {
-      await this.dockerClient.pull(this.repoTag);
+      await dockerClient.pull(this.repoTag);
     }
 
     const boundPorts = await new PortBinder().bind(this.ports);
-    const container = await this.dockerClient.create(this.repoTag, this.env, boundPorts, this.cmd);
-    await this.dockerClient.start(container);
+    const container = await dockerClient.create(this.repoTag, this.env, boundPorts, this.cmd);
+    await dockerClient.start(container);
     const inspectResult = await container.inspect();
     const containerState = new ContainerState(inspectResult);
     await this.waitForContainer(container, containerState, boundPorts);
 
-    return new StartedGenericContainer(container, this.dockerClient.getHost(), boundPorts);
+    return new StartedGenericContainer(container, dockerClient.getHost(), boundPorts);
   }
 
   public withCmd(cmd: Command[]) {
@@ -87,7 +89,8 @@ export class GenericContainer implements TestContainer {
   }
 
   private async hasRepoTagLocally(): Promise<boolean> {
-    const repoTags = await this.dockerClient.fetchRepoTags();
+    const dockerClient = await this.dockerClientPromise;
+    const repoTags = await dockerClient.fetchRepoTags();
     return repoTags.some(repoTag => repoTag.equals(this.repoTag));
   }
 
@@ -97,18 +100,19 @@ export class GenericContainer implements TestContainer {
     boundPorts: BoundPorts
   ): Promise<void> {
     log.debug("Starting container health checks");
-    const waitStrategy = this.getWaitStrategy(container);
+    const waitStrategy = await this.getWaitStrategy(container);
     await waitStrategy.withStartupTimeout(this.startupTimeout).waitUntilReady(container, containerState, boundPorts);
     log.debug("Container health checks complete");
   }
 
-  private getWaitStrategy(container: Container): WaitStrategy {
+  private async getWaitStrategy(container: Container): Promise<WaitStrategy> {
+    const dockerClient = await this.dockerClientPromise;
     if (this.waitStrategy) {
       return this.waitStrategy;
     }
-    const hostPortCheck = new HostPortCheck(this.dockerClient.getHost());
-    const internalPortCheck = new InternalPortCheck(container, this.dockerClient);
-    return new HostPortWaitStrategy(this.dockerClient, hostPortCheck, internalPortCheck);
+    const hostPortCheck = new HostPortCheck(await dockerClient.getHost());
+    const internalPortCheck = new InternalPortCheck(container, dockerClient);
+    return new HostPortWaitStrategy(dockerClient, hostPortCheck, internalPortCheck);
   }
 }
 

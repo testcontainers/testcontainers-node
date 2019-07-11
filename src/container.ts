@@ -12,8 +12,8 @@ export type InspectResult = {
 
 type ExecOptions = {
   cmd: Command[];
-  attachStdout: true;
-  attachStderr: true;
+  attachStdout: boolean;
+  attachStderr: boolean;
 };
 
 type ExecInspectResult = {
