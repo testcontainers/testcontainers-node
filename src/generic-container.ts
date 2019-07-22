@@ -2,7 +2,7 @@ import { Duration, TemporalUnit } from "node-duration";
 import { BoundPorts } from "./bound-ports";
 import { Container } from "./container";
 import { ContainerState } from "./container-state";
-import { BuildContext, Command, DockerClient, Env, EnvKey, EnvValue } from "./docker-client";
+import { BuildContext, Command, DockerClient, Env, EnvKey, EnvValue, ExecResult } from "./docker-client";
 import { DockerClientFactory, DockerodeClientFactory, Host } from "./docker-client-factory";
 import log from "./logger";
 import { Port } from "./port";
@@ -58,7 +58,7 @@ export class GenericContainer implements TestContainer {
     const containerState = new ContainerState(inspectResult);
     await this.waitForContainer(container, containerState, boundPorts);
 
-    return new StartedGenericContainer(container, this.dockerClient.getHost(), boundPorts);
+    return new StartedGenericContainer(container, this.dockerClient.getHost(), boundPorts, this.dockerClient);
   }
 
   public withCmd(cmd: Command[]) {
@@ -116,7 +116,8 @@ class StartedGenericContainer implements StartedTestContainer {
   constructor(
     private readonly container: Container,
     private readonly host: Host,
-    private readonly boundPorts: BoundPorts
+    private readonly boundPorts: BoundPorts,
+    private readonly dockerClient: DockerClient
   ) {}
 
   public async stop(): Promise<StoppedTestContainer> {
@@ -131,6 +132,10 @@ class StartedGenericContainer implements StartedTestContainer {
 
   public getMappedPort(port: Port): Port {
     return this.boundPorts.getBinding(port);
+  }
+
+  public exec(command: Command[]): Promise<ExecResult> {
+    return this.dockerClient.exec(this.container, command);
   }
 }
 

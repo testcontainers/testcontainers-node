@@ -66,6 +66,25 @@ const { GenericContainer } = require("testcontainers");
 })();
 ```
 
+Running commands inside running container
+
+```javascript
+const path = require('path');
+const { GenericContainer, Wait } = require("testcontainers");
+
+(async () => {
+  const container = await new GenericContainer("mysql")
+      .withEnv("MYSQL_ALLOW_EMPTY_PASSWORD", "true")
+      .withWaitStrategy(Wait.forLogMessage("ready for connections"))
+      .start();
+
+  const { output, exitCode } = await container.exec(["mysql", "--execute", "show databases"]);
+  console.log(output);
+
+  await container.stop();
+})();
+```
+
 ## Wait Strategies
 
 Ordinarily Testcontainers will wait for up to 60 seconds for the container's mapped network ports to start listening. 
