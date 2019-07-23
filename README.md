@@ -69,17 +69,16 @@ const { GenericContainer } = require("testcontainers");
 Running commands inside running container
 
 ```javascript
-const path = require('path');
-const { GenericContainer, Wait } = require("testcontainers");
+const { GenericContainer } = require("testcontainers");
 
 (async () => {
   const container = await new GenericContainer("mysql")
       .withEnv("MYSQL_ALLOW_EMPTY_PASSWORD", "true")
-      .withWaitStrategy(Wait.forLogMessage("ready for connections"))
       .start();
 
   const { output, exitCode } = await container.exec(["mysql", "--execute", "show databases"]);
-  console.log(output);
+
+  console.log(exitCode, output);
 
   await container.stop();
 })();
