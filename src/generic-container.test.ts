@@ -83,6 +83,25 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
+  it("should allow for exec'ing in running container", async () => {
+    const container = await new GenericContainer("mysql")
+      .withEnv("MYSQL_ALLOW_EMPTY_PASSWORD", "true")
+      .withWaitStrategy(Wait.forLogMessage("ready for connections"))
+      .start();
+
+    const { output, exitCode } = await container.exec([
+      "mysql",
+      "-B",
+      "--disable-column-names",
+      "--execute",
+      "show databases"
+    ]);
+    expect(exitCode).toBe(0);
+    expect(output).toContain("performance_schema");
+
+    await container.stop();
+  });
+
   it("should work for couch db", async () => {
     const container = await new GenericContainer("couchdb").withExposedPorts(5984).start();
 

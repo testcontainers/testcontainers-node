@@ -18,8 +18,8 @@ type DockerodeEnvironment = string[];
 
 export type BuildContext = string;
 
-type StreamOutput = string;
-type ExecResult = { output: StreamOutput; exitCode: ExitCode };
+export type StreamOutput = string;
+export type ExecResult = { output: StreamOutput; exitCode: ExitCode };
 type DockerodeExposedPorts = { [port in PortString]: {} };
 
 export interface DockerClient {
