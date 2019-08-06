@@ -32,6 +32,7 @@
   "dependencies": {
     "byline": "^5.0.0",
     "debug": "^4.1.1",
+    "default-gateway": "^5.0.2",
     "dockerode": "^2.5.8",
     "get-port": "^4.2.0",
     "node-duration": "^1.0.4",

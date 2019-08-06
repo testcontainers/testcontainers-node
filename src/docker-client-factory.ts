@@ -1,4 +1,7 @@
+// @ts-ignore
+import defaultGateway from "default-gateway";
 import Dockerode from "dockerode";
+import * as fs from "fs";
 import url from "url";
 import { DockerClient, DockerodeClient } from "./docker-client";
 import log from "./logger";
@@ -17,6 +20,11 @@ export class DockerodeClientFactory implements DockerClientFactory {
   constructor() {
     if (process.env.DOCKER_HOST) {
       const { host, client } = this.fromDockerHost(process.env.DOCKER_HOST);
+      this.host = host;
+      this.client = client;
+    }
+    if (fs.existsSync("/.dockerenv")) {
+      const { host, client } = this.fromDockerWormhole();
       this.host = host;
       this.client = client;
     } else {
@@ -53,6 +61,18 @@ export class DockerodeClientFactory implements DockerClientFactory {
     }
 
     const dockerode = new Dockerode({ host, port });
+    const client = new DockerodeClient(host, dockerode);
+
+    return { host, client };
+  }
+
+  private fromDockerWormhole() {
+    log.info("Using Docker in Docker method");
+
+    const { gateway } = defaultGateway.v4.sync();
+
+    const host = gateway;
+    const dockerode = new Dockerode();
     const client = new DockerodeClient(host, dockerode);
 
     return { host, client };

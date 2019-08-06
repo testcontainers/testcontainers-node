@@ -17,13 +17,14 @@ export class GenericContainer implements TestContainer {
   public static async fromDockerfile(
     context: BuildContext,
     uuid: Uuid = new RandomUuid(),
-    dockerClientFactory: DockerClientFactory = new DockerodeClientFactory()
+    dockerClientFactory: DockerClientFactory = new DockerodeClientFactory(),
+    buildParameters: {} = {}
   ): Promise<GenericContainer> {
     const image = uuid.nextUuid();
     const tag = uuid.nextUuid();
     const repoTag = new RepoTag(image, tag);
     const dockerClient = dockerClientFactory.getClient();
-    await dockerClient.buildImage(repoTag, context);
+    await dockerClient.buildImage(repoTag, context, buildParameters);
     const container = new GenericContainer(image, tag);
     return Promise.resolve(container);
   }
