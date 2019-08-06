@@ -74,6 +74,30 @@ describe("GenericContainer", () => {
     await expect(fetch(url)).rejects.toThrowError();
   });
 
+  it("should build and start from a Dockerfile with build arguments", async () => {
+    const context = path.resolve(__dirname, "..", "docker-with-buildargs");
+    const container = await GenericContainer.fromDockerfile(context, undefined, undefined, {
+      buildargs: {
+        VERSION: "10-alpine"
+      }
+    });
+    const startedContainer = await container.withExposedPorts(8080).start();
+
+    const url = `http://${startedContainer.getContainerIpAddress()}:${startedContainer.getMappedPort(8080)}`;
+    const response = await fetch(`${url}/hello-world`);
+    expect(response.status).toBe(200);
+
+    await startedContainer.stop();
+    await expect(fetch(url)).rejects.toThrowError();
+  });
+
+  it("should not build and start from a Dockerfile with missing build arguments", async () => {
+    const context = path.resolve(__dirname, "..", "docker-with-buildargs");
+    const container = await GenericContainer.fromDockerfile(context);
+
+    expect(container.start()).rejects.toThrowError();
+  });
+
   it("should work for mysql", async () => {
     const container = await new GenericContainer("mysql")
       .withEnv("MYSQL_ROOT_PASSWORD", "my-root-pw")

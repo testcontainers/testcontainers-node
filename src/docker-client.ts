@@ -27,7 +27,7 @@ export interface DockerClient {
   create(repoTag: RepoTag, env: Env, boundPorts: BoundPorts, cmd: Command[]): Promise<Container>;
   start(container: Container): Promise<void>;
   exec(container: Container, command: Command[]): Promise<ExecResult>;
-  buildImage(repoTag: RepoTag, context: BuildContext): Promise<void>;
+  buildImage(repoTag: RepoTag, context: BuildContext, buildParameters: {}): Promise<void>;
   fetchRepoTags(): Promise<RepoTag[]>;
   getHost(): Host;
 }
@@ -76,11 +76,11 @@ export class DockerodeClient implements DockerClient {
     return { output, exitCode };
   }
 
-  public async buildImage(repoTag: RepoTag, context: BuildContext): Promise<void> {
+  public async buildImage(repoTag: RepoTag, context: BuildContext, buildParameters: {}): Promise<void> {
     log.info(`Building image '${repoTag.toString()}' with context '${context}'`);
 
     const tarStream = tar.pack(context);
-    const stream = await this.dockerode.buildImage(tarStream, { t: repoTag.toString() });
+    const stream = await this.dockerode.buildImage(tarStream, { ...buildParameters, t: repoTag.toString() });
     await streamToArray(stream);
   }
 
