@@ -4,7 +4,7 @@ import { GenericContainer } from "./generic-container";
 import { Wait } from "./wait";
 
 describe("GenericContainer", () => {
-  jest.setTimeout(45000);
+  jest.setTimeout(90000);
 
   it("should wait for port", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.11")
@@ -130,5 +130,20 @@ describe("GenericContainer", () => {
     const container = await new GenericContainer("couchdb").withExposedPorts(5984).start();
 
     await container.stop();
+  });
+
+  it("should build and start named container from a Dockerfile", async () => {
+    const context = path.resolve(__dirname, "..", "docker");
+    const container = await GenericContainer.fromDockerfile(
+      context,
+      undefined,
+      undefined,
+      undefined,
+      "testimage",
+      "testtag",
+      true
+    );
+    expect(container.image).toBe("testimage");
+    expect(container.tag).toBe("testtag");
   });
 });

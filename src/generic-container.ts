@@ -18,13 +18,22 @@ export class GenericContainer implements TestContainer {
     context: BuildContext,
     uuid: Uuid = new RandomUuid(),
     dockerClientFactory: DockerClientFactory = new DockerodeClientFactory(),
-    buildParameters: {} = {}
+    buildParameters: {} = {},
+    imageName?: string,
+    tagName?: string,
+    abortOnExistingImage: boolean = false
   ): Promise<GenericContainer> {
-    const image = uuid.nextUuid();
-    const tag = uuid.nextUuid();
+    let image = uuid.nextUuid();
+    if (imageName) {
+      image = imageName;
+    }
+    let tag = uuid.nextUuid();
+    if (tagName) {
+      tag = tagName;
+    }
     const repoTag = new RepoTag(image, tag);
     const dockerClient = dockerClientFactory.getClient();
-    await dockerClient.buildImage(repoTag, context, buildParameters);
+    await dockerClient.buildImage(repoTag, context, buildParameters, abortOnExistingImage);
     const container = new GenericContainer(image, tag);
     return Promise.resolve(container);
   }
