@@ -93,9 +93,8 @@ describe("GenericContainer", () => {
 
   it("should not build and start from a Dockerfile with missing build arguments", async () => {
     const context = path.resolve(__dirname, "..", "docker-with-buildargs");
-    const container = await GenericContainer.fromDockerfile(context);
 
-    expect(container.start()).rejects.toThrowError();
+    await expect(GenericContainer.fromDockerfile(context)).rejects.toThrowError("Failed to build image");
   });
 
   it("should work for mysql", async () => {
