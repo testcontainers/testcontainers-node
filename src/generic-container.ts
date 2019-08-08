@@ -28,8 +28,8 @@ export class GenericContainer implements TestContainer {
     const container = new GenericContainer(image, tag);
 
     // tslint:disable-next-line
-    if (!await container.hasRepoTagLocally()) {
-      throw new Error("Failed to build image")
+    if (!(await container.hasRepoTagLocally())) {
+      throw new Error("Failed to build image");
     }
 
     return Promise.resolve(container);
