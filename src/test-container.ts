@@ -1,5 +1,5 @@
 import { Duration } from "node-duration";
-import { Command, EnvKey, EnvValue, ExecResult } from "./docker-client";
+import { Command, ContainerName, EnvKey, EnvValue, ExecResult } from "./docker-client";
 import { Host } from "./docker-client-factory";
 import { Port } from "./port";
 import { WaitStrategy } from "./wait-strategy";
@@ -16,6 +16,7 @@ export interface StartedTestContainer {
   stop(): Promise<StoppedTestContainer>;
   getContainerIpAddress(): Host;
   getMappedPort(port: Port): Port;
+  getName(): ContainerName;
   exec(command: Command[]): Promise<ExecResult>;
 }
 
