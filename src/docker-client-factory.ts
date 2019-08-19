@@ -1,7 +1,6 @@
-// @ts-ignore
 import defaultGateway from "default-gateway";
 import Dockerode from "dockerode";
-import * as fs from "fs";
+import fs from "fs";
 import url from "url";
 import { DockerClient, DockerodeClient } from "./docker-client";
 import log from "./logger";

@@ -1,6 +1,7 @@
 import fetch from "node-fetch";
 import path from "path";
 import { GenericContainer } from "./generic-container";
+import { withBuildArg, withContext } from "./options";
 import { Wait } from "./wait";
 
 describe("GenericContainer", () => {
@@ -63,7 +64,7 @@ describe("GenericContainer", () => {
 
   it("should build and start from a Dockerfile", async () => {
     const context = path.resolve(__dirname, "..", "docker");
-    const container = await GenericContainer.fromDockerfile(context);
+    const container = await GenericContainer.fromDockerfile(withContext(context));
     const startedContainer = await container.withExposedPorts(8080).start();
 
     const url = `http://${startedContainer.getContainerIpAddress()}:${startedContainer.getMappedPort(8080)}`;
@@ -76,11 +77,7 @@ describe("GenericContainer", () => {
 
   it("should build and start from a Dockerfile with build arguments", async () => {
     const context = path.resolve(__dirname, "..", "docker-with-buildargs");
-    const container = await GenericContainer.fromDockerfile(context, undefined, undefined, {
-      buildargs: {
-        VERSION: "10-alpine"
-      }
-    });
+    const container = await GenericContainer.fromDockerfile(withContext(context), withBuildArg("VERSION", "10-alpine"));
     const startedContainer = await container.withExposedPorts(8080).start();
 
     const url = `http://${startedContainer.getContainerIpAddress()}:${startedContainer.getMappedPort(8080)}`;
@@ -93,9 +90,8 @@ describe("GenericContainer", () => {
 
   it("should not build and start from a Dockerfile with missing build arguments", async () => {
     const context = path.resolve(__dirname, "..", "docker-with-buildargs");
-    const container = await GenericContainer.fromDockerfile(context);
 
-    expect(container.start()).rejects.toThrowError();
+    await expect(GenericContainer.fromDockerfile(withContext(context))).rejects.toThrowError("Failed to build image");
   });
 
   it("should work for mysql", async () => {

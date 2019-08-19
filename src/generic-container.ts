@@ -2,9 +2,10 @@ import { Duration, TemporalUnit } from "node-duration";
 import { BoundPorts } from "./bound-ports";
 import { Container } from "./container";
 import { ContainerState } from "./container-state";
-import { BuildContext, Command, DockerClient, Env, EnvKey, EnvValue, ExecResult } from "./docker-client";
+import { Command, DockerClient, Env, EnvKey, EnvValue, ExecResult } from "./docker-client";
 import { DockerClientFactory, DockerodeClientFactory, Host } from "./docker-client-factory";
 import log from "./logger";
+import { Options, WithArgument } from "./options";
 import { Port } from "./port";
 import { PortBinder } from "./port-binder";
 import { HostPortCheck, InternalPortCheck } from "./port-check";
@@ -14,27 +15,28 @@ import { RandomUuid, Uuid } from "./uuid";
 import { HostPortWaitStrategy, WaitStrategy } from "./wait-strategy";
 
 export class GenericContainer implements TestContainer {
-  public static async fromDockerfile(
-    context: BuildContext,
-    uuid: Uuid = new RandomUuid(),
-    dockerClientFactory: DockerClientFactory = new DockerodeClientFactory(),
-    buildParameters: {} = {},
-    imageName?: string,
-    tagName?: string,
-    abortOnExistingImage: boolean = false
-  ): Promise<GenericContainer> {
-    let image = uuid.nextUuid();
-    if (imageName) {
-      image = imageName;
+  public static async fromDockerfile(...options: WithArgument[]): Promise<GenericContainer> {
+    let opts: Options = {
+      uuid: new RandomUuid(),
+      dockerClientFactory: new DockerodeClientFactory() as DockerClientFactory,
+      buildArgs: {}
+    } as Options;
+    for (const opt of options) {
+      opts = opt(opts);
     }
-    let tag = uuid.nextUuid();
-    if (tagName) {
-      tag = tagName;
-    }
+
+    const image = opts.uuid.nextUuid();
+    const tag = opts.uuid.nextUuid();
     const repoTag = new RepoTag(image, tag);
-    const dockerClient = dockerClientFactory.getClient();
-    await dockerClient.buildImage(repoTag, context, buildParameters, abortOnExistingImage);
+    const dockerClient = opts.dockerClientFactory.getClient();
+    await dockerClient.buildImage(repoTag, opts);
     const container = new GenericContainer(image, tag);
+
+    // tslint:disable-next-line
+    if (!(await container.hasRepoTagLocally())) {
+      throw new Error("Failed to build image");
+    }
+
     return Promise.resolve(container);
   }
 
