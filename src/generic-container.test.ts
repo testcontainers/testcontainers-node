@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
 import path from "path";
 import { GenericContainer } from "./generic-container";
-import { withBuildArg, withContext } from "./options";
+import { abortOnExistingImage, withBuildArg, withContext, withImageName, withImageTag } from "./options";
 import { Wait } from "./wait";
 
 describe("GenericContainer", () => {
@@ -131,13 +131,10 @@ describe("GenericContainer", () => {
   it("should build and start named container from a Dockerfile", async () => {
     const context = path.resolve(__dirname, "..", "docker");
     const container = await GenericContainer.fromDockerfile(
-      context,
-      undefined,
-      undefined,
-      undefined,
-      "testimage",
-      "testtag",
-      true
+      withContext(context),
+      withImageName("testimage"),
+      withImageTag("testtag"),
+      abortOnExistingImage()
     );
     expect(container.image).toBe("testimage");
     expect(container.tag).toBe("testtag");

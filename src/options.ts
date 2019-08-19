@@ -7,6 +7,9 @@ export interface Options {
   dockerClientFactory: DockerClientFactory;
   uuid: Uuid;
   buildArgs: { [key: string]: string };
+  imageName: string;
+  imageTag: string;
+  abortOnExistingImage: boolean;
 }
 
 export type WithArgument = (options: Options) => Options;
@@ -35,6 +38,27 @@ export const withUuid = (uuid: Uuid): WithArgument => {
 export const withBuildArg = (key: string, value: string): WithArgument => {
   return (options: Options): Options => {
     options.buildArgs[key] = value;
+    return options;
+  };
+};
+
+export const withImageName = (name: string): WithArgument => {
+  return (options: Options): Options => {
+    options.imageName = name;
+    return options;
+  };
+};
+
+export const withImageTag = (tag: string): WithArgument => {
+  return (options: Options): Options => {
+    options.imageTag = tag;
+    return options;
+  };
+};
+
+export const abortOnExistingImage = (): WithArgument => {
+  return (options: Options): Options => {
+    options.abortOnExistingImage = true;
     return options;
   };
 };

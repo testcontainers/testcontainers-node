@@ -25,8 +25,8 @@ export class GenericContainer implements TestContainer {
       opts = opt(opts);
     }
 
-    const image = opts.uuid.nextUuid();
-    const tag = opts.uuid.nextUuid();
+    const image = opts.imageName || opts.uuid.nextUuid();
+    const tag = opts.imageTag || opts.uuid.nextUuid();
     const repoTag = new RepoTag(image, tag);
     const dockerClient = opts.dockerClientFactory.getClient();
     await dockerClient.buildImage(repoTag, opts);
