@@ -51,7 +51,7 @@ export class DockerodeContainer implements Container {
   }
 
   public remove(): Promise<void> {
-    return this.container.remove();
+    return this.container.remove({ v: true });
   }
 
   public async exec(options: ExecOptions): Promise<Exec> {
