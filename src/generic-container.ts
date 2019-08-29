@@ -139,7 +139,7 @@ class StartedGenericContainer implements StartedTestContainer {
   ) {}
 
   public async stop(options: OptionalStopOptions = {}): Promise<StoppedTestContainer> {
-    const resolvedOptions = { ...DEFAULT_STOP_OPTIONS, options };
+    const resolvedOptions = { ...DEFAULT_STOP_OPTIONS, ...options };
     await this.container.stop({ timeout: resolvedOptions.timeout });
     await this.container.remove({ removeVolumes: resolvedOptions.removeVolumes });
     return new StoppedGenericContainer();
