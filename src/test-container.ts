@@ -14,7 +14,12 @@ export interface TestContainer {
   withStartupTimeout(startupTimeout: Duration): TestContainer;
 }
 
-export interface StopOptions {
+export interface OptionalStopOptions {
+  timeout?: Duration;
+  removeVolumes?: boolean;
+}
+
+interface StopOptions {
   timeout: Duration;
   removeVolumes: boolean;
 }
@@ -25,7 +30,7 @@ export const DEFAULT_STOP_OPTIONS: StopOptions = {
 };
 
 export interface StartedTestContainer {
-  stop(options?: StopOptions): Promise<StoppedTestContainer>;
+  stop(options?: OptionalStopOptions): Promise<StoppedTestContainer>;
   getContainerIpAddress(): Host;
   getMappedPort(port: Port): Port;
   exec(command: Command[]): Promise<ExecResult>;

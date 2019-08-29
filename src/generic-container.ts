@@ -11,8 +11,8 @@ import { HostPortCheck, InternalPortCheck } from "./port-check";
 import { Image, RepoTag, Tag } from "./repo-tag";
 import {
   DEFAULT_STOP_OPTIONS,
+  OptionalStopOptions,
   StartedTestContainer,
-  StopOptions,
   StoppedTestContainer,
   TestContainer
 } from "./test-container";
@@ -138,9 +138,10 @@ class StartedGenericContainer implements StartedTestContainer {
     private readonly dockerClient: DockerClient
   ) {}
 
-  public async stop(options: StopOptions = DEFAULT_STOP_OPTIONS): Promise<StoppedTestContainer> {
-    await this.container.stop({ timeout: options.timeout });
-    await this.container.remove({ removeVolumes: options.removeVolumes });
+  public async stop(options: OptionalStopOptions = {}): Promise<StoppedTestContainer> {
+    const resolvedOptions = { ...DEFAULT_STOP_OPTIONS, options };
+    await this.container.stop({ timeout: resolvedOptions.timeout });
+    await this.container.remove({ removeVolumes: resolvedOptions.removeVolumes });
     return new StoppedGenericContainer();
   }
 
