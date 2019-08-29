@@ -51,7 +51,7 @@ export class DockerodeContainer implements Container {
     return this.container.start();
   }
 
-  public stop(options: StopOptions = { timeout: new Duration(1, TemporalUnit.MINUTES) }): Promise<void> {
+  public stop(options: StopOptions = { timeout: new Duration(10, TemporalUnit.SECONDS) }): Promise<void> {
     return this.container.stop({
       t: options.timeout.get(TemporalUnit.SECONDS)
     });
