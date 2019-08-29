@@ -9,7 +9,13 @@ import { Port } from "./port";
 import { PortBinder } from "./port-binder";
 import { HostPortCheck, InternalPortCheck } from "./port-check";
 import { Image, RepoTag, Tag } from "./repo-tag";
-import { StartedTestContainer, StoppedTestContainer, TestContainer } from "./test-container";
+import {
+  DEFAULT_STOP_OPTIONS,
+  StartedTestContainer,
+  StopOptions,
+  StoppedTestContainer,
+  TestContainer
+} from "./test-container";
 import { RandomUuid, Uuid } from "./uuid";
 import { HostPortWaitStrategy, WaitStrategy } from "./wait-strategy";
 
@@ -132,9 +138,9 @@ class StartedGenericContainer implements StartedTestContainer {
     private readonly dockerClient: DockerClient
   ) {}
 
-  public async stop(): Promise<StoppedTestContainer> {
-    await this.container.stop();
-    await this.container.remove();
+  public async stop(options: StopOptions = DEFAULT_STOP_OPTIONS): Promise<StoppedTestContainer> {
+    await this.container.stop({ timeout: options.timeout });
+    await this.container.remove({ removeVolumes: options.removeVolumes });
     return new StoppedGenericContainer();
   }
 

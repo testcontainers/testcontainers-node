@@ -11,12 +11,6 @@ export type InspectResult = {
   hostPorts: Port[];
 };
 
-type ExecOptions = {
-  cmd: Command[];
-  attachStdout: true;
-  attachStderr: true;
-};
-
 type ExecInspectResult = {
   exitCode: ExitCode;
 };
@@ -26,19 +20,25 @@ interface Exec {
   inspect(): Promise<ExecInspectResult>;
 }
 
-interface StopOptions {
-  timeout: Duration;
-}
+type ExecOptions = {
+  cmd: Command[];
+  attachStdout: true;
+  attachStderr: true;
+};
 
-interface RemoveOptions {
+type StopOptions = {
+  timeout: Duration;
+};
+
+type RemoveOptions = {
   removeVolumes: boolean;
-}
+};
 
 export interface Container {
   getId(): Id;
   start(): Promise<void>;
-  stop(options?: StopOptions): Promise<void>;
-  remove(options?: RemoveOptions): Promise<void>;
+  stop(options: StopOptions): Promise<void>;
+  remove(options: RemoveOptions): Promise<void>;
   exec(options: ExecOptions): Promise<Exec>;
   logs(): Promise<NodeJS.ReadableStream>;
   inspect(): Promise<InspectResult>;
@@ -55,13 +55,13 @@ export class DockerodeContainer implements Container {
     return this.container.start();
   }
 
-  public stop(options: StopOptions = { timeout: new Duration(10, TemporalUnit.SECONDS) }): Promise<void> {
+  public stop(options: StopOptions): Promise<void> {
     return this.container.stop({
       t: options.timeout.get(TemporalUnit.SECONDS)
     });
   }
 
-  public remove(options: RemoveOptions = { removeVolumes: true }): Promise<void> {
+  public remove(options: RemoveOptions): Promise<void> {
     return this.container.remove({
       v: options.removeVolumes
     });

@@ -1,4 +1,4 @@
-import { Duration } from "node-duration";
+import { Duration, TemporalUnit } from "node-duration";
 import { Command, EnvKey, EnvValue, ExecResult, TmpFs } from "./docker-client";
 import { Host } from "./docker-client-factory";
 import { Port } from "./port";
@@ -14,8 +14,18 @@ export interface TestContainer {
   withStartupTimeout(startupTimeout: Duration): TestContainer;
 }
 
+export interface StopOptions {
+  timeout: Duration;
+  removeVolumes: boolean;
+}
+
+export const DEFAULT_STOP_OPTIONS: StopOptions = {
+  timeout: new Duration(10, TemporalUnit.SECONDS),
+  removeVolumes: true
+};
+
 export interface StartedTestContainer {
-  stop(): Promise<StoppedTestContainer>;
+  stop(options?: StopOptions): Promise<StoppedTestContainer>;
   getContainerIpAddress(): Host;
   getMappedPort(port: Port): Port;
   exec(command: Command[]): Promise<ExecResult>;
