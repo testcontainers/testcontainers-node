@@ -1,5 +1,6 @@
 import byline from "byline";
 import dockerode, { ContainerInspectInfo } from "dockerode";
+import { Duration, TemporalUnit } from "node-duration";
 import { Command, ExitCode } from "./docker-client";
 import { Port } from "./port";
 
@@ -25,10 +26,14 @@ interface Exec {
   inspect(): Promise<ExecInspectResult>;
 }
 
+interface StopOptions {
+  timeout: Duration;
+}
+
 export interface Container {
   getId(): Id;
   start(): Promise<void>;
-  stop(): Promise<void>;
+  stop(options?: StopOptions): Promise<void>;
   remove(): Promise<void>;
   exec(options: ExecOptions): Promise<Exec>;
   logs(): Promise<NodeJS.ReadableStream>;
@@ -46,8 +51,10 @@ export class DockerodeContainer implements Container {
     return this.container.start();
   }
 
-  public stop(): Promise<void> {
-    return this.container.stop();
+  public stop(options: StopOptions = { timeout: new Duration(10, TemporalUnit.SECONDS) }): Promise<void> {
+    return this.container.stop({
+      t: options.timeout.get(TemporalUnit.SECONDS)
+    });
   }
 
   public remove(): Promise<void> {
