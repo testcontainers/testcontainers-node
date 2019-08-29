@@ -30,11 +30,15 @@ interface StopOptions {
   timeout: Duration;
 }
 
+interface RemoveOptions {
+  removeVolumes: boolean;
+}
+
 export interface Container {
   getId(): Id;
   start(): Promise<void>;
   stop(options?: StopOptions): Promise<void>;
-  remove(): Promise<void>;
+  remove(options?: RemoveOptions): Promise<void>;
   exec(options: ExecOptions): Promise<Exec>;
   logs(): Promise<NodeJS.ReadableStream>;
   inspect(): Promise<InspectResult>;
@@ -57,8 +61,10 @@ export class DockerodeContainer implements Container {
     });
   }
 
-  public remove(): Promise<void> {
-    return this.container.remove({ v: true });
+  public remove(options: RemoveOptions = { removeVolumes: true }): Promise<void> {
+    return this.container.remove({
+      v: options.removeVolumes
+    });
   }
 
   public async exec(options: ExecOptions): Promise<Exec> {
