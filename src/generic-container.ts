@@ -2,7 +2,7 @@ import { Duration, TemporalUnit } from "node-duration";
 import { BoundPorts } from "./bound-ports";
 import { Container } from "./container";
 import { ContainerState } from "./container-state";
-import { BuildContext, Command, DockerClient, Env, EnvKey, EnvValue, ExecResult } from "./docker-client";
+import { BuildContext, Command, DockerClient, Env, EnvKey, EnvValue, ExecResult, TmpFs } from "./docker-client";
 import { DockerClientFactory, DockerodeClientFactory, Host } from "./docker-client-factory";
 import log from "./logger";
 import { Port } from "./port";
@@ -34,6 +34,7 @@ export class GenericContainer implements TestContainer {
   private env: Env = {};
   private ports: Port[] = [];
   private cmd: Command[] = [];
+  private tmpFs: TmpFs = {};
   private waitStrategy?: WaitStrategy;
   private startupTimeout: Duration = new Duration(60_000, TemporalUnit.MILLISECONDS);
 
@@ -52,7 +53,13 @@ export class GenericContainer implements TestContainer {
     }
 
     const boundPorts = await new PortBinder().bind(this.ports);
-    const container = await this.dockerClient.create(this.repoTag, this.env, boundPorts, this.cmd);
+    const container = await this.dockerClient.create({
+      repoTag: this.repoTag,
+      env: this.env,
+      cmd: this.cmd,
+      tmpFs: this.tmpFs,
+      boundPorts
+    });
     await this.dockerClient.start(container);
     const inspectResult = await container.inspect();
     const containerState = new ContainerState(inspectResult);
@@ -68,6 +75,11 @@ export class GenericContainer implements TestContainer {
 
   public withEnv(key: EnvKey, value: EnvValue): TestContainer {
     this.env[key] = value;
+    return this;
+  }
+
+  public withTmpFs(tmpFs: TmpFs) {
+    this.tmpFs = tmpFs;
     return this;
   }
 

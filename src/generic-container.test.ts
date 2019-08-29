@@ -61,6 +61,24 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
+  it("should set tmpfs", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.11")
+      .withTmpFs({ "/testtmpfs": "rw" })
+      .withExposedPorts(8080)
+      .start();
+
+    const tmpFsFile = "/testtmpfs/test.file";
+
+    const { exitCode: exitCode1 } = await container.exec(["ls", tmpFsFile]);
+    expect(exitCode1).toBe(1);
+
+    await container.exec(["touch", tmpFsFile]);
+    const { exitCode: exitCode2 } = await container.exec(["ls", tmpFsFile]);
+    expect(exitCode2).toBe(0);
+
+    await container.stop();
+  });
+
   it("should execute a command on a running container", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.11")
       .withExposedPorts(8080)
