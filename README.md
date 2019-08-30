@@ -129,6 +129,9 @@ In some situations a container's log output is a simple way to determine if it i
 wait for a `Ready` message in the container's logs as follows:
 
 ```javascript
+const { GenericContainer, Wait } = require("testcontainers");
+const { Duration, TemporalUnit } = require("node-duration");
+
 const container = await new GenericContainer("redis")
   .withExposedPorts(6379)
   .withWaitStrategy(Wait.forLogMessage("Ready to accept connections"))
