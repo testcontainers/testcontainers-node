@@ -80,8 +80,7 @@ const container = await new GenericContainer("postgres")
   .start();
  ```
 
-Specifying a timeout to wait for a container to stop. Note that the
-default is 10 seconds:
+Testcontainers will wait 10 seconds for a container to stop, to override:
 
 ```javascript
 const { GenericContainer } = require("testcontainers");
@@ -96,7 +95,7 @@ await container.stop({
 })
  ```
 
-Testcontainers will remove any associated volumes created
+Testcontainers will remove associated volumes created
 by the container when stopped, to override:
 
  ```javascript
