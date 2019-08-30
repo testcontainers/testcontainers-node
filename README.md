@@ -49,7 +49,7 @@ const { GenericContainer } = require("testcontainers");
 Building and using your own Docker image:
 
 ```javascript
-const path = require('path');
+const path = require("path");
 const { GenericContainer } = require("testcontainers");
 
 (async () => {
@@ -76,7 +76,7 @@ Creating a container with a `tmpfs` mount:
  ```javascript
 const container = await new GenericContainer("postgres")
   .withExposedPorts(5432)
-  .withTmpFs({ '/temp_pgdata': 'rw,noexec,nosuid,size=65536k' })
+  .withTmpFs({ "/temp_pgdata": "rw,noexec,nosuid,size=65536k" })
   .start();
  ```
 
@@ -96,8 +96,8 @@ await container.stop({
 })
  ```
 
-By default, Testcontainers will remove any associated volumes created
-by the container when it is stopped. You can override this behaviour:
+Testcontainers will remove any associated volumes created
+by the container when stopped, to override:
 
  ```javascript
 const container = await new GenericContainer("postgres")
