@@ -68,12 +68,19 @@ const { GenericContainer } = require("testcontainers");
 Execute commands inside a running container:
 
 ```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await new GenericContainer("alpine")
+  .start();
+
 const { output, exitCode } = await container.exec(["echo", "hello", "world"]);
 ```
 
 Creating a container with a `tmpfs` mount:
 
  ```javascript
+const { GenericContainer } = require("testcontainers");
+
 const container = await new GenericContainer("postgres")
   .withExposedPorts(5432)
   .withTmpFs({ "/temp_pgdata": "rw,noexec,nosuid,size=65536k" })
@@ -99,6 +106,8 @@ Testcontainers will remove associated volumes created
 by the container when stopped, to override:
 
  ```javascript
+const { GenericContainer } = require("testcontainers");
+
 const container = await new GenericContainer("postgres")
   .withExposedPorts(5432)
   .start();
