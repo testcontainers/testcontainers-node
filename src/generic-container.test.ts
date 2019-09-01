@@ -71,7 +71,7 @@ describe("GenericContainer", () => {
       .withExposedPorts(8080)
       .start();
 
-    const { output } = await container.exec(["cat", "/tmp/test.txt"]);
+    const { output } = await container.exec(["cat", target]);
     expect(output).toContain("hello world");
 
     await container.stop();
