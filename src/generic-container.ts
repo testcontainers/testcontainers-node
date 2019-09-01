@@ -2,14 +2,30 @@ import { Duration, TemporalUnit } from "node-duration";
 import { BoundPorts } from "./bound-ports";
 import { Container } from "./container";
 import { ContainerState } from "./container-state";
-import { BuildContext, Command, ContainerName, DockerClient, Env, EnvKey, EnvValue, ExecResult } from "./docker-client";
+import {
+  BuildContext,
+  Command,
+  ContainerName,
+  DockerClient,
+  Env,
+  EnvKey,
+  EnvValue,
+  ExecResult,
+  TmpFs
+} from "./docker-client";
 import { DockerClientFactory, DockerodeClientFactory, Host } from "./docker-client-factory";
 import log from "./logger";
 import { Port } from "./port";
 import { PortBinder } from "./port-binder";
 import { HostPortCheck, InternalPortCheck } from "./port-check";
 import { Image, RepoTag, Tag } from "./repo-tag";
-import { StartedTestContainer, StoppedTestContainer, TestContainer } from "./test-container";
+import {
+  DEFAULT_STOP_OPTIONS,
+  OptionalStopOptions,
+  StartedTestContainer,
+  StoppedTestContainer,
+  TestContainer
+} from "./test-container";
 import { RandomUuid, Uuid } from "./uuid";
 import { HostPortWaitStrategy, WaitStrategy } from "./wait-strategy";
 
@@ -35,6 +51,7 @@ export class GenericContainer implements TestContainer {
   private ports: Port[] = [];
   private cmd: Command[] = [];
   private name?: ContainerName;
+  private tmpFs: TmpFs = {};
   private waitStrategy?: WaitStrategy;
   private startupTimeout: Duration = new Duration(60_000, TemporalUnit.MILLISECONDS);
 
@@ -53,7 +70,14 @@ export class GenericContainer implements TestContainer {
     }
 
     const boundPorts = await new PortBinder().bind(this.ports);
-    const container = await this.dockerClient.create(this.repoTag, this.env, boundPorts, this.cmd, this.name);
+    const container = await this.dockerClient.create({
+      repoTag: this.repoTag,
+      env: this.env,
+      cmd: this.cmd,
+      tmpFs: this.tmpFs,
+      boundPorts,
+      name: this.name
+    });
     await this.dockerClient.start(container);
     const inspectResult = await container.inspect();
     const containerState = new ContainerState(inspectResult);
@@ -80,6 +104,11 @@ export class GenericContainer implements TestContainer {
 
   public withEnv(key: EnvKey, value: EnvValue): TestContainer {
     this.env[key] = value;
+    return this;
+  }
+
+  public withTmpFs(tmpFs: TmpFs) {
+    this.tmpFs = tmpFs;
     return this;
   }
 
@@ -133,9 +162,10 @@ class StartedGenericContainer implements StartedTestContainer {
     private readonly dockerClient: DockerClient
   ) {}
 
-  public async stop(): Promise<StoppedTestContainer> {
-    await this.container.stop();
-    await this.container.remove();
+  public async stop(options: OptionalStopOptions = {}): Promise<StoppedTestContainer> {
+    const resolvedOptions = { ...DEFAULT_STOP_OPTIONS, ...options };
+    await this.container.stop({ timeout: resolvedOptions.timeout });
+    await this.container.remove({ removeVolumes: resolvedOptions.removeVolumes });
     return new StoppedGenericContainer();
   }
 

@@ -72,6 +72,37 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
+  it("should set tmpfs", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.11")
+      .withTmpFs({ "/testtmpfs": "rw" })
+      .withExposedPorts(8080)
+      .start();
+
+    const tmpFsFile = "/testtmpfs/test.file";
+
+    const { exitCode: exitCode1 } = await container.exec(["ls", tmpFsFile]);
+    expect(exitCode1).toBe(1);
+
+    await container.exec(["touch", tmpFsFile]);
+    const { exitCode: exitCode2 } = await container.exec(["ls", tmpFsFile]);
+    expect(exitCode2).toBe(0);
+
+    await container.stop();
+  });
+
+  it("should execute a command on a running container", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.11")
+      .withExposedPorts(8080)
+      .start();
+
+    const { output, exitCode } = await container.exec(["echo", "hello", "world"]);
+
+    expect(exitCode).toBe(0);
+    expect(output).toContain("hello world");
+
+    await container.stop();
+  });
+
   it("should build and start from a Dockerfile", async () => {
     const context = path.resolve(__dirname, "..", "docker");
     const container = await GenericContainer.fromDockerfile(context);
@@ -83,39 +114,5 @@ describe("GenericContainer", () => {
 
     await startedContainer.stop();
     await expect(fetch(url)).rejects.toThrowError();
-  });
-
-  it("should work for mysql", async () => {
-    const container = await new GenericContainer("mysql")
-      .withEnv("MYSQL_ROOT_PASSWORD", "my-root-pw")
-      .withExposedPorts(3306)
-      .start();
-
-    await container.stop();
-  });
-
-  it("should allow for exec'ing in running container", async () => {
-    const container = await new GenericContainer("mysql")
-      .withEnv("MYSQL_ALLOW_EMPTY_PASSWORD", "true")
-      .withWaitStrategy(Wait.forLogMessage("ready for connections"))
-      .start();
-
-    const { output, exitCode } = await container.exec([
-      "mysql",
-      "-B",
-      "--disable-column-names",
-      "--execute",
-      "show databases"
-    ]);
-    expect(exitCode).toBe(0);
-    expect(output).toContain("performance_schema");
-
-    await container.stop();
-  });
-
-  it("should work for couch db", async () => {
-    const container = await new GenericContainer("couchdb").withExposedPorts(5984).start();
-
-    await container.stop();
   });
 });
