@@ -56,8 +56,8 @@ export class DockerodeClient implements DockerClient {
   public async create(options: CreateOptions): Promise<Container> {
     log.info(`Creating container for image: ${options.repoTag}`);
 
-    const containerNameOption = options.name !== undefined ? { name: options.name } : {};
     const dockerodeContainer = await this.dockerode.createContainer({
+      name: options.name,
       Image: options.repoTag.toString(),
       Env: this.getEnv(options.env),
       ExposedPorts: this.getExposedPorts(options.boundPorts),
@@ -65,8 +65,7 @@ export class DockerodeClient implements DockerClient {
       HostConfig: {
         PortBindings: this.getPortBindings(options.boundPorts),
         Tmpfs: options.tmpFs
-      },
-      ...containerNameOption
+      }
     });
 
     return new DockerodeContainer(dockerodeContainer);
