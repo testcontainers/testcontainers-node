@@ -1,5 +1,6 @@
 import byline from "byline";
 import dockerode, { ContainerInspectInfo } from "dockerode";
+import { Duration, TemporalUnit } from "node-duration";
 import { Command, ContainerName, ExitCode } from "./docker-client";
 import { Port } from "./port";
 
@@ -11,12 +12,6 @@ export type InspectResult = {
   name: ContainerName;
 };
 
-type ExecOptions = {
-  cmd: Command[];
-  attachStdout: true;
-  attachStderr: true;
-};
-
 type ExecInspectResult = {
   exitCode: ExitCode;
 };
@@ -26,11 +21,25 @@ interface Exec {
   inspect(): Promise<ExecInspectResult>;
 }
 
+type ExecOptions = {
+  cmd: Command[];
+  attachStdout: true;
+  attachStderr: true;
+};
+
+type StopOptions = {
+  timeout: Duration;
+};
+
+type RemoveOptions = {
+  removeVolumes: boolean;
+};
+
 export interface Container {
   getId(): Id;
   start(): Promise<void>;
-  stop(): Promise<void>;
-  remove(): Promise<void>;
+  stop(options: StopOptions): Promise<void>;
+  remove(options: RemoveOptions): Promise<void>;
   exec(options: ExecOptions): Promise<Exec>;
   logs(): Promise<NodeJS.ReadableStream>;
   inspect(): Promise<InspectResult>;
@@ -47,12 +56,16 @@ export class DockerodeContainer implements Container {
     return this.container.start();
   }
 
-  public stop(): Promise<void> {
-    return this.container.stop();
+  public stop(options: StopOptions): Promise<void> {
+    return this.container.stop({
+      t: options.timeout.get(TemporalUnit.SECONDS)
+    });
   }
 
-  public remove(): Promise<void> {
-    return this.container.remove();
+  public remove(options: RemoveOptions): Promise<void> {
+    return this.container.remove({
+      v: options.removeVolumes
+    });
   }
 
   public async exec(options: ExecOptions): Promise<Exec> {
