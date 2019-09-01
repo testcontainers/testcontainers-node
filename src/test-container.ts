@@ -1,5 +1,5 @@
 import { Duration, TemporalUnit } from "node-duration";
-import { Command, EnvKey, EnvValue, ExecResult, TmpFs } from "./docker-client";
+import { BindMode, Command, Dir, EnvKey, EnvValue, ExecResult, TmpFs } from "./docker-client";
 import { Host } from "./docker-client-factory";
 import { Port } from "./port";
 import { WaitStrategy } from "./wait-strategy";
@@ -10,6 +10,7 @@ export interface TestContainer {
   withCmd(cmd: Command[]): TestContainer;
   withTmpFs(tmpFs: TmpFs): TestContainer;
   withExposedPorts(...ports: Port[]): TestContainer;
+  withBindMount(source: Dir, target: Dir, bindMode: BindMode): TestContainer;
   withWaitStrategy(waitStrategy: WaitStrategy): TestContainer;
   withStartupTimeout(startupTimeout: Duration): TestContainer;
 }

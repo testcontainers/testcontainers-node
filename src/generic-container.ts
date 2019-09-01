@@ -2,7 +2,19 @@ import { Duration, TemporalUnit } from "node-duration";
 import { BoundPorts } from "./bound-ports";
 import { Container } from "./container";
 import { ContainerState } from "./container-state";
-import { BuildContext, Command, DockerClient, Env, EnvKey, EnvValue, ExecResult, TmpFs } from "./docker-client";
+import {
+  BindMode,
+  BindMount,
+  BuildContext,
+  Command,
+  Dir,
+  DockerClient,
+  Env,
+  EnvKey,
+  EnvValue,
+  ExecResult,
+  TmpFs
+} from "./docker-client";
 import { DockerClientFactory, DockerodeClientFactory, Host } from "./docker-client-factory";
 import log from "./logger";
 import { Port } from "./port";
@@ -20,17 +32,17 @@ import { RandomUuid, Uuid } from "./uuid";
 import { HostPortWaitStrategy, WaitStrategy } from "./wait-strategy";
 
 export class GenericContainer implements TestContainer {
-  public static async fromDockerfile(
-    context: BuildContext,
-    uuid: Uuid = new RandomUuid(),
-    dockerClientFactory: DockerClientFactory = new DockerodeClientFactory()
-  ): Promise<GenericContainer> {
+  public static async fromDockerfile(context: BuildContext): Promise<GenericContainer> {
+    const uuid: Uuid = new RandomUuid();
+    const dockerClientFactory: DockerClientFactory = new DockerodeClientFactory();
+
     const image = uuid.nextUuid();
     const tag = uuid.nextUuid();
     const repoTag = new RepoTag(image, tag);
     const dockerClient = dockerClientFactory.getClient();
     await dockerClient.buildImage(repoTag, context);
     const container = new GenericContainer(image, tag);
+
     return Promise.resolve(container);
   }
 
@@ -40,6 +52,7 @@ export class GenericContainer implements TestContainer {
   private env: Env = {};
   private ports: Port[] = [];
   private cmd: Command[] = [];
+  private bindMounts: BindMount[] = [];
   private tmpFs: TmpFs = {};
   private waitStrategy?: WaitStrategy;
   private startupTimeout: Duration = new Duration(60_000, TemporalUnit.MILLISECONDS);
@@ -63,6 +76,7 @@ export class GenericContainer implements TestContainer {
       repoTag: this.repoTag,
       env: this.env,
       cmd: this.cmd,
+      bindMounts: this.bindMounts,
       tmpFs: this.tmpFs,
       boundPorts
     });
@@ -91,6 +105,11 @@ export class GenericContainer implements TestContainer {
 
   public withExposedPorts(...ports: Port[]): TestContainer {
     this.ports = ports;
+    return this;
+  }
+
+  public withBindMount(source: Dir, target: Dir, bindMode: BindMode = "rw"): TestContainer {
+    this.bindMounts.push({ source, target, bindMode });
     return this;
   }
 

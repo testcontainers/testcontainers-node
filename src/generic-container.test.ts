@@ -61,6 +61,22 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
+  it("should set bind mounts", async () => {
+    const filename = "test.txt";
+    const source = path.resolve(__dirname, "..", "docker", filename);
+    const target = `/tmp/${filename}`;
+
+    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.11")
+      .withBindMount(source, target)
+      .withExposedPorts(8080)
+      .start();
+
+    const { output } = await container.exec(["cat", "/tmp/test.txt"]);
+    expect(output).toContain("hello world");
+
+    await container.stop();
+  });
+
   it("should set tmpfs", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.11")
       .withTmpFs({ "/testtmpfs": "rw" })
