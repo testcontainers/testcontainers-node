@@ -76,6 +76,17 @@ const container = await new GenericContainer("alpine")
 const { output, exitCode } = await container.exec(["echo", "hello", "world"]);
 ```
 
+Creating a container with bind mounts:
+
+ ```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await new GenericContainer("alpine")
+  .withBindMount("/local/file.txt", "/remote/file.txt")
+  .withBindMount("/local/dir", "/remote/dir", "ro")
+  .start();
+ ```
+
 Creating a container with a `tmpfs` mount:
 
  ```javascript
