@@ -27,7 +27,7 @@
     "clean": "rm -rf dist",
     "test": "jest",
     "lint": "tslint --fix src/**/*.ts",
-    "format": "prettier --write package.json docker/index.js src/**/*.ts"
+    "format": "prettier --write package.json docker/index.js docker-with-buildargs/index.js src/**/*.ts"
   },
   "dependencies": {
     "byline": "^5.0.0",
