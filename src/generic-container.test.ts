@@ -64,11 +64,28 @@ describe("GenericContainer", () => {
   it("should set name", async () => {
     const containerName = "special-test-container";
     const expectedContainerName = "/special-test-container";
+
     const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.11")
       .withName(containerName)
       .start();
 
     expect(container.getName()).toEqual(expectedContainerName);
+    await container.stop();
+  });
+
+  it("should set bind mounts", async () => {
+    const filename = "test.txt";
+    const source = path.resolve(__dirname, "..", "docker", filename);
+    const target = `/tmp/${filename}`;
+
+    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.11")
+      .withBindMount(source, target)
+      .withExposedPorts(8080)
+      .start();
+
+    const { output } = await container.exec(["cat", target]);
+    expect(output).toContain("hello world");
+
     await container.stop();
   });
 

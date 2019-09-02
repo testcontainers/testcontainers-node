@@ -3,10 +3,13 @@ import { BoundPorts } from "./bound-ports";
 import { Container } from "./container";
 import { ContainerState } from "./container-state";
 import {
+  BindMode,
+  BindMount,
   BuildArgs,
   BuildContext,
   Command,
   ContainerName,
+  Dir,
   DockerClient,
   Env,
   EnvKey,
@@ -31,15 +34,13 @@ import { RandomUuid, Uuid } from "./uuid";
 import { HostPortWaitStrategy, WaitStrategy } from "./wait-strategy";
 
 export class GenericContainerBuilder {
-  private buildArgs: BuildArgs;
+  private buildArgs: BuildArgs = {};
 
   constructor(
     private readonly context: BuildContext,
     private readonly uuid: Uuid = new RandomUuid(),
     private readonly dockerClientFactory: DockerClientFactory = new DockerodeClientFactory()
-  ) {
-    this.buildArgs = {};
-  }
+  ) {}
 
   public withBuildArg(key: string, value: string): GenericContainerBuilder {
     this.buildArgs[key] = value;
@@ -73,6 +74,7 @@ export class GenericContainer implements TestContainer {
   private env: Env = {};
   private ports: Port[] = [];
   private cmd: Command[] = [];
+  private bindMounts: BindMount[] = [];
   private name?: ContainerName;
   private tmpFs: TmpFs = {};
   private waitStrategy?: WaitStrategy;
@@ -97,6 +99,7 @@ export class GenericContainer implements TestContainer {
       repoTag: this.repoTag,
       env: this.env,
       cmd: this.cmd,
+      bindMounts: this.bindMounts,
       tmpFs: this.tmpFs,
       boundPorts,
       name: this.name
@@ -137,6 +140,11 @@ export class GenericContainer implements TestContainer {
 
   public withExposedPorts(...ports: Port[]): TestContainer {
     this.ports = ports;
+    return this;
+  }
+
+  public withBindMount(source: Dir, target: Dir, bindMode: BindMode = "rw"): TestContainer {
+    this.bindMounts.push({ source, target, bindMode });
     return this;
   }
 
