@@ -42,7 +42,7 @@ export class DockerodeClientFactory implements DockerClientFactory {
   }
 
   private fromDefaults() {
-    log.info("Using default Docker configuration");
+    log.info("Using Docker defaults");
 
     const host = "localhost";
     const dockerode = new Dockerode();

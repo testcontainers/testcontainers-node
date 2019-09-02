@@ -22,7 +22,7 @@ export type Dir = string;
 export type TmpFs = { [dir in Dir]: Dir };
 
 export type BuildContext = string;
-export type BuildArgs = { [key: string]: string };
+export type BuildArgs = { [key in EnvKey]: EnvValue };
 
 export type StreamOutput = string;
 export type ExecResult = { output: StreamOutput; exitCode: ExitCode };

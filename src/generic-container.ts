@@ -50,6 +50,7 @@ export class GenericContainerBuilder {
   public async build(): Promise<GenericContainer> {
     const image = this.uuid.nextUuid();
     const tag = this.uuid.nextUuid();
+
     const repoTag = new RepoTag(image, tag);
     const dockerClient = this.dockerClientFactory.getClient();
     await dockerClient.buildImage(repoTag, this.context, this.buildArgs);

@@ -120,37 +120,33 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
-  it("should build and start from a Dockerfile", async () => {
-    const context = path.resolve(__dirname, "..", "docker");
-    const container = await GenericContainer.fromDockerfile(context).build();
-    const startedContainer = await container.withExposedPorts(8080).start();
+  describe("from Dockerfile", () => {
+    it("should build and start", async () => {
+      const context = path.resolve(__dirname, "..", "docker");
+      const container = await GenericContainer.fromDockerfile(context).build();
 
-    const url = `http://${startedContainer.getContainerIpAddress()}:${startedContainer.getMappedPort(8080)}`;
-    const response = await fetch(`${url}/hello-world`);
-    expect(response.status).toBe(200);
+      const startedContainer = await container.withExposedPorts(8080).start();
 
-    await startedContainer.stop();
-    await expect(fetch(url)).rejects.toThrowError();
-  });
+      const url = `http://${startedContainer.getContainerIpAddress()}:${startedContainer.getMappedPort(8080)}`;
+      const response = await fetch(`${url}/hello-world`);
+      expect(response.status).toBe(200);
 
-  it("should build and start from a Dockerfile with build arguments", async () => {
-    const context = path.resolve(__dirname, "..", "docker-with-buildargs");
-    const container = await GenericContainer.fromDockerfile(context)
-      .withBuildArg("VERSION", "10-alpine")
-      .build();
-    const startedContainer = await container.withExposedPorts(8080).start();
+      await startedContainer.stop();
+    });
 
-    const url = `http://${startedContainer.getContainerIpAddress()}:${startedContainer.getMappedPort(8080)}`;
-    const response = await fetch(`${url}/hello-world`);
-    expect(response.status).toBe(200);
+    it("should set build arguments", async () => {
+      const context = path.resolve(__dirname, "..", "docker-with-buildargs");
+      const container = await GenericContainer.fromDockerfile(context)
+        .withBuildArg("VERSION", "10-alpine")
+        .build();
 
-    await startedContainer.stop();
-    await expect(fetch(url)).rejects.toThrowError();
-  });
+      const startedContainer = await container.withExposedPorts(8080).start();
 
-  it("should not build and start from a Dockerfile with missing build arguments", async () => {
-    const context = path.resolve(__dirname, "..", "docker-with-buildargs");
+      const url = `http://${startedContainer.getContainerIpAddress()}:${startedContainer.getMappedPort(8080)}`;
+      const response = await fetch(`${url}/hello-world`);
+      expect(response.status).toBe(200);
 
-    await expect(GenericContainer.fromDockerfile(context).build()).rejects.toThrowError("Failed to build image");
+      await startedContainer.stop();
+    });
   });
 });

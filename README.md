@@ -22,7 +22,6 @@ The following environment variables are supported:
 | --- | --- | --- |
 | `DOCKER_HOST` | `tcp://docker:2375` | Override the Docker host, useful for DIND in CI environments |
 
-
 ## Examples
 
 Using a pre-built Docker image:
@@ -52,91 +51,36 @@ Building and using your own Docker image:
 const path = require("path");
 const { GenericContainer } = require("testcontainers");
 
-(async () => {
-  const buildContext = path.resolve(__dirname, "my-dir");
-  
-  const container = await GenericContainer.fromDockerfile(buildContext).build();
-  
-  const startedContainer = await container
-    .withExposedPorts(8080)
-    .start();
+const buildContext = path.resolve(__dirname, "dir-containing-dockerfile");
 
-  await startedContainer.stop();
-})();
+const container = await GenericContainer.fromDockerfile(buildContext)
+  .withBuildArg("ARG_KEY", "ARG_VALUE")
+  .build();
+
+const startedContainer = await container
+  .withExposedPorts(8080)
+  .start();
 ```
 
-Passing arguments to your own Docker image:
-```javascript
-const path = require("path");
-const { GenericContainer } = require("testcontainers");
-
-(async () => {
-  const buildContext = path.resolve(__dirname, "my-dir");
-  
-  const container = await GenericContainer
-      .fromDockerfile(buildContext)
-      .withBuildArg("SOME_ARG", "some value")
-      .build();
-  
-  const startedContainer = await container
-    .withExposedPorts(8080)
-    .start();
-
-  await startedContainer.stop();
-})();
-```
-
-Execute commands inside a running container:
+Creating a container with a specified name:
 
 ```javascript
 const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
+  .withName("custom-container-name")
   .start();
-
-const { output, exitCode } = await container.exec(["echo", "hello", "world"]);
 ```
 
-Creating a container with a `tmpfs` mount:
-
- ```javascript
-const { GenericContainer } = require("testcontainers");
-
-const container = await new GenericContainer("postgres")
-  .withExposedPorts(5432)
-  .withTmpFs({ "/temp_pgdata": "rw,noexec,nosuid,size=65536k" })
-  .start();
- ```
-
-Testcontainers will wait 10 seconds for a container to stop, to override:
+Creating a container with a command:
 
 ```javascript
 const { GenericContainer } = require("testcontainers");
-const { Duration, TemporalUnit } = require("node-duration");
 
-const container = await new GenericContainer("postgres")
-  .withExposedPorts(5432)
+const container = await new GenericContainer("alpine")
+  .withCmd(["top"])
   .start();
-
-await container.stop({ 
-  timeout: new Duration(10, TemporalUnit.SECONDS) 
-})
- ```
-
-Testcontainers will remove associated volumes created
-by the container when stopped, to override:
-
- ```javascript
-const { GenericContainer } = require("testcontainers");
-
-const container = await new GenericContainer("postgres")
-  .withExposedPorts(5432)
-  .start();
-
-await container.stop({ 
-  removeVolumes: false
-})
- ```
+```
 
 Execute commands inside a running container:
 
@@ -151,25 +95,35 @@ const { output, exitCode } = await container.exec(["echo", "hello", "world"]);
 
 Creating a container with bind mounts:
 
- ```javascript
+```javascript
 const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
   .withBindMount("/local/file.txt", "/remote/file.txt")
   .withBindMount("/local/dir", "/remote/dir", "ro")
   .start();
- ```
+```
 
 Creating a container with a `tmpfs` mount:
 
- ```javascript
+```javascript
 const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("postgres")
   .withExposedPorts(5432)
   .withTmpFs({ "/temp_pgdata": "rw,noexec,nosuid,size=65536k" })
   .start();
- ```
+```
+
+Creating a container with environment variables:
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await new GenericContainer("alpine")
+  .withEnv("ENV_KEY", "ENV_VALUE")
+  .start();
+```
 
 Testcontainers will wait 10 seconds for a container to stop, to override:
 
@@ -184,12 +138,12 @@ const container = await new GenericContainer("postgres")
 await container.stop({ 
   timeout: new Duration(10, TemporalUnit.SECONDS) 
 })
- ```
+```
 
 Testcontainers will remove associated volumes created
 by the container when stopped, to override:
 
- ```javascript
+```javascript
 const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("postgres")
@@ -199,7 +153,7 @@ const container = await new GenericContainer("postgres")
 await container.stop({ 
   removeVolumes: false
 })
- ```
+```
 
 ## Wait Strategies
 
