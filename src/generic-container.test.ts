@@ -1,7 +1,6 @@
 import fetch from "node-fetch";
 import path from "path";
 import { GenericContainer } from "./generic-container";
-import { withBuildArg, withContext } from "./options";
 import { Wait } from "./wait";
 
 describe("GenericContainer", () => {
@@ -62,9 +61,40 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
+  it("should set tmpfs", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.11")
+      .withTmpFs({ "/testtmpfs": "rw" })
+      .withExposedPorts(8080)
+      .start();
+
+    const tmpFsFile = "/testtmpfs/test.file";
+
+    const { exitCode: exitCode1 } = await container.exec(["ls", tmpFsFile]);
+    expect(exitCode1).toBe(1);
+
+    await container.exec(["touch", tmpFsFile]);
+    const { exitCode: exitCode2 } = await container.exec(["ls", tmpFsFile]);
+    expect(exitCode2).toBe(0);
+
+    await container.stop();
+  });
+
+  it("should execute a command on a running container", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.11")
+      .withExposedPorts(8080)
+      .start();
+
+    const { output, exitCode } = await container.exec(["echo", "hello", "world"]);
+
+    expect(exitCode).toBe(0);
+    expect(output).toContain("hello world");
+
+    await container.stop();
+  });
+
   it("should build and start from a Dockerfile", async () => {
     const context = path.resolve(__dirname, "..", "docker");
-    const container = await GenericContainer.fromDockerfile(withContext(context));
+    const container = await GenericContainer.fromDockerfile(context).build();
     const startedContainer = await container.withExposedPorts(8080).start();
 
     const url = `http://${startedContainer.getContainerIpAddress()}:${startedContainer.getMappedPort(8080)}`;
@@ -77,7 +107,9 @@ describe("GenericContainer", () => {
 
   it("should build and start from a Dockerfile with build arguments", async () => {
     const context = path.resolve(__dirname, "..", "docker-with-buildargs");
-    const container = await GenericContainer.fromDockerfile(withContext(context), withBuildArg("VERSION", "10-alpine"));
+    const container = await GenericContainer.fromDockerfile(context)
+      .withBuildArg("VERSION", "10-alpine")
+      .build();
     const startedContainer = await container.withExposedPorts(8080).start();
 
     const url = `http://${startedContainer.getContainerIpAddress()}:${startedContainer.getMappedPort(8080)}`;
@@ -91,7 +123,7 @@ describe("GenericContainer", () => {
   it("should not build and start from a Dockerfile with missing build arguments", async () => {
     const context = path.resolve(__dirname, "..", "docker-with-buildargs");
 
-    await expect(GenericContainer.fromDockerfile(withContext(context))).rejects.toThrowError("Failed to build image");
+    await expect(GenericContainer.fromDockerfile(context).build()).rejects.toThrowError("Failed to build image");
   });
 
   it("should work for mysql", async () => {
