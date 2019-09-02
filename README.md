@@ -138,6 +138,58 @@ await container.stop({
 })
  ```
 
+Execute commands inside a running container:
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await new GenericContainer("alpine")
+  .start();
+
+const { output, exitCode } = await container.exec(["echo", "hello", "world"]);
+```
+
+Creating a container with a `tmpfs` mount:
+
+ ```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await new GenericContainer("postgres")
+  .withExposedPorts(5432)
+  .withTmpFs({ "/temp_pgdata": "rw,noexec,nosuid,size=65536k" })
+  .start();
+ ```
+
+Testcontainers will wait 10 seconds for a container to stop, to override:
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+const { Duration, TemporalUnit } = require("node-duration");
+
+const container = await new GenericContainer("postgres")
+  .withExposedPorts(5432)
+  .start();
+
+await container.stop({ 
+  timeout: new Duration(10, TemporalUnit.SECONDS) 
+})
+ ```
+
+Testcontainers will remove associated volumes created
+by the container when stopped, to override:
+
+ ```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await new GenericContainer("postgres")
+  .withExposedPorts(5432)
+  .start();
+
+await container.stop({ 
+  removeVolumes: false
+})
+ ```
+
 ## Wait Strategies
 
 Ordinarily Testcontainers will wait for up to 60 seconds for the container's mapped network ports to start listening. 
