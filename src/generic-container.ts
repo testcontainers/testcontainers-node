@@ -34,7 +34,7 @@ export class GenericContainerBuilder {
   private uuid: Uuid;
   private buildArgs: BuildArgs;
 
-  constructor(private context: BuildContext) {
+  constructor(private readonly context: BuildContext) {
     this.factory = new DockerodeClientFactory();
     this.uuid = new RandomUuid();
     this.buildArgs = {};
