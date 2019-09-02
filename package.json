@@ -32,6 +32,7 @@
   "dependencies": {
     "byline": "^5.0.0",
     "debug": "^4.1.1",
+    "default-gateway": "^5.0.2",
     "dockerode": "^2.5.8",
     "get-port": "^4.2.0",
     "node-duration": "^1.0.4",
@@ -41,6 +42,7 @@
   "devDependencies": {
     "@types/byline": "^4.2.31",
     "@types/debug": "0.0.31",
+    "@types/default-gateway": "^3.0.0",
     "@types/dockerode": "^2.5.18",
     "@types/jest": "^23.3.14",
     "@types/node-fetch": "^2.3.4",

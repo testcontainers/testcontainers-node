@@ -5,6 +5,7 @@ import { ContainerState } from "./container-state";
 import {
   BindMode,
   BindMount,
+  BuildArgs,
   BuildContext,
   Command,
   ContainerName,
@@ -32,19 +33,39 @@ import {
 import { RandomUuid, Uuid } from "./uuid";
 import { HostPortWaitStrategy, WaitStrategy } from "./wait-strategy";
 
-export class GenericContainer implements TestContainer {
-  public static async fromDockerfile(context: BuildContext): Promise<GenericContainer> {
-    const uuid: Uuid = new RandomUuid();
-    const dockerClientFactory: DockerClientFactory = new DockerodeClientFactory();
+export class GenericContainerBuilder {
+  private buildArgs: BuildArgs = {};
 
-    const image = uuid.nextUuid();
-    const tag = uuid.nextUuid();
+  constructor(
+    private readonly context: BuildContext,
+    private readonly uuid: Uuid = new RandomUuid(),
+    private readonly dockerClientFactory: DockerClientFactory = new DockerodeClientFactory()
+  ) {}
+
+  public withBuildArg(key: string, value: string): GenericContainerBuilder {
+    this.buildArgs[key] = value;
+    return this;
+  }
+
+  public async build(): Promise<GenericContainer> {
+    const image = this.uuid.nextUuid();
+    const tag = this.uuid.nextUuid();
     const repoTag = new RepoTag(image, tag);
-    const dockerClient = dockerClientFactory.getClient();
-    await dockerClient.buildImage(repoTag, context);
+    const dockerClient = this.dockerClientFactory.getClient();
+    await dockerClient.buildImage(repoTag, this.context, this.buildArgs);
     const container = new GenericContainer(image, tag);
 
+    if (!(await container.hasRepoTagLocally())) {
+      throw new Error("Failed to build image");
+    }
+
     return Promise.resolve(container);
+  }
+}
+
+export class GenericContainer implements TestContainer {
+  public static fromDockerfile(context: BuildContext): GenericContainerBuilder {
+    return new GenericContainerBuilder(context);
   }
 
   private readonly repoTag: RepoTag;
@@ -137,7 +158,7 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
-  private async hasRepoTagLocally(): Promise<boolean> {
+  public async hasRepoTagLocally(): Promise<boolean> {
     const repoTags = await this.dockerClient.fetchRepoTags();
     return repoTags.some(repoTag => repoTag.equals(this.repoTag));
   }
