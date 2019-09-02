@@ -33,8 +33,8 @@ export class GenericContainerBuilder {
   private factory: DockerClientFactory;
   private uuid: Uuid;
   private buildArgs: BuildArgs;
-  private imageName: string|null;
-  private imageTag: string|null;
+  private imageName: string | null;
+  private imageTag: string | null;
   private abortBuildOnExistingImage: boolean;
 
   constructor(private context: BuildContext) {
