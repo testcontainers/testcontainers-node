@@ -9,6 +9,7 @@ import { PortString } from "./port";
 import { RepoTag } from "./repo-tag";
 
 export type Command = string;
+export type ContainerName = string;
 export type ExitCode = number;
 
 export type EnvKey = string;
@@ -41,6 +42,7 @@ type CreateOptions = {
   bindMounts: BindMount[];
   tmpFs: TmpFs;
   boundPorts: BoundPorts;
+  name?: ContainerName;
 };
 
 export interface DockerClient {
@@ -66,6 +68,7 @@ export class DockerodeClient implements DockerClient {
     log.info(`Creating container for image: ${options.repoTag}`);
 
     const dockerodeContainer = await this.dockerode.createContainer({
+      name: options.name,
       Image: options.repoTag.toString(),
       Env: this.getEnv(options.env),
       ExposedPorts: this.getExposedPorts(options.boundPorts),

@@ -7,6 +7,7 @@ import {
   BindMount,
   BuildContext,
   Command,
+  ContainerName,
   Dir,
   DockerClient,
   Env,
@@ -53,6 +54,7 @@ export class GenericContainer implements TestContainer {
   private ports: Port[] = [];
   private cmd: Command[] = [];
   private bindMounts: BindMount[] = [];
+  private name?: ContainerName;
   private tmpFs: TmpFs = {};
   private waitStrategy?: WaitStrategy;
   private startupTimeout: Duration = new Duration(60_000, TemporalUnit.MILLISECONDS);
@@ -78,18 +80,30 @@ export class GenericContainer implements TestContainer {
       cmd: this.cmd,
       bindMounts: this.bindMounts,
       tmpFs: this.tmpFs,
-      boundPorts
+      boundPorts,
+      name: this.name
     });
     await this.dockerClient.start(container);
     const inspectResult = await container.inspect();
     const containerState = new ContainerState(inspectResult);
     await this.waitForContainer(container, containerState, boundPorts);
 
-    return new StartedGenericContainer(container, this.dockerClient.getHost(), boundPorts, this.dockerClient);
+    return new StartedGenericContainer(
+      container,
+      this.dockerClient.getHost(),
+      boundPorts,
+      inspectResult.name,
+      this.dockerClient
+    );
   }
 
   public withCmd(cmd: Command[]) {
     this.cmd = cmd;
+    return this;
+  }
+
+  public withName(name: ContainerName) {
+    this.name = name;
     return this;
   }
 
@@ -154,6 +168,7 @@ class StartedGenericContainer implements StartedTestContainer {
     private readonly container: Container,
     private readonly host: Host,
     private readonly boundPorts: BoundPorts,
+    private readonly name: ContainerName,
     private readonly dockerClient: DockerClient
   ) {}
 
@@ -170,6 +185,10 @@ class StartedGenericContainer implements StartedTestContainer {
 
   public getMappedPort(port: Port): Port {
     return this.boundPorts.getBinding(port);
+  }
+
+  public getName(): ContainerName {
+    return this.name;
   }
 
   public exec(command: Command[]): Promise<ExecResult> {
