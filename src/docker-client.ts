@@ -20,6 +20,7 @@ type DockerodeEnvironment = string[];
 export type TmpFs = { [dir: string]: string };
 
 export type BuildContext = string;
+export type BuildArgs = { [key: string]: string };
 
 export type StreamOutput = string;
 export type ExecResult = { output: StreamOutput; exitCode: ExitCode };
@@ -39,7 +40,7 @@ export interface DockerClient {
   create(options: CreateOptions): Promise<Container>;
   start(container: Container): Promise<void>;
   exec(container: Container, command: Command[]): Promise<ExecResult>;
-  buildImage(repoTag: RepoTag, context: BuildContext): Promise<void>;
+  buildImage(repoTag: RepoTag, context: BuildContext, buildArgs: BuildArgs): Promise<void>;
   fetchRepoTags(): Promise<RepoTag[]>;
   getHost(): Host;
 }
@@ -90,11 +91,14 @@ export class DockerodeClient implements DockerClient {
     return { output, exitCode };
   }
 
-  public async buildImage(repoTag: RepoTag, context: BuildContext): Promise<void> {
+  public async buildImage(repoTag: RepoTag, context: BuildContext, buildArgs: BuildArgs): Promise<void> {
     log.info(`Building image '${repoTag.toString()}' with context '${context}'`);
 
     const tarStream = tar.pack(context);
-    const stream = await this.dockerode.buildImage(tarStream, { t: repoTag.toString() });
+    const stream = await this.dockerode.buildImage(tarStream, {
+      buildargs: buildArgs,
+      t: repoTag.toString()
+    });
     await streamToArray(stream);
   }
 

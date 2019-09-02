@@ -105,7 +105,7 @@ describe("GenericContainer", () => {
 
   it("should build and start from a Dockerfile", async () => {
     const context = path.resolve(__dirname, "..", "docker");
-    const container = await GenericContainer.fromDockerfile(context);
+    const container = await GenericContainer.fromDockerfile(context).build();
     const startedContainer = await container.withExposedPorts(8080).start();
 
     const url = `http://${startedContainer.getContainerIpAddress()}:${startedContainer.getMappedPort(8080)}`;
@@ -114,5 +114,26 @@ describe("GenericContainer", () => {
 
     await startedContainer.stop();
     await expect(fetch(url)).rejects.toThrowError();
+  });
+
+  it("should build and start from a Dockerfile with build arguments", async () => {
+    const context = path.resolve(__dirname, "..", "docker-with-buildargs");
+    const container = await GenericContainer.fromDockerfile(context)
+      .withBuildArg("VERSION", "10-alpine")
+      .build();
+    const startedContainer = await container.withExposedPorts(8080).start();
+
+    const url = `http://${startedContainer.getContainerIpAddress()}:${startedContainer.getMappedPort(8080)}`;
+    const response = await fetch(`${url}/hello-world`);
+    expect(response.status).toBe(200);
+
+    await startedContainer.stop();
+    await expect(fetch(url)).rejects.toThrowError();
+  });
+
+  it("should not build and start from a Dockerfile with missing build arguments", async () => {
+    const context = path.resolve(__dirname, "..", "docker-with-buildargs");
+
+    await expect(GenericContainer.fromDockerfile(context).build()).rejects.toThrowError("Failed to build image");
   });
 });
