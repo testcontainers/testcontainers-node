@@ -2,42 +2,99 @@ import { Duration, TemporalUnit } from "node-duration";
 import { BoundPorts } from "./bound-ports";
 import { Container } from "./container";
 import { ContainerState } from "./container-state";
-import { Command, DockerClient, Env, EnvKey, EnvValue, ExecResult } from "./docker-client";
+import {
+  BuildArgs,
+  BuildContext,
+  Command,
+  DockerClient,
+  Env,
+  EnvKey,
+  EnvValue,
+  ExecResult,
+  TmpFs
+} from "./docker-client";
 import { DockerClientFactory, DockerodeClientFactory, Host } from "./docker-client-factory";
 import log from "./logger";
-import { Options, WithArgument } from "./options";
 import { Port } from "./port";
 import { PortBinder } from "./port-binder";
 import { HostPortCheck, InternalPortCheck } from "./port-check";
 import { Image, RepoTag, Tag } from "./repo-tag";
-import { StartedTestContainer, StoppedTestContainer, TestContainer } from "./test-container";
+import {
+  DEFAULT_STOP_OPTIONS,
+  OptionalStopOptions,
+  StartedTestContainer,
+  StoppedTestContainer,
+  TestContainer
+} from "./test-container";
 import { RandomUuid, Uuid } from "./uuid";
 import { HostPortWaitStrategy, WaitStrategy } from "./wait-strategy";
 
-export class GenericContainer implements TestContainer {
-  public static async fromDockerfile(...options: WithArgument[]): Promise<GenericContainer> {
-    let opts: Options = {
-      uuid: new RandomUuid(),
-      dockerClientFactory: new DockerodeClientFactory() as DockerClientFactory,
-      buildArgs: {}
-    } as Options;
-    for (const opt of options) {
-      opts = opt(opts);
-    }
+export class GenericContainerBuilder {
+  private factory: DockerClientFactory;
+  private uuid: Uuid;
+  private buildArgs: BuildArgs;
+  private imageName: string|null;
+  private imageTag: string|null;
+  private abortBuildOnExistingImage: boolean;
 
-    const image = opts.imageName || opts.uuid.nextUuid();
-    const tag = opts.imageTag || opts.uuid.nextUuid();
+  constructor(private context: BuildContext) {
+    this.factory = new DockerodeClientFactory();
+    this.uuid = new RandomUuid();
+    this.buildArgs = {};
+    this.imageName = null;
+    this.imageTag = null;
+    this.abortBuildOnExistingImage = false;
+  }
+
+  public withDockerClientFactory(factory: DockerClientFactory): GenericContainerBuilder {
+    this.factory = factory;
+    return this;
+  }
+
+  public withUuid(uuid: Uuid): GenericContainerBuilder {
+    this.uuid = uuid;
+    return this;
+  }
+
+  public withBuildArg(key: string, value: string): GenericContainerBuilder {
+    this.buildArgs[key] = value;
+    return this;
+  }
+
+  public withImageName(name: string): GenericContainerBuilder {
+    this.imageName = name;
+    return this;
+  }
+
+  public withImageTag(tag: string): GenericContainerBuilder {
+    this.imageTag = tag;
+    return this;
+  }
+
+  public skipBuildOnExistingImage(): GenericContainerBuilder {
+    this.abortBuildOnExistingImage = true;
+    return this;
+  }
+
+  public async build(): Promise<GenericContainer> {
+    const image = this.imageName || this.uuid.nextUuid();
+    const tag = this.imageTag || this.uuid.nextUuid();
     const repoTag = new RepoTag(image, tag);
-    const dockerClient = opts.dockerClientFactory.getClient();
-    await dockerClient.buildImage(repoTag, opts);
+    const dockerClient = this.factory.getClient();
+    await dockerClient.buildImage(repoTag, this.context, this.buildArgs, this.abortBuildOnExistingImage);
     const container = new GenericContainer(image, tag);
 
-    // tslint:disable-next-line
     if (!(await container.hasRepoTagLocally())) {
       throw new Error("Failed to build image");
     }
 
     return Promise.resolve(container);
+  }
+}
+
+export class GenericContainer implements TestContainer {
+  public static fromDockerfile(context: BuildContext): GenericContainerBuilder {
+    return new GenericContainerBuilder(context);
   }
 
   private readonly repoTag: RepoTag;
@@ -46,6 +103,7 @@ export class GenericContainer implements TestContainer {
   private env: Env = {};
   private ports: Port[] = [];
   private cmd: Command[] = [];
+  private tmpFs: TmpFs = {};
   private waitStrategy?: WaitStrategy;
   private startupTimeout: Duration = new Duration(60_000, TemporalUnit.MILLISECONDS);
 
@@ -64,7 +122,13 @@ export class GenericContainer implements TestContainer {
     }
 
     const boundPorts = await new PortBinder().bind(this.ports);
-    const container = await this.dockerClient.create(this.repoTag, this.env, boundPorts, this.cmd);
+    const container = await this.dockerClient.create({
+      repoTag: this.repoTag,
+      env: this.env,
+      cmd: this.cmd,
+      tmpFs: this.tmpFs,
+      boundPorts
+    });
     await this.dockerClient.start(container);
     const inspectResult = await container.inspect();
     const containerState = new ContainerState(inspectResult);
@@ -83,6 +147,11 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
+  public withTmpFs(tmpFs: TmpFs) {
+    this.tmpFs = tmpFs;
+    return this;
+  }
+
   public withExposedPorts(...ports: Port[]): TestContainer {
     this.ports = ports;
     return this;
@@ -98,7 +167,7 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
-  private async hasRepoTagLocally(): Promise<boolean> {
+  public async hasRepoTagLocally(): Promise<boolean> {
     const repoTags = await this.dockerClient.fetchRepoTags();
     return repoTags.some(repoTag => repoTag.equals(this.repoTag));
   }
@@ -132,9 +201,10 @@ class StartedGenericContainer implements StartedTestContainer {
     private readonly dockerClient: DockerClient
   ) {}
 
-  public async stop(): Promise<StoppedTestContainer> {
-    await this.container.stop();
-    await this.container.remove();
+  public async stop(options: OptionalStopOptions = {}): Promise<StoppedTestContainer> {
+    const resolvedOptions = { ...DEFAULT_STOP_OPTIONS, ...options };
+    await this.container.stop({ timeout: resolvedOptions.timeout });
+    await this.container.remove({ removeVolumes: resolvedOptions.removeVolumes });
     return new StoppedGenericContainer();
   }
 

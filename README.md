@@ -33,12 +33,12 @@ const { GenericContainer } = require("testcontainers");
 
 (async () => {
   const container = await new GenericContainer("redis")
-      .withExposedPorts(6379)
-      .start();
-
+    .withExposedPorts(6379)
+    .start();
+  
   const redisClient = redis.createClient(
-      container.getMappedPort(6379),
-      container.getContainerIpAddress(),
+    container.getMappedPort(6379),
+    container.getContainerIpAddress(),
   );
   await redisClient.quit();
 
@@ -49,41 +49,146 @@ const { GenericContainer } = require("testcontainers");
 Building and using your own Docker image:
 
 ```javascript
-const path = require('path');
+const path = require("path");
 const { GenericContainer } = require("testcontainers");
 
 (async () => {
   const buildContext = path.resolve(__dirname, "my-dir");
   
-  const container = await GenericContainer.fromDockerfile(buildContext);
+  const container = await GenericContainer.fromDockerfile(buildContext).build();
   
   const startedContainer = await container
-      .withEnv("KEY", "VALUE")
-      .withExposedPorts(8080)
-      .start();
+    .withExposedPorts(8080)
+    .start();
 
   await startedContainer.stop();
 })();
 ```
 
-Running commands inside running container
-
+Passing arguments to your own Docker image:
 ```javascript
-const { GenericContainer, Wait } = require("testcontainers");
+const path = require("path");
+const { GenericContainer } = require("testcontainers");
 
 (async () => {
-  const container = await new GenericContainer("mysql")
-      .withEnv("MYSQL_ALLOW_EMPTY_PASSWORD", "true")
-      .withWaitStrategy(Wait.forLogMessage("ready for connections"))
-      .start();
+  const buildContext = path.resolve(__dirname, "my-dir");
+  
+  const container = await GenericContainer
+      .fromDockerfile(buildContext)
+      .withBuildArg("SOME_ARG", "some value")
+      .build();
+  
+  const startedContainer = await container
+    .withExposedPorts(8080)
+    .start();
 
-  const { output, exitCode } = await container.exec(["mysql", "--execute", "show databases"]);
-
-  console.log(exitCode, output);
-
-  await container.stop();
+  await startedContainer.stop();
 })();
 ```
+
+Execute commands inside a running container:
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await new GenericContainer("alpine")
+  .start();
+
+const { output, exitCode } = await container.exec(["echo", "hello", "world"]);
+```
+
+Creating a container with a `tmpfs` mount:
+
+ ```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await new GenericContainer("postgres")
+  .withExposedPorts(5432)
+  .withTmpFs({ "/temp_pgdata": "rw,noexec,nosuid,size=65536k" })
+  .start();
+ ```
+
+Testcontainers will wait 10 seconds for a container to stop, to override:
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+const { Duration, TemporalUnit } = require("node-duration");
+
+const container = await new GenericContainer("postgres")
+  .withExposedPorts(5432)
+  .start();
+
+await container.stop({ 
+  timeout: new Duration(10, TemporalUnit.SECONDS) 
+})
+ ```
+
+Testcontainers will remove associated volumes created
+by the container when stopped, to override:
+
+ ```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await new GenericContainer("postgres")
+  .withExposedPorts(5432)
+  .start();
+
+await container.stop({ 
+  removeVolumes: false
+})
+ ```
+
+Execute commands inside a running container:
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await new GenericContainer("alpine")
+  .start();
+
+const { output, exitCode } = await container.exec(["echo", "hello", "world"]);
+```
+
+Creating a container with a `tmpfs` mount:
+
+ ```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await new GenericContainer("postgres")
+  .withExposedPorts(5432)
+  .withTmpFs({ "/temp_pgdata": "rw,noexec,nosuid,size=65536k" })
+  .start();
+ ```
+
+Testcontainers will wait 10 seconds for a container to stop, to override:
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+const { Duration, TemporalUnit } = require("node-duration");
+
+const container = await new GenericContainer("postgres")
+  .withExposedPorts(5432)
+  .start();
+
+await container.stop({ 
+  timeout: new Duration(10, TemporalUnit.SECONDS) 
+})
+ ```
+
+Testcontainers will remove associated volumes created
+by the container when stopped, to override:
+
+ ```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await new GenericContainer("postgres")
+  .withExposedPorts(5432)
+  .start();
+
+await container.stop({ 
+  removeVolumes: false
+})
+ ```
 
 ## Wait Strategies
 
@@ -95,9 +200,9 @@ const { GenericContainer } = require("testcontainers");
 const { Duration, TemporalUnit } = require("node-duration");
 
 const container = await new GenericContainer("redis")
-    .withExposedPorts(6379)
-    .withStartupTimeout(new Duration(100, TemporalUnit.SECONDS))
-    .start();
+  .withExposedPorts(6379)
+  .withStartupTimeout(new Duration(100, TemporalUnit.SECONDS))
+  .start();
 ```
 
 ### Log output Wait Strategy
@@ -107,9 +212,10 @@ wait for a `Ready` message in the container's logs as follows:
 
 ```javascript
 const { GenericContainer, Wait } = require("testcontainers");
+const { Duration, TemporalUnit } = require("node-duration");
 
 const container = await new GenericContainer("redis")
-    .withExposedPorts(6379)
-    .withWaitStrategy(Wait.forLogMessage("Ready to accept connections"))
-    .start();
+  .withExposedPorts(6379)
+  .withWaitStrategy(Wait.forLogMessage("Ready to accept connections"))
+  .start();
 ```
