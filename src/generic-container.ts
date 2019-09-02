@@ -31,24 +31,14 @@ import { RandomUuid, Uuid } from "./uuid";
 import { HostPortWaitStrategy, WaitStrategy } from "./wait-strategy";
 
 export class GenericContainerBuilder {
-  private factory: DockerClientFactory;
-  private uuid: Uuid;
   private buildArgs: BuildArgs;
 
-  constructor(private readonly context: BuildContext) {
-    this.factory = new DockerodeClientFactory();
-    this.uuid = new RandomUuid();
+  constructor(
+    private readonly context: BuildContext,
+    private readonly uuid: Uuid = new RandomUuid(),
+    private readonly dockerClientFactory: DockerClientFactory = new DockerodeClientFactory()
+  ) {
     this.buildArgs = {};
-  }
-
-  public withDockerClientFactory(factory: DockerClientFactory): GenericContainerBuilder {
-    this.factory = factory;
-    return this;
-  }
-
-  public withUuid(uuid: Uuid): GenericContainerBuilder {
-    this.uuid = uuid;
-    return this;
   }
 
   public withBuildArg(key: string, value: string): GenericContainerBuilder {
@@ -60,7 +50,7 @@ export class GenericContainerBuilder {
     const image = this.uuid.nextUuid();
     const tag = this.uuid.nextUuid();
     const repoTag = new RepoTag(image, tag);
-    const dockerClient = this.factory.getClient();
+    const dockerClient = this.dockerClientFactory.getClient();
     await dockerClient.buildImage(repoTag, this.context, this.buildArgs);
     const container = new GenericContainer(image, tag);
 
