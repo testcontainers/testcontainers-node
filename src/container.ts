@@ -1,7 +1,7 @@
 import byline from "byline";
 import dockerode, { ContainerInspectInfo } from "dockerode";
 import { Duration, TemporalUnit } from "node-duration";
-import { Command, ExitCode } from "./docker-client";
+import { Command, ContainerName, ExitCode } from "./docker-client";
 import { Port } from "./port";
 
 type Id = string;
@@ -9,6 +9,7 @@ type Id = string;
 export type InspectResult = {
   internalPorts: Port[];
   hostPorts: Port[];
+  name: ContainerName;
 };
 
 type ExecInspectResult = {
@@ -103,8 +104,13 @@ export class DockerodeContainer implements Container {
     const inspectResult = await this.container.inspect();
     return {
       hostPorts: this.getHostPorts(inspectResult),
-      internalPorts: this.getInternalPorts(inspectResult)
+      internalPorts: this.getInternalPorts(inspectResult),
+      name: this.getName(inspectResult)
     };
+  }
+
+  private getName(inspectInfo: ContainerInspectInfo): ContainerName {
+    return inspectInfo.Name;
   }
 
   private getInternalPorts(inspectInfo: ContainerInspectInfo): Port[] {

@@ -61,6 +61,17 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
+  it("should set name", async () => {
+    const containerName = "special-test-container";
+    const expectedContainerName = "/special-test-container";
+    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.11")
+      .withName(containerName)
+      .start();
+
+    expect(container.getName()).toEqual(expectedContainerName);
+    await container.stop();
+  });
+
   it("should set tmpfs", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.11")
       .withTmpFs({ "/testtmpfs": "rw" })
