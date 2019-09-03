@@ -3,10 +3,13 @@ import { BoundPorts } from "./bound-ports";
 import { Container } from "./container";
 import { ContainerState } from "./container-state";
 import {
+  BindMode,
+  BindMount,
   BuildArgs,
   BuildContext,
   Command,
   ContainerName,
+  Dir,
   DockerClient,
   Env,
   EnvKey,
@@ -31,31 +34,16 @@ import { RandomUuid, Uuid } from "./uuid";
 import { HostPortWaitStrategy, WaitStrategy } from "./wait-strategy";
 
 export class GenericContainerBuilder {
-  private factory: DockerClientFactory;
-  private uuid: Uuid;
-  private buildArgs: BuildArgs;
-  private imageName: string | null;
-  private imageTag: string | null;
-  private abortBuildOnExistingImage: boolean;
+  private buildArgs: BuildArgs = {};
+  private imageName: string | null = null;
+  private imageTag: string | null = null;
+  private abortBuildOnExistingImage: boolean = false;
 
-  constructor(private context: BuildContext) {
-    this.factory = new DockerodeClientFactory();
-    this.uuid = new RandomUuid();
-    this.buildArgs = {};
-    this.imageName = null;
-    this.imageTag = null;
-    this.abortBuildOnExistingImage = false;
-  }
-
-  public withDockerClientFactory(factory: DockerClientFactory): GenericContainerBuilder {
-    this.factory = factory;
-    return this;
-  }
-
-  public withUuid(uuid: Uuid): GenericContainerBuilder {
-    this.uuid = uuid;
-    return this;
-  }
+  constructor(
+    private readonly context: BuildContext,
+    private readonly uuid: Uuid = new RandomUuid(),
+    private readonly dockerClientFactory: DockerClientFactory = new DockerodeClientFactory()
+  ) {}
 
   public withBuildArg(key: string, value: string): GenericContainerBuilder {
     this.buildArgs[key] = value;
@@ -80,8 +68,9 @@ export class GenericContainerBuilder {
   public async build(): Promise<GenericContainer> {
     const image = this.imageName || this.uuid.nextUuid();
     const tag = this.imageTag || this.uuid.nextUuid();
+
     const repoTag = new RepoTag(image, tag);
-    const dockerClient = this.factory.getClient();
+    const dockerClient = this.dockerClientFactory.getClient();
     await dockerClient.buildImage(repoTag, this.context, this.buildArgs, this.abortBuildOnExistingImage);
     const container = new GenericContainer(image, tag);
 
@@ -104,6 +93,7 @@ export class GenericContainer implements TestContainer {
   private env: Env = {};
   private ports: Port[] = [];
   private cmd: Command[] = [];
+  private bindMounts: BindMount[] = [];
   private name?: ContainerName;
   private tmpFs: TmpFs = {};
   private waitStrategy?: WaitStrategy;
@@ -128,6 +118,7 @@ export class GenericContainer implements TestContainer {
       repoTag: this.repoTag,
       env: this.env,
       cmd: this.cmd,
+      bindMounts: this.bindMounts,
       tmpFs: this.tmpFs,
       boundPorts,
       name: this.name
@@ -168,6 +159,11 @@ export class GenericContainer implements TestContainer {
 
   public withExposedPorts(...ports: Port[]): TestContainer {
     this.ports = ports;
+    return this;
+  }
+
+  public withBindMount(source: Dir, target: Dir, bindMode: BindMode = "rw"): TestContainer {
+    this.bindMounts.push({ source, target, bindMode });
     return this;
   }
 

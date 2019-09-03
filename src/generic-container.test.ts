@@ -4,7 +4,7 @@ import { GenericContainer } from "./generic-container";
 import { Wait } from "./wait";
 
 describe("GenericContainer", () => {
-  jest.setTimeout(90000);
+  jest.setTimeout(45000);
 
   it("should wait for port", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.11")
@@ -64,11 +64,28 @@ describe("GenericContainer", () => {
   it("should set name", async () => {
     const containerName = "special-test-container";
     const expectedContainerName = "/special-test-container";
+
     const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.11")
       .withName(containerName)
       .start();
 
     expect(container.getName()).toEqual(expectedContainerName);
+    await container.stop();
+  });
+
+  it("should set bind mounts", async () => {
+    const filename = "test.txt";
+    const source = path.resolve(__dirname, "..", "docker", filename);
+    const target = `/tmp/${filename}`;
+
+    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.11")
+      .withBindMount(source, target)
+      .withExposedPorts(8080)
+      .start();
+
+    const { output } = await container.exec(["cat", target]);
+    expect(output).toContain("hello world");
+
     await container.stop();
   });
 
@@ -103,72 +120,34 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
-  it("should build and start from a Dockerfile", async () => {
-    const context = path.resolve(__dirname, "..", "docker");
-    const container = await GenericContainer.fromDockerfile(context).build();
-    const startedContainer = await container.withExposedPorts(8080).start();
+  describe("from Dockerfile", () => {
+    it("should build and start", async () => {
+      const context = path.resolve(__dirname, "..", "docker");
+      const container = await GenericContainer.fromDockerfile(context).build();
 
-    const url = `http://${startedContainer.getContainerIpAddress()}:${startedContainer.getMappedPort(8080)}`;
-    const response = await fetch(`${url}/hello-world`);
-    expect(response.status).toBe(200);
+      const startedContainer = await container.withExposedPorts(8080).start();
 
-    await startedContainer.stop();
-    await expect(fetch(url)).rejects.toThrowError();
-  });
+      const url = `http://${startedContainer.getContainerIpAddress()}:${startedContainer.getMappedPort(8080)}`;
+      const response = await fetch(`${url}/hello-world`);
+      expect(response.status).toBe(200);
 
-  it("should build and start from a Dockerfile with build arguments", async () => {
-    const context = path.resolve(__dirname, "..", "docker-with-buildargs");
-    const container = await GenericContainer.fromDockerfile(context)
-      .withBuildArg("VERSION", "10-alpine")
-      .build();
-    const startedContainer = await container.withExposedPorts(8080).start();
+      await startedContainer.stop();
+    });
 
-    const url = `http://${startedContainer.getContainerIpAddress()}:${startedContainer.getMappedPort(8080)}`;
-    const response = await fetch(`${url}/hello-world`);
-    expect(response.status).toBe(200);
+    it("should set build arguments", async () => {
+      const context = path.resolve(__dirname, "..", "docker-with-buildargs");
+      const container = await GenericContainer.fromDockerfile(context)
+        .withBuildArg("VERSION", "10-alpine")
+        .build();
 
-    await startedContainer.stop();
-    await expect(fetch(url)).rejects.toThrowError();
-  });
+      const startedContainer = await container.withExposedPorts(8080).start();
 
-  it("should not build and start from a Dockerfile with missing build arguments", async () => {
-    const context = path.resolve(__dirname, "..", "docker-with-buildargs");
+      const url = `http://${startedContainer.getContainerIpAddress()}:${startedContainer.getMappedPort(8080)}`;
+      const response = await fetch(`${url}/hello-world`);
+      expect(response.status).toBe(200);
 
-    await expect(GenericContainer.fromDockerfile(context).build()).rejects.toThrowError("Failed to build image");
-  });
-
-  it("should work for mysql", async () => {
-    const container = await new GenericContainer("mysql")
-      .withEnv("MYSQL_ROOT_PASSWORD", "my-root-pw")
-      .withExposedPorts(3306)
-      .start();
-
-    await container.stop();
-  });
-
-  it("should allow for exec'ing in running container", async () => {
-    const container = await new GenericContainer("mysql")
-      .withEnv("MYSQL_ALLOW_EMPTY_PASSWORD", "true")
-      .withWaitStrategy(Wait.forLogMessage("ready for connections"))
-      .start();
-
-    const { output, exitCode } = await container.exec([
-      "mysql",
-      "-B",
-      "--disable-column-names",
-      "--execute",
-      "show databases"
-    ]);
-    expect(exitCode).toBe(0);
-    expect(output).toContain("performance_schema");
-
-    await container.stop();
-  });
-
-  it("should work for couch db", async () => {
-    const container = await new GenericContainer("couchdb").withExposedPorts(5984).start();
-
-    await container.stop();
+      await startedContainer.stop();
+    });
   });
 
   it("should build and start named container from a Dockerfile", async () => {

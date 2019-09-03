@@ -17,19 +17,30 @@ export type EnvValue = string;
 export type Env = { [key in EnvKey]: EnvValue };
 type DockerodeEnvironment = string[];
 
-export type TmpFs = { [dir: string]: string };
+export type Dir = string;
+
+export type TmpFs = { [dir in Dir]: Dir };
 
 export type BuildContext = string;
-export type BuildArgs = { [key: string]: string };
+export type BuildArgs = { [key in EnvKey]: EnvValue };
 
 export type StreamOutput = string;
 export type ExecResult = { output: StreamOutput; exitCode: ExitCode };
 type DockerodeExposedPorts = { [port in PortString]: {} };
 
+export type BindMode = "rw" | "ro";
+export type BindMount = {
+  source: Dir;
+  target: Dir;
+  bindMode: BindMode;
+};
+type DockerodeBindMount = string;
+
 type CreateOptions = {
   repoTag: RepoTag;
   env: Env;
   cmd: Command[];
+  bindMounts: BindMount[];
   tmpFs: TmpFs;
   boundPorts: BoundPorts;
   name?: ContainerName;
@@ -70,6 +81,7 @@ export class DockerodeClient implements DockerClient {
       Cmd: options.cmd,
       HostConfig: {
         PortBindings: this.getPortBindings(options.boundPorts),
+        Binds: this.getBindMounts(options.bindMounts),
         Tmpfs: options.tmpFs
       }
     });
@@ -165,5 +177,9 @@ export class DockerodeClient implements DockerClient {
       dockerodePortBindings[internalPort.toString()] = [{ HostPort: hostPort.toString() }];
     }
     return dockerodePortBindings;
+  }
+
+  private getBindMounts(bindMounts: BindMount[]): DockerodeBindMount[] {
+    return bindMounts.map(({ source, target, bindMode }) => `${source}:${target}:${bindMode}`);
   }
 }
