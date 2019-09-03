@@ -118,7 +118,7 @@ export class DockerodeClient implements DockerClient {
 
     if (abortBuildOnExistingImage) {
       const image: Dockerode.Image = this.dockerode.getImage(repoTag.toString());
-      if (!!image.id) {
+      if (image.id !== undefined) {
         return Promise.resolve();
       }
     }

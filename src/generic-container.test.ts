@@ -148,16 +148,18 @@ describe("GenericContainer", () => {
 
       await startedContainer.stop();
     });
-  });
 
-  it("should build and start named container from a Dockerfile", async () => {
-    const context = path.resolve(__dirname, "..", "docker");
-    const container = await GenericContainer.fromDockerfile(context)
-      .withImageName("testimage")
-      .withImageTag("testtag")
-      .skipBuildOnExistingImage()
-      .build();
-    expect(container.image).toBe("testimage");
-    expect(container.tag).toBe("testtag");
+    it("should build and start named container from a Dockerfile", async () => {
+      const context = path.resolve(__dirname, "..", "docker");
+      const container = await GenericContainer.fromDockerfile(context)
+        .withImage()
+        .withName("testimage")
+        .withTag("testtag")
+        .skipBuildOnExistingImage()
+        .build()
+        .build();
+      expect(container.image).toBe("testimage");
+      expect(container.tag).toBe("testtag");
+    });
   });
 });

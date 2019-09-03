@@ -5,7 +5,6 @@ import { ContainerState } from "./container-state";
 import {
   BindMode,
   BindMount,
-  BuildArgs,
   BuildContext,
   Command,
   ContainerName,
@@ -18,6 +17,7 @@ import {
   TmpFs
 } from "./docker-client";
 import { DockerClientFactory, DockerodeClientFactory, Host } from "./docker-client-factory";
+import { GenericContainerBuilder } from "./generic-container-builder";
 import log from "./logger";
 import { Port } from "./port";
 import { PortBinder } from "./port-binder";
@@ -30,57 +30,7 @@ import {
   StoppedTestContainer,
   TestContainer
 } from "./test-container";
-import { RandomUuid, Uuid } from "./uuid";
 import { HostPortWaitStrategy, WaitStrategy } from "./wait-strategy";
-
-export class GenericContainerBuilder {
-  private buildArgs: BuildArgs = {};
-  private imageName: string | null = null;
-  private imageTag: string | null = null;
-  private abortBuildOnExistingImage: boolean = false;
-
-  constructor(
-    private readonly context: BuildContext,
-    private readonly uuid: Uuid = new RandomUuid(),
-    private readonly dockerClientFactory: DockerClientFactory = new DockerodeClientFactory()
-  ) {}
-
-  public withBuildArg(key: string, value: string): GenericContainerBuilder {
-    this.buildArgs[key] = value;
-    return this;
-  }
-
-  public withImageName(name: string): GenericContainerBuilder {
-    this.imageName = name;
-    return this;
-  }
-
-  public withImageTag(tag: string): GenericContainerBuilder {
-    this.imageTag = tag;
-    return this;
-  }
-
-  public skipBuildOnExistingImage(): GenericContainerBuilder {
-    this.abortBuildOnExistingImage = true;
-    return this;
-  }
-
-  public async build(): Promise<GenericContainer> {
-    const image = this.imageName || this.uuid.nextUuid();
-    const tag = this.imageTag || this.uuid.nextUuid();
-
-    const repoTag = new RepoTag(image, tag);
-    const dockerClient = this.dockerClientFactory.getClient();
-    await dockerClient.buildImage(repoTag, this.context, this.buildArgs, this.abortBuildOnExistingImage);
-    const container = new GenericContainer(image, tag);
-
-    if (!(await container.hasRepoTagLocally())) {
-      throw new Error("Failed to build image");
-    }
-
-    return Promise.resolve(container);
-  }
-}
 
 export class GenericContainer implements TestContainer {
   public static fromDockerfile(context: BuildContext): GenericContainerBuilder {

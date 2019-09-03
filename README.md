@@ -62,6 +62,32 @@ const startedContainer = await container
   .start();
 ```
 
+Building your own Docker name with custom name/tag and skip if already built:
+
+```javascript
+const path = require("path");
+const { GenericContainer } = require("testcontainers");
+
+const buildContext = path.resolve(__dirname, "dir-containing-dockerfile");
+
+const container1 = await GenericContainer.fromDockerfile(buildContext)
+    .withImage()
+      .withName("my-image")
+      .withTag("my-tag")
+      .skipBuildOnExistingImage()
+      .build()
+    .build();
+
+// this will return immediately, because it notices that the image already exists
+const container2 = await GenericContainer.fromDockerfile(buildContext)
+    .withImage()
+      .withName("my-image")
+      .withTag("my-tag")
+      .skipBuildOnExistingImage()
+      .build()
+    .build();
+```
+
 Creating a container with a specified name:
 
 ```javascript
