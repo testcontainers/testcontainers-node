@@ -55,7 +55,7 @@ export interface DockerClient {
     repoTag: RepoTag,
     context: BuildContext,
     buildArgs: BuildArgs,
-    abortBuildOnExistingImage: boolean
+    forceRebuild: boolean
   ): Promise<void>;
   fetchRepoTags(): Promise<RepoTag[]>;
   getHost(): Host;
@@ -112,11 +112,11 @@ export class DockerodeClient implements DockerClient {
     repoTag: RepoTag,
     context: BuildContext,
     buildArgs: BuildArgs,
-    abortBuildOnExistingImage: boolean
+    forceRebuild: boolean
   ): Promise<void> {
     log.info(`Building image '${repoTag.toString()}' with context '${context}'`);
 
-    if (abortBuildOnExistingImage) {
+    if (!forceRebuild) {
       const image: Dockerode.Image = this.dockerode.getImage(repoTag.toString());
       if (image.id !== undefined) {
         return Promise.resolve();

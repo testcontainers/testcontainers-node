@@ -74,7 +74,7 @@ const container1 = await GenericContainer.fromDockerfile(buildContext)
     .withImage()
       .withName("my-image")
       .withTag("my-tag")
-      .skipBuildOnExistingImage()
+      .forceRebuild()
       .build()
     .build();
 
@@ -83,7 +83,7 @@ const container2 = await GenericContainer.fromDockerfile(buildContext)
     .withImage()
       .withName("my-image")
       .withTag("my-tag")
-      .skipBuildOnExistingImage()
+      .forceRebuild()
       .build()
     .build();
 ```

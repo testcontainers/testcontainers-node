@@ -4,7 +4,7 @@ import { Uuid } from "./uuid";
 export class ImageNameBuilder {
   public name?: string;
   public tag?: string;
-  public abortBuildOnExistingImage: boolean = false;
+  public rebuild: boolean = false;
 
   constructor(private readonly uuid: Uuid, private readonly parent: GenericContainerBuilder) {}
 
@@ -18,8 +18,8 @@ export class ImageNameBuilder {
     return this;
   }
 
-  public skipBuildOnExistingImage(): ImageNameBuilder {
-    this.abortBuildOnExistingImage = true;
+  public forceRebuild(): ImageNameBuilder {
+    this.rebuild = true;
     return this;
   }
 
@@ -35,7 +35,7 @@ export class ImageNameBuilder {
     return this.tag || this.uuid.nextUuid();
   }
 
-  public getAbortBuildOnExistingImage(): boolean {
-    return this.abortBuildOnExistingImage;
+  public shouldForceRebuild(): boolean {
+    return this.rebuild;
   }
 }

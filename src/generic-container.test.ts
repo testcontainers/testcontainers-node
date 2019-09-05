@@ -155,7 +155,7 @@ describe("GenericContainer", () => {
         .withImage()
         .withName("testimage")
         .withTag("testtag")
-        .skipBuildOnExistingImage()
+        .forceRebuild()
         .build()
         .build();
       expect(container.image).toBe("testimage");

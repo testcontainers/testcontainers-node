@@ -35,7 +35,7 @@ export class GenericContainerBuilder {
       repoTag,
       this.context,
       this.buildArgs,
-      this.imageNameBuilder.getAbortBuildOnExistingImage()
+      this.imageNameBuilder.shouldForceRebuild()
     );
     const container = new GenericContainer(image, tag);
 
