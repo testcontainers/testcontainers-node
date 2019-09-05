@@ -51,12 +51,7 @@ export interface DockerClient {
   create(options: CreateOptions): Promise<Container>;
   start(container: Container): Promise<void>;
   exec(container: Container, command: Command[]): Promise<ExecResult>;
-  buildImage(
-    repoTag: RepoTag,
-    context: BuildContext,
-    buildArgs: BuildArgs,
-    forceRebuild: boolean
-  ): Promise<void>;
+  buildImage(repoTag: RepoTag, context: BuildContext, buildArgs: BuildArgs, forceRebuild: boolean): Promise<void>;
   fetchRepoTags(): Promise<RepoTag[]>;
   getHost(): Host;
 }

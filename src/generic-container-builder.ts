@@ -31,12 +31,7 @@ export class GenericContainerBuilder {
     const tag = this.imageNameBuilder.getTag();
     const repoTag = new RepoTag(image, tag);
     const dockerClient = this.dockerClientFactory.getClient();
-    await dockerClient.buildImage(
-      repoTag,
-      this.context,
-      this.buildArgs,
-      this.imageNameBuilder.shouldForceRebuild()
-    );
+    await dockerClient.buildImage(repoTag, this.context, this.buildArgs, this.imageNameBuilder.shouldForceRebuild());
     const container = new GenericContainer(image, tag);
 
     if (!(await container.hasRepoTagLocally())) {
