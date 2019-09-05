@@ -83,7 +83,6 @@ const container2 = await GenericContainer.fromDockerfile(buildContext)
     .withImage()
       .withName("my-image")
       .withTag("my-tag")
-      .forceRebuild()
       .build()
     .build();
 ```
