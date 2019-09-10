@@ -51,7 +51,6 @@ Using a specific image version:
 const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("alpine", "3.10")
-  .withName("custom-container-name")
   .start();
 ```
 
