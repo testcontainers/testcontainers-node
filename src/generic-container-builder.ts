@@ -1,12 +1,12 @@
 import { BuildArgs, BuildContext } from "./docker-client";
 import { DockerClientFactory, DockerodeClientFactory } from "./docker-client-factory";
 import { GenericContainer } from "./generic-container";
-import { ImageNameBuilder } from "./image-name-builder";
+import { ImageBuilder } from "./image-builder";
 import { RepoTag } from "./repo-tag";
 import { RandomUuid, Uuid } from "./uuid";
 
 export class GenericContainerBuilder {
-  private readonly imageNameBuilder: ImageNameBuilder;
+  private readonly imageNameBuilder: ImageBuilder;
   private buildArgs: BuildArgs = {};
 
   constructor(
@@ -14,7 +14,7 @@ export class GenericContainerBuilder {
     private readonly uuid: Uuid = new RandomUuid(),
     private readonly dockerClientFactory: DockerClientFactory = new DockerodeClientFactory()
   ) {
-    this.imageNameBuilder = new ImageNameBuilder(uuid, this);
+    this.imageNameBuilder = new ImageBuilder(uuid, this);
   }
 
   public withBuildArg(key: string, value: string): GenericContainerBuilder {
@@ -22,7 +22,7 @@ export class GenericContainerBuilder {
     return this;
   }
 
-  public withImage(): ImageNameBuilder {
+  public withImage(): ImageBuilder {
     return this.imageNameBuilder;
   }
 

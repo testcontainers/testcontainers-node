@@ -1,24 +1,24 @@
 import { GenericContainerBuilder } from "./generic-container-builder";
 import { Uuid } from "./uuid";
 
-export class ImageNameBuilder {
+export class ImageBuilder {
   public name?: string;
   public tag?: string;
   public rebuild: boolean = false;
 
   constructor(private readonly uuid: Uuid, private readonly parent: GenericContainerBuilder) {}
 
-  public withName(name: string): ImageNameBuilder {
+  public withName(name: string): ImageBuilder {
     this.name = name;
     return this;
   }
 
-  public withTag(tag: string): ImageNameBuilder {
+  public withTag(tag: string): ImageBuilder {
     this.tag = tag;
     return this;
   }
 
-  public forceRebuild(): ImageNameBuilder {
+  public forceRebuild(): ImageBuilder {
     this.rebuild = true;
     return this;
   }
