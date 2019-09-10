@@ -45,6 +45,16 @@ const { GenericContainer } = require("testcontainers");
 })();
 ```
 
+Using a specific image version:
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await new GenericContainer("alpine", "3.10")
+  .withName("custom-container-name")
+  .start();
+```
+
 Building and using your own Docker image:
 
 ```javascript
