@@ -4,7 +4,7 @@
 
 [![Build Status](https://travis-ci.org/testcontainers/testcontainers-node.svg?branch=master)](https://travis-ci.org/testcontainers/testcontainers-node)
 [![npm version](https://badge.fury.io/js/testcontainers.svg)](https://www.npmjs.com/package/testcontainers)
-[![npm version](https://img.shields.io/npm/dt/testcontainers.svg)](https://www.npmjs.com/package/testcontainers)
+[![npm version](https://img.shields.io/npm/dm/testcontainers.svg)](https://www.npmjs.com/package/testcontainers)
 
 ## Install
 
@@ -186,7 +186,6 @@ wait for a `Ready` message in the container's logs as follows:
 
 ```javascript
 const { GenericContainer, Wait } = require("testcontainers");
-const { Duration, TemporalUnit } = require("node-duration");
 
 const container = await new GenericContainer("redis")
   .withExposedPorts(6379)
