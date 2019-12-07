@@ -28,11 +28,6 @@ export type StreamOutput = string;
 export type ExecResult = { output: StreamOutput; exitCode: ExitCode };
 type DockerodeExposedPorts = { [port in PortString]: {} };
 
-export type DockerInfo = {
-  version: string;
-  availableMb: number;
-};
-
 export type BindMode = "rw" | "ro";
 export type BindMount = {
   source: Dir;
@@ -52,7 +47,6 @@ type CreateOptions = {
 };
 
 export interface DockerClient {
-  info(): Promise<DockerInfo>;
   pull(repoTag: RepoTag): Promise<void>;
   create(options: CreateOptions): Promise<Container>;
   start(container: Container): Promise<void>;
@@ -64,16 +58,6 @@ export interface DockerClient {
 
 export class DockerodeClient implements DockerClient {
   constructor(private readonly host: Host, private readonly dockerode: Dockerode) {}
-
-  public async info(): Promise<DockerInfo> {
-    const { Version: version } = await this.dockerode.version();
-    const { LayersSize: availableBytes } = await this.dockerode.df();
-
-    return {
-      version,
-      availableMb: availableBytes / 1e6
-    };
-  }
 
   public async pull(repoTag: RepoTag): Promise<void> {
     log.info(`Pulling image: ${repoTag}`);

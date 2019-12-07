@@ -17,7 +17,7 @@ import {
   ExecResult,
   TmpFs
 } from "./docker-client";
-import { DockerodeClientFactory, Host } from "./docker-client-factory";
+import { DockerClientFactory, DockerodeClientFactory, Host } from "./docker-client-factory";
 import log from "./logger";
 import { Port } from "./port";
 import { PortBinder } from "./port-binder";
@@ -36,7 +36,11 @@ import { HostPortWaitStrategy, WaitStrategy } from "./wait-strategy";
 export class GenericContainerBuilder {
   private buildArgs: BuildArgs = {};
 
-  constructor(private readonly context: BuildContext, private readonly uuid: Uuid = new RandomUuid()) {}
+  constructor(
+    private readonly context: BuildContext,
+    private readonly uuid: Uuid = new RandomUuid(),
+    private readonly dockerClientFactory: DockerClientFactory = new DockerodeClientFactory()
+  ) {}
 
   public withBuildArg(key: string, value: string): GenericContainerBuilder {
     this.buildArgs[key] = value;
@@ -48,7 +52,7 @@ export class GenericContainerBuilder {
     const tag = this.uuid.nextUuid();
 
     const repoTag = new RepoTag(image, tag);
-    const dockerClient = DockerodeClientFactory.getInstance().getClient();
+    const dockerClient = this.dockerClientFactory.getClient();
     await dockerClient.buildImage(repoTag, this.context, this.buildArgs);
     const container = new GenericContainer(image, tag);
 
@@ -77,9 +81,13 @@ export class GenericContainer implements TestContainer {
   private waitStrategy?: WaitStrategy;
   private startupTimeout: Duration = new Duration(60_000, TemporalUnit.MILLISECONDS);
 
-  constructor(readonly image: Image, readonly tag: Tag = "latest") {
+  constructor(
+    readonly image: Image,
+    readonly tag: Tag = "latest",
+    readonly dockerClientFactory: DockerClientFactory = new DockerodeClientFactory()
+  ) {
     this.repoTag = new RepoTag(image, tag);
-    this.dockerClient = DockerodeClientFactory.getInstance().getClient();
+    this.dockerClient = dockerClientFactory.getClient();
   }
 
   public async start(): Promise<StartedTestContainer> {

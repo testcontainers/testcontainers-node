@@ -13,32 +13,10 @@ export interface DockerClientFactory {
 }
 
 export class DockerodeClientFactory implements DockerClientFactory {
-  public static getInstance() {
-    if (!DockerodeClientFactory.instance) {
-      DockerodeClientFactory.instance = new DockerodeClientFactory();
-
-      DockerodeClientFactory.instance
-        .getClient()
-        .info()
-        .then(info => {
-          log.debug(`Docker version: ${info.version}`);
-
-          const availableGb = info.availableMb / 1000;
-          if (availableGb < 2) {
-            log.warn(`Docker environment should have more than 2GB free disk space`);
-          }
-        });
-    }
-
-    return DockerodeClientFactory.instance;
-  }
-
-  private static instance: DockerodeClientFactory;
-
   private readonly host: Host;
   private readonly client: DockerClient;
 
-  private constructor() {
+  constructor() {
     if (process.env.DOCKER_HOST) {
       const { host, client } = this.fromDockerHost(process.env.DOCKER_HOST);
       this.host = host;
