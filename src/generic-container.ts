@@ -210,7 +210,7 @@ class StartedGenericContainer implements StartedTestContainer {
   }
 
   public getId(): ContainerId {
-    return this.container.getId()
+    return this.container.getId();
   }
 
   public getName(): ContainerName {
