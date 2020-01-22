@@ -36,25 +36,14 @@ describe("GenericContainer", () => {
 
   it("should set network mode", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.11")
-      .withName("special-test-container")
       .withNetworkMode("host")
       .start();
 
     const dockerodeClient = new Dockerode();
-    const listedContainers = await dockerodeClient.listContainers();
 
-    let containerInfo: undefined | Dockerode.ContainerInfo;
-    for (const listedContainer of listedContainers) {
-      if (listedContainer.Names.includes("/special-test-container")) {
-        containerInfo = listedContainer;
-        break;
-      }
-    }
-    if (containerInfo) {
-      expect(containerInfo.HostConfig.NetworkMode).toBe("host");
-    } else {
-      fail("This branch should be unreachable");
-    }
+    const dockerContainer = dockerodeClient.getContainer(container.getId());
+    const containerInfo = await dockerContainer.inspect();
+    expect(containerInfo.HostConfig.NetworkMode).toBe("host");
 
     await container.stop();
   });
