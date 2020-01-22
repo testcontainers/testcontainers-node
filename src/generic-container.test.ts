@@ -1,3 +1,4 @@
+import { default as Dockerode } from "dockerode";
 import fetch from "node-fetch";
 import path from "path";
 import { GenericContainer } from "./generic-container";
@@ -31,6 +32,31 @@ describe("GenericContainer", () => {
 
     await container.stop();
     await expect(fetch(url)).rejects.toThrowError();
+  });
+
+  it("should set network mode", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.11")
+      .withName("special-test-container")
+      .withNetworkMode("host")
+      .start();
+
+    const dockerodeClient = new Dockerode();
+    const listedContainers = await dockerodeClient.listContainers();
+
+    let containerInfo: undefined | Dockerode.ContainerInfo;
+    for (const listedContainer of listedContainers) {
+      if (listedContainer.Names.includes("/special-test-container")) {
+        containerInfo = listedContainer;
+        break;
+      }
+    }
+    if (containerInfo) {
+      expect(containerInfo.HostConfig.NetworkMode).toBe("host");
+    } else {
+      fail("This branch should be unreachable");
+    }
+
+    await container.stop();
   });
 
   it("should set environment variables", async () => {

@@ -15,6 +15,7 @@ import {
   EnvKey,
   EnvValue,
   ExecResult,
+  NetworkMode,
   TmpFs
 } from "./docker-client";
 import { DockerClientFactory, DockerodeClientFactory, Host } from "./docker-client-factory";
@@ -73,6 +74,7 @@ export class GenericContainer implements TestContainer {
   private readonly dockerClient: DockerClient;
 
   private env: Env = {};
+  private networkMode?: NetworkMode;
   private ports: Port[] = [];
   private cmd: Command[] = [];
   private bindMounts: BindMount[] = [];
@@ -103,7 +105,8 @@ export class GenericContainer implements TestContainer {
       bindMounts: this.bindMounts,
       tmpFs: this.tmpFs,
       boundPorts,
-      name: this.name
+      name: this.name,
+      networkMode: this.networkMode
     });
     await this.dockerClient.start(container);
     const inspectResult = await container.inspect();
@@ -136,6 +139,11 @@ export class GenericContainer implements TestContainer {
 
   public withTmpFs(tmpFs: TmpFs) {
     this.tmpFs = tmpFs;
+    return this;
+  }
+
+  public withNetworkMode(networkMode: NetworkMode): TestContainer {
+    this.networkMode = networkMode;
     return this;
   }
 

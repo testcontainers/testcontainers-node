@@ -10,6 +10,7 @@ import { RepoTag } from "./repo-tag";
 
 export type Command = string;
 export type ContainerName = string;
+export type NetworkMode = string;
 export type ExitCode = number;
 
 export type EnvKey = string;
@@ -44,6 +45,7 @@ type CreateOptions = {
   tmpFs: TmpFs;
   boundPorts: BoundPorts;
   name?: ContainerName;
+  networkMode?: NetworkMode;
 };
 
 export interface DockerClient {
@@ -75,6 +77,7 @@ export class DockerodeClient implements DockerClient {
       ExposedPorts: this.getExposedPorts(options.boundPorts),
       Cmd: options.cmd,
       HostConfig: {
+        NetworkMode: options.networkMode,
         PortBindings: this.getPortBindings(options.boundPorts),
         Binds: this.getBindMounts(options.bindMounts),
         Tmpfs: options.tmpFs
