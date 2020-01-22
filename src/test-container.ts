@@ -1,4 +1,5 @@
 import { Duration, TemporalUnit } from "node-duration";
+import { Id as ContainerId } from "./container";
 import { BindMode, Command, ContainerName, Dir, EnvKey, EnvValue, ExecResult, TmpFs } from "./docker-client";
 import { Host } from "./docker-client-factory";
 import { Port } from "./port";
@@ -35,6 +36,7 @@ export interface StartedTestContainer {
   getContainerIpAddress(): Host;
   getMappedPort(port: Port): Port;
   getName(): ContainerName;
+  getId(): ContainerId;
   exec(command: Command[]): Promise<ExecResult>;
 }
 

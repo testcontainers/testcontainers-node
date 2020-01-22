@@ -1,3 +1,4 @@
+import { default as Dockerode } from "dockerode";
 import fetch from "node-fetch";
 import path from "path";
 import { GenericContainer } from "./generic-container";
@@ -31,6 +32,20 @@ describe("GenericContainer", () => {
 
     await container.stop();
     await expect(fetch(url)).rejects.toThrowError();
+  });
+
+  it("should set network mode", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.11")
+      .withNetworkMode("host")
+      .start();
+
+    const dockerodeClient = new Dockerode();
+
+    const dockerContainer = dockerodeClient.getContainer(container.getId());
+    const containerInfo = await dockerContainer.inspect();
+    expect(containerInfo.HostConfig.NetworkMode).toBe("host");
+
+    await container.stop();
   });
 
   it("should set environment variables", async () => {
