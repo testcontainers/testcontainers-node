@@ -3,6 +3,7 @@ import { BindMode, Command, ContainerName, Dir, EnvKey, EnvValue, ExecResult, Tm
 import { Host } from "./docker-client-factory";
 import { Port } from "./port";
 import { WaitStrategy } from "./wait-strategy";
+import { Id as ContainerId } from "./container";
 
 export interface TestContainer {
   start(): Promise<StartedTestContainer>;
@@ -35,6 +36,7 @@ export interface StartedTestContainer {
   getContainerIpAddress(): Host;
   getMappedPort(port: Port): Port;
   getName(): ContainerName;
+  getId(): ContainerId;
   exec(command: Command[]): Promise<ExecResult>;
 }
 
