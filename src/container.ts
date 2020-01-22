@@ -4,7 +4,7 @@ import { Duration, TemporalUnit } from "node-duration";
 import { Command, ContainerName, ExitCode } from "./docker-client";
 import { Port } from "./port";
 
-type Id = string;
+export type Id = string;
 
 export type InspectResult = {
   internalPorts: Port[];

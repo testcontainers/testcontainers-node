@@ -1,6 +1,6 @@
 import { Duration, TemporalUnit } from "node-duration";
 import { BoundPorts } from "./bound-ports";
-import { Container } from "./container";
+import { Container, Id as ContainerId } from "./container";
 import { ContainerState } from "./container-state";
 import {
   BindMode,
@@ -207,6 +207,10 @@ class StartedGenericContainer implements StartedTestContainer {
 
   public getMappedPort(port: Port): Port {
     return this.boundPorts.getBinding(port);
+  }
+
+  public getId(): ContainerId {
+    return this.container.getId();
   }
 
   public getName(): ContainerName {
