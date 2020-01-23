@@ -1,6 +1,16 @@
 import { Duration, TemporalUnit } from "node-duration";
 import { Id as ContainerId } from "./container";
-import { BindMode, Command, ContainerName, Dir, EnvKey, EnvValue, ExecResult, TmpFs } from "./docker-client";
+import {
+  BindMode,
+  Command,
+  ContainerName,
+  Dir,
+  EnvKey,
+  EnvValue,
+  ExecResult,
+  NetworkMode,
+  TmpFs
+} from "./docker-client";
 import { Host } from "./docker-client-factory";
 import { Port } from "./port";
 import { WaitStrategy } from "./wait-strategy";
@@ -14,6 +24,7 @@ export interface TestContainer {
   withBindMount(source: Dir, target: Dir, bindMode: BindMode): TestContainer;
   withWaitStrategy(waitStrategy: WaitStrategy): TestContainer;
   withStartupTimeout(startupTimeout: Duration): TestContainer;
+  withNetworkMode(networkMode: NetworkMode): TestContainer;
 }
 
 export interface OptionalStopOptions {
