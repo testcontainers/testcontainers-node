@@ -18,11 +18,14 @@ export class DockerodeClientFactory implements DockerClientFactory {
 
   constructor() {
     if (process.env.DOCKER_HOST) {
-      const { host, client } = this.fromDockerHost(process.env.DOCKER_HOST);
+      const {host, client} = this.fromDockerHost(process.env.DOCKER_HOST);
       this.host = host;
       this.client = client;
-    }
-    if (fs.existsSync("/.dockerenv")) {
+    } else if (process.env.CODEBUILD_BUILD_NUMBER) {
+      const { host, client } = this.fromDefaults();
+      this.host = host;
+      this.client = client;
+    } else if (fs.existsSync("/.dockerenv")) {
       const { host, client } = this.fromDockerWormhole();
       this.host = host;
       this.client = client;
