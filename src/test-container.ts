@@ -17,14 +17,14 @@ import { WaitStrategy } from "./wait-strategy";
 
 export interface TestContainer {
   start(): Promise<StartedTestContainer>;
-  withEnv(key: EnvKey, value: EnvValue): TestContainer;
-  withCmd(cmd: Command[]): TestContainer;
-  withTmpFs(tmpFs: TmpFs): TestContainer;
-  withExposedPorts(...ports: Port[]): TestContainer;
-  withBindMount(source: Dir, target: Dir, bindMode: BindMode): TestContainer;
-  withWaitStrategy(waitStrategy: WaitStrategy): TestContainer;
-  withStartupTimeout(startupTimeout: Duration): TestContainer;
-  withNetworkMode(networkMode: NetworkMode): TestContainer;
+  withEnv(key: EnvKey, value: EnvValue): this;
+  withCmd(cmd: Command[]): this;
+  withTmpFs(tmpFs: TmpFs): this;
+  withExposedPorts(...ports: Port[]): this;
+  withBindMount(source: Dir, target: Dir, bindMode: BindMode): this;
+  withWaitStrategy(waitStrategy: WaitStrategy): this;
+  withStartupTimeout(startupTimeout: Duration): this;
+  withNetworkMode(networkMode: NetworkMode): this;
 }
 
 export interface OptionalStopOptions {
