@@ -122,47 +122,47 @@ export class GenericContainer implements TestContainer {
     );
   }
 
-  public withCmd(cmd: Command[]) {
+  public withCmd(cmd: Command[]): this {
     this.cmd = cmd;
     return this;
   }
 
-  public withName(name: ContainerName) {
+  public withName(name: ContainerName): this {
     this.name = name;
     return this;
   }
 
-  public withEnv(key: EnvKey, value: EnvValue): TestContainer {
+  public withEnv(key: EnvKey, value: EnvValue): this {
     this.env[key] = value;
     return this;
   }
 
-  public withTmpFs(tmpFs: TmpFs) {
+  public withTmpFs(tmpFs: TmpFs): this {
     this.tmpFs = tmpFs;
     return this;
   }
 
-  public withNetworkMode(networkMode: NetworkMode): TestContainer {
+  public withNetworkMode(networkMode: NetworkMode): this {
     this.networkMode = networkMode;
     return this;
   }
 
-  public withExposedPorts(...ports: Port[]): TestContainer {
+  public withExposedPorts(...ports: Port[]): this {
     this.ports = ports;
     return this;
   }
 
-  public withBindMount(source: Dir, target: Dir, bindMode: BindMode = "rw"): TestContainer {
+  public withBindMount(source: Dir, target: Dir, bindMode: BindMode = "rw"): this {
     this.bindMounts.push({ source, target, bindMode });
     return this;
   }
 
-  public withStartupTimeout(startupTimeout: Duration): TestContainer {
+  public withStartupTimeout(startupTimeout: Duration): this {
     this.startupTimeout = startupTimeout;
     return this;
   }
 
-  public withWaitStrategy(waitStrategy: WaitStrategy): TestContainer {
+  public withWaitStrategy(waitStrategy: WaitStrategy): this {
     this.waitStrategy = waitStrategy;
     return this;
   }
