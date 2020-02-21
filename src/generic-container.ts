@@ -55,7 +55,7 @@ export class GenericContainerBuilder {
     const repoTag = new RepoTag(image, tag);
     const dockerClient = this.dockerClientFactory.getClient();
     await dockerClient.buildImage(repoTag, this.context, this.buildArgs);
-    const container = new GenericContainer(image, tag);
+    const container = new GenericContainer(image, tag, this.dockerClientFactory);
 
     if (!(await container.hasRepoTagLocally())) {
       throw new Error("Failed to build image");
