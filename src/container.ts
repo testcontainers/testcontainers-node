@@ -6,7 +6,7 @@ import { Port } from "./port";
 
 export type Id = string;
 
-type HealthCheckStatus = "none" | "starting" | "unhealthy" | "healthy";
+export type HealthCheckStatus = "none" | "starting" | "unhealthy" | "healthy";
 
 export type InspectResult = {
   internalPorts: Port[];

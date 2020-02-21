@@ -1,6 +1,6 @@
 import { Duration, TemporalUnit } from "node-duration";
 import { BoundPorts } from "./bound-ports";
-import { Container } from "./container";
+import { Container, HealthCheckStatus } from "./container";
 import { ContainerState } from "./container-state";
 import { DockerClient } from "./docker-client";
 import log from "./logger";
@@ -60,11 +60,11 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
   }
 
   private async waitForPort(port: Port, portCheck: PortCheck): Promise<void> {
-    const retryStrategy = new IntervalRetryStrategy(new Duration(100, TemporalUnit.MILLISECONDS));
+    const retryStrategy = new IntervalRetryStrategy<boolean, Error>(new Duration(100, TemporalUnit.MILLISECONDS));
 
     await retryStrategy.retryUntil(
       () => portCheck.isBound(port),
-      isBound => isBound === true,
+      isBound => isBound,
       () => {
         const timeout = this.startupTimeout.get(TemporalUnit.MILLISECONDS);
         throw new Error(`Port :${port} not bound after ${timeout}ms`);
@@ -104,16 +104,28 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
 
 export class HealthCheckWaitStrategy extends AbstractWaitStrategy {
   public async waitUntilReady(container: Container): Promise<void> {
-    const retryStrategy = new IntervalRetryStrategy(new Duration(100, TemporalUnit.MILLISECONDS));
+    return new Promise(async (resolve, reject) => {
+      const retryStrategy = new IntervalRetryStrategy<HealthCheckStatus, Error>(
+        new Duration(100, TemporalUnit.MILLISECONDS)
+      );
 
-    await retryStrategy.retryUntil(
-      async () => (await container.inspect()).healthCheckStatus,
-      healthCheckStatus => healthCheckStatus === "healthy",
-      () => {
-        const timeout = this.startupTimeout.get(TemporalUnit.MILLISECONDS);
-        throw new Error(`Health check not healthy after ${timeout}ms`);
-      },
-      this.startupTimeout
-    );
+      const healthCheckStatus: HealthCheckStatus | Error = await retryStrategy.retryUntil(
+        async () => (await container.inspect()).healthCheckStatus,
+        status => status !== "starting",
+        () => {
+          const timeout = this.startupTimeout.get(TemporalUnit.MILLISECONDS);
+          return new Error(`Health check status not available after ${timeout}ms`);
+        },
+        this.startupTimeout
+      );
+
+      if (healthCheckStatus instanceof Error) {
+        return reject(healthCheckStatus);
+      } else if (healthCheckStatus === "unhealthy") {
+        return reject();
+      } else {
+        return resolve();
+      }
+    });
   }
 }
