@@ -101,3 +101,19 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
     });
   }
 }
+
+export class HealthCheckWaitStrategy extends AbstractWaitStrategy {
+  public async waitUntilReady(container: Container): Promise<void> {
+    const retryStrategy = new IntervalRetryStrategy(new Duration(100, TemporalUnit.MILLISECONDS));
+
+    await retryStrategy.retryUntil(
+      async () => (await container.inspect()).healthCheckStatus,
+      healthCheckStatus => healthCheckStatus === "healthy",
+      () => {
+        const timeout = this.startupTimeout.get(TemporalUnit.MILLISECONDS);
+        throw new Error(`Health check not healthy after ${timeout}ms`);
+      },
+      this.startupTimeout
+    );
+  }
+}
