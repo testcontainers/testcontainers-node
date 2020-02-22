@@ -106,30 +106,20 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
 
 export class HealthCheckWaitStrategy extends AbstractWaitStrategy {
   public async waitUntilReady(container: Container): Promise<void> {
-    return new Promise(async (resolve, reject) => {
-      log.debug(`Waiting for health check`);
+    log.debug(`Waiting for health check`);
 
-      const retryStrategy = new IntervalRetryStrategy<HealthCheckStatus, Error>(
-        new Duration(100, TemporalUnit.MILLISECONDS)
-      );
+    const retryStrategy = new IntervalRetryStrategy<HealthCheckStatus, Error>(
+      new Duration(100, TemporalUnit.MILLISECONDS)
+    );
 
-      const healthCheckStatus: HealthCheckStatus | Error = await retryStrategy.retryUntil(
-        async () => (await container.inspect()).healthCheckStatus,
-        status => status !== "starting",
-        () => {
-          const timeout = this.startupTimeout.get(TemporalUnit.MILLISECONDS);
-          return new Error(`Health check status not available after ${timeout}ms`);
-        },
-        this.startupTimeout
-      );
-
-      if (healthCheckStatus instanceof Error) {
-        return reject(healthCheckStatus);
-      } else if (healthCheckStatus === "unhealthy") {
-        return reject();
-      } else {
-        return resolve();
-      }
-    });
+    await retryStrategy.retryUntil(
+      async () => (await container.inspect()).healthCheckStatus,
+      status => status === "healthy",
+      () => {
+        const timeout = this.startupTimeout.get(TemporalUnit.MILLISECONDS);
+        throw new Error(`Health check not healthy after ${timeout}ms`);
+      },
+      this.startupTimeout
+    );
   }
 }

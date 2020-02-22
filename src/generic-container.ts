@@ -177,10 +177,10 @@ export class GenericContainer implements TestContainer {
     containerState: ContainerState,
     boundPorts: BoundPorts
   ): Promise<void> {
-    log.debug("Waiting for container to start");
+    log.debug("Waiting for container to be ready");
     const waitStrategy = this.getWaitStrategy(container);
     await waitStrategy.withStartupTimeout(this.startupTimeout).waitUntilReady(container, containerState, boundPorts);
-    log.debug("Container started successfully");
+    log.debug("Container is ready");
   }
 
   private getWaitStrategy(container: Container): WaitStrategy {
