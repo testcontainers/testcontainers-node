@@ -15,6 +15,7 @@ import {
   EnvKey,
   EnvValue,
   ExecResult,
+  HealthCheck,
   NetworkMode,
   TmpFs
 } from "./docker-client";
@@ -80,6 +81,7 @@ export class GenericContainer implements TestContainer {
   private bindMounts: BindMount[] = [];
   private name?: ContainerName;
   private tmpFs: TmpFs = {};
+  private healthCheck?: HealthCheck;
   private waitStrategy?: WaitStrategy;
   private startupTimeout: Duration = new Duration(60_000, TemporalUnit.MILLISECONDS);
 
@@ -106,7 +108,8 @@ export class GenericContainer implements TestContainer {
       tmpFs: this.tmpFs,
       boundPorts,
       name: this.name,
-      networkMode: this.networkMode
+      networkMode: this.networkMode,
+      healthCheck: this.healthCheck
     });
     await this.dockerClient.start(container);
     const inspectResult = await container.inspect();
@@ -154,6 +157,11 @@ export class GenericContainer implements TestContainer {
 
   public withBindMount(source: Dir, target: Dir, bindMode: BindMode = "rw"): this {
     this.bindMounts.push({ source, target, bindMode });
+    return this;
+  }
+
+  public withHealthCheck(healthCheck: HealthCheck): this {
+    this.healthCheck = healthCheck;
     return this;
   }
 

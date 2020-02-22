@@ -1,4 +1,5 @@
 import { default as Dockerode } from "dockerode";
+import { Duration, TemporalUnit } from "node-duration";
 import fetch from "node-fetch";
 import path from "path";
 import { GenericContainer } from "./generic-container";
@@ -8,7 +9,7 @@ describe("GenericContainer", () => {
   jest.setTimeout(45000);
 
   it("should wait for port", async () => {
-    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.11")
+    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
       .withExposedPorts(8080)
       .start();
 
@@ -21,7 +22,7 @@ describe("GenericContainer", () => {
   });
 
   it("should wait for log", async () => {
-    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.11")
+    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
       .withExposedPorts(8080)
       .withWaitStrategy(Wait.forLogMessage("Listening on port 8080"))
       .start();
@@ -50,8 +51,29 @@ describe("GenericContainer", () => {
     await expect(fetch(url)).rejects.toThrowError();
   });
 
+  it("should wait for custom health check", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
+      .withExposedPorts(8080)
+      .withHealthCheck({
+        test: "curl -f http://localhost:8080/hello-world || exit 1",
+        interval: new Duration(1, TemporalUnit.SECONDS),
+        timeout: new Duration(3, TemporalUnit.SECONDS),
+        retries: 5,
+        startPeriod: new Duration(1, TemporalUnit.SECONDS)
+      })
+      .withWaitStrategy(Wait.forHealthCheck())
+      .start();
+
+    const url = `http://${container.getContainerIpAddress()}:${container.getMappedPort(8080)}`;
+    const response = await fetch(`${url}/hello-world`);
+    expect(response.status).toBe(200);
+
+    await container.stop();
+    await expect(fetch(url)).rejects.toThrowError();
+  });
+
   it("should set network mode", async () => {
-    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.11")
+    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
       .withNetworkMode("host")
       .start();
 
@@ -65,7 +87,7 @@ describe("GenericContainer", () => {
   });
 
   it("should set environment variables", async () => {
-    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.11")
+    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
       .withEnv("customKey", "customValue")
       .withExposedPorts(8080)
       .start();
@@ -79,7 +101,7 @@ describe("GenericContainer", () => {
   });
 
   it("should set command", async () => {
-    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.11")
+    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
       .withCmd(["node", "index.js", "one", "two", "three"])
       .withExposedPorts(8080)
       .start();
@@ -96,7 +118,7 @@ describe("GenericContainer", () => {
     const containerName = "special-test-container";
     const expectedContainerName = "/special-test-container";
 
-    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.11")
+    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
       .withName(containerName)
       .start();
 
@@ -109,7 +131,7 @@ describe("GenericContainer", () => {
     const source = path.resolve(__dirname, "..", "docker", filename);
     const target = `/tmp/${filename}`;
 
-    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.11")
+    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
       .withBindMount(source, target)
       .withExposedPorts(8080)
       .start();
@@ -121,7 +143,7 @@ describe("GenericContainer", () => {
   });
 
   it("should set tmpfs", async () => {
-    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.11")
+    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
       .withTmpFs({ "/testtmpfs": "rw" })
       .withExposedPorts(8080)
       .start();
@@ -139,7 +161,7 @@ describe("GenericContainer", () => {
   });
 
   it("should execute a command on a running container", async () => {
-    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.11")
+    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
       .withExposedPorts(8080)
       .start();
 

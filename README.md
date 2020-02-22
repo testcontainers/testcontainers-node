@@ -153,6 +153,24 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+Creating a container with a health check command. Note that `interval`, `timeout`, `retries` and `startPeriod` are optional; the values will be inherited from the image or parent image if omitted. Also note that the wait strategy should be set to `Wait.forHealthCheck()` for this option to take effect:
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+const { Duration, TemporalUnit } = require("node-duration");
+
+const container = await new GenericContainer("alpine")
+  .withHealthCheck({
+    test: "curl -f http://localhost || exit 1",
+    interval: new Duration(1, TemporalUnit.SECONDS),
+    timeout: new Duration(3, TemporalUnit.SECONDS),
+    retries: 5,
+    startPeriod: new Duration(1, TemporalUnit.SECONDS)
+  })
+  .withWaitStrategy(Wait.forHealthCheck())
+  .start();
+```
+
 Creating a container that connects to a specific network:
 
 ```javascript
