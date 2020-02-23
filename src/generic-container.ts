@@ -55,7 +55,7 @@ export class GenericContainerBuilder {
     const repoTag = new RepoTag(image, tag);
     const dockerClient = this.dockerClientFactory.getClient();
     await dockerClient.buildImage(repoTag, this.context, this.buildArgs);
-    const container = new GenericContainer(image, tag);
+    const container = new GenericContainer(image, tag, this.dockerClientFactory);
 
     if (!(await container.hasRepoTagLocally())) {
       throw new Error("Failed to build image");
@@ -177,10 +177,10 @@ export class GenericContainer implements TestContainer {
     containerState: ContainerState,
     boundPorts: BoundPorts
   ): Promise<void> {
-    log.debug("Starting container health checks");
+    log.debug("Waiting for container to be ready");
     const waitStrategy = this.getWaitStrategy(container);
     await waitStrategy.withStartupTimeout(this.startupTimeout).waitUntilReady(container, containerState, boundPorts);
-    log.debug("Container health checks complete");
+    log.debug("Container is ready");
   }
 
   private getWaitStrategy(container: Container): WaitStrategy {

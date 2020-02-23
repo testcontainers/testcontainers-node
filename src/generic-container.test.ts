@@ -34,6 +34,22 @@ describe("GenericContainer", () => {
     await expect(fetch(url)).rejects.toThrowError();
   });
 
+  it("should wait for health check", async () => {
+    const context = path.resolve(__dirname, "..", "docker-with-health-check");
+    const customGenericContainer = await GenericContainer.fromDockerfile(context).build();
+    const container = await customGenericContainer
+      .withExposedPorts(8080)
+      .withWaitStrategy(Wait.forHealthCheck())
+      .start();
+
+    const url = `http://${container.getContainerIpAddress()}:${container.getMappedPort(8080)}`;
+    const response = await fetch(`${url}/hello-world`);
+    expect(response.status).toBe(200);
+
+    await container.stop();
+    await expect(fetch(url)).rejects.toThrowError();
+  });
+
   it("should set network mode", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.11")
       .withNetworkMode("host")

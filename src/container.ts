@@ -6,10 +6,13 @@ import { Port } from "./port";
 
 export type Id = string;
 
+export type HealthCheckStatus = "none" | "starting" | "unhealthy" | "healthy";
+
 export type InspectResult = {
   internalPorts: Port[];
   hostPorts: Port[];
   name: ContainerName;
+  healthCheckStatus: HealthCheckStatus;
 };
 
 type ExecInspectResult = {
@@ -105,7 +108,8 @@ export class DockerodeContainer implements Container {
     return {
       hostPorts: this.getHostPorts(inspectResult),
       internalPorts: this.getInternalPorts(inspectResult),
-      name: this.getName(inspectResult)
+      name: this.getName(inspectResult),
+      healthCheckStatus: this.getHealthCheckStatus(inspectResult)
     };
   }
 
@@ -121,6 +125,16 @@ export class DockerodeContainer implements Container {
     return Object.values(inspectInfo.NetworkSettings.Ports)
       .filter(portsArray => portsArray !== null)
       .map(portsArray => Number(portsArray[0].HostPort));
+  }
+
+  private getHealthCheckStatus(inspectResult: ContainerInspectInfo): HealthCheckStatus {
+    // @ts-ignore
+    const health = inspectResult.State.Health;
+    if (health === undefined) {
+      return "none";
+    } else {
+      return health.Status;
+    }
   }
 }
 
