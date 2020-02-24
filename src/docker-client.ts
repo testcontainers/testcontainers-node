@@ -1,4 +1,5 @@
 import Dockerode, { PortMap as DockerodePortBindings } from "dockerode";
+import { Duration, TemporalUnit } from "node-duration";
 import streamToArray from "stream-to-array";
 import tar from "tar-fs";
 import { BoundPorts } from "./bound-ports";
@@ -21,6 +22,21 @@ type DockerodeEnvironment = string[];
 export type Dir = string;
 
 export type TmpFs = { [dir in Dir]: Dir };
+
+export type HealthCheck = {
+  test: string;
+  interval?: Duration;
+  timeout?: Duration;
+  retries?: number;
+  startPeriod?: Duration;
+};
+type DockerodeHealthCheck = {
+  Test: string[];
+  Interval: number;
+  Timeout: number;
+  Retries: number;
+  StartPeriod: number;
+};
 
 export type BuildContext = string;
 export type BuildArgs = { [key in EnvKey]: EnvValue };
@@ -46,6 +62,7 @@ type CreateOptions = {
   boundPorts: BoundPorts;
   name?: ContainerName;
   networkMode?: NetworkMode;
+  healthCheck?: HealthCheck;
 };
 
 export interface DockerClient {
@@ -76,6 +93,8 @@ export class DockerodeClient implements DockerClient {
       Env: this.getEnv(options.env),
       ExposedPorts: this.getExposedPorts(options.boundPorts),
       Cmd: options.cmd,
+      // @ts-ignore
+      Healthcheck: this.getHealthCheck(options.healthCheck),
       HostConfig: {
         NetworkMode: options.networkMode,
         PortBindings: this.getPortBindings(options.boundPorts),
@@ -147,6 +166,23 @@ export class DockerodeClient implements DockerClient {
       },
       [] as DockerodeEnvironment
     );
+  }
+
+  private getHealthCheck(healthCheck?: HealthCheck): DockerodeHealthCheck | undefined {
+    if (healthCheck === undefined) {
+      return undefined;
+    }
+    return {
+      Test: ["CMD-SHELL", healthCheck.test],
+      Interval: healthCheck.interval ? this.toNanos(healthCheck.interval) : 0,
+      Timeout: healthCheck.timeout ? this.toNanos(healthCheck.timeout) : 0,
+      Retries: healthCheck.retries || 0,
+      StartPeriod: healthCheck.startPeriod ? this.toNanos(healthCheck.startPeriod) : 0
+    };
+  }
+
+  private toNanos(duration: Duration): number {
+    return duration.get(TemporalUnit.MILLISECONDS) * 1e6;
   }
 
   private getExposedPorts(boundPorts: BoundPorts): DockerodeExposedPorts {
