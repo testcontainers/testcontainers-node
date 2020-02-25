@@ -43,7 +43,7 @@
     "@types/byline": "^4.2.31",
     "@types/debug": "0.0.31",
     "@types/default-gateway": "^3.0.0",
-    "@types/dockerode": "^2.5.23",
+    "@types/dockerode": "^2.5.24",
     "@types/jest": "^23.3.14",
     "@types/node-fetch": "^2.3.4",
     "@types/stream-to-array": "^2.3.0",

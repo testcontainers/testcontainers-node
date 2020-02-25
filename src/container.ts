@@ -128,12 +128,11 @@ export class DockerodeContainer implements Container {
   }
 
   private getHealthCheckStatus(inspectResult: ContainerInspectInfo): HealthCheckStatus {
-    // @ts-ignore
     const health = inspectResult.State.Health;
     if (health === undefined) {
       return "none";
     } else {
-      return health.Status;
+      return health.Status as HealthCheckStatus;
     }
   }
 }
