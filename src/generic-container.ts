@@ -83,7 +83,7 @@ export class GenericContainer implements TestContainer {
   private tmpFs: TmpFs = {};
   private healthCheck?: HealthCheck;
   private waitStrategy?: WaitStrategy;
-  private startupTimeout: Duration = new Duration(60_000, TemporalUnit.MILLISECONDS);
+  private startupTimeout: Duration = new Duration(120_000, TemporalUnit.MILLISECONDS);
 
   constructor(
     readonly image: Image,
