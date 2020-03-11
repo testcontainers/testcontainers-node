@@ -1,4 +1,4 @@
-import Dockerode, { PortMap as DockerodePortBindings } from "dockerode";
+import Dockerode, { HostConfig, PortMap as DockerodePortBindings } from "dockerode";
 import { Duration, TemporalUnit } from "node-duration";
 import streamToArray from "stream-to-array";
 import tar from "tar-fs";
@@ -53,6 +53,15 @@ export type BindMount = {
 };
 type DockerodeBindMount = string;
 
+export type LogConfig = {
+  logDriver: string;
+  logOpts?: object;
+};
+type DockerodeLogConfig = {
+  Type: string;
+  Config: any;
+};
+
 type CreateOptions = {
   repoTag: RepoTag;
   env: Env;
@@ -63,6 +72,7 @@ type CreateOptions = {
   name?: ContainerName;
   networkMode?: NetworkMode;
   healthCheck?: HealthCheck;
+  useDefaultLogDriver: boolean;
 };
 
 export interface DockerClient {
@@ -99,7 +109,8 @@ export class DockerodeClient implements DockerClient {
         NetworkMode: options.networkMode,
         PortBindings: this.getPortBindings(options.boundPorts),
         Binds: this.getBindMounts(options.bindMounts),
-        Tmpfs: options.tmpFs
+        Tmpfs: options.tmpFs,
+        LogConfig: this.getLogConfig(options.useDefaultLogDriver)
       }
     });
 
@@ -203,5 +214,16 @@ export class DockerodeClient implements DockerClient {
 
   private getBindMounts(bindMounts: BindMount[]): DockerodeBindMount[] {
     return bindMounts.map(({ source, target, bindMode }) => `${source}:${target}:${bindMode}`);
+  }
+
+  private getLogConfig(useDefaultLogDriver: boolean): DockerodeLogConfig | undefined {
+    if (!useDefaultLogDriver) {
+      return undefined;
+    }
+
+    return {
+      Type: "json-file",
+      Config: {}
+    };
   }
 }

@@ -1,3 +1,4 @@
+import { HostConfig } from "dockerode";
 import { Duration, TemporalUnit } from "node-duration";
 import { BoundPorts } from "./bound-ports";
 import { Container, Id as ContainerId } from "./container";
@@ -16,6 +17,7 @@ import {
   EnvValue,
   ExecResult,
   HealthCheck,
+  LogConfig,
   NetworkMode,
   TmpFs
 } from "./docker-client";
@@ -84,6 +86,7 @@ export class GenericContainer implements TestContainer {
   private healthCheck?: HealthCheck;
   private waitStrategy?: WaitStrategy;
   private startupTimeout: Duration = new Duration(60_000, TemporalUnit.MILLISECONDS);
+  private useDefaultLogDriver: boolean = false;
 
   constructor(
     readonly image: Image,
@@ -109,7 +112,8 @@ export class GenericContainer implements TestContainer {
       boundPorts,
       name: this.name,
       networkMode: this.networkMode,
-      healthCheck: this.healthCheck
+      healthCheck: this.healthCheck,
+      useDefaultLogDriver: this.useDefaultLogDriver
     });
     await this.dockerClient.start(container);
     const inspectResult = await container.inspect();
@@ -172,6 +176,11 @@ export class GenericContainer implements TestContainer {
 
   public withWaitStrategy(waitStrategy: WaitStrategy): this {
     this.waitStrategy = waitStrategy;
+    return this;
+  }
+
+  public withDefaultLogDriver(): this {
+    this.useDefaultLogDriver = true;
     return this;
   }
 
