@@ -25,6 +25,7 @@ export interface TestContainer {
   withWaitStrategy(waitStrategy: WaitStrategy): this;
   withStartupTimeout(startupTimeout: Duration): this;
   withNetworkMode(networkMode: NetworkMode): this;
+  withDefaultLogDriver(): this;
 }
 
 export interface OptionalStopOptions {

@@ -181,6 +181,20 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+You can override the logging driver used by docker to be the default one (json-file).
+This might be necessary when the driver of your docker host does not support reading logs
+and you want to use the `Wait.forLogMessage` wait strategy.
+
+This is the same as [--log-driver json-file on docker run](https://docs.docker.com/config/containers/logging/configure/#configure-the-logging-driver-for-a-container).
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await new GenericContainer("redis")
+  .withDefaultLogDriver()
+  .start();
+```
+
 Testcontainers will wait 10 seconds for a container to stop, to override:
 
 ```javascript

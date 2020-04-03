@@ -160,6 +160,23 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
+  it("should set default log driver", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
+      .withDefaultLogDriver()
+      .start();
+
+    const dockerodeClient = new Dockerode();
+
+    const dockerContainer = dockerodeClient.getContainer(container.getId());
+    const containerInfo = await dockerContainer.inspect();
+    expect(containerInfo.HostConfig.LogConfig).toEqual({
+      Type: "json-file",
+      Config: {}
+    });
+
+    await container.stop();
+  });
+
   it("should execute a command on a running container", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
       .withExposedPorts(8080)
