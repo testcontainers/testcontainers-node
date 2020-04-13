@@ -14,6 +14,7 @@ import {
 import { Host } from "./docker-client-factory";
 import { Port } from "./port";
 import { WaitStrategy } from "./wait-strategy";
+import { AuthConfig } from "dockerode";
 
 export interface TestContainer {
   start(): Promise<StartedTestContainer>;
@@ -26,6 +27,7 @@ export interface TestContainer {
   withStartupTimeout(startupTimeout: Duration): this;
   withNetworkMode(networkMode: NetworkMode): this;
   withDefaultLogDriver(): this;
+  withAuthentication(authConfig: AuthConfig): this;
 }
 
 export interface OptionalStopOptions {

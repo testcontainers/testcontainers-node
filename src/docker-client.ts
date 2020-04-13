@@ -1,4 +1,4 @@
-import Dockerode, { HostConfig, PortMap as DockerodePortBindings } from "dockerode";
+import Dockerode, { AuthConfig, PortMap as DockerodePortBindings } from "dockerode";
 import { Duration, TemporalUnit } from "node-duration";
 import streamToArray from "stream-to-array";
 import tar from "tar-fs";
@@ -76,7 +76,7 @@ type CreateOptions = {
 };
 
 export interface DockerClient {
-  pull(repoTag: RepoTag): Promise<void>;
+  pull(repoTag: RepoTag, authConfig: AuthConfig): Promise<void>;
   create(options: CreateOptions): Promise<Container>;
   start(container: Container): Promise<void>;
   exec(container: Container, command: Command[]): Promise<ExecResult>;
@@ -88,9 +88,11 @@ export interface DockerClient {
 export class DockerodeClient implements DockerClient {
   constructor(private readonly host: Host, private readonly dockerode: Dockerode) {}
 
-  public async pull(repoTag: RepoTag): Promise<void> {
+  public async pull(repoTag: RepoTag, authConfig: AuthConfig): Promise<void> {
     log.info(`Pulling image: ${repoTag}`);
-    const stream = await this.dockerode.pull(repoTag.toString(), {});
+    const stream = await this.dockerode.pull(repoTag.toString(), {
+      authconfig: authConfig
+    });
     await streamToArray(stream);
   }
 
