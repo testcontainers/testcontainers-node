@@ -1,6 +1,7 @@
 import { Duration, TemporalUnit } from "node-duration";
 import { Id as ContainerId } from "./container";
 import {
+  AuthConfig,
   BindMode,
   Command,
   ContainerName,
@@ -14,7 +15,6 @@ import {
 import { Host } from "./docker-client-factory";
 import { Port } from "./port";
 import { WaitStrategy } from "./wait-strategy";
-import { AuthConfig } from "dockerode";
 
 export interface TestContainer {
   start(): Promise<StartedTestContainer>;

@@ -59,7 +59,7 @@ export type AuthConfig = {
   password: string;
   serveraddress: string;
   email?: string;
-}
+};
 
 export type LogConfig = {
   logDriver: string;
