@@ -1,9 +1,9 @@
-import { AuthConfig } from "dockerode";
 import { Duration, TemporalUnit } from "node-duration";
 import { BoundPorts } from "./bound-ports";
 import { Container, Id as ContainerId } from "./container";
 import { ContainerState } from "./container-state";
 import {
+  AuthConfig,
   BindMode,
   BindMount,
   BuildArgs,
@@ -86,7 +86,7 @@ export class GenericContainer implements TestContainer {
   private waitStrategy?: WaitStrategy;
   private startupTimeout: Duration = new Duration(60_000, TemporalUnit.MILLISECONDS);
   private useDefaultLogDriver: boolean = false;
-  private authConfig = {} as AuthConfig;
+  private authConfig?: AuthConfig;
 
   constructor(
     readonly image: Image,
