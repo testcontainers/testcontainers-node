@@ -1,9 +1,9 @@
-import { HostConfig } from "dockerode";
 import { Duration, TemporalUnit } from "node-duration";
 import { BoundPorts } from "./bound-ports";
 import { Container, Id as ContainerId } from "./container";
 import { ContainerState } from "./container-state";
 import {
+  AuthConfig,
   BindMode,
   BindMount,
   BuildArgs,
@@ -17,7 +17,6 @@ import {
   EnvValue,
   ExecResult,
   HealthCheck,
-  LogConfig,
   NetworkMode,
   TmpFs
 } from "./docker-client";
@@ -87,6 +86,7 @@ export class GenericContainer implements TestContainer {
   private waitStrategy?: WaitStrategy;
   private startupTimeout: Duration = new Duration(60_000, TemporalUnit.MILLISECONDS);
   private useDefaultLogDriver: boolean = false;
+  private authConfig?: AuthConfig;
 
   constructor(
     readonly image: Image,
@@ -99,7 +99,7 @@ export class GenericContainer implements TestContainer {
 
   public async start(): Promise<StartedTestContainer> {
     if (!(await this.hasRepoTagLocally())) {
-      await this.dockerClient.pull(this.repoTag);
+      await this.dockerClient.pull(this.repoTag, this.authConfig);
     }
 
     const boundPorts = await new PortBinder().bind(this.ports);
@@ -127,6 +127,11 @@ export class GenericContainer implements TestContainer {
       inspectResult.name,
       this.dockerClient
     );
+  }
+
+  public withAuthentication(authConfig: AuthConfig): this {
+    this.authConfig = authConfig;
+    return this;
   }
 
   public withCmd(cmd: Command[]): this {

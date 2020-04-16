@@ -1,6 +1,7 @@
 import { Duration, TemporalUnit } from "node-duration";
 import { Id as ContainerId } from "./container";
 import {
+  AuthConfig,
   BindMode,
   Command,
   ContainerName,
@@ -26,6 +27,7 @@ export interface TestContainer {
   withStartupTimeout(startupTimeout: Duration): this;
   withNetworkMode(networkMode: NetworkMode): this;
   withDefaultLogDriver(): this;
+  withAuthentication(authConfig: AuthConfig): this;
 }
 
 export interface OptionalStopOptions {

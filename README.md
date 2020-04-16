@@ -181,6 +181,21 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+Pulling an image from the private registry:
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await new GenericContainer("private-image")
+  .withAuthentication({
+    username: 'username',
+    password: 'password',
+    email: 'your@email.email',
+    serveraddress: 'https://index.docker.io/v1'
+  })
+  .start();
+```
+
 You can override the logging driver used by docker to be the default one (json-file).
 This might be necessary when the driver of your docker host does not support reading logs
 and you want to use the `Wait.forLogMessage` wait strategy.
