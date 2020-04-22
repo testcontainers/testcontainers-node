@@ -13,8 +13,9 @@ export class BoundPorts {
     return binding;
   }
 
-  public setBinding(key: Port, value: Port): void {
+  public setBinding(key: Port, value: Port): BoundPorts {
     this.ports.set(key, value);
+    return this;
   }
 
   public iterator(): Iterable<[Port, Port]> {
