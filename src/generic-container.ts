@@ -25,6 +25,7 @@ import log from "./logger";
 import { Port } from "./port";
 import { PortBinder } from "./port-binder";
 import { HostPortCheck, InternalPortCheck } from "./port-check";
+import { RandomPortClient } from "./port-client";
 import { Image, RepoTag, Tag } from "./repo-tag";
 import {
   DEFAULT_STOP_OPTIONS,
@@ -78,6 +79,7 @@ export class GenericContainer implements TestContainer {
   private env: Env = {};
   private networkMode?: NetworkMode;
   private ports: Port[] = [];
+  private mappedPorts: Array<Promise<Port>> = [];
   private cmd: Command[] = [];
   private bindMounts: BindMount[] = [];
   private name?: ContainerName;
@@ -102,7 +104,11 @@ export class GenericContainer implements TestContainer {
       await this.dockerClient.pull(this.repoTag, this.authConfig);
     }
 
-    const boundPorts = await new PortBinder().bind(this.ports);
+    const mappedPorts = await Promise.all(this.mappedPorts);
+    const boundPorts = this.ports.reduce(
+      (ports, port, idx) => ports.setBinding(port, mappedPorts[idx]),
+      new BoundPorts()
+    );
     const container = await this.dockerClient.create({
       repoTag: this.repoTag,
       env: this.env,
@@ -159,8 +165,14 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
+  public withExposedPort(port: Port, mappedPort?: Port): this {
+    this.ports.push(port);
+    this.mappedPorts.push(mappedPort ? Promise.resolve(mappedPort) : new RandomPortClient().getPort());
+    return this;
+  }
+
   public withExposedPorts(...ports: Port[]): this {
-    this.ports = ports;
+    ports.forEach(port => this.withExposedPort(port));
     return this;
   }
 

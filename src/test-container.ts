@@ -21,6 +21,7 @@ export interface TestContainer {
   withEnv(key: EnvKey, value: EnvValue): this;
   withCmd(cmd: Command[]): this;
   withTmpFs(tmpFs: TmpFs): this;
+  withExposedPort(port: Port, mappedPort?: Port): this;
   withExposedPorts(...ports: Port[]): this;
   withBindMount(source: Dir, target: Dir, bindMode: BindMode): this;
   withWaitStrategy(waitStrategy: WaitStrategy): this;
