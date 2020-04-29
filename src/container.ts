@@ -142,7 +142,8 @@ class DockerodeExec implements Exec {
 
   public start(): Promise<NodeJS.ReadableStream> {
     return new Promise((resolve, reject) => {
-      this.exec.start((err: Error, stream: NodeJS.ReadableStream) => {
+      const options = { Detach: false, Tty: true, stream: true, stdin: true, stdout: true, stderr: true };
+      this.exec.start(options, (err: Error, stream: NodeJS.ReadableStream) => {
         if (err) {
           return reject(err);
         }

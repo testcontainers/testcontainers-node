@@ -202,7 +202,7 @@ export class GenericContainer implements TestContainer {
     log.debug("Waiting for container to be ready");
     const waitStrategy = this.getWaitStrategy(container);
     await waitStrategy.withStartupTimeout(this.startupTimeout).waitUntilReady(container, containerState, boundPorts);
-    log.debug("Container is ready");
+    log.info("Container is ready");
   }
 
   private getWaitStrategy(container: Container): WaitStrategy {
