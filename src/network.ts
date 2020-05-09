@@ -6,7 +6,7 @@ class StartedNetwork {
   constructor(
     private readonly id: string,
     private readonly options: CreateNetworkOptions,
-    private readonly dockerClientFactory?: DockerodeClientFactory
+    private readonly dockerClientFactory: DockerodeClientFactory
   ) {}
 
   public getId(): string {
@@ -18,7 +18,7 @@ class StartedNetwork {
   }
 
   public async close(): Promise<void> {
-    return this.dockerClientFactory?.getClient().removeNetwork(this.id);
+    return this.dockerClientFactory.getClient().removeNetwork(this.id);
   }
 }
 
