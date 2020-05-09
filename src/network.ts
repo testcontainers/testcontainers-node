@@ -40,4 +40,8 @@ export class Network {
     const id = await dockerClientFactory.getClient().createNetwork(options);
     return new StartedNetwork(id, options, dockerClientFactory);
   }
+
+  constructor() {
+    throw new Error(`use static newNetwork() method to instantiate network`);
+  }
 }

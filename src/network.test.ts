@@ -43,4 +43,8 @@ describe("Network", () => {
     await container2.stop();
     await network.close();
   });
+
+  it("instantiating Network should throw", () => {
+    expect(() => new Network()).toThrowError("use static newNetwork() method to instantiate network");
+  });
 });
