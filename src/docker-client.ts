@@ -1,4 +1,4 @@
-import Dockerode, { PortMap as DockerodePortBindings } from "dockerode";
+import Dockerode, { Network, PortMap as DockerodePortBindings } from "dockerode";
 import { Duration, TemporalUnit } from "node-duration";
 import streamToArray from "stream-to-array";
 import tar from "tar-fs";
@@ -83,9 +83,23 @@ type CreateOptions = {
   useDefaultLogDriver: boolean;
 };
 
+export type CreateNetworkOptions = {
+  name: string;
+  driver?: "bridge" | "overlay" | string; // third option is for user-installed custom network drivers
+  checkDuplicate?: boolean;
+  internal?: boolean;
+  attachable?: boolean;
+  ingress?: boolean;
+  enableIPv6?: boolean;
+  labels?: { [key: string]: string };
+  options?: { [key: string]: string };
+};
+
 export interface DockerClient {
   pull(repoTag: RepoTag, authConfig?: AuthConfig): Promise<void>;
   create(options: CreateOptions): Promise<Container>;
+  createNetwork(options: CreateNetworkOptions): Promise<string>;
+  removeNetwork(id: string): Promise<void>;
   start(container: Container): Promise<void>;
   exec(container: Container, command: Command[]): Promise<ExecResult>;
   buildImage(repoTag: RepoTag, context: BuildContext, buildArgs: BuildArgs): Promise<void>;
@@ -125,6 +139,21 @@ export class DockerodeClient implements DockerClient {
     });
 
     return new DockerodeContainer(dockerodeContainer);
+  }
+
+  public async createNetwork(options: CreateNetworkOptions): Promise<string> {
+    log.info(`Creating network ${options.name}`);
+    const network: Network = await this.dockerode.createNetwork(options);
+    return network.id;
+  }
+
+  public async removeNetwork(id: string): Promise<void> {
+    log.info(`Removing network ${id}`);
+    const network = this.dockerode.getNetwork(id);
+    const { message } = await network.remove();
+    if (message) {
+      log.warn(message);
+    }
   }
 
   public start(container: Container): Promise<void> {
