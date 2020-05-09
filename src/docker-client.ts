@@ -85,12 +85,12 @@ type CreateOptions = {
 
 export type CreateNetworkOptions = {
   name: string;
-  driver?: "bridge" | "overlay" | string; // third option is for user-installed custom network drivers
-  checkDuplicate?: boolean;
-  internal?: boolean;
-  attachable?: boolean;
-  ingress?: boolean;
-  enableIPv6?: boolean;
+  driver: "bridge" | "overlay" | string; // third option is for user-installed custom network drivers
+  checkDuplicate: boolean;
+  internal: boolean;
+  attachable: boolean;
+  ingress: boolean;
+  enableIPv6: boolean;
   labels?: { [key: string]: string };
   options?: { [key: string]: string };
 };
