@@ -30,6 +30,7 @@
     "format": "prettier --write package.json docker/index.js docker-with-buildargs/index.js src/**/*.ts"
   },
   "dependencies": {
+    "@types/dockerode": "^2.5.24",
     "byline": "^5.0.0",
     "debug": "^4.1.1",
     "default-gateway": "^5.0.2",
@@ -43,7 +44,6 @@
     "@types/byline": "^4.2.31",
     "@types/debug": "0.0.31",
     "@types/default-gateway": "^3.0.0",
-    "@types/dockerode": "^2.5.24",
     "@types/jest": "^23.3.14",
     "@types/node-fetch": "^2.3.4",
     "@types/stream-to-array": "^2.3.0",
