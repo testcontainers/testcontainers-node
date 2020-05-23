@@ -52,6 +52,7 @@ export interface StartedTestContainer {
   getName(): ContainerName;
   getId(): ContainerId;
   exec(command: Command[]): Promise<ExecResult>;
+  logs(): Promise<NodeJS.ReadableStream>;
 }
 
 export interface StoppedTestContainer {}

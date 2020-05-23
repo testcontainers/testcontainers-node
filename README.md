@@ -121,6 +121,21 @@ const container = await new GenericContainer("alpine")
 const { output, exitCode } = await container.exec(["echo", "hello", "world"]);
 ```
 
+Stream logs from a running container:
+```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await new GenericContainer("alpine")
+  .start();
+
+const stream = await container.logs();
+stream
+    .on("data", line => console.log(line))
+    .on("err", line => console.error(line))
+    .on("end", () => console.log("Stream closed"));
+
+```
+
 Creating a container with bind mounts:
 
 ```javascript

@@ -96,6 +96,7 @@ export class DockerodeContainer implements Container {
           if (!stream) {
             reject(new Error("Log stream is undefined"));
           } else {
+            stream.setEncoding("utf-8");
             resolve(byline(stream));
           }
         }

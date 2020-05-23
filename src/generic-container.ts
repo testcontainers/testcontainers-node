@@ -250,6 +250,10 @@ class StartedGenericContainer implements StartedTestContainer {
   public exec(command: Command[]): Promise<ExecResult> {
     return this.dockerClient.exec(this.container, command);
   }
+
+  public logs(): Promise<NodeJS.ReadableStream> {
+    return this.container.logs();
+  }
 }
 
 class StoppedGenericContainer implements StoppedTestContainer {}

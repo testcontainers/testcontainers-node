@@ -88,12 +88,12 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
       const stream = await container.logs();
       stream
         .on("data", line => {
-          if (line.toString().includes(this.message)) {
+          if (line.includes(this.message)) {
             resolve();
           }
         })
         .on("err", line => {
-          if (line.toString().includes(this.message)) {
+          if (line.includes(this.message)) {
             resolve();
           }
         })
