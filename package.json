@@ -24,7 +24,7 @@
   "scripts": {
     "prepublish": "npm run build",
     "build": "npm run clean && tsc",
-    "clean": "rm -rf dist",
+    "clean": "rimraf dist",
     "test": "jest",
     "lint": "tslint --fix src/**/*.ts",
     "format": "prettier --write package.json docker/index.js docker-with-buildargs/index.js src/**/*.ts"
@@ -52,6 +52,7 @@
     "jest": "^24.8.0",
     "node-fetch": "^2.6.0",
     "prettier": "^1.17.1",
+    "rimraf": "^3.0.2",
     "ts-jest": "^24.0.2",
     "ts-node": "^7.0.1",
     "tslint": "^5.17.0",
