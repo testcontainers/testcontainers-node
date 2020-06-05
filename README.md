@@ -181,8 +181,7 @@ const { GenericContainer } = require("testcontainers");
 Create user-defined bridge network and attach container to it:
 
 ```javascript
-const { GenericContainer } = require("testcontainers");
-import { Network } from "./network";
+const { GenericContainer, Network } = require("testcontainers");
 
 const network = await Network.newNetwork();
 const container = await new GenericContainer("alpine").withNetworkMode(network.getName()).start();
