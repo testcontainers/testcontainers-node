@@ -31,7 +31,7 @@ export class Network {
       name: new RandomUuid().nextUuid(),
       driver: "bridge",
       checkDuplicate: true,
-      internal: true,
+      internal: false,
       attachable: false,
       ingress: false,
       enableIPv6: false,
