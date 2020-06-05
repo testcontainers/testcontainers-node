@@ -176,6 +176,7 @@ Creating a container that connects to a specific network:
 ```javascript
 const { GenericContainer } = require("testcontainers");
 
+const container = await new GenericContainer("alpine").withNetworkMode("network_name").start();
 ```
 
 Create user-defined bridge network and attach container to it:
