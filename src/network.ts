@@ -1,8 +1,34 @@
 import { CreateNetworkOptions } from "./docker-client";
 import { DockerodeClientFactory } from "./docker-client-factory";
-import { RandomUuid } from "./uuid";
+import { RandomUuid, Uuid } from "./uuid";
 
-class StartedNetwork {
+export class Network {
+  private readonly createNetworkOptions: CreateNetworkOptions;
+
+  constructor(
+    createNetworkOptions: Partial<CreateNetworkOptions> = {},
+    private readonly uuid: Uuid = new RandomUuid(),
+    private readonly dockerClientFactory: DockerodeClientFactory = new DockerodeClientFactory()
+  ) {
+    this.createNetworkOptions = {
+      name: this.uuid.nextUuid(),
+      driver: "bridge",
+      checkDuplicate: true,
+      internal: false,
+      attachable: false,
+      ingress: false,
+      enableIPv6: false,
+      ...createNetworkOptions
+    };
+  }
+
+  public async start(): Promise<StartedNetwork> {
+    const id = await this.dockerClientFactory.getClient().createNetwork(this.createNetworkOptions);
+    return new StartedNetwork(id, this.createNetworkOptions, this.dockerClientFactory);
+  }
+}
+
+export class StartedNetwork {
   constructor(
     private readonly id: string,
     private readonly options: CreateNetworkOptions,
@@ -10,7 +36,7 @@ class StartedNetwork {
   ) {}
 
   public getId(): string {
-    return this.id!;
+    return this.id;
   }
 
   public getName(): string {
@@ -19,29 +45,5 @@ class StartedNetwork {
 
   public async close(): Promise<void> {
     return this.dockerClientFactory.getClient().removeNetwork(this.id);
-  }
-}
-
-export class Network {
-  public static async newNetwork(
-    partialOptions: Partial<CreateNetworkOptions> = {},
-    dockerClientFactory: DockerodeClientFactory = new DockerodeClientFactory()
-  ): Promise<StartedNetwork> {
-    const options: CreateNetworkOptions = {
-      name: new RandomUuid().nextUuid(),
-      driver: "bridge",
-      checkDuplicate: true,
-      internal: false,
-      attachable: false,
-      ingress: false,
-      enableIPv6: false,
-      ...partialOptions
-    };
-    const id = await dockerClientFactory.getClient().createNetwork(options);
-    return new StartedNetwork(id, options, dockerClientFactory);
-  }
-
-  constructor() {
-    throw new Error(`use static newNetwork() method to instantiate network`);
   }
 }

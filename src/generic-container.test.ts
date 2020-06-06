@@ -1,4 +1,4 @@
-import { default as Dockerode } from "dockerode";
+import Dockerode from "dockerode";
 import { Duration, TemporalUnit } from "node-duration";
 import fetch from "node-fetch";
 import path from "path";

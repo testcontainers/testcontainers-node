@@ -201,10 +201,15 @@ Create user-defined bridge network and attach container to it:
 ```javascript
 const { GenericContainer, Network } = require("testcontainers");
 
-const network = await Network.newNetwork();
+const network = await new Network()
+    .start();
+
 const container = await new GenericContainer("alpine")
   .withNetworkMode(network.getName())
   .start();
+
+await container.stop();
+await network.close();
 ```
 
 Pulling an image from the private registry:

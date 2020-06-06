@@ -6,7 +6,7 @@ jest.setTimeout(45000);
 
 describe("Network", () => {
   it("should start container in a user-defined network", async () => {
-    const network = await Network.newNetwork();
+    const network = await new Network().start();
 
     const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
       .withNetworkMode(network.getName())
@@ -23,7 +23,7 @@ describe("Network", () => {
   });
 
   it("two containers in user-defined network should be able to ping each other by name", async () => {
-    const network = await Network.newNetwork();
+    const network = await new Network().start();
 
     const container1 = await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
       .withName("container1")
@@ -42,9 +42,5 @@ describe("Network", () => {
     await container1.stop();
     await container2.stop();
     await network.close();
-  });
-
-  it("instantiating Network should throw", () => {
-    expect(() => new Network()).toThrowError("use static newNetwork() method to instantiate network");
   });
 });
