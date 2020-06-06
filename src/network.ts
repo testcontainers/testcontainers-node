@@ -43,7 +43,7 @@ export class StartedNetwork {
     return this.options.name;
   }
 
-  public async close(): Promise<void> {
+  public async stop(): Promise<void> {
     return this.dockerClientFactory.getClient().removeNetwork(this.id);
   }
 }

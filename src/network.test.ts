@@ -19,7 +19,7 @@ describe("Network", () => {
     expect(containerInfo.HostConfig.NetworkMode).toBe(network.getName());
 
     await container.stop();
-    await network.close();
+    await network.stop();
   });
 
   it("two containers in user-defined network should be able to ping each other by name", async () => {
@@ -41,6 +41,6 @@ describe("Network", () => {
 
     await container1.stop();
     await container2.stop();
-    await network.close();
+    await network.stop();
   });
 });

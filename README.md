@@ -209,7 +209,7 @@ const container = await new GenericContainer("alpine")
   .start();
 
 await container.stop();
-await network.close();
+await network.stop();
 ```
 
 Pulling an image from the private registry:
