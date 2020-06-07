@@ -65,6 +65,7 @@ export type LogConfig = {
   logDriver: string;
   logOpts?: object;
 };
+
 type DockerodeLogConfig = {
   Type: string;
   Config: any;
@@ -81,6 +82,7 @@ type CreateOptions = {
   networkMode?: NetworkMode;
   healthCheck?: HealthCheck;
   useDefaultLogDriver: boolean;
+  privilegedMode: boolean;
 };
 
 export type CreateNetworkOptions = {
@@ -134,7 +136,8 @@ export class DockerodeClient implements DockerClient {
         PortBindings: this.getPortBindings(options.boundPorts),
         Binds: this.getBindMounts(options.bindMounts),
         Tmpfs: options.tmpFs,
-        LogConfig: this.getLogConfig(options.useDefaultLogDriver)
+        LogConfig: this.getLogConfig(options.useDefaultLogDriver),
+        Privileged: options.privilegedMode
       }
     });
 

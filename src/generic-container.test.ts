@@ -185,6 +185,22 @@ describe("GenericContainer", () => {
     });
   });
 
+  it("should set privileged mode", async () => {
+    const container = managedContainer(
+      await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
+        .withPrivilegedMode()
+        .withExposedPorts(8080)
+        .start()
+    );
+    const dockerContainer = dockerodeClient.getContainer(container.getId());
+    const containerInfo = await dockerContainer.inspect();
+    expect(containerInfo.HostConfig.Privileged).toBe(true);
+
+    const url = `http://${container.getContainerIpAddress()}:${container.getMappedPort(8080)}`;
+    const response = await fetch(`${url}/hello-world`);
+    expect(response.status).toBe(200);
+  });
+
   it("should execute a command on a running container", async () => {
     const container = managedContainer(
       await new GenericContainer("cristianrgreco/testcontainer", "1.1.12").withExposedPorts(8080).start()
