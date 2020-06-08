@@ -86,6 +86,7 @@ export class GenericContainer implements TestContainer {
   private waitStrategy?: WaitStrategy;
   private startupTimeout: Duration = new Duration(60_000, TemporalUnit.MILLISECONDS);
   private useDefaultLogDriver: boolean = false;
+  private privilegedMode: boolean = false;
   private authConfig?: AuthConfig;
 
   constructor(
@@ -113,7 +114,8 @@ export class GenericContainer implements TestContainer {
       name: this.name,
       networkMode: this.networkMode,
       healthCheck: this.healthCheck,
-      useDefaultLogDriver: this.useDefaultLogDriver
+      useDefaultLogDriver: this.useDefaultLogDriver,
+      privilegedMode: this.privilegedMode
     });
     await this.dockerClient.start(container);
     const inspectResult = await container.inspect();
@@ -186,6 +188,11 @@ export class GenericContainer implements TestContainer {
 
   public withDefaultLogDriver(): this {
     this.useDefaultLogDriver = true;
+    return this;
+  }
+
+  public withPrivilegedMode(): this {
+    this.privilegedMode = true;
     return this;
   }
 

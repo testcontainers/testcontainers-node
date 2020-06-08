@@ -27,6 +27,7 @@ export interface TestContainer {
   withStartupTimeout(startupTimeout: Duration): this;
   withNetworkMode(networkMode: NetworkMode): this;
   withDefaultLogDriver(): this;
+  withPrivilegedMode(): this;
   withAuthentication(authConfig: AuthConfig): this;
 }
 

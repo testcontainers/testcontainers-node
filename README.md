@@ -241,6 +241,16 @@ const container = await new GenericContainer("redis")
   .start();
 ```
 
+Creating a container with privileged mode:
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await new GenericContainer("alpine")
+  .withPrivilegedMode()
+  .start();
+```
+
 Testcontainers will wait 10 seconds for a container to stop, to override:
 
 ```javascript
