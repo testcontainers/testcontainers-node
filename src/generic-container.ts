@@ -98,12 +98,20 @@ export class GenericContainer implements TestContainer {
     this.dockerClient = dockerClientFactory.getClient();
   }
 
+
+  // An interceptor method for any routine which needs to be performed
+  // after everything is prepared and a step before container is created
+  protected isCreating?(boundPorts: BoundPorts): void;
+
   public async start(): Promise<StartedTestContainer> {
     if (!(await this.hasRepoTagLocally())) {
       await this.dockerClient.pull(this.repoTag, this.authConfig);
     }
 
     const boundPorts = await new PortBinder().bind(this.ports);
+    if (this.isCreating) {
+      this.isCreating(boundPorts);
+    }
     const container = await this.dockerClient.create({
       repoTag: this.repoTag,
       env: this.env,
