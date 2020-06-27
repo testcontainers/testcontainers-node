@@ -98,20 +98,17 @@ export class GenericContainer implements TestContainer {
     this.dockerClient = dockerClientFactory.getClient();
   }
 
-
-  // An interceptor method for any routine which needs to be performed
-  // after everything is prepared and a step before container is created
-  protected isCreating?(boundPorts: BoundPorts): void;
-
   public async start(): Promise<StartedTestContainer> {
     if (!(await this.hasRepoTagLocally())) {
       await this.dockerClient.pull(this.repoTag, this.authConfig);
     }
 
     const boundPorts = await new PortBinder().bind(this.ports);
+
     if (this.isCreating) {
       this.isCreating(boundPorts);
     }
+
     const container = await this.dockerClient.create({
       repoTag: this.repoTag,
       env: this.env,
@@ -125,9 +122,16 @@ export class GenericContainer implements TestContainer {
       useDefaultLogDriver: this.useDefaultLogDriver,
       privilegedMode: this.privilegedMode
     });
+
     await this.dockerClient.start(container);
+
+    (await container.logs())
+      .on("data", data => log.trace(`${container.getId()}: ${data}`))
+      .on("err", data => log.error(`${container.getId()}: ${data}`));
+
     const inspectResult = await container.inspect();
     const containerState = new ContainerState(inspectResult);
+
     await this.waitForContainer(container, containerState, boundPorts);
 
     return new StartedGenericContainer(
@@ -208,6 +212,8 @@ export class GenericContainer implements TestContainer {
     const repoTags = await this.dockerClient.fetchRepoTags();
     return repoTags.some(repoTag => repoTag.equals(this.repoTag));
   }
+
+  protected isCreating?(boundPorts: BoundPorts): void;
 
   private async waitForContainer(
     container: Container,

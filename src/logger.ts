@@ -3,6 +3,7 @@ import debug, { IDebugger } from "debug";
 type Message = string;
 
 export interface Logger {
+  trace(message: Message): void;
   debug(message: Message): void;
   info(message: Message): void;
   warn(message: Message): void;
@@ -14,6 +15,10 @@ class DebugLogger implements Logger {
 
   constructor() {
     this.logger = debug("testcontainers");
+  }
+
+  public trace(message: Message): void {
+    this.logger(`TRACE: ${message}`);
   }
 
   public debug(message: Message): void {
