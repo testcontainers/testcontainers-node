@@ -1,5 +1,8 @@
 import Dockerode, { Network, PortMap as DockerodePortBindings } from "dockerode";
+import fs from "fs";
+import glob from "glob";
 import { Duration, TemporalUnit } from "node-duration";
+import path from "path";
 import streamToArray from "stream-to-array";
 import tar from "tar-fs";
 import { BoundPorts } from "./bound-ports";
@@ -181,7 +184,28 @@ export class DockerodeClient implements DockerClient {
   public async buildImage(repoTag: RepoTag, context: BuildContext, buildArgs: BuildArgs): Promise<void> {
     log.info(`Building image '${repoTag.toString()}' with context '${context}'`);
 
-    const tarStream = tar.pack(context);
+    const dockerIgnorePath = path.join(context, ".dockerignore");
+
+    const dockerIgnoreMatches = new Set();
+
+    if (fs.existsSync(dockerIgnorePath)) {
+      const dockerIgnore: string = await new Promise(resolve =>
+        fs.readFile(dockerIgnorePath, { encoding: "utf-8" }, (err, data) => resolve(data))
+      );
+      const dockerIgnorePatterns = dockerIgnore.split("\n");
+      const globMatches: string[][] = await Promise.all(
+        dockerIgnorePatterns.map(
+          dockerIgnorePattern =>
+            new Promise(resolve => glob(path.resolve(context, dockerIgnorePattern), (err, matches) => resolve(matches)))
+        )
+      );
+      const flattenedGlobMatches = globMatches.reduce((set, matches) => {
+        matches.forEach(match => set.add(match));
+        return set;
+      }, dockerIgnoreMatches);
+    }
+
+    const tarStream = tar.pack(context, { ignore: name => dockerIgnoreMatches.has(name) });
     const stream = await this.dockerode.buildImage(tarStream, {
       buildargs: buildArgs,
       t: repoTag.toString()

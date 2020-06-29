@@ -36,6 +36,7 @@
     "default-gateway": "^5.0.2",
     "dockerode": "^2.5.8",
     "get-port": "^4.2.0",
+    "glob": "^7.1.6",
     "node-duration": "^1.0.4",
     "stream-to-array": "^2.3.0",
     "tar-fs": "^2.0.0"
@@ -44,6 +45,7 @@
     "@types/byline": "^4.2.31",
     "@types/debug": "0.0.31",
     "@types/default-gateway": "^3.0.0",
+    "@types/glob": "^7.1.2",
     "@types/jest": "^23.3.14",
     "@types/node-fetch": "^2.3.4",
     "@types/stream-to-array": "^2.3.0",

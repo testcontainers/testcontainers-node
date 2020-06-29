@@ -225,6 +225,23 @@ describe("GenericContainer", () => {
     expect(log).toContain("Listening on port 8080");
   });
 
+  it("should honour .dockerignore file", async () => {
+    const context = path.resolve(__dirname, "..", "docker-with-dockerignore");
+    const container = await GenericContainer.fromDockerfile(context).build();
+    const startedContainer = managedContainer(await container.withExposedPorts(8080).start());
+
+    const { output } = await startedContainer.exec(["find"]);
+
+    expect(output).toContain("exist1.txt");
+    expect(output).toContain("exist2.txt");
+    expect(output).not.toContain("example1.txt");
+    expect(output).not.toContain("example2.txt");
+    expect(output).not.toContain("example3.txt");
+    expect(output).not.toContain("example4.txt");
+    expect(output).not.toContain("example5.txt");
+    expect(output).not.toContain("example6.txt");
+  });
+
   describe("from Dockerfile", () => {
     it("should build and start", async () => {
       const context = path.resolve(__dirname, "..", "docker");
