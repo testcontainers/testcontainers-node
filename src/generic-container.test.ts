@@ -49,7 +49,7 @@ describe("GenericContainer", () => {
   });
 
   it("should wait for health check", async () => {
-    const context = path.resolve(__dirname, "..", "docker-with-health-check");
+    const context = path.resolve(__dirname, "..", "fixtures", "docker-with-health-check");
     const customGenericContainer = await GenericContainer.fromDockerfile(context).build();
     const container = managedContainer(
       await customGenericContainer
@@ -139,7 +139,7 @@ describe("GenericContainer", () => {
 
   it("should set bind mounts", async () => {
     const filename = "test.txt";
-    const source = path.resolve(__dirname, "..", "docker", filename);
+    const source = path.resolve(__dirname, "..", "fixtures", "docker", filename);
     const target = `/tmp/${filename}`;
 
     const container = managedContainer(
@@ -226,7 +226,7 @@ describe("GenericContainer", () => {
   });
 
   it("should honour .dockerignore file", async () => {
-    const context = path.resolve(__dirname, "..", "docker-with-dockerignore");
+    const context = path.resolve(__dirname, "..", "fixtures", "docker-with-dockerignore");
     const container = await GenericContainer.fromDockerfile(context).build();
     const startedContainer = managedContainer(await container.withExposedPorts(8080).start());
 
@@ -244,7 +244,7 @@ describe("GenericContainer", () => {
 
   describe("from Dockerfile", () => {
     it("should build and start", async () => {
-      const context = path.resolve(__dirname, "..", "docker");
+      const context = path.resolve(__dirname, "..", "fixtures", "docker");
       const container = await GenericContainer.fromDockerfile(context).build();
       const startedContainer = managedContainer(await container.withExposedPorts(8080).start());
 
@@ -255,7 +255,7 @@ describe("GenericContainer", () => {
     });
 
     it("should set build arguments", async () => {
-      const context = path.resolve(__dirname, "..", "docker-with-buildargs");
+      const context = path.resolve(__dirname, "..", "fixtures", "docker-with-buildargs");
       const container = await GenericContainer.fromDockerfile(context)
         .withBuildArg("VERSION", "10-alpine")
         .build();

@@ -27,7 +27,7 @@
     "clean": "rimraf dist",
     "test": "jest",
     "lint": "tslint --fix src/**/*.ts",
-    "format": "prettier --write package.json docker/index.js docker-with-buildargs/index.js src/**/*.ts"
+    "format": "prettier --write package.json src/**/*.ts"
   },
   "dependencies": {
     "@types/dockerode": "^2.5.24",
