@@ -5,6 +5,7 @@ import tar from "tar-fs";
 import { BoundPorts } from "./bound-ports";
 import { Container, DockerodeContainer } from "./container";
 import { Host } from "./docker-client-factory";
+import { findDockerIgnoreFiles } from "./docker-ignore";
 import log from "./logger";
 import { PortString } from "./port";
 import { RepoTag } from "./repo-tag";
@@ -180,8 +181,8 @@ export class DockerodeClient implements DockerClient {
 
   public async buildImage(repoTag: RepoTag, context: BuildContext, buildArgs: BuildArgs): Promise<void> {
     log.info(`Building image '${repoTag.toString()}' with context '${context}'`);
-
-    const tarStream = tar.pack(context);
+    const dockerIgnoreFiles = await findDockerIgnoreFiles(context);
+    const tarStream = tar.pack(context, { ignore: name => dockerIgnoreFiles.has(name) });
     const stream = await this.dockerode.buildImage(tarStream, {
       buildargs: buildArgs,
       t: repoTag.toString()
