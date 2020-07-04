@@ -14,6 +14,7 @@ import {
 } from "./docker-client";
 import { Host } from "./docker-client-factory";
 import { Port } from "./port";
+import { PullPolicy } from "./pull-policy";
 import { WaitStrategy } from "./wait-strategy";
 
 export interface TestContainer {
@@ -28,6 +29,7 @@ export interface TestContainer {
   withNetworkMode(networkMode: NetworkMode): this;
   withDefaultLogDriver(): this;
   withPrivilegedMode(): this;
+  withPullPolicy(pullPolicy: PullPolicy): this;
   withAuthentication(authConfig: AuthConfig): this;
 }
 
