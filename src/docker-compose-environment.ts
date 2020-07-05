@@ -8,7 +8,6 @@ import { DockerClient } from "./docker-client";
 import { DockerodeClientFactory } from "./docker-client-factory";
 import { StartedGenericContainer } from "./generic-container";
 import log from "./logger";
-import { Port } from "./port";
 import { HostPortCheck, InternalPortCheck } from "./port-check";
 import { HostPortWaitStrategy, WaitStrategy } from "./wait-strategy";
 
@@ -133,11 +132,7 @@ export class StartedDockerComposeEnvironment {
     }
   }
 
-  public getContainerIpAddress(containerName: string) {
-    return this.startedGenericContainers[containerName].getContainerIpAddress();
-  }
-
-  public getMappedPort(containerName: string, port: Port): Port {
-    return this.startedGenericContainers[containerName].getMappedPort(port);
+  public getContainer(containerName: string): StartedGenericContainer {
+    return this.startedGenericContainers[containerName];
   }
 }
