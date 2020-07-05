@@ -30,7 +30,7 @@ export class DockerComposeEnvironment {
         container => container.Labels["com.docker.compose.version"] !== undefined
       );
 
-      const startedGenericContainers = await Promise.all(
+      const startedGenericContainers = (await Promise.all(
         dockerComposeContainers.map(async container => {
           const dockerodeContainer = await this.dockerClient.getContainer(container.Id);
           const inspectResult = await dockerodeContainer.inspect();
@@ -48,6 +48,9 @@ export class DockerComposeEnvironment {
             this.dockerClient
           );
         })
+      )).reduce(
+        (map, startedGenericContainer) => ({ ...map, [startedGenericContainer.getName()]: startedGenericContainer }),
+        {}
       );
 
       return new StartedDockerComposeEnvironment(startedGenericContainers);
@@ -75,17 +78,13 @@ export class DockerComposeEnvironment {
 }
 
 export class StartedDockerComposeEnvironment {
-  constructor(private readonly startedGenericContainers: StartedGenericContainer[]) {}
+  constructor(private readonly startedGenericContainers: { [containerName: string]: StartedGenericContainer }) {}
 
   public getContainerIpAddress(containerName: string) {
-    // @ts-ignore
-    return this.startedGenericContainers
-      .find(container => container.getName() === containerName)
-      .getContainerIpAddress();
+    return this.startedGenericContainers[containerName].getContainerIpAddress();
   }
 
   public getMappedPort(containerName: string, port: Port): Port {
-    // @ts-ignore
-    return this.startedGenericContainers.find(container => container.getName() === containerName).getMappedPort(port);
+    return this.startedGenericContainers[containerName].getMappedPort(port);
   }
 }
