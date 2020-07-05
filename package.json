@@ -34,6 +34,7 @@
     "byline": "^5.0.0",
     "debug": "^4.1.1",
     "default-gateway": "^5.0.2",
+    "docker-compose": "^0.23.4",
     "dockerode": "^2.5.8",
     "get-port": "^4.2.0",
     "glob": "^7.1.6",
