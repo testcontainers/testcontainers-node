@@ -214,11 +214,11 @@ await network.stop();
 
 Specifying a pull policy. 
 
-Note that if omitted will use the `DefaultPullPolicy` which will
-not re-pull the requested image if it has already been pulled, this is usually the preferred
-option. In cases where there is a local image for a given tag but the remote image with the 
-same tag may have changed (for example when using the `latest` tag), you can tell 
-testcontainers to pull the image again by specifying an `AlwaysPullPolicy`: 
+Note that if omitted will use the `DefaultPullPolicy` which will use a locally cached 
+image if one already exists, this is usually the preferred option. In cases where 
+there is a local image for a given tag but the remote image with the same tag may 
+have changed (for example when using the `latest` tag), you can tell testcontainers 
+to pull the image again by specifying an `AlwaysPullPolicy`: 
 
 ```javascript
 const { GenericContainer, AlwaysPullPolicy } = require("testcontainers");
