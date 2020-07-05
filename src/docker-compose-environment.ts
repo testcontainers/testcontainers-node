@@ -20,10 +20,21 @@ const createDockerComposeOptions = (filePath: string, fileName: string): dockerC
 export class DockerComposeEnvironment {
   private readonly dockerClient: DockerClient;
 
+  private waitStrategy: { [containerName: string]: WaitStrategy } = {};
   private startupTimeout: Duration = new Duration(60_000, TemporalUnit.MILLISECONDS);
 
   constructor(private readonly composeFilePath: string, private readonly composeFile: string) {
     this.dockerClient = new DockerodeClientFactory().getClient();
+  }
+
+  public withWaitStrategy(containerName: string, waitStrategy: WaitStrategy): this {
+    this.waitStrategy[containerName] = waitStrategy;
+    return this;
+  }
+
+  public withStartupTimeout(startupTimeout: Duration): this {
+    this.startupTimeout = startupTimeout;
+    return this;
   }
 
   public async up(): Promise<StartedDockerComposeEnvironment> {
@@ -46,7 +57,7 @@ export class DockerComposeEnvironment {
 
         const containerState = new ContainerState(inspectResult);
 
-        await this.waitForContainer(container, containerState, boundPorts);
+        await this.waitForContainer(container, containerName, containerState, boundPorts);
         return new StartedGenericContainer(
           await this.dockerClient.getContainer(startedContainer.Id),
           this.dockerClient.getHost(),
@@ -99,19 +110,24 @@ export class DockerComposeEnvironment {
 
   private async waitForContainer(
     container: Container,
+    containerName: string,
     containerState: ContainerState,
     boundPorts: BoundPorts
   ): Promise<void> {
     log.debug("Waiting for container to be ready");
-    const waitStrategy = this.getWaitStrategy(container);
+    const waitStrategy = this.getWaitStrategy(container, containerName);
     await waitStrategy.withStartupTimeout(this.startupTimeout).waitUntilReady(container, containerState, boundPorts);
     log.info("Container is ready");
   }
 
-  private getWaitStrategy(container: Container): WaitStrategy {
-    const hostPortCheck = new HostPortCheck(this.dockerClient.getHost());
-    const internalPortCheck = new InternalPortCheck(container, this.dockerClient);
-    return new HostPortWaitStrategy(this.dockerClient, hostPortCheck, internalPortCheck);
+  private getWaitStrategy(container: Container, containerName: string): WaitStrategy {
+    if (this.waitStrategy[containerName]) {
+      return this.waitStrategy[containerName];
+    } else {
+      const hostPortCheck = new HostPortCheck(this.dockerClient.getHost());
+      const internalPortCheck = new InternalPortCheck(container, this.dockerClient);
+      return new HostPortWaitStrategy(this.dockerClient, hostPortCheck, internalPortCheck);
+    }
   }
 }
 
@@ -122,10 +138,11 @@ export class StartedDockerComposeEnvironment {
     private readonly startedGenericContainers: { [containerName: string]: StartedGenericContainer }
   ) {}
 
-  public async down(): Promise<void> {
+  public async down(): Promise<StoppedDockerComposeEnvironment> {
     log.info(`Stopping docker-compose environment`);
     try {
       await dockerCompose.down(createDockerComposeOptions(this.composeFilePath, this.composeFile));
+      return new StoppedDockerComposeEnvironment();
     } catch ({ err }) {
       log.error(`Failed to stop docker-compose environment: ${err}`);
       throw new Error(err.trim());
@@ -136,3 +153,5 @@ export class StartedDockerComposeEnvironment {
     return this.startedGenericContainers[containerName];
   }
 }
+
+export class StoppedDockerComposeEnvironment {}
