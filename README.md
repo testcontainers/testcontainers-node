@@ -171,7 +171,7 @@ const container = await new GenericContainer("alpine")
 Creating a container with a custom health check command. Note that `interval`, `timeout`, `retries` and `startPeriod` are optional; the values will be inherited from the image or parent image if omitted. Also note that the wait strategy should be set to `Wait.forHealthCheck()` for this option to take effect:
 
 ```javascript
-const { GenericContainer } = require("testcontainers");
+const { GenericContainer, Wait } = require("testcontainers");
 const { Duration, TemporalUnit } = require("node-duration");
 
 const container = await new GenericContainer("alpine")
@@ -327,7 +327,7 @@ const { DockerComposeEnvironment } = require("testcontainers");
 Create the containers with their own wait strategies:
 
 ```javascript
-const { DockerComposeEnvironment } = require("testcontainers");
+const { DockerComposeEnvironment, Wait } = require("testcontainers");
 
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
   .withWaitStrategy("redis_1", Wait.forLogMessage("Ready to accept connections"))
