@@ -1,6 +1,7 @@
 import * as dockerCompose from "docker-compose";
 import Dockerode from "dockerode";
 import { Duration, TemporalUnit } from "node-duration";
+import path from "path";
 import { BoundPorts } from "./bound-ports";
 import { Container } from "./container";
 import { ContainerState } from "./container-state";
@@ -12,58 +13,75 @@ import { Port } from "./port";
 import { HostPortCheck, InternalPortCheck } from "./port-check";
 import { HostPortWaitStrategy, WaitStrategy } from "./wait-strategy";
 
+const createDockerComposeOptions = (filePath: string, fileName: string): dockerCompose.IDockerComposeOptions => ({
+  cwd: filePath,
+  config: fileName,
+  log: false
+});
+
 export class DockerComposeEnvironment {
+  private readonly dockerClient: DockerClient;
+
   private startupTimeout: Duration = new Duration(60_000, TemporalUnit.MILLISECONDS);
 
-  constructor(
-    private readonly composeFilePath: string,
-    private readonly composeFile: string,
-    private readonly dockerClient: DockerClient = new DockerodeClientFactory().getClient()
-  ) {}
+  constructor(private readonly composeFilePath: string, private readonly composeFile: string) {
+    this.dockerClient = new DockerodeClientFactory().getClient();
+  }
 
-  public async start(): Promise<StartedDockerComposeEnvironment> {
-    try {
-      await this.dockerComposeUp();
-      const startedContainers = await this.findStartedContainers();
+  public async up(): Promise<StartedDockerComposeEnvironment> {
+    log.info(`Starting docker-compose environment`);
 
-      const startedGenericContainers = (await Promise.all(
-        startedContainers.map(async startedContainer => {
-          const container = await this.dockerClient.getContainer(startedContainer.Id);
-          const inspectResult = await container.inspect();
-          const containerState = new ContainerState(inspectResult);
+    await this.dockerComposeUp();
+    const startedContainers = await this.findStartedContainers();
 
-          const boundPorts = new BoundPorts();
-          startedContainer.Ports.forEach(port => boundPorts.setBinding(port.PrivatePort, port.PublicPort));
+    const startedGenericContainers = (await Promise.all(
+      startedContainers.map(async startedContainer => {
+        const container = await this.dockerClient.getContainer(startedContainer.Id);
+        const inspectResult = await container.inspect();
+        const boundPorts = this.getBoundPorts(startedContainer);
+        const containerState = new ContainerState(inspectResult);
 
-          await this.waitForContainer(container, containerState, boundPorts);
+        await this.waitForContainer(container, containerState, boundPorts);
 
-          return new StartedGenericContainer(
-            await this.dockerClient.getContainer(startedContainer.Id),
-            this.dockerClient.getHost(),
-            boundPorts,
-            this.getContainerName(startedContainer),
-            this.dockerClient
-          );
-        })
-      )).reduce((map, startedGenericContainer) => {
-        const containerName = startedGenericContainer.getName();
-        return { ...map, [containerName]: startedGenericContainer };
-      }, {});
+        return new StartedGenericContainer(
+          await this.dockerClient.getContainer(startedContainer.Id),
+          this.dockerClient.getHost(),
+          boundPorts,
+          this.getContainerName(startedContainer),
+          this.dockerClient
+        );
+      })
+    )).reduce((map, startedGenericContainer) => {
+      const containerName = startedGenericContainer.getName();
+      return { ...map, [containerName]: startedGenericContainer };
+    }, {});
 
-      return new StartedDockerComposeEnvironment(startedGenericContainers);
-    } catch ({ err }) {
-      throw new Error(err.trim());
-    }
+    return new StartedDockerComposeEnvironment(this.composeFilePath, this.composeFile, startedGenericContainers);
   }
 
   private async dockerComposeUp() {
-    const options = { cwd: this.composeFilePath, config: this.composeFile, log: true };
-    await dockerCompose.upAll(options);
+    try {
+      await dockerCompose.upAll(createDockerComposeOptions(this.composeFilePath, this.composeFile));
+    } catch ({ err }) {
+      log.error(`Failed to start docker-compose environment: ${err}`);
+      try {
+        await dockerCompose.down(createDockerComposeOptions(this.composeFilePath, this.composeFile));
+      } catch {
+        log.warn(`Failed to stop docker-compose environment after failed start`);
+      }
+      throw new Error(err.trim());
+    }
   }
 
   private async findStartedContainers(): Promise<Dockerode.ContainerInfo[]> {
     const containers = await this.dockerClient.listContainers();
     return containers.filter(container => container.Labels["com.docker.compose.version"] !== undefined);
+  }
+
+  private getBoundPorts(containerInfo: Dockerode.ContainerInfo): BoundPorts {
+    const boundPorts = new BoundPorts();
+    containerInfo.Ports.forEach(port => boundPorts.setBinding(port.PrivatePort, port.PublicPort));
+    return boundPorts;
   }
 
   private getContainerName(container: Dockerode.ContainerInfo): string {
@@ -94,7 +112,21 @@ export class DockerComposeEnvironment {
 }
 
 export class StartedDockerComposeEnvironment {
-  constructor(private readonly startedGenericContainers: { [containerName: string]: StartedGenericContainer }) {}
+  constructor(
+    private readonly composeFilePath: string,
+    private readonly composeFile: string,
+    private readonly startedGenericContainers: { [containerName: string]: StartedGenericContainer }
+  ) {}
+
+  public async down(): Promise<void> {
+    log.info(`Stopping docker-compose environment`);
+    try {
+      await dockerCompose.down(createDockerComposeOptions(this.composeFilePath, this.composeFile));
+    } catch ({ err }) {
+      log.error(`Failed to stop docker-compose environment: ${err}`);
+      throw new Error(err.trim());
+    }
+  }
 
   public getContainerIpAddress(containerName: string) {
     return this.startedGenericContainers[containerName].getContainerIpAddress();
