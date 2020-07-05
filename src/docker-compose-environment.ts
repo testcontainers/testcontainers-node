@@ -1,7 +1,6 @@
 import * as dockerCompose from "docker-compose";
 import Dockerode from "dockerode";
 import { Duration, TemporalUnit } from "node-duration";
-import path from "path";
 import { BoundPorts } from "./bound-ports";
 import { Container } from "./container";
 import { ContainerState } from "./container-state";
@@ -37,17 +36,23 @@ export class DockerComposeEnvironment {
     const startedGenericContainers = (await Promise.all(
       startedContainers.map(async startedContainer => {
         const container = await this.dockerClient.getContainer(startedContainer.Id);
+        const containerName = this.getContainerName(startedContainer);
+
+        (await container.logs())
+          .on("data", data => log.trace(`${containerName}: ${data}`))
+          .on("err", data => log.error(`${containerName}: ${data}`));
+
         const inspectResult = await container.inspect();
         const boundPorts = this.getBoundPorts(startedContainer);
+
         const containerState = new ContainerState(inspectResult);
 
         await this.waitForContainer(container, containerState, boundPorts);
-
         return new StartedGenericContainer(
           await this.dockerClient.getContainer(startedContainer.Id),
           this.dockerClient.getHost(),
           boundPorts,
-          this.getContainerName(startedContainer),
+          containerName,
           this.dockerClient
         );
       })

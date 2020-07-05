@@ -39,9 +39,8 @@ describe("DockerComposeEnvironment", () => {
       await new DockerComposeEnvironment(fixtures, "docker-compose.yml").up()
     );
 
-    const containerNames = ["container_1", "another_container_1"];
     await Promise.all(
-      containerNames.map(async containerName => {
+      ["container_1", "another_container_1"].map(async containerName => {
         const containerIpAddress = startedEnvironment.getContainerIpAddress(containerName);
         const containerPort = startedEnvironment.getMappedPort(containerName, 8080);
         const url = `http://${containerIpAddress}:${containerPort}`;
