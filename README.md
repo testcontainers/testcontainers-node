@@ -223,7 +223,7 @@ testcontainers to pull the image again by specifying an `AlwaysPullPolicy`:
 ```javascript
 const { GenericContainer, AlwaysPullPolicy } = require("testcontainers");
 
-const container = await new GenericContainer("private-image")
+const container = await new GenericContainer("alpine", "latest")
   .withPullPolicy(new AlwaysPullPolicy())
   .start();
 ```
