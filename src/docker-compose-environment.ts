@@ -57,6 +57,7 @@ export class DockerComposeEnvironment {
         const containerState = new ContainerState(inspectResult);
 
         await this.waitForContainer(container, containerName, containerState, boundPorts);
+
         return new StartedGenericContainer(
           await this.dockerClient.getContainer(startedContainer.Id),
           this.dockerClient.getHost(),
