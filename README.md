@@ -304,7 +304,6 @@ You can start and stop the environment, and interact with its containers.
 ```javascript
 const path = require("path");
 const redis = require("async-redis");
-
 const { DockerComposeEnvironment } = require("testcontainers");
 
 (async () => {
