@@ -309,7 +309,6 @@ const { DockerComposeEnvironment } = require("testcontainers");
 (async () => {
   const composeFilePath = path.resolve(__dirname, "dir-containing-docker-compose-yml");
   const composeFile = "docker-compose.yml"
-
   const environment = await new DockerComposeEnvironment(composeFilePath, composeFile).up();
 
   const container = environment.getContainer("redis_1");
