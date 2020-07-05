@@ -54,7 +54,6 @@ export class DockerComposeEnvironment {
 
         const inspectResult = await container.inspect();
         const boundPorts = this.getBoundPorts(startedContainer);
-
         const containerState = new ContainerState(inspectResult);
 
         await this.waitForContainer(container, containerName, containerState, boundPorts);
