@@ -4,6 +4,8 @@ import { DockerComposeEnvironment, StartedDockerComposeEnvironment } from "./doc
 import { Wait } from "./wait";
 
 describe("DockerComposeEnvironment", () => {
+  jest.setTimeout(45000);
+
   const fixtures = path.resolve(__dirname, "..", "fixtures", "docker-compose");
 
   let managedEnvironments: StartedDockerComposeEnvironment[] = [];
@@ -18,21 +20,15 @@ describe("DockerComposeEnvironment", () => {
   });
 
   it("should throw error when compose file is malformed", async () => {
-    try {
-      manageEnvironment(await new DockerComposeEnvironment(fixtures, "docker-compose-malformed.yml").up());
-      fail();
-    } catch (err) {
-      expect(err.message).toContain(`Version in "./docker-compose-malformed.yml" is invalid - it should be a string.`);
-    }
+    await expect(new DockerComposeEnvironment(fixtures, "docker-compose-malformed.yml").up()).rejects.toThrowError(
+      `Version in "./docker-compose-malformed.yml" is invalid - it should be a string.`
+    );
   });
 
   it("should throw error when compose file fails to start", async () => {
-    try {
-      manageEnvironment(await new DockerComposeEnvironment(fixtures, "docker-compose-port-error.yml").up());
-      fail();
-    } catch (err) {
-      expect(err.message).toContain("Cannot start service");
-    }
+    await expect(new DockerComposeEnvironment(fixtures, "docker-compose-port-error.yml").up()).rejects.toThrowError(
+      `Bind for 0.0.0.0:8080 failed`
+    );
   });
 
   it("should start all containers in the compose file", async () => {

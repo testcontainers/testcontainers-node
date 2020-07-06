@@ -9,22 +9,22 @@ import { Wait } from "./wait";
 describe("GenericContainer", () => {
   jest.setTimeout(45000);
 
-  let containers: StartedTestContainer[] = [];
-
+  const fixtures = path.resolve(__dirname, "..", "fixtures");
   const dockerodeClient = new Dockerode();
 
-  const managedContainer = (container: StartedTestContainer): StartedTestContainer => {
-    containers.push(container);
+  let managedContainers: StartedTestContainer[] = [];
+  const manageContainer = (container: StartedTestContainer): StartedTestContainer => {
+    managedContainers.push(container);
     return container;
   };
 
   afterEach(async () => {
-    await Promise.all(containers.map(container => container.stop()));
-    containers = [];
+    await Promise.all(managedContainers.map(container => container.stop()));
+    managedContainers = [];
   });
 
   it("should wait for port", async () => {
-    const container = managedContainer(
+    const container = manageContainer(
       await new GenericContainer("cristianrgreco/testcontainer", "1.1.12").withExposedPorts(8080).start()
     );
 
@@ -35,7 +35,7 @@ describe("GenericContainer", () => {
   });
 
   it("should wait for log", async () => {
-    const container = managedContainer(
+    const container = manageContainer(
       await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
         .withExposedPorts(8080)
         .withWaitStrategy(Wait.forLogMessage("Listening on port 8080"))
@@ -49,9 +49,9 @@ describe("GenericContainer", () => {
   });
 
   it("should wait for health check", async () => {
-    const context = path.resolve(__dirname, "..", "fixtures", "docker-with-health-check");
+    const context = path.resolve(fixtures, "docker-with-health-check");
     const customGenericContainer = await GenericContainer.fromDockerfile(context).build();
-    const container = managedContainer(
+    const container = manageContainer(
       await customGenericContainer
         .withExposedPorts(8080)
         .withWaitStrategy(Wait.forHealthCheck())
@@ -65,7 +65,7 @@ describe("GenericContainer", () => {
   });
 
   it("should wait for custom health check", async () => {
-    const container = managedContainer(
+    const container = manageContainer(
       await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
         .withExposedPorts(8080)
         .withHealthCheck({
@@ -86,7 +86,7 @@ describe("GenericContainer", () => {
   });
 
   it("should set network mode", async () => {
-    const container = managedContainer(
+    const container = manageContainer(
       await new GenericContainer("cristianrgreco/testcontainer", "1.1.12").withNetworkMode("host").start()
     );
     const dockerContainer = dockerodeClient.getContainer(container.getId());
@@ -97,7 +97,7 @@ describe("GenericContainer", () => {
   });
 
   it("should set environment variables", async () => {
-    const container = managedContainer(
+    const container = manageContainer(
       await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
         .withEnv("customKey", "customValue")
         .withExposedPorts(8080)
@@ -112,7 +112,7 @@ describe("GenericContainer", () => {
   });
 
   it("should set command", async () => {
-    const container = managedContainer(
+    const container = manageContainer(
       await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
         .withCmd(["node", "index.js", "one", "two", "three"])
         .withExposedPorts(8080)
@@ -130,7 +130,7 @@ describe("GenericContainer", () => {
     const containerName = "special-test-container";
     const expectedContainerName = "/special-test-container";
 
-    const container = managedContainer(
+    const container = manageContainer(
       await new GenericContainer("cristianrgreco/testcontainer", "1.1.12").withName(containerName).start()
     );
 
@@ -139,10 +139,10 @@ describe("GenericContainer", () => {
 
   it("should set bind mounts", async () => {
     const filename = "test.txt";
-    const source = path.resolve(__dirname, "..", "fixtures", "docker", filename);
+    const source = path.resolve(fixtures, "docker", filename);
     const target = `/tmp/${filename}`;
 
-    const container = managedContainer(
+    const container = manageContainer(
       await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
         .withBindMount(source, target)
         .withExposedPorts(8080)
@@ -154,7 +154,7 @@ describe("GenericContainer", () => {
   });
 
   it("should set tmpfs", async () => {
-    const container = managedContainer(
+    const container = manageContainer(
       await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
         .withTmpFs({ "/testtmpfs": "rw" })
         .withExposedPorts(8080)
@@ -172,7 +172,7 @@ describe("GenericContainer", () => {
   });
 
   it("should set default log driver", async () => {
-    const container = managedContainer(
+    const container = manageContainer(
       await new GenericContainer("cristianrgreco/testcontainer", "1.1.12").withDefaultLogDriver().start()
     );
     const dockerContainer = dockerodeClient.getContainer(container.getId());
@@ -186,7 +186,7 @@ describe("GenericContainer", () => {
   });
 
   it("should set privileged mode", async () => {
-    const container = managedContainer(
+    const container = manageContainer(
       await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
         .withPrivilegedMode()
         .withExposedPorts(8080)
@@ -202,7 +202,7 @@ describe("GenericContainer", () => {
   });
 
   it("should execute a command on a running container", async () => {
-    const container = managedContainer(
+    const container = manageContainer(
       await new GenericContainer("cristianrgreco/testcontainer", "1.1.12").withExposedPorts(8080).start()
     );
 
@@ -213,7 +213,7 @@ describe("GenericContainer", () => {
   });
 
   it("should stream logs from a running container", async () => {
-    const container = managedContainer(
+    const container = manageContainer(
       await new GenericContainer("cristianrgreco/testcontainer", "1.1.12").withExposedPorts(8080).start()
     );
 
@@ -226,9 +226,9 @@ describe("GenericContainer", () => {
   });
 
   it("should honour .dockerignore file", async () => {
-    const context = path.resolve(__dirname, "..", "fixtures", "docker-with-dockerignore");
+    const context = path.resolve(fixtures, "docker-with-dockerignore");
     const container = await GenericContainer.fromDockerfile(context).build();
-    const startedContainer = managedContainer(await container.withExposedPorts(8080).start());
+    const startedContainer = manageContainer(await container.withExposedPorts(8080).start());
 
     const { output } = await startedContainer.exec(["find"]);
 
@@ -244,9 +244,9 @@ describe("GenericContainer", () => {
 
   describe("from Dockerfile", () => {
     it("should build and start", async () => {
-      const context = path.resolve(__dirname, "..", "fixtures", "docker");
+      const context = path.resolve(fixtures, "docker");
       const container = await GenericContainer.fromDockerfile(context).build();
-      const startedContainer = managedContainer(await container.withExposedPorts(8080).start());
+      const startedContainer = manageContainer(await container.withExposedPorts(8080).start());
 
       const url = `http://${startedContainer.getContainerIpAddress()}:${startedContainer.getMappedPort(8080)}`;
       const response = await fetch(`${url}/hello-world`);
@@ -255,11 +255,11 @@ describe("GenericContainer", () => {
     });
 
     it("should set build arguments", async () => {
-      const context = path.resolve(__dirname, "..", "fixtures", "docker-with-buildargs");
+      const context = path.resolve(fixtures, "docker-with-buildargs");
       const container = await GenericContainer.fromDockerfile(context)
         .withBuildArg("VERSION", "10-alpine")
         .build();
-      const startedContainer = managedContainer(await container.withExposedPorts(8080).start());
+      const startedContainer = manageContainer(await container.withExposedPorts(8080).start());
 
       const url = `http://${startedContainer.getContainerIpAddress()}:${startedContainer.getMappedPort(8080)}`;
       const response = await fetch(`${url}/hello-world`);
