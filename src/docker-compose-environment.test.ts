@@ -63,4 +63,14 @@ describe("DockerComposeEnvironment", () => {
       })
     );
   });
+
+  it("should throw error when you get container that does not exist", async () => {
+    const startedEnvironment = manageEnvironment(
+      await new DockerComposeEnvironment(fixtures, "docker-compose.yml").up()
+    );
+
+    expect(() => startedEnvironment.getContainer("non_existent_container")).toThrowError(
+      `Cannot get container "non_existent_container" as it is not running`
+    );
+  });
 });

@@ -150,7 +150,13 @@ export class StartedDockerComposeEnvironment {
   }
 
   public getContainer(containerName: string): StartedGenericContainer {
-    return this.startedGenericContainers[containerName];
+    const container = this.startedGenericContainers[containerName];
+    if (!container) {
+      const error = `Cannot get container "${containerName}" as it is not running`;
+      log.error(error);
+      throw new Error(error);
+    }
+    return container;
   }
 }
 
