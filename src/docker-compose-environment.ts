@@ -6,6 +6,7 @@ import { Container } from "./container";
 import { ContainerState } from "./container-state";
 import { DockerClient } from "./docker-client";
 import { DockerodeClientFactory } from "./docker-client-factory";
+import { resolveDockerComposeContainerName } from "./docker-compose-container-name-resolver";
 import { StartedGenericContainer } from "./generic-container";
 import log from "./logger";
 import { HostPortCheck, InternalPortCheck } from "./port-check";
@@ -46,7 +47,7 @@ export class DockerComposeEnvironment {
     const startedGenericContainers = (await Promise.all(
       startedContainers.map(async startedContainer => {
         const container = await this.dockerClient.getContainer(startedContainer.Id);
-        const containerName = this.getContainerName(startedContainer);
+        const containerName = resolveDockerComposeContainerName(startedContainer.Names[0]);
 
         (await container.logs())
           .on("data", data => log.trace(`${containerName}: ${data}`))
@@ -97,15 +98,6 @@ export class DockerComposeEnvironment {
     const boundPorts = new BoundPorts();
     containerInfo.Ports.forEach(port => boundPorts.setBinding(port.PrivatePort, port.PublicPort));
     return boundPorts;
-  }
-
-  private getContainerName(container: Dockerode.ContainerInfo): string {
-    const containerName = container.Names[0];
-    const matches = containerName.match(/^.*docker-compose_(.*$)/);
-    if (!matches) {
-      throw new Error(`Unable to compute container name for: "${containerName}"`);
-    }
-    return matches[1];
   }
 
   private async waitForContainer(
