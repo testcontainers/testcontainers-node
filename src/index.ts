@@ -6,4 +6,5 @@ export {
   StoppedDockerComposeEnvironment
 } from "./docker-compose-environment";
 export { Wait } from "./wait";
+export { PullPolicy, DefaultPullPolicy, AlwaysPullPolicy } from "./pull-policy";
 export { Network, StartedNetwork } from "./network";

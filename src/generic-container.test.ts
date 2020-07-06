@@ -3,24 +3,40 @@ import { Duration, TemporalUnit } from "node-duration";
 import fetch from "node-fetch";
 import path from "path";
 import { GenericContainer } from "./generic-container";
+import { AlwaysPullPolicy } from "./pull-policy";
 import { StartedTestContainer } from "./test-container";
 import { Wait } from "./wait";
 
 describe("GenericContainer", () => {
   jest.setTimeout(45000);
 
+  let managedContainers: StartedTestContainer[] = [];
+  let managedStreams: NodeJS.ReadableStream[] = [];
+
   const fixtures = path.resolve(__dirname, "..", "fixtures");
   const dockerodeClient = new Dockerode();
 
-  let managedContainers: StartedTestContainer[] = [];
   const manageContainer = (container: StartedTestContainer): StartedTestContainer => {
     managedContainers.push(container);
     return container;
   };
 
+  const managedStream = (stream: NodeJS.ReadableStream): NodeJS.ReadableStream => {
+    managedStreams.push(stream);
+    return stream;
+  };
+
   afterEach(async () => {
     await Promise.all(managedContainers.map(container => container.stop()));
     managedContainers = [];
+
+    await Promise.all(
+      managedStreams.map(stream => {
+        // @ts-ignore
+        return stream.destroy();
+      })
+    );
+    managedStreams = [];
   });
 
   it("should wait for port", async () => {
@@ -199,6 +215,35 @@ describe("GenericContainer", () => {
     const url = `http://${container.getContainerIpAddress()}:${container.getMappedPort(8080)}`;
     const response = await fetch(`${url}/hello-world`);
     expect(response.status).toBe(200);
+  });
+
+  it("should use pull policy", async () => {
+    manageContainer(
+      await new GenericContainer("cristianrgreco/testcontainer", "1.1.12").withExposedPorts(8080).start()
+    );
+
+    const events = managedStream(await dockerodeClient.getEvents());
+    events.setEncoding("utf-8");
+
+    manageContainer(
+      await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
+        .withPullPolicy(new AlwaysPullPolicy())
+        .withExposedPorts(8080)
+        .start()
+    );
+
+    const statuses = await new Promise(resolve => {
+      const eventStatuses: string[] = [];
+      events.on("data", data => {
+        const status = JSON.parse(data).status;
+        eventStatuses.push(status);
+        if (status === "create") {
+          resolve(eventStatuses);
+        }
+      });
+    });
+
+    expect(statuses).toContain("pull");
   });
 
   it("should execute a command on a running container", async () => {

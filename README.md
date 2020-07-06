@@ -212,6 +212,22 @@ await container.stop();
 await network.stop();
 ```
 
+Specifying a pull policy. 
+
+Note that if omitted will use the `DefaultPullPolicy` which will use a locally cached 
+image if one already exists, this is usually the preferred option. In cases where 
+there is a local image for a given tag but the remote image with the same tag may 
+have changed (for example when using the `latest` tag), you can tell testcontainers 
+to pull the image again by specifying an `AlwaysPullPolicy`: 
+
+```javascript
+const { GenericContainer, AlwaysPullPolicy } = require("testcontainers");
+
+const container = await new GenericContainer("alpine", "latest")
+  .withPullPolicy(new AlwaysPullPolicy())
+  .start();
+```
+
 Pulling an image from the private registry:
 
 ```javascript
@@ -227,11 +243,12 @@ const container = await new GenericContainer("private-image")
   .start();
 ```
 
+Specifying a default log driver.
+
 You can override the logging driver used by docker to be the default one (json-file).
 This might be necessary when the driver of your docker host does not support reading logs
-and you want to use the `Wait.forLogMessage` wait strategy.
-
-This is the same as [--log-driver json-file on docker run](https://docs.docker.com/config/containers/logging/configure/#configure-the-logging-driver-for-a-container).
+and you want to use the `Wait.forLogMessage` wait strategy. This is the same as 
+[--log-driver json-file on docker run](https://docs.docker.com/config/containers/logging/configure/#configure-the-logging-driver-for-a-container).
 
 ```javascript
 const { GenericContainer } = require("testcontainers");

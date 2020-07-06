@@ -25,6 +25,7 @@ import log from "./logger";
 import { Port } from "./port";
 import { PortBinder } from "./port-binder";
 import { HostPortCheck, InternalPortCheck } from "./port-check";
+import { DefaultPullPolicy, PullPolicy } from "./pull-policy";
 import { Image, RepoTag, Tag } from "./repo-tag";
 import {
   DEFAULT_STOP_OPTIONS,
@@ -59,7 +60,7 @@ export class GenericContainerBuilder {
     await dockerClient.buildImage(repoTag, this.context, this.buildArgs);
     const container = new GenericContainer(image, tag, this.dockerClientFactory);
 
-    if (!(await container.hasRepoTagLocally())) {
+    if (!(await container.isImageCached())) {
       throw new Error("Failed to build image");
     }
 
@@ -88,6 +89,7 @@ export class GenericContainer implements TestContainer {
   private useDefaultLogDriver: boolean = false;
   private privilegedMode: boolean = false;
   private authConfig?: AuthConfig;
+  private pullPolicy: PullPolicy = new DefaultPullPolicy();
 
   constructor(
     readonly image: Image,
@@ -99,7 +101,7 @@ export class GenericContainer implements TestContainer {
   }
 
   public async start(): Promise<StartedTestContainer> {
-    if (!(await this.hasRepoTagLocally())) {
+    if (this.pullPolicy.shouldPull() || !(await this.isImageCached())) {
       await this.dockerClient.pull(this.repoTag, this.authConfig);
     }
 
@@ -208,7 +210,12 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
-  public async hasRepoTagLocally(): Promise<boolean> {
+  public withPullPolicy(pullPolicy: PullPolicy): this {
+    this.pullPolicy = pullPolicy;
+    return this;
+  }
+
+  public async isImageCached(): Promise<boolean> {
     const repoTags = await this.dockerClient.fetchRepoTags();
     return repoTags.some(repoTag => repoTag.equals(this.repoTag));
   }
