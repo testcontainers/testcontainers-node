@@ -105,7 +105,7 @@ export interface DockerClient {
   removeNetwork(id: string): Promise<void>;
   start(container: Container): Promise<void>;
   exec(container: Container, command: Command[]): Promise<ExecResult>;
-  buildImage(repoTag: RepoTag, context: BuildContext, buildArgs: BuildArgs): Promise<void>;
+  buildImage(repoTag: RepoTag, context: BuildContext, dockerfileName: string, buildArgs: BuildArgs): Promise<void>;
   fetchRepoTags(): Promise<RepoTag[]>;
   getHost(): Host;
 }
@@ -179,11 +179,17 @@ export class DockerodeClient implements DockerClient {
     return { output, exitCode };
   }
 
-  public async buildImage(repoTag: RepoTag, context: BuildContext, buildArgs: BuildArgs): Promise<void> {
+  public async buildImage(
+    repoTag: RepoTag,
+    context: BuildContext,
+    dockerfileName: string,
+    buildArgs: BuildArgs
+  ): Promise<void> {
     log.info(`Building image '${repoTag.toString()}' with context '${context}'`);
     const dockerIgnoreFiles = await findDockerIgnoreFiles(context);
     const tarStream = tar.pack(context, { ignore: name => dockerIgnoreFiles.has(name) });
     const stream = await this.dockerode.buildImage(tarStream, {
+      dockerfile: dockerfileName,
       buildargs: buildArgs,
       t: repoTag.toString()
     });
