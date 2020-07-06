@@ -177,7 +177,9 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
-Creating a container with a custom health check command. Note that `interval`, `timeout`, `retries` and `startPeriod` are optional; the values will be inherited from the image or parent image if omitted. Also note that the wait strategy should be set to `Wait.forHealthCheck()` for this option to take effect:
+Creating a container with a custom health check command. 
+
+Note that `interval`, `timeout`, `retries` and `startPeriod` are optional; the values will be inherited from the image or parent image if omitted. Also note that the wait strategy should be set to `Wait.forHealthCheck()` for this option to take effect:
 
 ```javascript
 const { GenericContainer, Wait } = require("testcontainers");
@@ -205,7 +207,7 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
-Create user-defined bridge network and attach container to it:
+Create user-defined bridge network and attach the container to it:
 
 ```javascript
 const { GenericContainer, Network } = require("testcontainers");
@@ -325,7 +327,7 @@ services:
       - 5432
 ```
 
-You can start and stop the environment, and interact with its containers.
+You can start and stop the environment, and interact with its containers:
 
 ```javascript
 const path = require("path");

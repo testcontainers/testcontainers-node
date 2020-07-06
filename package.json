@@ -68,7 +68,6 @@
   },
   "lint-staged": {
     "src/**/*.ts": [
-      "echo",
       "prettier --write",
       "tslint --fix"
     ]
