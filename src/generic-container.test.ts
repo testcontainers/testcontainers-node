@@ -302,7 +302,7 @@ describe("GenericContainer", () => {
     it("should build and start with custom file name", async () => {
       const context = path.resolve(__dirname, "..", "fixtures", "docker-with-custom-filename");
       const container = await GenericContainer.fromDockerfile(context, "Dockerfile-A").build();
-      const startedContainer = managedContainer(await container.withExposedPorts(8080).start());
+      const startedContainer = manageContainer(await container.withExposedPorts(8080).start());
 
       const url = `http://${startedContainer.getContainerIpAddress()}:${startedContainer.getMappedPort(8080)}`;
       const response = await fetch(`${url}/hello-world`);
