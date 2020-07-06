@@ -180,7 +180,7 @@ const container = await new GenericContainer("alpine")
 Creating a container with a custom health check command. Note that `interval`, `timeout`, `retries` and `startPeriod` are optional; the values will be inherited from the image or parent image if omitted. Also note that the wait strategy should be set to `Wait.forHealthCheck()` for this option to take effect:
 
 ```javascript
-const { GenericContainer } = require("testcontainers");
+const { GenericContainer, Wait } = require("testcontainers");
 const { Duration, TemporalUnit } = require("node-duration");
 
 const container = await new GenericContainer("alpine")
@@ -305,6 +305,70 @@ const container = await new GenericContainer("postgres")
 await container.stop({ 
   removeVolumes: false
 })
+```
+
+## Docker Compose
+
+Testcontainers supports docker-compose. For example for the following `docker-compose.yml`:
+
+```yaml
+version: "3"
+
+services:
+  redis:
+    image: redis:latest
+    ports:
+      - 6379
+  postgres:
+    image: postgres:latest
+    ports:
+      - 5432
+```
+
+You can start and stop the environment, and interact with its containers.
+
+```javascript
+const path = require("path");
+const redis = require("async-redis");
+const { DockerComposeEnvironment } = require("testcontainers");
+
+(async () => {
+  const composeFilePath = path.resolve(__dirname, "dir-containing-docker-compose-yml");
+  const composeFile = "docker-compose.yml"
+  const environment = await new DockerComposeEnvironment(composeFilePath, composeFile).up();
+
+  const container = environment.getContainer("redis_1");
+  
+  const redisClient = redis.createClient(
+    container.getMappedPort(6379),
+    container.getContainerIpAddress(),
+  );
+  await redisClient.quit();
+
+  await environment.down();
+})();
+```
+
+Create the containers with their own wait strategies:
+
+```javascript
+const { DockerComposeEnvironment, Wait } = require("testcontainers");
+
+const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
+  .withWaitStrategy("redis_1", Wait.forLogMessage("Ready to accept connections"))
+  .withWaitStrategy("postgres_1", Wait.forHealthCheck())
+  .up();
+```
+
+Once the environment has started, you can interact with the containers as you would any other `GenericContainer`:
+
+```javascript
+const { DockerComposeEnvironment } = require("testcontainers");
+
+const environment = await new DockerComposeEnvironment(composeFilePath, composeFile).up();
+
+const container = environment.getContainer("alpine_1");
+const { output, exitCode } = await container.exec(["echo", "hello", "world"]);
 ```
 
 ## Wait Strategies

@@ -3,7 +3,7 @@ import { Duration, TemporalUnit } from "node-duration";
 import streamToArray from "stream-to-array";
 import tar from "tar-fs";
 import { BoundPorts } from "./bound-ports";
-import { Container, DockerodeContainer } from "./container";
+import { Container, DockerodeContainer, Id } from "./container";
 import { Host } from "./docker-client-factory";
 import { findDockerIgnoreFiles } from "./docker-ignore";
 import log from "./logger";
@@ -108,6 +108,8 @@ export interface DockerClient {
   buildImage(repoTag: RepoTag, context: BuildContext, dockerfileName: string, buildArgs: BuildArgs): Promise<void>;
   fetchRepoTags(): Promise<RepoTag[]>;
   getHost(): Host;
+  listContainers(): Promise<Dockerode.ContainerInfo[]>;
+  getContainer(id: Id): Promise<Container>;
 }
 
 export class DockerodeClient implements DockerClient {
@@ -209,6 +211,14 @@ export class DockerodeClient implements DockerClient {
       });
       return [...repoTags, ...imageRepoTags];
     }, []);
+  }
+
+  public async listContainers(): Promise<Dockerode.ContainerInfo[]> {
+    return await this.dockerode.listContainers();
+  }
+
+  public async getContainer(id: Id): Promise<Container> {
+    return new DockerodeContainer(await this.dockerode.getContainer(id));
   }
 
   public getHost(): Host {

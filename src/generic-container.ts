@@ -244,7 +244,7 @@ export class GenericContainer implements TestContainer {
   }
 }
 
-class StartedGenericContainer implements StartedTestContainer {
+export class StartedGenericContainer implements StartedTestContainer {
   constructor(
     private readonly container: Container,
     private readonly host: Host,
