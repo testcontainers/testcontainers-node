@@ -90,6 +90,15 @@ const startedContainer = await container
   .start();
 ```
 
+Using a custom Dockerfile name:
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await GenericContainer.fromDockerfile(buildContext, "my-dockerfile")
+  .build();
+```
+
 Creating a container with a specified name:
 
 ```javascript

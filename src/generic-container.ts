@@ -42,6 +42,7 @@ export class GenericContainerBuilder {
 
   constructor(
     private readonly context: BuildContext,
+    private readonly dockerfileName: string,
     private readonly uuid: Uuid = new RandomUuid(),
     private readonly dockerClientFactory: DockerClientFactory = new DockerodeClientFactory()
   ) {}
@@ -57,7 +58,7 @@ export class GenericContainerBuilder {
 
     const repoTag = new RepoTag(image, tag);
     const dockerClient = this.dockerClientFactory.getClient();
-    await dockerClient.buildImage(repoTag, this.context, this.buildArgs);
+    await dockerClient.buildImage(repoTag, this.context, this.dockerfileName, this.buildArgs);
     const container = new GenericContainer(image, tag, this.dockerClientFactory);
 
     if (!(await container.isImageCached())) {
@@ -69,8 +70,8 @@ export class GenericContainerBuilder {
 }
 
 export class GenericContainer implements TestContainer {
-  public static fromDockerfile(context: BuildContext): GenericContainerBuilder {
-    return new GenericContainerBuilder(context);
+  public static fromDockerfile(context: BuildContext, dockerfileName: string = "Dockerfile"): GenericContainerBuilder {
+    return new GenericContainerBuilder(context, dockerfileName);
   }
 
   private readonly repoTag: RepoTag;
