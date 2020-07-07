@@ -35,7 +35,7 @@ export class DockerClientFactory {
       if (!fs.existsSync("/.dockerenv")) {
         const network = dockerode.getNetwork("bridge");
         const networkInfo: NetworkInspectInfo = await network.inspect();
-        console.log("networkInfo", networkInfo);
+        console.log("networkInfo", JSON.stringify(networkInfo.IPAM, null, 2));
 
         const host = "localhost";
         log.info(`Using default Docker host: ${host}, socket path: ${socketPath}`);
