@@ -10,6 +10,7 @@ on:
     branches: [ master ]
 
 jobs:
+
   build:
     runs-on: ubuntu-latest
 
@@ -19,9 +20,31 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
+    - name: Test ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm ci
     - run: npm test
+      
+  dind:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [10.x, 12.x, 14.x]
+        node-image-version: [10-alpine, 12-alpine, 14-alpine]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Test DIND ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - run: docker run -i --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            -v "$HOME:$HOME" \
+            -v "$PWD:$PWD" \
+            -w "$PWD" \
+            node:${{ matrix.node-image-version }} \
+            npm ci && npm test
