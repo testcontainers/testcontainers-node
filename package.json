@@ -1,7 +1,7 @@
 {
   "name": "testcontainers",
   "author": "Cristian Greco",
-  "version": "2.18.2",
+  "version": "2.18.3",
   "main": "dist/index",
   "types": "dist/index",
   "keywords": [
@@ -26,7 +26,10 @@
     "build": "npm run clean && tsc",
     "clean": "rimraf dist",
     "test": "jest",
-    "format": "prettier --write package.json src/**/*.ts"
+    "format": "prettier --write package.json src/**/*.ts",
+    "version:major": "npm --no-git-tag-version version major",
+    "version:minor": "npm --no-git-tag-version version minor",
+    "version:patch": "npm --no-git-tag-version version patch"
   },
   "dependencies": {
     "@types/dockerode": "^2.5.33",

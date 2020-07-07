@@ -4,7 +4,7 @@ import { DockerComposeEnvironment, StartedDockerComposeEnvironment } from "./doc
 import { Wait } from "./wait";
 
 describe("DockerComposeEnvironment", () => {
-  jest.setTimeout(45000);
+  jest.setTimeout(60000);
 
   const fixtures = path.resolve(__dirname, "..", "fixtures", "docker-compose");
 

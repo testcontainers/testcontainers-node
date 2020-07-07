@@ -8,7 +8,7 @@ import { StartedTestContainer } from "./test-container";
 import { Wait } from "./wait";
 
 describe("GenericContainer", () => {
-  jest.setTimeout(45000);
+  jest.setTimeout(60000);
 
   let managedContainers: StartedTestContainer[] = [];
   let managedStreams: NodeJS.ReadableStream[] = [];

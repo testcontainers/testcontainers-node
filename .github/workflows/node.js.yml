@@ -11,7 +11,7 @@ on:
 
 jobs:
 
-  build:
+  native:
     runs-on: ${{matrix.os-version}}
 
     strategy:
