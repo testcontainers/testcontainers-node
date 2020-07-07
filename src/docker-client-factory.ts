@@ -37,14 +37,13 @@ export class DockerClientFactory {
         log.info(`Using default Docker host: ${host}, socket path: ${socketPath}`);
         return host;
       } else {
-        const network = dockerode.getNetwork("bridge");
-        const networkInfo: NetworkInspectInfo = await network.inspect();
-        if (!networkInfo.IPAM || !networkInfo.IPAM.Config) {
+        const network: NetworkInspectInfo = await dockerode.getNetwork("bridge").inspect();
+        if (!network.IPAM || !network.IPAM.Config) {
           const host = "localhost";
           log.info(`Using Docker host from gateway without IPAM: ${host}, socket path: ${socketPath}`);
           return host;
         } else {
-          const gateways = networkInfo.IPAM.Config.filter((config) => !!config.Gateway);
+          const gateways = network.IPAM.Config.filter((config) => !!config.Gateway);
           if (gateways.length > 0) {
             const host = gateways[0].Gateway;
             log.info(`Using Docker host from gateway with IPAM: ${host}, socket path: ${socketPath}`);
