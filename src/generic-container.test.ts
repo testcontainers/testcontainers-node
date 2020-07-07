@@ -50,19 +50,6 @@ describe("GenericContainer", () => {
     expect(response.status).toBe(200);
   });
 
-  it("should wait for port with postgres", async () => {
-    const container = manageContainer(
-      await new GenericContainer('postgres')
-          .withEnv('POSTGRES_USER', 'test')
-          .withEnv('POSTGRES_PASSWORD', 'test')
-          .withEnv('POSTGRES_DB', 'postgres')
-          .withExposedPorts(5432)
-          .start()
-    );
-
-    expect(container).toBeTruthy()
-  });
-
   it("should wait for log", async () => {
     const container = manageContainer(
       await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")

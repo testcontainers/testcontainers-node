@@ -20,7 +20,7 @@ import {
   NetworkMode,
   TmpFs,
 } from "./docker-client";
-import { DockerClientFactory, DockerodeClientFactory, Host } from "./docker-client-factory";
+import { DockerClientFactory, Host } from "./docker-client-factory";
 import log from "./logger";
 import { Port } from "./port";
 import { PortBinder } from "./port-binder";
@@ -43,8 +43,7 @@ export class GenericContainerBuilder {
   constructor(
     private readonly context: BuildContext,
     private readonly dockerfileName: string,
-    private readonly uuid: Uuid = new RandomUuid(),
-    private readonly dockerClientFactory: DockerClientFactory = new DockerodeClientFactory()
+    private readonly uuid: Uuid = new RandomUuid()
   ) {}
 
   public withBuildArg(key: string, value: string): GenericContainerBuilder {
@@ -57,11 +56,11 @@ export class GenericContainerBuilder {
     const tag = this.uuid.nextUuid();
 
     const repoTag = new RepoTag(image, tag);
-    const dockerClient = this.dockerClientFactory.getClient();
+    const dockerClient = await DockerClientFactory.getClient();
     await dockerClient.buildImage(repoTag, this.context, this.dockerfileName, this.buildArgs);
-    const container = new GenericContainer(image, tag, this.dockerClientFactory);
+    const container = new GenericContainer(image, tag);
 
-    if (!(await container.isImageCached())) {
+    if (!(await container.isImageCached(dockerClient))) {
       throw new Error("Failed to build image");
     }
 
@@ -75,7 +74,6 @@ export class GenericContainer implements TestContainer {
   }
 
   private readonly repoTag: RepoTag;
-  private readonly dockerClient: DockerClient;
 
   private env: Env = {};
   private networkMode?: NetworkMode;
@@ -92,18 +90,15 @@ export class GenericContainer implements TestContainer {
   private authConfig?: AuthConfig;
   private pullPolicy: PullPolicy = new DefaultPullPolicy();
 
-  constructor(
-    readonly image: Image,
-    readonly tag: Tag = "latest",
-    readonly dockerClientFactory: DockerClientFactory = new DockerodeClientFactory()
-  ) {
+  constructor(readonly image: Image, readonly tag: Tag = "latest") {
     this.repoTag = new RepoTag(image, tag);
-    this.dockerClient = dockerClientFactory.getClient();
   }
 
   public async start(): Promise<StartedTestContainer> {
-    if (this.pullPolicy.shouldPull() || !(await this.isImageCached())) {
-      await this.dockerClient.pull(this.repoTag, this.authConfig);
+    const dockerClient = await DockerClientFactory.getClient();
+
+    if (this.pullPolicy.shouldPull() || !(await this.isImageCached(dockerClient))) {
+      await dockerClient.pull(this.repoTag, this.authConfig);
     }
 
     const boundPorts = await new PortBinder().bind(this.ports);
@@ -112,7 +107,7 @@ export class GenericContainer implements TestContainer {
       this.isCreating(boundPorts);
     }
 
-    const container = await this.dockerClient.create({
+    const container = await dockerClient.create({
       repoTag: this.repoTag,
       env: this.env,
       cmd: this.cmd,
@@ -126,7 +121,7 @@ export class GenericContainer implements TestContainer {
       privilegedMode: this.privilegedMode,
     });
 
-    await this.dockerClient.start(container);
+    await dockerClient.start(container);
 
     (await container.logs())
       .on("data", (data) => log.trace(`${container.getId()}: ${data}`))
@@ -135,14 +130,14 @@ export class GenericContainer implements TestContainer {
     const inspectResult = await container.inspect();
     const containerState = new ContainerState(inspectResult);
 
-    await this.waitForContainer(container, containerState, boundPorts);
+    await this.waitForContainer(dockerClient, container, containerState, boundPorts);
 
     return new StartedGenericContainer(
       container,
-      this.dockerClient.getHost(),
+      dockerClient.getHost(),
       boundPorts,
       inspectResult.name,
-      this.dockerClient
+      dockerClient
     );
   }
 
@@ -216,31 +211,32 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
-  public async isImageCached(): Promise<boolean> {
-    const repoTags = await this.dockerClient.fetchRepoTags();
+  public async isImageCached(dockerClient: DockerClient): Promise<boolean> {
+    const repoTags = await dockerClient.fetchRepoTags();
     return repoTags.some((repoTag) => repoTag.equals(this.repoTag));
   }
 
   protected isCreating?(boundPorts: BoundPorts): void;
 
   private async waitForContainer(
+      dockerClient: DockerClient,
     container: Container,
     containerState: ContainerState,
     boundPorts: BoundPorts
   ): Promise<void> {
     log.debug("Waiting for container to be ready");
-    const waitStrategy = this.getWaitStrategy(container);
+    const waitStrategy = this.getWaitStrategy(dockerClient, container);
     await waitStrategy.withStartupTimeout(this.startupTimeout).waitUntilReady(container, containerState, boundPorts);
     log.info("Container is ready");
   }
 
-  private getWaitStrategy(container: Container): WaitStrategy {
+  private getWaitStrategy(dockerClient: DockerClient, container: Container): WaitStrategy {
     if (this.waitStrategy) {
       return this.waitStrategy;
     }
-    const hostPortCheck = new HostPortCheck(this.dockerClient.getHost());
-    const internalPortCheck = new InternalPortCheck(container, this.dockerClient);
-    return new HostPortWaitStrategy(this.dockerClient, hostPortCheck, internalPortCheck);
+    const hostPortCheck = new HostPortCheck(dockerClient.getHost());
+    const internalPortCheck = new InternalPortCheck(container, dockerClient);
+    return new HostPortWaitStrategy(dockerClient, hostPortCheck, internalPortCheck);
   }
 }
 

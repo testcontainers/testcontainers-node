@@ -1,46 +1,61 @@
-import defaultGateway from "default-gateway";
-import Dockerode from "dockerode";
+import fs from "fs";
+import Dockerode, {NetworkInspectInfo} from "dockerode";
 import { DockerClient, DockerodeClient } from "./docker-client";
 import log from "./logger";
 
 export type Host = string;
 
-export interface DockerClientFactory {
-  getClient(): DockerClient;
-  getHost(): Host;
-}
+export class DockerClientFactory {
+  private static client?: DockerClient;
 
-export class DockerodeClientFactory implements DockerClientFactory {
-  private readonly host: Host;
-  private readonly client: DockerClient;
+  public static async getClient(): Promise<DockerClient> {
+    if (this.client) {
+      return this.client;
+    } else {
+      const dockerode = new Dockerode();
+      const host = await this.getHost(dockerode);
+      this.client = new DockerodeClient(host, dockerode);
+      return this.client;
+    }
+  }
 
-  constructor() {
-    const dockerode = new Dockerode();
+  private static async getHost(dockerode: Dockerode): Promise<Host> {
     const modem = dockerode.modem;
 
-    if (modem.host) {
-      this.host = modem.host;
-      log.info(`Using Docker host from modem: ${this.host}`);
-    } else {
-      const socketPath = modem.socketPath;
-      if (socketPath === "//./pipe/docker_engine") {
-        const { gateway } = defaultGateway.v4.sync();
-        this.host = gateway;
-        log.info(`Using Docker host from wormhole: ${this.host}, socket path is: ${socketPath}`);
-      } else {
-        this.host = "localhost";
-        log.info(`Using default Docker host: ${this.host}, socket path is: ${socketPath}`);
-      }
+    if (process.env.DOCKER_HOST) {
+      log.info(`Detected DOCKER_HOST environment variable: ${process.env.DOCKER_HOST}`);
     }
 
-    this.client = new DockerodeClient(this.host, dockerode);
-  }
-
-  public getClient(): DockerClient {
-    return this.client;
-  }
-
-  public getHost(): Host {
-    return this.host;
+    if (modem.host) {
+      const host = modem.host;
+      log.info(`Using Docker host from modem: ${host}`);
+      return host;
+    } else {
+      const socketPath = modem.socketPath;
+      if (!fs.existsSync("/.dockerenv")) {
+        const host = "localhost";
+        log.info(`Using default Docker host: ${host}, socket path: ${socketPath}`);
+        return host;
+      } else {
+        const network = dockerode.getNetwork("bridge");
+        const networkInfo: NetworkInspectInfo = await network.inspect();
+        if (!networkInfo.IPAM || !networkInfo.IPAM.Config) {
+          const host = "localhost";
+          log.info(`Using Docker host from gateway without IPAM: ${host}, socket path: ${socketPath}`);
+          return host;
+        } else {
+          const gateways = networkInfo.IPAM.Config.filter(config => !!config.Gateway);
+          if (gateways.length > 0) {
+            const host = gateways[0].Gateway;
+            log.info(`Using Docker host from gateway with IPAM: ${host}, socket path: ${socketPath}`);
+            return host;
+          } else {
+            const host = "localhost";
+            log.info(`Using Docker host from gateway with IPAM without gateway: ${host}, socket path: ${socketPath}`);
+            return host;
+          }
+        }
+      }
+    }
   }
 }

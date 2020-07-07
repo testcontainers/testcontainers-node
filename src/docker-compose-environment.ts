@@ -5,7 +5,7 @@ import { BoundPorts } from "./bound-ports";
 import { Container } from "./container";
 import { ContainerState } from "./container-state";
 import { DockerClient } from "./docker-client";
-import { DockerodeClientFactory } from "./docker-client-factory";
+import { DockerClientFactory } from "./docker-client-factory";
 import { resolveDockerComposeContainerName } from "./docker-compose-container-name-resolver";
 import { StartedGenericContainer } from "./generic-container";
 import log from "./logger";
@@ -19,13 +19,10 @@ const createDockerComposeOptions = (filePath: string, fileName: string): dockerC
 });
 
 export class DockerComposeEnvironment {
-  private readonly dockerClient: DockerClient;
-
   private waitStrategy: { [containerName: string]: WaitStrategy } = {};
   private startupTimeout: Duration = new Duration(60_000, TemporalUnit.MILLISECONDS);
 
   constructor(private readonly composeFilePath: string, private readonly composeFile: string) {
-    this.dockerClient = new DockerodeClientFactory().getClient();
   }
 
   public withWaitStrategy(containerName: string, waitStrategy: WaitStrategy): this {
@@ -41,13 +38,15 @@ export class DockerComposeEnvironment {
   public async up(): Promise<StartedDockerComposeEnvironment> {
     log.info(`Starting docker-compose environment`);
 
+    const dockerClient = await DockerClientFactory.getClient();
+
     await this.dockerComposeUp();
-    const startedContainers = await this.findStartedContainers();
+    const startedContainers = await this.findStartedContainers(dockerClient);
 
     const startedGenericContainers = (
       await Promise.all(
         startedContainers.map(async (startedContainer) => {
-          const container = await this.dockerClient.getContainer(startedContainer.Id);
+          const container = await dockerClient.getContainer(startedContainer.Id);
           const containerName = resolveDockerComposeContainerName(startedContainer.Names[0]);
 
           (await container.logs())
@@ -58,14 +57,14 @@ export class DockerComposeEnvironment {
           const boundPorts = this.getBoundPorts(startedContainer);
           const containerState = new ContainerState(inspectResult);
 
-          await this.waitForContainer(container, containerName, containerState, boundPorts);
+          await this.waitForContainer(dockerClient, container, containerName, containerState, boundPorts);
 
           return new StartedGenericContainer(
             container,
-            this.dockerClient.getHost(),
+            dockerClient.getHost(),
             boundPorts,
             containerName,
-            this.dockerClient
+            dockerClient
           );
         })
       )
@@ -91,8 +90,8 @@ export class DockerComposeEnvironment {
     }
   }
 
-  private async findStartedContainers(): Promise<Dockerode.ContainerInfo[]> {
-    const containers = await this.dockerClient.listContainers();
+  private async findStartedContainers(dockerClient: DockerClient): Promise<Dockerode.ContainerInfo[]> {
+    const containers = await dockerClient.listContainers();
     return containers.filter((container) => container.Labels["com.docker.compose.version"] !== undefined);
   }
 
@@ -103,24 +102,25 @@ export class DockerComposeEnvironment {
   }
 
   private async waitForContainer(
+    dockerClient: DockerClient,
     container: Container,
     containerName: string,
     containerState: ContainerState,
     boundPorts: BoundPorts
   ): Promise<void> {
     log.debug("Waiting for container to be ready");
-    const waitStrategy = this.getWaitStrategy(container, containerName);
+    const waitStrategy = this.getWaitStrategy(dockerClient, container, containerName);
     await waitStrategy.withStartupTimeout(this.startupTimeout).waitUntilReady(container, containerState, boundPorts);
     log.info("Container is ready");
   }
 
-  private getWaitStrategy(container: Container, containerName: string): WaitStrategy {
+  private getWaitStrategy(dockerClient: DockerClient, container: Container, containerName: string): WaitStrategy {
     if (this.waitStrategy[containerName]) {
       return this.waitStrategy[containerName];
     } else {
-      const hostPortCheck = new HostPortCheck(this.dockerClient.getHost());
-      const internalPortCheck = new InternalPortCheck(container, this.dockerClient);
-      return new HostPortWaitStrategy(this.dockerClient, hostPortCheck, internalPortCheck);
+      const hostPortCheck = new HostPortCheck(dockerClient.getHost());
+      const internalPortCheck = new InternalPortCheck(container, dockerClient);
+      return new HostPortWaitStrategy(dockerClient, hostPortCheck, internalPortCheck);
     }
   }
 }
