@@ -118,7 +118,7 @@ export class DockerodeClient implements DockerClient {
   public async pull(repoTag: RepoTag, authConfig?: AuthConfig): Promise<void> {
     log.info(`Pulling image: ${repoTag}`);
     const stream = await this.dockerode.pull(repoTag.toString(), {
-      authconfig: authConfig
+      authconfig: authConfig,
     });
     await streamToArray(stream);
   }
@@ -140,8 +140,8 @@ export class DockerodeClient implements DockerClient {
         Binds: this.getBindMounts(options.bindMounts),
         Tmpfs: options.tmpFs,
         LogConfig: this.getLogConfig(options.useDefaultLogDriver),
-        Privileged: options.privilegedMode
-      }
+        Privileged: options.privilegedMode,
+      },
     });
 
     return new DockerodeContainer(dockerodeContainer);
@@ -149,7 +149,18 @@ export class DockerodeClient implements DockerClient {
 
   public async createNetwork(options: CreateNetworkOptions): Promise<string> {
     log.info(`Creating network ${options.name}`);
-    const network: Network = await this.dockerode.createNetwork(options);
+    const network: Network = await this.dockerode.createNetwork({
+      Name: options.name,
+      CheckDuplicate: options.checkDuplicate,
+      Driver: options.driver,
+      Internal: options.internal,
+      Attachable: options.attachable,
+      Ingress: options.ingress,
+      IPAM: undefined,
+      EnableIPv6: options.enableIPv6,
+      Options: options.options,
+      Labels: options.labels,
+    });
     return network.id;
   }
 
@@ -171,7 +182,7 @@ export class DockerodeClient implements DockerClient {
     const exec = await container.exec({
       cmd: command,
       attachStdout: true,
-      attachStderr: true
+      attachStderr: true,
     });
 
     const stream = await exec.start();
@@ -189,11 +200,11 @@ export class DockerodeClient implements DockerClient {
   ): Promise<void> {
     log.info(`Building image '${repoTag.toString()}' with context '${context}'`);
     const dockerIgnoreFiles = await findDockerIgnoreFiles(context);
-    const tarStream = tar.pack(context, { ignore: name => dockerIgnoreFiles.has(name) });
+    const tarStream = tar.pack(context, { ignore: (name) => dockerIgnoreFiles.has(name) });
     const stream = await this.dockerode.buildImage(tarStream, {
       dockerfile: dockerfileName,
       buildargs: buildArgs,
-      t: repoTag.toString()
+      t: repoTag.toString(),
     });
     await streamToArray(stream);
   }
@@ -205,7 +216,7 @@ export class DockerodeClient implements DockerClient {
       if (this.isDanglingImage(image)) {
         return repoTags;
       }
-      const imageRepoTags = image.RepoTags.map(imageRepoTag => {
+      const imageRepoTags = image.RepoTags.map((imageRepoTag) => {
         const [imageName, tag] = imageRepoTag.split(":");
         return new RepoTag(imageName, tag);
       });
@@ -230,12 +241,9 @@ export class DockerodeClient implements DockerClient {
   }
 
   private getEnv(env: Env): DockerodeEnvironment {
-    return Object.entries(env).reduce(
-      (dockerodeEnvironment, [key, value]) => {
-        return [...dockerodeEnvironment, `${key}=${value}`];
-      },
-      [] as DockerodeEnvironment
-    );
+    return Object.entries(env).reduce((dockerodeEnvironment, [key, value]) => {
+      return [...dockerodeEnvironment, `${key}=${value}`];
+    }, [] as DockerodeEnvironment);
   }
 
   private getHealthCheck(healthCheck?: HealthCheck): DockerodeHealthCheck | undefined {
@@ -247,7 +255,7 @@ export class DockerodeClient implements DockerClient {
       Interval: healthCheck.interval ? this.toNanos(healthCheck.interval) : 0,
       Timeout: healthCheck.timeout ? this.toNanos(healthCheck.timeout) : 0,
       Retries: healthCheck.retries || 0,
-      StartPeriod: healthCheck.startPeriod ? this.toNanos(healthCheck.startPeriod) : 0
+      StartPeriod: healthCheck.startPeriod ? this.toNanos(healthCheck.startPeriod) : 0,
     };
   }
 
@@ -282,7 +290,7 @@ export class DockerodeClient implements DockerClient {
 
     return {
       Type: "json-file",
-      Config: {}
+      Config: {},
     };
   }
 }

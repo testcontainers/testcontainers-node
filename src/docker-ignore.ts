@@ -13,25 +13,24 @@ export const findDockerIgnoreFiles = async (context: string): Promise<Set<string
   const dockerIgnorePatterns = (await fs.readFile(dockerIgnoreFilePath, { encoding: "utf-8" }))
     .toString()
     .split("\n")
-    .map(dockerIgnorePattern => path.resolve(context, dockerIgnorePattern));
+    .map((dockerIgnorePattern) => path.resolve(context, dockerIgnorePattern));
 
   const dockerIgnoreMatches: string[][] = await Promise.all(
-    dockerIgnorePatterns.map(
-      dockerIgnorePattern =>
-        new Promise((resolve, reject) =>
-          glob(dockerIgnorePattern, (err, matches) => {
-            if (err) {
-              return reject(err);
-            } else {
-              resolve(matches);
-            }
-          })
-        )
-    )
+    dockerIgnorePatterns.map((dockerIgnorePattern) => {
+      return new Promise((resolve, reject) =>
+        glob(dockerIgnorePattern, (err, matches) => {
+          if (err) {
+            return reject(err);
+          } else {
+            resolve(matches);
+          }
+        })
+      ) as Promise<string[]>;
+    })
   );
 
-  dockerIgnoreMatches.forEach(dockerIgnoreFileBatch => {
-    dockerIgnoreFileBatch.forEach(dockerIgnoreFile => dockerIgnoreFiles.add(dockerIgnoreFile));
+  dockerIgnoreMatches.forEach((dockerIgnoreFileBatch) => {
+    dockerIgnoreFileBatch.forEach((dockerIgnoreFile) => dockerIgnoreFiles.add(dockerIgnoreFile));
   });
 
   return dockerIgnoreFiles;
