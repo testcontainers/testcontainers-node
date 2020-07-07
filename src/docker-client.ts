@@ -156,7 +156,6 @@ export class DockerodeClient implements DockerClient {
       Internal: options.internal,
       Attachable: options.attachable,
       Ingress: options.ingress,
-      IPAM: undefined,
       EnableIPv6: options.enableIPv6,
       Options: options.options,
       Labels: options.labels,
