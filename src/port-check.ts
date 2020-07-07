@@ -12,7 +12,7 @@ export class HostPortCheck implements PortCheck {
   constructor(private readonly host: Host) {}
 
   public async isBound(port: Port): Promise<boolean> {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       const socket = new Socket();
       socket
         .setTimeout(1000)
@@ -40,9 +40,11 @@ export class InternalPortCheck implements PortCheck {
     const commands = [
       ["/bin/sh", "-c", `cat /proc/net/tcp{,6} | awk '{print $2}' | grep -i :${portHex}`],
       ["/bin/sh", "-c", `nc -vz -w 1 localhost ${port}`],
-      ["/bin/bash", "-c", `</dev/tcp/localhost/${port}`]
+      ["/bin/bash", "-c", `</dev/tcp/localhost/${port}`],
     ];
-    const commandResults = await Promise.all(commands.map(command => this.dockerClient.exec(this.container, command)));
-    return commandResults.some(result => result.exitCode === 0);
+    const commandResults = await Promise.all(
+      commands.map((command) => this.dockerClient.exec(this.container, command))
+    );
+    return commandResults.some((result) => result.exitCode === 0);
   }
 }

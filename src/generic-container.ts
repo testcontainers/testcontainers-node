@@ -18,7 +18,7 @@ import {
   ExecResult,
   HealthCheck,
   NetworkMode,
-  TmpFs
+  TmpFs,
 } from "./docker-client";
 import { DockerClientFactory, DockerodeClientFactory, Host } from "./docker-client-factory";
 import log from "./logger";
@@ -32,7 +32,7 @@ import {
   OptionalStopOptions,
   StartedTestContainer,
   StoppedTestContainer,
-  TestContainer
+  TestContainer,
 } from "./test-container";
 import { RandomUuid, Uuid } from "./uuid";
 import { HostPortWaitStrategy, WaitStrategy } from "./wait-strategy";
@@ -123,14 +123,14 @@ export class GenericContainer implements TestContainer {
       networkMode: this.networkMode,
       healthCheck: this.healthCheck,
       useDefaultLogDriver: this.useDefaultLogDriver,
-      privilegedMode: this.privilegedMode
+      privilegedMode: this.privilegedMode,
     });
 
     await this.dockerClient.start(container);
 
     (await container.logs())
-      .on("data", data => log.trace(`${container.getId()}: ${data}`))
-      .on("err", data => log.error(`${container.getId()}: ${data}`));
+      .on("data", (data) => log.trace(`${container.getId()}: ${data}`))
+      .on("err", (data) => log.error(`${container.getId()}: ${data}`));
 
     const inspectResult = await container.inspect();
     const containerState = new ContainerState(inspectResult);
@@ -218,7 +218,7 @@ export class GenericContainer implements TestContainer {
 
   public async isImageCached(): Promise<boolean> {
     const repoTags = await this.dockerClient.fetchRepoTags();
-    return repoTags.some(repoTag => repoTag.equals(this.repoTag));
+    return repoTags.some((repoTag) => repoTag.equals(this.repoTag));
   }
 
   protected isCreating?(boundPorts: BoundPorts): void;

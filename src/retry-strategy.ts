@@ -25,7 +25,7 @@ abstract class AbstractRetryStrategy<T, U> implements RetryStrategy<T, U> {
   }
 
   protected wait(duration: Duration): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, duration.get(TemporalUnit.MILLISECONDS)));
+    return new Promise((resolve) => setTimeout(resolve, duration.get(TemporalUnit.MILLISECONDS)));
   }
 }
 

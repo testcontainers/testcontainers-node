@@ -64,7 +64,7 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
 
     await retryStrategy.retryUntil(
       () => portCheck.isBound(port),
-      isBound => isBound,
+      (isBound) => isBound,
       () => {
         const timeout = this.startupTimeout.get(TemporalUnit.MILLISECONDS);
         throw new Error(`Port ${port} not bound after ${timeout}ms`);
@@ -87,12 +87,12 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
 
       const stream = await container.logs();
       stream
-        .on("data", line => {
+        .on("data", (line) => {
           if (line.includes(this.message)) {
             resolve();
           }
         })
-        .on("err", line => {
+        .on("err", (line) => {
           if (line.includes(this.message)) {
             resolve();
           }
@@ -114,7 +114,7 @@ export class HealthCheckWaitStrategy extends AbstractWaitStrategy {
 
     await retryStrategy.retryUntil(
       async () => (await container.inspect()).healthCheckStatus,
-      status => status === "healthy",
+      (status) => status === "healthy",
       () => {
         const timeout = this.startupTimeout.get(TemporalUnit.MILLISECONDS);
         throw new Error(`Health check not healthy after ${timeout}ms`);

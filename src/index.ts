@@ -3,7 +3,7 @@ export { TestContainer, StartedTestContainer, StoppedTestContainer } from "./tes
 export {
   DockerComposeEnvironment,
   StartedDockerComposeEnvironment,
-  StoppedDockerComposeEnvironment
+  StoppedDockerComposeEnvironment,
 } from "./docker-compose-environment";
 export { Wait } from "./wait";
 export { PullPolicy, DefaultPullPolicy, AlwaysPullPolicy } from "./pull-policy";

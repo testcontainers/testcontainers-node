@@ -18,7 +18,7 @@ export class Network {
       attachable: false,
       ingress: false,
       enableIPv6: false,
-      ...createNetworkOptions
+      ...createNetworkOptions,
     };
   }
 
