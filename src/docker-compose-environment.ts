@@ -60,7 +60,7 @@ export class DockerComposeEnvironment {
         await this.waitForContainer(container, containerName, containerState, boundPorts);
 
         return new StartedGenericContainer(
-          await this.dockerClient.getContainer(startedContainer.Id),
+          container,
           this.dockerClient.getHost(),
           boundPorts,
           containerName,
