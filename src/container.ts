@@ -61,13 +61,13 @@ export class DockerodeContainer implements Container {
 
   public stop(options: StopOptions): Promise<void> {
     return this.container.stop({
-      t: options.timeout.get(TemporalUnit.SECONDS)
+      t: options.timeout.get(TemporalUnit.SECONDS),
     });
   }
 
   public remove(options: RemoveOptions): Promise<void> {
     return this.container.remove({
-      v: options.removeVolumes
+      v: options.removeVolumes,
     });
   }
 
@@ -76,7 +76,7 @@ export class DockerodeContainer implements Container {
       await this.container.exec({
         Cmd: options.cmd,
         AttachStdout: options.attachStdout,
-        AttachStderr: options.attachStderr
+        AttachStderr: options.attachStderr,
       })
     );
   }
@@ -86,7 +86,7 @@ export class DockerodeContainer implements Container {
       const options = {
         follow: true,
         stdout: true,
-        stderr: true
+        stderr: true,
       };
 
       this.container.logs(options, (err, stream) => {
@@ -110,7 +110,7 @@ export class DockerodeContainer implements Container {
       hostPorts: this.getHostPorts(inspectResult),
       internalPorts: this.getInternalPorts(inspectResult),
       name: this.getName(inspectResult),
-      healthCheckStatus: this.getHealthCheckStatus(inspectResult)
+      healthCheckStatus: this.getHealthCheckStatus(inspectResult),
     };
   }
 
@@ -119,13 +119,13 @@ export class DockerodeContainer implements Container {
   }
 
   private getInternalPorts(inspectInfo: ContainerInspectInfo): Port[] {
-    return Object.keys(inspectInfo.NetworkSettings.Ports).map(port => Number(port.split("/")[0]));
+    return Object.keys(inspectInfo.NetworkSettings.Ports).map((port) => Number(port.split("/")[0]));
   }
 
   private getHostPorts(inspectInfo: ContainerInspectInfo): Port[] {
     return Object.values(inspectInfo.NetworkSettings.Ports)
-      .filter(portsArray => portsArray !== null)
-      .map(portsArray => Number(portsArray[0].HostPort));
+      .filter((portsArray) => portsArray !== null)
+      .map((portsArray) => Number(portsArray[0].HostPort));
   }
 
   private getHealthCheckStatus(inspectResult: ContainerInspectInfo): HealthCheckStatus {

@@ -27,11 +27,11 @@ describe("GenericContainer", () => {
   };
 
   afterEach(async () => {
-    await Promise.all(managedContainers.map(container => container.stop()));
+    await Promise.all(managedContainers.map((container) => container.stop()));
     managedContainers = [];
 
     await Promise.all(
-      managedStreams.map(stream => {
+      managedStreams.map((stream) => {
         // @ts-ignore
         return stream.destroy();
       })
@@ -68,10 +68,7 @@ describe("GenericContainer", () => {
     const context = path.resolve(fixtures, "docker-with-health-check");
     const customGenericContainer = await GenericContainer.fromDockerfile(context).build();
     const container = manageContainer(
-      await customGenericContainer
-        .withExposedPorts(8080)
-        .withWaitStrategy(Wait.forHealthCheck())
-        .start()
+      await customGenericContainer.withExposedPorts(8080).withWaitStrategy(Wait.forHealthCheck()).start()
     );
     const url = `http://${container.getContainerIpAddress()}:${container.getMappedPort(8080)}`;
 
@@ -89,7 +86,7 @@ describe("GenericContainer", () => {
           interval: new Duration(1, TemporalUnit.SECONDS),
           timeout: new Duration(3, TemporalUnit.SECONDS),
           retries: 5,
-          startPeriod: new Duration(1, TemporalUnit.SECONDS)
+          startPeriod: new Duration(1, TemporalUnit.SECONDS),
         })
         .withWaitStrategy(Wait.forHealthCheck())
         .start()
@@ -197,7 +194,7 @@ describe("GenericContainer", () => {
 
     expect(containerInfo.HostConfig.LogConfig).toEqual({
       Type: "json-file",
-      Config: {}
+      Config: {},
     });
   });
 
@@ -232,9 +229,9 @@ describe("GenericContainer", () => {
         .start()
     );
 
-    const statuses = await new Promise(resolve => {
+    const statuses = await new Promise((resolve) => {
       const eventStatuses: string[] = [];
-      events.on("data", data => {
+      events.on("data", (data) => {
         const status = JSON.parse(data).status;
         eventStatuses.push(status);
         if (status === "create") {
@@ -262,9 +259,9 @@ describe("GenericContainer", () => {
       await new GenericContainer("cristianrgreco/testcontainer", "1.1.12").withExposedPorts(8080).start()
     );
 
-    const log = await new Promise(async resolve => {
+    const log = await new Promise(async (resolve) => {
       const stream = await container.logs();
-      stream.on("data", line => resolve(line));
+      stream.on("data", (line) => resolve(line));
     });
 
     expect(log).toContain("Listening on port 8080");
@@ -312,9 +309,7 @@ describe("GenericContainer", () => {
 
     it("should set build arguments", async () => {
       const context = path.resolve(fixtures, "docker-with-buildargs");
-      const container = await GenericContainer.fromDockerfile(context)
-        .withBuildArg("VERSION", "10-alpine")
-        .build();
+      const container = await GenericContainer.fromDockerfile(context).withBuildArg("VERSION", "10-alpine").build();
       const startedContainer = manageContainer(await container.withExposedPorts(8080).start());
 
       const url = `http://${startedContainer.getContainerIpAddress()}:${startedContainer.getMappedPort(8080)}`;

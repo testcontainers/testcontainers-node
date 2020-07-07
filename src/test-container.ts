@@ -10,7 +10,7 @@ import {
   EnvValue,
   ExecResult,
   NetworkMode,
-  TmpFs
+  TmpFs,
 } from "./docker-client";
 import { Host } from "./docker-client-factory";
 import { Port } from "./port";
@@ -45,7 +45,7 @@ interface StopOptions {
 
 export const DEFAULT_STOP_OPTIONS: StopOptions = {
   timeout: new Duration(10, TemporalUnit.SECONDS),
-  removeVolumes: true
+  removeVolumes: true,
 };
 
 export interface StartedTestContainer {
