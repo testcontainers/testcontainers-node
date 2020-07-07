@@ -70,9 +70,6 @@
     }
   },
   "lint-staged": {
-    "package.json": [
-      "prettier --write"
-    ],
     "src/**/*.ts": [
       "prettier --write",
       "tslint --fix"
