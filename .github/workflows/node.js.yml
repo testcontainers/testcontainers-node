@@ -42,4 +42,4 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - run: docker run -i --rm -v /var/run/docker.sock:/var/run/docker.sock -v "$HOME:$HOME" -v "$PWD:$PWD" -w "$PWD" node:${{ matrix.node-image-version }} npm ci && npm test
+    - run: docker run -i --rm -v /var/run/docker.sock:/var/run/docker.sock -v "$HOME:$HOME" -v "$PWD:$PWD" -w "$PWD" node:${{ matrix.node-image-version }} echo "Creating /.dockerenv" && touch /.dockerenv && npm ci && npm test
