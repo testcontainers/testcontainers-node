@@ -16,7 +16,7 @@ jobs:
 
     strategy:
       matrix:
-        os-version: [ubuntu-latest]
+        os-version: [ubuntu-latest, windows-latest]
         node-version: [10.x, 12.x, 14.x]
 
     steps:
@@ -42,4 +42,4 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - run: docker run -i --rm -v /var/run/docker.sock:/var/run/docker.sock -v "$HOME:$HOME" -v "$PWD:$PWD" -w "$PWD" node:${{ matrix.node-image-version }} touch /.dockerenv && npm ci && npm test
+    - run: docker run -i --rm -v /var/run/docker.sock:/var/run/docker.sock -v "$HOME:$HOME" -v "$PWD:$PWD" -w "$PWD" node:${{ matrix.node-image-version }} npm ci && npm test
