@@ -1,4 +1,4 @@
-import {CreateNetworkOptions, DockerClient} from "./docker-client";
+import { CreateNetworkOptions, DockerClient } from "./docker-client";
 import { DockerClientFactory } from "./docker-client-factory";
 import { RandomUuid, Uuid } from "./uuid";
 

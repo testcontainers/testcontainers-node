@@ -22,8 +22,7 @@ export class DockerComposeEnvironment {
   private waitStrategy: { [containerName: string]: WaitStrategy } = {};
   private startupTimeout: Duration = new Duration(60_000, TemporalUnit.MILLISECONDS);
 
-  constructor(private readonly composeFilePath: string, private readonly composeFile: string) {
-  }
+  constructor(private readonly composeFilePath: string, private readonly composeFile: string) {}
 
   public withWaitStrategy(containerName: string, waitStrategy: WaitStrategy): this {
     this.waitStrategy[containerName] = waitStrategy;

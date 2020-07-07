@@ -1,5 +1,5 @@
 import fs from "fs";
-import Dockerode, {NetworkInspectInfo} from "dockerode";
+import Dockerode, { NetworkInspectInfo } from "dockerode";
 import { DockerClient, DockerodeClient } from "./docker-client";
 import log from "./logger";
 
@@ -44,7 +44,7 @@ export class DockerClientFactory {
           log.info(`Using Docker host from gateway without IPAM: ${host}, socket path: ${socketPath}`);
           return host;
         } else {
-          const gateways = networkInfo.IPAM.Config.filter(config => !!config.Gateway);
+          const gateways = networkInfo.IPAM.Config.filter((config) => !!config.Gateway);
           if (gateways.length > 0) {
             const host = gateways[0].Gateway;
             log.info(`Using Docker host from gateway with IPAM: ${host}, socket path: ${socketPath}`);

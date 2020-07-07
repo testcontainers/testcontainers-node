@@ -132,13 +132,7 @@ export class GenericContainer implements TestContainer {
 
     await this.waitForContainer(dockerClient, container, containerState, boundPorts);
 
-    return new StartedGenericContainer(
-      container,
-      dockerClient.getHost(),
-      boundPorts,
-      inspectResult.name,
-      dockerClient
-    );
+    return new StartedGenericContainer(container, dockerClient.getHost(), boundPorts, inspectResult.name, dockerClient);
   }
 
   public withAuthentication(authConfig: AuthConfig): this {
@@ -219,7 +213,7 @@ export class GenericContainer implements TestContainer {
   protected isCreating?(boundPorts: BoundPorts): void;
 
   private async waitForContainer(
-      dockerClient: DockerClient,
+    dockerClient: DockerClient,
     container: Container,
     containerState: ContainerState,
     boundPorts: BoundPorts
