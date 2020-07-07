@@ -1,5 +1,5 @@
-import { CreateNetworkOptions } from "./docker-client";
-import { DockerodeClientFactory } from "./docker-client-factory";
+import { CreateNetworkOptions, DockerClient } from "./docker-client";
+import { DockerClientFactory } from "./docker-client-factory";
 import { RandomUuid, Uuid } from "./uuid";
 
 export class Network {
@@ -7,8 +7,7 @@ export class Network {
 
   constructor(
     createNetworkOptions: Partial<CreateNetworkOptions> = {},
-    private readonly uuid: Uuid = new RandomUuid(),
-    private readonly dockerClientFactory: DockerodeClientFactory = new DockerodeClientFactory()
+    private readonly uuid: Uuid = new RandomUuid()
   ) {
     this.createNetworkOptions = {
       name: this.uuid.nextUuid(),
@@ -23,8 +22,9 @@ export class Network {
   }
 
   public async start(): Promise<StartedNetwork> {
-    const id = await this.dockerClientFactory.getClient().createNetwork(this.createNetworkOptions);
-    return new StartedNetwork(id, this.createNetworkOptions, this.dockerClientFactory);
+    const dockerClient = await DockerClientFactory.getClient();
+    const id = await dockerClient.createNetwork(this.createNetworkOptions);
+    return new StartedNetwork(id, this.createNetworkOptions, dockerClient);
   }
 }
 
@@ -32,7 +32,7 @@ export class StartedNetwork {
   constructor(
     private readonly id: string,
     private readonly options: CreateNetworkOptions,
-    private readonly dockerClientFactory: DockerodeClientFactory
+    private readonly dockerClient: DockerClient
   ) {}
 
   public getId(): string {
@@ -44,6 +44,6 @@ export class StartedNetwork {
   }
 
   public async stop(): Promise<void> {
-    return this.dockerClientFactory.getClient().removeNetwork(this.id);
+    return this.dockerClient.removeNetwork(this.id);
   }
 }

@@ -1,82 +1,60 @@
-import defaultGateway from "default-gateway";
-import Dockerode from "dockerode";
 import fs from "fs";
-import url from "url";
+import Dockerode, { NetworkInspectInfo } from "dockerode";
 import { DockerClient, DockerodeClient } from "./docker-client";
 import log from "./logger";
 
 export type Host = string;
 
-export interface DockerClientFactory {
-  getClient(): DockerClient;
-  getHost(): Host;
-}
+export class DockerClientFactory {
+  private static client?: DockerClient;
 
-export class DockerodeClientFactory implements DockerClientFactory {
-  private readonly host: Host;
-  private readonly client: DockerClient;
-
-  constructor() {
-    if (process.env.DOCKER_HOST) {
-      const { host, client } = this.fromDockerHost(process.env.DOCKER_HOST);
-      this.host = host;
-      this.client = client;
-    } else if (process.env.CODEBUILD_BUILD_NUMBER) {
-      const { host, client } = this.fromDefaults();
-      this.host = host;
-      this.client = client;
-    } else if (fs.existsSync("/.dockerenv")) {
-      const { host, client } = this.fromDockerWormhole();
-      this.host = host;
-      this.client = client;
+  public static async getClient(): Promise<DockerClient> {
+    if (this.client) {
+      return this.client;
     } else {
-      const { host, client } = this.fromDefaults();
-      this.host = host;
-      this.client = client;
+      const dockerode = new Dockerode();
+      const host = await this.getHost(dockerode);
+      this.client = new DockerodeClient(host, dockerode);
+      return this.client;
     }
   }
 
-  public getClient(): DockerClient {
-    return this.client;
-  }
+  private static async getHost(dockerode: Dockerode): Promise<Host> {
+    const modem = dockerode.modem;
 
-  public getHost(): Host {
-    return this.host;
-  }
-
-  private fromDefaults() {
-    log.info("Using Docker defaults");
-
-    const host = "localhost";
-    const dockerode = new Dockerode();
-    const client = new DockerodeClient(host, dockerode);
-
-    return { host, client };
-  }
-
-  private fromDockerHost(dockerHost: string) {
-    log.info(`Using Docker configuration from DOCKER_HOST: ${dockerHost}`);
-
-    const { hostname: host, port } = url.parse(dockerHost);
-    if (!host || !port) {
-      throw new Error(`Invalid format for DOCKER_HOST, found: ${dockerHost}`);
+    if (process.env.DOCKER_HOST) {
+      log.info(`Detected DOCKER_HOST environment variable: ${process.env.DOCKER_HOST}`);
     }
 
-    const dockerode = new Dockerode({ host, port });
-    const client = new DockerodeClient(host, dockerode);
-
-    return { host, client };
-  }
-
-  private fromDockerWormhole() {
-    log.info("Using Docker in Docker method");
-
-    const { gateway } = defaultGateway.v4.sync();
-
-    const host = gateway;
-    const dockerode = new Dockerode();
-    const client = new DockerodeClient(host, dockerode);
-
-    return { host, client };
+    if (modem.host) {
+      const host = modem.host;
+      log.info(`Using Docker host from modem: ${host}`);
+      return host;
+    } else {
+      const socketPath = modem.socketPath;
+      if (!fs.existsSync("/.dockerenv")) {
+        const host = "localhost";
+        log.info(`Using default Docker host: ${host}, socket path: ${socketPath}`);
+        return host;
+      } else {
+        const network: NetworkInspectInfo = await dockerode.getNetwork("bridge").inspect();
+        if (!network.IPAM || !network.IPAM.Config) {
+          const host = "localhost";
+          log.info(`Using Docker host from gateway without IPAM: ${host}, socket path: ${socketPath}`);
+          return host;
+        } else {
+          const gateways = network.IPAM.Config.filter((config) => !!config.Gateway);
+          if (gateways.length > 0) {
+            const host = gateways[0].Gateway;
+            log.info(`Using Docker host from gateway with IPAM: ${host}, socket path: ${socketPath}`);
+            return host;
+          } else {
+            const host = "localhost";
+            log.info(`Using Docker host from gateway with IPAM without gateway: ${host}, socket path: ${socketPath}`);
+            return host;
+          }
+        }
+      }
+    }
   }
 }
