@@ -8,7 +8,7 @@ describe("resolveDockerComposeContainerName", () => {
     expect(resolveDockerComposeContainerName(name)).toBe(expected);
   });
 
-  describe('from generated', () => {
+  describe("from generated", () => {
     it("should remove docker-compose label", () => {
       const name = "docker-compose_container_1";
       const expected = "container_1";
@@ -32,8 +32,8 @@ describe("resolveDockerComposeContainerName", () => {
 
     it("should throw error if unable to resolve container name", () => {
       expect(() => resolveDockerComposeContainerName("docker-compose_")).toThrowError(
-          `Unable to resolve container name for: "docker-compose_"`
+        `Unable to resolve container name for: "docker-compose_"`
       );
     });
-  })
+  });
 });
