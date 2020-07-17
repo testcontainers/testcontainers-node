@@ -1,0 +1,7 @@
+version: "3"
+services:
+  db:
+    container_name: custom_container_name
+    image: cristianrgreco/testcontainer:1.1.12
+    ports:
+      - 8080
