@@ -62,11 +62,6 @@ export type AuthConfig = {
   email?: string;
 };
 
-export type LogConfig = {
-  logDriver: string;
-  logOpts?: object;
-};
-
 type DockerodeLogConfig = {
   Type: string;
   Config: any;

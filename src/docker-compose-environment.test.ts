@@ -46,6 +46,17 @@ describe("DockerComposeEnvironment", () => {
     );
   });
 
+  it("should start container with a given name", async () => {
+    const startedEnvironment = manageEnvironment(
+      await new DockerComposeEnvironment(fixtures, "docker-compose-with-name.yml").up()
+    );
+
+    const container = startedEnvironment.getContainer("custom_container_name");
+    const url = `http://${container.getContainerIpAddress()}:${container.getMappedPort(8080)}`;
+    const response = await fetch(`${url}/hello-world`);
+    expect(response.status).toBe(200);
+  });
+
   it("should support non-default wait strategies", async () => {
     const startedEnvironment = manageEnvironment(
       await new DockerComposeEnvironment(fixtures, "docker-compose.yml")
