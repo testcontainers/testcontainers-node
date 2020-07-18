@@ -54,6 +54,7 @@
     "@types/tar-fs": "^2.0.0",
     "husky": "^4.2.5",
     "jest": "^26.1.0",
+    "kafkajs": "^1.12.0",
     "lint-staged": "^10.2.11",
     "node-fetch": "^2.6.0",
     "prettier": "^2.0.5",

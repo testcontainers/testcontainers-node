@@ -104,7 +104,7 @@ export class GenericContainer implements TestContainer {
     const boundPorts = await new PortBinder().bind(this.ports);
 
     if (this.isCreating) {
-      this.isCreating(boundPorts);
+      this.isCreating(dockerClient, boundPorts);
     }
 
     const container = await dockerClient.create({
@@ -210,7 +210,7 @@ export class GenericContainer implements TestContainer {
     return repoTags.some((repoTag) => repoTag.equals(this.repoTag));
   }
 
-  protected isCreating?(boundPorts: BoundPorts): void;
+  protected isCreating?(dockerClient: DockerClient, boundPorts: BoundPorts): void;
 
   private async waitForContainer(
     dockerClient: DockerClient,
