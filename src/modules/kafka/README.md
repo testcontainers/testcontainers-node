@@ -6,7 +6,7 @@ Using the built-in ZooKeeper:
 
 ```javascript
 const { Kafka } = require("kafkajs");
-const { KafkaContainer } = require("./kafka-container");
+const { KafkaContainer } = require("testcontainers");
 
 const container = await new KafkaContainer("confluentinc/cp-kafka", "latest", "kafka")
   .withExposedPorts(9093)
@@ -24,7 +24,7 @@ Providing your own ZooKeeper:
 
 ```javascript
 const { Kafka } = require("kafkajs");
-const { KafkaContainer, Network } = require("./kafka-container");
+const { KafkaContainer, Network } = require("testcontainers");
 
 const ZOO_KEEPER_HOST = "zookeeper";
 const ZOO_KEEPER_PORT = 2181;
