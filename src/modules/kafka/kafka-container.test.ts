@@ -1,8 +1,8 @@
-import { Kafka, Producer } from "kafkajs";
-import { KafkaContainer } from "./kafka-container";
-import { Network, StartedNetwork } from "../../network";
-import { GenericContainer } from "../../generic-container";
-import { StartedTestContainer } from "../../test-container";
+import {Consumer, Kafka, logLevel, Producer} from "kafkajs";
+import {KafkaContainer} from "./kafka-container";
+import {Network, StartedNetwork} from "../../network";
+import {GenericContainer} from "../../generic-container";
+import {StartedTestContainer} from "../../test-container";
 
 describe("KafkaContainer", () => {
   jest.setTimeout(120000);
@@ -10,6 +10,7 @@ describe("KafkaContainer", () => {
   let managedContainers: StartedTestContainer[] = [];
   let managedNetworks: StartedNetwork[] = [];
   let managedProducers: Producer[] = [];
+  let managedConsumers: Consumer[] = [];
 
   const manageContainer = (container: StartedTestContainer): StartedTestContainer => {
     managedContainers.push(container);
@@ -26,9 +27,16 @@ describe("KafkaContainer", () => {
     return producer;
   };
 
+  const manageConsumer = (consumer: Consumer): Consumer => {
+    managedConsumers.push(consumer);
+    return consumer;
+  };
+
   afterEach(async () => {
     await Promise.all(managedProducers.map((producer) => producer.disconnect()));
     managedProducers = [];
+    await Promise.all(managedConsumers.map((consumer) => consumer.disconnect()));
+    managedConsumers = [];
     await Promise.all(managedContainers.map((container) => container.stop()));
     managedContainers = [];
     await Promise.all(managedNetworks.map((network) => network.stop()));
@@ -39,18 +47,8 @@ describe("KafkaContainer", () => {
     const kafkaContainer = manageContainer(
       await new KafkaContainer("confluentinc/cp-kafka", "latest", "kafka").withExposedPorts(9093).start()
     );
-    const client = new Kafka({
-      brokers: [`${kafkaContainer.getContainerIpAddress()}:${kafkaContainer.getMappedPort(9093)}`],
-    });
-    const producer = manageProducer(client.producer());
-    await producer.connect();
 
-    const result = await producer.send({
-      topic: "test-topic",
-      messages: [{ value: "test message" }],
-    });
-
-    expect(result).toBeDefined();
+    await testPubSub(kafkaContainer);
   });
 
   it("should connect to kafka using provided zookeeper", async () => {
@@ -63,29 +61,45 @@ describe("KafkaContainer", () => {
         .withName(zooKeeperHost)
         .withEnv("ZOOKEEPER_CLIENT_PORT", zooKeeperPort.toString())
         .withNetworkMode(network.getName())
+        .withExposedPorts(zooKeeperPort)
         .start()
     );
 
     const kafkaContainer = manageContainer(
       await new KafkaContainer("confluentinc/cp-kafka", "latest", "kafka")
+        .withNetworkMode(network.getName())
         .withZooKeeper(zooKeeperHost, zooKeeperPort)
         .withExposedPorts(9093)
-        .withNetworkMode(network.getName())
         .start()
     );
 
-    const client = new Kafka({
+    await testPubSub(kafkaContainer);
+  });
+
+  const testPubSub = async (kafkaContainer: StartedTestContainer) => {
+    const kafka = new Kafka({
+      logLevel: logLevel.NOTHING,
       brokers: [`${kafkaContainer.getContainerIpAddress()}:${kafkaContainer.getMappedPort(9093)}`],
     });
 
-    const producer = manageProducer(client.producer());
+    const producer = manageProducer(kafka.producer());
     await producer.connect();
 
-    const result = await producer.send({
+    const consumer = manageConsumer(kafka.consumer({ groupId: "test-group" }))
+    await consumer.connect()
+
+    await producer.send({
       topic: "test-topic",
       messages: [{ value: "test message" }],
     });
 
-    expect(result).toBeDefined();
-  });
+    await consumer.subscribe({ topic: 'test-topic', fromBeginning: true })
+    const consumedMessage = await new Promise(async resolve => {
+      await consumer.run({
+        eachMessage: async ({message}) => resolve(message.value.toString())
+      })
+    });
+
+    expect(consumedMessage).toBe("test message");
+  }
 });
