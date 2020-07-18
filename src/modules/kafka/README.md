@@ -35,6 +35,7 @@ const zooKeeperContainer = await new GenericContainer("confluentinc/cp-zookeeper
   .withName(ZOO_KEEPER_HOST)
   .withEnv("ZOOKEEPER_CLIENT_PORT", ZOO_KEEPER_PORT.toString())
   .withNetworkMode(network.getName())
+  .withExposedPorts(ZOO_KEEPER_PORT)
   .start();
 
 const kafkaContainer = await new KafkaContainer("confluentinc/cp-kafka", "latest", "kafka")
