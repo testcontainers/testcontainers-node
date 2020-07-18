@@ -90,6 +90,8 @@ export class GenericContainer implements TestContainer {
   private authConfig?: AuthConfig;
   private pullPolicy: PullPolicy = new DefaultPullPolicy();
 
+  protected sidecarContainers: StartedTestContainer[] = [];
+
   constructor(readonly image: Image, readonly tag: Tag = "latest") {
     this.repoTag = new RepoTag(image, tag);
   }
@@ -103,8 +105,8 @@ export class GenericContainer implements TestContainer {
 
     const boundPorts = await new PortBinder().bind(this.ports);
 
-    if (this.isCreating) {
-      this.isCreating(dockerClient, boundPorts);
+    if (this.preCreate) {
+      await this.preCreate(dockerClient, boundPorts);
     }
 
     const container = await dockerClient.create({
@@ -132,7 +134,14 @@ export class GenericContainer implements TestContainer {
 
     await this.waitForContainer(dockerClient, container, containerState, boundPorts);
 
-    return new StartedGenericContainer(container, dockerClient.getHost(), boundPorts, inspectResult.name, dockerClient);
+    return new StartedGenericContainer(
+      container,
+      this.sidecarContainers,
+      dockerClient.getHost(),
+      boundPorts,
+      inspectResult.name,
+      dockerClient
+    );
   }
 
   public withAuthentication(authConfig: AuthConfig): this {
@@ -210,7 +219,7 @@ export class GenericContainer implements TestContainer {
     return repoTags.some((repoTag) => repoTag.equals(this.repoTag));
   }
 
-  protected isCreating?(dockerClient: DockerClient, boundPorts: BoundPorts): void;
+  protected preCreate?(dockerClient: DockerClient, boundPorts: BoundPorts): Promise<void>;
 
   private async waitForContainer(
     dockerClient: DockerClient,
@@ -237,6 +246,7 @@ export class GenericContainer implements TestContainer {
 export class StartedGenericContainer implements StartedTestContainer {
   constructor(
     private readonly container: Container,
+    private readonly sidecarContainers: StartedTestContainer[],
     private readonly host: Host,
     private readonly boundPorts: BoundPorts,
     private readonly name: ContainerName,
@@ -244,6 +254,12 @@ export class StartedGenericContainer implements StartedTestContainer {
   ) {}
 
   public async stop(options: OptionalStopOptions = {}): Promise<StoppedTestContainer> {
+    await Promise.all(this.sidecarContainers.map((sidecarContainer) => sidecarContainer.stop(options)));
+    return await this.stopContainer(options);
+  }
+
+  private async stopContainer(options: OptionalStopOptions = {}): Promise<StoppedGenericContainer> {
+    log.info("Stopping container");
     const resolvedOptions = { ...DEFAULT_STOP_OPTIONS, ...options };
     await this.container.stop({ timeout: resolvedOptions.timeout });
     await this.container.remove({ removeVolumes: resolvedOptions.removeVolumes });

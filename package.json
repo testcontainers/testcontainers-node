@@ -26,7 +26,7 @@
     "build": "npm run clean && tsc",
     "clean": "rimraf dist",
     "test": "DEBUG=testcontainers jest",
-    "format": "prettier --write package.json src/**/*.ts",
+    "format": "prettier --write package.json 'src/**/*.ts'",
     "version:major": "npm --no-git-tag-version version major",
     "version:minor": "npm --no-git-tag-version version minor",
     "version:patch": "npm --no-git-tag-version version patch"

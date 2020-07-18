@@ -1,73 +1,91 @@
 import { Kafka, Producer } from "kafkajs";
-import { Network, StartedNetwork } from "../network";
-import { StartedTestContainer } from "../test-container";
-import { GenericContainer } from "../generic-container";
 import { KafkaContainer } from "./kafka-container";
+import { Network, StartedNetwork } from "../network";
+import { GenericContainer } from "../generic-container";
+import { StartedTestContainer } from "../test-container";
 
 describe("KafkaContainer", () => {
   jest.setTimeout(120000);
 
-  let network: StartedNetwork;
-  let kafkaContainer: StartedTestContainer;
-  let zookeeperContainer: StartedTestContainer;
+  let managedContainers: StartedTestContainer[] = [];
+  let managedNetworks: StartedNetwork[] = [];
+  let managedProducers: Producer[] = [];
 
-  let client: Kafka;
-  let producer: Producer;
+  const manageContainer = (container: StartedTestContainer): StartedTestContainer => {
+    managedContainers.push(container);
+    return container;
+  };
 
-  beforeAll(async () => {
-    network = await new Network().start();
+  const manageNetwork = (network: StartedNetwork): StartedNetwork => {
+    managedNetworks.push(network);
+    return network;
+  };
 
-    const ZOOKEEPER_IMAGE = "confluentinc/cp-zookeeper";
-    const ZOOKEEPER_HOST_NAME = "zookeeper";
-    const ZOOKEEPER_PORT = 2181;
-    zookeeperContainer = await new GenericContainer(ZOOKEEPER_IMAGE)
-      .withName(ZOOKEEPER_HOST_NAME)
-      .withEnv("ZOOKEEPER_CLIENT_PORT", ZOOKEEPER_PORT.toString())
-      .withNetworkMode(network.getName())
-      .start();
+  const manageProducer = (producer: Producer): Producer => {
+    managedProducers.push(producer);
+    return producer;
+  };
 
-    const KAFKA_IMAGE = "confluentinc/cp-kafka";
-    const KAFKA_TAG = "latest";
-    const KAFKA_HOST_NAME = "kafka";
-    const KAFKA_PORT = 9093;
-    const KAFKA_BROKER_PORT = 9092;
-    kafkaContainer = await new KafkaContainer(
-      KAFKA_IMAGE,
-      KAFKA_TAG,
-      KAFKA_PORT,
-      KAFKA_HOST_NAME,
-      KAFKA_BROKER_PORT,
-      ZOOKEEPER_HOST_NAME,
-      ZOOKEEPER_PORT
-    )
-      .withExposedPorts(KAFKA_PORT)
-      .withNetworkMode(network.getName())
-      .start();
+  afterEach(async () => {
+    await Promise.all(managedProducers.map((producer) => producer.disconnect()));
+    managedProducers = [];
+    await Promise.all(managedContainers.map((container) => container.stop()));
+    managedContainers = [];
+    await Promise.all(managedNetworks.map((network) => network.stop()));
+    managedNetworks = [];
+  });
 
-    const clientOptions = {
-      brokers: [`${kafkaContainer.getContainerIpAddress()}:${kafkaContainer.getMappedPort(KAFKA_PORT)}`],
-    };
-    client = new Kafka(clientOptions);
-
-    producer = client.producer();
+  it("should connect to kafka using in-built zookeeper", async () => {
+    const kafkaContainer = manageContainer(
+      await new KafkaContainer("confluentinc/cp-kafka", "latest", "kafka").withExposedPorts(9093).start()
+    );
+    const client = new Kafka({
+      brokers: [`${kafkaContainer.getContainerIpAddress()}:${kafkaContainer.getMappedPort(9093)}`],
+    });
+    const producer = manageProducer(client.producer());
     await producer.connect();
+
+    const result = await producer.send({
+      topic: "test-topic",
+      messages: [{ value: "test message" }],
+    });
+
+    expect(result).toBeDefined();
   });
 
-  afterAll(async () => {
-    await producer?.disconnect();
-    await kafkaContainer?.stop();
-    await zookeeperContainer?.stop();
-    await network?.stop();
-  });
+  it("should connect to kafka using provided zookeeper", async () => {
+    const network = manageNetwork(await new Network().start());
 
-  // write tests e.g. producer test
+    const zooKeeperHost = "zookeeper";
+    const zooKeeperPort = 2181;
+    manageContainer(
+      await new GenericContainer("confluentinc/cp-zookeeper", "latest")
+        .withName(zooKeeperHost)
+        .withEnv("ZOOKEEPER_CLIENT_PORT", zooKeeperPort.toString())
+        .withNetworkMode(network.getName())
+        .start()
+    );
 
-  it("connects to kafka cluster and sends a message", async () => {
-    await expect(
-      producer.send({
-        topic: "test-topic",
-        messages: [{ value: "test message" }],
-      })
-    ).resolves.toBeDefined();
+    const kafkaContainer = manageContainer(
+      await new KafkaContainer("confluentinc/cp-kafka", "latest", "kafka")
+        .withZooKeeper(zooKeeperHost, zooKeeperPort)
+        .withExposedPorts(9093, 9092)
+        .withNetworkMode(network.getName())
+        .start()
+    );
+
+    const client = new Kafka({
+      brokers: [`${kafkaContainer.getContainerIpAddress()}:${kafkaContainer.getMappedPort(9093)}`],
+    });
+
+    const producer = manageProducer(client.producer());
+    await producer.connect();
+
+    const result = await producer.send({
+      topic: "test-topic",
+      messages: [{ value: "test message" }],
+    });
+
+    expect(result).toBeDefined();
   });
 });
