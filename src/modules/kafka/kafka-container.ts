@@ -16,9 +16,10 @@ export class KafkaContainer extends GenericContainer {
   private zooKeeperHost?: Host;
   private zooKeeperPort?: Port;
 
-  constructor(readonly image: Image, readonly tag: Tag = "latest", private readonly kafkaName: string) {
+  constructor(readonly image: Image = "confluentinc/cp-kafka", readonly tag: Tag = "latest", readonly host?: Host) {
     super(image, tag);
-    this.withName(kafkaName)
+    this.host = host === undefined ? this.uuid.nextUuid() : host;
+    this.withName(this.host)
       .withEnv(
         "KAFKA_LISTENER_SECURITY_PROTOCOL_MAP",
         "BROKER:PLAINTEXT,EXTERNAL_LISTENER:PLAINTEXT,PLAINTEXT:PLAINTEXT"
@@ -44,7 +45,7 @@ export class KafkaContainer extends GenericContainer {
     this.withEnv("KAFKA_LISTENERS", `EXTERNAL_LISTENER://0.0.0.0:${kafkaPort},BROKER://0.0.0.0:${kafkaBrokerPort}`);
     this.withEnv(
       "KAFKA_ADVERTISED_LISTENERS",
-      `EXTERNAL_LISTENER://${dockerClient.getHost()}:${kafkaInternalPort},BROKER://${this.kafkaName}:${kafkaBrokerPort}`
+      `EXTERNAL_LISTENER://${dockerClient.getHost()}:${kafkaInternalPort},BROKER://${this.host}:${kafkaBrokerPort}`
     );
 
     if (this.isZooKeeperProvided) {

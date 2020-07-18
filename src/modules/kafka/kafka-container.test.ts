@@ -1,8 +1,8 @@
-import {Consumer, Kafka, logLevel, Producer} from "kafkajs";
-import {KafkaContainer} from "./kafka-container";
-import {Network, StartedNetwork} from "../../network";
-import {GenericContainer} from "../../generic-container";
-import {StartedTestContainer} from "../../test-container";
+import { Consumer, Kafka, logLevel, Producer } from "kafkajs";
+import { KafkaContainer } from "./kafka-container";
+import { Network, StartedNetwork } from "../../network";
+import { GenericContainer } from "../../generic-container";
+import { StartedTestContainer } from "../../test-container";
 
 describe("KafkaContainer", () => {
   jest.setTimeout(120000);
@@ -44,9 +44,7 @@ describe("KafkaContainer", () => {
   });
 
   it("should connect to kafka using in-built zookeeper", async () => {
-    const kafkaContainer = manageContainer(
-      await new KafkaContainer("confluentinc/cp-kafka", "latest", "kafka").withExposedPorts(9093).start()
-    );
+    const kafkaContainer = manageContainer(await new KafkaContainer().withExposedPorts(9093).start());
 
     await testPubSub(kafkaContainer);
   });
@@ -66,7 +64,7 @@ describe("KafkaContainer", () => {
     );
 
     const kafkaContainer = manageContainer(
-      await new KafkaContainer("confluentinc/cp-kafka", "latest", "kafka")
+      await new KafkaContainer()
         .withNetworkMode(network.getName())
         .withZooKeeper(zooKeeperHost, zooKeeperPort)
         .withExposedPorts(9093)
@@ -85,21 +83,22 @@ describe("KafkaContainer", () => {
     const producer = manageProducer(kafka.producer());
     await producer.connect();
 
-    const consumer = manageConsumer(kafka.consumer({ groupId: "test-group" }))
-    await consumer.connect()
+    const consumer = manageConsumer(kafka.consumer({ groupId: "test-group" }));
+    await consumer.connect();
 
     await producer.send({
       topic: "test-topic",
       messages: [{ value: "test message" }],
     });
 
-    await consumer.subscribe({ topic: 'test-topic', fromBeginning: true })
-    const consumedMessage = await new Promise(async resolve => {
+    await consumer.subscribe({ topic: "test-topic", fromBeginning: true });
+
+    const consumedMessage = await new Promise(async (resolve) => {
       await consumer.run({
-        eachMessage: async ({message}) => resolve(message.value.toString())
-      })
+        eachMessage: async ({ message }) => resolve(message.value.toString()),
+      });
     });
 
     expect(consumedMessage).toBe("test message");
-  }
+  };
 });

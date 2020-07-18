@@ -8,7 +8,7 @@ Using the built-in ZooKeeper:
 const { Kafka } = require("kafkajs");
 const { KafkaContainer } = require("testcontainers");
 
-const container = await new KafkaContainer("confluentinc/cp-kafka", "latest", "kafka")
+const container = await new KafkaContainer()
   .withExposedPorts(9093)
   .start();
 
@@ -38,7 +38,7 @@ const zooKeeperContainer = await new GenericContainer("confluentinc/cp-zookeeper
   .withExposedPorts(ZOO_KEEPER_PORT)
   .start();
 
-const kafkaContainer = await new KafkaContainer("confluentinc/cp-kafka", "latest", "kafka")
+const kafkaContainer = await new KafkaContainer()
   .withNetworkMode(network.getName())
   .withZooKeeper(ZOO_KEEPER_HOST, ZOO_KEEPER_PORT)
   .withExposedPorts(9093)
