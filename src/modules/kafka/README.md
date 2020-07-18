@@ -15,9 +15,6 @@ const container = await new KafkaContainer()
 const client = new Kafka({
   brokers: [`${container.getContainerIpAddress()}:${container.getMappedPort(9093)}`],
 });
-
-const producer = client.producer();
-await producer.connect();
 ```
 
 Providing your own ZooKeeper:
