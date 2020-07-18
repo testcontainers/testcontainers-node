@@ -21,7 +21,7 @@ Providing your own ZooKeeper:
 
 ```javascript
 const { Kafka } = require("kafkajs");
-const { KafkaContainer, Network } = require("testcontainers");
+const { GenericContainer, KafkaContainer, Network } = require("testcontainers");
 
 const ZOO_KEEPER_HOST = "zookeeper";
 const ZOO_KEEPER_PORT = 2181;
