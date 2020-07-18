@@ -1,8 +1,8 @@
 import { Kafka, Producer } from "kafkajs";
 import { KafkaContainer } from "./kafka-container";
-import { Network, StartedNetwork } from "../network";
-import { GenericContainer } from "../generic-container";
-import { StartedTestContainer } from "../test-container";
+import { Network, StartedNetwork } from "../../network";
+import { GenericContainer } from "../../generic-container";
+import { StartedTestContainer } from "../../test-container";
 
 describe("KafkaContainer", () => {
   jest.setTimeout(120000);
@@ -69,7 +69,7 @@ describe("KafkaContainer", () => {
     const kafkaContainer = manageContainer(
       await new KafkaContainer("confluentinc/cp-kafka", "latest", "kafka")
         .withZooKeeper(zooKeeperHost, zooKeeperPort)
-        .withExposedPorts(9093, 9092)
+        .withExposedPorts(9093)
         .withNetworkMode(network.getName())
         .start()
     );

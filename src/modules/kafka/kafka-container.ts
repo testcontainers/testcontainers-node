@@ -1,12 +1,12 @@
-import { GenericContainer } from "../generic-container";
-import { BoundPorts } from "../bound-ports";
-import { DockerClient } from "../docker-client";
-import { Image, Tag } from "../repo-tag";
-import { Network } from "../network";
-import { Host } from "../docker-client-factory";
-import { Port } from "../port";
-import { PortClient, RandomPortClient } from "../port-client";
-import { RandomUuid, Uuid } from "../uuid";
+import { GenericContainer } from "../../generic-container";
+import { BoundPorts } from "../../bound-ports";
+import { DockerClient } from "../../docker-client";
+import { Image, Tag } from "../../repo-tag";
+import { Network } from "../../network";
+import { Host } from "../../docker-client-factory";
+import { Port } from "../../port";
+import { PortClient, RandomPortClient } from "../../port-client";
+import { RandomUuid, Uuid } from "../../uuid";
 
 export class KafkaContainer extends GenericContainer {
   private readonly uuid: Uuid = new RandomUuid();

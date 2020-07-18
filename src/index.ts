@@ -8,3 +8,4 @@ export {
 export { Wait } from "./wait";
 export { PullPolicy, DefaultPullPolicy, AlwaysPullPolicy } from "./pull-policy";
 export { Network, StartedNetwork } from "./network";
+export { KafkaContainer } from "./modules/kafka/kafka-container";
