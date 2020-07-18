@@ -51,21 +51,26 @@ export class KafkaContainer extends GenericContainer {
     if (this.isZooKeeperProvided) {
       this.withEnv("KAFKA_ZOOKEEPER_CONNECT", `${this.zooKeeperHost}:${this.zooKeeperPort}`);
     } else {
-      const network = await new Network().start();
       const zooKeeperHost = this.uuid.nextUuid();
       const zooKeeperPort = await this.portClient.getPort();
+
+      this.withEnv("KAFKA_ZOOKEEPER_CONNECT", `${zooKeeperHost}:${zooKeeperPort}`);
 
       const zookeeperContainer = await new GenericContainer("confluentinc/cp-zookeeper", "latest")
         .withName(zooKeeperHost)
         .withEnv("ZOOKEEPER_CLIENT_PORT", zooKeeperPort.toString())
-        .withNetworkMode(network.getName())
-        .withExposedPorts(zooKeeperPort)
-        .start();
+        .withExposedPorts(zooKeeperPort);
 
-      this.sidecarContainers.push(zookeeperContainer);
+      if (this.networkMode !== undefined) {
+        zookeeperContainer.withNetworkMode(this.networkMode);
+      } else {
+        const network = await new Network().start(); // todo how/when to close this?
+        this.withNetworkMode(network.getName());
+        zookeeperContainer.withNetworkMode(network.getName());
+      }
 
-      this.withNetworkMode(network.getName());
-      this.withEnv("KAFKA_ZOOKEEPER_CONNECT", `${zooKeeperHost}:${zooKeeperPort}`);
+      const startedZooKeeperContainer = await zookeeperContainer.start();
+      this.sidecarContainers.push(startedZooKeeperContainer);
     }
   }
 }

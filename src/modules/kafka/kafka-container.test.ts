@@ -43,13 +43,23 @@ describe("KafkaContainer", () => {
     managedNetworks = [];
   });
 
-  it("should connect to kafka using in-built zookeeper", async () => {
+  it("should connect to kafka using in-built zoo-keeper", async () => {
     const kafkaContainer = manageContainer(await new KafkaContainer().withExposedPorts(9093).start());
 
     await testPubSub(kafkaContainer);
   });
 
-  it("should connect to kafka using provided zookeeper", async () => {
+  it("should connect to kafka using in-build zoo-keeper and custom network", async () => {
+    const network = manageNetwork(await new Network().start());
+
+    const kafkaContainer = manageContainer(
+      await new KafkaContainer().withNetworkMode(network.getName()).withExposedPorts(9093).start()
+    );
+
+    await testPubSub(kafkaContainer);
+  });
+
+  it("should connect to kafka using provided zoo-keeper", async () => {
     const network = manageNetwork(await new Network().start());
 
     const zooKeeperHost = "zookeeper";

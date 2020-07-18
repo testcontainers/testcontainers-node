@@ -75,21 +75,20 @@ export class GenericContainer implements TestContainer {
 
   private readonly repoTag: RepoTag;
 
-  private env: Env = {};
-  private networkMode?: NetworkMode;
-  private ports: Port[] = [];
-  private cmd: Command[] = [];
-  private bindMounts: BindMount[] = [];
-  private name?: ContainerName;
-  private tmpFs: TmpFs = {};
-  private healthCheck?: HealthCheck;
-  private waitStrategy?: WaitStrategy;
-  private startupTimeout: Duration = new Duration(60_000, TemporalUnit.MILLISECONDS);
-  private useDefaultLogDriver: boolean = false;
-  private privilegedMode: boolean = false;
-  private authConfig?: AuthConfig;
-  private pullPolicy: PullPolicy = new DefaultPullPolicy();
-
+  protected env: Env = {};
+  protected networkMode?: NetworkMode;
+  protected ports: Port[] = [];
+  protected cmd: Command[] = [];
+  protected bindMounts: BindMount[] = [];
+  protected name?: ContainerName;
+  protected tmpFs: TmpFs = {};
+  protected healthCheck?: HealthCheck;
+  protected waitStrategy?: WaitStrategy;
+  protected startupTimeout: Duration = new Duration(60_000, TemporalUnit.MILLISECONDS);
+  protected useDefaultLogDriver: boolean = false;
+  protected privilegedMode: boolean = false;
+  protected authConfig?: AuthConfig;
+  protected pullPolicy: PullPolicy = new DefaultPullPolicy();
   protected sidecarContainers: StartedTestContainer[] = [];
 
   constructor(readonly image: Image, readonly tag: Tag = "latest") {
