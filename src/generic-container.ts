@@ -91,8 +91,8 @@ export class GenericContainer implements TestContainer {
   protected authConfig?: AuthConfig;
   protected pullPolicy: PullPolicy = new DefaultPullPolicy();
 
-  protected sidecarContainers: StartedTestContainer[] = [];
-  protected sidecarNetworks: StartedNetwork[] = [];
+  protected additionalContainers: StartedTestContainer[] = [];
+  protected additionalNetworks: StartedNetwork[] = [];
 
   constructor(readonly image: Image, readonly tag: Tag = "latest") {
     this.repoTag = new RepoTag(image, tag);
@@ -138,12 +138,12 @@ export class GenericContainer implements TestContainer {
 
     return new StartedGenericContainer(
       container,
-      this.sidecarContainers,
-      this.sidecarNetworks,
       dockerClient.getHost(),
       boundPorts,
       inspectResult.name,
-      dockerClient
+      dockerClient,
+      this.additionalContainers,
+      this.additionalNetworks
     );
   }
 
@@ -249,18 +249,18 @@ export class GenericContainer implements TestContainer {
 export class StartedGenericContainer implements StartedTestContainer {
   constructor(
     private readonly container: Container,
-    private readonly sidecarContainers: StartedTestContainer[],
-    private readonly sidecarNetworks: StartedNetwork[],
     private readonly host: Host,
     private readonly boundPorts: BoundPorts,
     private readonly name: ContainerName,
-    private readonly dockerClient: DockerClient
+    private readonly dockerClient: DockerClient,
+    private readonly additionalContainers: StartedTestContainer[] = [],
+    private readonly additionalNetworks: StartedNetwork[] = []
   ) {}
 
   public async stop(options: OptionalStopOptions = {}): Promise<StoppedTestContainer> {
-    await Promise.all(this.sidecarContainers.map((sidecarContainer) => sidecarContainer.stop(options)));
+    await Promise.all(this.additionalContainers.map((sidecarContainer) => sidecarContainer.stop(options)));
     const stoppedContainer = await this.stopContainer(options);
-    await Promise.all(this.sidecarNetworks.map((sidecarNetwork) => sidecarNetwork.stop()));
+    await Promise.all(this.additionalNetworks.map((sidecarNetwork) => sidecarNetwork.stop()));
     return stoppedContainer;
   }
 

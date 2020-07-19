@@ -65,13 +65,13 @@ export class KafkaContainer extends GenericContainer {
         zookeeperContainer.withNetworkMode(this.networkMode);
       } else {
         const network = await new Network().start();
-        this.sidecarNetworks.push(network);
+        this.additionalNetworks.push(network);
         this.withNetworkMode(network.getName());
         zookeeperContainer.withNetworkMode(network.getName());
       }
 
       const startedZooKeeperContainer = await zookeeperContainer.start();
-      this.sidecarContainers.push(startedZooKeeperContainer);
+      this.additionalContainers.push(startedZooKeeperContainer);
     }
   }
 }
