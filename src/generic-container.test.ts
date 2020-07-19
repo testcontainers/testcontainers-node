@@ -317,5 +317,16 @@ describe("GenericContainer", () => {
 
       expect(response.status).toBe(200);
     });
+
+    it("should exit immediately and stop without exception", async () => {
+      const message = "This container will exit immediately.";
+      const context = path.resolve(fixtures, "docker-exit-immediately");
+      const container = await GenericContainer.fromDockerfile(context).build();
+      const startedContainer = await container.withWaitStrategy(Wait.forLogMessage(message)).start();
+
+      await new Promise((res) => setTimeout(res, 1000));
+
+      await startedContainer.stop();
+    });
   });
 });
