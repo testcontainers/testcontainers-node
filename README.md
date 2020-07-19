@@ -99,6 +99,10 @@ const container = await GenericContainer.fromDockerfile(buildContext, "my-docker
   .build();
 ```
 
+Using a pre-prepared module:
+
+[See available modules.](src/modules)
+
 Creating a container with a specified name:
 
 ```javascript
