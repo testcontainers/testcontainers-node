@@ -1,5 +1,6 @@
 import byline from "byline";
 import dockerode, { ContainerInspectInfo } from "dockerode";
+import log from "./logger";
 import { Duration, TemporalUnit } from "node-duration";
 import { Command, ContainerName, ExitCode } from "./docker-client";
 import { Port } from "./port";
@@ -60,9 +61,18 @@ export class DockerodeContainer implements Container {
   }
 
   public stop(options: StopOptions): Promise<void> {
-    return this.container.stop({
-      t: options.timeout.get(TemporalUnit.SECONDS),
-    });
+    return this.container
+      .stop({
+        t: options.timeout.get(TemporalUnit.SECONDS),
+      })
+      .catch((error) => {
+        /* 304 container already stopped */
+        if (error.statusCode === 304) {
+          log.warn(`Container ${this.getId()} already stopped`);
+        } else {
+          throw error;
+        }
+      });
   }
 
   public remove(options: RemoveOptions): Promise<void> {
