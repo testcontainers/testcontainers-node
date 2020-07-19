@@ -41,6 +41,10 @@ timeouts set by test frameworks are sufficient.
 
 - Increase the test timeout via the methods provided by the testing framework.
 
+## Modules
+
+[Check if there already exists a pre-prepared module for your use-case.](src/modules)
+
 ## Examples
 
 Using a pre-built Docker image:
@@ -98,10 +102,6 @@ const { GenericContainer } = require("testcontainers");
 const container = await GenericContainer.fromDockerfile(buildContext, "my-dockerfile")
   .build();
 ```
-
-Using a pre-prepared module:
-
-[See available modules.](src/modules)
 
 Creating a container with a specified name:
 
