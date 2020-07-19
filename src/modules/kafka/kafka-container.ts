@@ -64,7 +64,8 @@ export class KafkaContainer extends GenericContainer {
       if (this.networkMode !== undefined) {
         zookeeperContainer.withNetworkMode(this.networkMode);
       } else {
-        const network = await new Network().start(); // todo how/when to close this?
+        const network = await new Network().start();
+        this.sidecarNetworks.push(network);
         this.withNetworkMode(network.getName());
         zookeeperContainer.withNetworkMode(network.getName());
       }
