@@ -258,9 +258,9 @@ export class StartedGenericContainer implements StartedTestContainer {
   ) {}
 
   public async stop(options: OptionalStopOptions = {}): Promise<StoppedTestContainer> {
-    await Promise.all(this.additionalContainers.map((sidecarContainer) => sidecarContainer.stop(options)));
+    await Promise.all(this.additionalContainers.map((additionalContainer) => additionalContainer.stop(options)));
     const stoppedContainer = await this.stopContainer(options);
-    await Promise.all(this.additionalNetworks.map((sidecarNetwork) => sidecarNetwork.stop()));
+    await Promise.all(this.additionalNetworks.map((additionalNetwork) => additionalNetwork.stop()));
     return stoppedContainer;
   }
 
