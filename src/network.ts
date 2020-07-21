@@ -1,6 +1,7 @@
 import { CreateNetworkOptions, DockerClient } from "./docker-client";
 import { DockerClientFactory } from "./docker-client-factory";
 import { RandomUuid, Uuid } from "./uuid";
+import log from "./logger";
 
 export class Network {
   private readonly createNetworkOptions: CreateNetworkOptions;
@@ -24,6 +25,7 @@ export class Network {
   public async start(): Promise<StartedNetwork> {
     const dockerClient = await DockerClientFactory.getClient();
     const id = await dockerClient.createNetwork(this.createNetworkOptions);
+    log.info(`Started network with ID: ${id}`);
     return new StartedNetwork(id, this.createNetworkOptions, dockerClient);
   }
 }
@@ -43,7 +45,11 @@ export class StartedNetwork {
     return this.options.name;
   }
 
-  public async stop(): Promise<void> {
-    return this.dockerClient.removeNetwork(this.id);
+  public async stop(): Promise<StoppedNetwork> {
+    log.info(`Stopping network with ID: ${this.id}`);
+    await this.dockerClient.removeNetwork(this.id);
+    return new StoppedNetwork();
   }
 }
+
+export class StoppedNetwork {}

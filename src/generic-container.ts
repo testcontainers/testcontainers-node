@@ -36,6 +36,7 @@ import {
 } from "./test-container";
 import { RandomUuid, Uuid } from "./uuid";
 import { HostPortWaitStrategy, WaitStrategy } from "./wait-strategy";
+import { StartedNetwork } from "./network";
 
 export class GenericContainerBuilder {
   private buildArgs: BuildArgs = {};
@@ -75,20 +76,23 @@ export class GenericContainer implements TestContainer {
 
   private readonly repoTag: RepoTag;
 
-  private env: Env = {};
-  private networkMode?: NetworkMode;
-  private ports: Port[] = [];
-  private cmd: Command[] = [];
-  private bindMounts: BindMount[] = [];
-  private name?: ContainerName;
-  private tmpFs: TmpFs = {};
-  private healthCheck?: HealthCheck;
-  private waitStrategy?: WaitStrategy;
-  private startupTimeout: Duration = new Duration(60_000, TemporalUnit.MILLISECONDS);
-  private useDefaultLogDriver: boolean = false;
-  private privilegedMode: boolean = false;
-  private authConfig?: AuthConfig;
-  private pullPolicy: PullPolicy = new DefaultPullPolicy();
+  protected env: Env = {};
+  protected networkMode?: NetworkMode;
+  protected ports: Port[] = [];
+  protected cmd: Command[] = [];
+  protected bindMounts: BindMount[] = [];
+  protected name?: ContainerName;
+  protected tmpFs: TmpFs = {};
+  protected healthCheck?: HealthCheck;
+  protected waitStrategy?: WaitStrategy;
+  protected startupTimeout: Duration = new Duration(60_000, TemporalUnit.MILLISECONDS);
+  protected useDefaultLogDriver: boolean = false;
+  protected privilegedMode: boolean = false;
+  protected authConfig?: AuthConfig;
+  protected pullPolicy: PullPolicy = new DefaultPullPolicy();
+
+  protected additionalContainers: StartedTestContainer[] = [];
+  protected additionalNetworks: StartedNetwork[] = [];
 
   constructor(readonly image: Image, readonly tag: Tag = "latest") {
     this.repoTag = new RepoTag(image, tag);
@@ -103,8 +107,8 @@ export class GenericContainer implements TestContainer {
 
     const boundPorts = await new PortBinder().bind(this.ports);
 
-    if (this.isCreating) {
-      this.isCreating(boundPorts);
+    if (this.preCreate) {
+      await this.preCreate(dockerClient, boundPorts);
     }
 
     const container = await dockerClient.create({
@@ -132,7 +136,15 @@ export class GenericContainer implements TestContainer {
 
     await this.waitForContainer(dockerClient, container, containerState, boundPorts);
 
-    return new StartedGenericContainer(container, dockerClient.getHost(), boundPorts, inspectResult.name, dockerClient);
+    return new StartedGenericContainer(
+      container,
+      dockerClient.getHost(),
+      boundPorts,
+      inspectResult.name,
+      dockerClient,
+      this.additionalContainers,
+      this.additionalNetworks
+    );
   }
 
   public withAuthentication(authConfig: AuthConfig): this {
@@ -210,7 +222,7 @@ export class GenericContainer implements TestContainer {
     return repoTags.some((repoTag) => repoTag.equals(this.repoTag));
   }
 
-  protected isCreating?(boundPorts: BoundPorts): void;
+  protected preCreate?(dockerClient: DockerClient, boundPorts: BoundPorts): Promise<void>;
 
   private async waitForContainer(
     dockerClient: DockerClient,
@@ -218,7 +230,7 @@ export class GenericContainer implements TestContainer {
     containerState: ContainerState,
     boundPorts: BoundPorts
   ): Promise<void> {
-    log.debug("Waiting for container to be ready");
+    log.debug(`Waiting for container to be ready: ${container.getId()}`);
     const waitStrategy = this.getWaitStrategy(dockerClient, container);
     await waitStrategy.withStartupTimeout(this.startupTimeout).waitUntilReady(container, containerState, boundPorts);
     log.info("Container is ready");
@@ -240,10 +252,20 @@ export class StartedGenericContainer implements StartedTestContainer {
     private readonly host: Host,
     private readonly boundPorts: BoundPorts,
     private readonly name: ContainerName,
-    private readonly dockerClient: DockerClient
+    private readonly dockerClient: DockerClient,
+    private readonly additionalContainers: StartedTestContainer[] = [],
+    private readonly additionalNetworks: StartedNetwork[] = []
   ) {}
 
   public async stop(options: OptionalStopOptions = {}): Promise<StoppedTestContainer> {
+    await Promise.all(this.additionalContainers.map((additionalContainer) => additionalContainer.stop(options)));
+    const stoppedContainer = await this.stopContainer(options);
+    await Promise.all(this.additionalNetworks.map((additionalNetwork) => additionalNetwork.stop()));
+    return stoppedContainer;
+  }
+
+  private async stopContainer(options: OptionalStopOptions = {}): Promise<StoppedGenericContainer> {
+    log.info(`Stopping container with ID: ${this.container.getId()}`);
     const resolvedOptions = { ...DEFAULT_STOP_OPTIONS, ...options };
     await this.container.stop({ timeout: resolvedOptions.timeout });
     await this.container.remove({ removeVolumes: resolvedOptions.removeVolumes });

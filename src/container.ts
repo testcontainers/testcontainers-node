@@ -68,7 +68,7 @@ export class DockerodeContainer implements Container {
       .catch((error) => {
         /* 304 container already stopped */
         if (error.statusCode === 304) {
-          log.warn(`Container ${this.getId()} already stopped`);
+          log.info(`Container has already been stopped: ${this.getId()}`);
         } else {
           throw error;
         }

@@ -1,5 +1,6 @@
 export { GenericContainer, GenericContainerBuilder } from "./generic-container";
 export { TestContainer, StartedTestContainer, StoppedTestContainer } from "./test-container";
+export { Network, StartedNetwork, StoppedNetwork } from "./network";
 export {
   DockerComposeEnvironment,
   StartedDockerComposeEnvironment,
@@ -7,4 +8,4 @@ export {
 } from "./docker-compose-environment";
 export { Wait } from "./wait";
 export { PullPolicy, DefaultPullPolicy, AlwaysPullPolicy } from "./pull-policy";
-export { Network, StartedNetwork } from "./network";
+export { KafkaContainer } from "./modules/kafka/kafka-container";
