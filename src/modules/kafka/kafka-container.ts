@@ -58,8 +58,7 @@ export class KafkaContainer extends GenericContainer {
 
       const zookeeperContainer = await new GenericContainer("confluentinc/cp-zookeeper", "latest")
         .withName(zooKeeperHost)
-        .withEnv("ZOOKEEPER_CLIENT_PORT", zooKeeperPort.toString())
-        .withExposedPorts(zooKeeperPort);
+        .withEnv("ZOOKEEPER_CLIENT_PORT", zooKeeperPort.toString());
 
       if (this.networkMode !== undefined) {
         zookeeperContainer.withNetworkMode(this.networkMode);
