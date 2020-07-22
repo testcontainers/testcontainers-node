@@ -44,7 +44,12 @@ export class DockerComposeEnvironment {
     const dockerClient = await DockerClientFactory.getClient();
 
     await this.dockerComposeUp();
-    const startedContainers = await this.findStartedContainers(dockerClient);
+
+    const startedContainers = (await this.findStartedContainers(dockerClient)).filter((startedContainer) => {
+      const containersComposeWorkingDir: string = startedContainer.Labels["com.docker.compose.project.working_dir"];
+      const containersComposeFile: string = startedContainer.Labels["com.docker.compose.project.config_files"];
+      return containersComposeWorkingDir === this.composeFilePath && containersComposeFile === this.composeFile;
+    });
 
     const startedGenericContainers = (
       await Promise.all(
