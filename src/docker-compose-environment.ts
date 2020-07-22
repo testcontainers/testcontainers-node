@@ -12,17 +12,21 @@ import log from "./logger";
 import { HostPortCheck, InternalPortCheck } from "./port-check";
 import { HostPortWaitStrategy, WaitStrategy } from "./wait-strategy";
 
-const createDockerComposeOptions = (filePath: string, fileName: string): dockerCompose.IDockerComposeOptions => ({
-  cwd: filePath,
-  config: fileName,
-  log: false,
-});
+const partialDockerComposeOptions: Partial<dockerCompose.IDockerComposeOptions> = {
+  log: false
+};
 
 export class DockerComposeEnvironment {
+  private build = false;
   private waitStrategy: { [containerName: string]: WaitStrategy } = {};
   private startupTimeout: Duration = new Duration(60_000, TemporalUnit.MILLISECONDS);
 
   constructor(private readonly composeFilePath: string, private readonly composeFile: string) {}
+
+  public withBuild(): this {
+    this.build = true;
+    return this;
+  }
 
   public withWaitStrategy(containerName: string, waitStrategy: WaitStrategy): this {
     this.waitStrategy[containerName] = waitStrategy;
@@ -77,15 +81,29 @@ export class DockerComposeEnvironment {
 
   private async dockerComposeUp() {
     try {
-      await dockerCompose.upAll(createDockerComposeOptions(this.composeFilePath, this.composeFile));
+      await dockerCompose.upAll(this.createDockerComposeOptions());
     } catch ({ err }) {
       log.error(`Failed to start docker-compose environment: ${err}`);
       try {
-        await dockerCompose.down(createDockerComposeOptions(this.composeFilePath, this.composeFile));
+        await dockerCompose.down(this.createDockerComposeOptions());
       } catch {
         log.warn(`Failed to stop docker-compose environment after failed start`);
       }
       throw new Error(err.trim());
+    }
+  }
+
+  private createDockerComposeOptions(): dockerCompose.IDockerComposeOptions {
+    const commandOptions = [];
+    if (this.build) {
+      commandOptions.push("--build");
+    }
+
+    return {
+      ...partialDockerComposeOptions,
+      cwd: this.composeFilePath,
+      config: this.composeFile,
+      commandOptions
     }
   }
 
@@ -134,7 +152,11 @@ export class StartedDockerComposeEnvironment {
   public async down(): Promise<StoppedDockerComposeEnvironment> {
     log.info(`Stopping docker-compose environment`);
     try {
-      await dockerCompose.down(createDockerComposeOptions(this.composeFilePath, this.composeFile));
+      await dockerCompose.down({
+        ...partialDockerComposeOptions,
+        cwd: this.composeFilePath,
+        config: this.composeFile
+      });
       return new StoppedDockerComposeEnvironment();
     } catch ({ err }) {
       log.error(`Failed to stop docker-compose environment: ${err}`);
