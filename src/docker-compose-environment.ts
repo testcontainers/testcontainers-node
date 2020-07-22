@@ -111,7 +111,6 @@ export class DockerComposeEnvironment {
     const containers = await dockerClient.listContainers();
     return containers.filter(
       (container) =>
-        container.Labels["com.docker.compose.version"] !== undefined &&
         container.Labels["com.docker.compose.project.working_dir"] === this.composeFilePath &&
         container.Labels["com.docker.compose.project.config_files"] === this.composeFile
     );
