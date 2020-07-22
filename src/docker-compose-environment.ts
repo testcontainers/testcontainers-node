@@ -45,11 +45,7 @@ export class DockerComposeEnvironment {
 
     await this.dockerComposeUp();
 
-    const startedContainers = (await this.findStartedContainers(dockerClient)).filter((startedContainer) => {
-      const containersComposeWorkingDir: string = startedContainer.Labels["com.docker.compose.project.working_dir"];
-      const containersComposeFile: string = startedContainer.Labels["com.docker.compose.project.config_files"];
-      return containersComposeWorkingDir === this.composeFilePath && containersComposeFile === this.composeFile;
-    });
+    const startedContainers = await this.findStartedContainers(dockerClient);
 
     const startedGenericContainers = (
       await Promise.all(
@@ -114,7 +110,12 @@ export class DockerComposeEnvironment {
 
   private async findStartedContainers(dockerClient: DockerClient): Promise<Dockerode.ContainerInfo[]> {
     const containers = await dockerClient.listContainers();
-    return containers.filter((container) => container.Labels["com.docker.compose.version"] !== undefined);
+    return containers.filter(
+      (container) =>
+        container.Labels["com.docker.compose.version"] !== undefined &&
+        container.Labels["com.docker.compose.project.working_dir"] === this.composeFilePath &&
+        container.Labels["com.docker.compose.project.config_files"] === this.composeFile
+    );
   }
 
   private getBoundPorts(containerInfo: Dockerode.ContainerInfo): BoundPorts {
