@@ -377,6 +377,16 @@ const container = environment.getContainer("alpine_1");
 const { output, exitCode } = await container.exec(["echo", "hello", "world"]);
 ```
 
+By default docker-compose does not re-build Dockerfiles, but you can override this behaviour:
+
+```javascript
+const { DockerComposeEnvironment, Wait } = require("testcontainers");
+
+const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
+  .withBuild()
+  .up();
+```
+
 ## Wait Strategies
 
 Ordinarily Testcontainers will wait for up to 60 seconds for the container's mapped network ports to start listening. 
