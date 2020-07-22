@@ -44,7 +44,6 @@ export class DockerComposeEnvironment {
     const dockerClient = await DockerClientFactory.getClient();
 
     await this.dockerComposeUp();
-
     const startedContainers = await this.findStartedContainers(dockerClient);
 
     const startedGenericContainers = (
