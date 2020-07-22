@@ -77,18 +77,16 @@ describe("DockerComposeEnvironment", () => {
 
   it("should re-build the Dockerfiles", async () => {
     const startedEnvironment = manageEnvironment(
-        await new DockerComposeEnvironment(fixtures, "docker-compose.yml")
-            .withBuild()
-            .up()
+      await new DockerComposeEnvironment(fixtures, "docker-compose.yml").withBuild().up()
     );
 
     await Promise.all(
-        ["container_1", "another_container_1"].map(async (containerName) => {
-          const container = startedEnvironment.getContainer(containerName);
-          const url = `http://${container.getContainerIpAddress()}:${container.getMappedPort(8080)}`;
-          const response = await fetch(`${url}/hello-world`);
-          expect(response.status).toBe(200);
-        })
+      ["container_1", "another_container_1"].map(async (containerName) => {
+        const container = startedEnvironment.getContainer(containerName);
+        const url = `http://${container.getContainerIpAddress()}:${container.getMappedPort(8080)}`;
+        const response = await fetch(`${url}/hello-world`);
+        expect(response.status).toBe(200);
+      })
     );
   });
 

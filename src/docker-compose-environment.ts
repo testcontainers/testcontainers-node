@@ -13,7 +13,7 @@ import { HostPortCheck, InternalPortCheck } from "./port-check";
 import { HostPortWaitStrategy, WaitStrategy } from "./wait-strategy";
 
 const partialDockerComposeOptions: Partial<dockerCompose.IDockerComposeOptions> = {
-  log: false
+  log: false,
 };
 
 export class DockerComposeEnvironment {
@@ -103,8 +103,8 @@ export class DockerComposeEnvironment {
       ...partialDockerComposeOptions,
       cwd: this.composeFilePath,
       config: this.composeFile,
-      commandOptions
-    }
+      commandOptions,
+    };
   }
 
   private async findStartedContainers(dockerClient: DockerClient): Promise<Dockerode.ContainerInfo[]> {
@@ -155,7 +155,7 @@ export class StartedDockerComposeEnvironment {
       await dockerCompose.down({
         ...partialDockerComposeOptions,
         cwd: this.composeFilePath,
-        config: this.composeFile
+        config: this.composeFile,
       });
       return new StoppedDockerComposeEnvironment();
     } catch ({ err }) {
