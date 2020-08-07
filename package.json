@@ -39,6 +39,7 @@
     "dockerode": "^3.2.0",
     "get-port": "^5.1.1",
     "glob": "^7.1.6",
+    "neo4j-driver": "^4.1.1",
     "node-duration": "^1.0.4",
     "stream-to-array": "^2.3.0",
     "tar-fs": "^2.1.0"
