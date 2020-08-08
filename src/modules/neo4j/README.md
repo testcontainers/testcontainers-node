@@ -1,4 +1,4 @@
-# neo4j
+# Neo4j
 
 Neo4j is a highly scalable, robust native graph database.
 Let's test it!
@@ -41,7 +41,7 @@ Install APOC plugin:
 container = await new Neo4jContainer().withApoc().start();
   ```
 
-Set custom password
+Set custom password:
 
 ```typescript
 container = await new Neo4jContainer().withApoc().start();

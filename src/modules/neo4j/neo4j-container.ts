@@ -1,84 +1,21 @@
 import { GenericContainer, Wait } from "../..";
 import { Image, Tag } from "../../repo-tag";
 import { Host } from "../../docker-client-factory";
-import { DockerClient, ContainerName, ExecResult, Command } from "../../docker-client";
+import { DockerClient } from "../../docker-client";
 import { BoundPorts } from "../../bound-ports";
-import { StartedTestContainer, OptionalStopOptions, StoppedTestContainer } from "../../test-container";
+import { StartedTestContainer } from "../../test-container";
 import { Port } from "../../port";
-import { Id as ContainerId } from "../../container";
 import { RandomUuid } from "../../uuid";
-
-export class StartedNeo4jTestContainer implements StartedTestContainer {
-  constructor(
-    private startedContainer: StartedTestContainer,
-    private boltPort: number,
-    private httpPort: number,
-    private username: string,
-    private password: string
-  ) {}
-
-  public stop(options?: OptionalStopOptions): Promise<StoppedTestContainer> {
-    return this.startedContainer.stop(options);
-  }
-
-  public getContainerIpAddress(): Host {
-    return this.startedContainer.getContainerIpAddress();
-  }
-
-  public getMappedPort(port: Port): Port {
-    return this.startedContainer.getMappedPort(port);
-  }
-
-  public getName(): ContainerName {
-    return this.startedContainer.getName();
-  }
-
-  public getId(): ContainerId {
-    return this.startedContainer.getId();
-  }
-
-  public exec(command: Command[]): Promise<ExecResult> {
-    return this.startedContainer.exec(command);
-  }
-
-  public logs(): Promise<NodeJS.ReadableStream> {
-    return this.startedContainer.logs();
-  }
-
-  public getBoltUri() {
-    return `bolt://${this.startedContainer.getContainerIpAddress()}:${this.startedContainer.getMappedPort(
-      this.boltPort
-    )}/`;
-  }
-
-  public getHttpUri() {
-    return `http://${this.startedContainer.getContainerIpAddress()}:${this.startedContainer.getMappedPort(
-      this.httpPort
-    )}/`;
-  }
-
-  public getPassword() {
-    return this.password;
-  }
-
-  public getUsername() {
-    return this.username;
-  }
-}
+import { AbstractStartedContainer } from "../../generic-container";
 
 export class Neo4jContainer extends GenericContainer {
   private readonly defaultBoltPort = 7687;
-  private readonly defaultHttPort = 7474;
+  private readonly defaultHttpPort = 7474;
   private readonly defaultUsername = "neo4j";
 
-  constructor(
-    readonly image: Image = "neo4j",
-    readonly tag: Tag = "latest",
-    readonly host?: Host,
-    private password = new RandomUuid().nextUuid()
-  ) {
+  constructor(image: Image = "neo4j", tag: Tag = "latest", private password = new RandomUuid().nextUuid()) {
     super(image, tag);
-    this.withExposedPorts(this.defaultBoltPort, this.defaultHttPort);
+    this.withExposedPorts(this.defaultBoltPort, this.defaultHttpPort).withWaitStrategy(Wait.forLogMessage("Started."));
   }
 
   public withPassword(password: string): this {
@@ -94,19 +31,52 @@ export class Neo4jContainer extends GenericContainer {
   }
 
   protected async preCreate(dockerClient: DockerClient, boundPorts: BoundPorts): Promise<void> {
-    this.withEnv("NEO4J_AUTH", `${this.defaultUsername}/${this.password}`).withWaitStrategy(
-      Wait.forLogMessage("Started.")
-    );
+    this.withEnv("NEO4J_AUTH", `${this.defaultUsername}/${this.password}`);
   }
 
-  public async start(): Promise<StartedNeo4jTestContainer> {
+  public async start(): Promise<StartedNeo4jContainer> {
     const startedTestContainer = await super.start();
-    return new StartedNeo4jTestContainer(
+    return new StartedNeo4jContainer(
       startedTestContainer,
       this.defaultBoltPort,
-      this.defaultHttPort,
+      this.defaultHttpPort,
       this.defaultUsername,
       this.password
     );
+  }
+}
+
+export class StartedNeo4jContainer extends AbstractStartedContainer {
+  private readonly host: Host;
+  private readonly boltPort: Port;
+  private readonly httpPort: Port;
+
+  constructor(
+    startedTestContainer: StartedTestContainer,
+    boltPort: number,
+    httpPort: number,
+    private readonly username: string,
+    private readonly password: string
+  ) {
+    super(startedTestContainer);
+    this.host = this.startedTestContainer.getContainerIpAddress();
+    this.boltPort = this.startedTestContainer.getMappedPort(boltPort);
+    this.httpPort = this.startedTestContainer.getMappedPort(httpPort);
+  }
+
+  public getBoltUri() {
+    return `bolt://${this.host}:${this.boltPort}/`;
+  }
+
+  public getHttpUri() {
+    return `http://${this.host}:${this.httpPort}/`;
+  }
+
+  public getPassword() {
+    return this.password;
+  }
+
+  public getUsername() {
+    return this.username;
   }
 }
