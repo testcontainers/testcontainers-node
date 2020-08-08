@@ -14,8 +14,8 @@ import { Neo4jContainer } from "testcontainers";
 const container = await new Neo4jContainer().start();
 
 const driver = neo4j.driver(
-  "bolt://localhost:" + container.getMappedPort(Neo4jContainer.defaultBoltPort),
-  neo4j.auth.basic(Neo4jContainer.defaultUserName, Neo4jContainer.defaultPassword)
+  container.getBoltUri(),
+  neo4j.auth.basic(container.getUsername(), container.getPassword())
 );
 
 const session = driver.session();
@@ -27,8 +27,7 @@ try {
   const singleRecord = result.records[0];
   const node = singleRecord.get(0);
 
-  console.log(node.properties.name);
-
+  expect(node.properties.name).toBe(personName);
 } finally {
   await session.close();
   await driver.close();
@@ -36,15 +35,14 @@ try {
 }
 ```
 
-Example installing APOC plugin and enabling ttl.
+Install APOC plugin:
 
 ```typescript
-import neo4j from "neo4j-driver";
+container = await new Neo4jContainer().withApoc().start();
+  ```
 
-container = await new Neo4jContainer()
-  .withEnv("NEO4JLABS_PLUGINS","[\"apoc\"]")
-  .withEnv("NEO4J_apoc_ttl_enabled","true")
-  .withPassword("124213")
-  .start();
+Set custom password
 
+```typescript
+container = await new Neo4jContainer().withApoc().start();
   ```

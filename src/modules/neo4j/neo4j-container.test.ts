@@ -8,8 +8,8 @@ describe("Neo4jContainer", () => {
     const container = await new Neo4jContainer().start();
 
     const driver = neo4j.driver(
-      "bolt://localhost:" + container.getMappedPort(Neo4jContainer.defaultBoltPort),
-      neo4j.auth.basic(Neo4jContainer.defaultUserName, Neo4jContainer.defaultPassword)
+      container.getBoltUri(),
+      neo4j.auth.basic(container.getUsername(), container.getPassword())
     );
 
     const session = driver.session();
@@ -29,13 +29,12 @@ describe("Neo4jContainer", () => {
     }
   });
 
-  it("with custom user", async () => {
-    const password = "customPassword";
-    const container = await new Neo4jContainer().withPassword(password).start();
+  it("should connect with custom user", async () => {
+    const container = await new Neo4jContainer().start();
 
     const driver = neo4j.driver(
-      "bolt://localhost:" + container.getMappedPort(Neo4jContainer.defaultBoltPort),
-      neo4j.auth.basic(Neo4jContainer.defaultUserName, password)
+      container.getBoltUri(),
+      neo4j.auth.basic(container.getUsername(), container.getPassword())
     );
 
     const session = driver.session();
@@ -48,6 +47,28 @@ describe("Neo4jContainer", () => {
       const node = singleRecord.get(0);
 
       expect(node.properties.name).toBe(personName);
+    } finally {
+      await session.close();
+      await driver.close();
+      await container.stop();
+    }
+  });
+
+  it("should have APOC plugin installed", async () => {
+    const container = await new Neo4jContainer().withApoc().start();
+
+    const driver = neo4j.driver(
+      container.getBoltUri(),
+      neo4j.auth.basic(container.getUsername(), container.getPassword())
+    );
+
+    const session = driver.session();
+
+    try {
+      const result = await session.run("CALL apoc.help('text')");
+
+      const singleRecord = result.records[0];
+      expect(singleRecord.length).toBeGreaterThan(0);
     } finally {
       await session.close();
       await driver.close();
