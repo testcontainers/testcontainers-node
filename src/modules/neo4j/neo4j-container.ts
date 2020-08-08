@@ -35,9 +35,8 @@ export class Neo4jContainer extends GenericContainer {
   }
 
   public async start(): Promise<StartedNeo4jContainer> {
-    const startedTestContainer = await super.start();
     return new StartedNeo4jContainer(
-      startedTestContainer,
+      await super.start(),
       this.defaultBoltPort,
       this.defaultHttpPort,
       this.defaultUsername,
@@ -53,8 +52,8 @@ export class StartedNeo4jContainer extends AbstractStartedContainer {
 
   constructor(
     startedTestContainer: StartedTestContainer,
-    boltPort: number,
-    httpPort: number,
+    boltPort: Port,
+    httpPort: Port,
     private readonly username: string,
     private readonly password: string
   ) {
