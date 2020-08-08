@@ -29,8 +29,8 @@ describe("Neo4jContainer", () => {
     }
   });
 
-  it("should connect with custom user", async () => {
-    const container = await new Neo4jContainer().start();
+  it("should connect with custom password", async () => {
+    const container = await new Neo4jContainer().withPassword("xyz1234@!").start();
 
     const driver = neo4j.driver(
       container.getBoltUri(),

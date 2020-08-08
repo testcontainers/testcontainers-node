@@ -1,28 +1,84 @@
 import { GenericContainer, Wait } from "../..";
 import { Image, Tag } from "../../repo-tag";
 import { Host } from "../../docker-client-factory";
-import { DockerClient } from "../../docker-client";
+import { DockerClient, ContainerName, ExecResult, Command } from "../../docker-client";
 import { BoundPorts } from "../../bound-ports";
-import { StartedTestContainer } from "../../test-container";
+import { StartedTestContainer, OptionalStopOptions, StoppedTestContainer } from "../../test-container";
+import { Port } from "../../port";
+import { Id as ContainerId } from "../../container";
+import { RandomUuid } from "../../uuid";
 
-export interface StartedNeo4jTestContainer extends StartedTestContainer {
-  getPassword: () => string;
-  getUsername: () => string;
-  getBoltUri: () => string;
+export class StartedNeo4jTestContainer implements StartedTestContainer {
+  constructor(
+    private startedContainer: StartedTestContainer,
+    private boltPort: number,
+    private httpPort: number,
+    private username: string,
+    private password: string
+  ) {}
+
+  public stop(options?: OptionalStopOptions): Promise<StoppedTestContainer> {
+    return this.startedContainer.stop(options);
+  }
+
+  public getContainerIpAddress(): Host {
+    return this.startedContainer.getContainerIpAddress();
+  }
+
+  public getMappedPort(port: Port): Port {
+    return this.startedContainer.getMappedPort(port);
+  }
+
+  public getName(): ContainerName {
+    return this.startedContainer.getName();
+  }
+
+  public getId(): ContainerId {
+    return this.startedContainer.getId();
+  }
+
+  public exec(command: Command[]): Promise<ExecResult> {
+    return this.startedContainer.exec(command);
+  }
+
+  public logs(): Promise<NodeJS.ReadableStream> {
+    return this.startedContainer.logs();
+  }
+
+  public getBoltUri() {
+    return `bolt://${this.startedContainer.getContainerIpAddress()}:${this.startedContainer.getMappedPort(
+      this.boltPort
+    )}/`;
+  }
+
+  public getHttpUri() {
+    return `http://${this.startedContainer.getContainerIpAddress()}:${this.startedContainer.getMappedPort(
+      this.httpPort
+    )}/`;
+  }
+
+  public getPassword() {
+    return this.password;
+  }
+
+  public getUsername() {
+    return this.username;
+  }
 }
 
 export class Neo4jContainer extends GenericContainer {
-  public static readonly defaultBoltPort = 7687;
-  public static readonly defaultHttPort = 7474;
-  public static readonly defaultUsername = "neo4j";
-  public static readonly defaultPassword = "test";
+  private readonly defaultBoltPort = 7687;
+  private readonly defaultHttPort = 7474;
+  private readonly defaultUsername = "neo4j";
 
-  private password = Neo4jContainer.defaultPassword;
-  private startedContainer: StartedTestContainer | null = null;
-
-  constructor(readonly image: Image = "neo4j", readonly tag: Tag = "latest", readonly host?: Host) {
+  constructor(
+    readonly image: Image = "neo4j",
+    readonly tag: Tag = "latest",
+    readonly host?: Host,
+    private password = new RandomUuid().nextUuid()
+  ) {
     super(image, tag);
-    this.withExposedPorts(Neo4jContainer.defaultBoltPort, Neo4jContainer.defaultHttPort);
+    this.withExposedPorts(this.defaultBoltPort, this.defaultHttPort);
   }
 
   public withPassword(password: string): this {
@@ -38,31 +94,19 @@ export class Neo4jContainer extends GenericContainer {
   }
 
   protected async preCreate(dockerClient: DockerClient, boundPorts: BoundPorts): Promise<void> {
-    this.withEnv("NEO4J_AUTH", `${Neo4jContainer.defaultUsername}/${this.password}`).withWaitStrategy(
+    this.withEnv("NEO4J_AUTH", `${this.defaultUsername}/${this.password}`).withWaitStrategy(
       Wait.forLogMessage("Started.")
     );
   }
 
   public async start(): Promise<StartedNeo4jTestContainer> {
-    this.startedContainer = await super.start();
-    (this.startedContainer as any).getPassword = this.getPassword.bind(this);
-    (this.startedContainer as any).getUsername = this.getUsername.bind(this);
-    (this.startedContainer as any).getBoltUri = this.getBoltUri.bind(this);
-
-    return this.startedContainer as StartedNeo4jTestContainer;
-  }
-
-  private getBoltUri() {
-    return `bolt://${this.startedContainer!.getContainerIpAddress()}:${this.startedContainer!.getMappedPort(
-      Neo4jContainer.defaultBoltPort
-    )}/`;
-  }
-
-  private getPassword() {
-    return this.password;
-  }
-
-  private getUsername() {
-    return Neo4jContainer.defaultUsername;
+    const startedTestContainer = await super.start();
+    return new StartedNeo4jTestContainer(
+      startedTestContainer,
+      this.defaultBoltPort,
+      this.defaultHttPort,
+      this.defaultUsername,
+      this.password
+    );
   }
 }
