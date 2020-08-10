@@ -13,6 +13,7 @@ import { Neo4jContainer, StartedNeo4jContainer } from 'testcontainers'
 
 let container: StartedNeo4jContainer
 let driver: Driver
+let session: Session
 
 beforeEach(async () => {
   container = await new Neo4jContainer().withApoc().start()
@@ -22,30 +23,36 @@ beforeEach(async () => {
   )
 })
 
+afterEach(async () => {
+  await session?.close()
+  await driver?.close()
+  await container?.stop()
+})
+
 describe('neo4j', () => {
   jest.setTimeout(120000)
 
+  test('connect', async () => {
+    driver = await db()
+    const serverInfo = await driver.verifyConnectivity()
+    expect(serverInfo).toBeDefined()
+  })
+
   test('create person', async () => {
-    const session = driver.session()
+    session = driver.session()
     const personName = 'Chris'
 
-    try {
-      const result = await session.run(
-        'CREATE (a:Person {name: $name}) RETURN a',
-        {
-          name: personName,
-        }
-      )
+    const result = await session.run(
+      'CREATE (a:Person {name: $name}) RETURN a',
+      {
+        name: personName,
+      }
+    )
 
-      const singleRecord = result.records[0]
-      const node = singleRecord.get(0)
+    const singleRecord = result.records[0]
+    const node = singleRecord.get(0)
 
-      expect(node.properties.name).toBe(personName)
-    } finally {
-      await session.close()
-      await driver.close()
-      await container.stop()
-    }
+    expect(node.properties.name).toBe(personName)
   })
 })
 
