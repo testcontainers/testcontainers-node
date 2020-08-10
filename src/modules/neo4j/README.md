@@ -64,9 +64,13 @@ Install APOC plugin:
 container = await new Neo4jContainer().withApoc().start();
   ```
 
-Set custom password (by default the password is a random uuid):
+With APOC, ttl and custom password (by default the password is a random uuid):
 ```typescript
-container = await new Neo4jContainer().withApoc().withPassword('super_secret').start();
+container = await new Neo4jContainer()
+  .withApoc()
+  .withTtl(5)
+  .withPassword('super_secret')
+  .start();
 ```
 ## Contact
 You miss something? 
