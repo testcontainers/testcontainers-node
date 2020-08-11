@@ -5,34 +5,57 @@ Let's test it!
 
 ## Examples
 
-Start a neo4j container and create a person node
+Test with jest to create a person node in neo4j
 
 ```typescript
-import neo4j from "neo4j-driver";
-import { Neo4jContainer } from "testcontainers";
+import neo4j, { Driver } from 'neo4j-driver'
+import { Neo4jContainer, StartedNeo4jContainer } from 'testcontainers'
 
-const container = await new Neo4jContainer().start();
+let container: StartedNeo4jContainer
+let driver: Driver
+let session: Session
 
-const driver = neo4j.driver(
-  container.getBoltUri(),
-  neo4j.auth.basic(container.getUsername(), container.getPassword())
-);
+beforeEach(async () => {
+  container = await new Neo4jContainer().withApoc().start()
+  driver = neo4j.driver(
+    container.getBoltUri(),
+    neo4j.auth.basic(container.getUsername(), container.getPassword())
+  )
+})
 
-const session = driver.session();
-const personName = "Chris";
+afterEach(async () => {
+  await session?.close()
+  await driver?.close()
+  await container?.stop()
+})
 
-try {
-  const result = await session.run("CREATE (a:Person {name: $name}) RETURN a", { name: personName });
+describe('neo4j', () => {
+  jest.setTimeout(120000)
 
-  const singleRecord = result.records[0];
-  const node = singleRecord.get(0);
+  test('connect', async () => {
+    driver = await db()
+    const serverInfo = await driver.verifyConnectivity()
+    expect(serverInfo).toBeDefined()
+  })
 
-  expect(node.properties.name).toBe(personName);
-} finally {
-  await session.close();
-  await driver.close();
-  await container.stop();
-}
+  test('create person', async () => {
+    session = driver.session()
+    const personName = 'Chris'
+
+    const result = await session.run(
+      'CREATE (a:Person {name: $name}) RETURN a',
+      {
+        name: personName,
+      }
+    )
+
+    const singleRecord = result.records[0]
+    const node = singleRecord.get(0)
+
+    expect(node.properties.name).toBe(personName)
+  })
+})
+
 ```
 
 Install APOC plugin:
@@ -41,8 +64,14 @@ Install APOC plugin:
 container = await new Neo4jContainer().withApoc().start();
   ```
 
-Set custom password:
-
+With APOC, ttl and custom password (by default the password is a random uuid):
 ```typescript
-container = await new Neo4jContainer().withApoc().start();
-  ```
+container = await new Neo4jContainer()
+  .withApoc()
+  .withTtl(5)
+  .withPassword('super_secret')
+  .start();
+```
+## Contact
+You miss something? 
+Create an issue or write me on [twitter](https://twitter.com/ltwlf)

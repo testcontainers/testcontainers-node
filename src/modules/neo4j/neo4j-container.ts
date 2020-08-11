@@ -30,6 +30,10 @@ export class Neo4jContainer extends GenericContainer {
     );
   }
 
+  public withTtl(schedule = 5) {
+    this.withEnv("NEO4J_apoc_ttl_enabled", "true").withEnv("NEO4J_apoc_ttl_schedule", schedule.toString());
+  }
+
   protected async preCreate(dockerClient: DockerClient, boundPorts: BoundPorts): Promise<void> {
     this.withEnv("NEO4J_AUTH", `${this.defaultUsername}/${this.password}`);
   }
