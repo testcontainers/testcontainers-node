@@ -10,3 +10,4 @@ export { Wait } from "./wait";
 export { PullPolicy, DefaultPullPolicy, AlwaysPullPolicy } from "./pull-policy";
 export { KafkaContainer } from "./modules/kafka/kafka-container";
 export { Neo4jContainer, StartedNeo4jContainer } from "./modules/neo4j/neo4j-container";
+export { ArangoDBContainer, StartedArangoContainer } from "./modules/arangodb/arangodb-container";
