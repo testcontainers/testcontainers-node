@@ -1,52 +1,10 @@
 # ArangoDB
 
-ArangoDB is an open source frienly multi-model database.
+[[ArangoDB](https://www.arangodb.com/) is an open source friendly multi-model database.
+
+You can find the documentation of the [ArangoDB JavaScript](https://www.arangodb.com/docs/stable/drivers/js.html) driver here. 
 
 ## Examples
 
-Jest test to verify the connection
+Check out the [jest test](arangodb-container.test) to see how to start the container and connect the ArangoDB with the JavaScript driver. 
 
-```typescript
-import { Database } from "arangojs";
-import { ArangoDBContainer, StartedArangoContainer } from "./arangodb-container";
-import { Config } from "arangojs/lib/cjs/connection";
-
-describe("ArangoDB", () => {
-  jest.setTimeout(120000);
-
-  let container: StartedArangoContainer;
-
-  beforeEach(async () => {
-    container = await new ArangoDBContainer().start();
-  });
-
-  afterEach(async () => {
-    container.stop();
-  });
-
-  it("should connect", async () => {
-    const db = new Database({
-      url: container.getHttpUrl(),
-    } as Config);
-
-    db.useDatabase("_system");
-    db.useBasicAuth(container.getUsername(), container.getPassword());
-
-    const value = "Hello ArangoDB!";
-
-    const result = await db.query({
-      query: "RETURN @value",
-      bindVars: { value },
-    });
-    const returnValue = await result.next();
-    expect(returnValue).toBe(value);
-  });
-});
-
-```
-
-
-```
-## Contact
-You miss something? 
-Create an issue or write me on [twitter](https://twitter.com/ltwlf)
