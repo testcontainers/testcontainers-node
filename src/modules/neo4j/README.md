@@ -1,6 +1,6 @@
 # Neo4j
 
-Neo4j is a highly scalable, robust native graph database.
+[Neo4j](https://neo4j.com/) is a highly scalable, robust native graph database.
 Let's test it!
 
 ## Examples
@@ -72,6 +72,5 @@ container = await new Neo4jContainer()
   .withPassword('super_secret')
   .start();
 ```
-## Contact
-You miss something? 
-Create an issue or write me on [twitter](https://twitter.com/ltwlf)
+
+Miss something? Create an issue.
