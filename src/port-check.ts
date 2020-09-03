@@ -38,7 +38,7 @@ export class InternalPortCheck implements PortCheck {
   public async isBound(port: Port): Promise<boolean> {
     const portHex = port.toString(16).padStart(4, "0");
     const commands = [
-      ["/bin/sh", "-c", `cat /proc/net/tcp{,6} | awk '{print $2}' | grep -i :${portHex}`],
+      ["/bin/sh", "-c", `cat /proc/net/tcp* | awk '{print $2}' | grep -i :${portHex}`],
       ["/bin/sh", "-c", `nc -vz -w 1 localhost ${port}`],
       ["/bin/bash", "-c", `</dev/tcp/localhost/${port}`],
     ];
