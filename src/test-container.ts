@@ -33,12 +33,7 @@ export interface TestContainer {
   withAuthentication(authConfig: AuthConfig): this;
 }
 
-export interface OptionalStopOptions {
-  timeout?: Duration;
-  removeVolumes?: boolean;
-}
-
-interface StopOptions {
+export interface StopOptions {
   timeout: Duration;
   removeVolumes: boolean;
 }
@@ -49,7 +44,7 @@ export const DEFAULT_STOP_OPTIONS: StopOptions = {
 };
 
 export interface StartedTestContainer {
-  stop(options?: OptionalStopOptions): Promise<StoppedTestContainer>;
+  stop(options?: Partial<StopOptions>): Promise<StoppedTestContainer>;
   getContainerIpAddress(): Host;
   getMappedPort(port: Port): Port;
   getName(): ContainerName;

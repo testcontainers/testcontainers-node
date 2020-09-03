@@ -29,8 +29,8 @@ import { DefaultPullPolicy, PullPolicy } from "./pull-policy";
 import { Image, RepoTag, Tag } from "./repo-tag";
 import {
   DEFAULT_STOP_OPTIONS,
-  OptionalStopOptions,
   StartedTestContainer,
+  StopOptions,
   StoppedTestContainer,
   TestContainer,
 } from "./test-container";
@@ -249,7 +249,7 @@ export class GenericContainer implements TestContainer {
 export class AbstractStartedContainer {
   constructor(protected readonly startedTestContainer: StartedTestContainer) {}
 
-  public stop(options?: OptionalStopOptions): Promise<StoppedTestContainer> {
+  public stop(options?: Partial<StopOptions>): Promise<StoppedTestContainer> {
     return this.startedTestContainer.stop(options);
   }
 
@@ -289,14 +289,14 @@ export class StartedGenericContainer implements StartedTestContainer {
     private readonly additionalNetworks: StartedNetwork[] = []
   ) {}
 
-  public async stop(options: OptionalStopOptions = {}): Promise<StoppedTestContainer> {
+  public async stop(options: Partial<StopOptions> = {}): Promise<StoppedTestContainer> {
     await Promise.all(this.additionalContainers.map((additionalContainer) => additionalContainer.stop(options)));
     const stoppedContainer = await this.stopContainer(options);
     await Promise.all(this.additionalNetworks.map((additionalNetwork) => additionalNetwork.stop()));
     return stoppedContainer;
   }
 
-  private async stopContainer(options: OptionalStopOptions = {}): Promise<StoppedGenericContainer> {
+  private async stopContainer(options: Partial<StopOptions> = {}): Promise<StoppedGenericContainer> {
     log.info(`Stopping container with ID: ${this.container.getId()}`);
     const resolvedOptions = { ...DEFAULT_STOP_OPTIONS, ...options };
     await this.container.stop({ timeout: resolvedOptions.timeout });
