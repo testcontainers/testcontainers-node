@@ -39,12 +39,15 @@ export class DockerComposeEnvironment {
   }
 
   public async up(): Promise<StartedDockerComposeEnvironment> {
-    log.info(`Starting docker-compose environment`);
+    log.info(`Starting DockerCompose environment`);
 
     const dockerClient = await DockerClientFactory.getClient();
 
+    const existingContainersIds = new Set((await dockerClient.listContainers()).map((container) => container.Id));
     await this.dockerComposeUp();
-    const startedContainers = await this.findStartedContainers(dockerClient);
+    const startedContainers = (await this.findStartedContainers(dockerClient)).filter(
+      (container) => !existingContainersIds.has(container.Id)
+    );
 
     const startedGenericContainers = (
       await Promise.all(
@@ -76,6 +79,8 @@ export class DockerComposeEnvironment {
       return { ...map, [containerName]: startedGenericContainer };
     }, {});
 
+    log.info(`DockerCompose environment started: ${Object.keys(startedGenericContainers).join(", ")}`);
+
     return new StartedDockerComposeEnvironment(this.composeFilePath, this.composeFile, startedGenericContainers);
   }
 
@@ -83,11 +88,11 @@ export class DockerComposeEnvironment {
     try {
       await dockerCompose.upAll(this.createDockerComposeOptions());
     } catch ({ err }) {
-      log.error(`Failed to start docker-compose environment: ${err}`);
+      log.error(`Failed to start DockerCompose environment: ${err}`);
       try {
         await dockerCompose.down(this.createDockerComposeOptions());
       } catch {
-        log.warn(`Failed to stop docker-compose environment after failed start`);
+        log.warn(`Failed to stop DockerCompose environment after failed start`);
       }
       throw new Error(err.trim());
     }
@@ -154,7 +159,7 @@ export class StartedDockerComposeEnvironment {
   ) {}
 
   public async down(): Promise<StoppedDockerComposeEnvironment> {
-    log.info(`Stopping docker-compose environment`);
+    log.info(`Stopping DockerCompose environment`);
     try {
       await dockerCompose.down({
         ...partialDockerComposeOptions,
@@ -163,7 +168,7 @@ export class StartedDockerComposeEnvironment {
       });
       return new StoppedDockerComposeEnvironment();
     } catch ({ err }) {
-      log.error(`Failed to stop docker-compose environment: ${err}`);
+      log.error(`Failed to stop DockerCompose environment: ${err}`);
       throw new Error(err.trim());
     }
   }
