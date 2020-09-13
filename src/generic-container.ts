@@ -125,9 +125,8 @@ export class GenericContainer implements TestContainer {
 
     await dockerClient.start(container);
 
-    if (this.autoCleanup) {
-      const reaper = await Reaper.getReaper();
-      await reaper.add("label", "org.testcontainers.testcontainers-node");
+    if (this.autoCleanup && !Reaper.isRunning()) {
+      await Reaper.start();
     }
 
     (await container.logs())

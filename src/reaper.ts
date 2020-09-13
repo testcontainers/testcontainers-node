@@ -13,10 +13,14 @@ export class Reaper {
     return this.instance !== undefined;
   }
 
-  public static async getReaper(): Promise<Reaper> {
+  public static getInstance(): Reaper {
+    return this.instance;
+  }
+
+  public static async start(): Promise<void> {
     if (this.instance) {
-      log.debug("Using existing Reaper");
-      return this.instance;
+      log.debug("Reaper is already running");
+      return;
     }
 
     log.debug("Creating new Reaper");
@@ -33,18 +37,20 @@ export class Reaper {
     return new Promise((resolve) => {
       log.debug(`Connecting to Reaper on ${host}:${port}`);
       const socket = new Socket();
+      socket.on("close", () => {
+        log.debug("Connection to Reaper closed");
+      });
       socket.connect(port, host, () => {
         log.debug(`Connected to Reaper`);
         this.instance = new Reaper(container, socket);
-        resolve(this.instance);
+        this.writeFilter(socket, "label", "org.testcontainers.testcontainers-node").then(resolve);
       });
     });
   }
 
-  public async add(key: string, value: string) {
-    log.debug(`Registering "${key}=${value}" with Reaper`);
+  private static async writeFilter(socket: Socket, key: string, value: string): Promise<void> {
     return new Promise((resolve) => {
-      this.socket.write(`${key}=${value}\r\n`, () => {
+      socket.write(`${key}=${value}\r\n`, () => {
         log.debug(`Registered "${key}=${value}" with Reaper`);
         resolve();
       });

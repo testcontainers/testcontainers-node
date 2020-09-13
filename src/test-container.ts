@@ -31,7 +31,6 @@ export interface TestContainer {
   withPrivilegedMode(): this;
   withPullPolicy(pullPolicy: PullPolicy): this;
   withAuthentication(authConfig: AuthConfig): this;
-  withoutAutoCleanup(): this;
 }
 
 export interface StopOptions {

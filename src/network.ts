@@ -27,7 +27,11 @@ export class Network {
     const dockerClient = await DockerClientFactory.getClient();
     const id = await dockerClient.createNetwork(this.createNetworkOptions);
     log.info(`Started network with ID: ${id}`);
-    await (await Reaper.getReaper()).add("label", "org.testcontainers.testcontainers-node");
+
+    if (!Reaper.isRunning()) {
+      await Reaper.start();
+    }
+
     return new StartedNetwork(id, this.createNetworkOptions, dockerClient);
   }
 }
