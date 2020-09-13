@@ -45,7 +45,7 @@ export class DockerComposeEnvironment {
 
     const existingContainersIds = new Set((await dockerClient.listContainers()).map((container) => container.Id));
     await this.dockerComposeUp();
-    const startedContainers = (await this.findStartedContainers(dockerClient)).filter(
+    const startedContainers = (await dockerClient.listContainers()).filter(
       (container) => !existingContainersIds.has(container.Id)
     );
 
@@ -110,15 +110,6 @@ export class DockerComposeEnvironment {
       config: this.composeFile,
       commandOptions,
     };
-  }
-
-  private async findStartedContainers(dockerClient: DockerClient): Promise<Dockerode.ContainerInfo[]> {
-    const containers = await dockerClient.listContainers();
-    return containers.filter(
-      (container) =>
-        container.Labels["com.docker.compose.project.working_dir"] === this.composeFilePath &&
-        container.Labels["com.docker.compose.project.config_files"] === this.composeFile
-    );
   }
 
   private getBoundPorts(containerInfo: Dockerode.ContainerInfo): BoundPorts {
