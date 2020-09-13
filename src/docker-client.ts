@@ -127,6 +127,9 @@ export class DockerodeClient implements DockerClient {
       Env: this.getEnv(options.env),
       ExposedPorts: this.getExposedPorts(options.boundPorts),
       Cmd: options.cmd,
+      Labels: {
+        "org.testcontainers.testcontainers-node": "true",
+      },
       // @ts-ignore
       Healthcheck: this.getHealthCheck(options.healthCheck),
       HostConfig: {
@@ -153,7 +156,7 @@ export class DockerodeClient implements DockerClient {
       Ingress: options.ingress,
       EnableIPv6: options.enableIPv6,
       Options: options.options,
-      Labels: options.labels,
+      Labels: { ...options.labels, "org.testcontainers.testcontainers-node": "true" },
     });
     return network.id;
   }

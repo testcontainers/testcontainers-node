@@ -36,7 +36,7 @@ import {
 } from "./test-container";
 import { RandomUuid, Uuid } from "./uuid";
 import { HostPortWaitStrategy, WaitStrategy } from "./wait-strategy";
-import { StartedNetwork } from "./network";
+import { Reaper } from "./reaper";
 
 export class GenericContainerBuilder {
   private buildArgs: BuildArgs = {};
@@ -88,11 +88,9 @@ export class GenericContainer implements TestContainer {
   protected startupTimeout: Duration = new Duration(60_000, TemporalUnit.MILLISECONDS);
   protected useDefaultLogDriver: boolean = false;
   protected privilegedMode: boolean = false;
+  protected autoCleanup: boolean = true;
   protected authConfig?: AuthConfig;
   protected pullPolicy: PullPolicy = new DefaultPullPolicy();
-
-  protected additionalContainers: StartedTestContainer[] = [];
-  protected additionalNetworks: StartedNetwork[] = [];
 
   constructor(readonly image: Image, readonly tag: Tag = "latest") {
     this.repoTag = new RepoTag(image, tag);
@@ -127,6 +125,11 @@ export class GenericContainer implements TestContainer {
 
     await dockerClient.start(container);
 
+    if (this.autoCleanup) {
+      const reaper = await Reaper.getReaper();
+      await reaper.add("label", "org.testcontainers.testcontainers-node");
+    }
+
     (await container.logs())
       .on("data", (data) => log.trace(`${container.getId()}: ${data}`))
       .on("err", (data) => log.error(`${container.getId()}: ${data}`));
@@ -136,15 +139,7 @@ export class GenericContainer implements TestContainer {
 
     await this.waitForContainer(dockerClient, container, containerState, boundPorts);
 
-    return new StartedGenericContainer(
-      container,
-      dockerClient.getHost(),
-      boundPorts,
-      inspectResult.name,
-      dockerClient,
-      this.additionalContainers,
-      this.additionalNetworks
-    );
+    return new StartedGenericContainer(container, dockerClient.getHost(), boundPorts, inspectResult.name, dockerClient);
   }
 
   public withAuthentication(authConfig: AuthConfig): this {
@@ -217,6 +212,11 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
+  public withoutAutoCleanup(): this {
+    this.autoCleanup = false;
+    return this;
+  }
+
   public async isImageCached(dockerClient: DockerClient): Promise<boolean> {
     const repoTags = await dockerClient.fetchRepoTags();
     return repoTags.some((repoTag) => repoTag.equals(this.repoTag));
@@ -284,16 +284,11 @@ export class StartedGenericContainer implements StartedTestContainer {
     private readonly host: Host,
     private readonly boundPorts: BoundPorts,
     private readonly name: ContainerName,
-    private readonly dockerClient: DockerClient,
-    private readonly additionalContainers: StartedTestContainer[] = [],
-    private readonly additionalNetworks: StartedNetwork[] = []
+    private readonly dockerClient: DockerClient
   ) {}
 
   public async stop(options: Partial<StopOptions> = {}): Promise<StoppedTestContainer> {
-    await Promise.all(this.additionalContainers.map((additionalContainer) => additionalContainer.stop(options)));
-    const stoppedContainer = await this.stopContainer(options);
-    await Promise.all(this.additionalNetworks.map((additionalNetwork) => additionalNetwork.stop()));
-    return stoppedContainer;
+    return await this.stopContainer(options);
   }
 
   private async stopContainer(options: Partial<StopOptions> = {}): Promise<StoppedGenericContainer> {
