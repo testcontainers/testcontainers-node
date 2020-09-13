@@ -103,12 +103,13 @@ export interface DockerClient {
   buildImage(repoTag: RepoTag, context: BuildContext, dockerfileName: string, buildArgs: BuildArgs): Promise<void>;
   fetchRepoTags(): Promise<RepoTag[]>;
   getHost(): Host;
+  getSessionId(): Id;
   listContainers(): Promise<Dockerode.ContainerInfo[]>;
   getContainer(id: Id): Promise<Container>;
 }
 
 export class DockerodeClient implements DockerClient {
-  constructor(private readonly host: Host, private readonly dockerode: Dockerode) {}
+  constructor(private readonly host: Host, private readonly dockerode: Dockerode, private readonly sessionId: Id) {}
 
   public async pull(repoTag: RepoTag, authConfig?: AuthConfig): Promise<void> {
     log.info(`Pulling image: ${repoTag}`);
@@ -127,9 +128,7 @@ export class DockerodeClient implements DockerClient {
       Env: this.getEnv(options.env),
       ExposedPorts: this.getExposedPorts(options.boundPorts),
       Cmd: options.cmd,
-      Labels: {
-        "org.testcontainers.testcontainers-node": "true",
-      },
+      Labels: { [`org.testcontainers.session-id.${this.sessionId}`]: "true" },
       // @ts-ignore
       Healthcheck: this.getHealthCheck(options.healthCheck),
       HostConfig: {
@@ -156,7 +155,7 @@ export class DockerodeClient implements DockerClient {
       Ingress: options.ingress,
       EnableIPv6: options.enableIPv6,
       Options: options.options,
-      Labels: { ...options.labels, "org.testcontainers.testcontainers-node": "true" },
+      Labels: { ...options.labels, [`org.testcontainers.session-id.${this.sessionId}`]: "true" },
     });
     return network.id;
   }
@@ -231,6 +230,10 @@ export class DockerodeClient implements DockerClient {
 
   public getHost(): Host {
     return this.host;
+  }
+
+  public getSessionId(): Id {
+    return this.sessionId;
   }
 
   private isDanglingImage(image: Dockerode.ImageInfo) {

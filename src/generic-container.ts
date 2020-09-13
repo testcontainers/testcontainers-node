@@ -126,7 +126,7 @@ export class GenericContainer implements TestContainer {
     await dockerClient.start(container);
 
     if (this.autoCleanup && !Reaper.isRunning()) {
-      await Reaper.start();
+      await Reaper.start(dockerClient.getSessionId());
     }
 
     (await container.logs())

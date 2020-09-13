@@ -29,7 +29,7 @@ export class Network {
     log.info(`Started network with ID: ${id}`);
 
     if (!Reaper.isRunning()) {
-      await Reaper.start();
+      await Reaper.start(dockerClient.getSessionId());
     }
 
     return new StartedNetwork(id, this.createNetworkOptions, dockerClient);

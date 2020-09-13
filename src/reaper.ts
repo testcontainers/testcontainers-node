@@ -3,11 +3,16 @@ import log from "./logger";
 import { GenericContainer } from "./generic-container";
 import { StartedTestContainer } from "./test-container";
 import { Wait } from "./wait";
+import { Id } from "./container";
 
 export class Reaper {
   private static instance: Reaper;
 
-  constructor(private readonly container: StartedTestContainer, private readonly socket: Socket) {}
+  constructor(
+    private readonly sessionId: Id,
+    private readonly container: StartedTestContainer,
+    private readonly socket: Socket
+  ) {}
 
   public static isRunning(): boolean {
     return this.instance !== undefined;
@@ -17,13 +22,13 @@ export class Reaper {
     return this.instance;
   }
 
-  public static async start(): Promise<void> {
+  public static async start(sessionId: Id): Promise<void> {
     if (this.instance) {
-      log.debug("Reaper is already running");
+      log.debug(`Reaper is already running for session: ${sessionId}`);
       return;
     }
 
-    log.debug("Creating new Reaper");
+    log.debug(`Creating new Reaper for session: ${sessionId}`);
     const container = await new GenericContainer("quay.io/testcontainers/ryuk")
       .withExposedPorts(8080)
       .withBindMount("/var/run/docker.sock", "/var/run/docker.sock")
@@ -42,8 +47,8 @@ export class Reaper {
       });
       socket.connect(port, host, () => {
         log.debug(`Connected to Reaper`);
-        this.instance = new Reaper(container, socket);
-        this.writeFilter(socket, "label", "org.testcontainers.testcontainers-node").then(resolve);
+        this.instance = new Reaper(sessionId, container, socket);
+        this.writeFilter(socket, "label", `org.testcontainers.session-id.${sessionId}`).then(resolve);
       });
     });
   }
@@ -58,6 +63,9 @@ export class Reaper {
   }
 
   public async shutDown(): Promise<void> {
-    return new Promise((resolve) => this.socket.end(resolve));
+    return new Promise((resolve) => {
+      log.debug(`Shutting down reaper for session: ${this.sessionId}`);
+      this.socket.end(resolve);
+    });
   }
 }

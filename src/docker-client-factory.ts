@@ -2,6 +2,7 @@ import fs from "fs";
 import Dockerode, { NetworkInspectInfo } from "dockerode";
 import { DockerClient, DockerodeClient } from "./docker-client";
 import log from "./logger";
+import { RandomUuid } from "./uuid";
 
 export type Host = string;
 
@@ -14,7 +15,7 @@ export class DockerClientFactory {
     } else {
       const dockerode = new Dockerode();
       const host = await this.getHost(dockerode);
-      this.client = new DockerodeClient(host, dockerode);
+      this.client = new DockerodeClient(host, dockerode, new RandomUuid().nextUuid());
       return this.client;
     }
   }
