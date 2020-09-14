@@ -12,7 +12,7 @@ categories:
       - 'documentation'
   - title: '🧹 Maintenance'
     labels:
-      - 'chore'
+      - 'maintenance'
   - title: '📦 Dependency Updates'
     labels:
       - 'dependencies'
