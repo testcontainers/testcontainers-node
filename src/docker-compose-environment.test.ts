@@ -25,12 +25,6 @@ describe("DockerComposeEnvironment", () => {
     );
   });
 
-  it("should throw error when compose file fails to start", async () => {
-    await expect(new DockerComposeEnvironment(fixtures, "docker-compose-port-error.yml").up()).rejects.toThrowError(
-      `Bind for 0.0.0.0:8080 failed`
-    );
-  });
-
   it("should start all containers in the compose file", async () => {
     const startedEnvironment = manageEnvironment(
       await new DockerComposeEnvironment(fixtures, "docker-compose.yml").up()
