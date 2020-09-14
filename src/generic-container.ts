@@ -123,11 +123,11 @@ export class GenericContainer implements TestContainer {
       privilegedMode: this.privilegedMode,
     });
 
-    await dockerClient.start(container);
-
-    if (this.autoCleanup && !Reaper.isRunning()) {
+    if (this.autoCleanup) {
       await Reaper.start(dockerClient.getSessionId());
     }
+
+    await dockerClient.start(container);
 
     (await container.logs())
       .on("data", (data) => log.trace(`${container.getId()}: ${data}`))

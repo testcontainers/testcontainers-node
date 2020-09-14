@@ -39,25 +39,27 @@ export class Reaper {
     const host = container.getContainerIpAddress();
     const port = container.getMappedPort(8080);
 
-    return new Promise((resolve) => {
+    await new Promise((resolve) => {
       log.debug(`Connecting to Reaper on ${host}:${port}`);
       const socket = new Socket();
+
       socket.on("close", () => {
         log.debug("Connection to Reaper closed");
       });
+
+      socket.on("data", (chunk) => {
+        if (chunk.toString().trim() === "ACK") {
+          resolve();
+        }
+      });
+
       socket.connect(port, host, () => {
         log.debug(`Connected to Reaper`);
         this.instance = new Reaper(sessionId, container, socket);
-        this.writeFilter(socket, "label", `org.testcontainers.session-id.${sessionId}`).then(resolve);
-      });
-    });
-  }
 
-  private static async writeFilter(socket: Socket, key: string, value: string): Promise<void> {
-    return new Promise((resolve) => {
-      socket.write(`${key}=${value}\r\n`, () => {
-        log.debug(`Registered "${key}=${value}" with Reaper`);
-        resolve();
+        const key = "label";
+        const value = `org.testcontainers.session-id.${sessionId}`;
+        socket.write(`${key}=${value}\r\n`);
       });
     });
   }

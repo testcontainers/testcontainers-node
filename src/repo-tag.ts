@@ -11,4 +11,8 @@ export class RepoTag {
   public toString(): string {
     return `${this.image}:${this.tag}`;
   }
+
+  public isReaper(): boolean {
+    return this.image === "quay.io/testcontainers/ryuk";
+  }
 }

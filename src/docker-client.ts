@@ -128,7 +128,7 @@ export class DockerodeClient implements DockerClient {
       Env: this.getEnv(options.env),
       ExposedPorts: this.getExposedPorts(options.boundPorts),
       Cmd: options.cmd,
-      Labels: { [`org.testcontainers.session-id.${this.sessionId}`]: "true" },
+      Labels: this.createLabels(options.repoTag),
       // @ts-ignore
       Healthcheck: this.getHealthCheck(options.healthCheck),
       HostConfig: {
@@ -155,7 +155,7 @@ export class DockerodeClient implements DockerClient {
       Ingress: options.ingress,
       EnableIPv6: options.enableIPv6,
       Options: options.options,
-      Labels: { ...options.labels, [`org.testcontainers.session-id.${this.sessionId}`]: "true" },
+      Labels: { ...options.labels, ...this.createLabels() },
     });
     return network.id;
   }
@@ -201,6 +201,7 @@ export class DockerodeClient implements DockerClient {
       dockerfile: dockerfileName,
       buildargs: buildArgs,
       t: repoTag.toString(),
+      labels: this.createLabels(repoTag),
     });
     await streamToArray(stream);
   }
@@ -238,6 +239,16 @@ export class DockerodeClient implements DockerClient {
 
   private isDanglingImage(image: Dockerode.ImageInfo) {
     return image.RepoTags === null;
+  }
+
+  private createLabels(repoTag?: RepoTag): { [label: string]: string } {
+    if (repoTag && repoTag.isReaper()) {
+      return {};
+    }
+
+    return {
+      [`org.testcontainers.session-id.${this.sessionId}`]: "true",
+    };
   }
 
   private getEnv(env: Env): DockerodeEnvironment {

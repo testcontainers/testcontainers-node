@@ -5,7 +5,7 @@ import { GenericContainer } from "../../generic-container";
 import { StartedTestContainer } from "../../test-container";
 
 describe("KafkaContainer", () => {
-  jest.setTimeout(120000);
+  jest.setTimeout(180_000);
 
   let managedProducers: Producer[] = [];
   let managedConsumers: Consumer[] = [];
