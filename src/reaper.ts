@@ -47,8 +47,18 @@ export class Reaper {
         log.debug("Connection to Reaper closed");
       });
 
+      let ackCount = 0;
       socket.on("data", (chunk) => {
-        if (chunk.toString().trim() === "ACK") {
+        chunk
+          .toString()
+          .split("\n")
+          .map((line) => line.trim())
+          .forEach((line) => {
+            if (line === "ACK") {
+              ackCount++;
+            }
+          });
+        if (ackCount === 2) {
           resolve();
         }
       });
@@ -57,9 +67,8 @@ export class Reaper {
         log.debug(`Connected to Reaper`);
         this.instance = new Reaper(sessionId, container, socket);
 
-        const key = "label";
-        const value = `org.testcontainers.session-id.${sessionId}`;
-        socket.write(`${key}=${value}\r\n`);
+        socket.write(`label=org.testcontainers.session-id=${sessionId}\r\n`);
+        socket.write(`label=com.docker.compose.project=testcontainers-${sessionId}\r\n`);
       });
     });
   }

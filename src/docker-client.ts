@@ -245,10 +245,7 @@ export class DockerodeClient implements DockerClient {
     if (repoTag && repoTag.isReaper()) {
       return {};
     }
-
-    return {
-      [`org.testcontainers.session-id.${this.sessionId}`]: "true",
-    };
+    return { "org.testcontainers.session-id": this.sessionId };
   }
 
   private getEnv(env: Env): DockerodeEnvironment {
