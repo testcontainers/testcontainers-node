@@ -11,32 +11,30 @@ jobs:
   commit-version:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v2
         with:
-          persist-credentials: false
-          fetch-depth: 0
+          ref: master
       - uses: actions/setup-node@v1
         with:
           node-version: 12
       - run: |
-          git config --local user.name 'GitHub Action'
-          git config --local user.email 'no-reply@github.com'
+          git config user.name github-actions
+          git config user.email github-actions@github.com
           npm --no-git-tag-version version ${{ github.event.release.tag_name }}
           git add package.json package-lock.json
           git commit -m "${{ github.event.release.tag_name }}"
-      - uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          git push
 
   publish-npm:
     needs: commit-version
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          ref: master
       - uses: actions/setup-node@v1
         with:
           node-version: 12
-          registry-url: https://registry.npmjs.org/
       - run: npm ci
       - run: npm publish
         env:
