@@ -8,18 +8,23 @@ on:
     types: [published]
 
 jobs:
-  build:
+  commit-version:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
           node-version: 12
-      - run: npm ci
-      - run: npm test
+        run: |
+          git config --global user.name 'Cristian Greco'
+          git config --global user.email 'no-reply@github.com'
+          npm --no-git-tag-version version {{ github.event.release.tag_name }}
+          git add package.json package-lock.json
+          git commit -m "{{ github.event.release.tag_name }}"
+          git push
 
   publish-npm:
-    needs: build
+    needs: commit-version
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
