@@ -25,18 +25,16 @@ describe("DockerComposeEnvironment", () => {
         expect(response.status).toBe(200);
       })
     );
-
     await startedEnvironment.down();
   });
 
   it("should start container with a given name", async () => {
     const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-name.yml").up();
-
     const container = startedEnvironment.getContainer("custom_container_name");
+
     const url = `http://${container.getContainerIpAddress()}:${container.getMappedPort(8080)}`;
     const response = await fetch(`${url}/hello-world`);
     expect(response.status).toBe(200);
-
     await startedEnvironment.down();
   });
 
@@ -54,7 +52,6 @@ describe("DockerComposeEnvironment", () => {
         expect(response.status).toBe(200);
       })
     );
-
     await startedEnvironment.down();
   });
 
@@ -69,7 +66,6 @@ describe("DockerComposeEnvironment", () => {
         expect(response.status).toBe(200);
       })
     );
-
     await startedEnvironment.down();
   });
 
@@ -79,7 +75,6 @@ describe("DockerComposeEnvironment", () => {
     expect(() => startedEnvironment.getContainer("non_existent_container")).toThrowError(
       `Cannot get container "non_existent_container" as it is not running`
     );
-
     await startedEnvironment.down();
   });
 });

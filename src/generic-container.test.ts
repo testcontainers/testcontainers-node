@@ -21,6 +21,7 @@ describe("GenericContainer", () => {
     const response = await fetch(`${url}/hello-world`);
 
     expect(response.status).toBe(200);
+    await container.stop();
   });
 
   it("should wait for log", async () => {
@@ -33,6 +34,7 @@ describe("GenericContainer", () => {
     const response = await fetch(`${url}/hello-world`);
 
     expect(response.status).toBe(200);
+    await container.stop();
   });
 
   it("should wait for health check", async () => {
@@ -47,6 +49,7 @@ describe("GenericContainer", () => {
     const response = await fetch(`${url}/hello-world`);
 
     expect(response.status).toBe(200);
+    await container.stop();
   });
 
   it("should wait for custom health check", async () => {
@@ -66,6 +69,7 @@ describe("GenericContainer", () => {
     const response = await fetch(`${url}/hello-world`);
 
     expect(response.status).toBe(200);
+    await container.stop();
   });
 
   it("should set network mode", async () => {
@@ -77,6 +81,7 @@ describe("GenericContainer", () => {
     const containerInfo = await dockerContainer.inspect();
 
     expect(containerInfo.HostConfig.NetworkMode).toBe("host");
+    await container.stop();
   });
 
   it("should set environment variables", async () => {
@@ -90,6 +95,7 @@ describe("GenericContainer", () => {
     const responseBody = await response.json();
 
     expect(responseBody.customKey).toBe("customValue");
+    await container.stop();
   });
 
   it("should set command", async () => {
@@ -103,6 +109,7 @@ describe("GenericContainer", () => {
     const responseBody = await response.json();
 
     expect(responseBody).toEqual(["/usr/local/bin/node", "/index.js", "one", "two", "three"]);
+    await container.stop();
   });
 
   it("should set name", async () => {
@@ -114,6 +121,7 @@ describe("GenericContainer", () => {
       .start();
 
     expect(container.getName()).toEqual(expectedContainerName);
+    await container.stop();
   });
 
   it("should set bind mounts", async () => {
@@ -128,6 +136,8 @@ describe("GenericContainer", () => {
 
     const { output } = await container.exec(["cat", target]);
     expect(output).toContain("hello world");
+
+    await container.stop();
   });
 
   it("should set tmpfs", async () => {
@@ -144,6 +154,8 @@ describe("GenericContainer", () => {
     await container.exec(["touch", tmpFsFile]);
     const { exitCode: exitCode2 } = await container.exec(["ls", tmpFsFile]);
     expect(exitCode2).toBe(0);
+
+    await container.stop();
   });
 
   it("should set default log driver", async () => {
@@ -158,6 +170,7 @@ describe("GenericContainer", () => {
       Type: "json-file",
       Config: {},
     });
+    await container.stop();
   });
 
   it("should set privileged mode", async () => {
@@ -172,15 +185,19 @@ describe("GenericContainer", () => {
     const url = `http://${container.getContainerIpAddress()}:${container.getMappedPort(8080)}`;
     const response = await fetch(`${url}/hello-world`);
     expect(response.status).toBe(200);
+
+    await container.stop();
   });
 
   it("should use pull policy", async () => {
-    await new GenericContainer("cristianrgreco/testcontainer", "1.1.12").withExposedPorts(8080).start();
+    const container1 = await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
+      .withExposedPorts(8080)
+      .start();
 
     const events = await dockerodeClient.getEvents();
     events.setEncoding("utf-8");
 
-    await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
+    const container2 = await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
       .withPullPolicy(new AlwaysPullPolicy())
       .withExposedPorts(8080)
       .start();
@@ -196,10 +213,12 @@ describe("GenericContainer", () => {
       });
     });
 
+    expect(statuses).toContain("pull");
+
     // @ts-ignore
     events.destroy();
-
-    expect(statuses).toContain("pull");
+    await container1.stop();
+    await container2.stop();
   });
 
   it("should execute a command on a running container", async () => {
@@ -211,6 +230,8 @@ describe("GenericContainer", () => {
 
     expect(exitCode).toBe(0);
     expect(output).toContain("hello world");
+
+    await container.stop();
   });
 
   it("should stream logs from a running container", async () => {
@@ -224,6 +245,7 @@ describe("GenericContainer", () => {
     });
 
     expect(log).toContain("Listening on port 8080");
+    await container.stop();
   });
 
   it("should honour .dockerignore file", async () => {
@@ -241,6 +263,8 @@ describe("GenericContainer", () => {
     expect(output).not.toContain("example4.txt");
     expect(output).not.toContain("example5.txt");
     expect(output).not.toContain("example6.txt");
+
+    await startedContainer.stop();
   });
 
   describe("from Dockerfile", () => {
@@ -253,6 +277,7 @@ describe("GenericContainer", () => {
       const response = await fetch(`${url}/hello-world`);
 
       expect(response.status).toBe(200);
+      await startedContainer.stop();
     });
 
     it("should build and start with custom file name", async () => {
@@ -264,6 +289,7 @@ describe("GenericContainer", () => {
       const response = await fetch(`${url}/hello-world`);
 
       expect(response.status).toBe(200);
+      await startedContainer.stop();
     });
 
     it("should set build arguments", async () => {
@@ -275,6 +301,7 @@ describe("GenericContainer", () => {
       const response = await fetch(`${url}/hello-world`);
 
       expect(response.status).toBe(200);
+      await startedContainer.stop();
     });
 
     it("should exit immediately and stop without exception", async () => {
