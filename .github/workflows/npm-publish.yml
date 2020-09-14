@@ -15,7 +15,7 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 12
-        run: |
+      - run: |
           git config --global user.name 'Cristian Greco'
           git config --global user.email 'no-reply@github.com'
           npm --no-git-tag-version version {{ github.event.release.tag_name }}
