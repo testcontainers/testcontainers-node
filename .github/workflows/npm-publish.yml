@@ -18,6 +18,7 @@ jobs:
       - run: |
           git config --global user.name 'Cristian Greco'
           git config --global user.email 'no-reply@github.com'
+          git checkout master
           npm --no-git-tag-version version ${{ github.event.release.tag_name }}
           git add package.json package-lock.json
           git commit -m "${{ github.event.release.tag_name }}"
