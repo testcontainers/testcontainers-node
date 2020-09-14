@@ -33,8 +33,8 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [10.x, 12.x, 14.x]
-        node-image-version: [10-alpine, 12-alpine, 14-alpine]
+        node-version: [14.x]
+        node-image-version: [14-alpine]
 
     steps:
     - uses: actions/checkout@v2
