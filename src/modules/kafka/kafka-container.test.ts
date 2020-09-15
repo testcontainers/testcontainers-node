@@ -83,7 +83,7 @@ describe("KafkaContainer", () => {
 
     const consumedMessage = await new Promise(async (resolve) => {
       await consumer.run({
-        eachMessage: async ({ message }) => resolve(message.value.toString()),
+        eachMessage: async ({ message }) => resolve(message.value?.toString()),
       });
     });
 
