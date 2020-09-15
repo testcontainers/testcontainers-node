@@ -50,6 +50,18 @@ describe("GenericContainer", () => {
     expect(response.status).toBe(200);
   });
 
+  it.only("windows - should wait for port", async () => {
+    const container = manageContainer(
+      await new GenericContainer("microsoft/iis:nanoserver", "latest").withExposedPorts(80).start()
+    );
+
+    const url = `http://${container.getContainerIpAddress()}:${container.getMappedPort(80)}`;
+    const response = await fetch(url);
+
+    expect(response.status).toBe(200);
+    expect(await response.text()).toContain("Hello World!");
+  });
+
   it("should wait for log", async () => {
     const container = manageContainer(
       await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
