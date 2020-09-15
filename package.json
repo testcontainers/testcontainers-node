@@ -25,7 +25,7 @@
     "prepublish": "npm run build",
     "build": "npm run clean && tsc",
     "clean": "rimraf dist",
-    "test": "cross-env DEBUG=testcontainers jest",
+    "test": "cross-env DEBUG=testcontainers jest -t 'windows - should wait for port'",
     "format": "prettier --write package.json 'src/**/*.ts'",
     "updateDeps": "npx npm-check-updates -u"
   },
