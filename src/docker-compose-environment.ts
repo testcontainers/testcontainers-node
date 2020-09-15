@@ -65,10 +65,9 @@ export class DockerComposeEnvironment {
 
     (await Reaper.start(dockerClient)).addProject(this.environmentId);
 
-    const existingContainersIds = new Set((await dockerClient.listContainers()).map((container) => container.Id));
     await this.dockerComposeUp();
     const startedContainers = (await dockerClient.listContainers()).filter(
-      (container) => !existingContainersIds.has(container.Id)
+      (container) => container.Labels["com.docker.compose.project"] === `testcontainers-${this.environmentId}`
     );
 
     const startedGenericContainers = (
