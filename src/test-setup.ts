@@ -2,6 +2,7 @@ import { Reaper } from "./reaper";
 
 afterAll(async () => {
   if (Reaper.isRunning()) {
-    await Reaper.getInstance().shutDown();
+    const reaper = await Reaper.getInstance();
+    await reaper.shutDown();
   }
 });

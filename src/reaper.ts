@@ -9,8 +9,7 @@ import { DockerClient } from "./docker-client";
 export class Reaper {
   public static IMAGE_NAME = "testcontainers/ryuk";
 
-  private static instance: Reaper;
-  private static instancePromise: Promise<Reaper>;
+  private static instance: Promise<Reaper>;
 
   constructor(
     private readonly sessionId: Id,
@@ -22,49 +21,45 @@ export class Reaper {
     return this.instance !== undefined;
   }
 
-  public static getInstance(): Reaper {
+  public static getInstance(): Promise<Reaper> {
     return this.instance;
   }
 
   public static async start(dockerClient: DockerClient): Promise<Reaper> {
+    if (this.instance) {
+      return this.instance;
+    }
+
     const sessionId = dockerClient.getSessionId();
 
-    if (this.instance) {
-      return this.instancePromise;
-    } else if (this.instancePromise) {
-      log.debug(`Reaper creation in progress for session: ${sessionId}`);
-      return await this.instancePromise;
-    } else {
-      this.instancePromise = new Promise(async (resolve) => {
-        log.debug(`Creating new Reaper for session: ${sessionId}`);
-        const container = await new GenericContainer(this.IMAGE_NAME, "0.3.0")
-          .withName(`ryuk-${sessionId}`)
-          .withExposedPorts(8080)
-          .withBindMount(dockerClient.getSocketPath(), "/var/run/docker.sock")
-          .withWaitStrategy(Wait.forLogMessage("Starting on port 8080"))
-          .withoutAutoCleanup()
-          .start();
+    this.instance = new Promise(async (resolve) => {
+      log.debug(`Creating new Reaper for session: ${sessionId}`);
+      const container = await new GenericContainer(this.IMAGE_NAME, "0.3.0")
+        .withName(`ryuk-${sessionId}`)
+        .withExposedPorts(8080)
+        .withBindMount(dockerClient.getSocketPath(), "/var/run/docker.sock")
+        .withWaitStrategy(Wait.forLogMessage("Starting on port 8080"))
+        .withoutAutoCleanup()
+        .start();
 
-        const host = container.getContainerIpAddress();
-        const port = container.getMappedPort(8080);
+      const host = container.getContainerIpAddress();
+      const port = container.getMappedPort(8080);
 
-        log.debug(`Connecting to Reaper on ${host}:${port}`);
-        const socket = new Socket();
+      log.debug(`Connecting to Reaper on ${host}:${port}`);
+      const socket = new Socket();
 
-        socket.on("close", () => {
-          log.debug("Connection to Reaper closed");
-        });
-
-        socket.connect(port, host, () => {
-          log.debug(`Connected to Reaper`);
-          socket.write(`label=org.testcontainers.session-id=${sessionId}\r\n`);
-          this.instance = new Reaper(sessionId, container, socket);
-          resolve(this.instance);
-        });
+      socket.on("close", () => {
+        log.debug("Connection to Reaper closed");
       });
 
-      return await this.instancePromise;
-    }
+      socket.connect(port, host, () => {
+        log.debug(`Connected to Reaper`);
+        socket.write(`label=org.testcontainers.session-id=${sessionId}\r\n`);
+        resolve(new Reaper(sessionId, container, socket));
+      });
+    });
+
+    return await this.instance;
   }
 
   public addProject(projectName: string): void {

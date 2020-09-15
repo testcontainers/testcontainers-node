@@ -7,25 +7,21 @@ import { RandomUuid } from "./uuid";
 export type Host = string;
 
 export class DockerClientFactory {
-  private static client: DockerClient;
-  private static clientPromise: Promise<DockerClient>;
+  private static client: Promise<DockerClient>;
 
   public static async getClient(): Promise<DockerClient> {
     if (this.client) {
       return this.client;
-    } else if (this.clientPromise) {
-      log.debug("DockerClient creation in progress");
-      return await this.clientPromise;
-    } else {
-      this.clientPromise = new Promise(async (resolve) => {
-        log.debug("Creating new DockerClient");
-        const dockerode = new Dockerode();
-        const host = await this.getHost(dockerode);
-        this.client = new DockerodeClient(host, dockerode, new RandomUuid().nextUuid());
-        resolve(this.client);
-      });
-      return await this.clientPromise;
     }
+
+    this.client = new Promise(async (resolve) => {
+      log.debug("Creating new DockerClient");
+      const dockerode = new Dockerode();
+      const host = await this.getHost(dockerode);
+      resolve(new DockerodeClient(host, dockerode, new RandomUuid().nextUuid()));
+    });
+
+    return await this.client;
   }
 
   private static async getHost(dockerode: Dockerode): Promise<Host> {
