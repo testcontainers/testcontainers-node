@@ -8,7 +8,7 @@ import { DockerClient } from "./docker-client";
 import { DockerClientFactory } from "./docker-client-factory";
 import { resolveDockerComposeContainerName } from "./docker-compose-container-name-resolver";
 import { StartedGenericContainer } from "./generic-container";
-import log from "./logger";
+import { log, containerLog } from "./logger";
 import { HostPortCheck, InternalPortCheck } from "./port-check";
 import { HostPortWaitStrategy, WaitStrategy } from "./wait-strategy";
 
@@ -56,8 +56,8 @@ export class DockerComposeEnvironment {
           const containerName = resolveDockerComposeContainerName(startedContainer.Names[0]);
 
           (await container.logs())
-            .on("data", (data) => log.trace(`${containerName}: ${data}`))
-            .on("err", (data) => log.error(`${containerName}: ${data}`));
+            .on("data", (data) => containerLog.trace(`${containerName}: ${data}`))
+            .on("err", (data) => containerLog.error(`${containerName}: ${data}`));
 
           const inspectResult = await container.inspect();
           const boundPorts = this.getBoundPorts(startedContainer);
