@@ -1,7 +1,7 @@
 import { CreateNetworkOptions, DockerClient } from "./docker-client";
 import { DockerClientFactory } from "./docker-client-factory";
 import { RandomUuid, Uuid } from "./uuid";
-import log from "./logger";
+import { log } from "./logger";
 import { Reaper } from "./reaper";
 
 export class Network {

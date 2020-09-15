@@ -3,7 +3,7 @@ import { BoundPorts } from "./bound-ports";
 import { Container, HealthCheckStatus } from "./container";
 import { ContainerState } from "./container-state";
 import { DockerClient } from "./docker-client";
-import log from "./logger";
+import { log } from "./logger";
 import { Port } from "./port";
 import { PortCheck } from "./port-check";
 import { IntervalRetryStrategy } from "./retry-strategy";

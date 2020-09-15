@@ -13,8 +13,8 @@ export interface Logger {
 class DebugLogger implements Logger {
   private readonly logger: IDebugger;
 
-  constructor() {
-    this.logger = debug("testcontainers");
+  constructor(namespace: string) {
+    this.logger = debug(namespace);
   }
 
   public trace(message: Message): void {
@@ -38,4 +38,5 @@ class DebugLogger implements Logger {
   }
 }
 
-export default new DebugLogger();
+export const log = new DebugLogger("testcontainers");
+export const containerLog = new DebugLogger("testcontainers:containers");

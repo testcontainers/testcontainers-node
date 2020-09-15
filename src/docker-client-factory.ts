@@ -1,7 +1,7 @@
 import fs from "fs";
 import Dockerode, { NetworkInspectInfo } from "dockerode";
 import { DockerClient, DockerodeClient } from "./docker-client";
-import log from "./logger";
+import { log } from "./logger";
 import { RandomUuid } from "./uuid";
 
 export type Host = string;

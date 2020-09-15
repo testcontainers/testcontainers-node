@@ -1,5 +1,5 @@
 import { Socket } from "net";
-import log from "./logger";
+import { log } from "./logger";
 import { GenericContainer } from "./generic-container";
 import { StartedTestContainer } from "./test-container";
 import { Wait } from "./wait";

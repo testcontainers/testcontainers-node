@@ -21,7 +21,7 @@ import {
   TmpFs,
 } from "./docker-client";
 import { DockerClientFactory, Host } from "./docker-client-factory";
-import log from "./logger";
+import { log, containerLog } from "./logger";
 import { Port } from "./port";
 import { PortBinder } from "./port-binder";
 import { HostPortCheck, InternalPortCheck } from "./port-check";
@@ -130,8 +130,8 @@ export class GenericContainer implements TestContainer {
     await dockerClient.start(container);
 
     (await container.logs())
-      .on("data", (data) => log.trace(`${container.getId()}: ${data}`))
-      .on("err", (data) => log.error(`${container.getId()}: ${data}`));
+      .on("data", (data) => containerLog.trace(`${container.getId()}: ${data}`))
+      .on("err", (data) => containerLog.error(`${container.getId()}: ${data}`));
 
     const inspectResult = await container.inspect();
     const containerState = new ContainerState(inspectResult);
