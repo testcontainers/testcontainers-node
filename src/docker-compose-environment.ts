@@ -53,9 +53,9 @@ export class DockerComposeEnvironment {
     log.info(`Starting DockerCompose environment`);
 
     const dockerClient = await DockerClientFactory.getClient();
-    const sessionId = dockerClient.getSessionId();
-    await Reaper.start(sessionId);
+    await Reaper.start(dockerClient);
 
+    const sessionId = dockerClient.getSessionId();
     const existingContainersIds = new Set((await dockerClient.listContainers()).map((container) => container.Id));
     await this.dockerComposeUp(sessionId);
     const startedContainers = (await dockerClient.listContainers()).filter(

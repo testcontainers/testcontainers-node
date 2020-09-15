@@ -4,6 +4,7 @@ import { GenericContainer } from "./generic-container";
 import { StartedTestContainer } from "./test-container";
 import { Wait } from "./wait";
 import { Id } from "./container";
+import { DockerClient } from "./docker-client";
 
 export class Reaper {
   private static instance: Reaper;
@@ -22,7 +23,10 @@ export class Reaper {
     return this.instance;
   }
 
-  public static async start(sessionId: Id): Promise<void> {
+  public static async start(dockerClient: DockerClient): Promise<void> {
+    const sessionId = dockerClient.getSessionId();
+    const socketPath = dockerClient.getSocketPath();
+
     if (this.instance) {
       log.debug(`Reaper is already running for session: ${sessionId}`);
       return;
@@ -31,7 +35,7 @@ export class Reaper {
     log.debug(`Creating new Reaper for session: ${sessionId}`);
     const container = await new GenericContainer("quay.io/testcontainers/ryuk")
       .withExposedPorts(8080)
-      .withBindMount("/var/run/docker.sock", "/var/run/docker.sock")
+      .withBindMount(socketPath, "/var/run/docker.sock")
       .withWaitStrategy(Wait.forLogMessage("Starting on port 8080"))
       .withoutAutoCleanup()
       .start();

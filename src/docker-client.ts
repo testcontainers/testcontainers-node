@@ -102,10 +102,11 @@ export interface DockerClient {
   exec(container: Container, command: Command[]): Promise<ExecResult>;
   buildImage(repoTag: RepoTag, context: BuildContext, dockerfileName: string, buildArgs: BuildArgs): Promise<void>;
   fetchRepoTags(): Promise<RepoTag[]>;
-  getHost(): Host;
-  getSessionId(): Id;
   listContainers(): Promise<Dockerode.ContainerInfo[]>;
   getContainer(id: Id): Promise<Container>;
+  getHost(): Host;
+  getSessionId(): Id;
+  getSocketPath(): string;
 }
 
 export class DockerodeClient implements DockerClient {
@@ -235,6 +236,10 @@ export class DockerodeClient implements DockerClient {
 
   public getSessionId(): Id {
     return this.sessionId;
+  }
+
+  public getSocketPath(): string {
+    return this.dockerode.modem.socketPath;
   }
 
   private isDanglingImage(image: Dockerode.ImageInfo) {

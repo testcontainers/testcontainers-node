@@ -25,9 +25,11 @@ export class Network {
 
   public async start(): Promise<StartedNetwork> {
     const dockerClient = await DockerClientFactory.getClient();
-    await Reaper.start(dockerClient.getSessionId());
+    await Reaper.start(dockerClient);
+
     const id = await dockerClient.createNetwork(this.createNetworkOptions);
     log.info(`Started network with ID: ${id}`);
+
     return new StartedNetwork(id, this.createNetworkOptions, dockerClient);
   }
 }

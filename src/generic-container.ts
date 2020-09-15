@@ -105,6 +105,10 @@ export class GenericContainer implements TestContainer {
 
     const boundPorts = await new PortBinder().bind(this.ports);
 
+    if (this.autoCleanup) {
+      await Reaper.start(dockerClient);
+    }
+
     if (this.preCreate) {
       await this.preCreate(dockerClient, boundPorts);
     }
@@ -122,10 +126,6 @@ export class GenericContainer implements TestContainer {
       useDefaultLogDriver: this.useDefaultLogDriver,
       privilegedMode: this.privilegedMode,
     });
-
-    if (this.autoCleanup) {
-      await Reaper.start(dockerClient.getSessionId());
-    }
 
     await dockerClient.start(container);
 
