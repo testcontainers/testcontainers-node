@@ -1,6 +1,6 @@
 import byline from "byline";
 import dockerode, { ContainerInspectInfo } from "dockerode";
-import log from "./logger";
+import { log } from "./logger";
 import { Duration, TemporalUnit } from "node-duration";
 import { Command, ContainerName, ExitCode } from "./docker-client";
 import { Port } from "./port";

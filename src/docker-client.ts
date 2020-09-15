@@ -6,7 +6,7 @@ import { BoundPorts } from "./bound-ports";
 import { Container, DockerodeContainer, Id } from "./container";
 import { Host } from "./docker-client-factory";
 import { findDockerIgnoreFiles } from "./docker-ignore";
-import log from "./logger";
+import { log } from "./logger";
 import { PortString } from "./port";
 import { RepoTag } from "./repo-tag";
 
