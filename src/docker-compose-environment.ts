@@ -2,7 +2,7 @@ import * as dockerCompose from "docker-compose";
 import Dockerode from "dockerode";
 import { Duration, TemporalUnit } from "node-duration";
 import { BoundPorts } from "./bound-ports";
-import { Container, Id } from "./container";
+import { Container } from "./container";
 import { ContainerState } from "./container-state";
 import { DockerClient } from "./docker-client";
 import { DockerClientFactory } from "./docker-client-factory";
@@ -17,19 +17,19 @@ import { RandomUuid, Uuid } from "./uuid";
 const defaultDockerComposeOptions = (
   composeFilePath: string,
   composeFile: string,
-  environmentId: Id
+  projectName: string
 ): Partial<dockerCompose.IDockerComposeOptions> => ({
   log: false,
   cwd: composeFilePath,
   config: composeFile,
   env: {
     ...process.env,
-    COMPOSE_PROJECT_NAME: `testcontainers-${environmentId}`,
+    COMPOSE_PROJECT_NAME: projectName,
   },
 });
 
 export class DockerComposeEnvironment {
-  private readonly environmentId: Id;
+  private readonly projectName: string;
 
   private build = false;
   private waitStrategy: { [containerName: string]: WaitStrategy } = {};
@@ -38,9 +38,9 @@ export class DockerComposeEnvironment {
   constructor(
     private readonly composeFilePath: string,
     private readonly composeFile: string,
-    private uuid: Uuid = new RandomUuid()
+    uuid: Uuid = new RandomUuid()
   ) {
-    this.environmentId = uuid.nextUuid();
+    this.projectName = `testcontainers-${uuid.nextUuid()}`;
   }
 
   public withBuild(): this {
@@ -63,18 +63,18 @@ export class DockerComposeEnvironment {
 
     const dockerClient = await DockerClientFactory.getClient();
 
-    (await Reaper.start(dockerClient)).addProject(this.environmentId);
+    (await Reaper.start(dockerClient)).addProject(this.projectName);
 
     await this.dockerComposeUp();
     const startedContainers = (await dockerClient.listContainers()).filter(
-      (container) => container.Labels["com.docker.compose.project"] === `testcontainers-${this.environmentId}`
+      (container) => container.Labels["com.docker.compose.project"] === this.projectName
     );
 
     const startedGenericContainers = (
       await Promise.all(
         startedContainers.map(async (startedContainer) => {
           const container = await dockerClient.getContainer(startedContainer.Id);
-          const containerName = resolveDockerComposeContainerName(startedContainer.Names[0]);
+          const containerName = resolveDockerComposeContainerName(this.projectName, startedContainer.Names[0]);
 
           (await container.logs())
             .on("data", (data) => containerLog.trace(`${containerName}: ${data}`))
@@ -105,7 +105,7 @@ export class DockerComposeEnvironment {
     return new StartedDockerComposeEnvironment(
       this.composeFilePath,
       this.composeFile,
-      this.environmentId,
+      this.projectName,
       startedGenericContainers
     );
   }
@@ -131,7 +131,7 @@ export class DockerComposeEnvironment {
     }
 
     return {
-      ...defaultDockerComposeOptions(this.composeFilePath, this.composeFile, this.environmentId),
+      ...defaultDockerComposeOptions(this.composeFilePath, this.composeFile, this.projectName),
       commandOptions,
     };
   }
@@ -170,14 +170,14 @@ export class StartedDockerComposeEnvironment {
   constructor(
     private readonly composeFilePath: string,
     private readonly composeFile: string,
-    private readonly environmentId: Id,
+    private readonly projectName: string,
     private readonly startedGenericContainers: { [containerName: string]: StartedGenericContainer }
   ) {}
 
   public async down(): Promise<StoppedDockerComposeEnvironment> {
     log.info(`Stopping DockerCompose environment`);
     try {
-      await dockerCompose.down(defaultDockerComposeOptions(this.composeFilePath, this.composeFile, this.environmentId));
+      await dockerCompose.down(defaultDockerComposeOptions(this.composeFilePath, this.composeFile, this.projectName));
       return new StoppedDockerComposeEnvironment();
     } catch ({ err }) {
       log.error(`Failed to stop DockerCompose environment: ${err}`);

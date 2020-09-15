@@ -61,8 +61,8 @@ export class Reaper {
     });
   }
 
-  public addProject(environmentId: Id): void {
-    this.socket.write(`label=com.docker.compose.project=testcontainers-${environmentId}\r\n`);
+  public addProject(projectName: string): void {
+    this.socket.write(`label=com.docker.compose.project=${projectName}\r\n`);
   }
 
   public async shutDown(): Promise<void> {
