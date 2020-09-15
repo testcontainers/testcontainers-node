@@ -34,6 +34,7 @@ export class Reaper {
 
     log.debug(`Creating new Reaper for session: ${sessionId}`);
     const container = await new GenericContainer("quay.io/testcontainers/ryuk")
+      .withName(`ryuk-${sessionId}`)
       .withExposedPorts(8080)
       .withBindMount(socketPath, "/var/run/docker.sock")
       .withWaitStrategy(Wait.forLogMessage("Starting on port 8080"))
