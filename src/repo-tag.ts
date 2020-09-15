@@ -1,3 +1,5 @@
+import { Reaper } from "./reaper";
+
 export type Image = string;
 export type Tag = string;
 
@@ -13,6 +15,6 @@ export class RepoTag {
   }
 
   public isReaper(): boolean {
-    return this.image === "quay.io/testcontainers/ryuk";
+    return this.image === Reaper.IMAGE_NAME;
   }
 }
