@@ -12,27 +12,36 @@ import log from "./logger";
 import { HostPortCheck, InternalPortCheck } from "./port-check";
 import { HostPortWaitStrategy, WaitStrategy } from "./wait-strategy";
 import { Reaper } from "./reaper";
+import { RandomUuid, Uuid } from "./uuid";
 
 const defaultDockerComposeOptions = (
   composeFilePath: string,
   composeFile: string,
-  sessionId: Id
+  environmentId: Id
 ): Partial<dockerCompose.IDockerComposeOptions> => ({
   log: false,
   cwd: composeFilePath,
   config: composeFile,
   env: {
     ...process.env,
-    COMPOSE_PROJECT_NAME: `testcontainers-${sessionId}`,
+    COMPOSE_PROJECT_NAME: `testcontainers-${environmentId}`,
   },
 });
 
 export class DockerComposeEnvironment {
+  private readonly environmentId: Id;
+
   private build = false;
   private waitStrategy: { [containerName: string]: WaitStrategy } = {};
   private startupTimeout: Duration = new Duration(60_000, TemporalUnit.MILLISECONDS);
 
-  constructor(private readonly composeFilePath: string, private readonly composeFile: string) {}
+  constructor(
+    private readonly composeFilePath: string,
+    private readonly composeFile: string,
+    private uuid: Uuid = new RandomUuid()
+  ) {
+    this.environmentId = uuid.nextUuid();
+  }
 
   public withBuild(): this {
     this.build = true;
@@ -53,11 +62,11 @@ export class DockerComposeEnvironment {
     log.info(`Starting DockerCompose environment`);
 
     const dockerClient = await DockerClientFactory.getClient();
-    await Reaper.start(dockerClient);
 
-    const sessionId = dockerClient.getSessionId();
+    (await Reaper.start(dockerClient)).addProject(this.environmentId);
+
     const existingContainersIds = new Set((await dockerClient.listContainers()).map((container) => container.Id));
-    await this.dockerComposeUp(sessionId);
+    await this.dockerComposeUp();
     const startedContainers = (await dockerClient.listContainers()).filter(
       (container) => !existingContainersIds.has(container.Id)
     );
@@ -97,18 +106,18 @@ export class DockerComposeEnvironment {
     return new StartedDockerComposeEnvironment(
       this.composeFilePath,
       this.composeFile,
-      sessionId,
+      this.environmentId,
       startedGenericContainers
     );
   }
 
-  private async dockerComposeUp(sessionId: Id) {
+  private async dockerComposeUp() {
     try {
-      await dockerCompose.upAll(this.createDockerComposeOptions(sessionId));
+      await dockerCompose.upAll(this.createDockerComposeOptions());
     } catch ({ err }) {
       log.error(`Failed to start DockerCompose environment: ${err}`);
       try {
-        await dockerCompose.down(this.createDockerComposeOptions(sessionId));
+        await dockerCompose.down(this.createDockerComposeOptions());
       } catch {
         log.warn(`Failed to stop DockerCompose environment after failed start`);
       }
@@ -116,14 +125,14 @@ export class DockerComposeEnvironment {
     }
   }
 
-  private createDockerComposeOptions(sessionId: Id): dockerCompose.IDockerComposeOptions {
+  private createDockerComposeOptions(): dockerCompose.IDockerComposeOptions {
     const commandOptions = [];
     if (this.build) {
       commandOptions.push("--build");
     }
 
     return {
-      ...defaultDockerComposeOptions(this.composeFilePath, this.composeFile, sessionId),
+      ...defaultDockerComposeOptions(this.composeFilePath, this.composeFile, this.environmentId),
       commandOptions,
     };
   }
@@ -162,14 +171,14 @@ export class StartedDockerComposeEnvironment {
   constructor(
     private readonly composeFilePath: string,
     private readonly composeFile: string,
-    private readonly sessionId: Id,
+    private readonly environmentId: Id,
     private readonly startedGenericContainers: { [containerName: string]: StartedGenericContainer }
   ) {}
 
   public async down(): Promise<StoppedDockerComposeEnvironment> {
     log.info(`Stopping DockerCompose environment`);
     try {
-      await dockerCompose.down(defaultDockerComposeOptions(this.composeFilePath, this.composeFile, this.sessionId));
+      await dockerCompose.down(defaultDockerComposeOptions(this.composeFilePath, this.composeFile, this.environmentId));
       return new StoppedDockerComposeEnvironment();
     } catch ({ err }) {
       log.error(`Failed to stop DockerCompose environment: ${err}`);

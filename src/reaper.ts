@@ -23,13 +23,13 @@ export class Reaper {
     return this.instance;
   }
 
-  public static async start(dockerClient: DockerClient): Promise<void> {
+  public static async start(dockerClient: DockerClient): Promise<Reaper> {
     const sessionId = dockerClient.getSessionId();
     const socketPath = dockerClient.getSocketPath();
 
     if (this.instance) {
       log.debug(`Reaper is already running for session: ${sessionId}`);
-      return;
+      return Promise.resolve(this.instance);
     }
 
     log.debug(`Creating new Reaper for session: ${sessionId}`);
@@ -44,7 +44,7 @@ export class Reaper {
     const host = container.getContainerIpAddress();
     const port = container.getMappedPort(8080);
 
-    await new Promise((resolve) => {
+    return await new Promise((resolve) => {
       log.debug(`Connecting to Reaper on ${host}:${port}`);
       const socket = new Socket();
 
@@ -52,30 +52,17 @@ export class Reaper {
         log.debug("Connection to Reaper closed");
       });
 
-      let ackCount = 0;
-      socket.on("data", (chunk) => {
-        chunk
-          .toString()
-          .split("\n")
-          .map((line) => line.trim())
-          .forEach((line) => {
-            if (line === "ACK") {
-              ackCount++;
-            }
-          });
-        if (ackCount === 2) {
-          resolve();
-        }
-      });
-
       socket.connect(port, host, () => {
         log.debug(`Connected to Reaper`);
-        this.instance = new Reaper(sessionId, container, socket);
-
         socket.write(`label=org.testcontainers.session-id=${sessionId}\r\n`);
-        socket.write(`label=com.docker.compose.project=testcontainers-${sessionId}\r\n`);
+        this.instance = new Reaper(sessionId, container, socket);
+        resolve(this.instance);
       });
     });
+  }
+
+  public addProject(environmentId: Id): void {
+    this.socket.write(`label=com.docker.compose.project=testcontainers-${environmentId}\r\n`);
   }
 
   public async shutDown(): Promise<void> {
