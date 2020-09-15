@@ -15,7 +15,7 @@ export class DockerClientFactory {
       return this.client;
     } else if (this.clientPromise) {
       log.debug("DockerClient creation in progress");
-      return this.clientPromise;
+      return await this.clientPromise;
     } else {
       this.clientPromise = new Promise(async (resolve) => {
         log.debug("Creating new DockerClient");
@@ -24,7 +24,7 @@ export class DockerClientFactory {
         this.client = new DockerodeClient(host, dockerode, new RandomUuid().nextUuid());
         resolve(this.client);
       });
-      return this.clientPromise;
+      return await this.clientPromise;
     }
   }
 

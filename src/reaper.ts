@@ -33,7 +33,7 @@ export class Reaper {
       return this.instancePromise;
     } else if (this.instancePromise) {
       log.debug(`Reaper creation in progress for session: ${sessionId}`);
-      return this.instancePromise;
+      return await this.instancePromise;
     } else {
       this.instancePromise = new Promise(async (resolve) => {
         log.debug(`Creating new Reaper for session: ${sessionId}`);
@@ -63,7 +63,7 @@ export class Reaper {
         });
       });
 
-      return this.instancePromise;
+      return await this.instancePromise;
     }
   }
 
