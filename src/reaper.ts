@@ -33,6 +33,7 @@ export class Reaper {
       .withName(`ryuk-${sessionId}`)
       .withExposedPorts(8080)
       .withBindMount(dockerClient.getSocketPath(), "/var/run/docker.sock")
+      .withWaitStrategy(Wait.forLogMessage("Starting on port 8080"))
       .withDaemonMode()
       .start();
 
@@ -44,7 +45,7 @@ export class Reaper {
     socket.unref();
 
     socket.on("close", () => {
-      log.debug("Connection to Reaper closed");
+      log.warn("Connection to Reaper closed");
     });
 
     return await new Promise((resolve) => {
