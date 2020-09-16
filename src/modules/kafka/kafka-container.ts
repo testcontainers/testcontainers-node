@@ -1,4 +1,4 @@
-import { AbstractStartedContainer, GenericContainer } from "../../generic-container";
+import { GenericContainer } from "../../generic-container";
 import { BoundPorts } from "../../bound-ports";
 import { DockerClient } from "../../docker-client";
 import { Image, Tag } from "../../repo-tag";
@@ -10,6 +10,7 @@ import { RandomUuid, Uuid } from "../../uuid";
 import { StartedTestContainer, StoppedTestContainer } from "../..";
 import { StopOptions } from "../../test-container";
 import { log } from "../../logger";
+import { AbstractStartedContainer } from "../abstract-started-container";
 
 export class KafkaContainer extends GenericContainer {
   private readonly uuid: Uuid = new RandomUuid();

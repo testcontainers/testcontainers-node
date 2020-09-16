@@ -6,7 +6,7 @@ import { BoundPorts } from "../../bound-ports";
 import { StartedTestContainer } from "../../test-container";
 import { Port } from "../../port";
 import { RandomUuid } from "../../uuid";
-import { AbstractStartedContainer } from "../../generic-container";
+import { AbstractStartedContainer } from "../abstract-started-container";
 
 export class Neo4jContainer extends GenericContainer {
   private readonly defaultBoltPort = 7687;
