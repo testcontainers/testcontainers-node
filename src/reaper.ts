@@ -42,6 +42,7 @@ export class Reaper {
 
     log.debug(`Connecting to Reaper on ${host}:${port}`);
     const socket = new Socket();
+
     socket.unref();
 
     socket.on("close", () => {

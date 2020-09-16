@@ -84,6 +84,7 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
   public async waitUntilReady(container: Container): Promise<void> {
     log.debug(`Waiting for log message "${this.message}"`);
     const stream = await container.logs();
+
     return new Promise((resolve, reject) => {
       stream
         .on("data", (line) => {
