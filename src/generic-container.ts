@@ -88,7 +88,7 @@ export class GenericContainer implements TestContainer {
   protected startupTimeout: Duration = new Duration(60_000, TemporalUnit.MILLISECONDS);
   protected useDefaultLogDriver: boolean = false;
   protected privilegedMode: boolean = false;
-  protected autoCleanup: boolean = true;
+  protected daemonMode: boolean = false;
   protected authConfig?: AuthConfig;
   protected pullPolicy: PullPolicy = new DefaultPullPolicy();
 
@@ -105,7 +105,7 @@ export class GenericContainer implements TestContainer {
 
     const boundPorts = await new PortBinder().bind(this.ports);
 
-    if (this.autoCleanup) {
+    if (!this.repoTag.isReaper()) {
       await Reaper.start(dockerClient);
     }
 
@@ -125,13 +125,16 @@ export class GenericContainer implements TestContainer {
       healthCheck: this.healthCheck,
       useDefaultLogDriver: this.useDefaultLogDriver,
       privilegedMode: this.privilegedMode,
+      autoRemove: this.daemonMode,
     });
 
     await dockerClient.start(container);
 
-    // (await container.logs())
-    //   .on("data", (data) => containerLog.trace(`${container.getId()}: ${data}`))
-    //   .on("err", (data) => containerLog.error(`${container.getId()}: ${data}`));
+    if (!this.daemonMode) {
+      (await container.logs())
+        .on("data", (data) => containerLog.trace(`${container.getId()}: ${data}`))
+        .on("err", (data) => containerLog.error(`${container.getId()}: ${data}`));
+    }
 
     const inspectResult = await container.inspect();
     const containerState = new ContainerState(inspectResult);
@@ -211,8 +214,8 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
-  public withoutAutoCleanup(): this {
-    this.autoCleanup = false;
+  public withDaemonMode(): this {
+    this.daemonMode = true;
     return this;
   }
 

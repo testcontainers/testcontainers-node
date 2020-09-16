@@ -33,7 +33,7 @@ export class Reaper {
       .withName(`ryuk-${sessionId}`)
       .withExposedPorts(8080)
       .withBindMount(dockerClient.getSocketPath(), "/var/run/docker.sock")
-      .withoutAutoCleanup()
+      .withDaemonMode()
       .start();
 
     const host = container.getContainerIpAddress();

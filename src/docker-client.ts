@@ -79,6 +79,7 @@ type CreateOptions = {
   healthCheck?: HealthCheck;
   useDefaultLogDriver: boolean;
   privilegedMode: boolean;
+  autoRemove: boolean;
 };
 
 export type CreateNetworkOptions = {
@@ -133,6 +134,7 @@ export class DockerodeClient implements DockerClient {
       // @ts-ignore
       Healthcheck: this.getHealthCheck(options.healthCheck),
       HostConfig: {
+        AutoRemove: options.autoRemove,
         NetworkMode: options.networkMode,
         PortBindings: this.getPortBindings(options.boundPorts),
         Binds: this.getBindMounts(options.bindMounts),
