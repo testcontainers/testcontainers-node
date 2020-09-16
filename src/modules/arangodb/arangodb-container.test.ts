@@ -12,7 +12,7 @@ describe("ArangoDB", () => {
   });
 
   afterEach(async () => {
-    container.stop();
+    await container.stop();
   });
 
   xit("should connect", async () => {

@@ -31,14 +31,19 @@ describe("KafkaContainer", () => {
     const kafkaContainer = await new KafkaContainer().withExposedPorts(9093).start();
 
     await testPubSub(kafkaContainer);
+
+    await kafkaContainer.stop();
   });
 
-  it("should connect to kafka using in-build zoo-keeper and custom network", async () => {
+  it("should connect to kafka using in-built zoo-keeper and custom network", async () => {
     const network = await new Network().start();
 
     const kafkaContainer = await new KafkaContainer().withNetworkMode(network.getName()).withExposedPorts(9093).start();
 
     await testPubSub(kafkaContainer);
+
+    await kafkaContainer.stop();
+    // await network.stop();
   });
 
   it("should connect to kafka using provided zoo-keeper", async () => {
@@ -46,7 +51,7 @@ describe("KafkaContainer", () => {
 
     const zooKeeperHost = "zookeeper";
     const zooKeeperPort = 2181;
-    await new GenericContainer("confluentinc/cp-zookeeper", "latest")
+    const zookeeperContainer = await new GenericContainer("confluentinc/cp-zookeeper", "latest")
       .withName(zooKeeperHost)
       .withEnv("ZOOKEEPER_CLIENT_PORT", zooKeeperPort.toString())
       .withNetworkMode(network.getName())
@@ -60,6 +65,10 @@ describe("KafkaContainer", () => {
       .start();
 
     await testPubSub(kafkaContainer);
+
+    await zookeeperContainer.stop();
+    await kafkaContainer.stop();
+    await network.stop();
   });
 
   const testPubSub = async (kafkaContainer: StartedTestContainer) => {

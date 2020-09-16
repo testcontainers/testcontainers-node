@@ -5,6 +5,7 @@ import { StartedTestContainer } from "./test-container";
 import { Wait } from "./wait";
 import { Id } from "./container";
 import { DockerClient } from "./docker-client";
+import { Duration, TemporalUnit } from "node-duration";
 
 export class Reaper {
   public static IMAGE_NAME = "testcontainers/ryuk";
@@ -16,14 +17,6 @@ export class Reaper {
     private readonly container: StartedTestContainer,
     private readonly socket: Socket
   ) {}
-
-  public static isRunning(): boolean {
-    return this.instance !== undefined;
-  }
-
-  public static getInstance(): Promise<Reaper> {
-    return this.instance;
-  }
 
   public static async start(dockerClient: DockerClient): Promise<Reaper> {
     if (this.instance) {
@@ -55,7 +48,9 @@ export class Reaper {
       socket.connect(port, host, () => {
         log.debug(`Connected to Reaper`);
         socket.write(`label=org.testcontainers.session-id=${sessionId}\r\n`);
-        resolve(new Reaper(sessionId, container, socket));
+        const reaper = new Reaper(sessionId, container, socket);
+        process.on("exit", () => reaper.shutDown());
+        resolve(reaper);
       });
     });
 
@@ -67,9 +62,10 @@ export class Reaper {
   }
 
   public async shutDown(): Promise<void> {
-    return new Promise((resolve) => {
+    await new Promise((resolve) => {
       log.debug(`Shutting down reaper for session: ${this.sessionId}`);
       this.socket.end(resolve);
     });
+    await this.container.stop({ timeout: new Duration(0, TemporalUnit.MILLISECONDS) });
   }
 }
