@@ -43,10 +43,10 @@ describe("KafkaContainer", () => {
     await testPubSub(kafkaContainer);
 
     await kafkaContainer.stop();
-    // await network.stop();
+    await network.stop();
   });
 
-  it("should connect to kafka using provided zoo-keeper", async () => {
+  it("should connect to kafka using provided zoo-keeper and network", async () => {
     const network = await new Network().start();
 
     const zooKeeperHost = "zookeeper";
