@@ -47,8 +47,8 @@ describe("KafkaContainer", () => {
 
     await testPubSub(kafkaContainer);
 
-    await zookeeperContainer.stop({ timeout: new Duration(0, TemporalUnit.MILLISECONDS) });
-    await kafkaContainer.stop({ timeout: new Duration(0, TemporalUnit.MILLISECONDS) });
+    await zookeeperContainer.stop();
+    await kafkaContainer.stop();
     await network.stop();
   });
 
