@@ -1,31 +1,12 @@
-import { Consumer, Kafka, logLevel, Producer } from "kafkajs";
+import { Kafka, logLevel } from "kafkajs";
 import { KafkaContainer } from "./kafka-container";
 import { Network } from "../../network";
 import { GenericContainer } from "../../generic-container";
 import { StartedTestContainer } from "../../test-container";
+import { Duration, TemporalUnit } from "node-duration";
 
 describe("KafkaContainer", () => {
   jest.setTimeout(180_000);
-
-  let managedProducers: Producer[] = [];
-  let managedConsumers: Consumer[] = [];
-
-  const manageProducer = (producer: Producer): Producer => {
-    managedProducers.push(producer);
-    return producer;
-  };
-
-  const manageConsumer = (consumer: Consumer): Consumer => {
-    managedConsumers.push(consumer);
-    return consumer;
-  };
-
-  afterEach(async () => {
-    await Promise.all(managedProducers.map((producer) => producer.disconnect()));
-    managedProducers = [];
-    await Promise.all(managedConsumers.map((consumer) => consumer.disconnect()));
-    managedConsumers = [];
-  });
 
   it("should connect to kafka using in-built zoo-keeper", async () => {
     const kafkaContainer = await new KafkaContainer().withExposedPorts(9093).start();
@@ -66,8 +47,8 @@ describe("KafkaContainer", () => {
 
     await testPubSub(kafkaContainer);
 
-    await zookeeperContainer.stop();
-    await kafkaContainer.stop();
+    await zookeeperContainer.stop({ timeout: new Duration(0, TemporalUnit.MILLISECONDS) });
+    await kafkaContainer.stop({ timeout: new Duration(0, TemporalUnit.MILLISECONDS) });
     await network.stop();
   });
 
@@ -77,10 +58,10 @@ describe("KafkaContainer", () => {
       brokers: [`${kafkaContainer.getContainerIpAddress()}:${kafkaContainer.getMappedPort(9093)}`],
     });
 
-    const producer = manageProducer(kafka.producer());
+    const producer = kafka.producer();
     await producer.connect();
 
-    const consumer = manageConsumer(kafka.consumer({ groupId: "test-group" }));
+    const consumer = kafka.consumer({ groupId: "test-group" });
     await consumer.connect();
 
     await producer.send({
@@ -97,5 +78,8 @@ describe("KafkaContainer", () => {
     });
 
     expect(consumedMessage).toBe("test message");
+
+    await consumer.disconnect();
+    await producer.disconnect();
   };
 });
