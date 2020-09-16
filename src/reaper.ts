@@ -33,7 +33,6 @@ export class Reaper {
       .withName(`ryuk-${sessionId}`)
       .withExposedPorts(8080)
       .withBindMount(dockerClient.getSocketPath(), "/var/run/docker.sock")
-      .withWaitStrategy(Wait.forLogMessage("Starting on port 8080"))
       .withoutAutoCleanup()
       .start();
 
@@ -42,6 +41,7 @@ export class Reaper {
 
     log.debug(`Connecting to Reaper on ${host}:${port}`);
     const socket = new Socket();
+    socket.unref();
 
     socket.on("close", () => {
       log.debug("Connection to Reaper closed");
@@ -52,7 +52,6 @@ export class Reaper {
         log.debug(`Connected to Reaper`);
         socket.write(`label=org.testcontainers.session-id=${sessionId}\r\n`);
         const reaper = new Reaper(sessionId, container, socket);
-        process.on("exit", () => reaper.shutDown());
         resolve(reaper);
       });
     });
@@ -60,13 +59,5 @@ export class Reaper {
 
   public addProject(projectName: string): void {
     this.socket.write(`label=com.docker.compose.project=${projectName}\r\n`);
-  }
-
-  public async shutDown(): Promise<void> {
-    await new Promise((resolve) => {
-      log.debug(`Shutting down reaper for session: ${this.sessionId}`);
-      this.socket.end(resolve);
-    });
-    await this.container.stop({ timeout: new Duration(0, TemporalUnit.MILLISECONDS) });
   }
 }

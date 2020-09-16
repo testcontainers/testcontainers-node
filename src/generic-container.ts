@@ -129,9 +129,9 @@ export class GenericContainer implements TestContainer {
 
     await dockerClient.start(container);
 
-    (await container.logs())
-      .on("data", (data) => containerLog.trace(`${container.getId()}: ${data}`))
-      .on("err", (data) => containerLog.error(`${container.getId()}: ${data}`));
+    // (await container.logs())
+    //   .on("data", (data) => containerLog.trace(`${container.getId()}: ${data}`))
+    //   .on("err", (data) => containerLog.error(`${container.getId()}: ${data}`));
 
     const inspectResult = await container.inspect();
     const containerState = new ContainerState(inspectResult);
