@@ -90,8 +90,8 @@ describe("KafkaContainer", () => {
 
     await consumer.subscribe({ topic: "test-topic", fromBeginning: true });
 
-    const consumedMessage = await new Promise(async (resolve) => {
-      await consumer.run({
+    const consumedMessage = await new Promise((resolve) => {
+      consumer.run({
         eachMessage: async ({ message }) => resolve(message.value?.toString()),
       });
     });

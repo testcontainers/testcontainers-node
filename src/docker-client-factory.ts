@@ -10,18 +10,17 @@ export class DockerClientFactory {
   private static client: Promise<DockerClient>;
 
   public static async getClient(): Promise<DockerClient> {
-    if (this.client) {
-      return this.client;
+    if (!this.client) {
+      this.client = this.createClient();
     }
+    return this.client;
+  }
 
-    this.client = new Promise(async (resolve) => {
-      log.debug("Creating new DockerClient");
-      const dockerode = new Dockerode();
-      const host = await this.getHost(dockerode);
-      resolve(new DockerodeClient(host, dockerode, new RandomUuid().nextUuid()));
-    });
-
-    return await this.client;
+  private static async createClient(): Promise<DockerClient> {
+    log.debug("Creating new DockerClient");
+    const dockerode = new Dockerode();
+    const host = await this.getHost(dockerode);
+    return new DockerodeClient(host, dockerode, new RandomUuid().nextUuid());
   }
 
   private static async getHost(dockerode: Dockerode): Promise<Host> {

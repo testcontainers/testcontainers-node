@@ -19,32 +19,35 @@ export class Reaper {
   ) {}
 
   public static async start(dockerClient: DockerClient): Promise<Reaper> {
-    if (this.instance) {
-      return this.instance;
+    if (!this.instance) {
+      this.instance = this.createInstance(dockerClient);
     }
+    return this.instance;
+  }
 
+  private static async createInstance(dockerClient: DockerClient): Promise<Reaper> {
     const sessionId = dockerClient.getSessionId();
 
-    this.instance = new Promise(async (resolve) => {
-      log.debug(`Creating new Reaper for session: ${sessionId}`);
-      const container = await new GenericContainer(this.IMAGE_NAME, "0.3.0")
-        .withName(`ryuk-${sessionId}`)
-        .withExposedPorts(8080)
-        .withBindMount(dockerClient.getSocketPath(), "/var/run/docker.sock")
-        .withWaitStrategy(Wait.forLogMessage("Starting on port 8080"))
-        .withoutAutoCleanup()
-        .start();
+    log.debug(`Creating new Reaper for session: ${sessionId}`);
+    const container = await new GenericContainer(this.IMAGE_NAME, "0.3.0")
+      .withName(`ryuk-${sessionId}`)
+      .withExposedPorts(8080)
+      .withBindMount(dockerClient.getSocketPath(), "/var/run/docker.sock")
+      .withWaitStrategy(Wait.forLogMessage("Starting on port 8080"))
+      .withoutAutoCleanup()
+      .start();
 
-      const host = container.getContainerIpAddress();
-      const port = container.getMappedPort(8080);
+    const host = container.getContainerIpAddress();
+    const port = container.getMappedPort(8080);
 
-      log.debug(`Connecting to Reaper on ${host}:${port}`);
-      const socket = new Socket();
+    log.debug(`Connecting to Reaper on ${host}:${port}`);
+    const socket = new Socket();
 
-      socket.on("close", () => {
-        log.debug("Connection to Reaper closed");
-      });
+    socket.on("close", () => {
+      log.debug("Connection to Reaper closed");
+    });
 
+    return await new Promise((resolve) => {
       socket.connect(port, host, () => {
         log.debug(`Connected to Reaper`);
         socket.write(`label=org.testcontainers.session-id=${sessionId}\r\n`);
@@ -53,8 +56,6 @@ export class Reaper {
         resolve(reaper);
       });
     });
-
-    return await this.instance;
   }
 
   public addProject(projectName: string): void {

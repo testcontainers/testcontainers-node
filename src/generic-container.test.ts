@@ -239,10 +239,8 @@ describe("GenericContainer", () => {
       .withExposedPorts(8080)
       .start();
 
-    const log = await new Promise(async (resolve) => {
-      const stream = await container.logs();
-      stream.on("data", (line) => resolve(line));
-    });
+    const stream = await container.logs();
+    const log = await new Promise((resolve) => stream.on("data", (line) => resolve(line)));
 
     expect(log).toContain("Listening on port 8080");
     await container.stop();
