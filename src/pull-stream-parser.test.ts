@@ -11,14 +11,13 @@ describe("PullStreamParser", () => {
   beforeEach(() => {
     logger = new FakeLogger();
     parser = new PullStreamParser(new RepoTag("image", "tag"), logger);
-    stream = new Duplex();
+    stream = new Readable();
   });
 
   it("should wait for stream to end", async () => {
     const promise = new Promise((resolve) => parser.consume(stream).then(resolve));
 
     stream.push(null);
-    stream.destroy();
 
     await promise;
   });
@@ -29,7 +28,6 @@ describe("PullStreamParser", () => {
     stream.push(`Invalid`);
     stream.push(null);
 
-    stream.destroy();
     await promise;
 
     expect(logger.traceLogs).toHaveLength(0);
@@ -42,7 +40,6 @@ describe("PullStreamParser", () => {
     stream.push(`{"status":"Pulling from cristianrgreco/testcontainer","id":"id"}\n`);
     stream.push(null);
 
-    stream.destroy();
     await promise;
 
     expect(logger.traceLogs).toEqual(["Pulling image:tag - id - Pulling from cristianrgreco/testcontainer"]);
@@ -55,7 +52,6 @@ describe("PullStreamParser", () => {
     stream.push(`{"status":"Pulling from cristianrgreco/testcontainer","id":"id"}\n`);
     stream.push(null);
 
-    stream.destroy();
     await promise;
 
     expect(logger.traceLogs).toEqual(["Pulling image:tag - id - Pulling from cristianrgreco/testcontainer"]);
@@ -68,7 +64,6 @@ describe("PullStreamParser", () => {
     stream.push(`{"status":"Pulling from cristianrgreco/testcontainer","id":"id2"}\n`);
     stream.push(null);
 
-    stream.destroy();
     await promise;
 
     expect(logger.traceLogs).toEqual([
@@ -83,7 +78,6 @@ describe("PullStreamParser", () => {
     stream.push(`{"status":"Pulling from cristianrgreco/testcontainer"}\n`);
     stream.push(null);
 
-    stream.destroy();
     await promise;
 
     expect(logger.traceLogs).toEqual(["Pulling image:tag - Pulling from cristianrgreco/testcontainer"]);
@@ -95,7 +89,6 @@ describe("PullStreamParser", () => {
     stream.push(`{"status":"Downloading","progressDetail":{"current":5,"total":10},"progress":"...","id":"id"}\n`);
     stream.push(null);
 
-    stream.destroy();
     await promise;
 
     expect(logger.traceLogs).toEqual(["Pulling image:tag - id - Downloading 50%"]);
@@ -107,7 +100,6 @@ describe("PullStreamParser", () => {
     stream.push(`{"status":"Downloading","progressDetail":{"current":3,"total":9},"progress":"...","id":"id"}\n`);
     stream.push(null);
 
-    stream.destroy();
     await promise;
 
     expect(logger.traceLogs).toEqual(["Pulling image:tag - id - Downloading 33%"]);
@@ -120,7 +112,6 @@ describe("PullStreamParser", () => {
     stream.push(`{"status":"Downloading","progressDetail":{"current":5.0001,"total":10},"progress":"...","id":"id"}\n`);
     stream.push(null);
 
-    stream.destroy();
     await promise;
 
     expect(logger.traceLogs).toEqual(["Pulling image:tag - id - Downloading 50%"]);
@@ -134,7 +125,6 @@ describe("PullStreamParser", () => {
     );
     stream.push(null);
 
-    stream.destroy();
     await promise;
 
     expect(logger.traceLogs).toEqual([
