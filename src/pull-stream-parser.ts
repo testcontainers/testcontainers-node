@@ -7,7 +7,7 @@ export class PullStreamParser {
   constructor(private readonly repoTag: RepoTag, private readonly logger: Logger) {}
 
   public consume(stream: Readable): Promise<void> {
-    const messages = new Set();
+    const messagesById: Map<string, Set<string>> = new Map();
     const statusesById: Map<string, Set<string>> = new Map();
 
     return new Promise((resolve) => {
@@ -15,26 +15,25 @@ export class PullStreamParser {
         try {
           const json = JSON.parse(data);
           const { id, status } = json;
-
-          const prefix = `Pull ${this.repoTag.toString()} - ${id}`;
+          const prefix = `Pull ${this.repoTag.toString()}`;
 
           if (status === "Downloading") {
             const { current, total } = json.progressDetail;
             const percentage = Math.round(100 * (current / total));
             const message = `${prefix} - ${json.status} ${percentage}%`;
+            const messages = this.getOrElse(messagesById, id, new Set());
             if (!messages.has(message)) {
               messages.add(message);
               this.logger.trace(message);
             }
           } else {
-            if (!statusesById.get(id)) {
-              statusesById.set(id, new Set());
-            }
-            if (!statusesById.get(id)!.has(status)) {
-              statusesById.get(id)!.add(status);
+            const statuses = this.getOrElse(statusesById, id, new Set());
+            if (!statuses.has(status)) {
+              statuses.add(status);
               const message = `${prefix} - ${json.status}`;
+              const messages = this.getOrElse(messagesById, id, new Set());
               if (!messages.has(message)) {
-                messages.add(message);
+                messagesById.get(id)!.add(message);
                 this.logger.trace(message);
               }
             }
@@ -45,5 +44,14 @@ export class PullStreamParser {
       });
       stream.on("end", resolve);
     });
+  }
+
+  private getOrElse<K, V>(map: Map<K, V>, key: K, orElse: V): V {
+    const value = map.get(key);
+    if (!value) {
+      map.set(key, orElse);
+      return orElse;
+    }
+    return value;
   }
 }

@@ -45,7 +45,7 @@ describe("PullStreamParser", () => {
     stream.destroy();
     await promise;
 
-    expect(logger.traceLogs).toEqual(["Pull image:tag - id - Pulling from cristianrgreco/testcontainer"]);
+    expect(logger.traceLogs).toEqual(["Pull image:tag - Pulling from cristianrgreco/testcontainer"]);
   });
 
   it("should not log the same status twice", async () => {
@@ -58,7 +58,7 @@ describe("PullStreamParser", () => {
     stream.destroy();
     await promise;
 
-    expect(logger.traceLogs).toEqual(["Pull image:tag - id - Pulling from cristianrgreco/testcontainer"]);
+    expect(logger.traceLogs).toEqual(["Pull image:tag - Pulling from cristianrgreco/testcontainer"]);
   });
 
   it("should not log the same status twice per image id", async () => {
@@ -72,8 +72,8 @@ describe("PullStreamParser", () => {
     await promise;
 
     expect(logger.traceLogs).toEqual([
-      "Pull image:tag - id1 - Pulling from cristianrgreco/testcontainer",
-      "Pull image:tag - id2 - Pulling from cristianrgreco/testcontainer",
+      "Pull image:tag - Pulling from cristianrgreco/testcontainer",
+      "Pull image:tag - Pulling from cristianrgreco/testcontainer",
     ]);
   });
 
@@ -86,7 +86,7 @@ describe("PullStreamParser", () => {
     stream.destroy();
     await promise;
 
-    expect(logger.traceLogs).toEqual(["Pull image:tag - id - Downloading 50%"]);
+    expect(logger.traceLogs).toEqual(["Pull image:tag - Downloading 50%"]);
   });
 
   it("should round download progress percentage", async () => {
@@ -98,7 +98,7 @@ describe("PullStreamParser", () => {
     stream.destroy();
     await promise;
 
-    expect(logger.traceLogs).toEqual(["Pull image:tag - id - Downloading 33%"]);
+    expect(logger.traceLogs).toEqual(["Pull image:tag - Downloading 33%"]);
   });
 
   it("should not log the same download progress twice", async () => {
@@ -111,7 +111,7 @@ describe("PullStreamParser", () => {
     stream.destroy();
     await promise;
 
-    expect(logger.traceLogs).toEqual(["Pull image:tag - id - Downloading 50%"]);
+    expect(logger.traceLogs).toEqual(["Pull image:tag - Downloading 50%"]);
   });
 
   it("should log a single line at a time", async () => {
@@ -125,9 +125,6 @@ describe("PullStreamParser", () => {
     stream.destroy();
     await promise;
 
-    expect(logger.traceLogs).toEqual([
-      "Pull image:tag - id - Downloading 50%",
-      "Pull image:tag - id - Downloading 80%",
-    ]);
+    expect(logger.traceLogs).toEqual(["Pull image:tag - Downloading 50%", "Pull image:tag - Downloading 80%"]);
   });
 });
