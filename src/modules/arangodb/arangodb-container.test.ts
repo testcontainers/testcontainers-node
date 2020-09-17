@@ -15,7 +15,7 @@ describe("ArangoDB", () => {
     container.stop();
   });
 
-  xit("should connect", async () => {
+  it("should connect", async () => {
     const db = new Database({
       url: container.getHttpUrl(),
     } as Config);

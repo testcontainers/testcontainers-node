@@ -14,7 +14,7 @@ export class ArangoDBContainer extends GenericContainer {
 
   constructor(image: Image = "arangodb", tag: Tag = "latest", private password = new RandomUuid().nextUuid()) {
     super(image, tag);
-    this.withExposedPorts(this.defaultPort);
+    this.withExposedPorts(this.defaultPort).withWaitStrategy(Wait.forLogMessage("Have fun!"));
   }
 
   public withPassword(password: string): this {
