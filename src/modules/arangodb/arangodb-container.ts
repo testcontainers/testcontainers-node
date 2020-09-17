@@ -1,4 +1,4 @@
-import { GenericContainer } from "../..";
+import { GenericContainer, Wait } from "../..";
 import { Image, Tag } from "../../repo-tag";
 import { Host } from "../../docker-client-factory";
 import { DockerClient } from "../../docker-client";
