@@ -25,12 +25,9 @@
     "prepublish": "npm run build",
     "build": "npm run clean && tsc",
     "clean": "rimraf dist",
-    "test": "DEBUG=testcontainers jest",
+    "test": "cross-env DEBUG=testcontainers jest",
     "format": "prettier --write package.json 'src/**/*.ts'",
-    "updateDeps": "npx npm-check-updates -u",
-    "version:major": "npm --no-git-tag-version version major",
-    "version:minor": "npm --no-git-tag-version version minor",
-    "version:patch": "npm --no-git-tag-version version patch"
+    "updateDeps": "npx npm-check-updates -u"
   },
   "dependencies": {
     "@types/dockerode": "^2.5.34",
@@ -54,6 +51,7 @@
     "@types/stream-to-array": "^2.3.0",
     "@types/tar-fs": "^2.0.0",
     "arangojs": "^6.14.1",
+    "cross-env": "^7.0.2",
     "husky": "^4.3.0",
     "jest": "^26.4.2",
     "kafkajs": "^1.13.0",
