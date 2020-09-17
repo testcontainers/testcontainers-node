@@ -16,7 +16,7 @@ export class PullStreamParser {
           const json = JSON.parse(line);
           const { id, status } = json;
 
-          const prefix = id ? `Pull ${this.repoTag.toString()} - ${id}` : `Pull ${this.repoTag.toString()}`;
+          const prefix = id ? `Pulling ${this.repoTag.toString()} - ${id}` : `Pulling ${this.repoTag.toString()}`;
 
           if (status === "Downloading") {
             const { current, total } = json.progressDetail;
