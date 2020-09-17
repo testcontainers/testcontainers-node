@@ -11,9 +11,9 @@ export class PullStreamParser {
     const statusesById: Map<string, Set<string>> = new Map();
 
     return new Promise((resolve) => {
-      byline(stream).on("data", (data) => {
+      byline(stream).on("data", (line) => {
         try {
-          const json = JSON.parse(data);
+          const json = JSON.parse(line);
           const { id, status } = json;
           const prefix = `Pull ${this.repoTag.toString()}`;
 
@@ -39,7 +39,7 @@ export class PullStreamParser {
             }
           }
         } catch {
-          this.logger.warn(`Unexpected message format: ${data}`);
+          this.logger.warn(`Unexpected message format: ${line}`);
         }
       });
       stream.on("end", resolve);
