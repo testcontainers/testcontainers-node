@@ -12,7 +12,7 @@
 npm i -D testcontainers
 ```
 
-## Usage
+## Configuration
 
 The following environment variables are supported:
 
