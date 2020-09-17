@@ -5,7 +5,6 @@ import { StartedTestContainer } from "./test-container";
 import { Wait } from "./wait";
 import { Id } from "./container";
 import { DockerClient } from "./docker-client";
-import { Duration, TemporalUnit } from "node-duration";
 
 export class Reaper {
   public static IMAGE_NAME = "testcontainers/ryuk";
@@ -35,6 +34,7 @@ export class Reaper {
       .withBindMount(dockerClient.getSocketPath(), "/var/run/docker.sock")
       .withWaitStrategy(Wait.forLogMessage("Starting on port 8080"))
       .withDaemonMode()
+      .withPrivilegedMode()
       .start();
 
     const host = container.getContainerIpAddress();
