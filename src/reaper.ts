@@ -37,7 +37,7 @@ export class Reaper {
       .withPrivilegedMode()
       .start();
 
-    const host = container.getContainerIpAddress();
+    const host = dockerClient.getHost();
     const port = container.getMappedPort(8080);
 
     log.debug(`Connecting to Reaper on ${host}:${port}`);
