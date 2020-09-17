@@ -36,7 +36,7 @@ import {
 } from "./test-container";
 import { RandomUuid, Uuid } from "./uuid";
 import { HostPortWaitStrategy, WaitStrategy } from "./wait-strategy";
-import { StartedNetwork } from "./network";
+import { Reaper } from "./reaper";
 
 export class GenericContainerBuilder {
   private buildArgs: BuildArgs = {};
@@ -88,11 +88,9 @@ export class GenericContainer implements TestContainer {
   protected startupTimeout: Duration = new Duration(60_000, TemporalUnit.MILLISECONDS);
   protected useDefaultLogDriver: boolean = false;
   protected privilegedMode: boolean = false;
+  protected daemonMode: boolean = false;
   protected authConfig?: AuthConfig;
   protected pullPolicy: PullPolicy = new DefaultPullPolicy();
-
-  protected additionalContainers: StartedTestContainer[] = [];
-  protected additionalNetworks: StartedNetwork[] = [];
 
   constructor(readonly image: Image, readonly tag: Tag = "latest") {
     this.repoTag = new RepoTag(image, tag);
@@ -106,6 +104,10 @@ export class GenericContainer implements TestContainer {
     }
 
     const boundPorts = await new PortBinder().bind(this.ports);
+
+    if (!this.repoTag.isReaper()) {
+      await Reaper.start(dockerClient);
+    }
 
     if (this.preCreate) {
       await this.preCreate(dockerClient, boundPorts);
@@ -123,28 +125,23 @@ export class GenericContainer implements TestContainer {
       healthCheck: this.healthCheck,
       useDefaultLogDriver: this.useDefaultLogDriver,
       privilegedMode: this.privilegedMode,
+      autoRemove: this.daemonMode,
     });
 
     await dockerClient.start(container);
 
-    (await container.logs())
-      .on("data", (data) => containerLog.trace(`${container.getId()}: ${data}`))
-      .on("err", (data) => containerLog.error(`${container.getId()}: ${data}`));
+    if (!this.daemonMode) {
+      (await container.logs())
+        .on("data", (data) => containerLog.trace(`${container.getId()}: ${data}`))
+        .on("err", (data) => containerLog.error(`${container.getId()}: ${data}`));
+    }
 
     const inspectResult = await container.inspect();
     const containerState = new ContainerState(inspectResult);
 
     await this.waitForContainer(dockerClient, container, containerState, boundPorts);
 
-    return new StartedGenericContainer(
-      container,
-      dockerClient.getHost(),
-      boundPorts,
-      inspectResult.name,
-      dockerClient,
-      this.additionalContainers,
-      this.additionalNetworks
-    );
+    return new StartedGenericContainer(container, dockerClient.getHost(), boundPorts, inspectResult.name, dockerClient);
   }
 
   public withAuthentication(authConfig: AuthConfig): this {
@@ -217,6 +214,11 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
+  public withDaemonMode(): this {
+    this.daemonMode = true;
+    return this;
+  }
+
   public async isImageCached(dockerClient: DockerClient): Promise<boolean> {
     const repoTags = await dockerClient.fetchRepoTags();
     return repoTags.some((repoTag) => repoTag.equals(this.repoTag));
@@ -246,54 +248,17 @@ export class GenericContainer implements TestContainer {
   }
 }
 
-export class AbstractStartedContainer {
-  constructor(protected readonly startedTestContainer: StartedTestContainer) {}
-
-  public stop(options?: Partial<StopOptions>): Promise<StoppedTestContainer> {
-    return this.startedTestContainer.stop(options);
-  }
-
-  public getContainerIpAddress(): Host {
-    return this.startedTestContainer.getContainerIpAddress();
-  }
-
-  public getMappedPort(port: Port): Port {
-    return this.startedTestContainer.getMappedPort(port);
-  }
-
-  public getName(): ContainerName {
-    return this.startedTestContainer.getName();
-  }
-
-  public getId(): ContainerId {
-    return this.startedTestContainer.getId();
-  }
-
-  public exec(command: Command[]): Promise<ExecResult> {
-    return this.startedTestContainer.exec(command);
-  }
-
-  public logs(): Promise<NodeJS.ReadableStream> {
-    return this.startedTestContainer.logs();
-  }
-}
-
 export class StartedGenericContainer implements StartedTestContainer {
   constructor(
     private readonly container: Container,
     private readonly host: Host,
     private readonly boundPorts: BoundPorts,
     private readonly name: ContainerName,
-    private readonly dockerClient: DockerClient,
-    private readonly additionalContainers: StartedTestContainer[] = [],
-    private readonly additionalNetworks: StartedNetwork[] = []
+    private readonly dockerClient: DockerClient
   ) {}
 
   public async stop(options: Partial<StopOptions> = {}): Promise<StoppedTestContainer> {
-    await Promise.all(this.additionalContainers.map((additionalContainer) => additionalContainer.stop(options)));
-    const stoppedContainer = await this.stopContainer(options);
-    await Promise.all(this.additionalNetworks.map((additionalNetwork) => additionalNetwork.stop()));
-    return stoppedContainer;
+    return await this.stopContainer(options);
   }
 
   private async stopContainer(options: Partial<StopOptions> = {}): Promise<StoppedGenericContainer> {

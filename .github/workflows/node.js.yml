@@ -10,15 +10,12 @@ on:
     branches: [ master ]
 
 jobs:
-
   native:
     runs-on: ${{matrix.os-version}}
-
     strategy:
       matrix:
         os-version: [ubuntu-latest]
         node-version: [10.x, 12.x, 14.x]
-
     steps:
     - uses: actions/checkout@v2
     - name: Test ${{ matrix.node-version }}
@@ -28,17 +25,15 @@ jobs:
     - run: npm ci
     - run: npm test
 
-  dind:
+  wormhole:
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
         node-version: [14.x]
         node-image-version: [14-alpine]
-
     steps:
     - uses: actions/checkout@v2
-    - name: Test DIND ${{ matrix.node-version }}
+    - name: Test wormhole ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}

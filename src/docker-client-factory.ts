@@ -2,21 +2,25 @@ import fs from "fs";
 import Dockerode, { NetworkInspectInfo } from "dockerode";
 import { DockerClient, DockerodeClient } from "./docker-client";
 import { log } from "./logger";
+import { RandomUuid } from "./uuid";
 
 export type Host = string;
 
 export class DockerClientFactory {
-  private static client?: DockerClient;
+  private static client: Promise<DockerClient>;
 
   public static async getClient(): Promise<DockerClient> {
-    if (this.client) {
-      return this.client;
-    } else {
-      const dockerode = new Dockerode();
-      const host = await this.getHost(dockerode);
-      this.client = new DockerodeClient(host, dockerode);
-      return this.client;
+    if (!this.client) {
+      this.client = this.createClient();
     }
+    return this.client;
+  }
+
+  private static async createClient(): Promise<DockerClient> {
+    log.debug("Creating new DockerClient");
+    const dockerode = new Dockerode();
+    const host = await this.getHost(dockerode);
+    return new DockerodeClient(host, dockerode, new RandomUuid().nextUuid());
   }
 
   private static async getHost(dockerode: Dockerode): Promise<Host> {

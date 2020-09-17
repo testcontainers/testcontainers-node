@@ -1,3 +1,5 @@
+import { Reaper } from "./reaper";
+
 export type Image = string;
 export type Tag = string;
 
@@ -10,5 +12,9 @@ export class RepoTag {
 
   public toString(): string {
     return `${this.image}:${this.tag}`;
+  }
+
+  public isReaper(): boolean {
+    return this.image === Reaper.IMAGE_NAME;
   }
 }

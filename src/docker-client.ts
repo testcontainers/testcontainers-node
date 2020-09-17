@@ -80,6 +80,7 @@ type CreateOptions = {
   healthCheck?: HealthCheck;
   useDefaultLogDriver: boolean;
   privilegedMode: boolean;
+  autoRemove: boolean;
 };
 
 export type CreateNetworkOptions = {
@@ -103,13 +104,15 @@ export interface DockerClient {
   exec(container: Container, command: Command[]): Promise<ExecResult>;
   buildImage(repoTag: RepoTag, context: BuildContext, dockerfileName: string, buildArgs: BuildArgs): Promise<void>;
   fetchRepoTags(): Promise<RepoTag[]>;
-  getHost(): Host;
   listContainers(): Promise<Dockerode.ContainerInfo[]>;
   getContainer(id: Id): Promise<Container>;
+  getHost(): Host;
+  getSessionId(): Id;
+  getSocketPath(): string;
 }
 
 export class DockerodeClient implements DockerClient {
-  constructor(private readonly host: Host, private readonly dockerode: Dockerode) {}
+  constructor(private readonly host: Host, private readonly dockerode: Dockerode, private readonly sessionId: Id) {}
 
   public async pull(repoTag: RepoTag, authConfig?: AuthConfig): Promise<void> {
     log.info(`Pulling image: ${repoTag}`);
@@ -126,9 +129,11 @@ export class DockerodeClient implements DockerClient {
       Env: this.getEnv(options.env),
       ExposedPorts: this.getExposedPorts(options.boundPorts),
       Cmd: options.cmd,
+      Labels: this.createLabels(options.repoTag),
       // @ts-ignore
       Healthcheck: this.getHealthCheck(options.healthCheck),
       HostConfig: {
+        AutoRemove: options.autoRemove,
         NetworkMode: options.networkMode,
         PortBindings: this.getPortBindings(options.boundPorts),
         Binds: this.getBindMounts(options.bindMounts),
@@ -152,7 +157,7 @@ export class DockerodeClient implements DockerClient {
       Ingress: options.ingress,
       EnableIPv6: options.enableIPv6,
       Options: options.options,
-      Labels: options.labels,
+      Labels: { ...options.labels, ...this.createLabels() },
     });
     return network.id;
   }
@@ -198,6 +203,7 @@ export class DockerodeClient implements DockerClient {
       dockerfile: dockerfileName,
       buildargs: buildArgs,
       t: repoTag.toString(),
+      labels: this.createLabels(repoTag),
     });
     await streamToArray(stream);
   }
@@ -229,8 +235,23 @@ export class DockerodeClient implements DockerClient {
     return this.host;
   }
 
+  public getSessionId(): Id {
+    return this.sessionId;
+  }
+
+  public getSocketPath(): string {
+    return this.dockerode.modem.socketPath;
+  }
+
   private isDanglingImage(image: Dockerode.ImageInfo) {
     return image.RepoTags === null;
+  }
+
+  private createLabels(repoTag?: RepoTag): { [label: string]: string } {
+    if (repoTag && repoTag.isReaper()) {
+      return {};
+    }
+    return { "org.testcontainers.session-id": this.sessionId };
   }
 
   private getEnv(env: Env): DockerodeEnvironment {

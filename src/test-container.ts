@@ -39,7 +39,7 @@ export interface StopOptions {
 }
 
 export const DEFAULT_STOP_OPTIONS: StopOptions = {
-  timeout: new Duration(10, TemporalUnit.SECONDS),
+  timeout: new Duration(0, TemporalUnit.MILLISECONDS),
   removeVolumes: true,
 };
 

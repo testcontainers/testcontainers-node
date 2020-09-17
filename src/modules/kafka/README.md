@@ -6,9 +6,9 @@ Using the built-in ZooKeeper:
 
 ```javascript
 const { Kafka } = require("kafkajs");
-const { KafkaContainer } = require("testcontainers");
+const { KafkaContainer, StartedKafkaContainer } = require("testcontainers");
 
-const container = await new KafkaContainer()
+const container: StartedKafkaContainer = await new KafkaContainer()
   .withExposedPorts(9093)
   .start();
 

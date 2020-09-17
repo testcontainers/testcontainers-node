@@ -2,11 +2,15 @@ import { GenericContainer } from "../../generic-container";
 import { BoundPorts } from "../../bound-ports";
 import { DockerClient } from "../../docker-client";
 import { Image, Tag } from "../../repo-tag";
-import { Network } from "../../network";
+import { Network, StartedNetwork } from "../../network";
 import { Host } from "../../docker-client-factory";
 import { Port } from "../../port";
 import { PortClient, RandomPortClient } from "../../port-client";
 import { RandomUuid, Uuid } from "../../uuid";
+import { StartedTestContainer, StoppedTestContainer } from "../..";
+import { StopOptions } from "../../test-container";
+import { log } from "../../logger";
+import { AbstractStartedContainer } from "../abstract-started-container";
 
 export class KafkaContainer extends GenericContainer {
   private readonly uuid: Uuid = new RandomUuid();
@@ -15,6 +19,9 @@ export class KafkaContainer extends GenericContainer {
   private isZooKeeperProvided = false;
   private zooKeeperHost?: Host;
   private zooKeeperPort?: Port;
+
+  private network?: StartedNetwork;
+  private zooKeeperContainer?: StartedTestContainer;
 
   constructor(readonly image: Image = "confluentinc/cp-kafka", readonly tag: Tag = "latest", readonly host?: Host) {
     super(image, tag);
@@ -63,14 +70,40 @@ export class KafkaContainer extends GenericContainer {
       if (this.networkMode !== undefined) {
         zookeeperContainer.withNetworkMode(this.networkMode);
       } else {
-        const network = await new Network().start();
-        this.additionalNetworks.push(network);
-        this.withNetworkMode(network.getName());
-        zookeeperContainer.withNetworkMode(network.getName());
+        this.network = await new Network().start();
+        this.withNetworkMode(this.network.getName());
+        zookeeperContainer.withNetworkMode(this.network.getName());
       }
 
-      const startedZooKeeperContainer = await zookeeperContainer.start();
-      this.additionalContainers.push(startedZooKeeperContainer);
+      this.zooKeeperContainer = await zookeeperContainer.start();
     }
+  }
+
+  public async start(): Promise<StartedKafkaContainer> {
+    return new StartedKafkaContainer(await super.start(), this.network, this.zooKeeperContainer);
+  }
+}
+
+export class StartedKafkaContainer extends AbstractStartedContainer {
+  constructor(
+    startedTestContainer: StartedTestContainer,
+    private readonly network?: StartedNetwork,
+    private readonly zooKeeperContainer?: StartedTestContainer
+  ) {
+    super(startedTestContainer);
+  }
+
+  public async stop(options?: Partial<StopOptions>): Promise<StoppedTestContainer> {
+    log.debug("Stopping Kafka container");
+    const stoppedContainer = await super.stop(options);
+    if (this.zooKeeperContainer) {
+      log.debug("Stopping ZooKeeper container");
+      await this.zooKeeperContainer.stop(options);
+    }
+    if (this.network) {
+      log.debug("Stopping Kafka network");
+      await this.network.stop();
+    }
+    return stoppedContainer;
   }
 }

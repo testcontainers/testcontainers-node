@@ -3,7 +3,7 @@ import { ArangoDBContainer, StartedArangoContainer } from "./arangodb-container"
 import { Config } from "arangojs/lib/cjs/connection";
 
 describe("ArangoDB", () => {
-  jest.setTimeout(120000);
+  jest.setTimeout(180_000);
 
   let container: StartedArangoContainer;
 
@@ -12,7 +12,7 @@ describe("ArangoDB", () => {
   });
 
   afterEach(async () => {
-    container.stop();
+    await container.stop();
   });
 
   it("should connect", async () => {

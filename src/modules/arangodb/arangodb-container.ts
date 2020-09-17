@@ -1,4 +1,4 @@
-import { GenericContainer, Wait } from "../..";
+import { GenericContainer } from "../..";
 import { Image, Tag } from "../../repo-tag";
 import { Host } from "../../docker-client-factory";
 import { DockerClient } from "../../docker-client";
@@ -6,7 +6,7 @@ import { BoundPorts } from "../../bound-ports";
 import { StartedTestContainer } from "../../test-container";
 import { Port } from "../../port";
 import { RandomUuid } from "../../uuid";
-import { AbstractStartedContainer } from "../../generic-container";
+import { AbstractStartedContainer } from "../abstract-started-container";
 
 export class ArangoDBContainer extends GenericContainer {
   private readonly defaultPort = 8529;

@@ -82,25 +82,33 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
   }
 
   public async waitUntilReady(container: Container): Promise<void> {
-    return new Promise(async (resolve, reject) => {
-      log.debug(`Waiting for log message "${this.message}"`);
+    log.debug(`Waiting for log message "${this.message}"`);
+    const stream = await container.logs();
 
-      const stream = await container.logs();
+    return new Promise((resolve, reject) => {
       stream
         .on("data", (line) => {
           if (line.includes(this.message)) {
+            this.destroyStream(stream);
             resolve();
           }
         })
         .on("err", (line) => {
           if (line.includes(this.message)) {
+            this.destroyStream(stream);
             resolve();
           }
         })
         .on("end", () => {
+          this.destroyStream(stream);
           reject();
         });
     });
+  }
+
+  private destroyStream(stream: NodeJS.ReadableStream) {
+    // @ts-ignore
+    stream.destroy();
   }
 }
 

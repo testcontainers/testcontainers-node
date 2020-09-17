@@ -265,7 +265,7 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
-Testcontainers will wait 10 seconds for a container to stop, to override:
+Testcontainers will not wait for a container to stop, to override:
 
 ```javascript
 const { GenericContainer } = require("testcontainers");

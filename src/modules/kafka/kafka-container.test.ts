@@ -1,87 +1,55 @@
-import { Consumer, Kafka, logLevel, Producer } from "kafkajs";
+import { Kafka, logLevel } from "kafkajs";
 import { KafkaContainer } from "./kafka-container";
-import { Network, StartedNetwork } from "../../network";
+import { Network } from "../../network";
 import { GenericContainer } from "../../generic-container";
 import { StartedTestContainer } from "../../test-container";
+import { Duration, TemporalUnit } from "node-duration";
 
 describe("KafkaContainer", () => {
-  jest.setTimeout(120000);
-
-  let managedContainers: StartedTestContainer[] = [];
-  let managedNetworks: StartedNetwork[] = [];
-  let managedProducers: Producer[] = [];
-  let managedConsumers: Consumer[] = [];
-
-  const manageContainer = (container: StartedTestContainer): StartedTestContainer => {
-    managedContainers.push(container);
-    return container;
-  };
-
-  const manageNetwork = (network: StartedNetwork): StartedNetwork => {
-    managedNetworks.push(network);
-    return network;
-  };
-
-  const manageProducer = (producer: Producer): Producer => {
-    managedProducers.push(producer);
-    return producer;
-  };
-
-  const manageConsumer = (consumer: Consumer): Consumer => {
-    managedConsumers.push(consumer);
-    return consumer;
-  };
-
-  afterEach(async () => {
-    await Promise.all(managedProducers.map((producer) => producer.disconnect()));
-    managedProducers = [];
-    await Promise.all(managedConsumers.map((consumer) => consumer.disconnect()));
-    managedConsumers = [];
-    await Promise.all(managedContainers.map((container) => container.stop()));
-    managedContainers = [];
-    await Promise.all(managedNetworks.map((network) => network.stop()));
-    managedNetworks = [];
-  });
+  jest.setTimeout(180_000);
 
   it("should connect to kafka using in-built zoo-keeper", async () => {
-    const kafkaContainer = manageContainer(await new KafkaContainer().withExposedPorts(9093).start());
+    const kafkaContainer = await new KafkaContainer().withExposedPorts(9093).start();
 
     await testPubSub(kafkaContainer);
+
+    await kafkaContainer.stop();
   });
 
-  it("should connect to kafka using in-build zoo-keeper and custom network", async () => {
-    const network = manageNetwork(await new Network().start());
+  it("should connect to kafka using in-built zoo-keeper and custom network", async () => {
+    const network = await new Network().start();
 
-    const kafkaContainer = manageContainer(
-      await new KafkaContainer().withNetworkMode(network.getName()).withExposedPorts(9093).start()
-    );
+    const kafkaContainer = await new KafkaContainer().withNetworkMode(network.getName()).withExposedPorts(9093).start();
 
     await testPubSub(kafkaContainer);
+
+    await kafkaContainer.stop();
+    await network.stop();
   });
 
-  it("should connect to kafka using provided zoo-keeper", async () => {
-    const network = manageNetwork(await new Network().start());
+  it("should connect to kafka using provided zoo-keeper and network", async () => {
+    const network = await new Network().start();
 
     const zooKeeperHost = "zookeeper";
     const zooKeeperPort = 2181;
-    manageContainer(
-      await new GenericContainer("confluentinc/cp-zookeeper", "latest")
-        .withName(zooKeeperHost)
-        .withEnv("ZOOKEEPER_CLIENT_PORT", zooKeeperPort.toString())
-        .withNetworkMode(network.getName())
-        .withExposedPorts(zooKeeperPort)
-        .start()
-    );
+    const zookeeperContainer = await new GenericContainer("confluentinc/cp-zookeeper", "latest")
+      .withName(zooKeeperHost)
+      .withEnv("ZOOKEEPER_CLIENT_PORT", zooKeeperPort.toString())
+      .withNetworkMode(network.getName())
+      .withExposedPorts(zooKeeperPort)
+      .start();
 
-    const kafkaContainer = manageContainer(
-      await new KafkaContainer()
-        .withNetworkMode(network.getName())
-        .withZooKeeper(zooKeeperHost, zooKeeperPort)
-        .withExposedPorts(9093)
-        .start()
-    );
+    const kafkaContainer = await new KafkaContainer()
+      .withNetworkMode(network.getName())
+      .withZooKeeper(zooKeeperHost, zooKeeperPort)
+      .withExposedPorts(9093)
+      .start();
 
     await testPubSub(kafkaContainer);
+
+    await zookeeperContainer.stop();
+    await kafkaContainer.stop();
+    await network.stop();
   });
 
   const testPubSub = async (kafkaContainer: StartedTestContainer) => {
@@ -90,10 +58,10 @@ describe("KafkaContainer", () => {
       brokers: [`${kafkaContainer.getContainerIpAddress()}:${kafkaContainer.getMappedPort(9093)}`],
     });
 
-    const producer = manageProducer(kafka.producer());
+    const producer = kafka.producer();
     await producer.connect();
 
-    const consumer = manageConsumer(kafka.consumer({ groupId: "test-group" }));
+    const consumer = kafka.consumer({ groupId: "test-group" });
     await consumer.connect();
 
     await producer.send({
@@ -103,12 +71,15 @@ describe("KafkaContainer", () => {
 
     await consumer.subscribe({ topic: "test-topic", fromBeginning: true });
 
-    const consumedMessage = await new Promise(async (resolve) => {
-      await consumer.run({
+    const consumedMessage = await new Promise((resolve) => {
+      consumer.run({
         eachMessage: async ({ message }) => resolve(message.value?.toString()),
       });
     });
 
     expect(consumedMessage).toBe("test message");
+
+    await consumer.disconnect();
+    await producer.disconnect();
   };
 });

@@ -91,27 +91,13 @@ export class DockerodeContainer implements Container {
     );
   }
 
-  public logs(): Promise<NodeJS.ReadableStream> {
-    return new Promise((resolve, reject) => {
-      const options = {
-        follow: true,
-        stdout: true,
-        stderr: true,
-      };
-
-      this.container.logs(options, (err, stream) => {
-        if (err) {
-          reject(err);
-        } else {
-          if (!stream) {
-            reject(new Error("Log stream is undefined"));
-          } else {
-            stream.setEncoding("utf-8");
-            resolve(byline(stream));
-          }
-        }
-      });
-    });
+  public async logs(): Promise<NodeJS.ReadableStream> {
+    const options = {
+      follow: true,
+      stdout: true,
+      stderr: true,
+    };
+    return (await this.container.logs(options)).setEncoding("utf-8");
   }
 
   public async inspect(): Promise<InspectResult> {
