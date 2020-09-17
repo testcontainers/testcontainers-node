@@ -9,6 +9,7 @@ import { findDockerIgnoreFiles } from "./docker-ignore";
 import { log } from "./logger";
 import { PortString } from "./port";
 import { RepoTag } from "./repo-tag";
+import { PullStreamParser } from "./pull-stream-parser";
 
 export type Command = string;
 export type ContainerName = string;
@@ -112,10 +113,8 @@ export class DockerodeClient implements DockerClient {
 
   public async pull(repoTag: RepoTag, authConfig?: AuthConfig): Promise<void> {
     log.info(`Pulling image: ${repoTag}`);
-    const stream = await this.dockerode.pull(repoTag.toString(), {
-      authconfig: authConfig,
-    });
-    await streamToArray(stream);
+    const stream = await this.dockerode.pull(repoTag.toString(), { authconfig: authConfig });
+    await new PullStreamParser(repoTag, log).consume(stream);
   }
 
   public async create(options: CreateOptions): Promise<Container> {

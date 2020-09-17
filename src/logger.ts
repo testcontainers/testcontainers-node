@@ -38,5 +38,33 @@ class DebugLogger implements Logger {
   }
 }
 
+export class FakeLogger implements Logger {
+  public readonly traceLogs: Message[] = [];
+  public readonly debugLogs: Message[] = [];
+  public readonly infoLogs: Message[] = [];
+  public readonly warnLogs: Message[] = [];
+  public readonly errorLogs: Message[] = [];
+
+  public trace(message: Message): void {
+    this.traceLogs.push(message);
+  }
+
+  public debug(message: Message): void {
+    this.debugLogs.push(message);
+  }
+
+  public info(message: Message): void {
+    this.infoLogs.push(message);
+  }
+
+  public warn(message: Message): void {
+    this.warnLogs.push(message);
+  }
+
+  public error(message: Message): void {
+    this.errorLogs.push(message);
+  }
+}
+
 export const log = new DebugLogger("testcontainers");
 export const containerLog = new DebugLogger("testcontainers:containers");
