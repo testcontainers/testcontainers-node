@@ -13,8 +13,8 @@ export interface Logger {
 class DebugLogger implements Logger {
   private readonly logger: IDebugger;
 
-  constructor() {
-    this.logger = debug("testcontainers");
+  constructor(namespace: string) {
+    this.logger = debug(namespace);
   }
 
   public trace(message: Message): void {
@@ -38,4 +38,33 @@ class DebugLogger implements Logger {
   }
 }
 
-export default new DebugLogger();
+export class FakeLogger implements Logger {
+  public readonly traceLogs: Message[] = [];
+  public readonly debugLogs: Message[] = [];
+  public readonly infoLogs: Message[] = [];
+  public readonly warnLogs: Message[] = [];
+  public readonly errorLogs: Message[] = [];
+
+  public trace(message: Message): void {
+    this.traceLogs.push(message);
+  }
+
+  public debug(message: Message): void {
+    this.debugLogs.push(message);
+  }
+
+  public info(message: Message): void {
+    this.infoLogs.push(message);
+  }
+
+  public warn(message: Message): void {
+    this.warnLogs.push(message);
+  }
+
+  public error(message: Message): void {
+    this.errorLogs.push(message);
+  }
+}
+
+export const log = new DebugLogger("testcontainers");
+export const containerLog = new DebugLogger("testcontainers:containers");
