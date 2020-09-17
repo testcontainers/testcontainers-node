@@ -48,7 +48,7 @@ export class PullStreamParser {
 
   private getOrElse<K, V>(map: Map<K, V>, key: K, orElse: V): V {
     const value = map.get(key);
-    if (!value) {
+    if (value === undefined) {
       map.set(key, orElse);
       return orElse;
     }
