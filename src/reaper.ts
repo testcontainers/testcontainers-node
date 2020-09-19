@@ -38,8 +38,10 @@ export class Reaper {
     const socketPath = await dockerClient.getSocketPath();
 
     if (socketPath) {
+      log.debug(`Mounting socket into Reaper: ${socketPath}`);
       container.withBindMount(socketPath, "/var/run/docker.sock");
     } else if (process.env.DOCKER_HOST) {
+      log.debug(`Setting DOCKER_HOST into Reaper: ${socketPath}`);
       container.withEnv("DOCKER_HOST", process.env.DOCKER_HOST);
     }
 

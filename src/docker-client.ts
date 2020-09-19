@@ -249,9 +249,12 @@ export class DockerodeClient implements DockerClient {
     } else {
       try {
         const unixSocketPath = "/var/run/docker.sock";
+        log.debug(`Socket path not provided, looking for ${unixSocketPath}`);
         await fs.promises.access(unixSocketPath);
+        log.debug(`Socket found`);
         return unixSocketPath;
       } catch {
+        log.debug(`Socket not found`);
         return undefined;
       }
     }
