@@ -25,6 +25,7 @@ export class DockerClientFactory {
 
   private static async getHost(dockerode: Dockerode): Promise<Host> {
     const modem = dockerode.modem;
+    const socketPath = modem.socketPath;
 
     if (process.env.DOCKER_HOST) {
       log.info(`Detected DOCKER_HOST environment variable: ${process.env.DOCKER_HOST}`);
@@ -32,10 +33,9 @@ export class DockerClientFactory {
 
     if (modem.host) {
       const host = modem.host;
-      log.info(`Using Docker host from modem: ${host}`);
+      log.info(`Using Docker host from modem: ${host}, socket path: ${socketPath}`);
       return host;
     } else {
-      const socketPath = modem.socketPath;
       if (!fs.existsSync("/.dockerenv")) {
         const host = "localhost";
         log.info(`Using default Docker host: ${host}, socket path: ${socketPath}`);
