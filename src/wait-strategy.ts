@@ -4,7 +4,7 @@ import { BoundPorts } from "./bound-ports";
 import { Container, HealthCheckStatus } from "./container";
 import { ContainerState } from "./container-state";
 import { DockerClient } from "./docker-client";
-import { log, containerLog } from "./logger";
+import { log } from "./logger";
 import { Port } from "./port";
 import { PortCheck } from "./port-check";
 import { IntervalRetryStrategy } from "./retry-strategy";
@@ -50,6 +50,7 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
     for (const hostPort of containerState.getHostPorts()) {
       log.debug(`Waiting for host port ${hostPort}`);
       await this.waitForPort(hostPort, this.hostPortCheck);
+      log.debug(`Host port ${hostPort} ready`);
     }
   }
 
@@ -57,6 +58,7 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
     for (const [internalPort] of boundPorts.iterator()) {
       log.debug(`Waiting for internal port ${internalPort}`);
       await this.waitForPort(internalPort, this.internalPortCheck);
+      log.debug(`Internal port ${internalPort} ready`);
     }
   }
 
@@ -89,21 +91,18 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
     return new Promise((resolve, reject) => {
       byline(stream)
         .on("data", (line) => {
-          containerLog.trace(`Log message: ${line}`);
           if (line.includes(this.message)) {
             stream.destroy();
             resolve();
           }
         })
         .on("err", (line) => {
-          containerLog.trace(`Log message: ${line}`);
           if (line.includes(this.message)) {
             stream.destroy();
             resolve();
           }
         })
         .on("end", () => {
-          containerLog.trace(`Log stream closed`);
           stream.destroy();
           reject();
         });

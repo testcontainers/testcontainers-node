@@ -10,9 +10,7 @@ import { log } from "./logger";
 import { PortString } from "./port";
 import { RepoTag } from "./repo-tag";
 import { PullStreamParser } from "./pull-stream-parser";
-import * as fs from "fs";
 
-export type SocketPath = string | undefined;
 export type Command = string;
 export type ContainerName = string;
 export type NetworkMode = string;
@@ -110,7 +108,7 @@ export interface DockerClient {
   getContainer(id: Id): Promise<Container>;
   getHost(): Host;
   getSessionId(): Id;
-  getSocketPath(): Promise<SocketPath>;
+  getSocketPath(): string;
 }
 
 export class DockerodeClient implements DockerClient {
@@ -241,23 +239,8 @@ export class DockerodeClient implements DockerClient {
     return this.sessionId;
   }
 
-  public async getSocketPath(): Promise<SocketPath> {
-    const socketPath = this.dockerode.modem.socketPath;
-
-    if (socketPath !== undefined) {
-      return socketPath;
-    } else {
-      try {
-        const unixSocketPath = "/var/run/docker.sock";
-        log.debug(`Socket path not provided, looking for ${unixSocketPath}`);
-        await fs.promises.access(unixSocketPath);
-        log.debug(`Socket found`);
-        return unixSocketPath;
-      } catch {
-        log.debug(`Socket not found`);
-        return undefined;
-      }
-    }
+  public getSocketPath(): string {
+    return this.dockerode.modem.socketPath;
   }
 
   private isDanglingImage(image: Dockerode.ImageInfo) {
