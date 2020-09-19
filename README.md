@@ -20,7 +20,7 @@ The following environment variables are supported:
 | --- | --- | --- |
 | `DEBUG` | `testcontainers` | See output |
 | `DEBUG` | `testcontainers:containers` | See container output |
-| `DEBUG` | `testcontainers,testcontainers:containers` | See all output |
+| `DEBUG` | `testcontainers*` | See all output |
 | `DOCKER_HOST` | `tcp://docker:2375` | Override the Docker host, useful for DIND in CI environments |
 
 ## Modules
