@@ -36,7 +36,7 @@ export class StartedArangoContainer extends AbstractStartedContainer {
 
   constructor(
     startedTestContainer: StartedTestContainer,
-    private port: Port,
+    private readonly port: Port,
     private readonly username: string,
     private readonly password: string
   ) {
