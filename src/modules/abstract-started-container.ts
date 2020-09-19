@@ -3,6 +3,7 @@ import { Host } from "../docker-client-factory";
 import { Port } from "../port";
 import { Command, ContainerName, ExecResult } from "../docker-client";
 import { Id as ContainerId } from "../container";
+import { Readable } from "stream";
 
 export class AbstractStartedContainer {
   constructor(protected readonly startedTestContainer: StartedTestContainer) {}
@@ -31,7 +32,7 @@ export class AbstractStartedContainer {
     return this.startedTestContainer.exec(command);
   }
 
-  public logs(): Promise<NodeJS.ReadableStream> {
+  public logs(): Promise<Readable> {
     return this.startedTestContainer.logs();
   }
 }

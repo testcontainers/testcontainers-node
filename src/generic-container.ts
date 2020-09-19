@@ -37,6 +37,7 @@ import {
 import { RandomUuid, Uuid } from "./uuid";
 import { HostPortWaitStrategy, WaitStrategy } from "./wait-strategy";
 import { Reaper } from "./reaper";
+import { Readable } from "stream";
 
 export class GenericContainerBuilder {
   private buildArgs: BuildArgs = {};
@@ -289,7 +290,7 @@ export class StartedGenericContainer implements StartedTestContainer {
     return this.dockerClient.exec(this.container, command);
   }
 
-  public logs(): Promise<NodeJS.ReadableStream> {
+  public logs(): Promise<Readable> {
     return this.container.logs();
   }
 }

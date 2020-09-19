@@ -5,6 +5,7 @@ import path from "path";
 import { GenericContainer } from "./generic-container";
 import { AlwaysPullPolicy } from "./pull-policy";
 import { Wait } from "./wait";
+import { Readable } from "stream";
 
 describe("GenericContainer", () => {
   jest.setTimeout(180_000);
@@ -194,8 +195,7 @@ describe("GenericContainer", () => {
       .withExposedPorts(8080)
       .start();
 
-    const events = await dockerodeClient.getEvents();
-    events.setEncoding("utf-8");
+    const events = (await dockerodeClient.getEvents()).setEncoding("utf-8") as Readable;
 
     const container2 = await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
       .withPullPolicy(new AlwaysPullPolicy())
@@ -215,7 +215,6 @@ describe("GenericContainer", () => {
 
     expect(statuses).toContain("pull");
 
-    // @ts-ignore
     events.destroy();
     await container1.stop();
     await container2.stop();

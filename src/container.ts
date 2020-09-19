@@ -1,9 +1,9 @@
-import byline from "byline";
 import dockerode, { ContainerInspectInfo } from "dockerode";
 import { log } from "./logger";
 import { Duration, TemporalUnit } from "node-duration";
 import { Command, ContainerName, ExitCode } from "./docker-client";
 import { Port } from "./port";
+import { Readable } from "stream";
 
 export type Id = string;
 
@@ -45,7 +45,7 @@ export interface Container {
   stop(options: StopOptions): Promise<void>;
   remove(options: RemoveOptions): Promise<void>;
   exec(options: ExecOptions): Promise<Exec>;
-  logs(): Promise<NodeJS.ReadableStream>;
+  logs(): Promise<Readable>;
   inspect(): Promise<InspectResult>;
 }
 
@@ -91,13 +91,13 @@ export class DockerodeContainer implements Container {
     );
   }
 
-  public async logs(): Promise<NodeJS.ReadableStream> {
+  public async logs(): Promise<Readable> {
     const options = {
       follow: true,
       stdout: true,
       stderr: true,
     };
-    return (await this.container.logs(options)).setEncoding("utf-8");
+    return (await this.container.logs(options)).setEncoding("utf-8") as Readable;
   }
 
   public async inspect(): Promise<InspectResult> {
