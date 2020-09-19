@@ -8,6 +8,7 @@ import { log, containerLog } from "./logger";
 import { Port } from "./port";
 import { PortCheck } from "./port-check";
 import { IntervalRetryStrategy } from "./retry-strategy";
+import { Reaper } from "./reaper";
 
 export interface WaitStrategy {
   waitUntilReady(container: Container, containerState: ContainerState, boundPorts: BoundPorts): Promise<void>;
@@ -89,14 +90,14 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
     return new Promise((resolve, reject) => {
       byline(stream)
         .on("data", (line) => {
-          containerLog.trace(`Received log line: ${line}`);
+          containerLog.trace(`Log message: ${line}`);
           if (line.includes(this.message)) {
             stream.destroy();
             resolve();
           }
         })
         .on("err", (line) => {
-          containerLog.trace(`Received log line error: ${line}`);
+          containerLog.trace(`Log message: ${line}`);
           if (line.includes(this.message)) {
             stream.destroy();
             resolve();

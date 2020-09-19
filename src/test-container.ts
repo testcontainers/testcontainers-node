@@ -1,5 +1,5 @@
 import { Duration, TemporalUnit } from "node-duration";
-import { Id as ContainerId } from "./container";
+import { Id } from "./container";
 import {
   AuthConfig,
   BindMode,
@@ -49,7 +49,7 @@ export interface StartedTestContainer {
   getContainerIpAddress(): Host;
   getMappedPort(port: Port): Port;
   getName(): ContainerName;
-  getId(): ContainerId;
+  getId(): Id;
   exec(command: Command[]): Promise<ExecResult>;
   logs(): Promise<Readable>;
 }
