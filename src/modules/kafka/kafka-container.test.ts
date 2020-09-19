@@ -3,7 +3,6 @@ import { KafkaContainer } from "./kafka-container";
 import { Network } from "../../network";
 import { GenericContainer } from "../../generic-container";
 import { StartedTestContainer } from "../../test-container";
-import { Duration, TemporalUnit } from "node-duration";
 
 describe("KafkaContainer", () => {
   jest.setTimeout(180_000);

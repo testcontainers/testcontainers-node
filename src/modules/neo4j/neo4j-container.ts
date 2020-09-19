@@ -1,8 +1,6 @@
 import { GenericContainer, Wait } from "../..";
 import { Image, Tag } from "../../repo-tag";
 import { Host } from "../../docker-client-factory";
-import { DockerClient } from "../../docker-client";
-import { BoundPorts } from "../../bound-ports";
 import { StartedTestContainer } from "../../test-container";
 import { Port } from "../../port";
 import { RandomUuid } from "../../uuid";
@@ -30,11 +28,11 @@ export class Neo4jContainer extends GenericContainer {
     );
   }
 
-  public withTtl(schedule = 5) {
-    this.withEnv("NEO4J_apoc_ttl_enabled", "true").withEnv("NEO4J_apoc_ttl_schedule", schedule.toString());
+  public withTtl(schedule = 5): this {
+    return this.withEnv("NEO4J_apoc_ttl_enabled", "true").withEnv("NEO4J_apoc_ttl_schedule", schedule.toString());
   }
 
-  protected async preCreate(dockerClient: DockerClient, boundPorts: BoundPorts): Promise<void> {
+  protected async preCreate(): Promise<void> {
     this.withEnv("NEO4J_AUTH", `${this.defaultUsername}/${this.password}`);
   }
 
@@ -67,19 +65,19 @@ export class StartedNeo4jContainer extends AbstractStartedContainer {
     this.httpPort = this.startedTestContainer.getMappedPort(httpPort);
   }
 
-  public getBoltUri() {
+  public getBoltUri(): string {
     return `bolt://${this.host}:${this.boltPort}/`;
   }
 
-  public getHttpUri() {
+  public getHttpUri(): string {
     return `http://${this.host}:${this.httpPort}/`;
   }
 
-  public getPassword() {
+  public getPassword(): string {
     return this.password;
   }
 
-  public getUsername() {
+  public getUsername(): string {
     return this.username;
   }
 }

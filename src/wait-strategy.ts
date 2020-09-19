@@ -8,7 +8,6 @@ import { log, containerLog } from "./logger";
 import { Port } from "./port";
 import { PortCheck } from "./port-check";
 import { IntervalRetryStrategy } from "./retry-strategy";
-import { Reaper } from "./reaper";
 
 export interface WaitStrategy {
   waitUntilReady(container: Container, containerState: ContainerState, boundPorts: BoundPorts): Promise<void>;

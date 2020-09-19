@@ -1,8 +1,6 @@
 import { GenericContainer, Wait } from "../..";
 import { Image, Tag } from "../../repo-tag";
 import { Host } from "../../docker-client-factory";
-import { DockerClient } from "../../docker-client";
-import { BoundPorts } from "../../bound-ports";
 import { StartedTestContainer } from "../../test-container";
 import { Port } from "../../port";
 import { RandomUuid } from "../../uuid";
@@ -22,7 +20,7 @@ export class ArangoDBContainer extends GenericContainer {
     return this;
   }
 
-  protected async preCreate(dockerClient: DockerClient, boundPorts: BoundPorts): Promise<void> {
+  protected async preCreate(): Promise<void> {
     this.withEnv("ARANGO_ROOT_PASSWORD", this.password);
   }
 
@@ -45,19 +43,19 @@ export class StartedArangoContainer extends AbstractStartedContainer {
     this.port = this.startedTestContainer.getMappedPort(port);
   }
 
-  public getTcpUrl() {
+  public getTcpUrl(): string {
     return `tcp://${this.host}:${this.port}/`;
   }
 
-  public getHttpUrl() {
+  public getHttpUrl(): string {
     return `http://${this.host}:${this.port}/`;
   }
 
-  public getPassword() {
+  public getPassword(): string {
     return this.password;
   }
 
-  public getUsername() {
+  public getUsername(): string {
     return this.username;
   }
 }

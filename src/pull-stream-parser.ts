@@ -34,7 +34,7 @@ export class PullStreamParser {
               const message = `${prefix} - ${json.status}`;
               const messages = this.getOrElse(messagesById, id, new Set());
               if (!messages.has(message)) {
-                messagesById.get(id)!.add(message);
+                messages.add(message);
                 this.logger.trace(message);
               }
             }
