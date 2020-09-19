@@ -28,23 +28,17 @@ export class Reaper {
     const sessionId = dockerClient.getSessionId();
 
     log.debug(`Creating new Reaper for session: ${sessionId}`);
-    const container = new GenericContainer(this.IMAGE_NAME, "0.3.0")
+    const container = await new GenericContainer(this.IMAGE_NAME, "0.3.0")
       .withName(`ryuk-${sessionId}`)
       .withExposedPorts(8080)
       .withWaitStrategy(Wait.forLogMessage("Started!"))
+      .withBindMount(dockerClient.getSocketPath() || "/var/run/docker.sock", "/var/run/docker.sock")
       .withDaemonMode()
-      .withPrivilegedMode();
-
-    if (process.env.DOCKER_HOST) {
-      container.withEnv("DOCKER_HOST", process.env.DOCKER_HOST);
-    } else {
-      container.withBindMount(dockerClient.getSocketPath(), "/var/run/docker.sock");
-    }
-
-    const startedContainer = await container.start();
+      .withPrivilegedMode()
+      .start();
 
     const host = dockerClient.getHost();
-    const port = startedContainer.getMappedPort(8080);
+    const port = container.getMappedPort(8080);
 
     log.debug(`Connecting to Reaper on ${host}:${port}`);
     const socket = new Socket();
@@ -59,7 +53,7 @@ export class Reaper {
       socket.connect(port, host, () => {
         log.debug(`Connected to Reaper`);
         socket.write(`label=org.testcontainers.session-id=${sessionId}\r\n`);
-        const reaper = new Reaper(sessionId, startedContainer, socket);
+        const reaper = new Reaper(sessionId, container, socket);
         resolve(reaper);
       });
     });
