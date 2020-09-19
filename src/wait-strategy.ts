@@ -89,26 +89,21 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
       stream
         .on("data", (line) => {
           if (line.includes(this.message)) {
-            this.destroyStream(stream);
+            stream.destroy();
             resolve();
           }
         })
         .on("err", (line) => {
           if (line.includes(this.message)) {
-            this.destroyStream(stream);
+            stream.destroy();
             resolve();
           }
         })
         .on("end", () => {
-          this.destroyStream(stream);
+          stream.destroy();
           reject();
         });
     });
-  }
-
-  private destroyStream(stream: NodeJS.ReadableStream) {
-    // @ts-ignore
-    stream.destroy();
   }
 }
 

@@ -16,6 +16,7 @@ import { Host } from "./docker-client-factory";
 import { Port } from "./port";
 import { PullPolicy } from "./pull-policy";
 import { WaitStrategy } from "./wait-strategy";
+import { Readable } from "stream";
 
 export interface TestContainer {
   start(): Promise<StartedTestContainer>;
@@ -50,7 +51,7 @@ export interface StartedTestContainer {
   getName(): ContainerName;
   getId(): ContainerId;
   exec(command: Command[]): Promise<ExecResult>;
-  logs(): Promise<NodeJS.ReadableStream>;
+  logs(): Promise<Readable>;
 }
 
 export interface StoppedTestContainer {}
