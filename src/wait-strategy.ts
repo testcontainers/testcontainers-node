@@ -1,9 +1,10 @@
+import byline from "byline";
 import { Duration, TemporalUnit } from "node-duration";
 import { BoundPorts } from "./bound-ports";
 import { Container, HealthCheckStatus } from "./container";
 import { ContainerState } from "./container-state";
 import { DockerClient } from "./docker-client";
-import { log } from "./logger";
+import { log, containerLog } from "./logger";
 import { Port } from "./port";
 import { PortCheck } from "./port-check";
 import { IntervalRetryStrategy } from "./retry-strategy";
@@ -86,20 +87,23 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
     const stream = await container.logs();
 
     return new Promise((resolve, reject) => {
-      stream
+      byline(stream)
         .on("data", (line) => {
+          containerLog.trace(`Received log line: ${line}`);
           if (line.includes(this.message)) {
             stream.destroy();
             resolve();
           }
         })
         .on("err", (line) => {
+          containerLog.trace(`Received log line error: ${line}`);
           if (line.includes(this.message)) {
             stream.destroy();
             resolve();
           }
         })
         .on("end", () => {
+          containerLog.trace(`Log stream closed`);
           stream.destroy();
           reject();
         });
