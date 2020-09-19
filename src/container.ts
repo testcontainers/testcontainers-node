@@ -3,7 +3,7 @@ import { log } from "./logger";
 import { Duration, TemporalUnit } from "node-duration";
 import { Command, ContainerName, ExitCode } from "./docker-client";
 import { Port } from "./port";
-import { Readable } from "stream";
+import { Duplex, Readable } from "stream";
 
 export type Id = string;
 
@@ -135,12 +135,12 @@ export class DockerodeContainer implements Container {
 }
 
 class DockerodeExec implements Exec {
-  constructor(private readonly exec: any) {}
+  constructor(private readonly exec: dockerode.Exec) {}
 
   public start(): Promise<NodeJS.ReadableStream> {
     return new Promise((resolve, reject) => {
       const options = { Detach: false, Tty: true, stream: true, stdin: true, stdout: true, stderr: true };
-      this.exec.start(options, (err: Error, stream: NodeJS.ReadableStream) => {
+      this.exec.start(options, (err?: Error, stream?: Duplex) => {
         if (err) {
           return reject(err);
         }
@@ -151,6 +151,6 @@ class DockerodeExec implements Exec {
 
   public async inspect(): Promise<ExecInspectResult> {
     const inspectResult = await this.exec.inspect();
-    return { exitCode: inspectResult.ExitCode };
+    return { exitCode: inspectResult.ExitCode === null ? -1 : inspectResult.ExitCode };
   }
 }

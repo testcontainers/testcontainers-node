@@ -71,7 +71,7 @@ export class GenericContainerBuilder {
 }
 
 export class GenericContainer implements TestContainer {
-  public static fromDockerfile(context: BuildContext, dockerfileName: string = "Dockerfile"): GenericContainerBuilder {
+  public static fromDockerfile(context: BuildContext, dockerfileName = "Dockerfile"): GenericContainerBuilder {
     return new GenericContainerBuilder(context, dockerfileName);
   }
 
@@ -87,9 +87,9 @@ export class GenericContainer implements TestContainer {
   protected healthCheck?: HealthCheck;
   protected waitStrategy?: WaitStrategy;
   protected startupTimeout: Duration = new Duration(60_000, TemporalUnit.MILLISECONDS);
-  protected useDefaultLogDriver: boolean = false;
-  protected privilegedMode: boolean = false;
-  protected daemonMode: boolean = false;
+  protected useDefaultLogDriver = false;
+  protected privilegedMode = false;
+  protected daemonMode = false;
   protected authConfig?: AuthConfig;
   protected pullPolicy: PullPolicy = new DefaultPullPolicy();
 

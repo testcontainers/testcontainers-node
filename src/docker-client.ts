@@ -46,7 +46,7 @@ export type BuildArgs = { [key in EnvKey]: EnvValue };
 
 export type StreamOutput = string;
 export type ExecResult = { output: StreamOutput; exitCode: ExitCode };
-type DockerodeExposedPorts = { [port in PortString]: {} };
+type DockerodeExposedPorts = { [port in PortString]: Record<string, unknown> };
 
 export type BindMode = "rw" | "ro";
 export type BindMount = {
@@ -65,7 +65,7 @@ export type AuthConfig = {
 
 type DockerodeLogConfig = {
   Type: string;
-  Config: any;
+  Config: Record<string, unknown>;
 };
 
 type CreateOptions = {

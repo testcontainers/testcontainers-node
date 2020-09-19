@@ -1,4 +1,4 @@
-import { Duplex, Readable } from "stream";
+import { Readable } from "stream";
 import { PullStreamParser } from "./pull-stream-parser";
 import { FakeLogger } from "./logger";
 import { RepoTag } from "./repo-tag";

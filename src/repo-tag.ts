@@ -6,7 +6,7 @@ export type Tag = string;
 export class RepoTag {
   constructor(private readonly image: Image, private readonly tag: Tag) {}
 
-  public equals(repoTag: RepoTag) {
+  public equals(repoTag: RepoTag): boolean {
     return this.image === repoTag.image && this.tag === repoTag.tag;
   }
 
