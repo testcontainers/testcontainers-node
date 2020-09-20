@@ -338,7 +338,7 @@ describe("DockerComposeEnvironment", () => {
   let redisClient;
 
   beforeAll(async () => {
-    const composeFilePath = __dirname;
+    const composeFilePath = path.resolve(__dirname, "dir-containing-docker-compose-yml");
     const composeFile = "docker-compose.yml";
 
     environment = await new DockerComposeEnvironment(composeFilePath, composeFile).up();
