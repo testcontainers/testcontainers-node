@@ -334,7 +334,6 @@ const { DockerComposeEnvironment } = require("testcontainers");
 
 describe("DockerComposeEnvironment", () => {
   let environment;
-  let redisContainer;
   let redisClient;
 
   beforeAll(async () => {
@@ -343,7 +342,7 @@ describe("DockerComposeEnvironment", () => {
 
     environment = await new DockerComposeEnvironment(composeFilePath, composeFile).up();
 
-    redisContainer = environment.getContainer("redis_1");
+    const redisContainer = environment.getContainer("redis_1");
     redisClient = redis.createClient(
       redisContainer.getMappedPort(6379),
       redisContainer.getContainerIpAddress(),
