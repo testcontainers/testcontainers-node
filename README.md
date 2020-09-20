@@ -35,19 +35,31 @@ Using a pre-built Docker image:
 const redis = require("async-redis");
 const { GenericContainer } = require("testcontainers");
 
-(async () => {
-  const container = await new GenericContainer("redis")
-    .withExposedPorts(6379)
-    .start();
-  
-  const redisClient = redis.createClient(
-    container.getMappedPort(6379),
-    container.getContainerIpAddress(),
-  );
-  await redisClient.quit();
+describe("GenericContainer", () => {
+  let container;
+  let redisClient;
 
-  await container.stop();
-})();
+  beforeAll(async () => {
+    container = await new GenericContainer("redis")
+      .withExposedPorts(6379)
+      .start();
+
+    redisClient = redis.createClient(
+      container.getMappedPort(6379),
+      container.getContainerIpAddress(),
+    );
+  });
+
+  afterAll(async () => {
+    await redisClient.quit();
+    await container.stop();
+  });
+
+  it("works", async () => {
+    await redisClient.set("key", "val");
+    expect(await redisClient.get("key")).toBe("val");
+  });
+});
 ```
 
 Using a specific image version:
@@ -320,21 +332,35 @@ const path = require("path");
 const redis = require("async-redis");
 const { DockerComposeEnvironment } = require("testcontainers");
 
-(async () => {
-  const composeFilePath = path.resolve(__dirname, "dir-containing-docker-compose-yml");
-  const composeFile = "docker-compose.yml"
-  const environment = await new DockerComposeEnvironment(composeFilePath, composeFile).up();
+describe("DockerComposeEnvironment", () => {
+  let environment;
+  let redisContainer;
+  let redisClient;
 
-  const container = environment.getContainer("redis_1");
-  
-  const redisClient = redis.createClient(
-    container.getMappedPort(6379),
-    container.getContainerIpAddress(),
-  );
-  await redisClient.quit();
+  beforeAll(async () => {
+    const composeFilePath = path.resolve(__dirname, "dir-containing-docker-compose-yml");
+    const composeFile = "docker-compose.yml";
 
-  await environment.down();
-})();
+    environment = await new DockerComposeEnvironment(composeFilePath, composeFile).up();
+
+    redisContainer = environment.getContainer("redis_1");
+    redisClient = redis.createClient(
+      redisContainer.getMappedPort(6379),
+      redisContainer.getContainerIpAddress(),
+    );
+  });
+
+  afterAll(async () => {
+    await redisClient.quit();
+    await environment.down();
+  });
+
+  it("works", async () => {
+    await redisClient.set("key", "val");
+    expect(await redisClient.get("key")).toBe("val");
+  });
+});
+
 ```
 
 Create the containers with their own wait strategies:
