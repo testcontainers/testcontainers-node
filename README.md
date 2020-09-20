@@ -356,8 +356,8 @@ describe("DockerComposeEnvironment", () => {
   });
 
   it("works", async () => {
-    await redisClient.set("string key", "string val");
-    expect(await redisClient.get("string key")).toBe("string val");
+    await redisClient.set("key", "val");
+    expect(await redisClient.get("key")).toBe("val");
   })
 });
 
