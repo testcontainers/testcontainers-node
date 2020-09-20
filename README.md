@@ -58,7 +58,7 @@ describe("GenericContainer", () => {
   it("works", async () => {
     await redisClient.set("key", "val");
     expect(await redisClient.get("key")).toBe("val");
-  })
+  });
 });
 ```
 
@@ -358,7 +358,7 @@ describe("DockerComposeEnvironment", () => {
   it("works", async () => {
     await redisClient.set("key", "val");
     expect(await redisClient.get("key")).toBe("val");
-  })
+  });
 });
 
 ```
