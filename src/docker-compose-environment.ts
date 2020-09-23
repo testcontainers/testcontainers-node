@@ -174,13 +174,24 @@ export class StartedDockerComposeEnvironment {
     private readonly startedGenericContainers: { [containerName: string]: StartedGenericContainer }
   ) {}
 
-  public async down(): Promise<StoppedDockerComposeEnvironment> {
+  public async stop(): Promise<StoppedDockerComposeEnvironment> {
     log.info(`Stopping DockerCompose environment`);
     try {
-      await dockerCompose.down(defaultDockerComposeOptions(this.composeFilePath, this.composeFile, this.projectName));
-      return new StoppedDockerComposeEnvironment();
+      await dockerCompose.stop(defaultDockerComposeOptions(this.composeFilePath, this.composeFile, this.projectName));
+      return new StoppedDockerComposeEnvironment(this.composeFilePath, this.composeFile, this.projectName);
     } catch ({ err }) {
       log.error(`Failed to stop DockerCompose environment: ${err}`);
+      throw new Error(err.trim());
+    }
+  }
+
+  public async down(): Promise<DownedDockerComposeEnvironment> {
+    log.info(`Downing DockerCompose environment`);
+    try {
+      await dockerCompose.down(defaultDockerComposeOptions(this.composeFilePath, this.composeFile, this.projectName));
+      return new DownedDockerComposeEnvironment();
+    } catch ({ err }) {
+      log.error(`Failed to down DockerCompose environment: ${err}`);
       throw new Error(err.trim());
     }
   }
@@ -196,4 +207,23 @@ export class StartedDockerComposeEnvironment {
   }
 }
 
-export class StoppedDockerComposeEnvironment {}
+export class StoppedDockerComposeEnvironment {
+  constructor(
+    private readonly composeFilePath: string,
+    private readonly composeFile: string,
+    private readonly projectName: string
+  ) {}
+
+  public async down(): Promise<DownedDockerComposeEnvironment> {
+    log.info(`Downing DockerCompose environment`);
+    try {
+      await dockerCompose.down(defaultDockerComposeOptions(this.composeFilePath, this.composeFile, this.projectName));
+      return new DownedDockerComposeEnvironment();
+    } catch ({ err }) {
+      log.error(`Failed to down DockerCompose environment: ${err}`);
+      throw new Error(err.trim());
+    }
+  }
+}
+
+export class DownedDockerComposeEnvironment {}

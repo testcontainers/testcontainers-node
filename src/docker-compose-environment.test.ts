@@ -55,6 +55,16 @@ describe("DockerComposeEnvironment", () => {
     await startedEnvironment.down();
   });
 
+  it("should stop a docker-compose environment", async () => {
+    const environment1 = await new DockerComposeEnvironment(fixtures, "docker-compose-with-network.yml").up();
+    const environment2 = await new DockerComposeEnvironment(fixtures, "docker-compose-with-network.yml").up();
+
+    const stoppedEnvironment = await environment2.stop();
+    await environment1.down();
+
+    await stoppedEnvironment.down();
+  });
+
   it("should re-build the Dockerfiles", async () => {
     const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml").withBuild().up();
 
