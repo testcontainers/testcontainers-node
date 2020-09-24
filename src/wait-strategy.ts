@@ -91,7 +91,7 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
     return new Promise((resolve, reject) => {
       const startupTimeout = this.startupTimeout.get(TemporalUnit.MILLISECONDS);
       const timeout = setTimeout(
-        () => reject(new Error(`Health check not healthy after ${startupTimeout}ms`)),
+        () => reject(new Error(`Log message not received after ${startupTimeout}ms`)),
         startupTimeout
       );
 
