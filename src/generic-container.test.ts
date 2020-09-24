@@ -6,6 +6,7 @@ import { GenericContainer } from "./generic-container";
 import { AlwaysPullPolicy } from "./pull-policy";
 import { Wait } from "./wait";
 import { Readable } from "stream";
+import { RandomUuid } from "./uuid";
 
 describe("GenericContainer", () => {
   jest.setTimeout(180_000);
@@ -245,6 +246,70 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
+  it("should stop the container when the host port check wait strategy times out", async () => {
+    const containerName = `container-${new RandomUuid().nextUuid()}`;
+
+    await expect(
+      new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
+        .withName(containerName)
+        .withExposedPorts(8080)
+        .withWaitStrategy(Wait.forHealthCheck())
+        .withStartupTimeout(new Duration(0, TemporalUnit.MILLISECONDS))
+        .start()
+    ).rejects.toThrowError("Health check not healthy after 0ms");
+
+    expect(await getRunningContainerNames()).not.toContain(containerName);
+  });
+
+  it("should stop the container when the log message wait strategy times out", async () => {
+    const containerName = `container-${new RandomUuid().nextUuid()}`;
+
+    await expect(
+      new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
+        .withName(containerName)
+        .withExposedPorts(8080)
+        .withWaitStrategy(Wait.forLogMessage("unexpected"))
+        .withStartupTimeout(new Duration(0, TemporalUnit.MILLISECONDS))
+        .start()
+    ).rejects.toThrowError("Health check not healthy after 0ms");
+
+    expect(await getRunningContainerNames()).not.toContain(containerName);
+  });
+
+  it("should stop the container when the health check wait strategy times out", async () => {
+    const containerName = `container-${new RandomUuid().nextUuid()}`;
+
+    const context = path.resolve(fixtures, "docker-with-health-check");
+    const customGenericContainer = await GenericContainer.fromDockerfile(context).build();
+    await expect(
+      customGenericContainer
+        .withName(containerName)
+        .withExposedPorts(8080)
+        .withWaitStrategy(Wait.forHealthCheck())
+        .withStartupTimeout(new Duration(0, TemporalUnit.MILLISECONDS))
+        .start()
+    ).rejects.toThrowError("Health check not healthy after 0ms");
+
+    expect(await getRunningContainerNames()).not.toContain(containerName);
+  });
+
+  it("should stop the container when the health check fails", async () => {
+    const containerName = `container-${new RandomUuid().nextUuid()}`;
+
+    const context = path.resolve(fixtures, "docker-with-health-check");
+    const customGenericContainer = await GenericContainer.fromDockerfile(context).build();
+    await expect(
+      customGenericContainer
+        .withName(containerName)
+        .withExposedPorts(8080)
+        .withHealthCheck({ test: "exit 1" })
+        .withWaitStrategy(Wait.forHealthCheck())
+        .start()
+    ).rejects.toThrowError("Health check failed");
+
+    expect(await getRunningContainerNames()).not.toContain(containerName);
+  });
+
   it("should honour .dockerignore file", async () => {
     const context = path.resolve(fixtures, "docker-with-dockerignore");
     const container = await GenericContainer.fromDockerfile(context).build();
@@ -312,4 +377,12 @@ describe("GenericContainer", () => {
       await startedContainer.stop();
     });
   });
+
+  const getRunningContainerNames = async (): Promise<string[]> => {
+    const containers = await dockerodeClient.listContainers();
+    return containers
+      .map((container) => container.Names)
+      .reduce((result, containerNames) => [...result, ...containerNames], [])
+      .map((containerName) => containerName.replace("/", ""));
+  };
 });
