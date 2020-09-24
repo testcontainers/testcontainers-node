@@ -252,11 +252,10 @@ describe("GenericContainer", () => {
     await expect(
       new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
         .withName(containerName)
-        .withExposedPorts(8080)
-        .withWaitStrategy(Wait.forHealthCheck())
+        .withExposedPorts(8081)
         .withStartupTimeout(new Duration(0, TemporalUnit.MILLISECONDS))
         .start()
-    ).rejects.toThrowError("Health check not healthy after 0ms");
+    ).rejects.toThrowError("Port 8081 not bound after 0ms");
 
     expect(await getRunningContainerNames()).not.toContain(containerName);
   });
@@ -271,7 +270,7 @@ describe("GenericContainer", () => {
         .withWaitStrategy(Wait.forLogMessage("unexpected"))
         .withStartupTimeout(new Duration(0, TemporalUnit.MILLISECONDS))
         .start()
-    ).rejects.toThrowError("Log message not received after 0ms");
+    ).rejects.toThrowError(`Log message "unexpected" not received after 0ms`);
 
     expect(await getRunningContainerNames()).not.toContain(containerName);
   });
