@@ -21,7 +21,7 @@ import {
   TmpFs,
 } from "./docker-client";
 import { DockerClientFactory, Host } from "./docker-client-factory";
-import { log, containerLog } from "./logger";
+import { containerLog, log } from "./logger";
 import { Port } from "./port";
 import { PortBinder } from "./port-binder";
 import { HostPortCheck, InternalPortCheck } from "./port-check";
@@ -235,8 +235,20 @@ export class GenericContainer implements TestContainer {
   ): Promise<void> {
     log.debug(`Waiting for container to be ready: ${container.getId()}`);
     const waitStrategy = this.getWaitStrategy(dockerClient, container);
-    await waitStrategy.withStartupTimeout(this.startupTimeout).waitUntilReady(container, containerState, boundPorts);
-    log.info("Container is ready");
+
+    try {
+      await waitStrategy.withStartupTimeout(this.startupTimeout).waitUntilReady(container, containerState, boundPorts);
+      log.info("Container is ready");
+    } catch (err) {
+      log.error("Container failed to be ready");
+      try {
+        await container.stop({ timeout: new Duration(0, TemporalUnit.MILLISECONDS) });
+        await container.remove({ removeVolumes: true });
+      } catch (stopErr) {
+        log.error("Failed to stop container after it failed to be ready");
+      }
+      throw err;
+    }
   }
 
   private getWaitStrategy(dockerClient: DockerClient, container: Container): WaitStrategy {

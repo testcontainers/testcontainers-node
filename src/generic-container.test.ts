@@ -271,7 +271,7 @@ describe("GenericContainer", () => {
         .withWaitStrategy(Wait.forLogMessage("unexpected"))
         .withStartupTimeout(new Duration(0, TemporalUnit.MILLISECONDS))
         .start()
-    ).rejects.toThrowError("Health check not healthy after 0ms");
+    ).rejects.toThrowError("Log message not received after 0ms");
 
     expect(await getRunningContainerNames()).not.toContain(containerName);
   });
