@@ -89,21 +89,30 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
     const stream = await container.logs();
 
     return new Promise((resolve, reject) => {
+      const startupTimeout = this.startupTimeout.get(TemporalUnit.MILLISECONDS);
+      const timeout = setTimeout(
+        () => reject(new Error(`Log message "${this.message}" not received after ${startupTimeout}ms`)),
+        startupTimeout
+      );
+
       byline(stream)
         .on("data", (line) => {
           if (line.includes(this.message)) {
             stream.destroy();
+            clearTimeout(timeout);
             resolve();
           }
         })
         .on("err", (line) => {
           if (line.includes(this.message)) {
             stream.destroy();
+            clearTimeout(timeout);
             resolve();
           }
         })
         .on("end", () => {
           stream.destroy();
+          clearTimeout(timeout);
           reject();
         });
     });
@@ -118,14 +127,18 @@ export class HealthCheckWaitStrategy extends AbstractWaitStrategy {
       new Duration(100, TemporalUnit.MILLISECONDS)
     );
 
-    await retryStrategy.retryUntil(
+    const status = await retryStrategy.retryUntil(
       async () => (await container.inspect()).healthCheckStatus,
-      (status) => status === "healthy",
+      (status) => status === "healthy" || status === "unhealthy",
       () => {
         const timeout = this.startupTimeout.get(TemporalUnit.MILLISECONDS);
         throw new Error(`Health check not healthy after ${timeout}ms`);
       },
       this.startupTimeout
     );
+
+    if (status !== "healthy") {
+      throw new Error(`Health check failed`);
+    }
   }
 }
