@@ -8,7 +8,7 @@ import { DockerClient } from "./docker-client";
 import { DockerClientFactory } from "./docker-client-factory";
 import { resolveDockerComposeContainerName } from "./docker-compose-container-name-resolver";
 import { StartedGenericContainer } from "./generic-container";
-import { log, containerLog } from "./logger";
+import { containerLog, log } from "./logger";
 import { HostPortCheck, InternalPortCheck } from "./port-check";
 import { HostPortWaitStrategy, WaitStrategy } from "./wait-strategy";
 import { Reaper } from "./reaper";
@@ -51,7 +51,7 @@ export class DockerComposeEnvironment {
 
     (await Reaper.start(dockerClient)).addProject(this.projectName);
 
-    await this.dockerComposeUp();
+    await upAll(this.composeFilePath, this.composeFile, this.projectName, this.build);
     const startedContainers = (await dockerClient.listContainers()).filter(
       (container) => container.Labels["com.docker.compose.project"] === this.projectName
     );
@@ -96,20 +96,6 @@ export class DockerComposeEnvironment {
     );
   }
 
-  private async dockerComposeUp() {
-    try {
-      await upAll(this.composeFilePath, this.composeFile, this.projectName, this.build);
-    } catch ({ err }) {
-      log.error(`Failed to start DockerCompose environment: ${err}`);
-      try {
-        await down(this.composeFilePath, this.composeFile, this.projectName);
-      } catch {
-        log.warn(`Failed to stop DockerCompose environment after failed start`);
-      }
-      throw new Error(err.trim());
-    }
-  }
-
   private getBoundPorts(containerInfo: Dockerode.ContainerInfo): BoundPorts {
     const boundPorts = new BoundPorts();
     containerInfo.Ports.forEach((port) => boundPorts.setBinding(port.PrivatePort, port.PublicPort));
@@ -149,14 +135,8 @@ export class StartedDockerComposeEnvironment {
   ) {}
 
   public async stop(): Promise<StoppedDockerComposeEnvironment> {
-    log.info(`Stopping DockerCompose environment`);
-    try {
-      await dockerCompose.stop(defaultDockerComposeOptions(this.composeFilePath, this.composeFile, this.projectName));
-      return new StoppedDockerComposeEnvironment(this.composeFilePath, this.composeFile, this.projectName);
-    } catch ({ err }) {
-      log.error(`Failed to stop DockerCompose environment: ${err}`);
-      throw new Error(err.trim());
-    }
+    await stop(this.composeFilePath, this.composeFile, this.projectName);
+    return new StoppedDockerComposeEnvironment(this.composeFilePath, this.composeFile, this.projectName);
   }
 
   public async down(): Promise<DownedDockerComposeEnvironment> {
@@ -191,25 +171,20 @@ export class StoppedDockerComposeEnvironment {
 export class DownedDockerComposeEnvironment {}
 
 const defaultDockerComposeOptions = (
-  composeFilePath: string,
-  composeFile: string,
+  filePath: string,
+  file: string,
   projectName: string
 ): Partial<dockerCompose.IDockerComposeOptions> => ({
   log: false,
-  cwd: composeFilePath,
-  config: composeFile,
+  cwd: filePath,
+  config: file,
   env: {
     ...process.env,
     COMPOSE_PROJECT_NAME: projectName,
   },
 });
 
-const upAll = async (
-  composeFilePath: string,
-  composeFile: string,
-  projectName: string,
-  build: boolean
-): Promise<void> => {
+const upAll = async (filePath: string, file: string, projectName: string, build: boolean): Promise<void> => {
   const createOptions = (): dockerCompose.IDockerComposeOptions => {
     const commandOptions = [];
     if (build) {
@@ -217,27 +192,49 @@ const upAll = async (
     }
 
     return {
-      ...defaultDockerComposeOptions(composeFilePath, composeFile, projectName),
+      ...defaultDockerComposeOptions(filePath, file, projectName),
       commandOptions,
     };
   };
 
-  log.info(`Upping DockerCompose environment`);
-  await dockerCompose.upAll(createOptions());
-  log.info(`Upped DockerCompose environment`);
+  log.info(`Starting DockerCompose environment`);
+  try {
+    await dockerCompose.upAll(createOptions());
+    log.info(`Started DockerCompose environment`);
+  } catch ({ err }) {
+    log.error(`Failed to start DockerCompose environment: ${err}`);
+    try {
+      await down(filePath, file, projectName);
+    } catch {
+      log.warn(`Failed to stop DockerCompose environment after failed start`);
+    }
+    throw new Error(err.trim());
+  }
 };
 
-const down = async (composeFilePath: string, composeFile: string, projectName: string): Promise<void> => {
+const down = async (filePath: string, file: string, projectName: string): Promise<void> => {
   const createOptions = (): dockerCompose.IDockerComposeOptions => ({
-    ...defaultDockerComposeOptions(composeFilePath, composeFile, projectName),
+    ...defaultDockerComposeOptions(filePath, file, projectName),
     commandOptions: ["-v"],
   });
 
   log.info(`Downing DockerCompose environment`);
   try {
     await dockerCompose.down(createOptions());
+    log.info(`Downed DockerCompose environment`);
   } catch ({ err }) {
     log.error(`Failed to down DockerCompose environment: ${err}`);
+    throw new Error(err.trim());
+  }
+};
+
+const stop = async (filePath: string, file: string, projectName: string): Promise<void> => {
+  log.info(`Stopping DockerCompose environment`);
+  try {
+    await dockerCompose.stop(defaultDockerComposeOptions(filePath, file, projectName));
+    log.info(`Stopped DockerCompose environment`);
+  } catch ({ err }) {
+    log.error(`Failed to stop DockerCompose environment: ${err}`);
     throw new Error(err.trim());
   }
 };
