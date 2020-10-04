@@ -2,11 +2,13 @@ import fetch from "node-fetch";
 import path from "path";
 import { DockerComposeEnvironment } from "./docker-compose-environment";
 import { Wait } from "./wait";
+import Dockerode from "dockerode";
 
 describe("DockerComposeEnvironment", () => {
   jest.setTimeout(60000);
 
   const fixtures = path.resolve(__dirname, "..", "fixtures", "docker-compose");
+  const dockerodeClient = new Dockerode();
 
   it("should throw error when compose file is malformed", async () => {
     await expect(new DockerComposeEnvironment(fixtures, "docker-compose-malformed.yml").up()).rejects.toThrowError(
@@ -63,6 +65,18 @@ describe("DockerComposeEnvironment", () => {
     await environment1.down();
 
     await stoppedEnvironment.down();
+  });
+
+  it("should remove volumes when downing an environment", async () => {
+    const environment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-volume.yml").up();
+
+    await environment.down();
+
+    const testVolumes = (await dockerodeClient.listVolumes()).Volumes.map(
+      (volume) => volume.Name
+    ).filter((volumeName) => volumeName.includes("test-volume"));
+
+    expect(testVolumes).toHaveLength(0);
   });
 
   it("should re-build the Dockerfiles", async () => {
