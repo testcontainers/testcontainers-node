@@ -1,0 +1,10 @@
+version: "3"
+
+services:
+  container:
+    image: cristianrgreco/testcontainer:1.1.12
+    ports:
+      - 8080
+
+volumes:
+  test-volume:
