@@ -40,7 +40,7 @@ describe("DockerComposeEnvironment", () => {
     await startedEnvironment.down();
   });
 
-  it("should support non-default wait strategies", async () => {
+  it("should support log message wait strategy", async () => {
     const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml")
       .withWaitStrategy("container_1", Wait.forLogMessage("Listening on port 8080"))
       .withWaitStrategy("another_container_1", Wait.forLogMessage("Listening on port 8080"))
@@ -54,6 +54,19 @@ describe("DockerComposeEnvironment", () => {
         expect(response.status).toBe(200);
       })
     );
+    await startedEnvironment.down();
+  });
+
+  it("should support health check wait strategy", async () => {
+    const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-healthcheck.yml")
+      .withWaitStrategy("container_1", Wait.forHealthCheck())
+      .up();
+
+    const container = startedEnvironment.getContainer("container_1");
+    const url = `http://${container.getContainerIpAddress()}:${container.getMappedPort(8080)}`;
+    const response = await fetch(`${url}/hello-world`);
+    expect(response.status).toBe(200);
+
     await startedEnvironment.down();
   });
 

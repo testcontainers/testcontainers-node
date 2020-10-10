@@ -138,7 +138,7 @@ export class HealthCheckWaitStrategy extends AbstractWaitStrategy {
     );
 
     if (status !== "healthy") {
-      throw new Error(`Health check failed`);
+      throw new Error(`Health check failed: ${status}`);
     }
   }
 }
