@@ -151,6 +151,6 @@ class DockerodeExec implements Exec {
 
   public async inspect(): Promise<ExecInspectResult> {
     const inspectResult = await this.exec.inspect();
-    return { exitCode: inspectResult.ExitCode === null ? -1 : inspectResult.ExitCode };
+    return { exitCode: inspectResult.ExitCode === null ? 0 : inspectResult.ExitCode };
   }
 }

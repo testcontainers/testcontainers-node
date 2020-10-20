@@ -36,15 +36,22 @@ export class InternalPortCheck implements PortCheck {
   constructor(private readonly container: Container, private readonly dockerClient: DockerClient) {}
 
   public async isBound(port: Port): Promise<boolean> {
-    const portHex = port.toString(16).padStart(4, "0");
-    const commands = [
-      ["/bin/sh", "-c", `cat /proc/net/tcp* | awk '{print $2}' | grep -i :${portHex}`],
-      ["/bin/sh", "-c", `nc -vz -w 1 localhost ${port}`],
-      ["/bin/bash", "-c", `</dev/tcp/localhost/${port}`],
-    ];
-    const commandResults = await Promise.all(
-      commands.map((command) => this.dockerClient.exec(this.container, command))
-    );
-    return commandResults.some((result) => result.exitCode === 0);
+    return new Promise((resolve) => {
+      const timeout = setTimeout(() => resolve(false), 1000);
+      const portHex = port.toString(16).padStart(4, "0");
+      const commands = [
+        ["/bin/sh", "-c", `cat /proc/net/tcp* | awk '{print $2}' | grep -i :${portHex}`],
+        ["/bin/sh", "-c", `nc -vz -w 1 localhost ${port}`],
+        ["/bin/bash", "-c", `</dev/tcp/localhost/${port}`],
+      ];
+      commands.map((command) =>
+        this.dockerClient.exec(this.container, command).then((result) => {
+          if (result.exitCode === 0) {
+            clearTimeout(timeout);
+            resolve(true);
+          }
+        })
+      );
+    });
   }
 }

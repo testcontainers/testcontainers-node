@@ -1,4 +1,5 @@
-version: "3"
+version: "3.5"
+
 services:
   db:
     container_name: custom_container_name

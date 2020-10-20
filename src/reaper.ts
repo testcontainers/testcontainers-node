@@ -32,7 +32,7 @@ export class Reaper {
       .withName(`ryuk-${sessionId}`)
       .withExposedPorts(8080)
       .withWaitStrategy(Wait.forLogMessage("Started!"))
-      .withBindMount(dockerClient.getSocketPath() || "/var/run/docker.sock", "/var/run/docker.sock")
+      .withBindMount("/var/run/docker.sock", "/var/run/docker.sock")
       .withDaemonMode()
       .withPrivilegedMode()
       .start();

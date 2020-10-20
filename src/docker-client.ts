@@ -1,3 +1,4 @@
+import byline from "byline";
 import Dockerode, { Network, PortMap as DockerodePortBindings } from "dockerode";
 import { Duration, TemporalUnit } from "node-duration";
 import streamToArray from "stream-to-array";
@@ -183,8 +184,12 @@ export class DockerodeClient implements DockerClient {
       attachStderr: true,
     });
 
-    const stream = await exec.start();
-    const output = Buffer.concat(await streamToArray(stream)).toString();
+    const stream = byline(await exec.start()).setEncoding("utf-8");
+
+    const output: string = await new Promise((resolve) => stream.on("data", (chunk) => resolve(chunk)));
+
+    stream.destroy();
+
     const { exitCode } = await exec.inspect();
 
     return { output, exitCode };
