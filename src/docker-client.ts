@@ -186,9 +186,11 @@ export class DockerodeClient implements DockerClient {
 
     const stream = byline(await exec.start()).setEncoding("utf-8");
 
-    const output: string = await new Promise((resolve) => stream.on("data", (chunk) => resolve(chunk)));
-
-    stream.destroy();
+    const output: string = await new Promise((resolve) => {
+      const chunks: string[] = [];
+      stream.on("data", (chunk) => chunks.push(chunk));
+      stream.on("end", () => resolve(chunks.reduce((result, chunk) => result + chunk, "")));
+    });
 
     const { exitCode } = await exec.inspect();
 
