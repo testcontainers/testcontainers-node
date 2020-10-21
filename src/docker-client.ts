@@ -11,6 +11,7 @@ import { log } from "./logger";
 import { PortString } from "./port";
 import { RepoTag } from "./repo-tag";
 import { PullStreamParser } from "./pull-stream-parser";
+import { Readable } from "stream";
 
 export type Command = string;
 export type ContainerName = string;
@@ -184,7 +185,7 @@ export class DockerodeClient implements DockerClient {
       attachStderr: true,
     });
 
-    const stream = (await exec.start()).setEncoding("utf-8");
+    const stream = (await exec.start()).setEncoding("utf-8") as Readable;
 
     return await new Promise((resolve) => {
       let output = "";
@@ -195,6 +196,7 @@ export class DockerodeClient implements DockerClient {
 
         if (!running) {
           clearInterval(interval);
+          stream.destroy();
           resolve({ output, exitCode });
         }
       }, 100);
