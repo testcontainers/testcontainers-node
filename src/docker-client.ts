@@ -2,6 +2,7 @@ import Dockerode, { Network, PortMap as DockerodePortBindings } from "dockerode"
 import { Duration, TemporalUnit } from "node-duration";
 import streamToArray from "stream-to-array";
 import tar from "tar-fs";
+import slash from "slash";
 import { BoundPorts } from "./bound-ports";
 import { Container, DockerodeContainer, Id } from "./container";
 import { Host } from "./docker-client-factory";
@@ -208,7 +209,7 @@ export class DockerodeClient implements DockerClient {
   ): Promise<void> {
     log.info(`Building image '${repoTag.toString()}' with context '${context}'`);
     const dockerIgnoreFiles = await findDockerIgnoreFiles(context);
-    const tarStream = tar.pack(context, { ignore: (name) => dockerIgnoreFiles.has(name) });
+    const tarStream = tar.pack(context, { ignore: (name) => dockerIgnoreFiles.has(slash(name)) });
     const stream = await this.dockerode.buildImage(tarStream, {
       dockerfile: dockerfileName,
       buildargs: buildArgs,
