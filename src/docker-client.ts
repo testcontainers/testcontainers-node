@@ -1,4 +1,3 @@
-import byline from "byline";
 import Dockerode, { Network, PortMap as DockerodePortBindings } from "dockerode";
 import { Duration, TemporalUnit } from "node-duration";
 import streamToArray from "stream-to-array";
@@ -184,17 +183,21 @@ export class DockerodeClient implements DockerClient {
       attachStderr: true,
     });
 
-    const stream = byline(await exec.start()).setEncoding("utf-8");
+    const stream = (await exec.start()).setEncoding("utf-8");
 
-    const output: string = await new Promise((resolve) => {
-      const chunks: string[] = [];
-      stream.on("data", (chunk) => chunks.push(chunk));
-      stream.on("end", () => resolve(chunks.reduce((result, chunk) => result + chunk, "")));
+    return await new Promise((resolve) => {
+      let output = "";
+      stream.on("data", (chunk) => (output += chunk));
+
+      const interval = setInterval(async () => {
+        const { running, exitCode } = await exec.inspect();
+
+        if (!running) {
+          clearInterval(interval);
+          resolve({ output, exitCode });
+        }
+      }, 100);
     });
-
-    const { exitCode } = await exec.inspect();
-
-    return { output, exitCode };
   }
 
   public async buildImage(
