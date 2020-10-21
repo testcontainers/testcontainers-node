@@ -12,7 +12,7 @@ describe("DockerComposeEnvironment", () => {
 
   it("should throw error when compose file is malformed", async () => {
     await expect(new DockerComposeEnvironment(fixtures, "docker-compose-malformed.yml").up()).rejects.toThrowError(
-      `Version in "./docker-compose-malformed.yml" is invalid - it should be a string.`
+      `Version in ".${path.sep}docker-compose-malformed.yml" is invalid - it should be a string.`
     );
   });
 

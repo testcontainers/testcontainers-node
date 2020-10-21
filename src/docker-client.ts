@@ -2,6 +2,7 @@ import Dockerode, { Network, PortMap as DockerodePortBindings } from "dockerode"
 import { Duration, TemporalUnit } from "node-duration";
 import streamToArray from "stream-to-array";
 import tar from "tar-fs";
+import slash from "slash";
 import { BoundPorts } from "./bound-ports";
 import { Container, DockerodeContainer, Id } from "./container";
 import { Host } from "./docker-client-factory";
@@ -10,6 +11,7 @@ import { log } from "./logger";
 import { PortString } from "./port";
 import { RepoTag } from "./repo-tag";
 import { PullStreamParser } from "./pull-stream-parser";
+import { Readable } from "stream";
 
 export type Command = string;
 export type ContainerName = string;
@@ -172,7 +174,6 @@ export class DockerodeClient implements DockerClient {
   }
 
   public start(container: Container): Promise<void> {
-    log.info(`Starting container with ID: ${container.getId()}`);
     return container.start();
   }
 
@@ -183,11 +184,22 @@ export class DockerodeClient implements DockerClient {
       attachStderr: true,
     });
 
-    const stream = await exec.start();
-    const output = Buffer.concat(await streamToArray(stream)).toString();
-    const { exitCode } = await exec.inspect();
+    const stream = (await exec.start()).setEncoding("utf-8") as Readable;
 
-    return { output, exitCode };
+    return await new Promise((resolve) => {
+      let output = "";
+      stream.on("data", (chunk) => (output += chunk));
+
+      const interval = setInterval(async () => {
+        const { running, exitCode } = await exec.inspect();
+
+        if (!running) {
+          clearInterval(interval);
+          stream.destroy();
+          resolve({ output, exitCode });
+        }
+      }, 100);
+    });
   }
 
   public async buildImage(
@@ -198,7 +210,7 @@ export class DockerodeClient implements DockerClient {
   ): Promise<void> {
     log.info(`Building image '${repoTag.toString()}' with context '${context}'`);
     const dockerIgnoreFiles = await findDockerIgnoreFiles(context);
-    const tarStream = tar.pack(context, { ignore: (name) => dockerIgnoreFiles.has(name) });
+    const tarStream = tar.pack(context, { ignore: (name) => dockerIgnoreFiles.has(slash(name)) });
     const stream = await this.dockerode.buildImage(tarStream, {
       dockerfile: dockerfileName,
       buildargs: buildArgs,

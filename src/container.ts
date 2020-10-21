@@ -18,6 +18,9 @@ export type InspectResult = {
 
 type ExecInspectResult = {
   exitCode: ExitCode;
+  running: boolean;
+  entrypoint: string;
+  arguments: string[];
 };
 
 interface Exec {
@@ -151,6 +154,12 @@ class DockerodeExec implements Exec {
 
   public async inspect(): Promise<ExecInspectResult> {
     const inspectResult = await this.exec.inspect();
-    return { exitCode: inspectResult.ExitCode === null ? -1 : inspectResult.ExitCode };
+
+    return {
+      exitCode: inspectResult.ExitCode === null ? -1 : inspectResult.ExitCode,
+      running: inspectResult.Running,
+      entrypoint: inspectResult.ProcessConfig.entrypoint,
+      arguments: inspectResult.ProcessConfig.arguments,
+    };
   }
 }

@@ -129,6 +129,7 @@ export class GenericContainer implements TestContainer {
       autoRemove: this.daemonMode,
     });
 
+    log.info(`Starting container ${this.repoTag} with ID: ${container.getId()}`);
     await dockerClient.start(container);
 
     if (!this.daemonMode) {
@@ -241,6 +242,13 @@ export class GenericContainer implements TestContainer {
       log.info("Container is ready");
     } catch (err) {
       log.error("Container failed to be ready");
+
+      if (this.daemonMode) {
+        (await container.logs())
+          .on("data", (data) => containerLog.trace(`${container.getId()}: ${data}`))
+          .on("err", (data) => containerLog.error(`${container.getId()}: ${data}`));
+      }
+
       try {
         await container.stop({ timeout: new Duration(0, TemporalUnit.MILLISECONDS) });
         await container.remove({ removeVolumes: true });

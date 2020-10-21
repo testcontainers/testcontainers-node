@@ -1,4 +1,5 @@
 import { existsSync, promises as fs } from "fs";
+import os from "os";
 import glob from "glob";
 import path from "path";
 
@@ -12,7 +13,7 @@ export const findDockerIgnoreFiles = async (context: string): Promise<Set<string
 
   const dockerIgnorePatterns = (await fs.readFile(dockerIgnoreFilePath, { encoding: "utf-8" }))
     .toString()
-    .split("\n")
+    .split(os.EOL)
     .map((dockerIgnorePattern) => path.resolve(context, dockerIgnorePattern));
 
   const dockerIgnoreMatches: string[][] = await Promise.all(
