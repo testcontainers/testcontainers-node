@@ -174,7 +174,6 @@ export class DockerodeClient implements DockerClient {
   }
 
   public start(container: Container): Promise<void> {
-    log.info(`Starting container with ID: ${container.getId()}`);
     return container.start();
   }
 
