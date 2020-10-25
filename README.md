@@ -97,6 +97,16 @@ const container = await GenericContainer.fromDockerfile(buildContext, "my-docker
   .build();
 ```
 
+Creating a container with multiple exposed ports:
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await new GenericContainer("alpine")
+  .withExposedPorts(22, 80, 443)
+  .start();
+```
+
 Creating a container with a specified name:
 
 ```javascript
