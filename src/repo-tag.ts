@@ -1,4 +1,4 @@
-import { ReaperFactory } from "./reaper";
+import { ReaperInstance } from "./reaper";
 
 export type Image = string;
 export type Tag = string;
@@ -15,6 +15,6 @@ export class RepoTag {
   }
 
   public isReaper(): boolean {
-    return this.image === ReaperFactory.IMAGE_NAME;
+    return this.image === ReaperInstance.IMAGE_NAME;
   }
 }

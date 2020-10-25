@@ -28,7 +28,7 @@ class DisabledReaper implements Reaper {
   }
 }
 
-export class ReaperFactory {
+export class ReaperInstance {
   public static IMAGE_NAME = "testcontainers/ryuk";
   public static IMAGE_VERSION = "0.3.0";
 

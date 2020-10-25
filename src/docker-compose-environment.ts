@@ -11,7 +11,7 @@ import { StartedGenericContainer } from "./generic-container";
 import { containerLog, log } from "./logger";
 import { HostPortCheck, InternalPortCheck } from "./port-check";
 import { HostPortWaitStrategy, WaitStrategy } from "./wait-strategy";
-import { ReaperFactory } from "./reaper";
+import { ReaperInstance } from "./reaper";
 import { RandomUuid, Uuid } from "./uuid";
 
 export class DockerComposeEnvironment {
@@ -49,7 +49,7 @@ export class DockerComposeEnvironment {
 
     const dockerClient = await DockerClientFactory.getClient();
 
-    (await ReaperFactory.start(dockerClient)).addProject(this.projectName);
+    (await ReaperInstance.start(dockerClient)).addProject(this.projectName);
 
     await upAll(this.composeFilePath, this.composeFile, this.projectName, this.build);
     const startedContainers = (await dockerClient.listContainers()).filter(
