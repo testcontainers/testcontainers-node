@@ -6,29 +6,62 @@ import { Wait } from "./wait";
 import { Id } from "./container";
 import { DockerClient } from "./docker-client";
 
-export class Reaper {
-  public static IMAGE_NAME = "testcontainers/ryuk";
+export interface Reaper {
+  addProject(projectName: string): void;
+}
 
-  private static instance: Promise<Reaper>;
-
+class RealReaper implements Reaper {
   constructor(
     private readonly sessionId: Id,
     private readonly container: StartedTestContainer,
     private readonly socket: Socket
   ) {}
 
+  public addProject(projectName: string): void {
+    this.socket.write(`label=com.docker.compose.project=${projectName}\r\n`);
+  }
+}
+
+class DisabledReaper implements Reaper {
+  public addProject(): void {
+    // noop
+  }
+}
+
+export class ReaperFactory {
+  public static IMAGE_NAME = "testcontainers/ryuk";
+  public static IMAGE_VERSION = "0.3.0";
+
+  private static instance: Promise<Reaper>;
+
   public static async start(dockerClient: DockerClient): Promise<Reaper> {
     if (!this.instance) {
-      this.instance = this.createInstance(dockerClient);
+      if (this.isEnabled()) {
+        this.instance = this.createRealInstance(dockerClient);
+      } else {
+        this.instance = this.createDisabledInstance(dockerClient);
+      }
     }
+
     return this.instance;
   }
 
-  private static async createInstance(dockerClient: DockerClient): Promise<Reaper> {
+  private static isEnabled(): boolean {
+    return process.env.TESTCONTAINERS_RYUK_DISABLED !== "true";
+  }
+
+  private static createDisabledInstance(dockerClient: DockerClient): Promise<Reaper> {
+    const sessionId = dockerClient.getSessionId();
+
+    log.debug(`Not creating new Reaper for session: ${sessionId}`);
+    return Promise.resolve(new DisabledReaper());
+  }
+
+  private static async createRealInstance(dockerClient: DockerClient): Promise<Reaper> {
     const sessionId = dockerClient.getSessionId();
 
     log.debug(`Creating new Reaper for session: ${sessionId}`);
-    const container = await new GenericContainer(this.IMAGE_NAME, "0.3.0")
+    const container = await new GenericContainer(this.IMAGE_NAME, this.IMAGE_VERSION)
       .withName(`ryuk-${sessionId}`)
       .withExposedPorts(8080)
       .withWaitStrategy(Wait.forLogMessage("Started!"))
@@ -53,13 +86,9 @@ export class Reaper {
       socket.connect(port, host, () => {
         log.debug(`Connected to Reaper`);
         socket.write(`label=org.testcontainers.session-id=${sessionId}\r\n`);
-        const reaper = new Reaper(sessionId, container, socket);
+        const reaper = new RealReaper(sessionId, container, socket);
         resolve(reaper);
       });
     });
-  }
-
-  public addProject(projectName: string): void {
-    this.socket.write(`label=com.docker.compose.project=${projectName}\r\n`);
   }
 }

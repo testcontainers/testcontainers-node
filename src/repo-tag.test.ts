@@ -1,5 +1,5 @@
 import { RepoTag } from "./repo-tag";
-import { Reaper } from "./reaper";
+import { ReaperFactory } from "./reaper";
 
 describe("RepoTag", () => {
   it("should return whether two repo tags are equal", () => {
@@ -15,7 +15,7 @@ describe("RepoTag", () => {
   });
 
   it("should return whether the repo tag is for a Reaper", () => {
-    const reaper = new RepoTag(Reaper.IMAGE_NAME, "latest");
+    const reaper = new RepoTag(ReaperFactory.IMAGE_NAME, "latest");
     const notReaper = new RepoTag("quay.io/testcontainers/notReaper", "latest");
 
     expect(reaper.isReaper()).toBe(true);
