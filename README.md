@@ -21,7 +21,8 @@ The following environment variables are supported:
 | `DEBUG` | `testcontainers` | See output |
 | `DEBUG` | `testcontainers:containers` | See container output |
 | `DEBUG` | `testcontainers*` | See all output |
-| `DOCKER_HOST` | `tcp://docker:2375` | Override the Docker host, useful for DIND in CI environments |
+| `DOCKER_HOST` | `tcp://docker:2375` | Override the Docker host |
+| `TESTCONTAINERS_RYUK_DISABLED` | `true` | Disable [ryuk](#ryuk) |
 
 ## Modules
 
@@ -449,6 +450,14 @@ const container = await new GenericContainer("redis")
   .withWaitStrategy(Wait.forHealthCheck())
   .start();
 ```
+
+## ryuk
+
+Testcontainers will start a sidecar container called ryuk whenever a container, docker-compose environment or network is started. This container keeps track of containers/images/networks/volumes created by testcontainers and will automatically clean up these resources 10s after connectivity with testcontainers is lost. 
+
+This is useful for example if a test starts a container and then terminates unexpectedly, as these dangling resources will be automatically removed.
+
+ryuk must be run with privileged mode; in CI environments such as Bit Bucket where this isn't supported, ryuk can be disabled by setting the environment variable `TESTCONTAINERS_RYUK_DISABLED` to `true`.
 
 ## Common Issues
 

@@ -36,7 +36,7 @@ import {
 } from "./test-container";
 import { RandomUuid, Uuid } from "./uuid";
 import { HostPortWaitStrategy, WaitStrategy } from "./wait-strategy";
-import { Reaper } from "./reaper";
+import { ReaperInstance } from "./reaper";
 import { Readable } from "stream";
 
 export class GenericContainerBuilder {
@@ -107,7 +107,7 @@ export class GenericContainer implements TestContainer {
     const boundPorts = await new PortBinder().bind(this.ports);
 
     if (!this.repoTag.isReaper()) {
-      await Reaper.start(dockerClient);
+      await ReaperInstance.start(dockerClient);
     }
 
     if (this.preCreate) {
