@@ -453,7 +453,9 @@ const container = await new GenericContainer("redis")
 
 ## ryuk
 
-Testcontainers will start a sidecar container called ryuk whenever a container, docker-compose environment or network is started. This container keeps track of containers/images/networks/volumes created by testcontainers and will automatically clean up these resources 10s after connectivity with testcontainers is lost. This is useful for example if a test starts a container and then terminates unexpectedly, as these dangling resources will be automatically removed.
+Testcontainers will start a sidecar container called ryuk whenever a container, docker-compose environment or network is started. This container keeps track of containers/images/networks/volumes created by testcontainers and will automatically clean up these resources 10s after connectivity with testcontainers is lost. 
+
+This is useful for example if a test starts a container and then terminates unexpectedly, as these dangling resources will be automatically removed.
 
 ryuk must be run with privileged mode; in CI environments such as Bit Bucket where this isn't supported, ryuk can be disabled by setting the environment variable `TESTCONTAINERS_RYUK_DISABLED` to `true`.
 
