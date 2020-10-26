@@ -1,7 +1,7 @@
 import { HealthCheckWaitStrategy, Log, LogWaitStrategy, WaitStrategy } from "./wait-strategy";
 
 export class Wait {
-  public static forLogMessage(message: Log): WaitStrategy {
+  public static forLogMessage(message: Log | RegExp): WaitStrategy {
     return new LogWaitStrategy(message);
   }
 
