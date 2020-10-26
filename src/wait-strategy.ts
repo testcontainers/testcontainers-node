@@ -80,7 +80,7 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
 export type Log = string;
 
 export class LogWaitStrategy extends AbstractWaitStrategy {
-  constructor(private readonly message: Log) {
+  constructor(private readonly message: Log | RegExp) {
     super();
   }
 
@@ -95,16 +95,24 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
         startupTimeout
       );
 
+      const comparisonFn: (line: string) => boolean = (line: string) => {
+        if (this.message instanceof RegExp) {
+          return this.message.test(line);
+        } else {
+          return line.includes(this.message);
+        }
+      };
+
       byline(stream)
         .on("data", (line) => {
-          if (line.includes(this.message)) {
+          if (comparisonFn(line)) {
             stream.destroy();
             clearTimeout(timeout);
             resolve();
           }
         })
         .on("err", (line) => {
-          if (line.includes(this.message)) {
+          if (comparisonFn(line)) {
             stream.destroy();
             clearTimeout(timeout);
             resolve();

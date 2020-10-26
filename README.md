@@ -431,12 +431,25 @@ const container = await new GenericContainer("redis")
 
 ### Log output
 
+Plain text:
+
 ```javascript
 const { GenericContainer, Wait } = require("testcontainers");
 
 const container = await new GenericContainer("redis")
   .withExposedPorts(6379)
   .withWaitStrategy(Wait.forLogMessage("Ready to accept connections"))
+  .start();
+```
+
+Regular expression:
+
+```javascript
+const { GenericContainer, Wait } = require("testcontainers");
+
+const container = await new GenericContainer("redis")
+  .withExposedPorts(6379)
+  .withWaitStrategy(Wait.forLogMessage(/Listening on port [0-9]+/))
   .start();
 ```
 

@@ -39,6 +39,19 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
+  it("should wait for log with regex", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
+      .withExposedPorts(8080)
+      .withWaitStrategy(Wait.forLogMessage(/Listening on port [0-9]+/))
+      .start();
+
+    const url = `http://${container.getContainerIpAddress()}:${container.getMappedPort(8080)}`;
+    const response = await fetch(`${url}/hello-world`);
+
+    expect(response.status).toBe(200);
+    await container.stop();
+  });
+
   it("should wait for health check", async () => {
     const context = path.resolve(fixtures, "docker-with-health-check");
     const customGenericContainer = await GenericContainer.fromDockerfile(context).build();
