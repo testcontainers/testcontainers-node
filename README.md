@@ -186,7 +186,7 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
-Creating a container with a custom health check command. 
+Creating a container with a custom health check command. You will need to `npm i -D node-duration@1.0.4` for this.
 
 Note that `interval`, `timeout`, `retries` and `startPeriod` are optional; the values will be inherited from the image or parent image if omitted. Also note that the wait strategy should be set to `Wait.forHealthCheck()` for this option to take effect:
 
@@ -232,13 +232,13 @@ await container.stop();
 await network.stop();
 ```
 
-Specifying a pull policy. 
+Specifying a pull policy.
 
-Note that if omitted will use the `DefaultPullPolicy` which will use a locally cached 
-image if one already exists, this is usually the preferred option. In cases where 
-there is a local image for a given tag but the remote image with the same tag may 
-have changed (for example when using the `latest` tag), you can tell testcontainers 
-to pull the image again by specifying an `AlwaysPullPolicy`: 
+Note that if omitted will use the `DefaultPullPolicy` which will use a locally cached
+image if one already exists, this is usually the preferred option. In cases where
+there is a local image for a given tag but the remote image with the same tag may
+have changed (for example when using the `latest` tag), you can tell testcontainers
+to pull the image again by specifying an `AlwaysPullPolicy`:
 
 ```javascript
 const { GenericContainer, AlwaysPullPolicy } = require("testcontainers");
@@ -267,7 +267,7 @@ Specifying a default log driver.
 
 You can override the logging driver used by docker to be the default one (json-file).
 This might be necessary when the driver of your docker host does not support reading logs
-and you want to use the `Wait.forLogMessage` wait strategy. This is the same as 
+and you want to use the `Wait.forLogMessage` wait strategy. This is the same as
 [--log-driver json-file on docker run](https://docs.docker.com/config/containers/logging/configure/#configure-the-logging-driver-for-a-container).
 
 ```javascript
@@ -298,8 +298,8 @@ const container = await new GenericContainer("postgres")
   .withExposedPorts(5432)
   .start();
 
-await container.stop({ 
-  timeout: new Duration(10, TemporalUnit.SECONDS) 
+await container.stop({
+  timeout: new Duration(10, TemporalUnit.SECONDS)
 })
 ```
 
@@ -313,7 +313,7 @@ const container = await new GenericContainer("postgres")
   .withExposedPorts(5432)
   .start();
 
-await container.stop({ 
+await container.stop({
   removeVolumes: false
 })
 ```
@@ -416,7 +416,7 @@ const environment = await new DockerComposeEnvironment(composeFilePath, composeF
 
 ## Wait Strategies
 
-Ordinarily Testcontainers will wait for up to 60 seconds for the container's mapped network ports to start listening. 
+Ordinarily Testcontainers will wait for up to 60 seconds for the container's mapped network ports to start listening.
 If the default 60s timeout is not sufficient, it can be altered with the `withStartupTimeout()` method:
 
 ```javascript
@@ -466,7 +466,7 @@ const container = await new GenericContainer("redis")
 
 ## ryuk
 
-Testcontainers will start a sidecar container called ryuk whenever a container, docker-compose environment or network is started. This container keeps track of containers/images/networks/volumes created by testcontainers and will automatically clean up these resources 10s after connectivity with testcontainers is lost. 
+Testcontainers will start a sidecar container called ryuk whenever a container, docker-compose environment or network is started. This container keeps track of containers/images/networks/volumes created by testcontainers and will automatically clean up these resources 10s after connectivity with testcontainers is lost.
 
 This is useful for example if a test starts a container and then terminates unexpectedly, as these dangling resources will be automatically removed.
 
@@ -476,16 +476,16 @@ ryuk must be run with privileged mode; in CI environments such as Bit Bucket whe
 
 1. **Insufficient Docker memory**
 
-By default, Docker sets CPU and memory limits, with a default memory limit 
-of 2GB. If exceeded, you will be unable to pull/run Docker images. 
+By default, Docker sets CPU and memory limits, with a default memory limit
+of 2GB. If exceeded, you will be unable to pull/run Docker images.
 To see how much memory Docker has  used, you can run ```docker system info```
 
 - To remove existing containers and images to clear some space you can run ```docker system prune```
 - Alternatively you can increase the memory limit via Docker's settings under the Advanced pane.
 
-2. **Insufficient test timeouts** 
+2. **Insufficient test timeouts**
 
-It can take a few seconds up to a few minutes to pull and run certain Docker images, 
+It can take a few seconds up to a few minutes to pull and run certain Docker images,
 depending on file sizes and network constraints. It's unlikely that the default
 timeouts set by test frameworks are sufficient.
 
