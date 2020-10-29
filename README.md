@@ -192,15 +192,14 @@ Note that `interval`, `timeout`, `retries` and `startPeriod` are optional; the v
 
 ```javascript
 const { GenericContainer, Wait } = require("testcontainers");
-const { Duration, TemporalUnit } = require("node-duration");
 
 const container = await new GenericContainer("alpine")
   .withHealthCheck({
     test: "curl -f http://localhost || exit 1",
-    interval: new Duration(1, TemporalUnit.SECONDS),
-    timeout: new Duration(3, TemporalUnit.SECONDS),
+    interval: 1000,
+    timeout: 3000,
     retries: 5,
-    startPeriod: new Duration(1, TemporalUnit.SECONDS)
+    startPeriod: 1000
   })
   .withWaitStrategy(Wait.forHealthCheck())
   .start();
@@ -292,14 +291,13 @@ Testcontainers will not wait for a container to stop, to override:
 
 ```javascript
 const { GenericContainer } = require("testcontainers");
-const { Duration, TemporalUnit } = require("node-duration");
 
 const container = await new GenericContainer("postgres")
   .withExposedPorts(5432)
   .start();
 
 await container.stop({ 
-  timeout: new Duration(10, TemporalUnit.SECONDS) 
+  timeout: 10000 
 })
 ```
 
@@ -421,11 +419,10 @@ If the default 60s timeout is not sufficient, it can be altered with the `withSt
 
 ```javascript
 const { GenericContainer } = require("testcontainers");
-const { Duration, TemporalUnit } = require("node-duration");
 
 const container = await new GenericContainer("redis")
   .withExposedPorts(6379)
-  .withStartupTimeout(new Duration(100, TemporalUnit.SECONDS))
+  .withStartupTimeout(120000)
   .start();
 ```
 

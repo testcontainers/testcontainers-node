@@ -1,5 +1,4 @@
 import byline from "byline";
-import { Duration, TemporalUnit } from "node-duration";
 import { BoundPorts } from "./bound-ports";
 import { Container, HealthCheckStatus } from "./container";
 import { ContainerState } from "./container-state";
@@ -11,11 +10,11 @@ import { IntervalRetryStrategy } from "./retry-strategy";
 
 export interface WaitStrategy {
   waitUntilReady(container: Container, containerState: ContainerState, boundPorts: BoundPorts): Promise<void>;
-  withStartupTimeout(startupTimeout: Duration): WaitStrategy;
+  withStartupTimeout(startupTimeout: number): WaitStrategy;
 }
 
 abstract class AbstractWaitStrategy implements WaitStrategy {
-  protected startupTimeout = new Duration(30_000, TemporalUnit.MILLISECONDS);
+  protected startupTimeout = 60_000;
 
   public abstract waitUntilReady(
     container: Container,
@@ -23,7 +22,7 @@ abstract class AbstractWaitStrategy implements WaitStrategy {
     boundPorts: BoundPorts
   ): Promise<void>;
 
-  public withStartupTimeout(startupTimeout: Duration): WaitStrategy {
+  public withStartupTimeout(startupTimeout: number): WaitStrategy {
     this.startupTimeout = startupTimeout;
     return this;
   }
@@ -63,13 +62,13 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
   }
 
   private async waitForPort(port: Port, portCheck: PortCheck): Promise<void> {
-    const retryStrategy = new IntervalRetryStrategy<boolean, Error>(new Duration(100, TemporalUnit.MILLISECONDS));
+    const retryStrategy = new IntervalRetryStrategy<boolean, Error>(100);
 
     await retryStrategy.retryUntil(
       () => portCheck.isBound(port),
       (isBound) => isBound,
       () => {
-        const timeout = this.startupTimeout.get(TemporalUnit.MILLISECONDS);
+        const timeout = this.startupTimeout;
         throw new Error(`Port ${port} not bound after ${timeout}ms`);
       },
       this.startupTimeout
@@ -89,7 +88,7 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
     const stream = await container.logs();
 
     return new Promise((resolve, reject) => {
-      const startupTimeout = this.startupTimeout.get(TemporalUnit.MILLISECONDS);
+      const startupTimeout = this.startupTimeout;
       const timeout = setTimeout(
         () => reject(new Error(`Log message "${this.message}" not received after ${startupTimeout}ms`)),
         startupTimeout
@@ -131,15 +130,13 @@ export class HealthCheckWaitStrategy extends AbstractWaitStrategy {
   public async waitUntilReady(container: Container): Promise<void> {
     log.debug(`Waiting for health check`);
 
-    const retryStrategy = new IntervalRetryStrategy<HealthCheckStatus, Error>(
-      new Duration(100, TemporalUnit.MILLISECONDS)
-    );
+    const retryStrategy = new IntervalRetryStrategy<HealthCheckStatus, Error>(100);
 
     const status = await retryStrategy.retryUntil(
       async () => (await container.inspect()).healthCheckStatus,
       (status) => status === "healthy" || status === "unhealthy",
       () => {
-        const timeout = this.startupTimeout.get(TemporalUnit.MILLISECONDS);
+        const timeout = this.startupTimeout;
         throw new Error(`Health check not healthy after ${timeout}ms`);
       },
       this.startupTimeout

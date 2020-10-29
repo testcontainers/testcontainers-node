@@ -1,6 +1,5 @@
 import { GenericContainer, StartedTestContainer } from "../..";
 import { Image, Tag } from "../../repo-tag";
-import { Duration, TemporalUnit } from "node-duration";
 import { AbstractStartedContainer } from "../abstract-started-container";
 import { Port } from "../../port";
 
@@ -14,7 +13,7 @@ export class ElasticsearchContainer extends GenericContainer {
   constructor(
     readonly image: Image = ELASTIC_SEARCH_IMAGE_NAME,
     readonly tag: Tag = ELASTIC_SEARCH_IMAGE_TAG,
-    readonly timeout = new Duration(2, TemporalUnit.MINUTES)
+    readonly timeout = 120_000
   ) {
     super(image, tag);
 
@@ -31,7 +30,7 @@ export class StartedElasticsearchContainer extends AbstractStartedContainer {
     super(startedTestContainer);
   }
 
-  getHttpUrl() {
+  getHttpUrl(): string {
     return `http://${this.getContainerIpAddress()}:${this.getMappedPort(this.httpPort)}`;
   }
 }

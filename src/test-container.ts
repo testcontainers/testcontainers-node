@@ -1,4 +1,3 @@
-import { Duration, TemporalUnit } from "node-duration";
 import { Id } from "./container";
 import {
   AuthConfig,
@@ -26,7 +25,7 @@ export interface TestContainer {
   withExposedPorts(...ports: Port[]): this;
   withBindMount(source: Dir, target: Dir, bindMode: BindMode): this;
   withWaitStrategy(waitStrategy: WaitStrategy): this;
-  withStartupTimeout(startupTimeout: Duration): this;
+  withStartupTimeout(startupTimeout: number): this;
   withNetworkMode(networkMode: NetworkMode): this;
   withDefaultLogDriver(): this;
   withPrivilegedMode(): this;
@@ -35,12 +34,12 @@ export interface TestContainer {
 }
 
 export interface StopOptions {
-  timeout: Duration;
+  timeout: number;
   removeVolumes: boolean;
 }
 
 export const DEFAULT_STOP_OPTIONS: StopOptions = {
-  timeout: new Duration(0, TemporalUnit.MILLISECONDS),
+  timeout: 0,
   removeVolumes: true,
 };
 

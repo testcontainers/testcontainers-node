@@ -1,5 +1,4 @@
 import Dockerode, { Network, PortMap as DockerodePortBindings } from "dockerode";
-import { Duration, TemporalUnit } from "node-duration";
 import streamToArray from "stream-to-array";
 import tar from "tar-fs";
 import slash from "slash";
@@ -29,10 +28,10 @@ export type TmpFs = { [dir in Dir]: Dir };
 
 export type HealthCheck = {
   test: string;
-  interval?: Duration;
-  timeout?: Duration;
+  interval?: number;
+  timeout?: number;
   retries?: number;
-  startPeriod?: Duration;
+  startPeriod?: number;
 };
 
 type DockerodeHealthCheck = {
@@ -285,8 +284,8 @@ export class DockerodeClient implements DockerClient {
     };
   }
 
-  private toNanos(duration: Duration): number {
-    return duration.get(TemporalUnit.MILLISECONDS) * 1e6;
+  private toNanos(duration: number): number {
+    return duration * 1e6;
   }
 
   private getExposedPorts(boundPorts: BoundPorts): DockerodeExposedPorts {
