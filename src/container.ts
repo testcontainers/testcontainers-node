@@ -1,6 +1,5 @@
 import dockerode, { ContainerInspectInfo } from "dockerode";
 import { log } from "./logger";
-import { Duration, TemporalUnit } from "node-duration";
 import { Command, ContainerName, ExitCode } from "./docker-client";
 import { Port } from "./port";
 import { Duplex, Readable } from "stream";
@@ -35,7 +34,7 @@ type ExecOptions = {
 };
 
 type StopOptions = {
-  timeout: Duration;
+  timeout: number;
 };
 
 type RemoveOptions = {
@@ -66,7 +65,7 @@ export class DockerodeContainer implements Container {
   public stop(options: StopOptions): Promise<void> {
     return this.container
       .stop({
-        t: options.timeout.get(TemporalUnit.SECONDS),
+        t: options.timeout / 1000,
       })
       .catch((error) => {
         /* 304 container already stopped */

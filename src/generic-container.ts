@@ -1,4 +1,3 @@
-import { Duration, TemporalUnit } from "node-duration";
 import { BoundPorts } from "./bound-ports";
 import { Container, Id as ContainerId } from "./container";
 import { ContainerState } from "./container-state";
@@ -86,7 +85,7 @@ export class GenericContainer implements TestContainer {
   protected tmpFs: TmpFs = {};
   protected healthCheck?: HealthCheck;
   protected waitStrategy?: WaitStrategy;
-  protected startupTimeout: Duration = new Duration(60_000, TemporalUnit.MILLISECONDS);
+  protected startupTimeout = 60_000;
   protected useDefaultLogDriver = false;
   protected privilegedMode = false;
   protected daemonMode = false;
@@ -191,7 +190,7 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
-  public withStartupTimeout(startupTimeout: Duration): this {
+  public withStartupTimeout(startupTimeout: number): this {
     this.startupTimeout = startupTimeout;
     return this;
   }
@@ -250,7 +249,7 @@ export class GenericContainer implements TestContainer {
       }
 
       try {
-        await container.stop({ timeout: new Duration(0, TemporalUnit.MILLISECONDS) });
+        await container.stop({ timeout: 0 });
         await container.remove({ removeVolumes: true });
       } catch (stopErr) {
         log.error("Failed to stop container after it failed to be ready");

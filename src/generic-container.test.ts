@@ -1,5 +1,4 @@
 import Dockerode from "dockerode";
-import { Duration, TemporalUnit } from "node-duration";
 import fetch from "node-fetch";
 import path from "path";
 import { GenericContainer } from "./generic-container";
@@ -72,10 +71,10 @@ describe("GenericContainer", () => {
       .withExposedPorts(8080)
       .withHealthCheck({
         test: "curl -f http://localhost:8080/hello-world || exit 1",
-        interval: new Duration(1, TemporalUnit.SECONDS),
-        timeout: new Duration(3, TemporalUnit.SECONDS),
+        interval: 1000,
+        timeout: 3000,
         retries: 5,
-        startPeriod: new Duration(1, TemporalUnit.SECONDS),
+        startPeriod: 1000,
       })
       .withWaitStrategy(Wait.forHealthCheck())
       .start();
@@ -266,7 +265,7 @@ describe("GenericContainer", () => {
       new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
         .withName(containerName)
         .withExposedPorts(8081)
-        .withStartupTimeout(new Duration(0, TemporalUnit.MILLISECONDS))
+        .withStartupTimeout(0)
         .start()
     ).rejects.toThrowError("Port 8081 not bound after 0ms");
 
@@ -281,7 +280,7 @@ describe("GenericContainer", () => {
         .withName(containerName)
         .withExposedPorts(8080)
         .withWaitStrategy(Wait.forLogMessage("unexpected"))
-        .withStartupTimeout(new Duration(0, TemporalUnit.MILLISECONDS))
+        .withStartupTimeout(0)
         .start()
     ).rejects.toThrowError(`Log message "unexpected" not received after 0ms`);
 
@@ -298,7 +297,7 @@ describe("GenericContainer", () => {
         .withName(containerName)
         .withExposedPorts(8080)
         .withWaitStrategy(Wait.forHealthCheck())
-        .withStartupTimeout(new Duration(0, TemporalUnit.MILLISECONDS))
+        .withStartupTimeout(0)
         .start()
     ).rejects.toThrowError("Health check not healthy after 0ms");
 

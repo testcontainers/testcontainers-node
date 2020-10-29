@@ -1,6 +1,5 @@
 import * as dockerCompose from "docker-compose";
 import Dockerode from "dockerode";
-import { Duration, TemporalUnit } from "node-duration";
 import { BoundPorts } from "./bound-ports";
 import { Container } from "./container";
 import { ContainerState } from "./container-state";
@@ -19,7 +18,7 @@ export class DockerComposeEnvironment {
 
   private build = false;
   private waitStrategy: { [containerName: string]: WaitStrategy } = {};
-  private startupTimeout: Duration = new Duration(60_000, TemporalUnit.MILLISECONDS);
+  private startupTimeout = 60_000;
 
   constructor(
     private readonly composeFilePath: string,
@@ -39,7 +38,7 @@ export class DockerComposeEnvironment {
     return this;
   }
 
-  public withStartupTimeout(startupTimeout: Duration): this {
+  public withStartupTimeout(startupTimeout: number): this {
     this.startupTimeout = startupTimeout;
     return this;
   }

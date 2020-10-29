@@ -1,4 +1,3 @@
-import { Duration, TemporalUnit } from "node-duration";
 import { Clock, SystemClock, Time } from "./clock";
 
 export interface RetryStrategy<T, U> {
@@ -6,7 +5,7 @@ export interface RetryStrategy<T, U> {
     fn: () => Promise<T>,
     predicate: (result: T) => boolean,
     onTimeout: () => U,
-    timeout: Duration
+    timeout: number
   ): Promise<T | U>;
 }
 
@@ -17,20 +16,20 @@ abstract class AbstractRetryStrategy<T, U> implements RetryStrategy<T, U> {
     fn: () => Promise<T>,
     predicate: (result: T) => boolean,
     onTimeout: () => U,
-    timeout: Duration
+    timeout: number
   ): Promise<T | U>;
 
-  protected hasTimedOut(timeout: Duration, startTime: Time): boolean {
-    return this.clock.getTime() - startTime > timeout.get(TemporalUnit.MILLISECONDS);
+  protected hasTimedOut(timeout: number, startTime: Time): boolean {
+    return this.clock.getTime() - startTime > timeout;
   }
 
-  protected wait(duration: Duration): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, duration.get(TemporalUnit.MILLISECONDS)));
+  protected wait(duration: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, duration));
   }
 }
 
 export class IntervalRetryStrategy<T, U> extends AbstractRetryStrategy<T, U> {
-  constructor(private readonly interval: Duration) {
+  constructor(private readonly interval: number) {
     super();
   }
 
@@ -38,7 +37,7 @@ export class IntervalRetryStrategy<T, U> extends AbstractRetryStrategy<T, U> {
     fn: () => Promise<T>,
     predicate: (result: T) => boolean,
     onTimeout: () => U,
-    timeout: Duration
+    timeout: number
   ): Promise<T | U> {
     const startTime = this.clock.getTime();
 
