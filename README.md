@@ -392,6 +392,16 @@ const container = environment.getContainer("alpine_1");
 const { output, exitCode } = await container.exec(["echo", "hello", "world"]);
 ```
 
+You can supply [multiple compose files](https://docs.docker.com/compose/extends/#multiple-compose-files) to support overriding:
+
+```javascript
+const { DockerComposeEnvironment } = require("testcontainers");
+
+const environment = await new DockerComposeEnvironment(composeFilePath, [composeFile1, composeFile2]).up();
+
+await environment.stop();
+```
+
 If you have multiple docker-compose environments which share dependencies such as networks, you can stop the environment instead of downing it:
 
 ```javascript

@@ -1,0 +1,6 @@
+version: "3.5"
+
+services:
+  container:
+    environment:
+      IS_OVERRIDDEN: "true"
