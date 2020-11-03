@@ -40,6 +40,23 @@ describe("DockerComposeEnvironment", () => {
     await startedEnvironment.down();
   });
 
+  it("should start environment with multiple compose files", async () => {
+    const overrideFixtures = path.resolve(fixtures, "docker-compose-with-override");
+
+    const startedEnvironment = await new DockerComposeEnvironment(overrideFixtures, [
+      "docker-compose.yml",
+      "docker-compose-update.yml",
+    ]).up();
+    const container = startedEnvironment.getContainer("container_1");
+
+    const url = `http://${container.getContainerIpAddress()}:${container.getMappedPort(8080)}`;
+    const response = await fetch(`${url}/env`);
+    const responseBody = await response.json();
+
+    expect(responseBody["IS_OVERRIDDEN"]).toBe("true");
+    await startedEnvironment.down();
+  });
+
   it("should support log message wait strategy", async () => {
     const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml")
       .withWaitStrategy("container_1", Wait.forLogMessage("Listening on port 8080"))
