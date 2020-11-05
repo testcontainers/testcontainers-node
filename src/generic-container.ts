@@ -297,7 +297,7 @@ export class StartedGenericContainer implements StartedTestContainer {
     return new StoppedGenericContainer();
   }
 
-  public getContainerIpAddress(): Host {
+  public getHost(): Host {
     return this.host;
   }
 
@@ -313,8 +313,8 @@ export class StartedGenericContainer implements StartedTestContainer {
     return this.name;
   }
 
-  public getNetworkSettings(networkName: string): NetworkSettings {
-    return this.inspectResult.networkSettings[networkName];
+  public getIpAddress(networkName: string): string {
+    return this.inspectResult.networkSettings[networkName].ipAddress;
   }
 
   public exec(command: Command[]): Promise<ExecResult> {

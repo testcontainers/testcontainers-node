@@ -39,7 +39,7 @@ export class StartedArangoContainer extends AbstractStartedContainer {
     private readonly password: string
   ) {
     super(startedTestContainer);
-    this.host = this.startedTestContainer.getContainerIpAddress();
+    this.host = this.startedTestContainer.getHost();
     this.port = this.startedTestContainer.getMappedPort(port);
   }
 

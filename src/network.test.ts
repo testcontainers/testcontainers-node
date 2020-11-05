@@ -51,9 +51,7 @@ describe("Network", () => {
       .withNetworkMode(network.getName())
       .start();
 
-    expect(container.getNetworkSettings(network.getName()).ipAddress).toEqual(
-      expect.stringMatching(/^\d+\.\d+\.\d+\.\d+$/)
-    );
+    expect(container.getIpAddress(network.getName())).toEqual(expect.stringMatching(/^\d+\.\d+\.\d+\.\d+$/));
 
     await container.stop();
     await network.stop();

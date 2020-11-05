@@ -18,7 +18,7 @@ describe("GenericContainer", () => {
       .withExposedPorts(8080)
       .start();
 
-    const url = `http://${container.getContainerIpAddress()}:${container.getMappedPort(8080)}`;
+    const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
     const response = await fetch(`${url}/hello-world`);
 
     expect(response.status).toBe(200);
@@ -31,7 +31,7 @@ describe("GenericContainer", () => {
       .withWaitStrategy(Wait.forLogMessage("Listening on port 8080"))
       .start();
 
-    const url = `http://${container.getContainerIpAddress()}:${container.getMappedPort(8080)}`;
+    const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
     const response = await fetch(`${url}/hello-world`);
 
     expect(response.status).toBe(200);
@@ -44,7 +44,7 @@ describe("GenericContainer", () => {
       .withWaitStrategy(Wait.forLogMessage(/Listening on port [0-9]+/))
       .start();
 
-    const url = `http://${container.getContainerIpAddress()}:${container.getMappedPort(8080)}`;
+    const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
     const response = await fetch(`${url}/hello-world`);
 
     expect(response.status).toBe(200);
@@ -59,7 +59,7 @@ describe("GenericContainer", () => {
       .withWaitStrategy(Wait.forHealthCheck())
       .start();
 
-    const url = `http://${container.getContainerIpAddress()}:${container.getMappedPort(8080)}`;
+    const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
     const response = await fetch(`${url}/hello-world`);
 
     expect(response.status).toBe(200);
@@ -79,7 +79,7 @@ describe("GenericContainer", () => {
       .withWaitStrategy(Wait.forHealthCheck())
       .start();
 
-    const url = `http://${container.getContainerIpAddress()}:${container.getMappedPort(8080)}`;
+    const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
     const response = await fetch(`${url}/hello-world`);
 
     expect(response.status).toBe(200);
@@ -104,7 +104,7 @@ describe("GenericContainer", () => {
       .withExposedPorts(8080)
       .start();
 
-    const url = `http://${container.getContainerIpAddress()}:${container.getMappedPort(8080)}`;
+    const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
     const response = await fetch(`${url}/env`);
     const responseBody = await response.json();
 
@@ -118,7 +118,7 @@ describe("GenericContainer", () => {
       .withExposedPorts(8080)
       .start();
 
-    const url = `http://${container.getContainerIpAddress()}:${container.getMappedPort(8080)}`;
+    const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
     const response = await fetch(`${url}/cmd`);
     const responseBody = await response.json();
 
@@ -196,7 +196,7 @@ describe("GenericContainer", () => {
     const containerInfo = await dockerContainer.inspect();
     expect(containerInfo.HostConfig.Privileged).toBe(true);
 
-    const url = `http://${container.getContainerIpAddress()}:${container.getMappedPort(8080)}`;
+    const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
     const response = await fetch(`${url}/hello-world`);
     expect(response.status).toBe(200);
 
@@ -346,7 +346,7 @@ describe("GenericContainer", () => {
       const container = await GenericContainer.fromDockerfile(context).build();
       const startedContainer = await container.withExposedPorts(8080).start();
 
-      const url = `http://${startedContainer.getContainerIpAddress()}:${startedContainer.getMappedPort(8080)}`;
+      const url = `http://${startedContainer.getHost()}:${startedContainer.getMappedPort(8080)}`;
       const response = await fetch(`${url}/hello-world`);
 
       expect(response.status).toBe(200);
@@ -358,7 +358,7 @@ describe("GenericContainer", () => {
       const container = await GenericContainer.fromDockerfile(context, "Dockerfile-A").build();
       const startedContainer = await container.withExposedPorts(8080).start();
 
-      const url = `http://${startedContainer.getContainerIpAddress()}:${startedContainer.getMappedPort(8080)}`;
+      const url = `http://${startedContainer.getHost()}:${startedContainer.getMappedPort(8080)}`;
       const response = await fetch(`${url}/hello-world`);
 
       expect(response.status).toBe(200);
@@ -370,7 +370,7 @@ describe("GenericContainer", () => {
       const container = await GenericContainer.fromDockerfile(context).withBuildArg("VERSION", "10-alpine").build();
       const startedContainer = await container.withExposedPorts(8080).start();
 
-      const url = `http://${startedContainer.getContainerIpAddress()}:${startedContainer.getMappedPort(8080)}`;
+      const url = `http://${startedContainer.getHost()}:${startedContainer.getMappedPort(8080)}`;
       const response = await fetch(`${url}/hello-world`);
 
       expect(response.status).toBe(200);

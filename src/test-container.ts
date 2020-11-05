@@ -1,4 +1,4 @@
-import { Id, NetworkSettings } from "./container";
+import { Id } from "./container";
 import {
   AuthConfig,
   BindMode,
@@ -45,11 +45,11 @@ export const DEFAULT_STOP_OPTIONS: StopOptions = {
 
 export interface StartedTestContainer {
   stop(options?: Partial<StopOptions>): Promise<StoppedTestContainer>;
-  getContainerIpAddress(): Host;
+  getHost(): Host;
   getMappedPort(port: Port): Port;
   getName(): ContainerName;
   getId(): Id;
-  getNetworkSettings(networkName: string): NetworkSettings;
+  getIpAddress(networkName: string): string;
   exec(command: Command[]): Promise<ExecResult>;
   logs(): Promise<Readable>;
 }

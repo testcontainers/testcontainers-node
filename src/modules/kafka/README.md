@@ -13,7 +13,7 @@ const container: StartedKafkaContainer = await new KafkaContainer()
   .start();
 
 const client = new Kafka({
-  brokers: [`${container.getContainerIpAddress()}:${container.getMappedPort(9093)}`],
+  brokers: [`${container.getHost()}:${container.getMappedPort(9093)}`],
 });
 ```
 

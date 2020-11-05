@@ -54,7 +54,7 @@ describe("KafkaContainer", () => {
   const testPubSub = async (kafkaContainer: StartedTestContainer) => {
     const kafka = new Kafka({
       logLevel: logLevel.NOTHING,
-      brokers: [`${kafkaContainer.getContainerIpAddress()}:${kafkaContainer.getMappedPort(9093)}`],
+      brokers: [`${kafkaContainer.getHost()}:${kafkaContainer.getMappedPort(9093)}`],
     });
 
     const producer = kafka.producer();

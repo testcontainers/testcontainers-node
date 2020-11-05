@@ -47,7 +47,7 @@ describe("GenericContainer", () => {
 
     redisClient = redis.createClient(
       container.getMappedPort(6379),
-      container.getContainerIpAddress(),
+      container.getHost(),
     );
   });
 
@@ -328,7 +328,7 @@ const container = await new GenericContainer("alpine")
   .withNetworkMode(network.getName())
   .start();
 
-const networkIpAddress = container.getNetworkSettings(network.getName()).ipAddress;
+const networkIpAddress = container.getIpAddress(network.getName());
 ```
 
 ## Docker Compose
@@ -369,7 +369,7 @@ describe("DockerComposeEnvironment", () => {
     const redisContainer = environment.getContainer("redis_1");
     redisClient = redis.createClient(
       redisContainer.getMappedPort(6379),
-      redisContainer.getContainerIpAddress(),
+      redisContainer.getHost(),
     );
   });
 
