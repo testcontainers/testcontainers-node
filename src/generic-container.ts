@@ -1,5 +1,5 @@
 import { BoundPorts } from "./bound-ports";
-import { Container, Id as ContainerId } from "./container";
+import { Container, Id as ContainerId, InspectResult, NetworkSettings } from "./container";
 import { ContainerState } from "./container-state";
 import {
   AuthConfig,
@@ -142,7 +142,14 @@ export class GenericContainer implements TestContainer {
 
     await this.waitForContainer(dockerClient, container, containerState, boundPorts);
 
-    return new StartedGenericContainer(container, dockerClient.getHost(), boundPorts, inspectResult.name, dockerClient);
+    return new StartedGenericContainer(
+      container,
+      dockerClient.getHost(),
+      inspectResult,
+      boundPorts,
+      inspectResult.name,
+      dockerClient
+    );
   }
 
   public withAuthentication(authConfig: AuthConfig): this {
@@ -272,6 +279,7 @@ export class StartedGenericContainer implements StartedTestContainer {
   constructor(
     private readonly container: Container,
     private readonly host: Host,
+    private readonly inspectResult: InspectResult,
     private readonly boundPorts: BoundPorts,
     private readonly name: ContainerName,
     private readonly dockerClient: DockerClient
@@ -303,6 +311,10 @@ export class StartedGenericContainer implements StartedTestContainer {
 
   public getName(): ContainerName {
     return this.name;
+  }
+
+  public getNetworkSettings(networkName: string): NetworkSettings {
+    return this.inspectResult.networkSettings[networkName];
   }
 
   public exec(command: Command[]): Promise<ExecResult> {

@@ -2,7 +2,7 @@ import { StartedTestContainer, StopOptions, StoppedTestContainer } from "../test
 import { Host } from "../docker-client-factory";
 import { Port } from "../port";
 import { Command, ContainerName, ExecResult } from "../docker-client";
-import { Id as ContainerId } from "../container";
+import { Id as ContainerId, NetworkSettings } from "../container";
 import { Readable } from "stream";
 
 export class AbstractStartedContainer {
@@ -26,6 +26,10 @@ export class AbstractStartedContainer {
 
   public getId(): ContainerId {
     return this.startedTestContainer.getId();
+  }
+
+  public getNetworkSettings(networkName: string): NetworkSettings {
+    return this.startedTestContainer.getNetworkSettings(networkName);
   }
 
   public exec(command: Command[]): Promise<ExecResult> {

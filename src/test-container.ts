@@ -1,4 +1,4 @@
-import { Id } from "./container";
+import { Id, NetworkSettings } from "./container";
 import {
   AuthConfig,
   BindMode,
@@ -49,6 +49,7 @@ export interface StartedTestContainer {
   getMappedPort(port: Port): Port;
   getName(): ContainerName;
   getId(): Id;
+  getNetworkSettings(networkName: string): NetworkSettings;
   exec(command: Command[]): Promise<ExecResult>;
   logs(): Promise<Readable>;
 }

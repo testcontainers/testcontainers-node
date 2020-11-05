@@ -2,9 +2,9 @@ import Dockerode from "dockerode";
 import { GenericContainer } from "./generic-container";
 import { Network } from "./network";
 
-jest.setTimeout(45000);
-
 describe("Network", () => {
+  jest.setTimeout(180_000);
+
   it("should start container in a user-defined network", async () => {
     const network = await new Network().start();
 
@@ -41,6 +41,21 @@ describe("Network", () => {
 
     await container1.stop();
     await container2.stop();
+    await network.stop();
+  });
+
+  it("should expose the IP address of a container in a given network", async () => {
+    const network = await new Network().start();
+
+    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
+      .withNetworkMode(network.getName())
+      .start();
+
+    expect(container.getNetworkSettings(network.getName()).ipAddress).toEqual(
+      expect.stringMatching(/^\d+\.\d+\.\d+\.\d+$/)
+    );
+
+    await container.stop();
     await network.stop();
   });
 });
