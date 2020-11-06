@@ -8,11 +8,16 @@ export type Id = string;
 
 export type HealthCheckStatus = "none" | "starting" | "unhealthy" | "healthy";
 
+export type NetworkSettings = {
+  ipAddress: string;
+};
+
 export type InspectResult = {
+  name: ContainerName;
   internalPorts: Port[];
   hostPorts: Port[];
-  name: ContainerName;
   healthCheckStatus: HealthCheckStatus;
+  networkSettings: { [networkName: string]: NetworkSettings };
 };
 
 type ExecInspectResult = {
@@ -109,6 +114,7 @@ export class DockerodeContainer implements Container {
       internalPorts: this.getInternalPorts(inspectResult),
       name: this.getName(inspectResult),
       healthCheckStatus: this.getHealthCheckStatus(inspectResult),
+      networkSettings: this.getNetworkSettings(inspectResult),
     };
   }
 
@@ -133,6 +139,16 @@ export class DockerodeContainer implements Container {
     } else {
       return health.Status as HealthCheckStatus;
     }
+  }
+
+  private getNetworkSettings(inspectResult: ContainerInspectInfo): { [networkName: string]: NetworkSettings } {
+    return Object.entries(inspectResult.NetworkSettings.Networks)
+      .map(([networkName, network]) => ({
+        [networkName]: {
+          ipAddress: network.IPAddress,
+        },
+      }))
+      .reduce((prev, next) => ({ ...prev, ...next }), {});
   }
 }
 

@@ -22,7 +22,7 @@ describe("DockerComposeEnvironment", () => {
     await Promise.all(
       ["container_1", "another_container_1"].map(async (containerName) => {
         const container = startedEnvironment.getContainer(containerName);
-        const url = `http://${container.getContainerIpAddress()}:${container.getMappedPort(8080)}`;
+        const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
         const response = await fetch(`${url}/hello-world`);
         expect(response.status).toBe(200);
       })
@@ -34,7 +34,7 @@ describe("DockerComposeEnvironment", () => {
     const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-name.yml").up();
     const container = startedEnvironment.getContainer("custom_container_name");
 
-    const url = `http://${container.getContainerIpAddress()}:${container.getMappedPort(8080)}`;
+    const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
     const response = await fetch(`${url}/hello-world`);
     expect(response.status).toBe(200);
     await startedEnvironment.down();
@@ -49,7 +49,7 @@ describe("DockerComposeEnvironment", () => {
     ]).up();
     const container = startedEnvironment.getContainer("container_1");
 
-    const url = `http://${container.getContainerIpAddress()}:${container.getMappedPort(8080)}`;
+    const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
     const response = await fetch(`${url}/env`);
     const responseBody = await response.json();
 
@@ -66,7 +66,7 @@ describe("DockerComposeEnvironment", () => {
     await Promise.all(
       ["container_1", "another_container_1"].map(async (containerName) => {
         const container = startedEnvironment.getContainer(containerName);
-        const url = `http://${container.getContainerIpAddress()}:${container.getMappedPort(8080)}`;
+        const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
         const response = await fetch(`${url}/hello-world`);
         expect(response.status).toBe(200);
       })
@@ -80,7 +80,7 @@ describe("DockerComposeEnvironment", () => {
       .up();
 
     const container = startedEnvironment.getContainer("container_1");
-    const url = `http://${container.getContainerIpAddress()}:${container.getMappedPort(8080)}`;
+    const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
     const response = await fetch(`${url}/hello-world`);
     expect(response.status).toBe(200);
 
@@ -115,7 +115,7 @@ describe("DockerComposeEnvironment", () => {
     await Promise.all(
       ["container_1", "another_container_1"].map(async (containerName) => {
         const container = startedEnvironment.getContainer(containerName);
-        const url = `http://${container.getContainerIpAddress()}:${container.getMappedPort(8080)}`;
+        const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
         const response = await fetch(`${url}/hello-world`);
         expect(response.status).toBe(200);
       })

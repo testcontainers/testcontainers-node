@@ -12,8 +12,8 @@ export class AbstractStartedContainer {
     return this.startedTestContainer.stop(options);
   }
 
-  public getContainerIpAddress(): Host {
-    return this.startedTestContainer.getContainerIpAddress();
+  public getHost(): Host {
+    return this.startedTestContainer.getHost();
   }
 
   public getMappedPort(port: Port): Port {
@@ -26,6 +26,10 @@ export class AbstractStartedContainer {
 
   public getId(): ContainerId {
     return this.startedTestContainer.getId();
+  }
+
+  public getIpAddress(networkName: string): string {
+    return this.startedTestContainer.getIpAddress(networkName);
   }
 
   public exec(command: Command[]): Promise<ExecResult> {

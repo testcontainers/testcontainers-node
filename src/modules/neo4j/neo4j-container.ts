@@ -60,7 +60,7 @@ export class StartedNeo4jContainer extends AbstractStartedContainer {
     private readonly password: string
   ) {
     super(startedTestContainer);
-    this.host = this.startedTestContainer.getContainerIpAddress();
+    this.host = this.startedTestContainer.getHost();
     this.boltPort = this.startedTestContainer.getMappedPort(boltPort);
     this.httpPort = this.startedTestContainer.getMappedPort(httpPort);
   }

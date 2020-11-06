@@ -74,6 +74,7 @@ export class DockerComposeEnvironment {
           return new StartedGenericContainer(
             container,
             dockerClient.getHost(),
+            inspectResult,
             boundPorts,
             containerName,
             dockerClient

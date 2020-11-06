@@ -31,6 +31,6 @@ export class StartedElasticsearchContainer extends AbstractStartedContainer {
   }
 
   getHttpUrl(): string {
-    return `http://${this.getContainerIpAddress()}:${this.getMappedPort(this.httpPort)}`;
+    return `http://${this.getHost()}:${this.getMappedPort(this.httpPort)}`;
   }
 }
