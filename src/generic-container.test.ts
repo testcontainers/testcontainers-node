@@ -354,8 +354,6 @@ describe("GenericContainer", () => {
       }).listen(randomPort, "localhost");
     });
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
     await TestContainers.exposeHostPorts(randomPort);
 
     const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
@@ -365,6 +363,7 @@ describe("GenericContainer", () => {
     await expect(socketReceivesDataPromise).resolves.toBe("hello world");
 
     await container.stop();
+    // todo shutdown port forwarder to not interfere with other tests
   });
 
   describe("from Dockerfile", () => {
