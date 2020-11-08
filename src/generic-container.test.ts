@@ -352,17 +352,14 @@ describe("GenericContainer", () => {
         res.writeHead(200);
         res.end("hello world");
       });
-      server.on("connection", () => console.log("connection"));
-      server.listen(randomPort, "localhost", () => resolve(server));
+      server.listen(randomPort, () => resolve(server));
     });
 
     await TestContainers.exposeHostPorts(randomPort);
 
-    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
-      .withExposedPorts(8080)
-      .start();
+    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.12").withCmd(["top"]).start();
 
-    const { output } = await container.exec(["curl", "-v", `http://host.testcontainers.internal:${randomPort}`]);
+    const { output } = await container.exec(["curl", `http://host.testcontainers.internal:${randomPort}`]);
     expect(output).toBe("hello world");
 
     await server.close();

@@ -117,7 +117,7 @@ export class GenericContainer implements TestContainer {
       await this.preCreate(dockerClient, boundPorts);
     }
 
-    if (!this.repoTag.isReaper() && !this.repoTag.isPortForwarder() && PortForwarderInstance.isRunning()) {
+    if (!this.repoTag.isHelperContainer() && PortForwarderInstance.isRunning()) {
       const portForwarder = await PortForwarderInstance.getInstance(dockerClient);
       this.extraHosts.push({ host: "host.testcontainers.internal", ipAddress: portForwarder.getIpAddress() });
     }
@@ -138,13 +138,12 @@ export class GenericContainer implements TestContainer {
       extraHosts: this.extraHosts,
     });
 
-    if (!this.repoTag.isReaper() && !this.repoTag.isPortForwarder() && PortForwarderInstance.isRunning()) {
+    if (!this.repoTag.isHelperContainer() && PortForwarderInstance.isRunning()) {
       const portForwarder = await PortForwarderInstance.getInstance(dockerClient);
       const portForwarderNetworkId = portForwarder.getNetworkId();
       const excludedNetworks = [portForwarderNetworkId, "none", "host"];
 
       if (!this.networkMode || !excludedNetworks.includes(this.networkMode)) {
-        // this.networkMode = portForwarderNetworkId;
         await dockerClient.connectToNetwork(container.getId(), portForwarderNetworkId);
       }
     }

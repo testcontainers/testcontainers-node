@@ -12,7 +12,7 @@ export class PortForwarder {
   constructor(private readonly sshConnection: Client, private readonly container: StartedTestContainer) {}
 
   public async exposeHostPort(port: Port): Promise<void> {
-    log.debug(`Exposing host port ${port}`);
+    log.info(`Exposing host port ${port}`);
     await new Promise((resolve, reject) => {
       this.sshConnection.forwardIn("127.0.0.1", port, (err) => {
         if (err) {
@@ -81,8 +81,8 @@ export class PortForwarderInstance {
   }
 
   private static async createSshConnection(
-    containerHost: Host,
-    containerPort: Port,
+    host: Host,
+    port: Port,
     username: string,
     password: string
   ): Promise<Client> {
@@ -90,6 +90,7 @@ export class PortForwarderInstance {
       const connection = new Client();
       connection
         .on("ready", () => {
+          log.debug("SSH connection established");
           // @ts-ignore
           connection._sock.unref();
           resolve(connection);
@@ -97,20 +98,9 @@ export class PortForwarderInstance {
         .on("tcp connection", (info, accept) => {
           const stream = accept();
           stream
-            .on("data", (data: unknown) => {
-              console.log("TCP :: DATA: " + data);
-            })
-            .on("end", () => {
-              console.log("TCP :: EOF");
-            })
-            .on("error", (err: unknown) => {
-              console.log("TCP :: ERROR: " + err);
-            })
-            .on("close", (hadErr: unknown) => {
-              console.log("TCP :: CLOSED", hadErr ? "had error" : "");
-            });
-
-          stream.pause();
+            .on("end", () => log.debug("SSH connection ended"))
+            .on("error", (err: unknown) => log.warn(`SSH error: ${err}`))
+            .pause();
 
           const socket = net.connect(info.destPort, info.destIP, () => {
             stream.pipe(socket);
@@ -118,7 +108,7 @@ export class PortForwarderInstance {
             stream.resume();
           });
         })
-        .connect({ host: containerHost, port: containerPort, username, password });
+        .connect({ host, port, username, password });
     });
   }
 }
