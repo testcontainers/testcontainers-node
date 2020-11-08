@@ -9,18 +9,18 @@ import * as net from "net";
 export class PortForwarder {
   constructor(private client: Client, private readonly container: StartedTestContainer) {}
 
-  public async stop() {
-    this.client.destroy();
-    // await this.container.stop();
-  }
-
   public async exposeHostPort(port: Port): Promise<void> {
     log.debug(`Exposing host port ${port}`);
 
     return new Promise((resolve) => {
       const conn = new Client();
+
       this.client = conn;
       conn
+        .on("connect", () => {
+          // @ts-ignore
+          conn._sock.unref();
+        })
         .on("ready", function () {
           console.log("Client :: ready");
           conn.forwardIn("127.0.0.1", port, function (err) {
@@ -41,7 +41,6 @@ export class PortForwarder {
 
           stream.on("end", function () {
             console.log("TCP :: EOF");
-            socket.destroy();
           });
 
           stream.on("error", function (err: any) {
@@ -59,25 +58,6 @@ export class PortForwarder {
             socket.pipe(stream);
             stream.resume();
           });
-
-          /*        accept().on('close', function() {
-          console.log('TCP :: CLOSED');
-        }).on('data', function(data: any) {
-          console.log('TCP :: DATA: ' + data);
-          // const target = net.createConnection({
-          //   host: info.destIP,
-          //   port: info.destPort
-          // });
-          // target.push(data);
-        }).end([
-          'HTTP/1.1 404 Not Found',
-          'Date: Thu, 15 Nov 2012 02:07:58 GMT',
-          'Server: ForwardedConnection',
-          'Content-Length: 0',
-          'Connection: close',
-          '',
-          ''
-        ].join('\r\n'))*/
         })
         .connect({
           host: this.container.getHost(),
@@ -86,22 +66,6 @@ export class PortForwarder {
           password: "password",
         });
     });
-
-    // await new Promise((resolve, reject) => {
-    //   this.client.on('tcp connection', (info, accept, reject) => {
-    //     console.log('TCP CONNECTION?', info);
-    //     accept()
-    //     // @ts-ignore
-    //       .on('data', data => console.log('tcp data', data))
-    //   });
-    //   this.client.forwardIn("127.0.0.1", port, (err) => {
-    //     if (err) {
-    //       return reject(err);
-    //     }
-    //     log.debug(`Listening for connections on server on port ${port}`);
-    //     resolve();
-    //   });
-    // });
   }
 
   public getNetworkId(): string {
@@ -155,12 +119,6 @@ export class PortForwarderInstance {
     const port = container.getMappedPort(22);
 
     log.debug(`Connecting to Port Forwarder on ${host}:${port}`);
-
-    // const client: Client = await new Promise((resolve) => {
-    //   const client = new Client();
-    //   client.on("ready", () => resolve(client));
-    //   client.connect({ host, port, username: "root", password });
-    // });
 
     // @ts-ignore
     return new PortForwarder(null, container);

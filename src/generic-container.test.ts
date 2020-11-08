@@ -347,10 +347,8 @@ describe("GenericContainer", () => {
 
   it("should expose host ports to the container", async () => {
     const randomPort = await new RandomPortClient().getPort();
-
     const server: Server = await new Promise((resolve) => {
       const server = createServer((req, res) => {
-        console.log("server received request!");
         res.writeHead(200);
         res.end("hello world");
       });
@@ -362,28 +360,13 @@ describe("GenericContainer", () => {
 
     const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
       .withExposedPorts(8080)
-      // .withCmd(["top"])
       .start();
 
-    // const response = await container.exec(["sh", "-c", `echo "hello world" | nc host.testcontainers.internal ${randomPort}`]);
-    const response = await container.exec(["curl", "-v", `http://host.testcontainers.internal:${randomPort}`]);
-    // const response = await container.exec(["echo", "hello"]);
-
-    console.log("response", response);
-    // const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
-    // .withExposedPorts(8080)
-    // .withCmd(["sh", "-c", `echo "hello world" | nc host.testcontainers.internal ${randomPort}`])
-    // .start();
-
-    expect(response.output).toBe("hello world");
-    // await expect(socketReceivesDataPromise).resolves.toBe("hello world");
+    const { output } = await container.exec(["curl", "-v", `http://host.testcontainers.internal:${randomPort}`]);
+    expect(output).toBe("hello world");
 
     await server.close();
     await container.stop();
-    await (await PortForwarderInstance.getInstance(await DockerClientInstance.getInstance())).stop();
-    // await PortForwarderInstance.stop();
-    // todo shutdown server
-    // todo shutdown port forwarder to not interfere with other tests
   });
 
   describe("from Dockerfile", () => {
