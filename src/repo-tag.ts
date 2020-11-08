@@ -5,7 +5,7 @@ export type Image = string;
 export type Tag = string;
 
 export class RepoTag {
-  private readonly helperContainers = new Set([ReaperInstance.IMAGE_NAME, PortForwarderInstance.IMAGE_NAME]);
+  private readonly HELPER_CONTAINERS = new Set([ReaperInstance.IMAGE_NAME, PortForwarderInstance.IMAGE_NAME]);
 
   constructor(private readonly image: Image, private readonly tag: Tag) {}
 
@@ -22,6 +22,6 @@ export class RepoTag {
   }
 
   public isHelperContainer(): boolean {
-    return this.helperContainers.has(this.image);
+    return this.HELPER_CONTAINERS.has(this.image);
   }
 }
