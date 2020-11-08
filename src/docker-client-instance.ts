@@ -6,17 +6,17 @@ import { RandomUuid } from "./uuid";
 
 export type Host = string;
 
-export class DockerClientFactory {
-  private static client: Promise<DockerClient>;
+export class DockerClientInstance {
+  private static instance: Promise<DockerClient>;
 
-  public static async getClient(): Promise<DockerClient> {
-    if (!this.client) {
-      this.client = this.createClient();
+  public static async getInstance(): Promise<DockerClient> {
+    if (!this.instance) {
+      this.instance = this.createInstance();
     }
-    return this.client;
+    return this.instance;
   }
 
-  private static async createClient(): Promise<DockerClient> {
+  private static async createInstance(): Promise<DockerClient> {
     log.debug("Creating new DockerClient");
     const dockerode = new Dockerode();
     const host = await this.getHost(dockerode);

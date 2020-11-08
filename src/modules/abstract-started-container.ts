@@ -1,5 +1,5 @@
 import { StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
-import { Host } from "../docker-client-factory";
+import { Host } from "../docker-client-instance";
 import { Port } from "../port";
 import { Command, ContainerName, ExecResult } from "../docker-client";
 import { Id as ContainerId } from "../container";
@@ -26,6 +26,14 @@ export class AbstractStartedContainer {
 
   public getId(): ContainerId {
     return this.startedTestContainer.getId();
+  }
+
+  public getNetworkNames(): string[] {
+    return this.startedTestContainer.getNetworkNames();
+  }
+
+  public getNetworkId(networkName: string): string {
+    return this.startedTestContainer.getNetworkId(networkName);
   }
 
   public getIpAddress(networkName: string): string {

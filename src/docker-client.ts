@@ -4,7 +4,7 @@ import tar from "tar-fs";
 import slash from "slash";
 import { BoundPorts } from "./bound-ports";
 import { Container, DockerodeContainer, Id } from "./container";
-import { Host } from "./docker-client-factory";
+import { Host } from "./docker-client-instance";
 import { findDockerIgnoreFiles } from "./docker-ignore";
 import { log } from "./logger";
 import { PortString } from "./port";
@@ -57,6 +57,12 @@ export type BindMount = {
 };
 type DockerodeBindMount = string;
 
+export type ExtraHost = {
+  host: Host;
+  ipAddress: string;
+};
+type DockerodeExtraHosts = string[];
+
 export type AuthConfig = {
   username: string;
   password: string;
@@ -82,6 +88,7 @@ type CreateOptions = {
   useDefaultLogDriver: boolean;
   privilegedMode: boolean;
   autoRemove: boolean;
+  extraHosts: ExtraHost[];
 };
 
 export type CreateNetworkOptions = {
@@ -101,6 +108,7 @@ export interface DockerClient {
   create(options: CreateOptions): Promise<Container>;
   createNetwork(options: CreateNetworkOptions): Promise<string>;
   removeNetwork(id: string): Promise<void>;
+  connectToNetwork(containerId: string, networkId: string): Promise<void>;
   start(container: Container): Promise<void>;
   exec(container: Container, command: Command[]): Promise<ExecResult>;
   buildImage(repoTag: RepoTag, context: BuildContext, dockerfileName: string, buildArgs: BuildArgs): Promise<void>;
@@ -134,6 +142,7 @@ export class DockerodeClient implements DockerClient {
       // @ts-ignore
       Healthcheck: this.getHealthCheck(options.healthCheck),
       HostConfig: {
+        ExtraHosts: this.getExtraHosts(options.extraHosts),
         AutoRemove: options.autoRemove,
         NetworkMode: options.networkMode,
         PortBindings: this.getPortBindings(options.boundPorts),
@@ -145,6 +154,12 @@ export class DockerodeClient implements DockerClient {
     });
 
     return new DockerodeContainer(dockerodeContainer);
+  }
+
+  public async connectToNetwork(containerId: string, networkId: string): Promise<void> {
+    log.debug(`Connecting container ${containerId} to network ${networkId}`);
+    const network = this.dockerode.getNetwork(networkId);
+    await network.connect({ Container: containerId });
   }
 
   public async createNetwork(options: CreateNetworkOptions): Promise<string> {
@@ -294,6 +309,10 @@ export class DockerodeClient implements DockerClient {
       dockerodeExposedPorts[internalPort.toString()] = {};
     }
     return dockerodeExposedPorts;
+  }
+
+  private getExtraHosts(extraHosts: ExtraHost[]): DockerodeExtraHosts {
+    return extraHosts.map((extraHost) => `${extraHost.host}:${extraHost.ipAddress}`);
   }
 
   private getPortBindings(boundPorts: BoundPorts): DockerodePortBindings {

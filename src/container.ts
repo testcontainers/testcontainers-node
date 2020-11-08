@@ -9,6 +9,7 @@ export type Id = string;
 export type HealthCheckStatus = "none" | "starting" | "unhealthy" | "healthy";
 
 export type NetworkSettings = {
+  networkId: string;
   ipAddress: string;
 };
 
@@ -145,6 +146,7 @@ export class DockerodeContainer implements Container {
     return Object.entries(inspectResult.NetworkSettings.Networks)
       .map(([networkName, network]) => ({
         [networkName]: {
+          networkId: network.NetworkID,
           ipAddress: network.IPAddress,
         },
       }))

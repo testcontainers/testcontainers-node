@@ -1,7 +1,7 @@
 import { Socket } from "net";
 import { Container } from "./container";
 import { DockerClient } from "./docker-client";
-import { Host } from "./docker-client-factory";
+import { Host } from "./docker-client-instance";
 import { Port } from "./port";
 
 export interface PortCheck {

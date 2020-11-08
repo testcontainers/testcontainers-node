@@ -4,7 +4,7 @@ import { BoundPorts } from "./bound-ports";
 import { Container } from "./container";
 import { ContainerState } from "./container-state";
 import { DockerClient } from "./docker-client";
-import { DockerClientFactory } from "./docker-client-factory";
+import { DockerClientInstance } from "./docker-client-instance";
 import { resolveDockerComposeContainerName } from "./docker-compose-container-name-resolver";
 import { StartedGenericContainer } from "./generic-container";
 import { containerLog, log } from "./logger";
@@ -46,9 +46,9 @@ export class DockerComposeEnvironment {
   public async up(): Promise<StartedDockerComposeEnvironment> {
     log.info(`Starting DockerCompose environment`);
 
-    const dockerClient = await DockerClientFactory.getClient();
+    const dockerClient = await DockerClientInstance.getInstance();
 
-    (await ReaperInstance.start(dockerClient)).addProject(this.projectName);
+    (await ReaperInstance.getInstance(dockerClient)).addProject(this.projectName);
 
     await upAll(this.composeFilePath, this.composeFiles, this.projectName, this.build);
     const startedContainers = (await dockerClient.listContainers()).filter(
