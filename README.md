@@ -322,13 +322,35 @@ Finding a container's IP address in a given network:
 const { GenericContainer, Network } = require("testcontainers");
 
 const network = await new Network()
-    .start();
+  .start();
 
 const container = await new GenericContainer("alpine")
   .withNetworkMode(network.getName())
   .start();
 
 const networkIpAddress = container.getIpAddress(network.getName());
+```
+
+[Exposing host ports to the container:](https://www.testcontainers.org/features/networking/#exposing-host-ports-to-the-container)
+
+```javascript
+const { GenericContainer, TestContainers } = require("testcontainers");
+const { createServer } = require("http");
+
+const server = createServer((req, res) => {
+  res.writeHead(200);
+  res.end("hello world");
+});
+server.listen(8000);
+
+await TestContainers.exposeHostPorts(8000);
+
+const container = await new GenericContainer("alpine")
+  .withCmd(["top"])
+  .start();
+
+const { output } = await container.exec(["curl", `http://host.testcontainers.internal:8000`]);
+assert(output === "hello world");
 ```
 
 ## Docker Compose
