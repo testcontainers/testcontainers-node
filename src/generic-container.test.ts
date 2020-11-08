@@ -1,7 +1,7 @@
 import Dockerode from "dockerode";
 import fetch from "node-fetch";
 import path from "path";
-import { createServer } from "net";
+import { createServer, Server } from "http";
 import { GenericContainer } from "./generic-container";
 import { AlwaysPullPolicy } from "./pull-policy";
 import { Wait } from "./wait";
@@ -9,6 +9,8 @@ import { Readable } from "stream";
 import { RandomUuid } from "./uuid";
 import { TestContainers } from "./test-containers";
 import { RandomPortClient } from "./port-client";
+import { PortForwarderInstance } from "./port-forwarder";
+import { DockerClientInstance } from "./docker-client-instance";
 
 describe("GenericContainer", () => {
   jest.setTimeout(180_000);
@@ -345,24 +347,42 @@ describe("GenericContainer", () => {
 
   it("should expose host ports to the container", async () => {
     const randomPort = await new RandomPortClient().getPort();
-    const socketReceivesDataPromise = new Promise((resolve) => {
-      createServer((socket) => {
-        socket.on("data", (data) => {
-          socket.destroy();
-          resolve(data.toString());
-        });
-      }).listen(randomPort, "localhost");
+
+    const server: Server = await new Promise((resolve) => {
+      const server = createServer((req, res) => {
+        console.log("server received request!");
+        res.writeHead(200);
+        res.end("hello world");
+      });
+      server.on("connection", () => console.log("connection"));
+      server.listen(randomPort, "localhost", () => resolve(server));
     });
 
     await TestContainers.exposeHostPorts(randomPort);
 
     const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
-      .withCmd(["sh", "-c", `echo "hello world" | nc host.testcontainers.internal ${randomPort}`])
+      .withExposedPorts(8080)
+      // .withCmd(["top"])
       .start();
 
-    await expect(socketReceivesDataPromise).resolves.toBe("hello world");
+    // const response = await container.exec(["sh", "-c", `echo "hello world" | nc host.testcontainers.internal ${randomPort}`]);
+    const response = await container.exec(["curl", "-v", `http://host.testcontainers.internal:${randomPort}`]);
+    // const response = await container.exec(["echo", "hello"]);
 
+    console.log("response", response);
+    // const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
+    // .withExposedPorts(8080)
+    // .withCmd(["sh", "-c", `echo "hello world" | nc host.testcontainers.internal ${randomPort}`])
+    // .start();
+
+    expect(response.output).toBe("hello world");
+    // await expect(socketReceivesDataPromise).resolves.toBe("hello world");
+
+    await server.close();
     await container.stop();
+    await (await PortForwarderInstance.getInstance(await DockerClientInstance.getInstance())).stop();
+    // await PortForwarderInstance.stop();
+    // todo shutdown server
     // todo shutdown port forwarder to not interfere with other tests
   });
 
