@@ -4,67 +4,22 @@ import { log } from "./logger";
 import { GenericContainer } from "./generic-container";
 import { Port } from "./port";
 import { StartedTestContainer } from "./test-container";
-import * as net from "net";
+import net from "net";
+import { Host } from "./docker-client-instance";
+import { RandomUuid } from "./uuid";
 
 export class PortForwarder {
-  constructor(private client: Client, private readonly container: StartedTestContainer) {}
+  constructor(private readonly sshConnection: Client, private readonly container: StartedTestContainer) {}
 
   public async exposeHostPort(port: Port): Promise<void> {
     log.debug(`Exposing host port ${port}`);
-
-    return new Promise((resolve) => {
-      const conn = new Client();
-
-      this.client = conn;
-      conn
-        .on("connect", () => {
-          // @ts-ignore
-          conn._sock.unref();
-        })
-        .on("ready", function () {
-          console.log("Client :: ready");
-          conn.forwardIn("127.0.0.1", port, function (err) {
-            if (err) throw err;
-            console.log(`Listening for connections on server on port ${port}!`);
-            resolve();
-          });
-        })
-        .on("tcp connection", function (info, accept, reject) {
-          console.log("TCP :: INCOMING CONNECTION:");
-          console.dir(info);
-
-          const stream = accept();
-
-          stream.on("data", function (data: any) {
-            console.log("TCP :: DATA: " + data);
-          });
-
-          stream.on("end", function () {
-            console.log("TCP :: EOF");
-          });
-
-          stream.on("error", function (err: any) {
-            console.log("TCP :: ERROR: " + err);
-          });
-
-          stream.on("close", function (had_err: any) {
-            console.log("TCP :: CLOSED", had_err ? "had error" : "");
-          });
-
-          stream.pause();
-
-          const socket = net.connect(info.destPort, info.destIP, () => {
-            stream.pipe(socket);
-            socket.pipe(stream);
-            stream.resume();
-          });
-        })
-        .connect({
-          host: this.container.getHost(),
-          port: this.container.getMappedPort(22),
-          username: "root",
-          password: "password",
-        });
+    await new Promise((resolve, reject) => {
+      this.sshConnection.forwardIn("127.0.0.1", port, (err) => {
+        if (err) {
+          return reject(err);
+        }
+        resolve();
+      });
     });
   }
 
@@ -101,7 +56,8 @@ export class PortForwarderInstance {
   private static async createInstance(dockerClient: DockerClient): Promise<PortForwarder> {
     log.debug(`Creating new Port Forwarder`);
 
-    const password = "password";
+    const username = "root";
+    const password = new RandomUuid().nextUuid();
 
     const container = await new GenericContainer(this.IMAGE_NAME, this.IMAGE_VERSION)
       .withName(`testcontainers-port-forwarder-${dockerClient.getSessionId()}`)
@@ -111,7 +67,7 @@ export class PortForwarderInstance {
       .withCmd([
         "sh",
         "-c",
-        `echo "root:$PASSWORD" | chpasswd && /usr/sbin/sshd -D -o PermitRootLogin=yes -o AddressFamily=inet -o GatewayPorts=yes`,
+        `echo "${username}:$PASSWORD" | chpasswd && /usr/sbin/sshd -D -o PermitRootLogin=yes -o AddressFamily=inet -o GatewayPorts=yes`,
       ])
       .start();
 
@@ -119,8 +75,50 @@ export class PortForwarderInstance {
     const port = container.getMappedPort(22);
 
     log.debug(`Connecting to Port Forwarder on ${host}:${port}`);
+    const connection = await this.createSshConnection(host, port, username, password);
 
-    // @ts-ignore
-    return new PortForwarder(null, container);
+    return new PortForwarder(connection, container);
+  }
+
+  private static async createSshConnection(
+    containerHost: Host,
+    containerPort: Port,
+    username: string,
+    password: string
+  ): Promise<Client> {
+    return await new Promise((resolve) => {
+      const connection = new Client();
+      connection
+        .on("ready", () => {
+          // @ts-ignore
+          connection._sock.unref();
+          resolve(connection);
+        })
+        .on("tcp connection", (info, accept) => {
+          const stream = accept();
+          stream
+            .on("data", (data: unknown) => {
+              console.log("TCP :: DATA: " + data);
+            })
+            .on("end", () => {
+              console.log("TCP :: EOF");
+            })
+            .on("error", (err: unknown) => {
+              console.log("TCP :: ERROR: " + err);
+            })
+            .on("close", (hadErr: unknown) => {
+              console.log("TCP :: CLOSED", hadErr ? "had error" : "");
+            });
+
+          stream.pause();
+
+          const socket = net.connect(info.destPort, info.destIP, () => {
+            stream.pipe(socket);
+            socket.pipe(stream);
+            stream.resume();
+          });
+        })
+        .connect({ host: containerHost, port: containerPort, username, password });
+    });
   }
 }
