@@ -1,5 +1,6 @@
 export { TestContainer, StartedTestContainer, StoppedTestContainer } from "./test-container";
 export { GenericContainer, GenericContainerBuilder } from "./generic-container";
+export { TestContainers } from "./test-containers";
 
 export {
   DockerComposeEnvironment,

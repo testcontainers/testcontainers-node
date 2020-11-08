@@ -11,7 +11,7 @@ import {
   NetworkMode,
   TmpFs,
 } from "./docker-client";
-import { Host } from "./docker-client-factory";
+import { Host } from "./docker-client-instance";
 import { Port } from "./port";
 import { PullPolicy } from "./pull-policy";
 import { WaitStrategy } from "./wait-strategy";
@@ -49,6 +49,8 @@ export interface StartedTestContainer {
   getMappedPort(port: Port): Port;
   getName(): ContainerName;
   getId(): Id;
+  getNetworkNames(): string[];
+  getNetworkId(networkName: string): string;
   getIpAddress(networkName: string): string;
   exec(command: Command[]): Promise<ExecResult>;
   logs(): Promise<Readable>;

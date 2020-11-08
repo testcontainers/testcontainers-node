@@ -34,7 +34,7 @@ export class ReaperInstance {
 
   private static instance: Promise<Reaper>;
 
-  public static async start(dockerClient: DockerClient): Promise<Reaper> {
+  public static async getInstance(dockerClient: DockerClient): Promise<Reaper> {
     if (!this.instance) {
       if (this.isEnabled()) {
         this.instance = this.createRealInstance(dockerClient);
@@ -62,7 +62,7 @@ export class ReaperInstance {
 
     log.debug(`Creating new Reaper for session: ${sessionId}`);
     const container = await new GenericContainer(this.IMAGE_NAME, this.IMAGE_VERSION)
-      .withName(`ryuk-${sessionId}`)
+      .withName(`testcontainers-ryuk-${sessionId}`)
       .withExposedPorts(8080)
       .withWaitStrategy(Wait.forLogMessage("Started!"))
       .withBindMount("/var/run/docker.sock", "/var/run/docker.sock")

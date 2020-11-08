@@ -1,4 +1,5 @@
 import { ReaperInstance } from "./reaper";
+import { PortForwarderInstance } from "./port-forwarder";
 
 export type Image = string;
 export type Tag = string;
@@ -16,5 +17,9 @@ export class RepoTag {
 
   public isReaper(): boolean {
     return this.image === ReaperInstance.IMAGE_NAME;
+  }
+
+  public isPortForwarder(): boolean {
+    return this.image === PortForwarderInstance.IMAGE_NAME;
   }
 }

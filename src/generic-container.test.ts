@@ -1,11 +1,14 @@
 import Dockerode from "dockerode";
 import fetch from "node-fetch";
 import path from "path";
+import { createServer } from "net";
 import { GenericContainer } from "./generic-container";
 import { AlwaysPullPolicy } from "./pull-policy";
 import { Wait } from "./wait";
 import { Readable } from "stream";
 import { RandomUuid } from "./uuid";
+import { TestContainers } from "./test-containers";
+import { RandomPortClient } from "./port-client";
 
 describe("GenericContainer", () => {
   jest.setTimeout(180_000);
@@ -338,6 +341,30 @@ describe("GenericContainer", () => {
     expect(output).not.toContain("example6.txt");
 
     await startedContainer.stop();
+  });
+
+  it("should expose host ports to the container", async () => {
+    const randomPort = await new RandomPortClient().getPort();
+    const socketReceivesDataPromise = new Promise((resolve) => {
+      createServer((socket) => {
+        socket.on("data", (data) => {
+          socket.destroy();
+          resolve(data.toString());
+        });
+      }).listen(randomPort, "localhost");
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    await TestContainers.exposeHostPorts(randomPort);
+
+    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
+      .withCmd(["sh", "-c", `echo "hello world" | nc host.testcontainers.internal ${randomPort}`])
+      .start();
+
+    await expect(socketReceivesDataPromise).resolves.toBe("hello world");
+
+    await container.stop();
   });
 
   describe("from Dockerfile", () => {

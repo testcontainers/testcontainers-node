@@ -3,7 +3,7 @@ import { BoundPorts } from "../../bound-ports";
 import { DockerClient } from "../../docker-client";
 import { Image, Tag } from "../../repo-tag";
 import { Network, StartedNetwork } from "../../network";
-import { Host } from "../../docker-client-factory";
+import { Host } from "../../docker-client-instance";
 import { Port } from "../../port";
 import { PortClient, RandomPortClient } from "../../port-client";
 import { RandomUuid, Uuid } from "../../uuid";

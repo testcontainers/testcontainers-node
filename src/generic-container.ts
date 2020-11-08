@@ -1,5 +1,5 @@
 import { BoundPorts } from "./bound-ports";
-import { Container, Id as ContainerId, InspectResult, NetworkSettings } from "./container";
+import { Container, Id as ContainerId, InspectResult } from "./container";
 import { ContainerState } from "./container-state";
 import {
   AuthConfig,
@@ -15,11 +15,12 @@ import {
   EnvKey,
   EnvValue,
   ExecResult,
+  ExtraHost,
   HealthCheck,
   NetworkMode,
   TmpFs,
 } from "./docker-client";
-import { DockerClientFactory, Host } from "./docker-client-factory";
+import { DockerClientInstance, Host } from "./docker-client-instance";
 import { containerLog, log } from "./logger";
 import { Port } from "./port";
 import { PortBinder } from "./port-binder";
@@ -37,6 +38,7 @@ import { RandomUuid, Uuid } from "./uuid";
 import { HostPortWaitStrategy, WaitStrategy } from "./wait-strategy";
 import { ReaperInstance } from "./reaper";
 import { Readable } from "stream";
+import { PortForwarderInstance } from "./port-forwarder";
 
 export class GenericContainerBuilder {
   private buildArgs: BuildArgs = {};
@@ -57,7 +59,7 @@ export class GenericContainerBuilder {
     const tag = this.uuid.nextUuid();
 
     const repoTag = new RepoTag(image, tag);
-    const dockerClient = await DockerClientFactory.getClient();
+    const dockerClient = await DockerClientInstance.getInstance();
     await dockerClient.buildImage(repoTag, this.context, this.dockerfileName, this.buildArgs);
     const container = new GenericContainer(image, tag);
 
@@ -92,12 +94,14 @@ export class GenericContainer implements TestContainer {
   protected authConfig?: AuthConfig;
   protected pullPolicy: PullPolicy = new DefaultPullPolicy();
 
+  private extraHosts: ExtraHost[] = [];
+
   constructor(readonly image: Image, readonly tag: Tag = "latest") {
     this.repoTag = new RepoTag(image, tag);
   }
 
   public async start(): Promise<StartedTestContainer> {
-    const dockerClient = await DockerClientFactory.getClient();
+    const dockerClient = await DockerClientInstance.getInstance();
 
     if (this.pullPolicy.shouldPull() || !(await this.isImageCached(dockerClient))) {
       await dockerClient.pull(this.repoTag, this.authConfig);
@@ -106,11 +110,16 @@ export class GenericContainer implements TestContainer {
     const boundPorts = await new PortBinder().bind(this.ports);
 
     if (!this.repoTag.isReaper()) {
-      await ReaperInstance.start(dockerClient);
+      await ReaperInstance.getInstance(dockerClient);
     }
 
     if (this.preCreate) {
       await this.preCreate(dockerClient, boundPorts);
+    }
+
+    if (!this.repoTag.isReaper() && !this.repoTag.isPortForwarder() && PortForwarderInstance.isRunning()) {
+      const portForwarder = await PortForwarderInstance.getInstance(dockerClient);
+      this.extraHosts.push({ host: "host.testcontainers.internal", ipAddress: portForwarder.getIpAddress() });
     }
 
     const container = await dockerClient.create({
@@ -126,7 +135,19 @@ export class GenericContainer implements TestContainer {
       useDefaultLogDriver: this.useDefaultLogDriver,
       privilegedMode: this.privilegedMode,
       autoRemove: this.daemonMode,
+      extraHosts: this.extraHosts,
     });
+
+    if (!this.repoTag.isReaper() && !this.repoTag.isPortForwarder() && PortForwarderInstance.isRunning()) {
+      const portForwarder = await PortForwarderInstance.getInstance(dockerClient);
+      const portForwarderNetworkId = portForwarder.getNetworkId();
+      const excludedNetworks = [portForwarderNetworkId, "none", "host"];
+
+      if (!this.networkMode || !excludedNetworks.includes(this.networkMode)) {
+        // this.networkMode = portForwarderNetworkId;
+        await dockerClient.connectToNetwork(container.getId(), portForwarderNetworkId);
+      }
+    }
 
     log.info(`Starting container ${this.repoTag} with ID: ${container.getId()}`);
     await dockerClient.start(container);
@@ -311,6 +332,14 @@ export class StartedGenericContainer implements StartedTestContainer {
 
   public getName(): ContainerName {
     return this.name;
+  }
+
+  public getNetworkNames(): string[] {
+    return Object.keys(this.inspectResult.networkSettings);
+  }
+
+  public getNetworkId(networkName: string): string {
+    return this.inspectResult.networkSettings[networkName].networkId;
   }
 
   public getIpAddress(networkName: string): string {

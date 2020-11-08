@@ -1,5 +1,5 @@
 import { CreateNetworkOptions, DockerClient } from "./docker-client";
-import { DockerClientFactory } from "./docker-client-factory";
+import { DockerClientInstance } from "./docker-client-instance";
 import { RandomUuid, Uuid } from "./uuid";
 import { log } from "./logger";
 import { ReaperInstance } from "./reaper";
@@ -24,8 +24,8 @@ export class Network {
   }
 
   public async start(): Promise<StartedNetwork> {
-    const dockerClient = await DockerClientFactory.getClient();
-    await ReaperInstance.start(dockerClient);
+    const dockerClient = await DockerClientInstance.getInstance();
+    await ReaperInstance.getInstance(dockerClient);
 
     const id = await dockerClient.createNetwork(this.createNetworkOptions);
     log.info(`Started network with ID: ${id}`);
