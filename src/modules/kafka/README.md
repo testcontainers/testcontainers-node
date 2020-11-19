@@ -17,6 +17,21 @@ const client = new Kafka({
 });
 ```
 
+Providing your own Kafka and ZooKeeper images:
+
+```javascript
+const { Kafka } = require("kafkajs");
+const { KafkaContainer, StartedKafkaContainer } = require("testcontainers");
+
+const container: StartedKafkaContainer = await new KafkaContainer("confluentinc/cp-kafka", "latest", undefined, "confluentinc/cp-zookeeper", "latest")
+  .withExposedPorts(9093)
+  .start();
+
+const client = new Kafka({
+  brokers: [`${container.getHost()}:${container.getMappedPort(9093)}`],
+});
+```
+
 Providing your own ZooKeeper:
 
 ```javascript
