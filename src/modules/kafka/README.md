@@ -17,13 +17,19 @@ const client = new Kafka({
 });
 ```
 
-Providing your own Kafka and ZooKeeper images:
+Providing your own Kafka and ZooKeeper images, note that all fields have working defaults:
 
 ```javascript
 const { Kafka } = require("kafkajs");
 const { KafkaContainer, StartedKafkaContainer } = require("testcontainers");
 
-const container: StartedKafkaContainer = await new KafkaContainer("confluentinc/cp-kafka", "latest", undefined, "confluentinc/cp-zookeeper", "latest")
+const container: StartedKafkaContainer = await new KafkaContainer(
+  "confluentinc/cp-kafka", // Kafka image
+  "latest", // Kafka image tag
+  undefined, // Host
+  "confluentinc/cp-zookeeper", // ZK image
+  "latest" // ZK image tag
+)
   .withExposedPorts(9093)
   .start();
 
