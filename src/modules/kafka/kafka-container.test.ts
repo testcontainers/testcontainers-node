@@ -15,6 +15,22 @@ describe("KafkaContainer", () => {
     await kafkaContainer.stop();
   });
 
+  it("should connect to kafka using in-built zoo-keeper and custom images", async () => {
+    const kafkaContainer = await new KafkaContainer(
+      "confluentinc/cp-kafka",
+      "latest",
+      undefined,
+      "confluentinc/cp-zookeeper",
+      "latest"
+    )
+      .withExposedPorts(9093)
+      .start();
+
+    await testPubSub(kafkaContainer);
+
+    await kafkaContainer.stop();
+  });
+
   it("should connect to kafka using in-built zoo-keeper and custom network", async () => {
     const network = await new Network().start();
 

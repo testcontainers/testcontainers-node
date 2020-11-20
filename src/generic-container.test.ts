@@ -9,8 +9,6 @@ import { Readable } from "stream";
 import { RandomUuid } from "./uuid";
 import { TestContainers } from "./test-containers";
 import { RandomPortClient } from "./port-client";
-import { PortForwarderInstance } from "./port-forwarder";
-import { DockerClientInstance } from "./docker-client-instance";
 
 describe("GenericContainer", () => {
   jest.setTimeout(180_000);
