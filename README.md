@@ -23,6 +23,7 @@ The following environment variables are supported:
 | `DEBUG` | `testcontainers*` | See all output |
 | `DOCKER_HOST` | `tcp://docker:2375` | Override the Docker host |
 | `TESTCONTAINERS_RYUK_DISABLED` | `true` | Disable [ryuk](#ryuk) |
+| `RYUK_CONTAINER_IMAGE` | `registry.mycompany.com/mirror/ryuk:0.3.0` | Custom image for [ryuk](#ryuk) |
 
 ## Modules
 
