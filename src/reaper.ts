@@ -59,7 +59,7 @@ export class ReaperInstance {
 
   private static resolveRyukImageVersion(): string {
     if (process.env.RYUK_CONTAINER_IMAGE !== undefined) {
-      this.IMAGE_NAME = process.env.RYUK_CONTAINER_IMAGE.split(/:/)[1];
+      this.IMAGE_VERSION = process.env.RYUK_CONTAINER_IMAGE.split(/:/)[1];
     }
     return this.IMAGE_VERSION;
   }
