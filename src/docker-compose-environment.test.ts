@@ -123,6 +123,18 @@ describe("DockerComposeEnvironment", () => {
     await startedEnvironment.down();
   });
 
+  it("should start container with a given context", async () => {
+    const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-name.yml")
+      .withContext("default")
+      .up();
+    const container = startedEnvironment.getContainer("custom_container_name");
+
+    const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
+    const response = await fetch(`${url}/hello-world`);
+    expect(response.status).toBe(200);
+    await startedEnvironment.down();
+  });
+
   it("should throw error when you get container that does not exist", async () => {
     const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml").up();
 

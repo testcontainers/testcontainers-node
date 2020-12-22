@@ -17,6 +17,7 @@ export class DockerComposeEnvironment {
   private readonly projectName: string;
 
   private build = false;
+  private context?: string;
   private waitStrategy: { [containerName: string]: WaitStrategy } = {};
   private startupTimeout = 60_000;
 
@@ -30,6 +31,11 @@ export class DockerComposeEnvironment {
 
   public withBuild(): this {
     this.build = true;
+    return this;
+  }
+
+  public withContext(context: string): this {
+    this.context = context;
     return this;
   }
 
@@ -50,7 +56,10 @@ export class DockerComposeEnvironment {
 
     (await ReaperInstance.getInstance(dockerClient)).addProject(this.projectName);
 
-    await upAll(this.composeFilePath, this.composeFiles, this.projectName, this.build);
+    await upAll(this.composeFilePath, this.composeFiles, this.projectName, {
+      build: this.build,
+      context: this.context,
+    });
     const startedContainers = (await dockerClient.listContainers()).filter(
       (container) => container.Labels["com.docker.compose.project"] === this.projectName
     );
@@ -184,16 +193,24 @@ const defaultDockerComposeOptions = (
   },
 });
 
+interface UpOptions {
+  build: boolean;
+  context: string | undefined;
+}
+
 const upAll = async (
   filePath: string,
   files: string | string[],
   projectName: string,
-  build: boolean
+  options: UpOptions
 ): Promise<void> => {
   const createOptions = (): dockerCompose.IDockerComposeOptions => {
     const commandOptions = [];
-    if (build) {
+    if (options.build) {
       commandOptions.push("--build");
+    }
+    if (options.context) {
+      commandOptions.push(`--context ${options.context}`);
     }
 
     return {
