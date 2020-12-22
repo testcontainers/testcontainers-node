@@ -1,6 +1,6 @@
 import { Database } from "arangojs";
+import { Config } from "arangojs/connection";
 import { ArangoDBContainer, StartedArangoContainer } from "./arangodb-container";
-import { Config } from "arangojs/lib/cjs/connection";
 
 describe("ArangoDB", () => {
   jest.setTimeout(180_000);
@@ -20,7 +20,7 @@ describe("ArangoDB", () => {
       url: container.getHttpUrl(),
     } as Config);
 
-    db.useDatabase("_system");
+    db.database("_system");
     db.useBasicAuth(container.getUsername(), container.getPassword());
 
     const value = "Hello ArangoDB!";

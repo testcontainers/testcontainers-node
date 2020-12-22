@@ -3,7 +3,9 @@ import { Client } from "@elastic/elasticsearch";
 
 describe("ElasticsearchContainer", () => {
   jest.setTimeout(180_000);
+
   let container: StartedElasticsearchContainer;
+
   beforeAll(async () => {
     container = await new ElasticsearchContainer().start();
   });
@@ -34,14 +36,7 @@ describe("ElasticsearchContainer", () => {
       id: document.id,
     });
 
-    expect(
-      (
-        await client.get({
-          index: "people",
-          id: document.id,
-        })
-      ).body._source
-    ).toStrictEqual(document);
+    expect((await client.get({ index: "people", id: document.id })).body._source).toStrictEqual(document);
   });
 
   afterAll(async () => {

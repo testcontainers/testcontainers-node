@@ -163,6 +163,8 @@ class DockerodeExec implements Exec {
       this.exec.start(options, (err?: Error, stream?: Duplex) => {
         if (err) {
           return reject(err);
+        } else if (!stream) {
+          return reject(new Error("Unexpected error occurred, stream is undefined"));
         }
         return resolve(stream);
       });
