@@ -461,6 +461,16 @@ const environment = await new DockerComposeEnvironment(composeFilePath, composeF
   .up();
 ```
 
+[Provide a context](https://docs.docker.com/engine/context/working-with-contexts/):
+
+```javascript
+const { DockerComposeEnvironment, Wait } = require("testcontainers");
+
+const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
+  .withContext("remote")
+  .up();
+```
+
 ## Wait Strategies
 
 Ordinarily Testcontainers will wait for up to 60 seconds for the container's mapped network ports to start listening. 
