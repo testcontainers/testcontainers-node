@@ -21,4 +21,16 @@ describe("RepoTag", () => {
     expect(reaper.isReaper()).toBe(true);
     expect(notReaper.isReaper()).toBe(false);
   });
+
+  describe("fromString", () => {
+    it("should work", () => {
+      const repoTag = RepoTag.fromString("image:latest");
+      expect(repoTag.equals(new RepoTag("image", "latest"))).toBe(true);
+    });
+
+    it("should work with registry", () => {
+      const repoTag = RepoTag.fromString("domain:5000/image:latest");
+      expect(repoTag.equals(new RepoTag("image", "latest"))).toBe(true);
+    });
+  });
 });
