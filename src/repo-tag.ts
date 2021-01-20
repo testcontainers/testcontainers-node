@@ -24,4 +24,19 @@ export class RepoTag {
   public isHelperContainer(): boolean {
     return this.HELPER_CONTAINERS.has(this.image);
   }
+
+  public static fromString(string: string): RepoTag {
+    const parts = string.split("/");
+
+    if (parts.length === 1) {
+      return this.fromImage(parts[0]);
+    } else {
+      return this.fromImage(parts[1]);
+    }
+  }
+
+  private static fromImage(image: string): RepoTag {
+    const [imageName, tag] = image.split(":");
+    return new RepoTag(imageName, tag);
+  }
 }
