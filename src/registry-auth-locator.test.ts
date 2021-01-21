@@ -18,7 +18,7 @@ describe("RegistryAuthLocator", () => {
     });
 
     describe("getAuthConfig", () => {
-      it("should work", async () => {
+      xit("should work", async () => {
         const dockerConfig: DockerConfig = { credHelpers: { "index.docker.io": "desktop" } };
         const authConfig: AuthConfig = {
           username: expect.stringMatching(/.+/),
@@ -51,7 +51,7 @@ describe("RegistryAuthLocator", () => {
     });
 
     describe("getAuthConfig", () => {
-      it("should work", async () => {
+      xit("should work", async () => {
         const dockerConfig: DockerConfig = { credsStore: "desktop" };
         const authConfig: AuthConfig = {
           username: expect.stringMatching(/.+/),
