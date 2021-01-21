@@ -66,7 +66,7 @@ type DockerodeExtraHosts = string[];
 export type AuthConfig = {
   username: string;
   password: string;
-  serveraddress: string;
+  registryAddress: string;
   email?: string;
 };
 

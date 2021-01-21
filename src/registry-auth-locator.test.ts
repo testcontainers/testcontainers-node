@@ -1,4 +1,5 @@
 import { Auths, CredHelpers, CredsStore, DockerConfig } from "./registry-auth-locator";
+import { AuthConfig } from "./docker-client";
 
 describe("RegistryAuthLocator", () => {
   describe("CredHelpers", () => {
@@ -6,12 +7,12 @@ describe("RegistryAuthLocator", () => {
 
     it("should return false when config does not contain cred helpers", () => {
       const dockerConfig: DockerConfig = {};
-      expect(locator.applies("registry-name", dockerConfig)).toBe(false);
+      expect(locator.isApplicable("registry-name", dockerConfig)).toBe(false);
     });
 
     it("should return true when config contains cred helpers", () => {
-      const dockerConfig: DockerConfig = { credHelpers: { "registry-name": "value" } };
-      expect(locator.applies("registry-name", dockerConfig)).toBe(true);
+      const dockerConfig: DockerConfig = { credHelpers: { "registry-name": "helperName" } };
+      expect(locator.isApplicable("registry-name", dockerConfig)).toBe(true);
     });
   });
 
@@ -20,36 +21,81 @@ describe("RegistryAuthLocator", () => {
 
     it("should return false when config does not contain creds store", () => {
       const dockerConfig: DockerConfig = {};
-      expect(locator.applies("registry-name", dockerConfig)).toBe(false);
+      expect(locator.isApplicable("registry-name", dockerConfig)).toBe(false);
     });
 
     it("should return false when creds store is empty", () => {
       const dockerConfig: DockerConfig = { credsStore: "" };
-      expect(locator.applies("registry-name", dockerConfig)).toBe(false);
+      expect(locator.isApplicable("registry-name", dockerConfig)).toBe(false);
     });
 
     it("should return true when config does contain cred store", () => {
       const dockerConfig: DockerConfig = { credsStore: "storeName" };
-      expect(locator.applies("registry-name", dockerConfig)).toBe(true);
+      expect(locator.isApplicable("registry-name", dockerConfig)).toBe(true);
     });
   });
 
   describe("Auths", () => {
     const locator = new Auths();
 
-    it("should return false when auths is undefined", () => {
-      const dockerConfig: DockerConfig = {};
-      expect(locator.applies("registry-name", dockerConfig)).toBe(false);
+    describe("isApplicable", () => {
+      it("should return false when auths is undefined", () => {
+        const dockerConfig: DockerConfig = {};
+        expect(locator.isApplicable("registry-name", dockerConfig)).toBe(false);
+      });
+
+      it("should return false when auths does not contain registry name", () => {
+        const dockerConfig: DockerConfig = { auths: [] };
+        expect(locator.isApplicable("registry-name", dockerConfig)).toBe(false);
+      });
+
+      it("should return true when auths does contain registry name", () => {
+        const dockerConfig: DockerConfig = { auths: [{ "registry-name": { auth: "value" } }] };
+        expect(locator.isApplicable("registry-name", dockerConfig)).toBe(true);
+      });
     });
 
-    it("should return false when auths does not contain registry name", () => {
-      const dockerConfig: DockerConfig = { auths: [] };
-      expect(locator.applies("registry-name", dockerConfig)).toBe(false);
-    });
+    describe("getAuthConfig", () => {
+      it("should return credentials from username and password", () => {
+        const dockerConfig: DockerConfig = {
+          auths: [
+            {
+              "https://registry.example.com": {
+                email: "user@example.com",
+                username: "user",
+                password: "pass",
+              },
+            },
+          ],
+        };
+        const authConfig: AuthConfig = {
+          username: "user",
+          password: "pass",
+          email: "user@example.com",
+          registryAddress: "https://registry.example.com",
+        };
+        expect(locator.getAuthConfig("https://registry.example.com", dockerConfig)).toEqual(authConfig);
+      });
 
-    it("should return true when auths does contain registry name", () => {
-      const dockerConfig: DockerConfig = { auths: [{ "registry-name": { auth: "value" } }] };
-      expect(locator.applies("registry-name", dockerConfig)).toBe(true);
+      it("should return credentials from encoded auth", () => {
+        const dockerConfig: DockerConfig = {
+          auths: [
+            {
+              "https://registry.example.com": {
+                email: "user@example.com",
+                auth: "dXNlcjpwYXNz",
+              },
+            },
+          ],
+        };
+        const authConfig: AuthConfig = {
+          username: "user",
+          password: "pass",
+          email: "user@example.com",
+          registryAddress: "https://registry.example.com",
+        };
+        expect(locator.getAuthConfig("https://registry.example.com", dockerConfig)).toEqual(authConfig);
+      });
     });
   });
 });
