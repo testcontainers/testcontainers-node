@@ -1,7 +1,15 @@
 import { promises as fs } from "fs";
+import { spawn } from "child_process";
 import os from "os";
 import path from "path";
+import { log } from "./logger";
 import { AuthConfig } from "./docker-client";
+
+type CredentialProviderResponse = {
+  ServerURL: string;
+  Username: string;
+  Secret: string;
+};
 
 type Auth = {
   auth?: string;
@@ -30,14 +38,47 @@ const dockerConfigPromise: Promise<DockerConfig> = fs.readFile(dockerConfigFile)
 
 export interface RegistryAuthLocator {
   isApplicable(registry: string, dockerConfig: DockerConfig): boolean;
-  getAuthConfig(registry: string, dockerConfig: DockerConfig): AuthConfig;
+  getAuthConfig(registry: string, dockerConfig: DockerConfig): Promise<AuthConfig>;
 }
 
-interface CredentialProvider {
-  getCredentialProviderName(registry: string, dockerConfig: DockerConfig): string;
+abstract class CredentialProvider implements RegistryAuthLocator {
+  abstract isApplicable(registry: string, dockerConfig: DockerConfig): boolean;
+
+  abstract getCredentialProviderName(registry: string, dockerConfig: DockerConfig): string;
+
+  async getAuthConfig(registry: string, dockerConfig: DockerConfig): Promise<AuthConfig> {
+    const programName = `docker-credential-${this.getCredentialProviderName(registry, dockerConfig)}`;
+    log.debug(`Executing Docker credential provider: ${programName}`);
+
+    const response = await this.runCredentialProvider(registry, programName);
+    log.debug(`Docker credential provider found auth config for: ${registry}`);
+
+    return {
+      username: response.Username,
+      password: response.Secret,
+      registryAddress: registry,
+    };
+  }
+
+  private runCredentialProvider(registry: string, credentialProviderName: string): Promise<CredentialProviderResponse> {
+    return new Promise((resolve) => {
+      const sink = spawn(credentialProviderName, ["get"]);
+
+      const chunks: string[] = [];
+      sink.stdout.on("data", (chunk) => chunks.push(chunk));
+
+      sink.on("close", (code) => {
+        log.debug(`Docker credential provider exited with code: ${code}`);
+        resolve(JSON.parse(chunks.join("")));
+      });
+
+      sink.stdin.write(`${registry}\n`);
+      sink.stdin.end();
+    });
+  }
 }
 
-export class CredHelpers implements RegistryAuthLocator, CredentialProvider {
+export class CredHelpers extends CredentialProvider {
   isApplicable(registry: string, dockerConfig: DockerConfig): boolean {
     return dockerConfig.credHelpers !== undefined && dockerConfig.credHelpers[registry] !== undefined;
   }
@@ -46,13 +87,9 @@ export class CredHelpers implements RegistryAuthLocator, CredentialProvider {
     // @ts-ignore
     return dockerConfig.credHelpers[registry];
   }
-
-  getAuthConfig(registry: string, dockerConfig: DockerConfig): AuthConfig {
-    return {} as AuthConfig;
-  }
 }
 
-export class CredsStore implements RegistryAuthLocator, CredentialProvider {
+export class CredsStore extends CredentialProvider {
   isApplicable(registry: string, dockerConfig: DockerConfig): boolean {
     return dockerConfig.credsStore !== undefined && dockerConfig.credsStore.length > 0;
   }
@@ -61,10 +98,6 @@ export class CredsStore implements RegistryAuthLocator, CredentialProvider {
     // @ts-ignore
     return dockerConfig.credsStore;
   }
-
-  getAuthConfig(registry: string, dockerConfig: DockerConfig): AuthConfig {
-    return {} as AuthConfig;
-  }
 }
 
 export class Auths implements RegistryAuthLocator {
@@ -72,7 +105,7 @@ export class Auths implements RegistryAuthLocator {
     return dockerConfig.auths !== undefined && dockerConfig.auths.some((auth) => auth[registry] !== undefined);
   }
 
-  getAuthConfig(registry: string, dockerConfig: DockerConfig): AuthConfig {
+  async getAuthConfig(registry: string, dockerConfig: DockerConfig): Promise<AuthConfig> {
     const authConfig: Partial<AuthConfig> = { registryAddress: registry };
 
     // @ts-ignore
@@ -81,18 +114,19 @@ export class Auths implements RegistryAuthLocator {
     if (auth.email) {
       authConfig.email = auth.email;
     }
-    if (auth.username) {
-      authConfig.username = auth.username;
-    }
-    if (auth.password) {
-      authConfig.password = auth.password;
-    }
 
     if (auth.auth) {
       const decodedAuth = Buffer.from(auth.auth, "base64").toString();
       const [username, password] = decodedAuth.split(":");
       authConfig.username = username;
       authConfig.password = password;
+    } else {
+      if (auth.username) {
+        authConfig.username = auth.username;
+      }
+      if (auth.password) {
+        authConfig.password = auth.password;
+      }
     }
 
     return authConfig as AuthConfig;

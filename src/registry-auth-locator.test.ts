@@ -5,33 +5,61 @@ describe("RegistryAuthLocator", () => {
   describe("CredHelpers", () => {
     const locator = new CredHelpers();
 
-    it("should return false when config does not contain cred helpers", () => {
-      const dockerConfig: DockerConfig = {};
-      expect(locator.isApplicable("registry-name", dockerConfig)).toBe(false);
+    describe("isApplicable", () => {
+      it("should return false when config does not contain cred helpers", () => {
+        const dockerConfig: DockerConfig = {};
+        expect(locator.isApplicable("registry-name", dockerConfig)).toBe(false);
+      });
+
+      it("should return true when config contains cred helpers", () => {
+        const dockerConfig: DockerConfig = { credHelpers: { "registry-name": "helperName" } };
+        expect(locator.isApplicable("registry-name", dockerConfig)).toBe(true);
+      });
     });
 
-    it("should return true when config contains cred helpers", () => {
-      const dockerConfig: DockerConfig = { credHelpers: { "registry-name": "helperName" } };
-      expect(locator.isApplicable("registry-name", dockerConfig)).toBe(true);
+    describe("getAuthConfig", () => {
+      it("should work", async () => {
+        const dockerConfig: DockerConfig = { credHelpers: { "index.docker.io": "desktop" } };
+        const authConfig: AuthConfig = {
+          username: expect.stringMatching(/.+/),
+          password: expect.stringMatching(/.+/),
+          registryAddress: "index.docker.io",
+        };
+        expect(await locator.getAuthConfig("index.docker.io", dockerConfig)).toEqual(authConfig);
+      });
     });
   });
 
   describe("CredsStore", () => {
     const locator = new CredsStore();
 
-    it("should return false when config does not contain creds store", () => {
-      const dockerConfig: DockerConfig = {};
-      expect(locator.isApplicable("registry-name", dockerConfig)).toBe(false);
+    describe("isApplicable", () => {
+      it("should return false when config does not contain creds store", () => {
+        const dockerConfig: DockerConfig = {};
+        expect(locator.isApplicable("registry-name", dockerConfig)).toBe(false);
+      });
+
+      it("should return false when creds store is empty", () => {
+        const dockerConfig: DockerConfig = { credsStore: "" };
+        expect(locator.isApplicable("registry-name", dockerConfig)).toBe(false);
+      });
+
+      it("should return true when config does contain cred store", () => {
+        const dockerConfig: DockerConfig = { credsStore: "storeName" };
+        expect(locator.isApplicable("registry-name", dockerConfig)).toBe(true);
+      });
     });
 
-    it("should return false when creds store is empty", () => {
-      const dockerConfig: DockerConfig = { credsStore: "" };
-      expect(locator.isApplicable("registry-name", dockerConfig)).toBe(false);
-    });
-
-    it("should return true when config does contain cred store", () => {
-      const dockerConfig: DockerConfig = { credsStore: "storeName" };
-      expect(locator.isApplicable("registry-name", dockerConfig)).toBe(true);
+    describe("getAuthConfig", () => {
+      it("should work", async () => {
+        const dockerConfig: DockerConfig = { credsStore: "desktop" };
+        const authConfig: AuthConfig = {
+          username: expect.stringMatching(/.+/),
+          password: expect.stringMatching(/.+/),
+          registryAddress: "index.docker.io",
+        };
+        expect(await locator.getAuthConfig("index.docker.io", dockerConfig)).toEqual(authConfig);
+      });
     });
   });
 
@@ -56,7 +84,7 @@ describe("RegistryAuthLocator", () => {
     });
 
     describe("getAuthConfig", () => {
-      it("should return credentials from username and password", () => {
+      it("should return credentials from username and password", async () => {
         const dockerConfig: DockerConfig = {
           auths: [
             {
@@ -74,10 +102,10 @@ describe("RegistryAuthLocator", () => {
           email: "user@example.com",
           registryAddress: "https://registry.example.com",
         };
-        expect(locator.getAuthConfig("https://registry.example.com", dockerConfig)).toEqual(authConfig);
+        expect(await locator.getAuthConfig("https://registry.example.com", dockerConfig)).toEqual(authConfig);
       });
 
-      it("should return credentials from encoded auth", () => {
+      it("should return credentials from encoded auth", async () => {
         const dockerConfig: DockerConfig = {
           auths: [
             {
@@ -94,7 +122,7 @@ describe("RegistryAuthLocator", () => {
           email: "user@example.com",
           registryAddress: "https://registry.example.com",
         };
-        expect(locator.getAuthConfig("https://registry.example.com", dockerConfig)).toEqual(authConfig);
+        expect(await locator.getAuthConfig("https://registry.example.com", dockerConfig)).toEqual(authConfig);
       });
     });
   });
