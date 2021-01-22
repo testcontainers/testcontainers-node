@@ -10,7 +10,7 @@ describe("PullStreamParser", () => {
 
   beforeEach(() => {
     logger = new FakeLogger();
-    parser = new PullStreamParser(new RepoTag("image", "tag"), logger);
+    parser = new PullStreamParser(new RepoTag(undefined, "image", "tag"), logger);
     stream = new Readable();
   });
 

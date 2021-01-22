@@ -3,11 +3,15 @@ import { AuthConfig } from "../docker-client";
 import { RegistryAuthLocator } from "./registry-auth-locator";
 
 export class Auths implements RegistryAuthLocator {
+  getName(): string {
+    return "Auths";
+  }
+
   isApplicable(registry: string, dockerConfig: DockerConfig): boolean {
     return dockerConfig.auths !== undefined && dockerConfig.auths.some((auth) => auth[registry] !== undefined);
   }
 
-  async getAuthConfig(registry: string, dockerConfig: DockerConfig): Promise<AuthConfig> {
+  async getAuthConfig(registry: string, dockerConfig: DockerConfig): Promise<AuthConfig | undefined> {
     const authConfig: Partial<AuthConfig> = { registryAddress: registry };
 
     // @ts-ignore

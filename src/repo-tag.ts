@@ -1,24 +1,32 @@
 import { ReaperInstance } from "./reaper";
 import { PortForwarderInstance } from "./port-forwarder";
 
+export type Registry = string;
 export type Image = string;
 export type Tag = string;
 
 export class RepoTag {
-  private readonly HELPER_CONTAINERS = new Set([ReaperInstance.IMAGE_NAME, PortForwarderInstance.IMAGE_NAME]);
+  private readonly string: string;
+  private readonly HELPER_CONTAINERS = new Set([ReaperInstance.getImage(), PortForwarderInstance.IMAGE_NAME]);
 
-  constructor(private readonly image: Image, private readonly tag: Tag) {}
+  constructor(public readonly registry: Registry | undefined, public readonly image: Image, public readonly tag: Tag) {
+    if (this.registry) {
+      this.string = `${this.registry}/${this.image}:${this.tag}`;
+    } else {
+      this.string = `${this.image}:${this.tag}`;
+    }
+  }
 
   public equals(repoTag: RepoTag): boolean {
-    return this.image === repoTag.image && this.tag === repoTag.tag;
+    return this.registry === repoTag.registry && this.image === repoTag.image && this.tag === repoTag.tag;
   }
 
   public toString(): string {
-    return `${this.image}:${this.tag}`;
+    return this.string;
   }
 
   public isReaper(): boolean {
-    return this.image === ReaperInstance.IMAGE_NAME;
+    return this.toString() === ReaperInstance.getImage();
   }
 
   public isHelperContainer(): boolean {
@@ -29,14 +37,11 @@ export class RepoTag {
     const parts = string.split("/");
 
     if (parts.length === 1) {
-      return this.fromImage(parts[0]);
+      const [imageName, tag] = parts[0].split(":");
+      return new RepoTag(undefined, imageName, tag);
     } else {
-      return this.fromImage(parts[1]);
+      const [imageName, tag] = parts[1].split(":");
+      return new RepoTag(parts[0], imageName, tag);
     }
-  }
-
-  private static fromImage(image: string): RepoTag {
-    const [imageName, tag] = image.split(":");
-    return new RepoTag(imageName, tag);
   }
 }

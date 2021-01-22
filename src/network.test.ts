@@ -8,7 +8,7 @@ describe("Network", () => {
   it("should start container in a user-defined network", async () => {
     const network = await new Network().start();
 
-    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
       .withNetworkMode(network.getName())
       .start();
 
@@ -25,12 +25,12 @@ describe("Network", () => {
   it("two containers in user-defined network should be able to ping each other by name", async () => {
     const network = await new Network().start();
 
-    const container1 = await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
+    const container1 = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
       .withName("container1")
       .withNetworkMode(network.getName())
       .start();
 
-    const container2 = await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
+    const container2 = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
       .withName("container2")
       .withNetworkMode(network.getName())
       .start();
@@ -47,7 +47,7 @@ describe("Network", () => {
   it("should expose the IP address of a container in a given network", async () => {
     const network = await new Network().start();
 
-    const container = await new GenericContainer("cristianrgreco/testcontainer", "1.1.12")
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
       .withNetworkMode(network.getName())
       .start();
 

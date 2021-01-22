@@ -1,6 +1,5 @@
 import { Id } from "./container";
 import {
-  AuthConfig,
   BindMode,
   Command,
   ContainerName,
@@ -30,7 +29,6 @@ export interface TestContainer {
   withDefaultLogDriver(): this;
   withPrivilegedMode(): this;
   withPullPolicy(pullPolicy: PullPolicy): this;
-  withAuthentication(authConfig: AuthConfig): this;
 }
 
 export interface StopOptions {

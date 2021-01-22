@@ -26,7 +26,7 @@ import { Port } from "./port";
 import { PortBinder } from "./port-binder";
 import { HostPortCheck, InternalPortCheck } from "./port-check";
 import { DefaultPullPolicy, PullPolicy } from "./pull-policy";
-import { Image, RepoTag, Tag } from "./repo-tag";
+import { RepoTag } from "./repo-tag";
 import {
   DEFAULT_STOP_OPTIONS,
   StartedTestContainer,
@@ -39,6 +39,7 @@ import { HostPortWaitStrategy, WaitStrategy } from "./wait-strategy";
 import { ReaperInstance } from "./reaper";
 import { Readable } from "stream";
 import { PortForwarderInstance } from "./port-forwarder";
+import { getAuthConfig } from "./registry-auth-locator";
 
 export class GenericContainerBuilder {
   private buildArgs: BuildArgs = {};
@@ -58,10 +59,10 @@ export class GenericContainerBuilder {
     const image = this.uuid.nextUuid();
     const tag = this.uuid.nextUuid();
 
-    const repoTag = new RepoTag(image, tag);
+    const repoTag = new RepoTag(undefined, image, tag);
     const dockerClient = await DockerClientInstance.getInstance();
     await dockerClient.buildImage(repoTag, this.context, this.dockerfileName, this.buildArgs);
-    const container = new GenericContainer(image, tag);
+    const container = new GenericContainer(repoTag.toString());
 
     if (!(await container.isImageCached(dockerClient))) {
       throw new Error("Failed to build image");
@@ -91,20 +92,20 @@ export class GenericContainer implements TestContainer {
   protected useDefaultLogDriver = false;
   protected privilegedMode = false;
   protected daemonMode = false;
-  protected authConfig?: AuthConfig;
   protected pullPolicy: PullPolicy = new DefaultPullPolicy();
 
   private extraHosts: ExtraHost[] = [];
 
-  constructor(readonly image: Image, readonly tag: Tag = "latest") {
-    this.repoTag = new RepoTag(image, tag);
+  constructor(readonly image: string) {
+    this.repoTag = RepoTag.fromString(image);
   }
 
   public async start(): Promise<StartedTestContainer> {
     const dockerClient = await DockerClientInstance.getInstance();
 
     if (this.pullPolicy.shouldPull() || !(await this.isImageCached(dockerClient))) {
-      await dockerClient.pull(this.repoTag, this.authConfig);
+      const authConfig = this.repoTag.registry ? await getAuthConfig(this.repoTag.registry) : undefined;
+      await dockerClient.pull(this.repoTag, authConfig);
     }
 
     const boundPorts = await new PortBinder().bind(this.ports);
@@ -170,11 +171,6 @@ export class GenericContainer implements TestContainer {
       inspectResult.name,
       dockerClient
     );
-  }
-
-  public withAuthentication(authConfig: AuthConfig): this {
-    this.authConfig = authConfig;
-    return this;
   }
 
   public withCmd(cmd: Command[]): this {

@@ -249,21 +249,6 @@ const container = await new GenericContainer("alpine", "latest")
   .start();
 ```
 
-Pulling an image from the private registry:
-
-```javascript
-const { GenericContainer } = require("testcontainers");
-
-const container = await new GenericContainer("private-image")
-  .withAuthentication({
-    username: 'username',
-    password: 'password',
-    email: 'your@email.email',
-    serveraddress: 'https://index.docker.io/v1'
-  })
-  .start();
-```
-
 Specifying a default log driver.
 
 You can override the logging driver used by docker to be the default one (json-file).
@@ -354,6 +339,10 @@ const container = await new GenericContainer("alpine")
 const { output } = await container.exec(["curl", `http://host.testcontainers.internal:8000`]);
 assert(output === "hello world");
 ```
+
+## Authentication
+
+TODO
 
 ## Docker Compose
 

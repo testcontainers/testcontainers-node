@@ -64,7 +64,7 @@ export class PortForwarderInstance {
     const username = "root";
     const password = new RandomUuid().nextUuid();
 
-    const container = await new GenericContainer(this.getImageName(), this.getImageVersion())
+    const container = await new GenericContainer(`${this.getImageName()}:${this.getImageVersion()}`)
       .withName(`testcontainers-port-forwarder-${dockerClient.getSessionId()}`)
       .withDaemonMode()
       .withExposedPorts(22)

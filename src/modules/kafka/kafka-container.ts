@@ -24,13 +24,11 @@ export class KafkaContainer extends GenericContainer {
   private zooKeeperContainer?: StartedTestContainer;
 
   constructor(
-    readonly image: Image = "confluentinc/cp-kafka",
-    readonly tag: Tag = "latest",
-    readonly host?: Host,
-    readonly zooKeeperImage: Image = "confluentinc/cp-zookeeper",
-    readonly zooKeeperTag: Tag = "latest"
+    image = "confluentinc/cp-kafka:latest",
+    private readonly host?: Host,
+    private readonly zooKeeperImage = "confluentinc/cp-zookeeper:latest"
   ) {
-    super(image, tag);
+    super(image);
     this.host = host === undefined ? this.uuid.nextUuid() : host;
     this.withName(this.host)
       .withEnv(
@@ -69,7 +67,7 @@ export class KafkaContainer extends GenericContainer {
 
       this.withEnv("KAFKA_ZOOKEEPER_CONNECT", `${zooKeeperHost}:${zooKeeperPort}`);
 
-      const zookeeperContainer = await new GenericContainer(this.zooKeeperImage, this.zooKeeperTag)
+      const zookeeperContainer = await new GenericContainer(this.zooKeeperImage)
         .withName(zooKeeperHost)
         .withEnv("ZOOKEEPER_CLIENT_PORT", zooKeeperPort.toString());
 

@@ -1,5 +1,4 @@
 import { GenericContainer, StartedTestContainer } from "../..";
-import { Image, Tag } from "../../repo-tag";
 import { AbstractStartedContainer } from "../abstract-started-container";
 import { Port } from "../../port";
 
@@ -10,13 +9,8 @@ const ELASTIC_SEARCH_IMAGE_TAG = "7.9.2";
 export class ElasticsearchContainer extends GenericContainer {
   private readonly httpPort = ELASTIC_SEARCH_HTTP_PORT;
 
-  constructor(
-    readonly image: Image = ELASTIC_SEARCH_IMAGE_NAME,
-    readonly tag: Tag = ELASTIC_SEARCH_IMAGE_TAG,
-    readonly timeout = 120_000
-  ) {
-    super(image, tag);
-
+  constructor(image = `${ELASTIC_SEARCH_IMAGE_NAME}:${ELASTIC_SEARCH_IMAGE_TAG}`, timeout = 120_000) {
+    super(image);
     this.withExposedPorts(this.httpPort).withEnv("discovery.type", "single-node").withStartupTimeout(timeout);
   }
 

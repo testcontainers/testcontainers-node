@@ -1,7 +1,11 @@
-export type CredentialProviderResponse = {
+export type CredentialProviderGetResponse = {
   ServerURL: string;
   Username: string;
   Secret: string;
+};
+
+export type CredentialProviderListResponse = {
+  [registry: string]: string;
 };
 
 export type Auth = {

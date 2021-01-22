@@ -2,6 +2,12 @@ import path from "path";
 import os from "os";
 import { DockerConfig } from "./types";
 import { promises as fs } from "fs";
+import { CredHelpers } from "./cred-helpers";
+import { CredsStore } from "./creds-store";
+import { Auths } from "./auths";
+import { RegistryAuthLocator } from "./registry-auth-locator";
+import { AuthConfig } from "../docker-client";
+import { log } from "../logger";
 
 const dockerConfigFile = path.resolve(os.homedir(), ".docker", "config.json");
 
@@ -14,3 +20,20 @@ const dockerConfigPromise: Promise<DockerConfig> = fs.readFile(dockerConfigFile)
     auths: object.auths,
   };
 });
+
+const registryAuthLocators: RegistryAuthLocator[] = [new CredHelpers(), new CredsStore(), new Auths()];
+
+export async function getAuthConfig(registry: string): Promise<AuthConfig | undefined> {
+  const dockerConfig = await dockerConfigPromise;
+
+  const registryAuthLocator = registryAuthLocators.find((authLocator) =>
+    authLocator.isApplicable(registry, dockerConfig)
+  );
+  if (!registryAuthLocator) {
+    log.debug(`No registry auth locator found for registry: "${registry}"`);
+    return undefined;
+  }
+
+  log.debug(`Found applicable registry auth locator for registry "${registry}": ${registryAuthLocator.getName()}`);
+  return await registryAuthLocator.getAuthConfig(registry, dockerConfig);
+}

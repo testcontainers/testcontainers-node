@@ -1,5 +1,4 @@
 import { GenericContainer, Wait } from "../..";
-import { Image, Tag } from "../../repo-tag";
 import { Host } from "../../docker-client-instance";
 import { StartedTestContainer } from "../../test-container";
 import { Port } from "../../port";
@@ -10,8 +9,8 @@ export class ArangoDBContainer extends GenericContainer {
   private readonly defaultPort = 8529;
   private readonly defaultUsername = "root";
 
-  constructor(image: Image = "arangodb", tag: Tag = "latest", private password = new RandomUuid().nextUuid()) {
-    super(image, tag);
+  constructor(image = "arangodb:latest", private password = new RandomUuid().nextUuid()) {
+    super(image);
     this.withExposedPorts(this.defaultPort).withWaitStrategy(Wait.forLogMessage("Have fun!"));
   }
 
