@@ -12,12 +12,17 @@ describe("Auths", () => {
     });
 
     it("should return false when auths does not contain registry name", () => {
-      const dockerConfig: DockerConfig = { auths: [] };
+      const dockerConfig: DockerConfig = { auths: {} };
       expect(locator.isApplicable("registry-name", dockerConfig)).toBe(false);
     });
 
     it("should return true when auths does contain registry name", () => {
-      const dockerConfig: DockerConfig = { auths: [{ "registry-name": { auth: "value" } }] };
+      /*
+      { 'https://index.docker.io/v1/':
+         { auth:
+            'Z2l0aHViYWN0aW9uczozZDY0NzJiOS0zZDQ5LTRkMTctOWZjOS05MGQyNDI1ODA0M2I=' } }
+       */
+      const dockerConfig: DockerConfig = { auths: { "registry-name": { auth: "value" } } };
       expect(locator.isApplicable("registry-name", dockerConfig)).toBe(true);
     });
   });
@@ -25,15 +30,13 @@ describe("Auths", () => {
   describe("getAuthConfig", () => {
     it("should return credentials from username and password", async () => {
       const dockerConfig: DockerConfig = {
-        auths: [
-          {
-            "https://registry.example.com": {
-              email: "user@example.com",
-              username: "user",
-              password: "pass",
-            },
+        auths: {
+          "https://registry.example.com": {
+            email: "user@example.com",
+            username: "user",
+            password: "pass",
           },
-        ],
+        },
       };
       const authConfig: AuthConfig = {
         username: "user",
@@ -46,14 +49,12 @@ describe("Auths", () => {
 
     it("should return credentials from encoded auth", async () => {
       const dockerConfig: DockerConfig = {
-        auths: [
-          {
-            "https://registry.example.com": {
-              email: "user@example.com",
-              auth: "dXNlcjpwYXNz",
-            },
+        auths: {
+          "https://registry.example.com": {
+            email: "user@example.com",
+            auth: "dXNlcjpwYXNz",
           },
-        ],
+        },
       };
       const authConfig: AuthConfig = {
         username: "user",

@@ -8,15 +8,14 @@ export class Auths implements RegistryAuthLocator {
   }
 
   isApplicable(registry: string, dockerConfig: DockerConfig): boolean {
-    console.log("dockerConfig.auths=", dockerConfig.auths);
-    return dockerConfig.auths !== undefined && dockerConfig.auths.some((auth) => auth[registry] !== undefined);
+    return dockerConfig.auths !== undefined && dockerConfig.auths[registry] !== undefined;
   }
 
   async getAuthConfig(registry: string, dockerConfig: DockerConfig): Promise<AuthConfig | undefined> {
     const authConfig: Partial<AuthConfig> = { registryAddress: registry };
 
     // @ts-ignore
-    const auth: Auth = dockerConfig.auths.find((auth) => auth[registry] !== undefined)[registry];
+    const auth: Auth = dockerConfig.auths[registry];
 
     if (auth.email) {
       authConfig.email = auth.email;

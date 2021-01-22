@@ -18,5 +18,5 @@ export type Auth = {
 export type DockerConfig = {
   credHelpers?: { [registry: string]: string };
   credsStore?: string;
-  auths?: { [registry: string]: Auth }[];
+  auths?: { [registry: string]: Auth };
 };
