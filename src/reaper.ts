@@ -5,7 +5,6 @@ import { StartedTestContainer } from "./test-container";
 import { Wait } from "./wait";
 import { Id } from "./container";
 import { DockerClient } from "./docker-client";
-import { RepoTag } from "./repo-tag";
 
 export interface Reaper {
   addProject(projectName: string): void;
@@ -46,7 +45,7 @@ export class ReaperInstance {
     return this.instance;
   }
 
-  public static getImage() {
+  public static getImage(): string {
     return process.env.RYUK_CONTAINER_IMAGE === undefined ? this.DEFAULT_IMAGE : process.env.RYUK_CONTAINER_IMAGE;
   }
 

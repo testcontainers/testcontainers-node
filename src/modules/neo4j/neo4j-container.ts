@@ -1,5 +1,4 @@
 import { GenericContainer, Wait } from "../..";
-import { Image, Tag } from "../../repo-tag";
 import { Host } from "../../docker-client-instance";
 import { StartedTestContainer } from "../../test-container";
 import { Port } from "../../port";

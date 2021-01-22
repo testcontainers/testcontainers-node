@@ -2,7 +2,6 @@ import { BoundPorts } from "./bound-ports";
 import { Container, Id as ContainerId, InspectResult } from "./container";
 import { ContainerState } from "./container-state";
 import {
-  AuthConfig,
   BindMode,
   BindMount,
   BuildArgs,
@@ -56,10 +55,7 @@ export class GenericContainerBuilder {
   }
 
   public async build(): Promise<GenericContainer> {
-    const image = this.uuid.nextUuid();
-    const tag = this.uuid.nextUuid();
-
-    const repoTag = new RepoTag(undefined, image, tag);
+    const repoTag = new RepoTag(undefined, this.uuid.nextUuid(), this.uuid.nextUuid());
     const dockerClient = await DockerClientInstance.getInstance();
     await dockerClient.buildImage(repoTag, this.context, this.dockerfileName, this.buildArgs);
     const container = new GenericContainer(repoTag.toString());

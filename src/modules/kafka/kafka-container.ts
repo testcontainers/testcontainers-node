@@ -1,7 +1,6 @@
 import { GenericContainer } from "../../generic-container";
 import { BoundPorts } from "../../bound-ports";
 import { DockerClient } from "../../docker-client";
-import { Image, Tag } from "../../repo-tag";
 import { Network, StartedNetwork } from "../../network";
 import { Host } from "../../docker-client-instance";
 import { Port } from "../../port";
