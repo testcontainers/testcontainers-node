@@ -4,6 +4,7 @@ import { ReaperInstance } from "./reaper";
 describe("RepoTag", () => {
   it("should return whether two repo tags are equal", () => {
     const repoTag = new RepoTag("registry", "image", "tag");
+
     expect(repoTag.equals(new RepoTag("registry", "image", "tag"))).toBe(true);
     expect(repoTag.equals(new RepoTag("registry", "image", "anotherTag"))).toBe(false);
     expect(repoTag.equals(new RepoTag("registry", "anotherImage", "tag"))).toBe(false);
@@ -31,12 +32,26 @@ describe("RepoTag", () => {
   describe("fromString", () => {
     it("should work", () => {
       const repoTag = RepoTag.fromString("image:latest");
-      expect(repoTag.equals(new RepoTag(undefined, "image", "latest"))).toBe(true);
+
+      expect(repoTag.registry).toBeUndefined();
+      expect(repoTag.image).toBe("image");
+      expect(repoTag.tag).toBe("latest");
     });
 
     it("should work with registry", () => {
       const repoTag = RepoTag.fromString("domain:5000/image:latest");
-      expect(repoTag.equals(new RepoTag("domain:5000", "image", "latest"))).toBe(true);
+
+      expect(repoTag.registry).toBe("domain:5000");
+      expect(repoTag.image).toBe("image");
+      expect(repoTag.tag).toBe("latest");
+    });
+
+    it("should work with registry and nested image", () => {
+      const repoTag = RepoTag.fromString("domain:5000/parent/child:latest");
+
+      expect(repoTag.registry).toBe("domain:5000");
+      expect(repoTag.image).toBe("parent/child");
+      expect(repoTag.tag).toBe("latest");
     });
   });
 });

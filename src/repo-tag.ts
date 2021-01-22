@@ -37,11 +37,20 @@ export class RepoTag {
     const parts = string.split("/");
 
     if (parts.length === 1) {
-      const [imageName, tag] = parts[0].split(":");
-      return new RepoTag(undefined, imageName, tag);
+      return this.fromStringWithoutRegistry(parts);
     } else {
-      const [imageName, tag] = parts[1].split(":");
-      return new RepoTag(parts[0], imageName, tag);
+      return this.fromStringWithRegistry(parts);
     }
+  }
+
+  private static fromStringWithoutRegistry(parts: string[]) {
+    const [imageName, tag] = parts[0].split(":");
+    return new RepoTag(undefined, imageName, tag);
+  }
+
+  private static fromStringWithRegistry(parts: string[]) {
+    const registry = parts[0];
+    const [image, tag] = parts.slice(1).join("/").split(":");
+    return new RepoTag(registry, image, tag);
   }
 }
