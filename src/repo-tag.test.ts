@@ -38,8 +38,24 @@ describe("RepoTag", () => {
       expect(repoTag.tag).toBe("latest");
     });
 
+    it("should work without tag", () => {
+      const repoTag = RepoTag.fromString("image");
+
+      expect(repoTag.registry).toBeUndefined();
+      expect(repoTag.image).toBe("image");
+      expect(repoTag.tag).toBe("latest");
+    });
+
     it("should work with registry", () => {
       const repoTag = RepoTag.fromString("domain:5000/image:latest");
+
+      expect(repoTag.registry).toBe("domain:5000");
+      expect(repoTag.image).toBe("image");
+      expect(repoTag.tag).toBe("latest");
+    });
+
+    it("should work with registry without tag", () => {
+      const repoTag = RepoTag.fromString("domain:5000/image");
 
       expect(repoTag.registry).toBe("domain:5000");
       expect(repoTag.image).toBe("image");

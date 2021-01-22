@@ -32,7 +32,7 @@ The following environment variables are supported:
 
 ## Examples
 
-Using a pre-built Docker image:
+Using a pre-built Docker image, note that omitting the tag will use `latest`:
 
 ```javascript
 const redis = require("async-redis");
@@ -70,7 +70,7 @@ Using a specific image version:
 ```javascript
 const { GenericContainer } = require("testcontainers");
 
-const container = await new GenericContainer("alpine", "3.10")
+const container = await new GenericContainer("alpine:3.10")
   .start();
 ```
 
@@ -188,9 +188,7 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
-Creating a container with a custom health check command. 
-
-Note that `interval`, `timeout`, `retries` and `startPeriod` are optional; the values will be inherited from the image or parent image if omitted. Also note that the wait strategy should be set to `Wait.forHealthCheck()` for this option to take effect:
+Creating a container with a custom health check command. Note that `interval`, `timeout`, `retries` and `startPeriod` are optional; the values will be inherited from the image or parent image if omitted. Also note that the wait strategy should be set to `Wait.forHealthCheck()` for this option to take effect:
 
 ```javascript
 const { GenericContainer, Wait } = require("testcontainers");
@@ -233,9 +231,7 @@ await container.stop();
 await network.stop();
 ```
 
-Specifying a pull policy. 
-
-Note that if omitted will use the `DefaultPullPolicy` which will use a locally cached 
+Specifying a pull policy. Note that if omitted will use the `DefaultPullPolicy` which will use a locally cached 
 image if one already exists, this is usually the preferred option. In cases where 
 there is a local image for a given tag but the remote image with the same tag may 
 have changed (for example when using the `latest` tag), you can tell testcontainers 
@@ -244,14 +240,12 @@ to pull the image again by specifying an `AlwaysPullPolicy`:
 ```javascript
 const { GenericContainer, AlwaysPullPolicy } = require("testcontainers");
 
-const container = await new GenericContainer("alpine", "latest")
+const container = await new GenericContainer("alpine:latest")
   .withPullPolicy(new AlwaysPullPolicy())
   .start();
 ```
 
-Specifying a default log driver.
-
-You can override the logging driver used by docker to be the default one (json-file).
+Specifying a default log driver. You can override the logging driver used by Docker to be the default one (json-file).
 This might be necessary when the driver of your docker host does not support reading logs
 and you want to use the `Wait.forLogMessage` wait strategy. This is the same as 
 [--log-driver json-file on docker run](https://docs.docker.com/config/containers/logging/configure/#configure-the-logging-driver-for-a-container).
@@ -342,7 +336,8 @@ assert(output === "hello world");
 
 ## Authentication
 
-TODO
+Testcontainers will automatically pick up and use credentials from `$HOME/.docker/config.json`, using
+credential helpers, credential stores, or raw auth as necessary and in that order.
 
 ## Docker Compose
 

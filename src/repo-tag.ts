@@ -44,13 +44,13 @@ export class RepoTag {
   }
 
   private static fromStringWithoutRegistry(parts: string[]) {
-    const [imageName, tag] = parts[0].split(":");
+    const [imageName, tag = "latest"] = parts[0].split(":");
     return new RepoTag(undefined, imageName, tag);
   }
 
   private static fromStringWithRegistry(parts: string[]) {
     const registry = parts[0];
-    const [image, tag] = parts.slice(1).join("/").split(":");
+    const [image, tag = "latest"] = parts.slice(1).join("/").split(":");
     return new RepoTag(registry, image, tag);
   }
 }
