@@ -47,27 +47,51 @@ describe("RepoTag", () => {
     });
 
     it("should work with registry", () => {
-      const repoTag = RepoTag.fromString("domain:5000/image:latest");
+      const repoTag = RepoTag.fromString("domain.com/image:latest");
 
-      expect(repoTag.registry).toBe("domain:5000");
+      expect(repoTag.registry).toBe("domain.com");
+      expect(repoTag.image).toBe("image");
+      expect(repoTag.tag).toBe("latest");
+    });
+
+    it("should work with registry with port", () => {
+      const repoTag = RepoTag.fromString("domain.com:5000/image:latest");
+
+      expect(repoTag.registry).toBe("domain.com:5000");
       expect(repoTag.image).toBe("image");
       expect(repoTag.tag).toBe("latest");
     });
 
     it("should work with registry without tag", () => {
-      const repoTag = RepoTag.fromString("domain:5000/image");
+      const repoTag = RepoTag.fromString("domain.com/image");
 
-      expect(repoTag.registry).toBe("domain:5000");
+      expect(repoTag.registry).toBe("domain.com");
       expect(repoTag.image).toBe("image");
       expect(repoTag.tag).toBe("latest");
     });
 
-    it("should work with registry and nested image", () => {
-      const repoTag = RepoTag.fromString("domain:5000/parent/child:latest");
+    it("should work with nested image", () => {
+      const repoTag = RepoTag.fromString("parent/child:latest");
 
-      expect(repoTag.registry).toBe("domain:5000");
+      expect(repoTag.registry).toBe(undefined);
       expect(repoTag.image).toBe("parent/child");
       expect(repoTag.tag).toBe("latest");
+    });
+
+    it("should work with registry and nested image", () => {
+      const repoTag = RepoTag.fromString("domain.com/parent/child:latest");
+
+      expect(repoTag.registry).toBe("domain.com");
+      expect(repoTag.image).toBe("parent/child");
+      expect(repoTag.tag).toBe("latest");
+    });
+
+    it("should work with tag being a hash", () => {
+      const repoTag = RepoTag.fromString("image@sha256:1234abcd1234abcd1234abcd1234abcd");
+
+      expect(repoTag.registry).toBe(undefined);
+      expect(repoTag.image).toBe("image");
+      expect(repoTag.tag).toBe("sha256:1234abcd1234abcd1234abcd1234abcd");
     });
   });
 });

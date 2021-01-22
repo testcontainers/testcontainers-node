@@ -34,23 +34,29 @@ export class RepoTag {
   }
 
   public static fromString(string: string): RepoTag {
-    const parts = string.split("/");
+    const registry = this.getRegistry(string);
+    const stringWithoutRegistry = registry ? string.split("/").slice(1).join("/") : string;
 
-    if (parts.length === 1) {
-      return this.fromStringWithoutRegistry(parts);
+    if (stringWithoutRegistry.includes("@")) {
+      const [image, tag] = stringWithoutRegistry.split("@");
+      return new RepoTag(registry, image, tag);
+    } else if (stringWithoutRegistry.includes(":")) {
+      const [image, tag] = stringWithoutRegistry.split(":");
+      return new RepoTag(registry, image, tag);
     } else {
-      return this.fromStringWithRegistry(parts);
+      return new RepoTag(registry, stringWithoutRegistry, "latest");
     }
   }
 
-  private static fromStringWithoutRegistry(parts: string[]) {
-    const [imageName, tag = "latest"] = parts[0].split(":");
-    return new RepoTag(undefined, imageName, tag);
+  private static getRegistry(string: string): string | undefined {
+    const parts = string.split("/");
+
+    if (parts.length > 1 && this.isRegistry(parts[0])) {
+      return parts[0];
+    }
   }
 
-  private static fromStringWithRegistry(parts: string[]) {
-    const registry = parts[0];
-    const [image, tag = "latest"] = parts.slice(1).join("/").split(":");
-    return new RepoTag(registry, image, tag);
+  private static isRegistry(string: string): boolean {
+    return string.includes(".") || string.includes(":") || string === "localhost";
   }
 }
