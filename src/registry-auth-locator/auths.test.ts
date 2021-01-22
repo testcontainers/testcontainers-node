@@ -17,11 +17,6 @@ describe("Auths", () => {
     });
 
     it("should return true when auths does contain registry name", () => {
-      /*
-      { 'https://index.docker.io/v1/':
-         { auth:
-            'Z2l0aHViYWN0aW9uczozZDY0NzJiOS0zZDQ5LTRkMTctOWZjOS05MGQyNDI1ODA0M2I=' } }
-       */
       const dockerConfig: DockerConfig = { auths: { "registry-name": { auth: "value" } } };
       expect(locator.isApplicable("registry-name", dockerConfig)).toBe(true);
     });
