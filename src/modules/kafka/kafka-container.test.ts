@@ -17,11 +17,9 @@ describe("KafkaContainer", () => {
 
   it("should connect to kafka using in-built zoo-keeper and custom images", async () => {
     const kafkaContainer = await new KafkaContainer(
-      "confluentinc/cp-kafka",
-      "latest",
+      "confluentinc/cp-kafka:latest",
       undefined,
-      "confluentinc/cp-zookeeper",
-      "latest"
+      "confluentinc/cp-zookeeper:latest"
     )
       .withExposedPorts(9093)
       .start();
@@ -47,7 +45,7 @@ describe("KafkaContainer", () => {
 
     const zooKeeperHost = "zookeeper";
     const zooKeeperPort = 2181;
-    const zookeeperContainer = await new GenericContainer("confluentinc/cp-zookeeper", "latest")
+    const zookeeperContainer = await new GenericContainer("confluentinc/cp-zookeeper:latest")
       .withName(zooKeeperHost)
       .withEnv("ZOOKEEPER_CLIENT_PORT", zooKeeperPort.toString())
       .withNetworkMode(network.getName())

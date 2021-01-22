@@ -7,7 +7,7 @@ export type Tag = string;
 
 export class RepoTag {
   private readonly string: string;
-  private readonly HELPER_CONTAINERS = new Set([ReaperInstance.getImage(), PortForwarderInstance.IMAGE_NAME]);
+  private readonly HELPER_CONTAINERS = new Set([ReaperInstance.getImage(), PortForwarderInstance.getImage()]);
 
   constructor(public readonly registry: Registry | undefined, public readonly image: Image, public readonly tag: Tag) {
     if (this.registry) {
@@ -26,11 +26,11 @@ export class RepoTag {
   }
 
   public isReaper(): boolean {
-    return this.toString() === ReaperInstance.getImage();
+    return this.string === ReaperInstance.getImage();
   }
 
   public isHelperContainer(): boolean {
-    return this.HELPER_CONTAINERS.has(this.image);
+    return this.HELPER_CONTAINERS.has(this.string);
   }
 
   public static fromString(string: string): RepoTag {
