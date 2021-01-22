@@ -8,6 +8,7 @@ export class Auths implements RegistryAuthLocator {
   }
 
   isApplicable(registry: string, dockerConfig: DockerConfig): boolean {
+    console.log("dockerConfig.auths=", dockerConfig.auths);
     return dockerConfig.auths !== undefined && dockerConfig.auths.some((auth) => auth[registry] !== undefined);
   }
 
