@@ -2,7 +2,6 @@ import { BoundPorts } from "./bound-ports";
 import { Container, Id as ContainerId, InspectResult } from "./container";
 import { ContainerState } from "./container-state";
 import {
-  AuthConfig,
   BindMode,
   BindMount,
   BuildArgs,
@@ -26,7 +25,7 @@ import { Port } from "./port";
 import { PortBinder } from "./port-binder";
 import { HostPortCheck, InternalPortCheck } from "./port-check";
 import { DefaultPullPolicy, PullPolicy } from "./pull-policy";
-import { Image, RepoTag, Tag } from "./repo-tag";
+import { DockerImageName } from "./docker-image-name";
 import {
   DEFAULT_STOP_OPTIONS,
   StartedTestContainer,
@@ -39,6 +38,7 @@ import { HostPortWaitStrategy, WaitStrategy } from "./wait-strategy";
 import { ReaperInstance } from "./reaper";
 import { Readable } from "stream";
 import { PortForwarderInstance } from "./port-forwarder";
+import { getAuthConfig } from "./registry-auth-locator";
 
 export class GenericContainerBuilder {
   private buildArgs: BuildArgs = {};
@@ -55,13 +55,10 @@ export class GenericContainerBuilder {
   }
 
   public async build(): Promise<GenericContainer> {
-    const image = this.uuid.nextUuid();
-    const tag = this.uuid.nextUuid();
-
-    const repoTag = new RepoTag(image, tag);
+    const dockerImageName = new DockerImageName(undefined, this.uuid.nextUuid(), this.uuid.nextUuid());
     const dockerClient = await DockerClientInstance.getInstance();
-    await dockerClient.buildImage(repoTag, this.context, this.dockerfileName, this.buildArgs);
-    const container = new GenericContainer(image, tag);
+    await dockerClient.buildImage(dockerImageName, this.context, this.dockerfileName, this.buildArgs);
+    const container = new GenericContainer(dockerImageName.toString());
 
     if (!(await container.isImageCached(dockerClient))) {
       throw new Error("Failed to build image");
@@ -76,7 +73,7 @@ export class GenericContainer implements TestContainer {
     return new GenericContainerBuilder(context, dockerfileName);
   }
 
-  private readonly repoTag: RepoTag;
+  private readonly dockerImageName: DockerImageName;
 
   protected env: Env = {};
   protected networkMode?: NetworkMode;
@@ -91,25 +88,25 @@ export class GenericContainer implements TestContainer {
   protected useDefaultLogDriver = false;
   protected privilegedMode = false;
   protected daemonMode = false;
-  protected authConfig?: AuthConfig;
   protected pullPolicy: PullPolicy = new DefaultPullPolicy();
 
   private extraHosts: ExtraHost[] = [];
 
-  constructor(readonly image: Image, readonly tag: Tag = "latest") {
-    this.repoTag = new RepoTag(image, tag);
+  constructor(readonly image: string) {
+    this.dockerImageName = DockerImageName.fromString(image);
   }
 
   public async start(): Promise<StartedTestContainer> {
     const dockerClient = await DockerClientInstance.getInstance();
 
     if (this.pullPolicy.shouldPull() || !(await this.isImageCached(dockerClient))) {
-      await dockerClient.pull(this.repoTag, this.authConfig);
+      const authConfig = this.dockerImageName.registry ? await getAuthConfig(this.dockerImageName.registry) : undefined;
+      await dockerClient.pull(this.dockerImageName, authConfig);
     }
 
     const boundPorts = await new PortBinder().bind(this.ports);
 
-    if (!this.repoTag.isReaper()) {
+    if (!this.dockerImageName.isReaper()) {
       await ReaperInstance.getInstance(dockerClient);
     }
 
@@ -117,13 +114,13 @@ export class GenericContainer implements TestContainer {
       await this.preCreate(dockerClient, boundPorts);
     }
 
-    if (!this.repoTag.isHelperContainer() && PortForwarderInstance.isRunning()) {
+    if (!this.dockerImageName.isHelperContainer() && PortForwarderInstance.isRunning()) {
       const portForwarder = await PortForwarderInstance.getInstance(dockerClient);
       this.extraHosts.push({ host: "host.testcontainers.internal", ipAddress: portForwarder.getIpAddress() });
     }
 
     const container = await dockerClient.create({
-      repoTag: this.repoTag,
+      dockerImageName: this.dockerImageName,
       env: this.env,
       cmd: this.cmd,
       bindMounts: this.bindMounts,
@@ -138,7 +135,7 @@ export class GenericContainer implements TestContainer {
       extraHosts: this.extraHosts,
     });
 
-    if (!this.repoTag.isHelperContainer() && PortForwarderInstance.isRunning()) {
+    if (!this.dockerImageName.isHelperContainer() && PortForwarderInstance.isRunning()) {
       const portForwarder = await PortForwarderInstance.getInstance(dockerClient);
       const portForwarderNetworkId = portForwarder.getNetworkId();
       const excludedNetworks = [portForwarderNetworkId, "none", "host"];
@@ -148,7 +145,7 @@ export class GenericContainer implements TestContainer {
       }
     }
 
-    log.info(`Starting container ${this.repoTag} with ID: ${container.getId()}`);
+    log.info(`Starting container ${this.dockerImageName} with ID: ${container.getId()}`);
     await dockerClient.start(container);
 
     if (!this.daemonMode) {
@@ -170,11 +167,6 @@ export class GenericContainer implements TestContainer {
       inspectResult.name,
       dockerClient
     );
-  }
-
-  public withAuthentication(authConfig: AuthConfig): this {
-    this.authConfig = authConfig;
-    return this;
   }
 
   public withCmd(cmd: Command[]): this {
@@ -248,8 +240,8 @@ export class GenericContainer implements TestContainer {
   }
 
   public async isImageCached(dockerClient: DockerClient): Promise<boolean> {
-    const repoTags = await dockerClient.fetchRepoTags();
-    return repoTags.some((repoTag) => repoTag.equals(this.repoTag));
+    const dockerImageNames = await dockerClient.fetchDockerImageNames();
+    return dockerImageNames.some((dockerImageName) => dockerImageName.equals(this.dockerImageName));
   }
 
   protected preCreate?(dockerClient: DockerClient, boundPorts: BoundPorts): Promise<void>;
@@ -267,7 +259,7 @@ export class GenericContainer implements TestContainer {
       await waitStrategy.withStartupTimeout(this.startupTimeout).waitUntilReady(container, containerState, boundPorts);
       log.info("Container is ready");
     } catch (err) {
-      log.error("Container failed to be ready");
+      log.error(`Container failed to be ready: ${err}`);
 
       if (this.daemonMode) {
         (await container.logs())
@@ -279,7 +271,7 @@ export class GenericContainer implements TestContainer {
         await container.stop({ timeout: 0 });
         await container.remove({ removeVolumes: true });
       } catch (stopErr) {
-        log.error("Failed to stop container after it failed to be ready");
+        log.error(`Failed to stop container after it failed to be ready: ${stopErr}`);
       }
       throw err;
     }

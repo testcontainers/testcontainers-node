@@ -29,8 +29,7 @@ class DisabledReaper implements Reaper {
 }
 
 export class ReaperInstance {
-  public static IMAGE_NAME = "testcontainers/ryuk";
-  public static IMAGE_VERSION = "0.3.0";
+  private static DEFAULT_IMAGE = "testcontainers/ryuk:0.3.0";
 
   private static instance: Promise<Reaper>;
 
@@ -46,22 +45,12 @@ export class ReaperInstance {
     return this.instance;
   }
 
+  public static getImage(): string {
+    return process.env.RYUK_CONTAINER_IMAGE === undefined ? this.DEFAULT_IMAGE : process.env.RYUK_CONTAINER_IMAGE;
+  }
+
   private static isEnabled(): boolean {
     return process.env.TESTCONTAINERS_RYUK_DISABLED !== "true";
-  }
-
-  private static getImageName(): string {
-    if (process.env.RYUK_CONTAINER_IMAGE !== undefined) {
-      this.IMAGE_NAME = process.env.RYUK_CONTAINER_IMAGE.split(/:/)[0];
-    }
-    return this.IMAGE_NAME;
-  }
-
-  private static getImageVersion(): string {
-    if (process.env.RYUK_CONTAINER_IMAGE !== undefined) {
-      this.IMAGE_VERSION = process.env.RYUK_CONTAINER_IMAGE.split(/:/)[1];
-    }
-    return this.IMAGE_VERSION;
   }
 
   private static createDisabledInstance(dockerClient: DockerClient): Promise<Reaper> {
@@ -75,7 +64,7 @@ export class ReaperInstance {
     const sessionId = dockerClient.getSessionId();
 
     log.debug(`Creating new Reaper for session: ${sessionId}`);
-    const container = await new GenericContainer(this.getImageName(), this.getImageVersion())
+    const container = await new GenericContainer(this.getImage())
       .withName(`testcontainers-ryuk-${sessionId}`)
       .withExposedPorts(8080)
       .withWaitStrategy(Wait.forLogMessage("Started!"))

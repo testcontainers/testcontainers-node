@@ -8,7 +8,7 @@ import { Host } from "./docker-client-instance";
 import { findDockerIgnoreFiles } from "./docker-ignore";
 import { log } from "./logger";
 import { PortString } from "./port";
-import { RepoTag } from "./repo-tag";
+import { DockerImageName } from "./docker-image-name";
 import { PullStreamParser } from "./pull-stream-parser";
 import { Readable } from "stream";
 
@@ -66,7 +66,7 @@ type DockerodeExtraHosts = string[];
 export type AuthConfig = {
   username: string;
   password: string;
-  serveraddress: string;
+  registryAddress: string;
   email?: string;
 };
 
@@ -76,7 +76,7 @@ type DockerodeLogConfig = {
 };
 
 type CreateOptions = {
-  repoTag: RepoTag;
+  dockerImageName: DockerImageName;
   env: Env;
   cmd: Command[];
   bindMounts: BindMount[];
@@ -104,15 +104,20 @@ export type CreateNetworkOptions = {
 };
 
 export interface DockerClient {
-  pull(repoTag: RepoTag, authConfig?: AuthConfig): Promise<void>;
+  pull(dockerImageName: DockerImageName, authConfig?: AuthConfig): Promise<void>;
   create(options: CreateOptions): Promise<Container>;
   createNetwork(options: CreateNetworkOptions): Promise<string>;
   removeNetwork(id: string): Promise<void>;
   connectToNetwork(containerId: string, networkId: string): Promise<void>;
   start(container: Container): Promise<void>;
   exec(container: Container, command: Command[]): Promise<ExecResult>;
-  buildImage(repoTag: RepoTag, context: BuildContext, dockerfileName: string, buildArgs: BuildArgs): Promise<void>;
-  fetchRepoTags(): Promise<RepoTag[]>;
+  buildImage(
+    dockerImageName: DockerImageName,
+    context: BuildContext,
+    dockerfileName: string,
+    buildArgs: BuildArgs
+  ): Promise<void>;
+  fetchDockerImageNames(): Promise<DockerImageName[]>;
   listContainers(): Promise<Dockerode.ContainerInfo[]>;
   getContainer(id: Id): Promise<Container>;
   getHost(): Host;
@@ -123,22 +128,22 @@ export interface DockerClient {
 export class DockerodeClient implements DockerClient {
   constructor(private readonly host: Host, private readonly dockerode: Dockerode, private readonly sessionId: Id) {}
 
-  public async pull(repoTag: RepoTag, authConfig?: AuthConfig): Promise<void> {
-    log.info(`Pulling image: ${repoTag}`);
-    const stream = await this.dockerode.pull(repoTag.toString(), { authconfig: authConfig });
-    await new PullStreamParser(repoTag, log).consume(stream);
+  public async pull(dockerImageName: DockerImageName, authConfig?: AuthConfig): Promise<void> {
+    log.info(`Pulling image: ${dockerImageName}`);
+    const stream = await this.dockerode.pull(dockerImageName.toString(), { authconfig: authConfig });
+    await new PullStreamParser(dockerImageName, log).consume(stream);
   }
 
   public async create(options: CreateOptions): Promise<Container> {
-    log.info(`Creating container for image: ${options.repoTag}`);
+    log.info(`Creating container for image: ${options.dockerImageName}`);
 
     const dockerodeContainer = await this.dockerode.createContainer({
       name: options.name,
-      Image: options.repoTag.toString(),
+      Image: options.dockerImageName.toString(),
       Env: this.getEnv(options.env),
       ExposedPorts: this.getExposedPorts(options.boundPorts),
       Cmd: options.cmd,
-      Labels: this.createLabels(options.repoTag),
+      Labels: this.createLabels(options.dockerImageName),
       // @ts-ignore
       Healthcheck: this.getHealthCheck(options.healthCheck),
       HostConfig: {
@@ -217,32 +222,32 @@ export class DockerodeClient implements DockerClient {
   }
 
   public async buildImage(
-    repoTag: RepoTag,
+    dockerImageName: DockerImageName,
     context: BuildContext,
     dockerfileName: string,
     buildArgs: BuildArgs
   ): Promise<void> {
-    log.info(`Building image '${repoTag.toString()}' with context '${context}'`);
+    log.info(`Building image '${dockerImageName.toString()}' with context '${context}'`);
     const dockerIgnoreFiles = await findDockerIgnoreFiles(context);
     const tarStream = tar.pack(context, { ignore: (name) => dockerIgnoreFiles.has(slash(name)) });
     const stream = await this.dockerode.buildImage(tarStream, {
       dockerfile: dockerfileName,
       buildargs: buildArgs,
-      t: repoTag.toString(),
-      labels: this.createLabels(repoTag),
+      t: dockerImageName.toString(),
+      labels: this.createLabels(dockerImageName),
     });
     await streamToArray(stream);
   }
 
-  public async fetchRepoTags(): Promise<RepoTag[]> {
+  public async fetchDockerImageNames(): Promise<DockerImageName[]> {
     const images = await this.dockerode.listImages();
 
-    return images.reduce((repoTags: RepoTag[], image) => {
+    return images.reduce((dockerImageNames: DockerImageName[], image) => {
       if (this.isDanglingImage(image)) {
-        return repoTags;
+        return dockerImageNames;
       }
-      const imageRepoTags = image.RepoTags.map((imageRepoTag) => RepoTag.fromString(imageRepoTag));
-      return [...repoTags, ...imageRepoTags];
+      const dockerImageNamesForImage = image.RepoTags.map((imageRepoTag) => DockerImageName.fromString(imageRepoTag));
+      return [...dockerImageNames, ...dockerImageNamesForImage];
     }, []);
   }
 
@@ -270,8 +275,8 @@ export class DockerodeClient implements DockerClient {
     return image.RepoTags === null;
   }
 
-  private createLabels(repoTag?: RepoTag): { [label: string]: string } {
-    if (repoTag && repoTag.isReaper()) {
+  private createLabels(dockerImageName?: DockerImageName): { [label: string]: string } {
+    if (dockerImageName && dockerImageName.isReaper()) {
       return {};
     }
     return { "org.testcontainers.session-id": this.sessionId };

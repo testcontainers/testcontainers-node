@@ -1,5 +1,4 @@
 import { GenericContainer, Wait } from "../..";
-import { Image, Tag } from "../../repo-tag";
 import { Host } from "../../docker-client-instance";
 import { StartedTestContainer } from "../../test-container";
 import { Port } from "../../port";
@@ -11,8 +10,8 @@ export class Neo4jContainer extends GenericContainer {
   private readonly defaultHttpPort = 7474;
   private readonly defaultUsername = "neo4j";
 
-  constructor(image: Image = "neo4j", tag: Tag = "latest", private password = new RandomUuid().nextUuid()) {
-    super(image, tag);
+  constructor(image = "neo4j:latest", private password = new RandomUuid().nextUuid()) {
+    super(image);
     this.withExposedPorts(this.defaultBoltPort, this.defaultHttpPort).withWaitStrategy(Wait.forLogMessage("Started."));
   }
 

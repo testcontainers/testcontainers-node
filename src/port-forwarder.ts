@@ -28,8 +28,7 @@ export class PortForwarder {
 }
 
 export class PortForwarderInstance {
-  public static IMAGE_NAME = "testcontainers/sshd";
-  public static IMAGE_VERSION = "1.0.0";
+  private static DEFAULT_IMAGE = "testcontainers/sshd:1.0.0";
 
   private static instance: Promise<PortForwarder>;
 
@@ -37,18 +36,8 @@ export class PortForwarderInstance {
     return this.instance !== undefined;
   }
 
-  private static getImageName(): string {
-    if (process.env.SSHD_CONTAINER_IMAGE !== undefined) {
-      this.IMAGE_NAME = process.env.SSHD_CONTAINER_IMAGE.split(/:/)[0];
-    }
-    return this.IMAGE_NAME;
-  }
-
-  private static getImageVersion(): string {
-    if (process.env.SSHD_CONTAINER_IMAGE !== undefined) {
-      this.IMAGE_VERSION = process.env.SSHD_CONTAINER_IMAGE.split(/:/)[1];
-    }
-    return this.IMAGE_VERSION;
+  public static getImage(): string {
+    return process.env.SSHD_CONTAINER_IMAGE === undefined ? this.DEFAULT_IMAGE : process.env.SSHD_CONTAINER_IMAGE;
   }
 
   public static async getInstance(dockerClient: DockerClient): Promise<PortForwarder> {
@@ -64,7 +53,7 @@ export class PortForwarderInstance {
     const username = "root";
     const password = new RandomUuid().nextUuid();
 
-    const container = await new GenericContainer(this.getImageName(), this.getImageVersion())
+    const container = await new GenericContainer(this.getImage())
       .withName(`testcontainers-port-forwarder-${dockerClient.getSessionId()}`)
       .withDaemonMode()
       .withExposedPorts(22)

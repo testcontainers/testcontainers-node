@@ -1,7 +1,7 @@
 import { Readable } from "stream";
 import { PullStreamParser } from "./pull-stream-parser";
 import { FakeLogger } from "./logger";
-import { RepoTag } from "./repo-tag";
+import { DockerImageName } from "./docker-image-name";
 
 describe("PullStreamParser", () => {
   let logger: FakeLogger;
@@ -10,7 +10,7 @@ describe("PullStreamParser", () => {
 
   beforeEach(() => {
     logger = new FakeLogger();
-    parser = new PullStreamParser(new RepoTag("image", "tag"), logger);
+    parser = new PullStreamParser(new DockerImageName(undefined, "image", "tag"), logger);
     stream = new Readable();
   });
 
