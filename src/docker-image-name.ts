@@ -5,9 +5,9 @@ export type Registry = string;
 export type Image = string;
 export type Tag = string;
 
-export class RepoTag {
+export class DockerImageName {
   private readonly string: string;
-  private readonly HELPER_CONTAINERS = new Set([ReaperInstance.getImage(), PortForwarderInstance.getImage()]);
+  private static readonly HELPER_CONTAINERS = new Set([ReaperInstance.getImage(), PortForwarderInstance.getImage()]);
 
   constructor(public readonly registry: Registry | undefined, public readonly image: Image, public readonly tag: Tag) {
     if (this.registry) {
@@ -17,8 +17,8 @@ export class RepoTag {
     }
   }
 
-  public equals(repoTag: RepoTag): boolean {
-    return this.registry === repoTag.registry && this.image === repoTag.image && this.tag === repoTag.tag;
+  public equals(other: DockerImageName): boolean {
+    return this.registry === other.registry && this.image === other.image && this.tag === other.tag;
   }
 
   public toString(): string {
@@ -30,21 +30,21 @@ export class RepoTag {
   }
 
   public isHelperContainer(): boolean {
-    return this.HELPER_CONTAINERS.has(this.string);
+    return DockerImageName.HELPER_CONTAINERS.has(this.string);
   }
 
-  public static fromString(string: string): RepoTag {
+  public static fromString(string: string): DockerImageName {
     const registry = this.getRegistry(string);
     const stringWithoutRegistry = registry ? string.split("/").slice(1).join("/") : string;
 
     if (stringWithoutRegistry.includes("@")) {
       const [image, tag] = stringWithoutRegistry.split("@");
-      return new RepoTag(registry, image, tag);
+      return new DockerImageName(registry, image, tag);
     } else if (stringWithoutRegistry.includes(":")) {
       const [image, tag] = stringWithoutRegistry.split(":");
-      return new RepoTag(registry, image, tag);
+      return new DockerImageName(registry, image, tag);
     } else {
-      return new RepoTag(registry, stringWithoutRegistry, "latest");
+      return new DockerImageName(registry, stringWithoutRegistry, "latest");
     }
   }
 

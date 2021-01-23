@@ -14,7 +14,12 @@ describe("GenericContainer", () => {
   jest.setTimeout(180_000);
 
   const fixtures = path.resolve(__dirname, "..", "fixtures", "docker");
-  const dockerodeClient = new Dockerode();
+
+  let dockerodeClient: Dockerode;
+
+  beforeEach(() => {
+    dockerodeClient = new Dockerode();
+  });
 
   it("should wait for port", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12").withExposedPorts(8080).start();

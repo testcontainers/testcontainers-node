@@ -1,10 +1,10 @@
 import byline from "byline";
 import { Readable } from "stream";
 import { Logger } from "./logger";
-import { RepoTag } from "./repo-tag";
+import { DockerImageName } from "./docker-image-name";
 
 export class PullStreamParser {
-  constructor(private readonly repoTag: RepoTag, private readonly logger: Logger) {}
+  constructor(private readonly dockerImageName: DockerImageName, private readonly logger: Logger) {}
 
   public consume(stream: Readable): Promise<void> {
     const messagesById: Map<string, Set<string>> = new Map();
@@ -16,7 +16,9 @@ export class PullStreamParser {
           const json = JSON.parse(line);
           const { id, status } = json;
 
-          const prefix = id ? `Pulling ${this.repoTag.toString()} - ${id}` : `Pulling ${this.repoTag.toString()}`;
+          const prefix = id
+            ? `Pulling ${this.dockerImageName.toString()} - ${id}`
+            : `Pulling ${this.dockerImageName.toString()}`;
 
           if (status === "Downloading") {
             const { current, total } = json.progressDetail;
