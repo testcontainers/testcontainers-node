@@ -3,6 +3,7 @@ import { log } from "./logger";
 import { Command, ContainerName, ExitCode } from "./docker-client";
 import { Port } from "./port";
 import { Duplex, Readable } from "stream";
+import streamToArray from "stream-to-array";
 
 export type Id = string;
 
@@ -122,11 +123,7 @@ export class DockerodeContainer implements Container {
 
   public async putArchive(stream: Readable, containerPath: string): Promise<void> {
     const respStream = await this.container.putArchive(stream, { path: containerPath });
-    await new Promise((resolve, reject) =>
-      this.container.modem.followProgress(respStream, (err: unknown, res: unknown) =>
-        err ? reject(err) : resolve(res)
-      )
-    );
+    await streamToArray(respStream);
   }
 
   private getName(inspectInfo: ContainerInspectInfo): ContainerName {

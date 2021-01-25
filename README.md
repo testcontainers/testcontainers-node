@@ -178,6 +178,18 @@ const container = await new GenericContainer("postgres")
   .start();
 ```
 
+Copy a file to a container before it is started:
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await new GenericContainer("postgres")
+  .withExposedPorts(5432)
+  .withCopyFileToContainer("/local/file.txt", "/remote/file1.txt")
+  .withCopyContentToContainer("hello world", "/remote/file2.txt")
+  .start();
+```
+
 Creating a container with environment variables:
 
 ```javascript
