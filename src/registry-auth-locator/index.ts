@@ -1,7 +1,7 @@
 import path from "path";
 import os from "os";
 import { DockerConfig } from "./types";
-import { promises as fs } from "fs";
+import { promises as fs, existsSync } from "fs";
 import { CredHelpers } from "./cred-helpers";
 import { CredsStore } from "./creds-store";
 import { Auths } from "./auths";
@@ -11,7 +11,12 @@ import { log } from "../logger";
 
 const dockerConfigFile = path.resolve(os.homedir(), ".docker", "config.json");
 
-const dockerConfigPromise: Promise<DockerConfig> = fs.readFile(dockerConfigFile).then((buffer) => {
+const readDockerConfig = async (): Promise<DockerConfig> => {
+  if (!existsSync(dockerConfigFile)) {
+    return Promise.resolve({});
+  }
+
+  const buffer = await fs.readFile(dockerConfigFile);
   const object = JSON.parse(buffer.toString());
 
   return {
@@ -19,7 +24,9 @@ const dockerConfigPromise: Promise<DockerConfig> = fs.readFile(dockerConfigFile)
     credHelpers: object.credHelpers,
     auths: object.auths,
   };
-});
+};
+
+const dockerConfigPromise = readDockerConfig();
 
 const registryAuthLocators: RegistryAuthLocator[] = [new CredHelpers(), new CredsStore(), new Auths()];
 
