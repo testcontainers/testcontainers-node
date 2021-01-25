@@ -55,6 +55,7 @@ export interface Container {
   exec(options: ExecOptions): Promise<Exec>;
   logs(): Promise<Readable>;
   inspect(): Promise<InspectResult>;
+  putArchive(stream: Readable, containerPath: string): Promise<void>;
 }
 
 export class DockerodeContainer implements Container {
@@ -117,6 +118,15 @@ export class DockerodeContainer implements Container {
       healthCheckStatus: this.getHealthCheckStatus(inspectResult),
       networkSettings: this.getNetworkSettings(inspectResult),
     };
+  }
+
+  public async putArchive(stream: Readable, containerPath: string): Promise<void> {
+    const respStream = await this.container.putArchive(stream, { path: containerPath });
+    await new Promise((resolve, reject) =>
+      this.container.modem.followProgress(respStream, (err: unknown, res: unknown) =>
+        err ? reject(err) : resolve(res)
+      )
+    );
   }
 
   private getName(inspectInfo: ContainerInspectInfo): ContainerName {

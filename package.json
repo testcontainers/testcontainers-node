@@ -32,6 +32,7 @@
   },
   "dependencies": {
     "@types/dockerode": "^3.2.1",
+    "archiver": "^5.2.0",
     "byline": "^5.0.0",
     "debug": "^4.3.1",
     "docker-compose": "^0.23.5",
@@ -45,6 +46,7 @@
   },
   "devDependencies": {
     "@elastic/elasticsearch": "^7.10.0",
+    "@types/archiver": "^5.1.0",
     "@types/byline": "^4.2.32",
     "@types/debug": "4.1.5",
     "@types/glob": "^7.1.3",

@@ -29,6 +29,8 @@ export interface TestContainer {
   withDefaultLogDriver(): this;
   withPrivilegedMode(): this;
   withPullPolicy(pullPolicy: PullPolicy): this;
+  withCopyFileToContainer(sourcePath: string, containerPath: string): this;
+  withCopyContentToContainer(content: string | Buffer | Readable, containerPath: string): this;
 }
 
 export interface StopOptions {
