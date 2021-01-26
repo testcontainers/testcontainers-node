@@ -120,7 +120,7 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
         .on("end", () => {
           stream.destroy();
           clearTimeout(timeout);
-          reject();
+          reject(new Error(`Log stream ended and message "${this.message}" was not received`));
         });
     });
   }
