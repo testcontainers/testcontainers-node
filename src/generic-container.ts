@@ -1,3 +1,4 @@
+import archiver from "archiver";
 import { BoundPorts } from "./bound-ports";
 import { Container, Id as ContainerId, InspectResult } from "./container";
 import { ContainerState } from "./container-state";
@@ -89,6 +90,7 @@ export class GenericContainer implements TestContainer {
   protected privilegedMode = false;
   protected daemonMode = false;
   protected pullPolicy: PullPolicy = new DefaultPullPolicy();
+  protected tarToCopy?: archiver.Archiver;
 
   private extraHosts: ExtraHost[] = [];
 
@@ -143,6 +145,11 @@ export class GenericContainer implements TestContainer {
       if (!this.networkMode || !excludedNetworks.includes(this.networkMode)) {
         await dockerClient.connectToNetwork(container.getId(), portForwarderNetworkId);
       }
+    }
+
+    if (this.tarToCopy) {
+      this.tarToCopy.finalize();
+      await container.putArchive(this.tarToCopy, "/");
     }
 
     log.info(`Starting container ${this.dockerImageName} with ID: ${container.getId()}`);
@@ -239,9 +246,26 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
+  public withCopyFileToContainer(sourcePath: string, containerPath: string): this {
+    this.getTarToCopy().file(sourcePath, { name: containerPath });
+    return this;
+  }
+
+  public withCopyContentToContainer(content: string | Buffer | Readable, containerPath: string): this {
+    this.getTarToCopy().append(content, { name: containerPath });
+    return this;
+  }
+
   public async isImageCached(dockerClient: DockerClient): Promise<boolean> {
     const dockerImageNames = await dockerClient.fetchDockerImageNames();
     return dockerImageNames.some((dockerImageName) => dockerImageName.equals(this.dockerImageName));
+  }
+
+  protected getTarToCopy(): archiver.Archiver {
+    if (!this.tarToCopy) {
+      this.tarToCopy = archiver("tar");
+    }
+    return this.tarToCopy;
   }
 
   protected preCreate?(dockerClient: DockerClient, boundPorts: BoundPorts): Promise<void>;

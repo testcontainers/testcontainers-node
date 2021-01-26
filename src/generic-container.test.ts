@@ -355,6 +355,32 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
+  it("should copy file to container", async () => {
+    const source = path.resolve(fixtures, "docker", "test.txt");
+    const target = "/tmp/test.txt";
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
+      .withCopyFileToContainer(source, target)
+      .withExposedPorts(8080)
+      .start();
+    const { output } = await container.exec(["cat", target]);
+
+    expect(output).toBe("hello world");
+    await container.stop();
+  });
+
+  it("should copy content to container", async () => {
+    const content = "hello world";
+    const target = "/tmp/test.txt";
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
+      .withCopyContentToContainer(content, target)
+      .withExposedPorts(8080)
+      .start();
+    const { output } = await container.exec(["cat", target]);
+
+    expect(output).toBe(content);
+    await container.stop();
+  });
+
   describe("from Dockerfile", () => {
     it("should build and start", async () => {
       const context = path.resolve(fixtures, "docker");

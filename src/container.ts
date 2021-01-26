@@ -3,6 +3,7 @@ import { log } from "./logger";
 import { Command, ContainerName, ExitCode } from "./docker-client";
 import { Port } from "./port";
 import { Duplex, Readable } from "stream";
+import streamToArray from "stream-to-array";
 
 export type Id = string;
 
@@ -55,6 +56,7 @@ export interface Container {
   exec(options: ExecOptions): Promise<Exec>;
   logs(): Promise<Readable>;
   inspect(): Promise<InspectResult>;
+  putArchive(stream: Readable, containerPath: string): Promise<void>;
 }
 
 export class DockerodeContainer implements Container {
@@ -117,6 +119,11 @@ export class DockerodeContainer implements Container {
       healthCheckStatus: this.getHealthCheckStatus(inspectResult),
       networkSettings: this.getNetworkSettings(inspectResult),
     };
+  }
+
+  public async putArchive(stream: Readable, containerPath: string): Promise<void> {
+    const respStream = await this.container.putArchive(stream, { path: containerPath });
+    await streamToArray(respStream);
   }
 
   private getName(inspectInfo: ContainerInspectInfo): ContainerName {
