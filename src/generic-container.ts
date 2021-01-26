@@ -90,7 +90,7 @@ export class GenericContainer implements TestContainer {
   protected privilegedMode = false;
   protected daemonMode = false;
   protected pullPolicy: PullPolicy = new DefaultPullPolicy();
-  protected tarToCopy: archiver.Archiver | undefined;
+  protected tarToCopy?: archiver.Archiver;
 
   private extraHosts: ExtraHost[] = [];
 
