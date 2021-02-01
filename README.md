@@ -452,7 +452,7 @@ const environment = await new DockerComposeEnvironment(composeFilePath, composeF
   .up();
 ```
 
-Bind environment variables to the docker-compose file. For example if we the following docker-compose file:
+Bind environment variables to the docker-compose file. For example if we have the following docker-compose file:
 
 ```yaml
 services:
