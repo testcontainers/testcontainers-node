@@ -3,7 +3,7 @@ import Dockerode from "dockerode";
 import { BoundPorts } from "./bound-ports";
 import { Container } from "./container";
 import { ContainerState } from "./container-state";
-import { DockerClient } from "./docker-client";
+import { DockerClient, Env, EnvKey, EnvValue } from "./docker-client";
 import { DockerClientInstance } from "./docker-client-instance";
 import { resolveDockerComposeContainerName } from "./docker-compose-container-name-resolver";
 import { StartedGenericContainer } from "./generic-container";
@@ -17,6 +17,7 @@ export class DockerComposeEnvironment {
   private readonly projectName: string;
 
   private build = false;
+  private env: Env = {};
   private waitStrategy: { [containerName: string]: WaitStrategy } = {};
   private startupTimeout = 60_000;
 
@@ -30,6 +31,11 @@ export class DockerComposeEnvironment {
 
   public withBuild(): this {
     this.build = true;
+    return this;
+  }
+
+  public withEnv(key: EnvKey, value: EnvValue): this {
+    this.env[key] = value;
     return this;
   }
 
@@ -50,7 +56,7 @@ export class DockerComposeEnvironment {
 
     (await ReaperInstance.getInstance(dockerClient)).addProject(this.projectName);
 
-    await upAll(this.composeFilePath, this.composeFiles, this.projectName, this.build);
+    await this.upAll();
     const startedContainers = (await dockerClient.listContainers()).filter(
       (container) => container.Labels["com.docker.compose.project"] === this.projectName
     );
@@ -94,6 +100,34 @@ export class DockerComposeEnvironment {
       this.projectName,
       startedGenericContainers
     );
+  }
+
+  private async upAll() {
+    const commandOptions = [];
+    if (this.build) {
+      commandOptions.push("--build");
+    }
+
+    const defaultOptions = defaultDockerComposeOptions(this.composeFilePath, this.composeFiles, this.projectName);
+    const options = {
+      ...defaultOptions,
+      commandOptions,
+      env: { ...defaultOptions.env, ...this.env },
+    };
+
+    log.info(`Starting DockerCompose environment`);
+    try {
+      await dockerCompose.upAll(options);
+      log.info(`Started DockerCompose environment`);
+    } catch (err) {
+      log.error(`Failed to start DockerCompose environment: ${err}`);
+      try {
+        await down(this.composeFilePath, this.composeFiles, this.projectName);
+      } catch {
+        log.warn(`Failed to stop DockerCompose environment after failed start`);
+      }
+      throw new Error(err);
+    }
   }
 
   private getBoundPorts(containerInfo: Dockerode.ContainerInfo): BoundPorts {
@@ -183,39 +217,6 @@ const defaultDockerComposeOptions = (
     COMPOSE_PROJECT_NAME: projectName,
   },
 });
-
-const upAll = async (
-  filePath: string,
-  files: string | string[],
-  projectName: string,
-  build: boolean
-): Promise<void> => {
-  const createOptions = (): dockerCompose.IDockerComposeOptions => {
-    const commandOptions = [];
-    if (build) {
-      commandOptions.push("--build");
-    }
-
-    return {
-      ...defaultDockerComposeOptions(filePath, files, projectName),
-      commandOptions,
-    };
-  };
-
-  log.info(`Starting DockerCompose environment`);
-  try {
-    await dockerCompose.upAll(createOptions());
-    log.info(`Started DockerCompose environment`);
-  } catch ({ err }) {
-    log.error(`Failed to start DockerCompose environment: ${err}`);
-    try {
-      await down(filePath, files, projectName);
-    } catch {
-      log.warn(`Failed to stop DockerCompose environment after failed start`);
-    }
-    throw new Error(err.trim());
-  }
-};
 
 const down = async (filePath: string, files: string | string[], projectName: string): Promise<void> => {
   const createOptions = (): dockerCompose.IDockerComposeOptions => ({

@@ -346,11 +346,6 @@ const { output } = await container.exec(["curl", `http://host.testcontainers.int
 assert(output === "hello world");
 ```
 
-## Authentication
-
-Testcontainers will automatically pick up and use credentials from `$HOME/.docker/config.json`, using
-credential helpers, credential stores, or raw auth as necessary and in that order.
-
 ## Docker Compose
 
 Testcontainers supports docker-compose. For example for the following `docker-compose.yml`:
@@ -447,13 +442,31 @@ const environment = await new DockerComposeEnvironment(composeFilePath, composeF
 await environment.stop();
 ```
 
-By default docker-compose does not re-build Dockerfiles, but you can override this behaviour:
+By default, docker-compose does not re-build Dockerfiles, but you can override this behaviour:
 
 ```javascript
 const { DockerComposeEnvironment, Wait } = require("testcontainers");
 
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
   .withBuild()
+  .up();
+```
+
+Bind environment variables to the docker-compose file. For example if we have a docker-compose file like:
+
+```yaml
+services:
+  redis:
+    image: redis:${TAG}
+```
+
+Then we can set `TAG` as follows:
+
+```javascript
+const { DockerComposeEnvironment, Wait } = require("testcontainers");
+
+const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
+  .withEnv("TAG", "value")
   .up();
 ```
 
@@ -505,6 +518,11 @@ const container = await new GenericContainer("redis")
   .withWaitStrategy(Wait.forHealthCheck())
   .start();
 ```
+
+## Authentication
+
+Testcontainers will automatically pick up and use credentials from `$HOME/.docker/config.json`, using
+credential helpers, credential stores, or raw auth as necessary and in that order.
 
 ## Sidecars
 
