@@ -445,14 +445,14 @@ await environment.stop();
 By default, docker-compose does not re-build Dockerfiles, but you can override this behaviour:
 
 ```javascript
-const { DockerComposeEnvironment, Wait } = require("testcontainers");
+const { DockerComposeEnvironment } = require("testcontainers");
 
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
   .withBuild()
   .up();
 ```
 
-Bind environment variables to the docker-compose file. For example if we have a docker-compose file like:
+Bind environment variables to the docker-compose file. For example if we the following docker-compose file:
 
 ```yaml
 services:
@@ -463,7 +463,7 @@ services:
 Then we can set `TAG` as follows:
 
 ```javascript
-const { DockerComposeEnvironment, Wait } = require("testcontainers");
+const { DockerComposeEnvironment } = require("testcontainers");
 
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
   .withEnv("TAG", "value")
