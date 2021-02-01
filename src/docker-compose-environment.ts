@@ -126,7 +126,11 @@ export class DockerComposeEnvironment {
       } catch {
         log.warn(`Failed to stop DockerCompose environment after failed start`);
       }
-      throw new Error(err);
+      if (err.err) {
+        throw new Error(err.trim());
+      } else {
+        throw new Error(err);
+      }
     }
   }
 
