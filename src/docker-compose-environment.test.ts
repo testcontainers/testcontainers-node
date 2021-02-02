@@ -123,6 +123,18 @@ describe("DockerComposeEnvironment", () => {
     await startedEnvironment.down();
   });
 
+  it("should bind environment variables to the docker compose file", async () => {
+    const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-env.yml")
+      .withEnv("ENV_VAR", "ENV_VAR_VALUE")
+      .up();
+
+    const container = startedEnvironment.getContainer("container_1");
+    const response = await fetch(`http://${container.getHost()}:${container.getMappedPort(8080)}/env`);
+    const responseBody = await response.json();
+    expect(responseBody["ENV_VAR"]).toBe("ENV_VAR_VALUE");
+    await startedEnvironment.down();
+  });
+
   it("should throw error when you get container that does not exist", async () => {
     const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml").up();
 
