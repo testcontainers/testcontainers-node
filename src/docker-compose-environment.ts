@@ -133,7 +133,7 @@ export class DockerComposeEnvironment {
       await dockerCompose.upAll(options);
       log.info(`Started DockerCompose environment`);
     } catch (err) {
-      const errorMessage = err.err ? err.err.trim().replace("\n", ". ") : err;
+      const errorMessage = err.err ? err.err.trim().replace("\r\n", "").replace("\n", ". ") : err;
       log.error(`Failed to start DockerCompose environment: ${errorMessage}`);
       try {
         await down(this.composeFilePath, this.composeFiles, this.projectName);
