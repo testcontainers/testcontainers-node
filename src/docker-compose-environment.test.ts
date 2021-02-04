@@ -81,7 +81,7 @@ describe("DockerComposeEnvironment", () => {
         .withWaitStrategy("custom_container_name", Wait.forLogMessage("unexpected"))
         .withStartupTimeout(0)
         .up()
-    ).rejects.toThrowError(`Log message "unexpected" not received after 0ms`); // todo container name?
+    ).rejects.toThrowError(`Log message "unexpected" not received after 0ms`);
 
     expect(await getRunningContainerNames(dockerodeClient)).not.toContain("custom_container_name");
   });
@@ -92,7 +92,7 @@ describe("DockerComposeEnvironment", () => {
         .withWaitStrategy("container_1", Wait.forHealthCheck())
         .withStartupTimeout(0)
         .up()
-    ).rejects.toThrowError(`Health check not healthy after 0ms`); // todo container name?
+    ).rejects.toThrowError(`Health check not healthy after 0ms`);
 
     expect(await getRunningContainerNames(dockerodeClient)).not.toContain("container_1");
   });
