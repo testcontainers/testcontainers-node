@@ -74,6 +74,25 @@ describe("DockerComposeEnvironment", () => {
     await startedEnvironment.down();
   });
 
+  it("should stop the container when the log message wait strategy times out", async () => {
+    await expect(
+      new DockerComposeEnvironment(fixtures, "docker-compose-with-name.yml")
+        .withWaitStrategy("custom_container_name", Wait.forLogMessage("unexpected"))
+        .withStartupTimeout(0)
+        .up()
+    ).rejects.toThrowError(`Log message "unexpected" not received after 0ms`);
+
+    expect(await getRunningContainerNames()).not.toContain("custom_container_name");
+  });
+
+  const getRunningContainerNames = async (): Promise<string[]> => {
+    const containers = await dockerodeClient.listContainers();
+    return containers
+      .map((container) => container.Names)
+      .reduce((result, containerNames) => [...result, ...containerNames], [])
+      .map((containerName) => containerName.replace("/", ""));
+  };
+
   it("should support health check wait strategy", async () => {
     const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-healthcheck.yml")
       .withWaitStrategy("container_1", Wait.forHealthCheck())

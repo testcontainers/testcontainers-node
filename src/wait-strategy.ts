@@ -89,10 +89,11 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
 
     return new Promise((resolve, reject) => {
       const startupTimeout = this.startupTimeout;
-      const timeout = setTimeout(
-        () => reject(new Error(`Log message "${this.message}" not received after ${startupTimeout}ms`)),
-        startupTimeout
-      );
+      const timeout = setTimeout(() => {
+        const message = `Log message "${this.message}" not received after ${startupTimeout}ms`;
+        log.error(message);
+        reject(new Error(message));
+      }, startupTimeout);
 
       const comparisonFn: (line: string) => boolean = (line: string) => {
         if (this.message instanceof RegExp) {

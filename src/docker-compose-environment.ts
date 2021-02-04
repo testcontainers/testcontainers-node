@@ -75,7 +75,20 @@ export class DockerComposeEnvironment {
           const boundPorts = this.getBoundPorts(startedContainer);
           const containerState = new ContainerState(inspectResult);
 
-          await this.waitForContainer(dockerClient, container, containerName, containerState, boundPorts);
+          try {
+            await this.waitForContainer(dockerClient, container, containerName, containerState, boundPorts);
+            log.info("Container is ready");
+          } catch (err) {
+            log.error(`Container failed to be ready: ${err}`);
+
+            try {
+              await container.stop({ timeout: 0 });
+              await container.remove({ removeVolumes: true });
+            } catch (stopErr) {
+              log.error(`Failed to stop container after it failed to be ready: ${stopErr}`);
+            }
+            throw err;
+          }
 
           return new StartedGenericContainer(
             container,
@@ -120,17 +133,14 @@ export class DockerComposeEnvironment {
       await dockerCompose.upAll(options);
       log.info(`Started DockerCompose environment`);
     } catch (err) {
-      log.error(`Failed to start DockerCompose environment: ${err}`);
+      const errorMessage = err.err ? err.err.trim().replace("\n", ". ") : err;
+      log.error(`Failed to start DockerCompose environment: ${errorMessage}`);
       try {
         await down(this.composeFilePath, this.composeFiles, this.projectName);
       } catch {
         log.warn(`Failed to stop DockerCompose environment after failed start`);
       }
-      if (err.err) {
-        throw new Error(err.err.trim());
-      } else {
-        throw new Error(err);
-      }
+      throw new Error(err.err.trim());
     }
   }
 
