@@ -42,26 +42,29 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
     containerState: ContainerState,
     boundPorts: BoundPorts
   ): Promise<void> {
-    await Promise.all([this.waitForHostPorts(containerState), this.waitForInternalPorts(boundPorts)]);
+    await Promise.all([
+      this.waitForHostPorts(container, containerState),
+      this.waitForInternalPorts(container, boundPorts),
+    ]);
   }
 
-  private async waitForHostPorts(containerState: ContainerState): Promise<void> {
+  private async waitForHostPorts(container: Container, containerState: ContainerState): Promise<void> {
     for (const hostPort of containerState.getHostPorts()) {
       log.debug(`Waiting for host port ${hostPort}`);
-      await this.waitForPort(hostPort, this.hostPortCheck);
+      await this.waitForPort(container, hostPort, this.hostPortCheck);
       log.debug(`Host port ${hostPort} ready`);
     }
   }
 
-  private async waitForInternalPorts(boundPorts: BoundPorts): Promise<void> {
+  private async waitForInternalPorts(container: Container, boundPorts: BoundPorts): Promise<void> {
     for (const [internalPort] of boundPorts.iterator()) {
       log.debug(`Waiting for internal port ${internalPort}`);
-      await this.waitForPort(internalPort, this.internalPortCheck);
+      await this.waitForPort(container, internalPort, this.internalPortCheck);
       log.debug(`Internal port ${internalPort} ready`);
     }
   }
 
-  private async waitForPort(port: Port, portCheck: PortCheck): Promise<void> {
+  private async waitForPort(container: Container, port: Port, portCheck: PortCheck): Promise<void> {
     const retryStrategy = new IntervalRetryStrategy<boolean, Error>(100);
 
     await retryStrategy.retryUntil(
@@ -69,7 +72,7 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
       (isBound) => isBound,
       () => {
         const timeout = this.startupTimeout;
-        throw new Error(`Port ${port} not bound after ${timeout}ms`);
+        throw new Error(`Port ${port} not bound after ${timeout}ms for ${container.getId()}`);
       },
       this.startupTimeout
     );
@@ -90,7 +93,7 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
     return new Promise((resolve, reject) => {
       const startupTimeout = this.startupTimeout;
       const timeout = setTimeout(() => {
-        const message = `Log message "${this.message}" not received after ${startupTimeout}ms`;
+        const message = `Log message "${this.message}" not received after ${startupTimeout}ms for ${container.getId()}`;
         log.error(message);
         reject(new Error(message));
       }, startupTimeout);
@@ -121,7 +124,7 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
         .on("end", () => {
           stream.destroy();
           clearTimeout(timeout);
-          reject(new Error(`Log stream ended and message "${this.message}" was not received`));
+          reject(new Error(`Log stream ended and message "${this.message}" was not received for ${container.getId()}`));
         });
     });
   }
@@ -138,13 +141,13 @@ export class HealthCheckWaitStrategy extends AbstractWaitStrategy {
       (status) => status === "healthy" || status === "unhealthy",
       () => {
         const timeout = this.startupTimeout;
-        throw new Error(`Health check not healthy after ${timeout}ms`);
+        throw new Error(`Health check not healthy after ${timeout}ms for ${container.getId()}`);
       },
       this.startupTimeout
     );
 
     if (status !== "healthy") {
-      throw new Error(`Health check failed: ${status}`);
+      throw new Error(`Health check failed: ${status} for ${container.getId()}`);
     }
   }
 }
