@@ -93,10 +93,9 @@ export class DockerComposeEnvironment {
             log.error(`Container ${containerName} failed to be ready: ${err}`);
 
             try {
-              await container.stop({ timeout: 0 });
-              await container.remove({ removeVolumes: true });
-            } catch (stopErr) {
-              log.error(`Failed to stop container ${containerName} after it failed to be ready: ${stopErr}`);
+              await down(this.composeFilePath, this.composeFiles, this.projectName);
+            } catch {
+              log.warn(`Failed to stop DockerCompose environment after failed up`);
             }
             throw err;
           }
