@@ -50,17 +50,17 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
 
   private async waitForHostPorts(container: Container, containerState: ContainerState): Promise<void> {
     for (const hostPort of containerState.getHostPorts()) {
-      log.debug(`Waiting for host port ${hostPort}`);
+      log.debug(`Waiting for host port ${hostPort} for ${container.getId()}`);
       await this.waitForPort(container, hostPort, this.hostPortCheck);
-      log.debug(`Host port ${hostPort} ready`);
+      log.debug(`Host port ${hostPort} ready for ${container.getId()}`);
     }
   }
 
   private async waitForInternalPorts(container: Container, boundPorts: BoundPorts): Promise<void> {
     for (const [internalPort] of boundPorts.iterator()) {
-      log.debug(`Waiting for internal port ${internalPort}`);
+      log.debug(`Waiting for internal port ${internalPort} for ${container.getId()}`);
       await this.waitForPort(container, internalPort, this.internalPortCheck);
-      log.debug(`Internal port ${internalPort} ready`);
+      log.debug(`Internal port ${internalPort} ready for ${container.getId()}`);
     }
   }
 
