@@ -144,14 +144,14 @@ export class DockerComposeEnvironment {
       await dockerCompose.upAll(options);
       log.info(`Upped DockerCompose environment`);
     } catch (err) {
-      const errorMessage = err.err ? err.err.trim().replace("\r\n", "").replace("\n", ". ") : err;
+      const errorMessage = err.err ? err.err.trim() : err;
       log.error(`Failed to up DockerCompose environment: ${errorMessage}`);
       try {
         await down(this.composeFilePath, this.composeFiles, this.projectName);
       } catch {
         log.warn(`Failed to stop DockerCompose environment after failed up`);
       }
-      throw new Error(err.err.trim());
+      throw new Error(errorMessage);
     }
   }
 
