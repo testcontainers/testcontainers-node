@@ -3,6 +3,7 @@ import path from "path";
 import { DockerComposeEnvironment } from "./docker-compose-environment";
 import { Wait } from "./wait";
 import Dockerode from "dockerode";
+import { getRunningContainerNames } from "./test-helper";
 
 describe("DockerComposeEnvironment", () => {
   jest.setTimeout(60000);
@@ -82,7 +83,7 @@ describe("DockerComposeEnvironment", () => {
         .up()
     ).rejects.toThrowError(`Log message "unexpected" not received after 0ms`); // todo container name?
 
-    expect(await getRunningContainerNames()).not.toContain("custom_container_name");
+    expect(await getRunningContainerNames(dockerodeClient)).not.toContain("custom_container_name");
   });
 
   it("should stop the container when the health check wait strategy times out", async () => {
@@ -93,16 +94,8 @@ describe("DockerComposeEnvironment", () => {
         .up()
     ).rejects.toThrowError(`Health check not healthy after 0ms`); // todo container name?
 
-    expect(await getRunningContainerNames()).not.toContain("container_1");
+    expect(await getRunningContainerNames(dockerodeClient)).not.toContain("container_1");
   });
-
-  const getRunningContainerNames = async (): Promise<string[]> => {
-    const containers = await dockerodeClient.listContainers();
-    return containers
-      .map((container) => container.Names)
-      .reduce((result, containerNames) => [...result, ...containerNames], [])
-      .map((containerName) => containerName.replace("/", ""));
-  };
 
   it("should support health check wait strategy", async () => {
     const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-healthcheck.yml")

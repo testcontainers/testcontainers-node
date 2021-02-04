@@ -9,6 +9,7 @@ import { Readable } from "stream";
 import { RandomUuid } from "./uuid";
 import { TestContainers } from "./test-containers";
 import { RandomPortClient } from "./port-client";
+import { getRunningContainerNames } from "./test-helper";
 
 describe("GenericContainer", () => {
   jest.setTimeout(180_000);
@@ -263,7 +264,7 @@ describe("GenericContainer", () => {
         .start()
     ).rejects.toThrowError("Port 8081 not bound after 0ms");
 
-    expect(await getRunningContainerNames()).not.toContain(containerName);
+    expect(await getRunningContainerNames(dockerodeClient)).not.toContain(containerName);
   });
 
   it("should stop the container when the log message wait strategy times out", async () => {
@@ -278,7 +279,7 @@ describe("GenericContainer", () => {
         .start()
     ).rejects.toThrowError(`Log message "unexpected" not received after 0ms`);
 
-    expect(await getRunningContainerNames()).not.toContain(containerName);
+    expect(await getRunningContainerNames(dockerodeClient)).not.toContain(containerName);
   });
 
   it("should stop the container when the health check wait strategy times out", async () => {
@@ -295,7 +296,7 @@ describe("GenericContainer", () => {
         .start()
     ).rejects.toThrowError("Health check not healthy after 0ms");
 
-    expect(await getRunningContainerNames()).not.toContain(containerName);
+    expect(await getRunningContainerNames(dockerodeClient)).not.toContain(containerName);
   });
 
   it("should stop the container when the health check fails", async () => {
@@ -312,7 +313,7 @@ describe("GenericContainer", () => {
         .start()
     ).rejects.toThrowError("Health check failed");
 
-    expect(await getRunningContainerNames()).not.toContain(containerName);
+    expect(await getRunningContainerNames(dockerodeClient)).not.toContain(containerName);
   });
 
   it("should honour .dockerignore file", async () => {
@@ -429,12 +430,4 @@ describe("GenericContainer", () => {
       await startedContainer.stop();
     });
   });
-
-  const getRunningContainerNames = async (): Promise<string[]> => {
-    const containers = await dockerodeClient.listContainers();
-    return containers
-      .map((container) => container.Names)
-      .reduce((result, containerNames) => [...result, ...containerNames], [])
-      .map((containerName) => containerName.replace("/", ""));
-  };
 });
