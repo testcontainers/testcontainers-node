@@ -1,5 +1,5 @@
 import * as dockerCompose from "docker-compose";
-import Dockerode from "dockerode";
+import Dockerode, { ContainerInfo } from "dockerode";
 import { BoundPorts } from "./bound-ports";
 import { Container } from "./container";
 import { ContainerState } from "./container-state";
@@ -50,7 +50,7 @@ export class DockerComposeEnvironment {
   }
 
   public async up(): Promise<StartedDockerComposeEnvironment> {
-    log.info(`Starting DockerCompose environment`);
+    log.info(`Starting DockerCompose environment ${this.projectName}`);
 
     const dockerClient = await DockerClientInstance.getInstance();
 
@@ -60,6 +60,16 @@ export class DockerComposeEnvironment {
     const startedContainers = (await dockerClient.listContainers()).filter(
       (container) => container.Labels["com.docker.compose.project"] === this.projectName
     );
+
+    const startedContainerNames = startedContainers.reduce(
+      (containerNames: string[], startedContainer: ContainerInfo) => [
+        ...containerNames,
+        startedContainer.Names.join(", "),
+      ],
+      []
+    );
+
+    log.info(`Started the following containers: ${startedContainerNames.join(", ")}`);
 
     const startedGenericContainers = (
       await Promise.all(
@@ -75,7 +85,20 @@ export class DockerComposeEnvironment {
           const boundPorts = this.getBoundPorts(startedContainer);
           const containerState = new ContainerState(inspectResult);
 
-          await this.waitForContainer(dockerClient, container, containerName, containerState, boundPorts);
+          try {
+            log.info(`Waiting for container ${containerName} to be ready`);
+            await this.waitForContainer(dockerClient, container, containerName, containerState, boundPorts);
+            log.info(`Container ${containerName} is ready`);
+          } catch (err) {
+            log.error(`Container ${containerName} failed to be ready: ${err}`);
+
+            try {
+              await down(this.composeFilePath, this.composeFiles, this.projectName);
+            } catch {
+              log.warn(`Failed to stop DockerCompose environment after failed up`);
+            }
+            throw err;
+          }
 
           return new StartedGenericContainer(
             container,
@@ -115,22 +138,19 @@ export class DockerComposeEnvironment {
       env: { ...defaultOptions.env, ...this.env },
     };
 
-    log.info(`Starting DockerCompose environment`);
+    log.info(`Upping DockerCompose environment`);
     try {
       await dockerCompose.upAll(options);
-      log.info(`Started DockerCompose environment`);
+      log.info(`Upped DockerCompose environment`);
     } catch (err) {
-      log.error(`Failed to start DockerCompose environment: ${err}`);
+      const errorMessage = err.err ? err.err.trim() : err;
+      log.error(`Failed to up DockerCompose environment: ${errorMessage}`);
       try {
         await down(this.composeFilePath, this.composeFiles, this.projectName);
       } catch {
-        log.warn(`Failed to stop DockerCompose environment after failed start`);
+        log.warn(`Failed to stop DockerCompose environment after failed up`);
       }
-      if (err.err) {
-        throw new Error(err.err.trim());
-      } else {
-        throw new Error(err);
-      }
+      throw new Error(errorMessage);
     }
   }
 
@@ -147,10 +167,8 @@ export class DockerComposeEnvironment {
     containerState: ContainerState,
     boundPorts: BoundPorts
   ): Promise<void> {
-    log.debug("Waiting for container to be ready");
     const waitStrategy = this.getWaitStrategy(dockerClient, container, containerName);
     await waitStrategy.withStartupTimeout(this.startupTimeout).waitUntilReady(container, containerState, boundPorts);
-    log.info("Container is ready");
   }
 
   private getWaitStrategy(dockerClient: DockerClient, container: Container, containerName: string): WaitStrategy {
