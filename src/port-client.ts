@@ -6,8 +6,13 @@ export interface PortClient {
 }
 
 export class RandomPortClient implements PortClient {
+  private preferredRandomPort(min: number, max: number) {
+    // min and max included
+    return Math.floor(Math.random() * (max - min + 1) + min);
+  }
+
   public getPort(): Promise<Port> {
-    return getRandomPort();
+    return getRandomPort({ port: this.preferredRandomPort(10000, 65535) });
   }
 }
 
