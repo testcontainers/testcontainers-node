@@ -36,7 +36,11 @@ export class DockerClientInstance {
       return host;
     } else {
       const socketPath = modem.socketPath;
-      if (!fs.existsSync("/.dockerenv")) {
+      if (process.env["TESTCONTAINERS_HOST_OVERRIDE"]) {
+        const host = process.env["TESTCONTAINERS_HOST_OVERRIDE"];
+        log.info(`Using TESTCONTAINERS_HOST_OVERRIDE: ${host}, socket path: ${socketPath}`);
+        return host;
+      } else if (!fs.existsSync("/.dockerenv")) {
         const host = "localhost";
         log.info(`Using default Docker host: ${host}, socket path: ${socketPath}`);
         return host;
