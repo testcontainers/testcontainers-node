@@ -32,7 +32,7 @@ class DisabledReaper implements Reaper {
     // noop
   }
 
-  stop(): void {
+  public stop(): void {
     // noop
   }
 }
@@ -54,7 +54,7 @@ export class ReaperInstance {
     return this.instance;
   }
 
-  public static async stopInstance() {
+  public static async stopInstance(): Promise<void> {
     if (this.instance) {
       const reaper = await this.instance;
       reaper.stop();
