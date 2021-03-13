@@ -55,8 +55,8 @@ export class GenericContainerBuilder {
     return this;
   }
 
-  public async build(): Promise<GenericContainer> {
-    const dockerImageName = new DockerImageName(undefined, this.uuid.nextUuid(), this.uuid.nextUuid());
+  public async build(image = `${this.uuid.nextUuid()}:${this.uuid.nextUuid()}`): Promise<GenericContainer> {
+    const dockerImageName = DockerImageName.fromString(image);
     const dockerClient = await DockerClientInstance.getInstance();
     await dockerClient.buildImage(dockerImageName, this.context, this.dockerfileName, this.buildArgs);
     const container = new GenericContainer(dockerImageName.toString());

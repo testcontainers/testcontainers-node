@@ -8,6 +8,7 @@ import { DockerClient } from "./docker-client";
 
 export interface Reaper {
   addProject(projectName: string): void;
+  stop(): void;
 }
 
 class RealReaper implements Reaper {
@@ -20,10 +21,18 @@ class RealReaper implements Reaper {
   public addProject(projectName: string): void {
     this.socket.write(`label=com.docker.compose.project=${projectName}\r\n`);
   }
+
+  public stop(): void {
+    this.socket.end();
+  }
 }
 
 class DisabledReaper implements Reaper {
   public addProject(): void {
+    // noop
+  }
+
+  stop(): void {
     // noop
   }
 }
@@ -31,7 +40,7 @@ class DisabledReaper implements Reaper {
 export class ReaperInstance {
   private static DEFAULT_IMAGE = "testcontainers/ryuk:0.3.0";
 
-  private static instance: Promise<Reaper>;
+  private static instance?: Promise<Reaper>;
 
   public static async getInstance(dockerClient: DockerClient): Promise<Reaper> {
     if (!this.instance) {
@@ -43,6 +52,14 @@ export class ReaperInstance {
     }
 
     return this.instance;
+  }
+
+  public static async stopInstance() {
+    if (this.instance) {
+      const reaper = await this.instance;
+      reaper.stop();
+      this.instance = undefined;
+    }
   }
 
   public static getImage(): string {
