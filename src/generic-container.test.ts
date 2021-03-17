@@ -253,6 +253,19 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
+  it("should set the IPC mode", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
+      .withIpcMode("host")
+      .withExposedPorts(8080)
+      .start();
+
+    const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
+    const response = await fetch(`${url}/hello-world`);
+
+    expect(response.status).toBe(200);
+    await container.stop();
+  });
+
   it("should stop the container when the host port check wait strategy times out", async () => {
     const containerName = `container-${new RandomUuid().nextUuid()}`;
 
