@@ -89,6 +89,7 @@ export class GenericContainer implements TestContainer {
   protected useDefaultLogDriver = false;
   protected privilegedMode = false;
   protected daemonMode = false;
+  protected ipcMode?: string;
   protected pullPolicy: PullPolicy = new DefaultPullPolicy();
   protected tarToCopy?: archiver.Archiver;
 
@@ -135,6 +136,7 @@ export class GenericContainer implements TestContainer {
       privilegedMode: this.privilegedMode,
       autoRemove: this.daemonMode,
       extraHosts: this.extraHosts,
+      ipcMode: this.ipcMode,
     });
 
     if (!this.dockerImageName.isHelperContainer() && PortForwarderInstance.isRunning()) {
@@ -243,6 +245,11 @@ export class GenericContainer implements TestContainer {
 
   public withDaemonMode(): this {
     this.daemonMode = true;
+    return this;
+  }
+
+  public withIpcMode(ipcMode: string): this {
+    this.ipcMode = ipcMode;
     return this;
   }
 

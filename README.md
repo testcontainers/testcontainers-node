@@ -281,6 +281,16 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+Creating a container with [IPC mode](https://docs.docker.com/engine/reference/run/#ipc-settings---ipc):
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await new GenericContainer("alpine")
+  .withIpcMode("host")
+  .start();
+```
+
 Testcontainers will not wait for a container to stop, to override:
 
 ```javascript

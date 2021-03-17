@@ -89,6 +89,7 @@ type CreateOptions = {
   privilegedMode: boolean;
   autoRemove: boolean;
   extraHosts: ExtraHost[];
+  ipcMode?: string;
 };
 
 export type CreateNetworkOptions = {
@@ -147,6 +148,7 @@ export class DockerodeClient implements DockerClient {
       // @ts-ignore
       Healthcheck: this.getHealthCheck(options.healthCheck),
       HostConfig: {
+        IpcMode: options.ipcMode,
         ExtraHosts: this.getExtraHosts(options.extraHosts),
         AutoRemove: options.autoRemove,
         NetworkMode: options.networkMode,
