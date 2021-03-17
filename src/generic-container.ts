@@ -40,7 +40,6 @@ import { ReaperInstance } from "./reaper";
 import { Readable } from "stream";
 import { PortForwarderInstance } from "./port-forwarder";
 import { getAuthConfig } from "./registry-auth-locator";
-import { doc } from "prettier";
 
 export class GenericContainerBuilder {
   private buildArgs: BuildArgs = {};
