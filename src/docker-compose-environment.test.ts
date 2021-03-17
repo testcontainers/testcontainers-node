@@ -2,14 +2,12 @@ import fetch from "node-fetch";
 import path from "path";
 import { DockerComposeEnvironment } from "./docker-compose-environment";
 import { Wait } from "./wait";
-import Dockerode from "dockerode";
-import { getRunningContainerNames } from "./test-helper";
+import { getRunningContainerNames, getVolumeNames } from "./test-helper";
 
 describe("DockerComposeEnvironment", () => {
   jest.setTimeout(60000);
 
   const fixtures = path.resolve(__dirname, "..", "fixtures", "docker-compose");
-  const dockerodeClient = new Dockerode();
 
   it("should throw error when compose file is malformed", async () => {
     await expect(new DockerComposeEnvironment(fixtures, "docker-compose-malformed.yml").up()).rejects.toThrowError(
@@ -83,7 +81,7 @@ describe("DockerComposeEnvironment", () => {
         .up()
     ).rejects.toThrowError(`Log message "unexpected" not received after 0ms`);
 
-    expect(await getRunningContainerNames(dockerodeClient)).not.toContain("custom_container_name");
+    expect(await getRunningContainerNames()).not.toContain("custom_container_name");
   });
 
   it("should stop the container when the health check wait strategy times out", async () => {
@@ -94,7 +92,7 @@ describe("DockerComposeEnvironment", () => {
         .up()
     ).rejects.toThrowError(`Health check not healthy after 0ms`);
 
-    expect(await getRunningContainerNames(dockerodeClient)).not.toContain("container_1");
+    expect(await getRunningContainerNames()).not.toContain("container_1");
   });
 
   it("should support health check wait strategy", async () => {
@@ -125,10 +123,7 @@ describe("DockerComposeEnvironment", () => {
 
     await environment.down();
 
-    const testVolumes = (await dockerodeClient.listVolumes()).Volumes.map(
-      (volume) => volume.Name
-    ).filter((volumeName) => volumeName.includes("test-volume"));
-
+    const testVolumes = (await getVolumeNames()).filter((volumeName) => volumeName.includes("test-volume"));
     expect(testVolumes).toHaveLength(0);
   });
 
