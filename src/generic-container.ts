@@ -40,6 +40,7 @@ import { ReaperInstance } from "./reaper";
 import { Readable } from "stream";
 import { PortForwarderInstance } from "./port-forwarder";
 import { getAuthConfig } from "./registry-auth-locator";
+import { doc } from "prettier";
 
 export class GenericContainerBuilder {
   private buildArgs: BuildArgs = {};
@@ -58,6 +59,7 @@ export class GenericContainerBuilder {
   public async build(image = `${this.uuid.nextUuid()}:${this.uuid.nextUuid()}`): Promise<GenericContainer> {
     const dockerImageName = DockerImageName.fromString(image);
     const dockerClient = await DockerClientInstance.getInstance();
+    await ReaperInstance.getInstance(dockerClient);
     await dockerClient.buildImage(dockerImageName, this.context, this.dockerfileName, this.buildArgs);
     const container = new GenericContainer(dockerImageName.toString());
 
