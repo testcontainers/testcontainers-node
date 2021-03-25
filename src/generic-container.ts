@@ -104,7 +104,7 @@ export class GenericContainer implements TestContainer {
     const dockerClient = await DockerClientInstance.getInstance();
 
     if (this.pullPolicy.shouldPull() || !(await this.isImageCached(dockerClient))) {
-      const authConfig = this.dockerImageName.registry ? await getAuthConfig(this.dockerImageName.registry) : undefined;
+      const authConfig = await getAuthConfig(this.dockerImageName.registry);
       await dockerClient.pull(this.dockerImageName, authConfig);
     }
 

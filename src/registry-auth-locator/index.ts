@@ -9,6 +9,7 @@ import { RegistryAuthLocator } from "./registry-auth-locator";
 import { AuthConfig } from "../docker-client";
 import { log } from "../logger";
 
+const DEFAULT_REGISTRY_NAME = "index.docker.io";
 const dockerConfigFile = path.resolve(os.homedir(), ".docker", "config.json");
 
 const readDockerConfig = async (): Promise<DockerConfig> => {
@@ -26,21 +27,27 @@ const readDockerConfig = async (): Promise<DockerConfig> => {
   };
 };
 
+function effectiveRegistryName(imageRegistryName?: string): string {
+  return imageRegistryName ?? DEFAULT_REGISTRY_NAME;
+}
+
 const dockerConfigPromise = readDockerConfig();
 
 const registryAuthLocators: RegistryAuthLocator[] = [new CredHelpers(), new CredsStore(), new Auths()];
 
-export async function getAuthConfig(registry: string): Promise<AuthConfig | undefined> {
+export async function getAuthConfig(registry: string | undefined): Promise<AuthConfig | undefined> {
   const dockerConfig = await dockerConfigPromise;
 
+  const registryName = effectiveRegistryName(registry);
+
   const registryAuthLocator = registryAuthLocators.find((authLocator) =>
-    authLocator.isApplicable(registry, dockerConfig)
+    authLocator.isApplicable(registryName, dockerConfig)
   );
   if (!registryAuthLocator) {
-    log.debug(`No registry auth locator found for registry: "${registry}"`);
+    log.debug(`No registry auth locator found for registry: "${registryName}"`);
     return undefined;
   }
 
-  log.debug(`Found applicable registry auth locator for registry "${registry}": ${registryAuthLocator.getName()}`);
-  return await registryAuthLocator.getAuthConfig(registry, dockerConfig);
+  log.debug(`Found applicable registry auth locator for registry "${registryName}": ${registryAuthLocator.getName()}`);
+  return await registryAuthLocator.getAuthConfig(registryName, dockerConfig);
 }
