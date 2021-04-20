@@ -20,6 +20,11 @@ describe("Auths", () => {
       const dockerConfig: DockerConfig = { auths: { "registry-name": { auth: "value" } } };
       expect(locator.isApplicable("registry-name", dockerConfig)).toBe(true);
     });
+
+    it("should return true when auths contains url for registry", () => {
+      const dockerConfig: DockerConfig = { auths: { "https://index.docker.io/v1/": { auth: "value" } } };
+      expect(locator.isApplicable("index.docker.io", dockerConfig)).toBe(true);
+    });
   });
 
   describe("getAuthConfig", () => {
