@@ -80,12 +80,14 @@ export class ReaperInstance {
   private static async createRealInstance(dockerClient: DockerClient): Promise<Reaper> {
     const sessionId = dockerClient.getSessionId();
 
+    const dockerSocket = process.env["TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE"] ?? "/var/run/docker.sock";
+
     log.debug(`Creating new Reaper for session: ${sessionId}`);
     const container = await new GenericContainer(this.getImage())
       .withName(`testcontainers-ryuk-${sessionId}`)
       .withExposedPorts(8080)
       .withWaitStrategy(Wait.forLogMessage("Started!"))
-      .withBindMount("/var/run/docker.sock", "/var/run/docker.sock")
+      .withBindMount(dockerSocket, "/var/run/docker.sock")
       .withDaemonMode()
       .withPrivilegedMode()
       .start();
