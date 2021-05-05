@@ -243,18 +243,21 @@ export class DockerodeClient implements DockerClient {
     const dockerIgnoreFiles = await findDockerIgnoreFiles(context);
     const tarStream = tar.pack(context, { ignore: (name) => dockerIgnoreFiles.has(slash(name)) });
 
-    const stream = await this.dockerode.buildImage(tarStream, {
-      dockerfile: dockerfileName,
-      buildargs: buildArgs,
-      t: dockerImageName.toString(),
-      labels: this.createLabels(dockerImageName),
-      registryconfig: registryConfig,
-    });
-    stream.setEncoding("utf-8");
-
     return new Promise((resolve) => {
-      byline(stream).on("data", (data) => log.trace(`${dockerImageName.toString()}: ${data.replace(EOL, "")}`));
-      stream.on("end", () => resolve());
+      this.dockerode
+        .buildImage(tarStream, {
+          dockerfile: dockerfileName,
+          buildargs: buildArgs,
+          t: dockerImageName.toString(),
+          labels: this.createLabels(dockerImageName),
+          registryconfig: registryConfig,
+        })
+        .then((stream) => byline(stream))
+        .then((stream) => {
+          stream.setEncoding("utf-8");
+          stream.on("data", (data) => log.trace(`${dockerImageName.toString()}: ${data.replace(EOL, "")}`));
+          stream.on("end", () => resolve());
+        });
     });
   }
 
