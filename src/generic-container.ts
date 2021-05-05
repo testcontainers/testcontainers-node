@@ -59,9 +59,11 @@ export class GenericContainerBuilder {
     return this;
   }
 
-  public async build(): Promise<GenericContainer> {
-    const dockerImageName = new DockerImageName(undefined, this.uuid.nextUuid(), this.uuid.nextUuid());
+  public async build(image = `${this.uuid.nextUuid()}:${this.uuid.nextUuid()}`): Promise<GenericContainer> {
+    const dockerImageName = DockerImageName.fromString(image);
     const dockerClient = await DockerClientInstance.getInstance();
+
+    await ReaperInstance.getInstance(dockerClient);
 
     const dockerfile = path.resolve(this.context, this.dockerfileName);
     log.debug(`Preparing to build Dockerfile: ${dockerfile}`);

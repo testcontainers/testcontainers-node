@@ -1,6 +1,6 @@
-import Dockerode from "dockerode";
 import { GenericContainer } from "./generic-container";
 import { Network } from "./network";
+import { getContainerById } from "./test-helper";
 
 describe("Network", () => {
   jest.setTimeout(180_000);
@@ -12,9 +12,7 @@ describe("Network", () => {
       .withNetworkMode(network.getName())
       .start();
 
-    const dockerodeClient = new Dockerode();
-
-    const dockerContainer = dockerodeClient.getContainer(container.getId());
+    const dockerContainer = getContainerById(container.getId());
     const containerInfo = await dockerContainer.inspect();
     expect(containerInfo.HostConfig.NetworkMode).toBe(network.getName());
 
