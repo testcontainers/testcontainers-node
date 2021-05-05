@@ -13,10 +13,9 @@ export const getDockerfileImages = async (dockerfile: string): Promise<DockerIma
           const parts = line.split(" ");
           return parts[parts.length - 1];
         })
-        .map((image) => DockerImageName.fromString(image))
-        .reduce((prev, next) => prev.add(next), new Set<DockerImageName>())
+        .reduce((prev, next) => prev.add(next), new Set<string>())
         .values()
-    );
+    ).map((image) => DockerImageName.fromString(image));
   } catch (err) {
     log.error(`Failed to read Dockerfile "${dockerfile}": ${err}`);
     throw err;
