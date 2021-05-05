@@ -44,7 +44,6 @@ import { Readable } from "stream";
 import { PortForwarderInstance } from "./port-forwarder";
 import { getAuthConfig } from "./registry-auth-locator";
 import { getDockerfileImages } from "./dockerfile-parser";
-import { auth } from "neo4j-driver";
 
 export class GenericContainerBuilder {
   private buildArgs: BuildArgs = {};
@@ -65,10 +64,23 @@ export class GenericContainerBuilder {
     const dockerClient = await DockerClientInstance.getInstance();
 
     const dockerfile = path.resolve(this.context, this.dockerfileName);
+    log.debug(`Preparing to build Dockerfile: ${dockerfile}`);
     const imageNames = await getDockerfileImages(dockerfile);
-    log.debug(`Found the following images to pre-pull in Dockerfile ${dockerfile}: ${imageNames.join(", ")}`);
+    const registryConfig = await this.getRegistryConfig(imageNames);
 
+    await dockerClient.buildImage(dockerImageName, this.context, this.dockerfileName, this.buildArgs, registryConfig);
+    const container = new GenericContainer(dockerImageName.toString());
+
+    if (!(await isImageCached(dockerClient, dockerImageName))) {
+      throw new Error("Failed to build image");
+    }
+
+    return Promise.resolve(container);
+  }
+
+  private async getRegistryConfig(imageNames: DockerImageName[]): Promise<RegistryConfig> {
     const authConfigs: AuthConfig[] = [];
+
     await Promise.all(
       imageNames.map(async (imageName) => {
         const authConfig = await getAuthConfig(imageName.registry);
@@ -79,7 +91,7 @@ export class GenericContainerBuilder {
       })
     );
 
-    const registryConfig: RegistryConfig = authConfigs
+    return authConfigs
       .map((authConfig) => {
         return {
           [authConfig.registryAddress]: {
@@ -89,15 +101,6 @@ export class GenericContainerBuilder {
         };
       })
       .reduce((prev, next) => ({ ...prev, ...next }), {} as RegistryConfig);
-
-    await dockerClient.buildImage(dockerImageName, this.context, this.dockerfileName, this.buildArgs, registryConfig);
-    const container = new GenericContainer(dockerImageName.toString());
-
-    if (!(await isImageCached(dockerClient, dockerImageName))) {
-      throw new Error("Failed to build image");
-    }
-
-    return Promise.resolve(container);
   }
 }
 

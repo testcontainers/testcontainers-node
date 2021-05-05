@@ -1,6 +1,6 @@
 import Dockerode, { Network, PortMap as DockerodePortBindings } from "dockerode";
-import streamToArray from "stream-to-array";
 import tar from "tar-fs";
+import byline from "byline";
 import slash from "slash";
 import { BoundPorts } from "./bound-ports";
 import { Container, DockerodeContainer, Id } from "./container";
@@ -11,6 +11,7 @@ import { PortString } from "./port";
 import { DockerImageName } from "./docker-image-name";
 import { PullStreamParser } from "./pull-stream-parser";
 import { Readable } from "stream";
+import * as os from "os";
 
 export type Command = string;
 export type ContainerName = string;
@@ -241,6 +242,7 @@ export class DockerodeClient implements DockerClient {
     log.info(`Building image '${dockerImageName.toString()}' with context '${context}'`);
     const dockerIgnoreFiles = await findDockerIgnoreFiles(context);
     const tarStream = tar.pack(context, { ignore: (name) => dockerIgnoreFiles.has(slash(name)) });
+
     const stream = await this.dockerode.buildImage(tarStream, {
       dockerfile: dockerfileName,
       buildargs: buildArgs,
@@ -248,16 +250,12 @@ export class DockerodeClient implements DockerClient {
       labels: this.createLabels(dockerImageName),
       registryconfig: registryConfig,
     });
+    stream.setEncoding("utf-8");
 
-    const newVar: string[] = await streamToArray(stream);
-    console.log(newVar.join("").toString());
-    /*
-    todo parse the output and trace log it
-
-    {"stream":"Step 1/2 : FROM cristianrgreco/testcontainer-private:1.1.12"}
-    {"stream":"\n"}
-    {"errorDetail":{"message":"pull access denied for cristianrgreco/testcontainer-private, repository does not exist or may require 'docker login': denied: requested access to the resource is denied"},"error":"pull access denied for cristianrgreco/testcontainer-private, repository does not exist or may require 'docker login': denied: requested access to the resource is denied"}
-     */
+    return new Promise((resolve) => {
+      byline(stream).on("data", (data) => log.trace(`${dockerImageName.toString()}: ${data.replace(os.EOL, "")}`));
+      stream.on("end", () => resolve());
+    });
   }
 
   public async fetchDockerImageNames(): Promise<DockerImageName[]> {
