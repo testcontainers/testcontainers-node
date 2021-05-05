@@ -11,7 +11,7 @@ import { PortString } from "./port";
 import { DockerImageName } from "./docker-image-name";
 import { PullStreamParser } from "./pull-stream-parser";
 import { Readable } from "stream";
-import * as os from "os";
+import { EOL } from "os";
 
 export type Command = string;
 export type ContainerName = string;
@@ -253,7 +253,7 @@ export class DockerodeClient implements DockerClient {
     stream.setEncoding("utf-8");
 
     return new Promise((resolve) => {
-      byline(stream).on("data", (data) => log.trace(`${dockerImageName.toString()}: ${data.replace(os.EOL, "")}`));
+      byline(stream).on("data", (data) => log.trace(`${dockerImageName.toString()}: ${data.replace(EOL, "")}`));
       stream.on("end", () => resolve());
     });
   }

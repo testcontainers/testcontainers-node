@@ -106,7 +106,6 @@ export class GenericContainerBuilder {
 
 async function isImageCached(dockerClient: DockerClient, imageName: DockerImageName) {
   const dockerImageNames = await dockerClient.fetchDockerImageNames();
-  // console.log(imageName, dockerImageNames);
   return dockerImageNames.some((dockerImageName) => dockerImageName.equals(imageName));
 }
 
