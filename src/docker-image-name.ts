@@ -6,12 +6,8 @@ export type Image = string;
 export type Tag = string;
 
 export class DockerImageName {
-  private static readonly HELPER_CONTAINERS = [
-    DockerImageName.fromString(ReaperInstance.getImage()),
-    DockerImageName.fromString(PortForwarderInstance.getImage()),
-  ];
-
   private readonly string: string;
+  private static readonly HELPER_CONTAINERS = new Set([ReaperInstance.getImage(), PortForwarderInstance.getImage()]);
 
   constructor(public readonly registry: Registry | undefined, public readonly image: Image, public readonly tag: Tag) {
     if (this.registry) {
@@ -30,26 +26,25 @@ export class DockerImageName {
   }
 
   public isReaper(): boolean {
-    return this.equals(DockerImageName.fromString(ReaperInstance.getImage()));
+    return this.string === ReaperInstance.getImage();
   }
 
   public isHelperContainer(): boolean {
-    return DockerImageName.HELPER_CONTAINERS.some((dockerImageName) => this.equals(dockerImageName));
+    return DockerImageName.HELPER_CONTAINERS.has(this.string);
   }
 
   public static fromString(string: string): DockerImageName {
     const registry = this.getRegistry(string);
     const stringWithoutRegistry = registry ? string.split("/").slice(1).join("/") : string;
-    const defaultedRegistry = registry ?? "index.docker.io";
 
     if (stringWithoutRegistry.includes("@")) {
       const [image, tag] = stringWithoutRegistry.split("@");
-      return new DockerImageName(defaultedRegistry, image, tag);
+      return new DockerImageName(registry, image, tag);
     } else if (stringWithoutRegistry.includes(":")) {
       const [image, tag] = stringWithoutRegistry.split(":");
-      return new DockerImageName(defaultedRegistry, image, tag);
+      return new DockerImageName(registry, image, tag);
     } else {
-      return new DockerImageName(defaultedRegistry, stringWithoutRegistry, "latest");
+      return new DockerImageName(registry, stringWithoutRegistry, "latest");
     }
   }
 

@@ -1,8 +1,10 @@
 import archiver from "archiver";
+import path from "path";
 import { BoundPorts } from "./bound-ports";
 import { Container, Id as ContainerId, InspectResult } from "./container";
 import { ContainerState } from "./container-state";
 import {
+  AuthConfig,
   BindMode,
   BindMount,
   BuildArgs,
@@ -18,6 +20,7 @@ import {
   ExtraHost,
   HealthCheck,
   NetworkMode,
+  RegistryConfig,
   TmpFs,
 } from "./docker-client";
 import { DockerClientInstance, Host } from "./docker-client-instance";
@@ -40,6 +43,8 @@ import { ReaperInstance } from "./reaper";
 import { Readable } from "stream";
 import { PortForwarderInstance } from "./port-forwarder";
 import { getAuthConfig } from "./registry-auth-locator";
+import { getDockerfileImages } from "./dockerfile-parser";
+import { auth } from "neo4j-driver";
 
 export class GenericContainerBuilder {
   private buildArgs: BuildArgs = {};
@@ -58,15 +63,48 @@ export class GenericContainerBuilder {
   public async build(): Promise<GenericContainer> {
     const dockerImageName = new DockerImageName(undefined, this.uuid.nextUuid(), this.uuid.nextUuid());
     const dockerClient = await DockerClientInstance.getInstance();
-    await dockerClient.buildImage(dockerImageName, this.context, this.dockerfileName, this.buildArgs);
+
+    const dockerfile = path.resolve(this.context, this.dockerfileName);
+    const imageNames = await getDockerfileImages(dockerfile);
+    log.debug(`Found the following images to pre-pull in Dockerfile ${dockerfile}: ${imageNames.join(", ")}`);
+
+    const authConfigs: AuthConfig[] = [];
+    await Promise.all(
+      imageNames.map(async (imageName) => {
+        const authConfig = await getAuthConfig(imageName.registry);
+
+        if (authConfig !== undefined) {
+          authConfigs.push(authConfig);
+        }
+      })
+    );
+
+    const registryConfig: RegistryConfig = authConfigs
+      .map((authConfig) => {
+        return {
+          [authConfig.registryAddress]: {
+            username: authConfig.username,
+            password: authConfig.password,
+          },
+        };
+      })
+      .reduce((prev, next) => ({ ...prev, ...next }), {} as RegistryConfig);
+
+    await dockerClient.buildImage(dockerImageName, this.context, this.dockerfileName, this.buildArgs, registryConfig);
     const container = new GenericContainer(dockerImageName.toString());
 
-    if (!(await container.isImageCached(dockerClient))) {
+    if (!(await isImageCached(dockerClient, dockerImageName))) {
       throw new Error("Failed to build image");
     }
 
     return Promise.resolve(container);
   }
+}
+
+async function isImageCached(dockerClient: DockerClient, imageName: DockerImageName) {
+  const dockerImageNames = await dockerClient.fetchDockerImageNames();
+  // console.log(imageName, dockerImageNames);
+  return dockerImageNames.some((dockerImageName) => dockerImageName.equals(imageName));
 }
 
 export class GenericContainer implements TestContainer {
@@ -102,8 +140,8 @@ export class GenericContainer implements TestContainer {
   public async start(): Promise<StartedTestContainer> {
     const dockerClient = await DockerClientInstance.getInstance();
 
-    if (this.pullPolicy.shouldPull() || !(await this.isImageCached(dockerClient))) {
-      const authConfig = this.dockerImageName.registry ? await getAuthConfig(this.dockerImageName.registry) : undefined;
+    if (this.pullPolicy.shouldPull() || !(await isImageCached(dockerClient, this.dockerImageName))) {
+      const authConfig = await getAuthConfig(this.dockerImageName.registry);
       await dockerClient.pull(this.dockerImageName, authConfig);
     }
 
@@ -261,11 +299,6 @@ export class GenericContainer implements TestContainer {
   public withCopyContentToContainer(content: string | Buffer | Readable, containerPath: string): this {
     this.getTarToCopy().append(content, { name: containerPath });
     return this;
-  }
-
-  public async isImageCached(dockerClient: DockerClient): Promise<boolean> {
-    const dockerImageNames = await dockerClient.fetchDockerImageNames();
-    return dockerImageNames.some((dockerImageName) => dockerImageName.equals(this.dockerImageName));
   }
 
   protected getTarToCopy(): archiver.Archiver {

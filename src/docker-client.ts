@@ -104,6 +104,13 @@ export type CreateNetworkOptions = {
   options?: { [key: string]: string };
 };
 
+export interface RegistryConfig {
+  [registryAddress: string]: {
+    username: string;
+    password: string;
+  };
+}
+
 export interface DockerClient {
   pull(dockerImageName: DockerImageName, authConfig?: AuthConfig): Promise<void>;
   create(options: CreateOptions): Promise<Container>;
@@ -116,7 +123,8 @@ export interface DockerClient {
     dockerImageName: DockerImageName,
     context: BuildContext,
     dockerfileName: string,
-    buildArgs: BuildArgs
+    buildArgs: BuildArgs,
+    registryConfig: RegistryConfig
   ): Promise<void>;
   fetchDockerImageNames(): Promise<DockerImageName[]>;
   listContainers(): Promise<Dockerode.ContainerInfo[]>;
@@ -227,7 +235,8 @@ export class DockerodeClient implements DockerClient {
     dockerImageName: DockerImageName,
     context: BuildContext,
     dockerfileName: string,
-    buildArgs: BuildArgs
+    buildArgs: BuildArgs,
+    registryConfig: RegistryConfig
   ): Promise<void> {
     log.info(`Building image '${dockerImageName.toString()}' with context '${context}'`);
     const dockerIgnoreFiles = await findDockerIgnoreFiles(context);
@@ -237,6 +246,7 @@ export class DockerodeClient implements DockerClient {
       buildargs: buildArgs,
       t: dockerImageName.toString(),
       labels: this.createLabels(dockerImageName),
+      registryconfig: registryConfig,
     });
 
     const newVar: string[] = await streamToArray(stream);

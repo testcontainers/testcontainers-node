@@ -9,6 +9,8 @@ import { RegistryAuthLocator } from "./registry-auth-locator";
 import { AuthConfig } from "../docker-client";
 import { log } from "../logger";
 
+const DEFAULT_REGISTRY = "https://index.docker.io/v1/";
+
 const dockerConfigFile = path.resolve(os.homedir(), ".docker", "config.json");
 
 const readDockerConfig = async (): Promise<DockerConfig> => {
@@ -30,7 +32,7 @@ const dockerConfigPromise = readDockerConfig();
 
 const registryAuthLocators: RegistryAuthLocator[] = [new CredHelpers(), new CredsStore(), new Auths()];
 
-export async function getAuthConfig(registry: string): Promise<AuthConfig | undefined> {
+export async function getAuthConfig(registry = DEFAULT_REGISTRY): Promise<AuthConfig | undefined> {
   const dockerConfig = await dockerConfigPromise;
 
   const registryAuthLocator = registryAuthLocators.find((authLocator) =>
