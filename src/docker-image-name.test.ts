@@ -32,10 +32,10 @@ describe("DockerImageName", () => {
   });
 
   describe("fromString", () => {
-    it("should work", () => {
+    it("should work with default registry", () => {
       const dockerImageName = DockerImageName.fromString("image:latest");
 
-      expect(dockerImageName.registry).toBeUndefined();
+      expect(dockerImageName.registry).toBe("index.docker.io");
       expect(dockerImageName.image).toBe("image");
       expect(dockerImageName.tag).toBe("latest");
     });
@@ -43,7 +43,7 @@ describe("DockerImageName", () => {
     it("should work without tag", () => {
       const dockerImageName = DockerImageName.fromString("image");
 
-      expect(dockerImageName.registry).toBeUndefined();
+      expect(dockerImageName.registry).toBe("index.docker.io");
       expect(dockerImageName.image).toBe("image");
       expect(dockerImageName.tag).toBe("latest");
     });
@@ -75,7 +75,7 @@ describe("DockerImageName", () => {
     it("should work with nested image", () => {
       const dockerImageName = DockerImageName.fromString("parent/child:latest");
 
-      expect(dockerImageName.registry).toBe(undefined);
+      expect(dockerImageName.registry).toBe("index.docker.io");
       expect(dockerImageName.image).toBe("parent/child");
       expect(dockerImageName.tag).toBe("latest");
     });
@@ -91,7 +91,7 @@ describe("DockerImageName", () => {
     it("should work with tag being a hash", () => {
       const dockerImageName = DockerImageName.fromString("image@sha256:1234abcd1234abcd1234abcd1234abcd");
 
-      expect(dockerImageName.registry).toBe(undefined);
+      expect(dockerImageName.registry).toBe("index.docker.io");
       expect(dockerImageName.image).toBe("image");
       expect(dockerImageName.tag).toBe("sha256:1234abcd1234abcd1234abcd1234abcd");
     });

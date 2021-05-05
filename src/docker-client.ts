@@ -238,7 +238,16 @@ export class DockerodeClient implements DockerClient {
       t: dockerImageName.toString(),
       labels: this.createLabels(dockerImageName),
     });
-    await streamToArray(stream);
+
+    const newVar: string[] = await streamToArray(stream);
+    console.log(newVar.join("").toString());
+    /*
+    todo parse the output and trace log it
+
+    {"stream":"Step 1/2 : FROM cristianrgreco/testcontainer-private:1.1.12"}
+    {"stream":"\n"}
+    {"errorDetail":{"message":"pull access denied for cristianrgreco/testcontainer-private, repository does not exist or may require 'docker login': denied: requested access to the resource is denied"},"error":"pull access denied for cristianrgreco/testcontainer-private, repository does not exist or may require 'docker login': denied: requested access to the resource is denied"}
+     */
   }
 
   public async fetchDockerImageNames(): Promise<DockerImageName[]> {
