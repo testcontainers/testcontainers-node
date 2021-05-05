@@ -25,7 +25,7 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
-  it("should wait for port for private image", async () => {
+  xit("should wait for port for private image", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer-private:1.1.12")
       .withExposedPorts(8080)
       .start();
@@ -413,7 +413,7 @@ describe("GenericContainer", () => {
       await startedContainer.stop();
     });
 
-    it("should build and start with private image", async () => {
+    xit("should build and start with private image", async () => {
       const context = path.resolve(fixtures, "docker-private");
       const container = await GenericContainer.fromDockerfile(context).build();
       const startedContainer = await container.withExposedPorts(8080).start();
