@@ -47,6 +47,7 @@ import { getDockerfileImages } from "./dockerfile-parser";
 
 export class GenericContainerBuilder {
   private buildArgs: BuildArgs = {};
+  private pullPolicy: PullPolicy = new DefaultPullPolicy();
 
   constructor(
     private readonly context: BuildContext,
@@ -56,6 +57,11 @@ export class GenericContainerBuilder {
 
   public withBuildArg(key: string, value: string): GenericContainerBuilder {
     this.buildArgs[key] = value;
+    return this;
+  }
+
+  public withPullPolicy(pullPolicy: PullPolicy): this {
+    this.pullPolicy = pullPolicy;
     return this;
   }
 
@@ -70,7 +76,14 @@ export class GenericContainerBuilder {
     const imageNames = await getDockerfileImages(dockerfile);
     const registryConfig = await this.getRegistryConfig(imageNames);
 
-    await dockerClient.buildImage(dockerImageName, this.context, this.dockerfileName, this.buildArgs, registryConfig);
+    await dockerClient.buildImage(
+      dockerImageName,
+      this.context,
+      this.dockerfileName,
+      this.buildArgs,
+      this.pullPolicy,
+      registryConfig
+    );
     const container = new GenericContainer(dockerImageName.toString());
 
     if (!(await isImageCached(dockerClient, dockerImageName))) {

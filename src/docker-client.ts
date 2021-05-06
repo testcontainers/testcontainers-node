@@ -12,6 +12,7 @@ import { DockerImageName } from "./docker-image-name";
 import { PullStreamParser } from "./pull-stream-parser";
 import { Readable } from "stream";
 import { EOL } from "os";
+import { PullPolicy } from "./pull-policy";
 
 export type Command = string;
 export type ContainerName = string;
@@ -125,6 +126,7 @@ export interface DockerClient {
     context: BuildContext,
     dockerfileName: string,
     buildArgs: BuildArgs,
+    pullPolicy: PullPolicy,
     registryConfig: RegistryConfig
   ): Promise<void>;
   fetchDockerImageNames(): Promise<DockerImageName[]>;
@@ -237,6 +239,7 @@ export class DockerodeClient implements DockerClient {
     context: BuildContext,
     dockerfileName: string,
     buildArgs: BuildArgs,
+    pullPolicy: PullPolicy,
     registryConfig: RegistryConfig
   ): Promise<void> {
     log.info(`Building image '${dockerImageName.toString()}' with context '${context}'`);
@@ -251,6 +254,7 @@ export class DockerodeClient implements DockerClient {
           t: dockerImageName.toString(),
           labels: this.createLabels(dockerImageName),
           registryconfig: registryConfig,
+          pull: pullPolicy.shouldPull(),
         })
         .then((stream) => byline(stream))
         .then((stream) => {
