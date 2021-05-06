@@ -24,7 +24,7 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
-  it("should wait for port for private image", async () => {
+  it("should pull an image from a private registry", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer-private:1.1.12")
       .withPullPolicy(new AlwaysPullPolicy())
       .withExposedPorts(8080)
@@ -413,7 +413,7 @@ describe("GenericContainer", () => {
       await startedContainer.stop();
     });
 
-    it("should build and start with private image", async () => {
+    it("should pull an image from a private registry", async () => {
       const context = path.resolve(fixtures, "docker-private");
       const container = await GenericContainer.fromDockerfile(context).withPullPolicy(new AlwaysPullPolicy()).build();
       const startedContainer = await container.withExposedPorts(8080).start();

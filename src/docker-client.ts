@@ -259,7 +259,7 @@ export class DockerodeClient implements DockerClient {
         .then((stream) => byline(stream))
         .then((stream) => {
           stream.setEncoding("utf-8");
-          stream.on("data", (data) => log.trace(`${dockerImageName.toString()}: ${data.replace(EOL, "")}`));
+          stream.on("data", (line) => log.trace(`${dockerImageName.toString()}: ${line}`));
           stream.on("end", () => resolve());
         });
     });
