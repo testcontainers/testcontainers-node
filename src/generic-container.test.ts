@@ -4,7 +4,6 @@ import { createServer, Server } from "http";
 import { GenericContainer } from "./generic-container";
 import { AlwaysPullPolicy } from "./pull-policy";
 import { Wait } from "./wait";
-import { Readable } from "stream";
 import { RandomUuid } from "./uuid";
 import { TestContainers } from "./test-containers";
 import { RandomPortClient } from "./port-client";
@@ -17,6 +16,19 @@ describe("GenericContainer", () => {
 
   it("should wait for port", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12").withExposedPorts(8080).start();
+
+    const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
+    const response = await fetch(`${url}/hello-world`);
+
+    expect(response.status).toBe(200);
+    await container.stop();
+  });
+
+  it("should pull an image from a private registry", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer-private:1.1.12")
+      .withPullPolicy(new AlwaysPullPolicy())
+      .withExposedPorts(8080)
+      .start();
 
     const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
     const response = await fetch(`${url}/hello-world`);
@@ -392,6 +404,18 @@ describe("GenericContainer", () => {
     it("should build and start", async () => {
       const context = path.resolve(fixtures, "docker");
       const container = await GenericContainer.fromDockerfile(context).build();
+      const startedContainer = await container.withExposedPorts(8080).start();
+
+      const url = `http://${startedContainer.getHost()}:${startedContainer.getMappedPort(8080)}`;
+      const response = await fetch(`${url}/hello-world`);
+
+      expect(response.status).toBe(200);
+      await startedContainer.stop();
+    });
+
+    it("should pull an image from a private registry", async () => {
+      const context = path.resolve(fixtures, "docker-private");
+      const container = await GenericContainer.fromDockerfile(context).withPullPolicy(new AlwaysPullPolicy()).build();
       const startedContainer = await container.withExposedPorts(8080).start();
 
       const url = `http://${startedContainer.getHost()}:${startedContainer.getMappedPort(8080)}`;

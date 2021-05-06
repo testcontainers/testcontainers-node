@@ -1,6 +1,6 @@
 import Dockerode, { Network, PortMap as DockerodePortBindings } from "dockerode";
-import streamToArray from "stream-to-array";
 import tar from "tar-fs";
+import byline from "byline";
 import slash from "slash";
 import { BoundPorts } from "./bound-ports";
 import { Container, DockerodeContainer, Id } from "./container";
@@ -11,6 +11,8 @@ import { PortString } from "./port";
 import { DockerImageName } from "./docker-image-name";
 import { PullStreamParser } from "./pull-stream-parser";
 import { Readable } from "stream";
+import { EOL } from "os";
+import { PullPolicy } from "./pull-policy";
 
 export type Command = string;
 export type ContainerName = string;
@@ -104,6 +106,13 @@ export type CreateNetworkOptions = {
   options?: { [key: string]: string };
 };
 
+export interface RegistryConfig {
+  [registryAddress: string]: {
+    username: string;
+    password: string;
+  };
+}
+
 export interface DockerClient {
   pull(dockerImageName: DockerImageName, authConfig?: AuthConfig): Promise<void>;
   create(options: CreateOptions): Promise<Container>;
@@ -116,7 +125,9 @@ export interface DockerClient {
     dockerImageName: DockerImageName,
     context: BuildContext,
     dockerfileName: string,
-    buildArgs: BuildArgs
+    buildArgs: BuildArgs,
+    pullPolicy: PullPolicy,
+    registryConfig: RegistryConfig
   ): Promise<void>;
   fetchDockerImageNames(): Promise<DockerImageName[]>;
   listContainers(): Promise<Dockerode.ContainerInfo[]>;
@@ -227,18 +238,31 @@ export class DockerodeClient implements DockerClient {
     dockerImageName: DockerImageName,
     context: BuildContext,
     dockerfileName: string,
-    buildArgs: BuildArgs
+    buildArgs: BuildArgs,
+    pullPolicy: PullPolicy,
+    registryConfig: RegistryConfig
   ): Promise<void> {
     log.info(`Building image '${dockerImageName.toString()}' with context '${context}'`);
     const dockerIgnoreFiles = await findDockerIgnoreFiles(context);
     const tarStream = tar.pack(context, { ignore: (name) => dockerIgnoreFiles.has(slash(name)) });
-    const stream = await this.dockerode.buildImage(tarStream, {
-      dockerfile: dockerfileName,
-      buildargs: buildArgs,
-      t: dockerImageName.toString(),
-      labels: this.createLabels(dockerImageName),
+
+    return new Promise((resolve) => {
+      this.dockerode
+        .buildImage(tarStream, {
+          dockerfile: dockerfileName,
+          buildargs: buildArgs,
+          t: dockerImageName.toString(),
+          labels: this.createLabels(dockerImageName),
+          registryconfig: registryConfig,
+          pull: pullPolicy.shouldPull(),
+        })
+        .then((stream) => byline(stream))
+        .then((stream) => {
+          stream.setEncoding("utf-8");
+          stream.on("data", (line) => log.trace(`${dockerImageName.toString()}: ${line}`));
+          stream.on("end", () => resolve());
+        });
     });
-    await streamToArray(stream);
   }
 
   public async fetchDockerImageNames(): Promise<DockerImageName[]> {
