@@ -16,17 +16,15 @@ npm i -D testcontainers
 
 The following environment variables are supported:
 
-| Key | Example value | Behaviour |
-| --- | --- | --- |
-| `DEBUG` | `testcontainers` | See output |
-| `DEBUG` | `testcontainers:containers` | See container output |
-| `DEBUG` | `testcontainers*` | See all output |
-| `DOCKER_HOST` | `tcp://docker:2375` | Daemon socket to connect to |
-| `TESTCONTAINERS_HOST_OVERRIDE` | `docker.svc.local` | Docker's host on which ports are exposed |
-| `TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE` | `/var/run/docker.sock` | Path to Docker's socket. Used by Ryuk and a few other containers that need to perform Docker actions
-| `TESTCONTAINERS_RYUK_DISABLED` | `true` | Disable [ryuk](#ryuk) |
-| `RYUK_CONTAINER_IMAGE` | `registry.mycompany.com/mirror/ryuk:0.3.0` | Custom image for [ryuk](#ryuk) |
-| `SSHD_CONTAINER_IMAGE` | `registry.mycompany.com/mirror/sshd:1.0.0` | Custom image for [SSHd](#SSHd) |
+- `DEBUG` | `testcontainers` | See output
+- `DEBUG` | `testcontainers:containers` | See container output
+- `DEBUG` | `testcontainers*` | See all output
+- `DOCKER_HOST` | `tcp://docker:2375*` | Daemon socket to connect to
+- `TESTCONTAINERS_HOST_OVERRIDE` | `docker.svc.local` | Docker's host on which ports are exposed
+- `TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE` | `/var/run/docker.sock` | Path to Docker's socket. Used by Ryuk and a few other containers that need to perform Docker actions
+- `TESTCONTAINERS_RYUK_DISABLED` | `true` | Disable [ryuk](#ryuk)
+- `RYUK_CONTAINER_IMAGE` | `registry.mycompany.com/mirror/ryuk:0.3.0` | Custom image for [ryuk](#ryuk)
+- `SSHD_CONTAINER_IMAGE` | `registry.mycompany.com/mirror/sshd:1.0.0` | Custom image for [SSHd](#SSHd)
 
 ## Modules
 
@@ -245,11 +243,10 @@ await container.stop();
 await network.stop();
 ```
 
-Specifying a pull policy. Note that if omitted will use the `DefaultPullPolicy` which will use a locally cached 
-image if one already exists, this is usually the preferred option. In cases where 
-there is a local image for a given tag but the remote image with the same tag may 
-have changed (for example when using the `latest` tag), you can tell testcontainers 
-to pull the image again by specifying an `AlwaysPullPolicy`: 
+Specifying a pull policy. Note that if omitted will use the `DefaultPullPolicy` which will use a locally cached image 
+if one already exists, this is usually the preferred option. In cases where there is a local image for a given tag 
+but the remote image with the same tag may have changed (for example when using the `latest` tag), you can tell 
+testcontainers to pull the image again by specifying an `AlwaysPullPolicy`: 
 
 ```javascript
 const { GenericContainer, AlwaysPullPolicy } = require("testcontainers");
@@ -257,6 +254,14 @@ const { GenericContainer, AlwaysPullPolicy } = require("testcontainers");
 const container = await new GenericContainer("alpine:latest")
   .withPullPolicy(new AlwaysPullPolicy())
   .start();
+```
+
+Same for images in a Dockerfile:
+
+```javascript
+const container = await GenericContainer.fromDockerfile(buildContext)
+  .withPullPolicy(new AlwaysPullPolicy())
+  .build();
 ```
 
 Specifying a default log driver. You can override the logging driver used by Docker to be the default one (json-file).
