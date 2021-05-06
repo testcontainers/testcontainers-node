@@ -259,6 +259,8 @@ const container = await new GenericContainer("alpine:latest")
 Same for images in a Dockerfile:
 
 ```javascript
+const { GenericContainer, AlwaysPullPolicy } = require("testcontainers");
+
 const container = await GenericContainer.fromDockerfile(buildContext)
   .withPullPolicy(new AlwaysPullPolicy())
   .build();

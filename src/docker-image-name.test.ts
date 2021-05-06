@@ -1,5 +1,6 @@
 import { DockerImageName } from "./docker-image-name";
 import { ReaperInstance } from "./reaper";
+import { PortForwarderInstance } from "./port-forwarder";
 
 describe("DockerImageName", () => {
   it("should return whether two image names are equal", () => {
@@ -17,6 +18,16 @@ describe("DockerImageName", () => {
 
     expect(reaper.isReaper()).toBe(true);
     expect(notReaper.isReaper()).toBe(false);
+  });
+
+  it("should return whether the repo tag is for a helper container", () => {
+    const reaper = DockerImageName.fromString(ReaperInstance.getImage());
+    const portForwarder = DockerImageName.fromString(PortForwarderInstance.getImage());
+    const notHelper = new DockerImageName(undefined, "testcontainers/notHelper", "latest");
+
+    expect(reaper.isHelperContainer()).toBe(true);
+    expect(portForwarder.isHelperContainer()).toBe(true);
+    expect(notHelper.isHelperContainer()).toBe(false);
   });
 
   describe("toString", () => {
