@@ -11,6 +11,9 @@ import { StopOptions } from "../../test-container";
 import { log } from "../../logger";
 import { AbstractStartedContainer } from "../abstract-started-container";
 
+export const KAFKA_IMAGE = "confluentinc/cp-kafka:5.5.4";
+export const ZK_IMAGE = "confluentinc/cp-zookeeper:5.5.4";
+
 export class KafkaContainer extends GenericContainer {
   private readonly uuid: Uuid = new RandomUuid();
   private readonly portClient: PortClient = new RandomPortClient();
@@ -22,11 +25,7 @@ export class KafkaContainer extends GenericContainer {
   private network?: StartedNetwork;
   private zooKeeperContainer?: StartedTestContainer;
 
-  constructor(
-    image = "confluentinc/cp-kafka:latest",
-    private readonly host?: Host,
-    private readonly zooKeeperImage = "confluentinc/cp-zookeeper:latest"
-  ) {
+  constructor(image = KAFKA_IMAGE, private readonly host?: Host, private readonly zooKeeperImage = ZK_IMAGE) {
     super(image);
     this.host = host === undefined ? this.uuid.nextUuid() : host;
     this.withName(this.host)
