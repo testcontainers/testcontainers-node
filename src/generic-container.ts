@@ -203,7 +203,9 @@ export class GenericContainer implements TestContainer {
       if (!this.networkMode || !excludedNetworks.includes(this.networkMode)) {
         await dockerClient.connectToNetwork(container.getId(), portForwarderNetworkId, this.networkAliases);
       }
-    } else if (this.networkMode && this.networkAliases.length > 0) {
+    }
+
+    if (this.networkMode && this.networkAliases.length > 0) {
       await dockerClient.connectToNetwork(container.getId(), this.networkMode, this.networkAliases);
     }
 
