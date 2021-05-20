@@ -11,7 +11,6 @@ import { PortString } from "./port";
 import { DockerImageName } from "./docker-image-name";
 import { PullStreamParser } from "./pull-stream-parser";
 import { Readable } from "stream";
-import { EOL } from "os";
 import { PullPolicy } from "./pull-policy";
 
 export type Command = string;

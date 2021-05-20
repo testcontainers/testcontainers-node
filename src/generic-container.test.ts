@@ -374,27 +374,6 @@ describe("GenericContainer", () => {
     await startedContainer.stop();
   });
 
-  it("should expose host ports to the container", async () => {
-    const randomPort = await new RandomPortClient().getPort();
-    const server: Server = await new Promise((resolve) => {
-      const server = createServer((req, res) => {
-        res.writeHead(200);
-        res.end("hello world");
-      });
-      server.listen(randomPort, () => resolve(server));
-    });
-
-    await TestContainers.exposeHostPorts(randomPort);
-
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12").withCmd(["top"]).start();
-
-    const { output } = await container.exec(["curl", `http://host.testcontainers.internal:${randomPort}`]);
-    expect(output).toBe("hello world");
-
-    await server.close();
-    await container.stop();
-  });
-
   it("should copy file to container", async () => {
     const source = path.resolve(fixtures, "docker", "test.txt");
     const target = "/tmp/test.txt";
