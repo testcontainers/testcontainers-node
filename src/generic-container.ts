@@ -201,7 +201,7 @@ export class GenericContainer implements TestContainer {
       const excludedNetworks = [portForwarderNetworkId, "none", "host"];
 
       if (!this.networkMode || !excludedNetworks.includes(this.networkMode)) {
-        await dockerClient.connectToNetwork(container.getId(), portForwarderNetworkId);
+        await dockerClient.connectToNetwork(container.getId(), portForwarderNetworkId, []);
       }
     }
 
