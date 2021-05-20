@@ -118,7 +118,7 @@ export interface DockerClient {
   create(options: CreateOptions): Promise<Container>;
   createNetwork(options: CreateNetworkOptions): Promise<string>;
   removeNetwork(id: string): Promise<void>;
-  connectToNetwork(containerId: string, networkId: string): Promise<void>;
+  connectToNetwork(containerId: string, networkId: string, networkAliases: string[] | undefined): Promise<void>;
   start(container: Container): Promise<void>;
   exec(container: Container, command: Command[]): Promise<ExecResult>;
   buildImage(
@@ -168,16 +168,16 @@ export class DockerodeClient implements DockerClient {
         Tmpfs: options.tmpFs,
         LogConfig: this.getLogConfig(options.useDefaultLogDriver),
         Privileged: options.privilegedMode,
-      },
+      }
     });
 
     return new DockerodeContainer(dockerodeContainer);
   }
 
-  public async connectToNetwork(containerId: string, networkId: string): Promise<void> {
+  public async connectToNetwork(containerId: string, networkId: string, networkAliases: string[] = []): Promise<void> {
     log.debug(`Connecting container ${containerId} to network ${networkId}`);
     const network = this.dockerode.getNetwork(networkId);
-    await network.connect({ Container: containerId });
+    await network.connect({ Container: containerId, EndpointConfig: { Aliases: networkAliases } });
   }
 
   public async createNetwork(options: CreateNetworkOptions): Promise<string> {

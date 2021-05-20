@@ -133,6 +133,7 @@ export class GenericContainer implements TestContainer {
 
   protected env: Env = {};
   protected networkMode?: NetworkMode;
+  protected networkAliases: string[] = [];
   protected ports: Port[] = [];
   protected cmd: Command[] = [];
   protected bindMounts: BindMount[] = [];
@@ -185,7 +186,7 @@ export class GenericContainer implements TestContainer {
       tmpFs: this.tmpFs,
       boundPorts,
       name: this.name,
-      networkMode: this.networkMode,
+      networkMode: this.networkAliases.length > 0 ? undefined : this.networkMode,
       healthCheck: this.healthCheck,
       useDefaultLogDriver: this.useDefaultLogDriver,
       privilegedMode: this.privilegedMode,
@@ -200,8 +201,10 @@ export class GenericContainer implements TestContainer {
       const excludedNetworks = [portForwarderNetworkId, "none", "host"];
 
       if (!this.networkMode || !excludedNetworks.includes(this.networkMode)) {
-        await dockerClient.connectToNetwork(container.getId(), portForwarderNetworkId);
+        await dockerClient.connectToNetwork(container.getId(), portForwarderNetworkId, this.networkAliases);
       }
+    } else if (this.networkMode && this.networkAliases.length > 0) {
+      await dockerClient.connectToNetwork(container.getId(), this.networkMode, this.networkAliases);
     }
 
     if (this.tarToCopy) {
@@ -255,6 +258,11 @@ export class GenericContainer implements TestContainer {
 
   public withNetworkMode(networkMode: NetworkMode): this {
     this.networkMode = networkMode;
+    return this;
+  }
+
+  public withNetworkAliases(...networkAliases: string[]): this {
+    this.networkAliases = networkAliases;
     return this;
   }
 
