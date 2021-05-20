@@ -117,12 +117,13 @@ describe("GenericContainer", () => {
       .start();
     const barContainer = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
       .withNetworkMode(network.getName())
-      .withNetworkAliases("bar")
+      .withNetworkAliases("bar", "baz")
       .start();
 
     expect((await fooContainer.exec(["nslookup", "bar"])).exitCode).toBe(0);
+    expect((await fooContainer.exec(["nslookup", "baz"])).exitCode).toBe(0);
     expect((await barContainer.exec(["nslookup", "foo"])).exitCode).toBe(0);
-    expect((await barContainer.exec(["nslookup", "baz"])).exitCode).toBe(1);
+    expect((await barContainer.exec(["nslookup", "unknown"])).exitCode).toBe(1);
 
     await barContainer.stop();
     await fooContainer.stop();

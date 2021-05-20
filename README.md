@@ -257,7 +257,7 @@ const container = await new GenericContainer("alpine")
 
 const fooContainer = await new GenericContainer("alpine")
   .withNetworkMode(network.getName())
-  .withNetworkAliases("foo")
+  .withNetworkAliases("foo", "bar")
   .start();
 
 expect((await container.exec(["nslookup", "foo"])).exitCode).toBe(0);
