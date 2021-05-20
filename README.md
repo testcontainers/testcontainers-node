@@ -243,6 +243,26 @@ await container.stop();
 await network.stop();
 ```
 
+Communicate to containers on the same network via aliases:
+
+```javascript
+const { GenericContainer, Network } = require("testcontainers");
+
+const network = await new Network()
+    .start();
+
+const container = await new GenericContainer("alpine")
+  .withNetworkMode(network.getName())
+  .start();
+
+const fooContainer = await new GenericContainer("alpine")
+  .withNetworkMode(network.getName())
+  .withNetworkAliases("foo")
+  .start();
+
+expect((await container.exec(["nslookup", "foo"])).exitCode).toBe(0);
+```
+
 Specifying a pull policy. Note that if omitted will use the `DefaultPullPolicy` which will use a locally cached image 
 if one already exists, this is usually the preferred option. In cases where there is a local image for a given tag 
 but the remote image with the same tag may have changed (for example when using the `latest` tag), you can tell 
