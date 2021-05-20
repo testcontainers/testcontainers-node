@@ -8,6 +8,7 @@ import { RandomUuid } from "./uuid";
 import { TestContainers } from "./test-containers";
 import { RandomPortClient } from "./port-client";
 import { getContainerById, getEvents, getRunningContainerNames } from "./test-helper";
+import {Network} from "./network";
 
 describe("GenericContainer", () => {
   jest.setTimeout(180_000);
@@ -106,6 +107,27 @@ describe("GenericContainer", () => {
 
     expect(containerInfo.HostConfig.NetworkMode).toBe("host");
     await container.stop();
+  });
+
+  it("should set network aliases", async () => {
+    const network = await new Network().start();
+    const fooContainer = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
+      .withNetworkMode(network.getName())
+      .withNetworkAliases("foo")
+      .start();
+    const barContainer = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
+      .withNetworkMode(network.getName())
+      .withNetworkAliases("bar", "baz")
+      .start();
+
+    expect((await fooContainer.exec(["nslookup", "bar"])).exitCode).toBe(0);
+    expect((await fooContainer.exec(["nslookup", "baz"])).exitCode).toBe(0);
+    expect((await barContainer.exec(["nslookup", "foo"])).exitCode).toBe(0);
+    expect((await barContainer.exec(["nslookup", "unknown"])).exitCode).toBe(1);
+
+    await barContainer.stop();
+    await fooContainer.stop();
+    await network.stop();
   });
 
   it("should set environment variables", async () => {
@@ -351,27 +373,6 @@ describe("GenericContainer", () => {
     expect(output).not.toContain("example6.txt");
 
     await startedContainer.stop();
-  });
-
-  it("should expose host ports to the container", async () => {
-    const randomPort = await new RandomPortClient().getPort();
-    const server: Server = await new Promise((resolve) => {
-      const server = createServer((req, res) => {
-        res.writeHead(200);
-        res.end("hello world");
-      });
-      server.listen(randomPort, () => resolve(server));
-    });
-
-    await TestContainers.exposeHostPorts(randomPort);
-
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12").withCmd(["top"]).start();
-
-    const { output } = await container.exec(["curl", `http://host.testcontainers.internal:${randomPort}`]);
-    expect(output).toBe("hello world");
-
-    await server.close();
-    await container.stop();
   });
 
   it("should copy file to container", async () => {
