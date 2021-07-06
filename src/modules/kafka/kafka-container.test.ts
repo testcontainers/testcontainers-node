@@ -16,9 +16,7 @@ describe("KafkaContainer", () => {
   });
 
   it("should connect to kafka using in-built zoo-keeper and custom images", async () => {
-    const kafkaContainer = await new KafkaContainer(KAFKA_IMAGE, undefined, ZK_IMAGE)
-      .withExposedPorts(9093)
-      .start();
+    const kafkaContainer = await new KafkaContainer(KAFKA_IMAGE, undefined, ZK_IMAGE).withExposedPorts(9093).start();
 
     await testPubSub(kafkaContainer);
 

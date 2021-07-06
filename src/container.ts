@@ -4,6 +4,7 @@ import { Command, ContainerName, ExitCode } from "./docker-client";
 import { Port } from "./port";
 import { Duplex, Readable } from "stream";
 import streamToArray from "stream-to-array";
+import { IncomingMessage } from "http";
 
 export type Id = string;
 
@@ -54,7 +55,7 @@ export interface Container {
   stop(options: StopOptions): Promise<void>;
   remove(options: RemoveOptions): Promise<void>;
   exec(options: ExecOptions): Promise<Exec>;
-  logs(): Promise<Readable>;
+  logs(): Promise<IncomingMessage>;
   inspect(): Promise<InspectResult>;
   putArchive(stream: Readable, containerPath: string): Promise<void>;
 }
@@ -101,13 +102,13 @@ export class DockerodeContainer implements Container {
     );
   }
 
-  public async logs(): Promise<Readable> {
+  public async logs(): Promise<IncomingMessage> {
     const options = {
       follow: true,
       stdout: true,
       stderr: true,
     };
-    return (await this.container.logs(options)).setEncoding("utf-8") as Readable;
+    return (await this.container.logs(options)).setEncoding("utf-8") as IncomingMessage;
   }
 
   public async inspect(): Promise<InspectResult> {

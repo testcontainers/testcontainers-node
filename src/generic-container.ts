@@ -217,10 +217,13 @@ export class GenericContainer implements TestContainer {
     log.info(`Starting container ${this.dockerImageName} with ID: ${container.getId()}`);
     await dockerClient.start(container);
 
-    if (!this.daemonMode) {
-      (await container.logs())
-        .on("data", (data) => containerLog.trace(`${container.getId()}: ${data}`))
-        .on("err", (data) => containerLog.error(`${container.getId()}: ${data}`));
+    const logs = await container.logs();
+    logs
+      .on("data", (data) => containerLog.trace(`${container.getId()}: ${data}`))
+      .on("err", (data) => containerLog.error(`${container.getId()}: ${data}`));
+
+    if (this.daemonMode) {
+      logs.socket.unref();
     }
 
     const inspectResult = await container.inspect();

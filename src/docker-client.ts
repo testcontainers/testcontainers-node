@@ -167,7 +167,7 @@ export class DockerodeClient implements DockerClient {
         Tmpfs: options.tmpFs,
         LogConfig: this.getLogConfig(options.useDefaultLogDriver),
         Privileged: options.privilegedMode,
-      }
+      },
     });
 
     return new DockerodeContainer(dockerodeContainer);

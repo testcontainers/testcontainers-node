@@ -8,7 +8,7 @@ import { RandomUuid } from "./uuid";
 import { TestContainers } from "./test-containers";
 import { RandomPortClient } from "./port-client";
 import { getContainerById, getEvents, getRunningContainerNames } from "./test-helper";
-import {Network} from "./network";
+import { Network } from "./network";
 
 describe("GenericContainer", () => {
   jest.setTimeout(180_000);
