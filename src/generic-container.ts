@@ -1,8 +1,8 @@
 import archiver from "archiver";
 import path from "path";
-import {BoundPorts} from "./bound-ports";
-import {Container, Id as ContainerId, InspectResult} from "./container";
-import {ContainerState} from "./container-state";
+import { BoundPorts } from "./bound-ports";
+import { Container, Id as ContainerId, InspectResult } from "./container";
+import { ContainerState } from "./container-state";
 import {
   AuthConfig,
   BindMode,
@@ -23,13 +23,13 @@ import {
   RegistryConfig,
   TmpFs,
 } from "./docker-client";
-import {DockerClientInstance, Host} from "./docker-client-instance";
-import {containerLog, log} from "./logger";
-import {Port} from "./port";
-import {PortBinder} from "./port-binder";
-import {HostPortCheck, InternalPortCheck} from "./port-check";
-import {DefaultPullPolicy, PullPolicy} from "./pull-policy";
-import {DockerImageName} from "./docker-image-name";
+import { DockerClientInstance, Host } from "./docker-client-instance";
+import { containerLog, log } from "./logger";
+import { Port } from "./port";
+import { PortBinder } from "./port-binder";
+import { HostPortCheck, InternalPortCheck } from "./port-check";
+import { DefaultPullPolicy, PullPolicy } from "./pull-policy";
+import { DockerImageName } from "./docker-image-name";
 import {
   DEFAULT_STOP_OPTIONS,
   StartedTestContainer,
@@ -37,13 +37,13 @@ import {
   StoppedTestContainer,
   TestContainer,
 } from "./test-container";
-import {RandomUuid, Uuid} from "./uuid";
-import {HostPortWaitStrategy, WaitStrategy} from "./wait-strategy";
-import {ReaperInstance} from "./reaper";
-import {Readable} from "stream";
-import {PortForwarderInstance} from "./port-forwarder";
-import {getAuthConfig} from "./registry-auth-locator";
-import {getDockerfileImages} from "./dockerfile-parser";
+import { RandomUuid, Uuid } from "./uuid";
+import { HostPortWaitStrategy, WaitStrategy } from "./wait-strategy";
+import { ReaperInstance } from "./reaper";
+import { Readable } from "stream";
+import { PortForwarderInstance } from "./port-forwarder";
+import { getAuthConfig } from "./registry-auth-locator";
+import { getDockerfileImages } from "./dockerfile-parser";
 
 export class GenericContainerBuilder {
   private buildArgs: BuildArgs = {};
@@ -53,8 +53,7 @@ export class GenericContainerBuilder {
     private readonly context: BuildContext,
     private readonly dockerfileName: string,
     private readonly uuid: Uuid = new RandomUuid()
-  ) {
-  }
+  ) {}
 
   public withBuildArg(key: string, value: string): GenericContainerBuilder {
     this.buildArgs[key] = value;
@@ -116,7 +115,7 @@ export class GenericContainerBuilder {
           },
         };
       })
-      .reduce((prev, next) => ({...prev, ...next}), {} as RegistryConfig);
+      .reduce((prev, next) => ({ ...prev, ...next }), {} as RegistryConfig);
   }
 }
 
@@ -176,7 +175,7 @@ export class GenericContainer implements TestContainer {
 
     if (!this.dockerImageName.isHelperContainer() && PortForwarderInstance.isRunning()) {
       const portForwarder = await PortForwarderInstance.getInstance(dockerClient);
-      this.extraHosts.push({host: "host.testcontainers.internal", ipAddress: portForwarder.getIpAddress()});
+      this.extraHosts.push({ host: "host.testcontainers.internal", ipAddress: portForwarder.getIpAddress() });
     }
 
     const container = await dockerClient.create({
@@ -278,7 +277,7 @@ export class GenericContainer implements TestContainer {
   }
 
   public withBindMount(source: Dir, target: Dir, bindMode: BindMode = "rw"): this {
-    this.bindMounts.push({source, target, bindMode});
+    this.bindMounts.push({ source, target, bindMode });
     return this;
   }
 
@@ -323,12 +322,12 @@ export class GenericContainer implements TestContainer {
   }
 
   public withCopyFileToContainer(sourcePath: string, containerPath: string): this {
-    this.getTarToCopy().file(sourcePath, {name: containerPath});
+    this.getTarToCopy().file(sourcePath, { name: containerPath });
     return this;
   }
 
   public withCopyContentToContainer(content: string | Buffer | Readable, containerPath: string): this {
-    this.getTarToCopy().append(content, {name: containerPath});
+    this.getTarToCopy().append(content, { name: containerPath });
     return this;
   }
 
@@ -363,8 +362,8 @@ export class GenericContainer implements TestContainer {
       }
 
       try {
-        await container.stop({timeout: 0});
-        await container.remove({removeVolumes: true});
+        await container.stop({ timeout: 0 });
+        await container.remove({ removeVolumes: true });
       } catch (stopErr) {
         log.error(`Failed to stop container after it failed to be ready: ${stopErr}`);
       }
@@ -390,8 +389,7 @@ export class StartedGenericContainer implements StartedTestContainer {
     private readonly boundPorts: BoundPorts,
     private readonly name: ContainerName,
     private readonly dockerClient: DockerClient
-  ) {
-  }
+  ) {}
 
   public async stop(options: Partial<StopOptions> = {}): Promise<StoppedTestContainer> {
     return await this.stopContainer(options);
@@ -399,9 +397,9 @@ export class StartedGenericContainer implements StartedTestContainer {
 
   private async stopContainer(options: Partial<StopOptions> = {}): Promise<StoppedGenericContainer> {
     log.info(`Stopping container with ID: ${this.container.getId()}`);
-    const resolvedOptions = {...DEFAULT_STOP_OPTIONS, ...options};
-    await this.container.stop({timeout: resolvedOptions.timeout});
-    await this.container.remove({removeVolumes: resolvedOptions.removeVolumes});
+    const resolvedOptions = { ...DEFAULT_STOP_OPTIONS, ...options };
+    await this.container.stop({ timeout: resolvedOptions.timeout });
+    await this.container.remove({ removeVolumes: resolvedOptions.removeVolumes });
     return new StoppedGenericContainer();
   }
 
@@ -442,5 +440,4 @@ export class StartedGenericContainer implements StartedTestContainer {
   }
 }
 
-class StoppedGenericContainer implements StoppedTestContainer {
-}
+class StoppedGenericContainer implements StoppedTestContainer {}
