@@ -26,11 +26,11 @@ class DebugLogger implements Logger {
   }
 
   public info(message: Message): void {
-    this.logger(`INFO ${message}`);
+    this.logger(`INFO  ${message}`);
   }
 
   public warn(message: Message): void {
-    this.logger(`WARN ${message}`);
+    this.logger(`WARN  ${message}`);
   }
 
   public error(message: Message): void {
