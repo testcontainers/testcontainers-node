@@ -95,18 +95,25 @@ export class ReaperInstance {
     const host = dockerClient.getHost();
     const port = container.getMappedPort(8080);
 
-    log.debug(`Connecting to Reaper on ${host}:${port}`);
+    log.debug(`Connecting to Reaper ${container.getId()} on ${host}:${port}`);
     const socket = new Socket();
 
     socket.unref();
 
-    socket.on("close", () => {
-      log.warn("Connection to Reaper closed");
-    });
+    socket
+      .on('timeout', () => log.error(`Reaper ${container.getId()} socket timed out`))
+      .on('error', err => log.error(`Reaper ${container.getId()} socket error: ${err}`))
+      .on("close", (hadError) => {
+        if (hadError) {
+          log.error(`Connection to Reaper ${container.getId()} closed with error`);
+        } else {
+          log.warn(`Connection to Reaper ${container.getId()} closed`);
+        }
+      });
 
     return await new Promise((resolve) => {
       socket.connect(port, host, () => {
-        log.debug(`Connected to Reaper`);
+        log.debug(`Connected to Reaper ${container.getId()}`);
         socket.write(`label=org.testcontainers.session-id=${sessionId}\r\n`);
         const reaper = new RealReaper(sessionId, container, socket);
         resolve(reaper);
