@@ -231,9 +231,9 @@ describe("GenericContainer", () => {
   it("should use pull policy", async () => {
     const container1 = await new GenericContainer("cristianrgreco/testcontainer:1.1.12").withExposedPorts(8080).start();
     const events = await getEvents();
-    const pullPromise = new Promise<void>(resolve => {
-      events.on('data', (data) => {
-        if (JSON.parse(data).status === 'pull') {
+    const pullPromise = new Promise<void>((resolve) => {
+      events.on("data", (data) => {
+        if (JSON.parse(data).status === "pull") {
           resolve();
         }
       });
