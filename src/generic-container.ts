@@ -210,7 +210,7 @@ export class GenericContainer implements TestContainer {
     }
 
     if (this.tarToCopy) {
-      this.tarToCopy.finalize();
+      await this.tarToCopy.finalize();
       await container.putArchive(this.tarToCopy, "/");
     }
 

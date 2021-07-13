@@ -20,7 +20,17 @@ export class DockerClientInstance {
     log.debug("Creating new DockerClient");
     const dockerode = new Dockerode();
     const host = await this.getHost(dockerode);
-    return new DockerodeClient(host, dockerode, new RandomUuid().nextUuid());
+
+    const dockerClient = new DockerodeClient(host, dockerode, new RandomUuid().nextUuid());
+    await this.logSystemDiagnostics(dockerClient);
+
+    return dockerClient;
+  }
+
+  private static async logSystemDiagnostics(dockerClient: DockerodeClient) {
+    const nodeInfo = { version: process.version, architecture: process.arch, platform: process.platform };
+    const dockerInfo = await dockerClient.getInfo();
+    log.debug(`System diagnostics: ${JSON.stringify({ node: nodeInfo, docker: dockerInfo }, null, 2)}`);
   }
 
   private static async getHost(dockerode: Dockerode): Promise<Host> {

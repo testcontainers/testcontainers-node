@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         os-version: [ubuntu-latest]
-        node-version: [10.x, 12.x, 14.x]
+        node-version: [10.x, 12.x, 14.x, 16.x]
     steps:
     - uses: actions/checkout@v2
     - name: Login to Docker Hub
