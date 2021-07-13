@@ -2,7 +2,6 @@ import { Socket } from "net";
 import { log } from "./logger";
 import { GenericContainer } from "./generic-container";
 import { StartedTestContainer } from "./test-container";
-import { Wait } from "./wait";
 import { Id } from "./container";
 import { DockerClient } from "./docker-client";
 
@@ -95,7 +94,6 @@ export class ReaperInstance {
     const container = await new GenericContainer(this.getImage())
       .withName(`testcontainers-ryuk-${sessionId}`)
       .withExposedPorts(8080)
-      .withWaitStrategy(Wait.forLogMessage("Started!"))
       .withBindMount(dockerSocket, "/var/run/docker.sock")
       .withDaemonMode()
       .withPrivilegedMode()
