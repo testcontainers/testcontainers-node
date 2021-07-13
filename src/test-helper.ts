@@ -1,5 +1,7 @@
 import Dockerode from "dockerode";
 import { Readable } from "stream";
+import { ReaperInstance } from "./reaper";
+import { DockerClientInstance } from "./docker-client-instance";
 
 export const dockerode = new Dockerode();
 
@@ -37,4 +39,12 @@ export const getImagesRepoTags = async (): Promise<string[]> => {
 export const getVolumeNames = async (): Promise<string[]> => {
   const { Volumes: volumes } = await dockerode.listVolumes();
   return volumes.map((volume) => volume.Name);
+};
+
+export const getReaperContainerId = async (): Promise<string> => {
+  return (await ReaperInstance.getInstance(await DockerClientInstance.getInstance())).getContainerId();
+};
+
+export const stopReaper = async (): Promise<void> => {
+  return ReaperInstance.stopInstance();
 };

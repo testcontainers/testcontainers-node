@@ -2,12 +2,12 @@ import { Socket } from "net";
 import { log } from "./logger";
 import { GenericContainer } from "./generic-container";
 import { StartedTestContainer } from "./test-container";
-import { Wait } from "./wait";
 import { Id } from "./container";
 import { DockerClient } from "./docker-client";
 
 export interface Reaper {
   addProject(projectName: string): void;
+  getContainerId(): string;
   stop(): void;
 }
 
@@ -22,6 +22,10 @@ class RealReaper implements Reaper {
     this.socket.write(`label=com.docker.compose.project=${projectName}\r\n`);
   }
 
+  public getContainerId(): string {
+    return this.container.getId();
+  }
+
   public stop(): void {
     this.socket.end();
   }
@@ -34,6 +38,10 @@ class DisabledReaper implements Reaper {
 
   public stop(): void {
     // noop
+  }
+
+  public getContainerId(): string {
+    return "";
   }
 }
 
@@ -86,7 +94,6 @@ export class ReaperInstance {
     const container = await new GenericContainer(this.getImage())
       .withName(`testcontainers-ryuk-${sessionId}`)
       .withExposedPorts(8080)
-      .withWaitStrategy(Wait.forLogMessage("Started!"))
       .withBindMount(dockerSocket, "/var/run/docker.sock")
       .withDaemonMode()
       .withPrivilegedMode()
@@ -101,8 +108,8 @@ export class ReaperInstance {
     socket.unref();
 
     socket
-      .on('timeout', () => log.error(`Reaper ${container.getId()} socket timed out`))
-      .on('error', err => log.error(`Reaper ${container.getId()} socket error: ${err}`))
+      .on("timeout", () => log.error(`Reaper ${container.getId()} socket timed out`))
+      .on("error", (err) => log.error(`Reaper ${container.getId()} socket error: ${err}`))
       .on("close", (hadError) => {
         if (hadError) {
           log.error(`Connection to Reaper ${container.getId()} closed with error`);

@@ -1,12 +1,9 @@
 import fetch from "node-fetch";
 import path from "path";
-import { createServer, Server } from "http";
 import { GenericContainer } from "./generic-container";
 import { AlwaysPullPolicy } from "./pull-policy";
 import { Wait } from "./wait";
 import { RandomUuid } from "./uuid";
-import { TestContainers } from "./test-containers";
-import { RandomPortClient } from "./port-client";
 import { getContainerById, getEvents, getRunningContainerNames } from "./test-helper";
 import { Network } from "./network";
 
