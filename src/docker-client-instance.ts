@@ -1,10 +1,15 @@
 import fs from "fs";
 import Dockerode, { NetworkInspectInfo } from "dockerode";
+import * as dockerCompose from "docker-compose";
 import { DockerClient, DockerodeClient } from "./docker-client";
 import { log } from "./logger";
 import { RandomUuid } from "./uuid";
 
 export type Host = string;
+
+type DockerComposeInfo = {
+  version: string;
+};
 
 export class DockerClientInstance {
   private static instance: Promise<DockerClient>;
@@ -28,9 +33,33 @@ export class DockerClientInstance {
   }
 
   private static async logSystemDiagnostics(dockerClient: DockerodeClient) {
-    const nodeInfo = { version: process.version, architecture: process.arch, platform: process.platform };
+    const nodeInfo = {
+      version: process.version,
+      architecture: process.arch,
+      platform: process.platform
+    };
+
     const dockerInfo = await dockerClient.getInfo();
-    log.debug(`System diagnostics: ${JSON.stringify({ node: nodeInfo, docker: dockerInfo }, null, 2)}`);
+    const dockerComposeInfo = await this.getDockerComposeInfo();
+
+    const info = {
+      node: nodeInfo,
+      docker: dockerInfo,
+      dockerCompose: dockerComposeInfo
+    };
+
+    log.debug(`System diagnostics: ${JSON.stringify(info, null, 2)}`);
+  }
+
+  private static async getDockerComposeInfo(): Promise<DockerComposeInfo | undefined> {
+    try {
+      return {
+        version: (await dockerCompose.version()).data.version
+      };
+    } catch {
+      log.warn('Unable to detect docker-compose version, is it installed?')
+      return undefined;
+    }
   }
 
   private static async getHost(dockerode: Dockerode): Promise<Host> {
