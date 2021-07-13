@@ -112,6 +112,15 @@ export interface RegistryConfig {
   };
 }
 
+export type Info = {
+  serverVersion: number;
+  operatingSystem: string;
+  operatingSystemType: string;
+  architecture: string;
+  cpus: number;
+  memory: number;
+};
+
 export interface DockerClient {
   pull(dockerImageName: DockerImageName, authConfig?: AuthConfig): Promise<void>;
   create(options: CreateOptions): Promise<Container>;
@@ -130,6 +139,7 @@ export interface DockerClient {
   ): Promise<void>;
   fetchDockerImageNames(): Promise<DockerImageName[]>;
   listContainers(): Promise<Dockerode.ContainerInfo[]>;
+  getInfo(): Promise<Info>;
   getContainer(id: Id): Promise<Container>;
   getHost(): Host;
   getSessionId(): Id;
@@ -278,6 +288,19 @@ export class DockerodeClient implements DockerClient {
 
   public async listContainers(): Promise<Dockerode.ContainerInfo[]> {
     return await this.dockerode.listContainers();
+  }
+
+  public async getInfo(): Promise<Info> {
+    const info = await this.dockerode.info();
+
+    return {
+      serverVersion: info.ServerVersion,
+      operatingSystem: info.OperatingSystem,
+      operatingSystemType: info.OSType,
+      architecture: info.Architecture,
+      cpus: info.NCPU,
+      memory: info.MemTotal,
+    };
   }
 
   public async getContainer(id: Id): Promise<Container> {
