@@ -230,26 +230,21 @@ describe("GenericContainer", () => {
 
   it("should use pull policy", async () => {
     const container1 = await new GenericContainer("cristianrgreco/testcontainer:1.1.12").withExposedPorts(8080).start();
-
     const events = await getEvents();
+    const pullPromise = new Promise<void>(resolve => {
+      events.on('data', (data) => {
+        if (JSON.parse(data).status === 'pull') {
+          resolve();
+        }
+      });
+    });
 
     const container2 = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
       .withPullPolicy(new AlwaysPullPolicy())
       .withExposedPorts(8080)
       .start();
 
-    const statuses = await new Promise((resolve) => {
-      const eventStatuses: string[] = [];
-      events.on("data", (data) => {
-        const status = JSON.parse(data).status;
-        eventStatuses.push(status);
-        if (status === "create") {
-          resolve(eventStatuses);
-        }
-      });
-    });
-
-    expect(statuses).toContain("pull");
+    await pullPromise;
 
     events.destroy();
     await container1.stop();
