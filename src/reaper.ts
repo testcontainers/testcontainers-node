@@ -8,6 +8,7 @@ import { DockerClient } from "./docker-client";
 
 export interface Reaper {
   addProject(projectName: string): void;
+  getContainerId(): string;
   stop(): void;
 }
 
@@ -22,6 +23,10 @@ class RealReaper implements Reaper {
     this.socket.write(`label=com.docker.compose.project=${projectName}\r\n`);
   }
 
+  public getContainerId(): string {
+    return this.container.getId();
+  }
+
   public stop(): void {
     this.socket.end();
   }
@@ -34,6 +39,10 @@ class DisabledReaper implements Reaper {
 
   public stop(): void {
     // noop
+  }
+
+  public getContainerId(): string {
+    return "";
   }
 }
 
@@ -101,8 +110,8 @@ export class ReaperInstance {
     socket.unref();
 
     socket
-      .on('timeout', () => log.error(`Reaper ${container.getId()} socket timed out`))
-      .on('error', err => log.error(`Reaper ${container.getId()} socket error: ${err}`))
+      .on("timeout", () => log.error(`Reaper ${container.getId()} socket timed out`))
+      .on("error", (err) => log.error(`Reaper ${container.getId()} socket error: ${err}`))
       .on("close", (hadError) => {
         if (hadError) {
           log.error(`Connection to Reaper ${container.getId()} closed with error`);

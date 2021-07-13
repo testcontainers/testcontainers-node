@@ -1,7 +1,7 @@
 import { createServer, Server } from "http";
 import { GenericContainer } from "./generic-container";
 import { TestContainers } from "./test-containers";
-import { RandomPortClient } from "./port-client";
+import { RandomUniquePortGenerator } from "./port-generator";
 import { Network } from "./network";
 
 describe("PortForwarder", () => {
@@ -11,13 +11,14 @@ describe("PortForwarder", () => {
   let server: Server;
 
   beforeEach(async () => {
-    randomPort = await new RandomPortClient().getPort();
-    server = await new Promise((resolve) => {
-      const server = createServer((req, res) => {
+    randomPort = await new RandomUniquePortGenerator().generatePort();
+
+    await new Promise<void>((resolve) => {
+      server = createServer((req, res) => {
         res.writeHead(200);
         res.end("hello world");
       });
-      server.listen(randomPort, () => resolve(server));
+      server.listen(randomPort, resolve);
     });
   });
 
