@@ -578,15 +578,15 @@ const container = await new GenericContainer("redis")
 Testcontainers will automatically pick up and use credentials from `$HOME/.docker/config.json`, using
 credential helpers, credential stores, or raw auth as necessary and in that order.
 
-## Sidecars
+## Auxiliary Containers
 
-Testcontainers may need to create sidecar containers to provide its functionality. 
+Testcontainers may need to create auxiliary containers to provide its functionality. 
 
 To avoid Docker pull limits, you can host your own images and use them by setting the appropriate environment variables:
 
-| Sidecar | Environment Variable | Default
+| Container | Environment Variable | Default
 | --- | --- | --- |
-| ryuk | `RYUK_CONTAINER_IMAGE` | `testcontainers/ryuk:0.3.0` |
+| ryuk | `RYUK_CONTAINER_IMAGE` | `cristianrgreco/ryuk:0.4.0` |
 | SSHd | `SSHD_CONTAINER_IMAGE` | `testcontainers/sshd:1.0.0` |
 
 ### ryuk
