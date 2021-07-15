@@ -55,7 +55,10 @@ describe("Neo4jContainer", () => {
   });
 
   it("should have APOC plugin installed", async () => {
-    const container = await new Neo4jContainer().withApoc().start();
+    const container = await new Neo4jContainer()
+      .withApoc()
+      .withStartupTimeout(120_000)
+      .start();
 
     const driver = neo4j.driver(
       container.getBoltUri(),
