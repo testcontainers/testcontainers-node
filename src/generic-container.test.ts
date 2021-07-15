@@ -448,7 +448,7 @@ describe("GenericContainer", () => {
       const container = await GenericContainer.fromDockerfile(context).build();
       const startedContainer = await container.withWaitStrategy(Wait.forLogMessage(message)).start();
 
-      await new Promise((res) => setTimeout(res, 1000));
+      await new Promise<void>((resolve) => setTimeout(resolve, 1000));
 
       await startedContainer.stop();
     });
