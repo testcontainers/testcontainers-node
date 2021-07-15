@@ -194,7 +194,7 @@ export class GenericContainer implements TestContainer {
       autoRemove: this.daemonMode,
       extraHosts: this.extraHosts,
       ipcMode: this.ipcMode,
-      user: this.user
+      user: this.user,
     });
 
     if (!this.dockerImageName.isHelperContainer() && PortForwarderInstance.isRunning()) {
