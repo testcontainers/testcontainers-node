@@ -91,6 +91,7 @@ type CreateOptions = {
   autoRemove: boolean;
   extraHosts: ExtraHost[];
   ipcMode?: string;
+  user?: string;
 };
 
 export type CreateNetworkOptions = {
@@ -160,6 +161,7 @@ export class DockerodeClient implements DockerClient {
 
     const dockerodeContainer = await this.dockerode.createContainer({
       name: options.name,
+      User: options.user,
       Image: options.dockerImageName.toString(),
       Env: this.getEnv(options.env),
       ExposedPorts: this.getExposedPorts(options.boundPorts),

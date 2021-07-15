@@ -28,6 +28,7 @@ export interface TestContainer {
   withNetworkMode(networkMode: NetworkMode): this;
   withDefaultLogDriver(): this;
   withPrivilegedMode(): this;
+  withUser(user: string): this;
   withPullPolicy(pullPolicy: PullPolicy): this;
   withCopyFileToContainer(sourcePath: string, containerPath: string): this;
   withCopyContentToContainer(content: string | Buffer | Readable, containerPath: string): this;

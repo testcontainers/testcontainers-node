@@ -36,7 +36,7 @@ export class DockerClientInstance {
     const nodeInfo = {
       version: process.version,
       architecture: process.arch,
-      platform: process.platform
+      platform: process.platform,
     };
 
     const dockerInfo = await dockerClient.getInfo();
@@ -45,7 +45,7 @@ export class DockerClientInstance {
     const info = {
       node: nodeInfo,
       docker: dockerInfo,
-      dockerCompose: dockerComposeInfo
+      dockerCompose: dockerComposeInfo,
     };
 
     log.debug(`System diagnostics: ${JSON.stringify(info, null, 2)}`);
@@ -54,10 +54,10 @@ export class DockerClientInstance {
   private static async getDockerComposeInfo(): Promise<DockerComposeInfo | undefined> {
     try {
       return {
-        version: (await dockerCompose.version()).data.version
+        version: (await dockerCompose.version()).data.version,
       };
     } catch {
-      log.warn('Unable to detect docker-compose version, is it installed?')
+      log.warn("Unable to detect docker-compose version, is it installed?");
       return undefined;
     }
   }
