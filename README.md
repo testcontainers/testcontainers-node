@@ -314,6 +314,16 @@ const container = await new GenericContainer("redis")
   .start();
 ```
 
+Creating and running a container with a specific user, note that the value can be a username or UID (format: `<name|uid>[:<group|gid>]`):
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await new GenericContainer("alpine")
+  .withUser("bob")
+  .start();
+```
+
 Creating a container with privileged mode:
 
 ```javascript
