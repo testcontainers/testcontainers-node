@@ -294,6 +294,8 @@ describe("GenericContainer", () => {
     const { output } = await container.exec(["whoami"]);
 
     expect(output.trim()).toBe("node");
+
+    await container.stop();
   });
 
   it("should stop the container when the host port check wait strategy times out", async () => {
@@ -415,6 +417,27 @@ describe("GenericContainer", () => {
 
       expect(response.status).toBe(200);
       await startedContainer.stop();
+    });
+
+    it("should use pull policy", async () => {
+      const containerSpec = await GenericContainer.fromDockerfile(path.resolve(fixtures, "docker")).withPullPolicy(
+        new AlwaysPullPolicy()
+      );
+      await containerSpec.build();
+
+      const events = await getEvents();
+      const pullPromise = new Promise<void>((resolve) => {
+        events.on("data", (data) => {
+          if (JSON.parse(data).status === "pull") {
+            resolve();
+          }
+        });
+      });
+      await containerSpec.build();
+
+      await pullPromise;
+
+      events.destroy();
     });
 
     it("should pull an image from a private registry", async () => {
