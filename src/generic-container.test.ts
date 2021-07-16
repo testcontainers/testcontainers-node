@@ -294,6 +294,8 @@ describe("GenericContainer", () => {
     const { output } = await container.exec(["whoami"]);
 
     expect(output.trim()).toBe("node");
+
+    await container.stop();
   });
 
   it("should stop the container when the host port check wait strategy times out", async () => {
