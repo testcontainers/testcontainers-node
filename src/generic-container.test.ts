@@ -428,7 +428,6 @@ describe("GenericContainer", () => {
       const events = await getEvents();
       const pullPromise = new Promise<void>((resolve) => {
         events.on("data", (data) => {
-          console.log(data);
           if (JSON.parse(data).status === "pull") {
             resolve();
           }
