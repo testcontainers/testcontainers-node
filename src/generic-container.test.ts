@@ -417,6 +417,28 @@ describe("GenericContainer", () => {
       await startedContainer.stop();
     });
 
+    it("should use pull policy", async () => {
+      const containerSpec = await GenericContainer.fromDockerfile(path.resolve(fixtures, "docker")).withPullPolicy(
+        new AlwaysPullPolicy()
+      );
+      await containerSpec.build();
+
+      const events = await getEvents();
+      const pullPromise = new Promise<void>((resolve) => {
+        events.on("data", (data) => {
+          console.log(data);
+          if (JSON.parse(data).status === "pull") {
+            resolve();
+          }
+        });
+      });
+      await containerSpec.build();
+
+      await pullPromise;
+
+      events.destroy();
+    });
+
     it("should pull an image from a private registry", async () => {
       const context = path.resolve(fixtures, "docker-private");
       const container = await GenericContainer.fromDockerfile(context).withPullPolicy(new AlwaysPullPolicy()).build();

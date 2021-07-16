@@ -265,7 +265,7 @@ export class DockerodeClient implements DockerClient {
           t: dockerImageName.toString(),
           labels: this.createLabels(dockerImageName),
           registryconfig: registryConfig,
-          pull: pullPolicy.shouldPull(),
+          pull: pullPolicy.shouldPull() ? "any" : undefined,
         })
         .then((stream) => byline(stream))
         .then((stream) => {
