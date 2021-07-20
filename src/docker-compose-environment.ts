@@ -2,7 +2,6 @@ import * as dockerCompose from "docker-compose";
 import Dockerode, { ContainerInfo } from "dockerode";
 import { BoundPorts } from "./bound-ports";
 import { Container } from "./container";
-import { ContainerState } from "./container-state";
 import { DockerClient, Env, EnvKey, EnvValue } from "./docker-client";
 import { DockerClientInstance } from "./docker-client-instance";
 import { resolveDockerComposeContainerName } from "./docker-compose-container-name-resolver";
@@ -83,11 +82,10 @@ export class DockerComposeEnvironment {
 
           const inspectResult = await container.inspect();
           const boundPorts = this.getBoundPorts(startedContainer);
-          const containerState = new ContainerState(inspectResult);
 
           try {
             log.info(`Waiting for container ${containerName} to be ready`);
-            await this.waitForContainer(dockerClient, container, containerName, containerState, boundPorts);
+            await this.waitForContainer(dockerClient, container, containerName, boundPorts);
             log.info(`Container ${containerName} is ready`);
           } catch (err) {
             log.error(`Container ${containerName} failed to be ready: ${err}`);
@@ -164,11 +162,10 @@ export class DockerComposeEnvironment {
     dockerClient: DockerClient,
     container: Container,
     containerName: string,
-    containerState: ContainerState,
     boundPorts: BoundPorts
   ): Promise<void> {
     const waitStrategy = this.getWaitStrategy(dockerClient, container, containerName);
-    await waitStrategy.withStartupTimeout(this.startupTimeout).waitUntilReady(container, containerState, boundPorts);
+    await waitStrategy.withStartupTimeout(this.startupTimeout).waitUntilReady(container, boundPorts);
   }
 
   private getWaitStrategy(dockerClient: DockerClient, container: Container, containerName: string): WaitStrategy {

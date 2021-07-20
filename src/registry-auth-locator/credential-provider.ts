@@ -65,7 +65,7 @@ export abstract class CredentialProvider implements RegistryAuthLocator {
           log.warn(`Docker credential provider exited with code: ${code}`);
         }
 
-        const response = chunks.join("").trim();
+        const response = chunks.join("");
         try {
           const parsedResponse = JSON.parse(response);
           resolve(parsedResponse);
