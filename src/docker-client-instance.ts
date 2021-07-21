@@ -1,7 +1,7 @@
 import fs from "fs";
 import Dockerode, { NetworkInspectInfo } from "dockerode";
 import * as dockerCompose from "docker-compose";
-import { DockerClient, DockerodeClient } from "./docker-client";
+import { Command, DockerClient, DockerodeClient } from "./docker-client";
 import { log } from "./logger";
 import { RandomUuid } from "./uuid";
 
@@ -79,7 +79,7 @@ export class DockerClientInstance {
         const host = process.env["TESTCONTAINERS_HOST_OVERRIDE"];
         log.info(`Using TESTCONTAINERS_HOST_OVERRIDE: ${host}, socket path: ${socketPath}`);
         return host;
-      } else if (!fs.existsSync("/.dockerenv")) {
+      } else if (!this.isInContainer()) {
         const host = "localhost";
         log.info(`Using default Docker host: ${host}, socket path: ${socketPath}`);
         return host;
@@ -96,12 +96,67 @@ export class DockerClientInstance {
             log.info(`Using Docker host from gateway with IPAM: ${host}, socket path: ${socketPath}`);
             return host;
           } else {
-            const host = "localhost";
-            log.info(`Using Docker host from gateway with IPAM without gateway: ${host}, socket path: ${socketPath}`);
-            return host;
+            const host = await this.runInContainer(dockerode, "alpine:3.5", [
+              "sh",
+              "-c",
+              "ip route|awk '/default/ { print $3 }'",
+            ]);
+            if (host) {
+              log.info(`Using Docker host from gateway with IPAM with gateway: ${host}, socket path: ${socketPath}`);
+              return host;
+            } else {
+              const host = "localhost";
+              log.info(`Using Docker host from gateway with IPAM without gateway: ${host}, socket path: ${socketPath}`);
+              return host;
+            }
           }
         }
       }
     }
+  }
+
+  private static async runInContainer(
+    dockerode: Dockerode,
+    image: string,
+    command: Command[]
+  ): Promise<string | undefined> {
+    try {
+      const container = await dockerode.createContainer({ Image: image, Cmd: command });
+      const stream = await container.attach({ stream: true, stdout: true, stderr: true });
+
+      const chunks: string[] = [];
+      const promise = new Promise<void>((resolve, reject) => {
+        stream.on("end", () => resolve());
+
+        const outStream = {
+          write: (chunk: string) => {
+            const chunkStr = Buffer.from(chunk).toString().trim();
+            chunks.push(chunkStr);
+          },
+        };
+
+        const errStream = {
+          write: (chunk: string) => {
+            const chunkStr = Buffer.from(chunk).toString().trim();
+            reject(`Error: ${chunkStr}`);
+          },
+        };
+
+        container.modem.demuxStream(stream, outStream, errStream);
+      });
+
+      await container.start();
+
+      await promise;
+
+      return chunks.join("");
+    } catch (err) {
+      log.error(`Failed to do smth: ${err}`);
+      return undefined;
+    }
+  }
+
+  private static isInContainer() {
+    return fs.existsSync("/.dockerenv");
   }
 }
