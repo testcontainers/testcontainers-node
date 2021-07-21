@@ -1,7 +1,6 @@
 import byline from "byline";
 import { BoundPorts } from "./bound-ports";
 import { Container, HealthCheckStatus } from "./container";
-import { ContainerState } from "./container-state";
 import { DockerClient } from "./docker-client";
 import { log } from "./logger";
 import { Port } from "./port";
@@ -9,7 +8,7 @@ import { PortCheck } from "./port-check";
 import { IntervalRetryStrategy } from "./retry-strategy";
 
 export interface WaitStrategy {
-  waitUntilReady(container: Container, containerState: ContainerState, boundPorts: BoundPorts): Promise<void>;
+  waitUntilReady(container: Container, boundPorts: BoundPorts): Promise<void>;
   withStartupTimeout(startupTimeout: number): WaitStrategy;
 }
 
@@ -18,7 +17,6 @@ abstract class AbstractWaitStrategy implements WaitStrategy {
 
   public abstract waitUntilReady(
     container: Container,
-    containerState: ContainerState,
     boundPorts: BoundPorts
   ): Promise<void>;
 
@@ -39,17 +37,16 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
 
   public async waitUntilReady(
     container: Container,
-    containerState: ContainerState,
     boundPorts: BoundPorts
   ): Promise<void> {
     await Promise.all([
-      this.waitForHostPorts(container, containerState),
+      this.waitForHostPorts(container, boundPorts),
       this.waitForInternalPorts(container, boundPorts),
     ]);
   }
 
-  private async waitForHostPorts(container: Container, containerState: ContainerState): Promise<void> {
-    for (const hostPort of containerState.getHostPorts()) {
+  private async waitForHostPorts(container: Container, boundPorts: BoundPorts): Promise<void> {
+    for (const [, hostPort] of boundPorts.iterator()) {
       log.debug(`Waiting for host port ${hostPort} for ${container.getId()}`);
       await this.waitForPort(container, hostPort, this.hostPortCheck);
       log.debug(`Host port ${hostPort} ready for ${container.getId()}`);

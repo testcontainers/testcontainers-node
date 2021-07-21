@@ -2,7 +2,6 @@ import archiver from "archiver";
 import path from "path";
 import { BoundPorts } from "./bound-ports";
 import { Container, Id as ContainerId, InspectResult } from "./container";
-import { ContainerState } from "./container-state";
 import {
   AuthConfig,
   BindMode,
@@ -229,9 +228,8 @@ export class GenericContainer implements TestContainer {
     }
 
     const inspectResult = await container.inspect();
-    const containerState = new ContainerState(inspectResult);
 
-    await this.waitForContainer(dockerClient, container, containerState, boundPorts);
+    await this.waitForContainer(dockerClient, container, boundPorts);
 
     return new StartedGenericContainer(
       container,
@@ -350,14 +348,13 @@ export class GenericContainer implements TestContainer {
   private async waitForContainer(
     dockerClient: DockerClient,
     container: Container,
-    containerState: ContainerState,
     boundPorts: BoundPorts
   ): Promise<void> {
     log.debug(`Waiting for container to be ready: ${container.getId()}`);
     const waitStrategy = this.getWaitStrategy(dockerClient, container);
 
     try {
-      await waitStrategy.withStartupTimeout(this.startupTimeout).waitUntilReady(container, containerState, boundPorts);
+      await waitStrategy.withStartupTimeout(this.startupTimeout).waitUntilReady(container, boundPorts);
       log.info("Container is ready");
     } catch (err) {
       log.error(`Container failed to be ready: ${err}`);
