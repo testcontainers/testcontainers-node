@@ -15,10 +15,7 @@ export interface WaitStrategy {
 abstract class AbstractWaitStrategy implements WaitStrategy {
   protected startupTimeout = 60_000;
 
-  public abstract waitUntilReady(
-    container: Container,
-    boundPorts: BoundPorts
-  ): Promise<void>;
+  public abstract waitUntilReady(container: Container, boundPorts: BoundPorts): Promise<void>;
 
   public withStartupTimeout(startupTimeout: number): WaitStrategy {
     this.startupTimeout = startupTimeout;
@@ -35,14 +32,8 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
     super();
   }
 
-  public async waitUntilReady(
-    container: Container,
-    boundPorts: BoundPorts
-  ): Promise<void> {
-    await Promise.all([
-      this.waitForHostPorts(container, boundPorts),
-      this.waitForInternalPorts(container, boundPorts),
-    ]);
+  public async waitUntilReady(container: Container, boundPorts: BoundPorts): Promise<void> {
+    await Promise.all([this.waitForHostPorts(container, boundPorts), this.waitForInternalPorts(container, boundPorts)]);
   }
 
   private async waitForHostPorts(container: Container, boundPorts: BoundPorts): Promise<void> {
