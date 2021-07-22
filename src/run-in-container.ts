@@ -1,7 +1,9 @@
-import { Command } from "./docker-client";
+import {Command, DockerClient} from "./docker-client";
 import { log } from "./logger";
 import Dockerode from "dockerode";
 import { PassThrough } from "stream";
+import {DockerImageName} from "./docker-image-name";
+import {PullStreamParser} from "./pull-stream-parser";
 
 export const runInContainer = async (
   dockerode: Dockerode,
@@ -9,6 +11,11 @@ export const runInContainer = async (
   command: Command[]
 ): Promise<string | undefined> => {
   try {
+    const dockerImageName = DockerImageName.fromString(image);
+    if (!await isImageCached(dockerode, dockerImageName)) {
+      log.debug(`Pulling image: ${dockerImageName.toString()}`);
+      await pull(dockerode, dockerImageName);
+    }
     const container = await dockerode.createContainer({ Image: image, Cmd: command });
     const stream = await container.attach({ stream: true, stdout: true, stderr: true });
 
@@ -36,3 +43,30 @@ export const runInContainer = async (
     return undefined;
   }
 };
+
+const pull = async (dockerode: Dockerode, dockerImageName: DockerImageName): Promise<void> => {
+  log.info(`Pulling image: ${dockerImageName}`);
+  const stream = await dockerode.pull(dockerImageName.toString());
+  await new PullStreamParser(dockerImageName, log).consume(stream);
+}
+
+const isImageCached = async(dockerode: Dockerode, imageName: DockerImageName): Promise<boolean> =>  {
+  const dockerImageNames = await fetchDockerImageNames(dockerode);
+  return dockerImageNames.some((dockerImageName) => dockerImageName.equals(imageName));
+}
+
+const fetchDockerImageNames = async(dockerode: Dockerode): Promise<DockerImageName[]> => {
+  const images = await dockerode.listImages();
+
+  return images.reduce((dockerImageNames: DockerImageName[], image) => {
+    if (isDanglingImage(image)) {
+      return dockerImageNames;
+    }
+    const dockerImageNamesForImage = image.RepoTags.map((imageRepoTag) => DockerImageName.fromString(imageRepoTag));
+    return [...dockerImageNames, ...dockerImageNamesForImage];
+  }, []);
+}
+
+const isDanglingImage = (image: Dockerode.ImageInfo) => {
+  return image.RepoTags === null;
+}
