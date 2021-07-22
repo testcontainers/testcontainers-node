@@ -220,8 +220,8 @@ export class GenericContainer implements TestContainer {
 
     const logs = await container.logs();
     logs
-      .on("data", (data) => containerLog.trace(`${container.getId()}: ${data}`))
-      .on("err", (data) => containerLog.error(`${container.getId()}: ${data}`));
+      .on("data", (data) => containerLog.trace(`${container.getId()}: ${data.trim()}`))
+      .on("err", (data) => containerLog.error(`${container.getId()}: ${data.trim()}`));
 
     const inspectResult = await container.inspect();
 
