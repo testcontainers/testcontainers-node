@@ -17,7 +17,7 @@ export const runInContainer = async (
     const promise = new Promise<void>((resolve) => {
       stream.on("end", () => resolve());
 
-      const out = new PassThrough({ encoding: "utf-8" }).on("data", (chunk) => chunks.push(chunk.trim()));
+      const out = new PassThrough({ encoding: "utf-8" }).on("data", (chunk) => chunks.push(chunk));
       const err = new PassThrough({ encoding: "utf-8" }).on("data", () => resolve(undefined));
 
       container.modem.demuxStream(stream, out, err);
@@ -29,7 +29,7 @@ export const runInContainer = async (
     if (chunks.length === 0) {
       return undefined;
     } else {
-      return chunks.join("");
+      return chunks.join("").trim();
     }
   } catch (err) {
     log.error(`Failed to run command in container: "${command.join(" ")}", error: "${err}"`);
