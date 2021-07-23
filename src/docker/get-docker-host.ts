@@ -4,54 +4,65 @@ import { Host } from "./types";
 import { runInContainer } from "./functions/run-in-container";
 import fs from "fs";
 
-export const getDockerHost = async (dockerode: Dockerode): Promise<Host> => {
-  const modem = dockerode.modem;
+const DEFAULT_HOST = "localhost";
 
+export const getDockerHost = async (dockerode: Dockerode): Promise<Host> => {
   if (process.env.DOCKER_HOST) {
     log.info(`Detected DOCKER_HOST environment variable: ${process.env.DOCKER_HOST}`);
   }
 
-  if (modem.host) {
-    const host = modem.host;
-    log.info(`Using Docker host from modem: ${host}`);
-    return host;
-  } else {
-    const socketPath = modem.socketPath;
-    if (process.env["TESTCONTAINERS_HOST_OVERRIDE"]) {
-      const host = process.env["TESTCONTAINERS_HOST_OVERRIDE"];
-      log.info(`Using TESTCONTAINERS_HOST_OVERRIDE: ${host}, socket path: ${socketPath}`);
-      return host;
-    } else if (!isInContainer()) {
-      const host = "localhost";
-      log.info(`Using default Docker host: ${host}, socket path: ${socketPath}`);
-      return host;
-    } else {
-      const network: NetworkInspectInfo = await dockerode.getNetwork("bridge").inspect();
-      if (!network.IPAM || !network.IPAM.Config) {
-        const host = "localhost";
-        log.info(`Using Docker host from gateway without IPAM: ${host}, socket path: ${socketPath}`);
-        return host;
-      } else {
-        const gateways = network.IPAM.Config.filter((config) => !!config.Gateway);
-        if (gateways.length > 0) {
-          const host = gateways[0].Gateway;
-          log.info(`Using Docker host from gateway with IPAM: ${host}, socket path: ${socketPath}`);
-          return host;
-        } else {
-          log.debug("Starting container in attempt to query gateway");
-          const host = await runInContainer("alpine:3.5", ["sh", "-c", "ip route|awk '/default/ { print $3 }'"]);
-          if (host) {
-            log.info(`Using Docker host from gateway with IPAM with gateway: ${host}, socket path: ${socketPath}`);
-            return host;
-          } else {
-            const host = "localhost";
-            log.info(`Using Docker host from gateway with IPAM without gateway: ${host}, socket path: ${socketPath}`);
-            return host;
-          }
-        }
-      }
+  for (const hostStrategy of hostStrategies(dockerode)) {
+    const result = await hostStrategy();
+
+    if (result && result.host) {
+      result.callback();
+      return result.host;
     }
   }
+
+  log.info(`Using fallback Docker host: ${DEFAULT_HOST}`);
+  return DEFAULT_HOST;
 };
+
+type HostStrategy = () => Promise<{ host: Host | undefined; callback: () => void } | undefined>;
+
+const hostStrategies = (dockerode: Dockerode): Array<HostStrategy> => [
+  async () => {
+    const host = dockerode.modem.host;
+    return { host, callback: () => log.info(`Using Docker host from modem: ${host}`) };
+  },
+
+  async () => {
+    const host = process.env["TESTCONTAINERS_HOST_OVERRIDE"];
+    return { host, callback: () => log.info(`Using TESTCONTAINERS_HOST_OVERRIDE: ${host}`) };
+  },
+
+  async () => {
+    if (!isInContainer()) {
+      return { host: DEFAULT_HOST, callback: () => log.info(`Using default Docker host: ${DEFAULT_HOST}`) };
+    }
+  },
+
+  async () => {
+    const network: NetworkInspectInfo = await dockerode.getNetwork("bridge").inspect();
+    if (!network.IPAM || !network.IPAM.Config) {
+      return {
+        host: DEFAULT_HOST,
+        callback: () => log.info(`Using default Docker host from within container: ${DEFAULT_HOST}`),
+      };
+    }
+
+    const gateways = network.IPAM.Config.filter((config) => !!config.Gateway);
+    if (gateways.length > 0) {
+      const host = gateways[0].Gateway;
+      return { host, callback: () => log.info(`Using Docker host from network gateway within container: ${host}`) };
+    }
+  },
+
+  async () => {
+    const host = await runInContainer("alpine:3.5", ["sh", "-c", "ip route|awk '/default/ { print $3 }'"]);
+    return { host, callback: () => log.info(`Using Docker host from evaluated gateway within container: ${host}`) };
+  },
+];
 
 const isInContainer = () => fs.existsSync("/.dockerenv");

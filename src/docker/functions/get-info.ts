@@ -1,6 +1,6 @@
 import { dockerode } from "../dockerode";
 
-type Info = {
+type DockerInfo = {
   serverVersion: number;
   operatingSystem: string;
   operatingSystemType: string;
@@ -9,7 +9,7 @@ type Info = {
   memory: number;
 };
 
-export const getDockerInfo = async (): Promise<Info> => {
+export const getDockerInfo = async (): Promise<DockerInfo> => {
   const info = await dockerode.info();
 
   return {
