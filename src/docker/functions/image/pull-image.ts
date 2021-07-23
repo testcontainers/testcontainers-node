@@ -14,13 +14,17 @@ export type PullImageOptions = {
 };
 
 export const pullImage = async (options: PullImageOptions): Promise<void> => {
-  if ((await imageExists(options.imageName)) && !options.force) {
-    log.debug(`Not pulling image as it already exists: ${options.imageName}`);
-    return;
+  try {
+    if ((await imageExists(options.imageName)) && !options.force) {
+      log.debug(`Not pulling image as it already exists: ${options.imageName}`);
+      return;
+    }
+
+    log.info(`Pulling image: ${options.imageName}`);
+    const stream = await dockerode.pull(options.imageName.toString(), {authconfig: options.authConfig});
+
+    await new PullStreamParser(options.imageName, log).consume(stream);
+  } catch (err) {
+    throw err;
   }
-
-  log.info(`Pulling image: ${options.imageName}`);
-  const stream = await dockerode.pull(options.imageName.toString(), { authconfig: options.authConfig });
-
-  await new PullStreamParser(options.imageName, log).consume(stream);
 };

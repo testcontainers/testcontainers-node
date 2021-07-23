@@ -1,8 +1,8 @@
 import { Socket } from "net";
-import { Container } from "./container";
 import { Port } from "./port";
 import { Host } from "./docker/types";
 import { execContainer } from "./docker/functions/container/exec-container";
+import Dockerode from "dockerode";
 
 export interface PortCheck {
   isBound(port: Port): Promise<boolean>;
@@ -33,7 +33,7 @@ export class HostPortCheck implements PortCheck {
 }
 
 export class InternalPortCheck implements PortCheck {
-  constructor(private readonly container: Container) {}
+  constructor(private readonly container: Dockerode.Container) {}
 
   public async isBound(port: Port): Promise<boolean> {
     const portHex = port.toString(16).padStart(4, "0");

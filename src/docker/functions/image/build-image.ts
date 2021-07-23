@@ -19,26 +19,30 @@ export type BuildImageOptions = {
 };
 
 export const buildImage = async (options: BuildImageOptions): Promise<void> => {
-  log.info(`Building image '${options.imageName.toString()}' with context '${options.context}'`);
+  try {
+    log.info(`Building image '${options.imageName.toString()}' with context '${options.context}'`);
 
-  const dockerIgnoreFiles = await findDockerIgnoreFiles(options.context);
-  const tarStream = tar.pack(options.context, { ignore: (name) => dockerIgnoreFiles.has(slash(name)) });
+    const dockerIgnoreFiles = await findDockerIgnoreFiles(options.context);
+    const tarStream = tar.pack(options.context, { ignore: (name) => dockerIgnoreFiles.has(slash(name)) });
 
-  return new Promise((resolve) =>
-    dockerode
-      .buildImage(tarStream, {
-        dockerfile: options.dockerfileName,
-        buildargs: options.buildArgs,
-        t: options.imageName.toString(),
-        labels: createLabels(options.imageName),
-        registryconfig: options.registryConfig,
-        pull: options.pullPolicy.shouldPull() ? "any" : undefined,
-      })
-      .then((stream) => byline(stream))
-      .then((stream) => {
-        stream.setEncoding("utf-8");
-        stream.on("data", (line) => log.trace(`${options.imageName.toString()}: ${line}`));
-        stream.on("end", () => resolve());
-      })
-  );
+    return new Promise((resolve) =>
+      dockerode
+        .buildImage(tarStream, {
+          dockerfile: options.dockerfileName,
+          buildargs: options.buildArgs,
+          t: options.imageName.toString(),
+          labels: createLabels(options.imageName),
+          registryconfig: options.registryConfig,
+          pull: options.pullPolicy.shouldPull() ? "any" : undefined,
+        })
+        .then((stream) => byline(stream))
+        .then((stream) => {
+          stream.setEncoding("utf-8");
+          stream.on("data", (line) => log.trace(`${options.imageName.toString()}: ${line}`));
+          stream.on("end", () => resolve());
+        })
+    );
+  } catch (err) {
+    throw err;
+  }
 };

@@ -1,10 +1,10 @@
-import { Readable } from "stream";
 import { IncomingMessage } from "http";
 import { log } from "../../../logger";
 import Dockerode from "dockerode";
 import { demuxStream } from "../demux-stream";
+import { Readable } from "stream";
 
-export const logs = async (container: Dockerode.Container): Promise<Readable> => {
+export const containerLogs = async (container: Dockerode.Container): Promise<Readable> => {
   try {
     const options = {
       follow: true,

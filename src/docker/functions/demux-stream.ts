@@ -1,8 +1,8 @@
-import { PassThrough } from "stream";
+import { PassThrough, Readable } from "stream";
 import { log } from "../../logger";
 import { dockerode } from "../dockerode";
 
-export const demuxStream = (stream: NodeJS.ReadableStream): NodeJS.ReadableStream => {
+export const demuxStream = (stream: Readable): Readable => {
   try {
     const demuxedStream = new PassThrough({ autoDestroy: true, encoding: "utf-8" });
     dockerode.modem.demuxStream(stream, demuxedStream, demuxedStream);

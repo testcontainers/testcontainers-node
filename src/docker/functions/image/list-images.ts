@@ -3,6 +3,7 @@ import { dockerode } from "../../dockerode";
 import Dockerode from "dockerode";
 
 export const listImages = async (): Promise<DockerImageName[]> => {
+  try {
   const images = await dockerode.listImages();
 
   return images.reduce((dockerImageNames: DockerImageName[], image) => {
@@ -12,6 +13,9 @@ export const listImages = async (): Promise<DockerImageName[]> => {
     const dockerImageNamesForImage = image.RepoTags.map((imageRepoTag) => DockerImageName.fromString(imageRepoTag));
     return [...dockerImageNames, ...dockerImageNamesForImage];
   }, []);
+  } catch (err) {
+    throw err;
+  }
 };
 
 const isDanglingImage = (image: Dockerode.ImageInfo) => image.RepoTags === null;

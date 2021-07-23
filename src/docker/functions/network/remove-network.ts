@@ -2,6 +2,7 @@ import { log } from "../../../logger";
 import { dockerode } from "../../dockerode";
 
 export const removeNetwork = async (id: string): Promise<void> => {
+  try {
   log.info(`Removing network ${id}`);
 
   const network = dockerode.getNetwork(id);
@@ -9,5 +10,8 @@ export const removeNetwork = async (id: string): Promise<void> => {
   const { message } = await network.remove();
   if (message) {
     log.warn(message);
+  }
+  } catch (err) {
+    throw err;
   }
 };

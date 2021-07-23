@@ -1,3 +1,5 @@
+export type Id = string;
+
 export type Host = string;
 
 export type EnvKey = string;
@@ -60,3 +62,10 @@ export type ExitCode = number;
 export type Command = string;
 
 export type ExecResult = { output: StreamOutput; exitCode: ExitCode };
+
+export type HealthCheckStatus = "none" | "starting" | "unhealthy" | "healthy";
+
+export type NetworkSettings = {
+  networkId: string;
+  ipAddress: string;
+};

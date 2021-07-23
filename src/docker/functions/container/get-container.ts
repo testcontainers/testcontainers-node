@@ -1,5 +1,5 @@
-import { Container, DockerodeContainer, Id } from "../../../container";
 import { dockerode } from "../../dockerode";
+import Dockerode from "dockerode";
+import { Id } from "../../types";
 
-export const getContainerById = async (id: Id): Promise<Container> =>
-  new DockerodeContainer(await dockerode.getContainer(id));
+export const getContainerById = (id: Id): Dockerode.Container => dockerode.getContainer(id);

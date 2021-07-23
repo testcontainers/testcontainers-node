@@ -1,7 +1,6 @@
 import * as dockerCompose from "docker-compose";
 import Dockerode, { ContainerInfo } from "dockerode";
 import { BoundPorts } from "./bound-ports";
-import { Container } from "./container";
 import { resolveDockerComposeContainerName } from "./docker-compose-container-name-resolver";
 import { StartedGenericContainer } from "./generic-container";
 import { containerLog, log } from "./logger";
@@ -13,6 +12,8 @@ import { Env, EnvKey, EnvValue, Host } from "./docker/types";
 import { listContainers } from "./docker/functions/container/list-containers";
 import { getContainerById } from "./docker/functions/container/get-container";
 import { dockerHost } from "./docker/docker-host";
+import { inspectContainer } from "./docker/functions/container/inspect-container";
+import {containerLogs} from "./docker/functions/container/container-logs";
 
 export class DockerComposeEnvironment {
   private readonly projectName: string;
@@ -76,11 +77,11 @@ export class DockerComposeEnvironment {
           const container = await getContainerById(startedContainer.Id);
           const containerName = resolveDockerComposeContainerName(this.projectName, startedContainer.Names[0]);
 
-          (await container.logs())
+          (await containerLogs(container))
             .on("data", (data) => containerLog.trace(`${containerName}: ${data}`))
             .on("err", (data) => containerLog.error(`${containerName}: ${data}`));
 
-          const inspectResult = await container.inspect();
+          const inspectResult = await inspectContainer(container);
           const boundPorts = this.getBoundPorts(startedContainer);
 
           try {
@@ -151,12 +152,16 @@ export class DockerComposeEnvironment {
     return boundPorts;
   }
 
-  private async waitForContainer(container: Container, containerName: string, boundPorts: BoundPorts): Promise<void> {
+  private async waitForContainer(
+    container: Dockerode.Container,
+    containerName: string,
+    boundPorts: BoundPorts
+  ): Promise<void> {
     const waitStrategy = this.getWaitStrategy(await dockerHost, container, containerName);
     await waitStrategy.withStartupTimeout(this.startupTimeout).waitUntilReady(container, boundPorts);
   }
 
-  private getWaitStrategy(host: Host, container: Container, containerName: string): WaitStrategy {
+  private getWaitStrategy(host: Host, container: Dockerode.Container, containerName: string): WaitStrategy {
     if (this.waitStrategy[containerName]) {
       return this.waitStrategy[containerName];
     } else {

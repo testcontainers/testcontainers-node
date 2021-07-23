@@ -2,9 +2,9 @@ import { Socket } from "net";
 import { log } from "./logger";
 import { GenericContainer } from "./generic-container";
 import { StartedTestContainer } from "./test-container";
-import { Id } from "./container";
 import { sessionId } from "./docker/session-id";
 import { dockerHost } from "./docker/docker-host";
+import { Id } from "./docker/types";
 
 export interface Reaper {
   addProject(projectName: string): void;

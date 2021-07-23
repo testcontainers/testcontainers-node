@@ -16,6 +16,7 @@ export type CreateNetworkOptions = {
 };
 
 export const createNetwork = async (options: CreateNetworkOptions): Promise<string> => {
+  try {
   log.info(`Creating network ${options.name}`);
 
   const network: Network = await dockerode.createNetwork({
@@ -31,4 +32,7 @@ export const createNetwork = async (options: CreateNetworkOptions): Promise<stri
   });
 
   return network.id;
+  } catch (err) {
+    throw err;
+  }
 };

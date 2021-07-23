@@ -2,13 +2,13 @@
 
 import Dockerode from "dockerode";
 import { existsSync } from "fs";
-import { getDockerHost } from "./get-docker-host";
-import { runInContainer } from "./run-in-container";
+import { getDockerHost } from "./docker-host";
+import { runInContainer } from "../run-in-container";
 
 jest.mock("fs");
 const mockedExistsSync = existsSync as jest.Mock;
 
-jest.mock("./run-in-container");
+jest.mock("../run-in-container");
 const mockedRunInContainer = runInContainer as jest.Mock;
 
 describe("getDockerHost", () => {

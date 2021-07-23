@@ -1,8 +1,6 @@
 import { StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
 import { Port } from "../port";
-import { Id as ContainerId } from "../container";
-import { Readable } from "stream";
-import { ContainerName, Host } from "../docker/types";
+import { ContainerName, Host, Id } from "../docker/types";
 import { Command, ExecResult } from "../docker/types";
 
 export class AbstractStartedContainer {
@@ -24,7 +22,7 @@ export class AbstractStartedContainer {
     return this.startedTestContainer.getName();
   }
 
-  public getId(): ContainerId {
+  public getId(): Id {
     return this.startedTestContainer.getId();
   }
 
@@ -44,7 +42,7 @@ export class AbstractStartedContainer {
     return this.startedTestContainer.exec(command);
   }
 
-  public logs(): Promise<Readable> {
+  public logs(): Promise<NodeJS.ReadableStream> {
     return this.startedTestContainer.logs();
   }
 }

@@ -1,9 +1,8 @@
-import { Container, DockerodeContainer } from "../../../container";
 import { log } from "../../../logger";
 import { DockerImageName } from "../../../docker-image-name";
 import { BoundPorts } from "../../../bound-ports";
 import { dockerode } from "../../dockerode";
-import { PortMap as DockerodePortBindings } from "dockerode";
+import Dockerode, { PortMap as DockerodePortBindings } from "dockerode";
 import { PortString } from "../../../port";
 import { createLabels } from "../create-labels";
 import { BindMount, Command, ContainerName, Env, ExtraHost, HealthCheck, NetworkMode, TmpFs } from "../../types";
@@ -26,33 +25,35 @@ export type CreateContainerOptions = {
   user?: string;
 };
 
-export const createContainer = async (options: CreateContainerOptions): Promise<Container> => {
-  log.info(`Creating container for image: ${options.dockerImageName}`);
+export const createContainer = async (options: CreateContainerOptions): Promise<Dockerode.Container> => {
+  try {
+    log.info(`Creating container for image: ${options.dockerImageName}`);
 
-  const dockerodeContainer = await dockerode.createContainer({
-    name: options.name,
-    User: options.user,
-    Image: options.dockerImageName.toString(),
-    Env: getEnv(options.env),
-    ExposedPorts: getExposedPorts(options.boundPorts),
-    Cmd: options.cmd,
-    Labels: createLabels(options.dockerImageName),
-    // @ts-ignore
-    Healthcheck: getHealthCheck(options.healthCheck),
-    HostConfig: {
-      IpcMode: options.ipcMode,
-      ExtraHosts: getExtraHosts(options.extraHosts),
-      AutoRemove: options.autoRemove,
-      NetworkMode: options.networkMode,
-      PortBindings: getPortBindings(options.boundPorts),
-      Binds: getBindMounts(options.bindMounts),
-      Tmpfs: options.tmpFs,
-      LogConfig: getLogConfig(options.useDefaultLogDriver),
-      Privileged: options.privilegedMode,
-    },
-  });
-
-  return new DockerodeContainer(dockerodeContainer);
+    return await dockerode.createContainer({
+      name: options.name,
+      User: options.user,
+      Image: options.dockerImageName.toString(),
+      Env: getEnv(options.env),
+      ExposedPorts: getExposedPorts(options.boundPorts),
+      Cmd: options.cmd,
+      Labels: createLabels(options.dockerImageName),
+      // @ts-ignore
+      Healthcheck: getHealthCheck(options.healthCheck),
+      HostConfig: {
+        IpcMode: options.ipcMode,
+        ExtraHosts: getExtraHosts(options.extraHosts),
+        AutoRemove: options.autoRemove,
+        NetworkMode: options.networkMode,
+        PortBindings: getPortBindings(options.boundPorts),
+        Binds: getBindMounts(options.bindMounts),
+        Tmpfs: options.tmpFs,
+        LogConfig: getLogConfig(options.useDefaultLogDriver),
+        Privileged: options.privilegedMode,
+      },
+    });
+  } catch (err) {
+    throw err;
+  }
 };
 
 type DockerodeEnvironment = string[];

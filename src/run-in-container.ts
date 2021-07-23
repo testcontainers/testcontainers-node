@@ -3,7 +3,8 @@ import Dockerode from "dockerode";
 import { DockerImageName } from "./docker-image-name";
 import { PullStreamParser } from "./pull-stream-parser";
 import { Command } from "./docker/types";
-import {demuxStream} from "./docker/functions/demux-stream";
+import { demuxStream } from "./docker/functions/demux-stream";
+import { Readable } from "stream";
 
 export const runInContainer = async (
   dockerode: Dockerode,
@@ -17,12 +18,13 @@ export const runInContainer = async (
       await pull(dockerode, dockerImageName);
     }
     const container = await dockerode.createContainer({ Image: image, Cmd: command });
-    const stream = demuxStream(await container.attach({ stream: true, stdout: true, stderr: true }));
+    // @ts-ignore
+    const stream = demuxStream((await container.attach({ stream: true, stdout: true, stderr: true })) as Readable);
 
-    const promise = new Promise<string>(resolve => {
+    const promise = new Promise<string>((resolve) => {
       const chunks: string[] = [];
-      stream.on('data', chunk => chunks.push(chunk));
-      stream.on('end', () => resolve(chunks.join("").trim()));
+      stream.on("data", (chunk) => chunks.push(chunk));
+      stream.on("end", () => resolve(chunks.join("").trim()));
     });
 
     await container.start();

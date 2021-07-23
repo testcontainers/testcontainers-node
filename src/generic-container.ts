@@ -1,7 +1,7 @@
 import archiver from "archiver";
 import path from "path";
 import { BoundPorts } from "./bound-ports";
-import { Container, Id as ContainerId, InspectResult } from "./container";
+import { Id as ContainerId } from "./docker/types";
 import { containerLog, log } from "./logger";
 import { Port } from "./port";
 import { PortBinder } from "./port-binder";
@@ -48,8 +48,14 @@ import { imageExists } from "./docker/functions/image/image-exists";
 import { pullImage } from "./docker/functions/image/pull-image";
 import { createContainer } from "./docker/functions/container/create-container";
 import { connectNetwork } from "./docker/functions/network/connect-network";
-import { startContainer } from "./docker/functions/container/start-container";
 import { dockerHost } from "./docker/docker-host";
+import { inspectContainer, InspectResult } from "./docker/functions/container/inspect-container";
+import Dockerode from "dockerode";
+import {startContainer} from "./docker/functions/container/start-container";
+import {containerLogs} from "./docker/functions/container/container-logs";
+import {stopContainer} from "./docker/functions/container/stop-container";
+import {removeContainer} from "./docker/functions/container/remove-container";
+import {putContainerArchive} from "./docker/functions/container/put-container-archive";
 
 export class GenericContainerBuilder {
   private buildArgs: BuildArgs = {};
@@ -202,13 +208,13 @@ export class GenericContainer implements TestContainer {
       const excludedNetworks = [portForwarderNetworkId, "none", "host"];
 
       if (!this.networkMode || !excludedNetworks.includes(this.networkMode)) {
-        await connectNetwork({ containerId: container.getId(), networkId: portForwarderNetworkId, networkAliases: [] });
+        await connectNetwork({ containerId: container.id, networkId: portForwarderNetworkId, networkAliases: [] });
       }
     }
 
     if (this.networkMode && this.networkAliases.length > 0) {
       await connectNetwork({
-        containerId: container.getId(),
+        containerId: container.id,
         networkId: this.networkMode,
         networkAliases: this.networkAliases,
       });
@@ -216,18 +222,18 @@ export class GenericContainer implements TestContainer {
 
     if (this.tarToCopy) {
       await this.tarToCopy.finalize();
-      await container.putArchive(this.tarToCopy, "/");
+      await putContainerArchive({ container, stream: this.tarToCopy, containerPath: "/"})
     }
 
-    log.info(`Starting container ${this.dockerImageName} with ID: ${container.getId()}`);
+    log.info(`Starting container ${this.dockerImageName} with ID: ${container.id}`);
     await startContainer(container);
 
-    const logs = await container.logs();
+    const logs = await containerLogs(container);
     logs
-      .on("data", (data) => containerLog.trace(`${container.getId()}: ${data.trim()}`))
-      .on("err", (data) => containerLog.error(`${container.getId()}: ${data.trim()}`));
+      .on("data", (data) => containerLog.trace(`${container.id}: ${data.trim()}`))
+      .on("err", (data) => containerLog.error(`${container.id}: ${data.trim()}`));
 
-    const inspectResult = await container.inspect();
+    const inspectResult = await inspectContainer(container);
 
     await this.waitForContainer(container, boundPorts);
 
@@ -338,8 +344,8 @@ export class GenericContainer implements TestContainer {
 
   protected preCreate?(boundPorts: BoundPorts): Promise<void>;
 
-  private async waitForContainer(container: Container, boundPorts: BoundPorts): Promise<void> {
-    log.debug(`Waiting for container to be ready: ${container.getId()}`);
+  private async waitForContainer(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void> {
+    log.debug(`Waiting for container to be ready: ${container.id}`);
     const waitStrategy = this.getWaitStrategy(await dockerHost, container);
 
     try {
@@ -349,14 +355,14 @@ export class GenericContainer implements TestContainer {
       log.error(`Container failed to be ready: ${err}`);
 
       if (this.daemonMode) {
-        (await container.logs())
-          .on("data", (data) => containerLog.trace(`${container.getId()}: ${data}`))
-          .on("err", (data) => containerLog.error(`${container.getId()}: ${data}`));
+        (await containerLogs(container))
+          .on("data", (data) => containerLog.trace(`${container.id}: ${data}`))
+          .on("err", (data) => containerLog.error(`${container.id}: ${data}`));
       }
 
       try {
-        await container.stop({ timeout: 0 });
-        await container.remove({ removeVolumes: true });
+        await stopContainer(container, {timeout: 0});
+        await removeContainer(container, {removeVolumes: true});
       } catch (stopErr) {
         log.error(`Failed to stop container after it failed to be ready: ${stopErr}`);
       }
@@ -364,7 +370,7 @@ export class GenericContainer implements TestContainer {
     }
   }
 
-  private getWaitStrategy(host: Host, container: Container): WaitStrategy {
+  private getWaitStrategy(host: Host, container: Dockerode.Container): WaitStrategy {
     if (this.waitStrategy) {
       return this.waitStrategy;
     }
@@ -376,7 +382,7 @@ export class GenericContainer implements TestContainer {
 
 export class StartedGenericContainer implements StartedTestContainer {
   constructor(
-    private readonly container: Container,
+    private readonly container: Dockerode.Container,
     private readonly host: Host,
     private readonly inspectResult: InspectResult,
     private readonly boundPorts: BoundPorts,
@@ -388,10 +394,10 @@ export class StartedGenericContainer implements StartedTestContainer {
   }
 
   private async stopContainer(options: Partial<StopOptions> = {}): Promise<StoppedGenericContainer> {
-    log.info(`Stopping container with ID: ${this.container.getId()}`);
+    log.info(`Stopping container with ID: ${this.container.id}`);
     const resolvedOptions = { ...DEFAULT_STOP_OPTIONS, ...options };
-    await this.container.stop({ timeout: resolvedOptions.timeout });
-    await this.container.remove({ removeVolumes: resolvedOptions.removeVolumes });
+    await stopContainer(this.container, {timeout: resolvedOptions.timeout});
+    await removeContainer(this.container, {removeVolumes: resolvedOptions.removeVolumes});
     return new StoppedGenericContainer();
   }
 
@@ -404,7 +410,7 @@ export class StartedGenericContainer implements StartedTestContainer {
   }
 
   public getId(): ContainerId {
-    return this.container.getId();
+    return this.container.id;
   }
 
   public getName(): ContainerName {
@@ -427,8 +433,8 @@ export class StartedGenericContainer implements StartedTestContainer {
     return execContainer(this.container, command);
   }
 
-  public logs(): Promise<Readable> {
-    return this.container.logs();
+  public logs(): Promise<NodeJS.ReadableStream> {
+    return containerLogs(this.container);
   }
 }
 

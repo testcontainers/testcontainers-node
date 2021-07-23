@@ -1,4 +1,3 @@
-import { Id } from "./container";
 import { Port } from "./port";
 import { PullPolicy } from "./pull-policy";
 import { WaitStrategy } from "./wait-strategy";
@@ -12,6 +11,7 @@ import {
   EnvValue,
   ExecResult,
   Host,
+  Id,
   NetworkMode,
   TmpFs,
 } from "./docker/types";
@@ -54,7 +54,7 @@ export interface StartedTestContainer {
   getNetworkId(networkName: string): string;
   getIpAddress(networkName: string): string;
   exec(command: Command[]): Promise<ExecResult>;
-  logs(): Promise<Readable>;
+  logs(): Promise<NodeJS.ReadableStream>;
 }
 
 export interface StoppedTestContainer {}
