@@ -1,8 +1,8 @@
-import { CreateNetworkOptions, DockerClient } from "./docker-client";
-import { DockerClientInstance } from "./docker-client-instance";
 import { RandomUuid, Uuid } from "./uuid";
 import { log } from "./logger";
 import { ReaperInstance } from "./reaper";
+import { createNetwork, CreateNetworkOptions } from "./docker/functions/network/create-network";
+import { removeNetwork } from "./docker/functions/network/remove-network";
 
 export class Network {
   private readonly createNetworkOptions: CreateNetworkOptions;
@@ -24,22 +24,17 @@ export class Network {
   }
 
   public async start(): Promise<StartedNetwork> {
-    const dockerClient = await DockerClientInstance.getInstance();
-    await ReaperInstance.getInstance(dockerClient);
+    await ReaperInstance.getInstance();
 
-    const id = await dockerClient.createNetwork(this.createNetworkOptions);
+    const id = await createNetwork(this.createNetworkOptions);
     log.info(`Started network with ID: ${id}`);
 
-    return new StartedNetwork(id, this.createNetworkOptions, dockerClient);
+    return new StartedNetwork(id, this.createNetworkOptions);
   }
 }
 
 export class StartedNetwork {
-  constructor(
-    private readonly id: string,
-    private readonly options: CreateNetworkOptions,
-    private readonly dockerClient: DockerClient
-  ) {}
+  constructor(private readonly id: string, private readonly options: CreateNetworkOptions) {}
 
   public getId(): string {
     return this.id;
@@ -51,7 +46,7 @@ export class StartedNetwork {
 
   public async stop(): Promise<StoppedNetwork> {
     log.info(`Stopping network with ID: ${this.id}`);
-    await this.dockerClient.removeNetwork(this.id);
+    await removeNetwork(this.id);
     return new StoppedNetwork();
   }
 }

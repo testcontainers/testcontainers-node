@@ -1,12 +1,14 @@
 import { log } from "../../../logger";
 import { dockerode } from "../../dockerode";
 
-export const connectNetwork = async (
-  containerId: string,
-  networkId: string,
-  networkAliases: string[]
-): Promise<void> => {
-  log.info(`Connecting container ${containerId} to network ${networkId}`);
-  const network = dockerode.getNetwork(networkId);
-  await network.connect({ Container: containerId, EndpointConfig: { Aliases: networkAliases } });
+export type ConnectNetworkOptions = {
+  containerId: string;
+  networkId: string;
+  networkAliases: string[];
+};
+
+export const connectNetwork = async (options: ConnectNetworkOptions): Promise<void> => {
+  log.info(`Connecting container ${options.containerId} to network ${options.networkId}`);
+  const network = dockerode.getNetwork(options.networkId);
+  await network.connect({ Container: options.containerId, EndpointConfig: { Aliases: options.networkAliases } });
 };

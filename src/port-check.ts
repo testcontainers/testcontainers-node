@@ -1,8 +1,8 @@
 import { Socket } from "net";
 import { Container } from "./container";
-import { DockerClient } from "./docker-client";
-import { Host } from "./docker-client-instance";
 import { Port } from "./port";
+import { Host } from "./docker/types";
+import { execContainer } from "./docker/functions/container/exec-container";
 
 export interface PortCheck {
   isBound(port: Port): Promise<boolean>;
@@ -33,7 +33,7 @@ export class HostPortCheck implements PortCheck {
 }
 
 export class InternalPortCheck implements PortCheck {
-  constructor(private readonly container: Container, private readonly dockerClient: DockerClient) {}
+  constructor(private readonly container: Container) {}
 
   public async isBound(port: Port): Promise<boolean> {
     const portHex = port.toString(16).padStart(4, "0");
@@ -42,9 +42,7 @@ export class InternalPortCheck implements PortCheck {
       ["/bin/sh", "-c", `nc -vz -w 1 localhost ${port}`],
       ["/bin/bash", "-c", `</dev/tcp/localhost/${port}`],
     ];
-    const commandResults = await Promise.all(
-      commands.map((command) => this.dockerClient.exec(this.container, command))
-    );
+    const commandResults = await Promise.all(commands.map((command) => execContainer(this.container, command)));
     return commandResults.some((result) => result.exitCode === 0);
   }
 }

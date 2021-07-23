@@ -3,7 +3,8 @@ import { log } from "./logger";
 import { GenericContainer } from "./generic-container";
 import { StartedTestContainer } from "./test-container";
 import { Id } from "./container";
-import { DockerClient } from "./docker-client";
+import { sessionId } from "./docker/session-id";
+import { dockerHost } from "./docker/docker-host";
 
 export interface Reaper {
   addProject(projectName: string): void;
@@ -50,12 +51,12 @@ export class ReaperInstance {
 
   private static instance?: Promise<Reaper>;
 
-  public static async getInstance(dockerClient: DockerClient): Promise<Reaper> {
+  public static async getInstance(): Promise<Reaper> {
     if (!this.instance) {
       if (this.isEnabled()) {
-        this.instance = this.createRealInstance(dockerClient);
+        this.instance = this.createRealInstance();
       } else {
-        this.instance = this.createDisabledInstance(dockerClient);
+        this.instance = this.createDisabledInstance();
       }
     }
 
@@ -78,16 +79,12 @@ export class ReaperInstance {
     return process.env.TESTCONTAINERS_RYUK_DISABLED !== "true";
   }
 
-  private static createDisabledInstance(dockerClient: DockerClient): Promise<Reaper> {
-    const sessionId = dockerClient.getSessionId();
-
+  private static createDisabledInstance(): Promise<Reaper> {
     log.debug(`Not creating new Reaper for session: ${sessionId}`);
     return Promise.resolve(new DisabledReaper());
   }
 
-  private static async createRealInstance(dockerClient: DockerClient): Promise<Reaper> {
-    const sessionId = dockerClient.getSessionId();
-
+  private static async createRealInstance(): Promise<Reaper> {
     const dockerSocket = process.env["TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE"] ?? "/var/run/docker.sock";
 
     log.debug(`Creating new Reaper for session: ${sessionId}`);
@@ -99,7 +96,7 @@ export class ReaperInstance {
       .withPrivilegedMode()
       .start();
 
-    const host = dockerClient.getHost();
+    const host = await dockerHost;
     const port = container.getMappedPort(8080);
 
     log.debug(`Connecting to Reaper ${container.getId()} on ${host}:${port}`);

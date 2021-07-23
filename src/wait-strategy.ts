@@ -1,7 +1,6 @@
 import byline from "byline";
 import { BoundPorts } from "./bound-ports";
 import { Container, HealthCheckStatus } from "./container";
-import { DockerClient } from "./docker-client";
 import { log } from "./logger";
 import { Port } from "./port";
 import { PortCheck } from "./port-check";
@@ -24,11 +23,7 @@ abstract class AbstractWaitStrategy implements WaitStrategy {
 }
 
 export class HostPortWaitStrategy extends AbstractWaitStrategy {
-  constructor(
-    private readonly dockerClient: DockerClient,
-    private readonly hostPortCheck: PortCheck,
-    private readonly internalPortCheck: PortCheck
-  ) {
+  constructor(private readonly hostPortCheck: PortCheck, private readonly internalPortCheck: PortCheck) {
     super();
   }
 

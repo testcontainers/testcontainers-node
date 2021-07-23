@@ -1,6 +1,6 @@
 import { DockerConfig } from "./types";
-import { AuthConfig } from "../docker-client";
 import { Auths } from "./auths";
+import { AuthConfig } from "../docker/types";
 
 describe("Auths", () => {
   const locator = new Auths();

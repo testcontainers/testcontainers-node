@@ -1,9 +1,9 @@
 import { StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
-import { Host } from "../docker-client-instance";
 import { Port } from "../port";
-import { Command, ContainerName, ExecResult } from "../docker-client";
 import { Id as ContainerId } from "../container";
 import { Readable } from "stream";
+import { ContainerName, Host } from "../docker/types";
+import { Command, ExecResult } from "../docker/types";
 
 export class AbstractStartedContainer {
   constructor(protected readonly startedTestContainer: StartedTestContainer) {}

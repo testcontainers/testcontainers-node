@@ -1,9 +1,9 @@
 import dockerode, { ContainerInspectInfo } from "dockerode";
 import { log } from "./logger";
-import { Command, ContainerName, ExitCode } from "./docker-client";
 import { Port } from "./port";
 import { Duplex, PassThrough, Readable } from "stream";
 import { IncomingMessage } from "http";
+import { Command, ContainerName, ExitCode } from "./docker/types";
 
 export type Id = string;
 

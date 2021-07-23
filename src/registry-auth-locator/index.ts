@@ -6,8 +6,8 @@ import { CredHelpers } from "./cred-helpers";
 import { CredsStore } from "./creds-store";
 import { Auths } from "./auths";
 import { RegistryAuthLocator } from "./registry-auth-locator";
-import { AuthConfig } from "../docker-client";
 import { log } from "../logger";
+import { AuthConfig } from "../docker/types";
 
 const DEFAULT_REGISTRY = "https://index.docker.io/v1/";
 

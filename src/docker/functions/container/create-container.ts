@@ -2,22 +2,13 @@ import { Container, DockerodeContainer } from "../../../container";
 import { log } from "../../../logger";
 import { DockerImageName } from "../../../docker-image-name";
 import { BoundPorts } from "../../../bound-ports";
-import {
-  BindMount,
-  Command,
-  ContainerName,
-  Env,
-  ExtraHost,
-  HealthCheck,
-  NetworkMode,
-  TmpFs,
-} from "../../../docker-client";
 import { dockerode } from "../../dockerode";
 import { PortMap as DockerodePortBindings } from "dockerode";
 import { PortString } from "../../../port";
 import { createLabels } from "../create-labels";
+import { BindMount, Command, ContainerName, Env, ExtraHost, HealthCheck, NetworkMode, TmpFs } from "../../types";
 
-type CreateOptions = {
+export type CreateContainerOptions = {
   dockerImageName: DockerImageName;
   env: Env;
   cmd: Command[];
@@ -35,7 +26,7 @@ type CreateOptions = {
   user?: string;
 };
 
-export const createContainer = async (options: CreateOptions): Promise<Container> => {
+export const createContainer = async (options: CreateContainerOptions): Promise<Container> => {
   log.info(`Creating container for image: ${options.dockerImageName}`);
 
   const dockerodeContainer = await dockerode.createContainer({
@@ -47,7 +38,7 @@ export const createContainer = async (options: CreateOptions): Promise<Container
     Cmd: options.cmd,
     Labels: createLabels(options.dockerImageName),
     // @ts-ignore
-    Healthcheck: this.getHealthCheck(options.healthCheck),
+    Healthcheck: getHealthCheck(options.healthCheck),
     HostConfig: {
       IpcMode: options.ipcMode,
       ExtraHosts: getExtraHosts(options.extraHosts),
@@ -97,6 +88,30 @@ const getPortBindings = (boundPorts: BoundPorts): DockerodePortBindings => {
 const getBindMounts = (bindMounts: BindMount[]): string[] => {
   return bindMounts.map(({ source, target, bindMode }) => `${source}:${target}:${bindMode}`);
 };
+
+type DockerodeHealthCheck = {
+  Test: string[];
+  Interval: number;
+  Timeout: number;
+  Retries: number;
+  StartPeriod: number;
+};
+
+const getHealthCheck = (healthCheck?: HealthCheck): DockerodeHealthCheck | undefined => {
+  if (healthCheck === undefined) {
+    return undefined;
+  }
+
+  return {
+    Test: ["CMD-SHELL", healthCheck.test],
+    Interval: healthCheck.interval ? toNanos(healthCheck.interval) : 0,
+    Timeout: healthCheck.timeout ? toNanos(healthCheck.timeout) : 0,
+    Retries: healthCheck.retries || 0,
+    StartPeriod: healthCheck.startPeriod ? toNanos(healthCheck.startPeriod) : 0,
+  };
+};
+
+const toNanos = (duration: number): number => duration * 1e6;
 
 type DockerodeLogConfig = {
   Type: string;

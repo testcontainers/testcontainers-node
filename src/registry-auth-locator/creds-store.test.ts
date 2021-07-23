@@ -1,6 +1,6 @@
 import { DockerConfig } from "./types";
-import { AuthConfig } from "../docker-client";
 import { CredsStore } from "./creds-store";
+import { AuthConfig } from "../docker/types";
 
 describe("CredsStore", () => {
   const locator = new CredsStore();

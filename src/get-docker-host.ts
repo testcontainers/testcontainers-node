@@ -1,9 +1,9 @@
-import { Host } from "./docker-client-instance";
 import { log } from "./logger";
 import { NetworkInspectInfo } from "dockerode";
 import { runInContainer } from "./run-in-container";
 import fs from "fs";
 import Dockerode from "dockerode";
+import { Host } from "./docker/types";
 
 export const getDockerHost = async (dockerode: Dockerode): Promise<Host> => {
   const modem = dockerode.modem;

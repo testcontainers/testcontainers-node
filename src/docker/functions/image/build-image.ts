@@ -5,11 +5,11 @@ import { findDockerIgnoreFiles } from "../../../docker-ignore";
 import tar from "tar-fs";
 import slash from "slash";
 import byline from "byline";
-import { BuildArgs, BuildContext, RegistryConfig } from "../../../docker-client";
 import { dockerode } from "../../dockerode";
 import { createLabels } from "../create-labels";
+import { BuildArgs, BuildContext, RegistryConfig } from "../../types";
 
-type BuildImageOptions = {
+export type BuildImageOptions = {
   imageName: DockerImageName;
   context: BuildContext;
   dockerfileName: string;

@@ -1,6 +1,6 @@
 import { Container } from "../../../container";
 import { Readable } from "stream";
-import { Command, ExecResult } from "../../../docker-client";
+import { Command, ExecResult } from "../../types";
 
 export const execContainer = async (container: Container, command: Command[]): Promise<ExecResult> => {
   const exec = await container.exec({

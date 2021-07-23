@@ -1,5 +1,5 @@
-import { AuthConfig } from "../docker-client";
 import { DockerConfig } from "./types";
+import { AuthConfig } from "../docker/types";
 
 export interface RegistryAuthLocator {
   getName(): string;

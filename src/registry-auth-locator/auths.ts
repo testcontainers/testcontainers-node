@@ -1,6 +1,6 @@
 import { Auth, DockerConfig } from "./types";
-import { AuthConfig } from "../docker-client";
 import { RegistryAuthLocator } from "./registry-auth-locator";
+import { AuthConfig } from "../docker/types";
 
 export class Auths implements RegistryAuthLocator {
   getName(): string {

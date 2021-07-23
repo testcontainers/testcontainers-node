@@ -3,7 +3,7 @@ import { Network } from "dockerode";
 import { dockerode } from "../../dockerode";
 import { createLabels } from "../create-labels";
 
-type CreateNetworkOptions = {
+export type CreateNetworkOptions = {
   name: string;
   driver: "bridge" | "overlay" | string; // third option is for user-installed custom network drivers
   checkDuplicate: boolean;

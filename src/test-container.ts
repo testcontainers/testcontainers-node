@@ -1,4 +1,8 @@
 import { Id } from "./container";
+import { Port } from "./port";
+import { PullPolicy } from "./pull-policy";
+import { WaitStrategy } from "./wait-strategy";
+import { Readable } from "stream";
 import {
   BindMode,
   Command,
@@ -7,14 +11,10 @@ import {
   EnvKey,
   EnvValue,
   ExecResult,
+  Host,
   NetworkMode,
   TmpFs,
-} from "./docker-client";
-import { Host } from "./docker-client-instance";
-import { Port } from "./port";
-import { PullPolicy } from "./pull-policy";
-import { WaitStrategy } from "./wait-strategy";
-import { Readable } from "stream";
+} from "./docker/types";
 
 export interface TestContainer {
   start(): Promise<StartedTestContainer>;

@@ -1,9 +1,9 @@
-import { Command } from "./docker-client";
 import { log } from "./logger";
 import Dockerode from "dockerode";
 import { PassThrough } from "stream";
 import { DockerImageName } from "./docker-image-name";
 import { PullStreamParser } from "./pull-stream-parser";
+import { Command } from "./docker/types";
 
 export const runInContainer = async (
   dockerode: Dockerode,

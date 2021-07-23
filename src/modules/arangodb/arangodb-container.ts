@@ -1,9 +1,9 @@
 import { GenericContainer, Wait } from "../..";
-import { Host } from "../../docker-client-instance";
 import { StartedTestContainer } from "../../test-container";
 import { Port } from "../../port";
 import { RandomUuid } from "../../uuid";
 import { AbstractStartedContainer } from "../abstract-started-container";
+import { Host } from "../../docker/types";
 
 export class ArangoDBContainer extends GenericContainer {
   private readonly defaultPort = 8529;
