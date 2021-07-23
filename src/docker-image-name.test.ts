@@ -1,6 +1,5 @@
 import { DockerImageName } from "./docker-image-name";
-import { REAPER_IMAGE } from "./reaper";
-import { SSHD_IMAGE } from "./port-forwarder";
+import { REAPER_IMAGE, SSHD_IMAGE } from "./images";
 
 describe("DockerImageName", () => {
   it("should return whether two image names are equal", () => {
