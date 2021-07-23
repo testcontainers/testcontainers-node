@@ -3,7 +3,7 @@ import { log } from "../logger";
 import { logSystemDiagnostics } from "../log-system-diagnostics";
 import Dockerode, { NetworkInspectInfo } from "dockerode";
 import { Host } from "./types";
-import { runInContainer } from "./run-in-container";
+import { runInContainer } from "./functions/run-in-container";
 import fs from "fs";
 
 export const getDockerHost = async (dockerode: Dockerode): Promise<Host> => {

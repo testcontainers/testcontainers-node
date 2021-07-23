@@ -4,8 +4,9 @@ import { GenericContainer } from "./generic-container";
 import { AlwaysPullPolicy } from "./pull-policy";
 import { Wait } from "./wait";
 import { RandomUuid } from "./uuid";
-import { getContainerById, getEvents, getRunningContainerNames } from "./test-helper";
+import { getEvents, getRunningContainerNames } from "./test-helper";
 import { Network } from "./network";
+import { getContainerById } from "./docker/functions/container/get-container";
 
 describe("GenericContainer", () => {
   jest.setTimeout(180_000);
