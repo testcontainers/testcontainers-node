@@ -34,7 +34,7 @@ export const execContainer = async (container: Dockerode.Container, command: Com
   }
 };
 
-const startExec = async (exec: Dockerode.Exec): Promise<Readable> => {
+const startExec = (exec: Dockerode.Exec): Promise<Readable> => {
   const options = {
     Detach: false,
     Tty: true,
