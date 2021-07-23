@@ -1,6 +1,7 @@
 import { Duplex, Readable } from "stream";
 import { Command, ExecResult, ExitCode } from "../../types";
 import Dockerode from "dockerode";
+import { log } from "../../../logger";
 
 export const execContainer = async (container: Dockerode.Container, command: Command[]): Promise<ExecResult> => {
   try {
@@ -18,16 +19,17 @@ export const execContainer = async (container: Dockerode.Container, command: Com
       stream.on("data", (chunk) => chunks.push(chunk));
 
       const interval = setInterval(async () => {
-        const {running, exitCode} = await inspectExec(exec);
+        const { running, exitCode } = await inspectExec(exec);
 
         if (!running) {
           clearInterval(interval);
           stream.destroy();
-          resolve({output: chunks.join(""), exitCode});
+          resolve({ output: chunks.join(""), exitCode });
         }
       }, 100);
     });
   } catch (err) {
+    log.error(`Failed to exec container ${container.id} with command "${command.join(" ")}": ${err}`);
     throw err;
   }
 };

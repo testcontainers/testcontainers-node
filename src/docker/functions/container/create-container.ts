@@ -8,7 +8,7 @@ import { createLabels } from "../create-labels";
 import { BindMount, Command, ContainerName, Env, ExtraHost, HealthCheck, NetworkMode, TmpFs } from "../../types";
 
 export type CreateContainerOptions = {
-  dockerImageName: DockerImageName;
+  imageName: DockerImageName;
   env: Env;
   cmd: Command[];
   bindMounts: BindMount[];
@@ -27,16 +27,16 @@ export type CreateContainerOptions = {
 
 export const createContainer = async (options: CreateContainerOptions): Promise<Dockerode.Container> => {
   try {
-    log.info(`Creating container for image: ${options.dockerImageName}`);
+    log.info(`Creating container for image: ${options.imageName}`);
 
     return await dockerode.createContainer({
       name: options.name,
       User: options.user,
-      Image: options.dockerImageName.toString(),
+      Image: options.imageName.toString(),
       Env: getEnv(options.env),
       ExposedPorts: getExposedPorts(options.boundPorts),
       Cmd: options.cmd,
-      Labels: createLabels(options.dockerImageName),
+      Labels: createLabels(options.imageName),
       // @ts-ignore
       Healthcheck: getHealthCheck(options.healthCheck),
       HostConfig: {
@@ -52,6 +52,7 @@ export const createContainer = async (options: CreateContainerOptions): Promise<
       },
     });
   } catch (err) {
+    log.error(`Failed to create container for image ${options.imageName}: ${err}`);
     throw err;
   }
 };

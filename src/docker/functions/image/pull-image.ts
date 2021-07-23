@@ -21,10 +21,11 @@ export const pullImage = async (options: PullImageOptions): Promise<void> => {
     }
 
     log.info(`Pulling image: ${options.imageName}`);
-    const stream = await dockerode.pull(options.imageName.toString(), {authconfig: options.authConfig});
+    const stream = await dockerode.pull(options.imageName.toString(), { authconfig: options.authConfig });
 
     await new PullStreamParser(options.imageName, log).consume(stream);
   } catch (err) {
+    log.error(`Failed to pull image "${options.imageName}": ${err}`);
     throw err;
   }
 };

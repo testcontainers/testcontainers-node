@@ -5,21 +5,15 @@ export type StopContainerOptions = {
   timeout: number;
 };
 
-export const stopContainer = (container: Dockerode.Container, options: StopContainerOptions): Promise<void> => {
+export const stopContainer = async (container: Dockerode.Container, options: StopContainerOptions): Promise<void> => {
   try {
-    return container
-      .stop({
-        t: options.timeout / 1000,
-      })
-      .catch((error) => {
-        /* 304 container already stopped */
-        if (error.statusCode === 304) {
-          log.info(`Container has already been stopped: ${container.id}`);
-        } else {
-          throw error;
-        }
-      });
+    await container.stop({ t: options.timeout / 1000 });
   } catch (err) {
-    throw err;
+    if (err.statusCode === 304) {
+      log.info(`Container has already been stopped: ${container.id}`);
+    } else {
+      log.error(`Failed to stop container ${container.id}: ${err}`);
+      throw err;
+    }
   }
 };

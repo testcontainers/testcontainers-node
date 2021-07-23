@@ -17,22 +17,23 @@ export type CreateNetworkOptions = {
 
 export const createNetwork = async (options: CreateNetworkOptions): Promise<string> => {
   try {
-  log.info(`Creating network ${options.name}`);
+    log.info(`Creating network ${options.name}`);
 
-  const network: Network = await dockerode.createNetwork({
-    Name: options.name,
-    CheckDuplicate: options.checkDuplicate,
-    Driver: options.driver,
-    Internal: options.internal,
-    Attachable: options.attachable,
-    Ingress: options.ingress,
-    EnableIPv6: options.enableIPv6,
-    Options: options.options,
-    Labels: { ...options.labels, ...createLabels() },
-  });
+    const network: Network = await dockerode.createNetwork({
+      Name: options.name,
+      CheckDuplicate: options.checkDuplicate,
+      Driver: options.driver,
+      Internal: options.internal,
+      Attachable: options.attachable,
+      Ingress: options.ingress,
+      EnableIPv6: options.enableIPv6,
+      Options: options.options,
+      Labels: { ...options.labels, ...createLabels() },
+    });
 
-  return network.id;
+    return network.id;
   } catch (err) {
+    log.error(`Failed to create network: ${err}`);
     throw err;
   }
 };

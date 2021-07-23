@@ -13,7 +13,7 @@ import { listContainers } from "./docker/functions/container/list-containers";
 import { getContainerById } from "./docker/functions/container/get-container";
 import { dockerHost } from "./docker/docker-host";
 import { inspectContainer } from "./docker/functions/container/inspect-container";
-import {containerLogs} from "./docker/functions/container/container-logs";
+import { containerLogs } from "./docker/functions/container/container-logs";
 
 export class DockerComposeEnvironment {
   private readonly projectName: string;

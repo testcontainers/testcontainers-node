@@ -51,11 +51,11 @@ import { connectNetwork } from "./docker/functions/network/connect-network";
 import { dockerHost } from "./docker/docker-host";
 import { inspectContainer, InspectResult } from "./docker/functions/container/inspect-container";
 import Dockerode from "dockerode";
-import {startContainer} from "./docker/functions/container/start-container";
-import {containerLogs} from "./docker/functions/container/container-logs";
-import {stopContainer} from "./docker/functions/container/stop-container";
-import {removeContainer} from "./docker/functions/container/remove-container";
-import {putContainerArchive} from "./docker/functions/container/put-container-archive";
+import { startContainer } from "./docker/functions/container/start-container";
+import { containerLogs } from "./docker/functions/container/container-logs";
+import { stopContainer } from "./docker/functions/container/stop-container";
+import { removeContainer } from "./docker/functions/container/remove-container";
+import { putContainerArchive } from "./docker/functions/container/put-container-archive";
 
 export class GenericContainerBuilder {
   private buildArgs: BuildArgs = {};
@@ -185,7 +185,7 @@ export class GenericContainer implements TestContainer {
     }
 
     const container = await createContainer({
-      dockerImageName: this.dockerImageName,
+      imageName: this.dockerImageName,
       env: this.env,
       cmd: this.cmd,
       bindMounts: this.bindMounts,
@@ -222,7 +222,7 @@ export class GenericContainer implements TestContainer {
 
     if (this.tarToCopy) {
       await this.tarToCopy.finalize();
-      await putContainerArchive({ container, stream: this.tarToCopy, containerPath: "/"})
+      await putContainerArchive({ container, stream: this.tarToCopy, containerPath: "/" });
     }
 
     log.info(`Starting container ${this.dockerImageName} with ID: ${container.id}`);
@@ -361,8 +361,8 @@ export class GenericContainer implements TestContainer {
       }
 
       try {
-        await stopContainer(container, {timeout: 0});
-        await removeContainer(container, {removeVolumes: true});
+        await stopContainer(container, { timeout: 0 });
+        await removeContainer(container, { removeVolumes: true });
       } catch (stopErr) {
         log.error(`Failed to stop container after it failed to be ready: ${stopErr}`);
       }
@@ -396,8 +396,8 @@ export class StartedGenericContainer implements StartedTestContainer {
   private async stopContainer(options: Partial<StopOptions> = {}): Promise<StoppedGenericContainer> {
     log.info(`Stopping container with ID: ${this.container.id}`);
     const resolvedOptions = { ...DEFAULT_STOP_OPTIONS, ...options };
-    await stopContainer(this.container, {timeout: resolvedOptions.timeout});
-    await removeContainer(this.container, {removeVolumes: resolvedOptions.removeVolumes});
+    await stopContainer(this.container, { timeout: resolvedOptions.timeout });
+    await removeContainer(this.container, { removeVolumes: resolvedOptions.removeVolumes });
     return new StoppedGenericContainer();
   }
 

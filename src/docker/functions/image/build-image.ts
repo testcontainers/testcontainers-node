@@ -43,6 +43,7 @@ export const buildImage = async (options: BuildImageOptions): Promise<void> => {
         })
     );
   } catch (err) {
+    log.error(`Failed to build image: ${err}`);
     throw err;
   }
 };
