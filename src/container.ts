@@ -111,7 +111,7 @@ export class DockerodeContainer implements Container {
       const rawStream = (await this.container.logs(options)) as IncomingMessage;
       rawStream.socket.unref();
 
-      const stream = new PassThrough({ encoding: "utf-8" });
+      const stream = new PassThrough({ autoDestroy: true, encoding: "utf-8" });
       this.container.modem.demuxStream(rawStream, stream, stream);
       rawStream.on("end", () => stream.end());
       return stream;
