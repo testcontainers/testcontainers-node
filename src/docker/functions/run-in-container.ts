@@ -1,10 +1,10 @@
-import { log } from "../logger";
-import { DockerImageName } from "../docker-image-name";
-import { Command } from "./types";
-import { dockerode } from "./dockerode";
-import { pullImage } from "./functions/image/pull-image";
-import { startContainer } from "./functions/container/start-container";
-import { attachContainer } from "./functions/container/attach-container";
+import { log } from "../../logger";
+import { DockerImageName } from "../../docker-image-name";
+import { Command } from "../types";
+import { dockerode } from "../dockerode";
+import { pullImage } from "./image/pull-image";
+import { startContainer } from "./container/start-container";
+import { attachContainer } from "./container/attach-container";
 
 export const runInContainer = async (image: string, command: Command[]): Promise<string | undefined> => {
   try {
