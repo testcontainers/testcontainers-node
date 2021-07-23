@@ -1,4 +1,4 @@
-import { Duplex, Readable } from "stream";
+import { Readable } from "stream";
 import { Command, ExecResult, ExitCode } from "../../types";
 import Dockerode from "dockerode";
 import { log } from "../../../logger";
@@ -34,27 +34,23 @@ export const execContainer = async (container: Dockerode.Container, command: Com
   }
 };
 
-const startExec = (exec: Dockerode.Exec): Promise<Readable> => {
-  const options = {
-    Detach: false,
-    Tty: true,
-    stream: true,
-    stdin: true,
-    stdout: true,
-    stderr: true,
-  };
-
-  return new Promise((resolve, reject) => {
-    exec.start(options, (err?: Error, stream?: Duplex) => {
-      if (err) {
-        return reject(err);
-      } else if (!stream) {
-        return reject(new Error("Unexpected error occurred, stream is undefined"));
-      }
-      stream.setEncoding("utf-8");
-      return resolve(stream);
-    });
-  });
+const startExec = async (exec: Dockerode.Exec): Promise<Readable> => {
+  try {
+    const options = {
+      Detach: false,
+      Tty: true,
+      stream: true,
+      stdin: true,
+      stdout: true,
+      stderr: true,
+    };
+    const stream = await exec.start(options);
+    stream.setEncoding("utf-8");
+    return stream;
+  } catch (err) {
+    log.error(`Failed to start exec: ${err}`);
+    throw err;
+  }
 };
 
 type ExecInspectResult = {
@@ -65,12 +61,17 @@ type ExecInspectResult = {
 };
 
 const inspectExec = async (exec: Dockerode.Exec): Promise<ExecInspectResult> => {
-  const inspectResult = await exec.inspect();
+  try {
+    const inspectResult = await exec.inspect();
 
-  return {
-    exitCode: inspectResult.ExitCode === null ? -1 : inspectResult.ExitCode,
-    running: inspectResult.Running,
-    entrypoint: inspectResult.ProcessConfig.entrypoint,
-    arguments: inspectResult.ProcessConfig.arguments,
-  };
+    return {
+      exitCode: inspectResult.ExitCode === null ? -1 : inspectResult.ExitCode,
+      running: inspectResult.Running,
+      entrypoint: inspectResult.ProcessConfig.entrypoint,
+      arguments: inspectResult.ProcessConfig.arguments,
+    };
+  } catch (err) {
+    log.error(`Failed to inspect exec: ${err}`);
+    throw err;
+  }
 };
