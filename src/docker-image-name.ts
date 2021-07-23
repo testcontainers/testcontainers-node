@@ -1,5 +1,4 @@
-import { REAPER_IMAGE } from "./reaper";
-import { SSHD_IMAGE } from "./port-forwarder";
+import { REAPER_IMAGE, SSHD_IMAGE } from "./images";
 
 export type Registry = string;
 export type Image = string;

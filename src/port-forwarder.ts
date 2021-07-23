@@ -6,9 +6,7 @@ import { StartedTestContainer } from "./test-container";
 import { RandomUuid } from "./uuid";
 import { sessionId } from "./docker/session-id";
 import { dockerHost } from "./docker/docker-host";
-
-export const SSHD_IMAGE =
-  process.env.SSHD_CONTAINER_IMAGE === undefined ? "testcontainers/sshd:1.0.0" : process.env.SSHD_CONTAINER_IMAGE;
+import { SSHD_IMAGE } from "./images";
 
 export class PortForwarder {
   constructor(private readonly sshConnection: SshConnection, private readonly container: StartedTestContainer) {}

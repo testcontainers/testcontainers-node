@@ -5,9 +5,7 @@ import { StartedTestContainer } from "./test-container";
 import { sessionId } from "./docker/session-id";
 import { dockerHost } from "./docker/docker-host";
 import { Id } from "./docker/types";
-
-export const REAPER_IMAGE =
-  process.env.RYUK_CONTAINER_IMAGE === undefined ? "cristianrgreco/ryuk:0.4.0" : process.env.RYUK_CONTAINER_IMAGE;
+import { REAPER_IMAGE } from "./images";
 
 export interface Reaper {
   addProject(projectName: string): void;
