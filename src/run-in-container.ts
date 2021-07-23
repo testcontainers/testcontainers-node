@@ -1,9 +1,9 @@
-import {Command, DockerClient} from "./docker-client";
+import { Command } from "./docker-client";
 import { log } from "./logger";
 import Dockerode from "dockerode";
 import { PassThrough } from "stream";
-import {DockerImageName} from "./docker-image-name";
-import {PullStreamParser} from "./pull-stream-parser";
+import { DockerImageName } from "./docker-image-name";
+import { PullStreamParser } from "./pull-stream-parser";
 
 export const runInContainer = async (
   dockerode: Dockerode,
@@ -12,7 +12,7 @@ export const runInContainer = async (
 ): Promise<string | undefined> => {
   try {
     const dockerImageName = DockerImageName.fromString(image);
-    if (!await isImageCached(dockerode, dockerImageName)) {
+    if (!(await isImageCached(dockerode, dockerImageName))) {
       log.debug(`Pulling image: ${dockerImageName.toString()}`);
       await pull(dockerode, dockerImageName);
     }
@@ -48,14 +48,14 @@ const pull = async (dockerode: Dockerode, dockerImageName: DockerImageName): Pro
   log.info(`Pulling image: ${dockerImageName}`);
   const stream = await dockerode.pull(dockerImageName.toString());
   await new PullStreamParser(dockerImageName, log).consume(stream);
-}
+};
 
-const isImageCached = async(dockerode: Dockerode, imageName: DockerImageName): Promise<boolean> =>  {
+const isImageCached = async (dockerode: Dockerode, imageName: DockerImageName): Promise<boolean> => {
   const dockerImageNames = await fetchDockerImageNames(dockerode);
   return dockerImageNames.some((dockerImageName) => dockerImageName.equals(imageName));
-}
+};
 
-const fetchDockerImageNames = async(dockerode: Dockerode): Promise<DockerImageName[]> => {
+const fetchDockerImageNames = async (dockerode: Dockerode): Promise<DockerImageName[]> => {
   const images = await dockerode.listImages();
 
   return images.reduce((dockerImageNames: DockerImageName[], image) => {
@@ -65,8 +65,8 @@ const fetchDockerImageNames = async(dockerode: Dockerode): Promise<DockerImageNa
     const dockerImageNamesForImage = image.RepoTags.map((imageRepoTag) => DockerImageName.fromString(imageRepoTag));
     return [...dockerImageNames, ...dockerImageNamesForImage];
   }, []);
-}
+};
 
 const isDanglingImage = (image: Dockerode.ImageInfo) => {
   return image.RepoTags === null;
-}
+};
