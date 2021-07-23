@@ -1,5 +1,5 @@
-import { ReaperInstance } from "./reaper";
-import { PortForwarderInstance } from "./port-forwarder";
+import { REAPER_IMAGE } from "./reaper";
+import { SSHD_IMAGE } from "./port-forwarder";
 
 export type Registry = string;
 export type Image = string;
@@ -7,7 +7,7 @@ export type Tag = string;
 
 export class DockerImageName {
   private readonly string: string;
-  private static readonly HELPER_CONTAINERS = new Set([ReaperInstance.getImage(), PortForwarderInstance.getImage()]);
+  private static readonly HELPER_CONTAINERS = new Set([REAPER_IMAGE, SSHD_IMAGE]);
 
   constructor(public readonly registry: Registry | undefined, public readonly image: Image, public readonly tag: Tag) {
     if (this.registry) {
@@ -26,7 +26,7 @@ export class DockerImageName {
   }
 
   public isReaper(): boolean {
-    return this.string === ReaperInstance.getImage();
+    return this.string === REAPER_IMAGE;
   }
 
   public isHelperContainer(): boolean {

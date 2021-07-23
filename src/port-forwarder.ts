@@ -1,11 +1,14 @@
 import { createSshConnection, SshConnection } from "ssh-remote-port-forward";
 import { log } from "./logger";
-import { GenericContainer } from "./generic-container";
+import { GenericContainer } from "./generic-container/generic-container";
 import { Port } from "./port";
 import { StartedTestContainer } from "./test-container";
 import { RandomUuid } from "./uuid";
 import { sessionId } from "./docker/session-id";
 import { dockerHost } from "./docker/docker-host";
+
+export const SSHD_IMAGE =
+  process.env.SSHD_CONTAINER_IMAGE === undefined ? "testcontainers/sshd:1.0.0" : process.env.SSHD_CONTAINER_IMAGE;
 
 export class PortForwarder {
   constructor(private readonly sshConnection: SshConnection, private readonly container: StartedTestContainer) {}
@@ -37,10 +40,6 @@ export class PortForwarderInstance {
     return this.instance !== undefined;
   }
 
-  public static getImage(): string {
-    return process.env.SSHD_CONTAINER_IMAGE === undefined ? this.DEFAULT_IMAGE : process.env.SSHD_CONTAINER_IMAGE;
-  }
-
   public static async getInstance(): Promise<PortForwarder> {
     if (!this.instance) {
       this.instance = this.createInstance();
@@ -54,7 +53,7 @@ export class PortForwarderInstance {
     const username = "root";
     const password = new RandomUuid().nextUuid();
 
-    const container = await new GenericContainer(this.getImage())
+    const container = await new GenericContainer(SSHD_IMAGE)
       .withName(`testcontainers-port-forwarder-${sessionId}`)
       .withDaemonMode()
       .withExposedPorts(22)

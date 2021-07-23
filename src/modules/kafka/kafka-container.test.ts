@@ -1,7 +1,7 @@
 import { Kafka, logLevel } from "kafkajs";
 import { KafkaContainer, KAFKA_IMAGE, ZK_IMAGE } from "./kafka-container";
 import { Network } from "../../network";
-import { GenericContainer } from "../../generic-container";
+import { GenericContainer } from "../../generic-container/generic-container";
 import { StartedTestContainer } from "../../test-container";
 
 describe("KafkaContainer", () => {

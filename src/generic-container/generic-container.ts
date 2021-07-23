@@ -1,26 +1,20 @@
 import archiver from "archiver";
-import path from "path";
-import { BoundPorts } from "./bound-ports";
-import { Id as ContainerId } from "./docker/types";
-import { containerLog, log } from "./logger";
-import { Port } from "./port";
-import { PortBinder } from "./port-binder";
-import { HostPortCheck, InternalPortCheck } from "./port-check";
-import { DefaultPullPolicy, PullPolicy } from "./pull-policy";
-import { DockerImageName } from "./docker-image-name";
-import { StartedTestContainer, StopOptions, StoppedTestContainer, TestContainer } from "./test-container";
-import { RandomUuid, Uuid } from "./uuid";
-import { HostPortWaitStrategy, WaitStrategy } from "./wait-strategy";
-import { ReaperInstance } from "./reaper";
+import { BoundPorts } from "../bound-ports";
+import { containerLog, log } from "../logger";
+import { Port } from "../port";
+import { PortBinder } from "../port-binder";
+import { HostPortCheck, InternalPortCheck } from "../port-check";
+import { DefaultPullPolicy, PullPolicy } from "../pull-policy";
+import { ReaperInstance } from "../reaper";
+import { DockerImageName } from "../docker-image-name";
+import { StartedTestContainer, TestContainer } from "../test-container";
+import { HostPortWaitStrategy, WaitStrategy } from "../wait-strategy";
 import { Readable } from "stream";
-import { PortForwarderInstance } from "./port-forwarder";
-import { getAuthConfig } from "./registry-auth-locator";
-import { getDockerfileImages } from "./dockerfile-parser";
+import { PortForwarderInstance } from "../port-forwarder";
+import { getAuthConfig } from "../registry-auth-locator";
 import {
-  AuthConfig,
   BindMode,
   BindMount,
-  BuildArgs,
   BuildContext,
   Command,
   ContainerName,
@@ -28,101 +22,25 @@ import {
   Env,
   EnvKey,
   EnvValue,
-  ExecResult,
   ExtraHost,
   HealthCheck,
   Host,
   NetworkMode,
-  RegistryConfig,
   TmpFs,
-} from "./docker/types";
-import { execContainer } from "./docker/functions/container/exec-container";
-import { buildImage } from "./docker/functions/image/build-image";
-import { imageExists } from "./docker/functions/image/image-exists";
-import { pullImage } from "./docker/functions/image/pull-image";
-import { createContainer } from "./docker/functions/container/create-container";
-import { connectNetwork } from "./docker/functions/network/connect-network";
-import { dockerHost } from "./docker/docker-host";
-import { inspectContainer, InspectResult } from "./docker/functions/container/inspect-container";
+} from "../docker/types";
+import { pullImage } from "../docker/functions/image/pull-image";
+import { createContainer } from "../docker/functions/container/create-container";
+import { connectNetwork } from "../docker/functions/network/connect-network";
+import { dockerHost } from "../docker/docker-host";
+import { inspectContainer } from "../docker/functions/container/inspect-container";
 import Dockerode from "dockerode";
-import { startContainer } from "./docker/functions/container/start-container";
-import { containerLogs } from "./docker/functions/container/container-logs";
-import { stopContainer } from "./docker/functions/container/stop-container";
-import { removeContainer } from "./docker/functions/container/remove-container";
-import { putContainerArchive } from "./docker/functions/container/put-container-archive";
-
-export class GenericContainerBuilder {
-  private buildArgs: BuildArgs = {};
-  private pullPolicy: PullPolicy = new DefaultPullPolicy();
-
-  constructor(
-    private readonly context: BuildContext,
-    private readonly dockerfileName: string,
-    private readonly uuid: Uuid = new RandomUuid()
-  ) {}
-
-  public withBuildArg(key: string, value: string): GenericContainerBuilder {
-    this.buildArgs[key] = value;
-    return this;
-  }
-
-  public withPullPolicy(pullPolicy: PullPolicy): this {
-    this.pullPolicy = pullPolicy;
-    return this;
-  }
-
-  public async build(image = `${this.uuid.nextUuid()}:${this.uuid.nextUuid()}`): Promise<GenericContainer> {
-    const imageName = DockerImageName.fromString(image);
-
-    await ReaperInstance.getInstance();
-
-    const dockerfile = path.resolve(this.context, this.dockerfileName);
-    log.debug(`Preparing to build Dockerfile: ${dockerfile}`);
-    const imageNames = await getDockerfileImages(dockerfile);
-    const registryConfig = await this.getRegistryConfig(imageNames);
-
-    await buildImage({
-      imageName: imageName,
-      context: this.context,
-      dockerfileName: this.dockerfileName,
-      buildArgs: this.buildArgs,
-      pullPolicy: this.pullPolicy,
-      registryConfig,
-    });
-    const container = new GenericContainer(imageName.toString());
-
-    if (!(await imageExists(imageName))) {
-      throw new Error("Failed to build image");
-    }
-
-    return Promise.resolve(container);
-  }
-
-  private async getRegistryConfig(imageNames: DockerImageName[]): Promise<RegistryConfig> {
-    const authConfigs: AuthConfig[] = [];
-
-    await Promise.all(
-      imageNames.map(async (imageName) => {
-        const authConfig = await getAuthConfig(imageName.registry);
-
-        if (authConfig !== undefined) {
-          authConfigs.push(authConfig);
-        }
-      })
-    );
-
-    return authConfigs
-      .map((authConfig) => {
-        return {
-          [authConfig.registryAddress]: {
-            username: authConfig.username,
-            password: authConfig.password,
-          },
-        };
-      })
-      .reduce((prev, next) => ({ ...prev, ...next }), {} as RegistryConfig);
-  }
-}
+import { startContainer } from "../docker/functions/container/start-container";
+import { containerLogs } from "../docker/functions/container/container-logs";
+import { stopContainer } from "../docker/functions/container/stop-container";
+import { removeContainer } from "../docker/functions/container/remove-container";
+import { putContainerArchive } from "../docker/functions/container/put-container-archive";
+import { GenericContainerBuilder } from "./generic-container-builder";
+import { StartedGenericContainer } from "./started-generic-container";
 
 export class GenericContainer implements TestContainer {
   public static fromDockerfile(context: BuildContext, dockerfileName = "Dockerfile"): GenericContainerBuilder {
@@ -222,8 +140,7 @@ export class GenericContainer implements TestContainer {
     log.info(`Starting container ${this.imageName} with ID: ${container.id}`);
     await startContainer(container);
 
-    const logs = await containerLogs(container);
-    logs
+    (await containerLogs(container))
       .on("data", (data) => containerLog.trace(`${container.id}: ${data.trim()}`))
       .on("err", (data) => containerLog.error(`${container.id}: ${data.trim()}`));
 
@@ -373,63 +290,3 @@ export class GenericContainer implements TestContainer {
     return new HostPortWaitStrategy(hostPortCheck, internalPortCheck);
   }
 }
-
-export class StartedGenericContainer implements StartedTestContainer {
-  constructor(
-    private readonly container: Dockerode.Container,
-    private readonly host: Host,
-    private readonly inspectResult: InspectResult,
-    private readonly boundPorts: BoundPorts,
-    private readonly name: ContainerName
-  ) {}
-
-  public async stop(options: Partial<StopOptions> = {}): Promise<StoppedTestContainer> {
-    return await this.stopContainer(options);
-  }
-
-  private async stopContainer(options: Partial<StopOptions> = {}): Promise<StoppedGenericContainer> {
-    log.info(`Stopping container with ID: ${this.container.id}`);
-    const resolvedOptions: StopOptions = { timeout: 0, removeVolumes: true, ...options };
-    await stopContainer(this.container, { timeout: resolvedOptions.timeout });
-    await removeContainer(this.container, { removeVolumes: resolvedOptions.removeVolumes });
-    return new StoppedGenericContainer();
-  }
-
-  public getHost(): Host {
-    return this.host;
-  }
-
-  public getMappedPort(port: Port): Port {
-    return this.boundPorts.getBinding(port);
-  }
-
-  public getId(): ContainerId {
-    return this.container.id;
-  }
-
-  public getName(): ContainerName {
-    return this.name;
-  }
-
-  public getNetworkNames(): string[] {
-    return Object.keys(this.inspectResult.networkSettings);
-  }
-
-  public getNetworkId(networkName: string): string {
-    return this.inspectResult.networkSettings[networkName].networkId;
-  }
-
-  public getIpAddress(networkName: string): string {
-    return this.inspectResult.networkSettings[networkName].ipAddress;
-  }
-
-  public exec(command: Command[]): Promise<ExecResult> {
-    return execContainer(this.container, command);
-  }
-
-  public logs(): Promise<Readable> {
-    return containerLogs(this.container);
-  }
-}
-
-class StoppedGenericContainer implements StoppedTestContainer {}

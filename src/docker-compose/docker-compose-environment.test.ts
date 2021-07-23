@@ -1,13 +1,13 @@
 import fetch from "node-fetch";
 import path from "path";
 import { DockerComposeEnvironment } from "./docker-compose-environment";
-import { Wait } from "./wait";
-import { getRunningContainerNames, getVolumeNames } from "./test-helper";
+import { Wait } from "../wait";
+import { getRunningContainerNames, getVolumeNames } from "../test-helper";
 
 describe("DockerComposeEnvironment", () => {
   jest.setTimeout(60000);
 
-  const fixtures = path.resolve(__dirname, "..", "fixtures", "docker-compose");
+  const fixtures = path.resolve(__dirname, "..", "..", "fixtures", "docker-compose");
 
   it("should throw error when compose file is malformed", async () => {
     await expect(new DockerComposeEnvironment(fixtures, "docker-compose-malformed.yml").up()).rejects.toThrowError(

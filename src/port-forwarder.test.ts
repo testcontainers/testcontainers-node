@@ -1,5 +1,5 @@
 import { createServer, Server } from "http";
-import { GenericContainer } from "./generic-container";
+import { GenericContainer } from "./generic-container/generic-container";
 import { TestContainers } from "./test-containers";
 import { RandomUniquePortGenerator } from "./port-generator";
 import { Network } from "./network";

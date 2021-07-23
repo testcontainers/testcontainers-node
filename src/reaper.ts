@@ -1,10 +1,13 @@
 import { Socket } from "net";
 import { log } from "./logger";
-import { GenericContainer } from "./generic-container";
+import { GenericContainer } from "./generic-container/generic-container";
 import { StartedTestContainer } from "./test-container";
 import { sessionId } from "./docker/session-id";
 import { dockerHost } from "./docker/docker-host";
 import { Id } from "./docker/types";
+
+export const REAPER_IMAGE =
+  process.env.RYUK_CONTAINER_IMAGE === undefined ? "cristianrgreco/ryuk:0.4.0" : process.env.RYUK_CONTAINER_IMAGE;
 
 export interface Reaper {
   addProject(projectName: string): void;
@@ -71,10 +74,6 @@ export class ReaperInstance {
     }
   }
 
-  public static getImage(): string {
-    return process.env.RYUK_CONTAINER_IMAGE === undefined ? this.DEFAULT_IMAGE : process.env.RYUK_CONTAINER_IMAGE;
-  }
-
   private static isEnabled(): boolean {
     return process.env.TESTCONTAINERS_RYUK_DISABLED !== "true";
   }
@@ -88,7 +87,7 @@ export class ReaperInstance {
     const dockerSocket = process.env["TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE"] ?? "/var/run/docker.sock";
 
     log.debug(`Creating new Reaper for session: ${sessionId}`);
-    const container = await new GenericContainer(this.getImage())
+    const container = await new GenericContainer(REAPER_IMAGE)
       .withName(`testcontainers-ryuk-${sessionId}`)
       .withExposedPorts(8080)
       .withBindMount(dockerSocket, "/var/run/docker.sock")

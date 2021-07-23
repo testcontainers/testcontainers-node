@@ -1,4 +1,4 @@
-import { GenericContainer } from "./generic-container";
+import { GenericContainer } from "./generic-container/generic-container";
 import { Network } from "./network";
 import { getContainerById } from "./docker/functions/container/get-container";
 

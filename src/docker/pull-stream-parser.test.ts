@@ -1,7 +1,7 @@
 import { Readable } from "stream";
 import { PullStreamParser } from "./pull-stream-parser";
-import { FakeLogger } from "./logger";
-import { DockerImageName } from "./docker-image-name";
+import { FakeLogger } from "../logger";
+import { DockerImageName } from "../docker-image-name";
 
 describe("PullStreamParser", () => {
   let logger: FakeLogger;

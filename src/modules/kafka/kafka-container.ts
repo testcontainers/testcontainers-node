@@ -1,4 +1,4 @@
-import { GenericContainer } from "../../generic-container";
+import { GenericContainer } from "../../generic-container/generic-container";
 import { BoundPorts } from "../../bound-ports";
 import { Network, StartedNetwork } from "../../network";
 import { Port } from "../../port";

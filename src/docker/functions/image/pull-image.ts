@@ -1,6 +1,6 @@
 import { DockerImageName } from "../../../docker-image-name";
 import { log } from "../../../logger";
-import { PullStreamParser } from "../../../pull-stream-parser";
+import { PullStreamParser } from "../../pull-stream-parser";
 import { dockerode } from "../../dockerode";
 import { AuthConfig } from "../../types";
 import { imageExists } from "./image-exists";
