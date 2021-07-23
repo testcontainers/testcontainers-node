@@ -2,7 +2,7 @@
 
 import Dockerode from "dockerode";
 import { existsSync } from "fs";
-import { getDockerHost } from "./docker-host";
+import { getDockerHost } from "./get-docker-host";
 import { runInContainer } from "./functions/run-in-container";
 
 jest.mock("fs");

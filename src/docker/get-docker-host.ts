@@ -1,11 +1,10 @@
 import { log } from "../logger";
-import { NetworkInspectInfo } from "dockerode";
+import Dockerode, { NetworkInspectInfo } from "dockerode";
 import { Host } from "./types";
 import { runInContainer } from "./functions/run-in-container";
 import fs from "fs";
-import { dockerode } from "./dockerode";
 
-export const getDockerHost = async (): Promise<Host> => {
+export const getDockerHost = async (dockerode: Dockerode): Promise<Host> => {
   const modem = dockerode.modem;
 
   if (process.env.DOCKER_HOST) {
