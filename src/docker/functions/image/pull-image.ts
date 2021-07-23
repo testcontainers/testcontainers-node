@@ -5,12 +5,10 @@ import { dockerode } from "../../dockerode";
 import { AuthConfig } from "../../types";
 import { imageExists } from "./image-exists";
 
-// todo rename DockerImageName => ImageName or Image
-
 export type PullImageOptions = {
   imageName: DockerImageName;
   force: boolean;
-  authConfig: AuthConfig | undefined;
+  authConfig?: AuthConfig;
 };
 
 export const pullImage = async (options: PullImageOptions): Promise<void> => {

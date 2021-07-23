@@ -78,7 +78,7 @@ export class GenericContainerBuilder {
   }
 
   public async build(image = `${this.uuid.nextUuid()}:${this.uuid.nextUuid()}`): Promise<GenericContainer> {
-    const dockerImageName = DockerImageName.fromString(image);
+    const imageName = DockerImageName.fromString(image);
 
     await ReaperInstance.getInstance();
 
@@ -88,16 +88,16 @@ export class GenericContainerBuilder {
     const registryConfig = await this.getRegistryConfig(imageNames);
 
     await buildImage({
-      imageName: dockerImageName,
+      imageName: imageName,
       context: this.context,
       dockerfileName: this.dockerfileName,
       buildArgs: this.buildArgs,
       pullPolicy: this.pullPolicy,
       registryConfig,
     });
-    const container = new GenericContainer(dockerImageName.toString());
+    const container = new GenericContainer(imageName.toString());
 
-    if (!(await imageExists(dockerImageName))) {
+    if (!(await imageExists(imageName))) {
       throw new Error("Failed to build image");
     }
 
@@ -135,7 +135,7 @@ export class GenericContainer implements TestContainer {
     return new GenericContainerBuilder(context, dockerfileName);
   }
 
-  private readonly dockerImageName: DockerImageName;
+  private readonly imageName: DockerImageName;
 
   protected env: Env = {};
   protected networkMode?: NetworkMode;
@@ -159,19 +159,19 @@ export class GenericContainer implements TestContainer {
   private extraHosts: ExtraHost[] = [];
 
   constructor(readonly image: string) {
-    this.dockerImageName = DockerImageName.fromString(image);
+    this.imageName = DockerImageName.fromString(image);
   }
 
   public async start(): Promise<StartedTestContainer> {
     await pullImage({
-      imageName: this.dockerImageName,
+      imageName: this.imageName,
       force: this.pullPolicy.shouldPull(),
-      authConfig: await getAuthConfig(this.dockerImageName.registry),
+      authConfig: await getAuthConfig(this.imageName.registry),
     });
 
     const boundPorts = await new PortBinder().bind(this.ports);
 
-    if (!this.dockerImageName.isReaper()) {
+    if (!this.imageName.isReaper()) {
       await ReaperInstance.getInstance();
     }
 
@@ -179,13 +179,13 @@ export class GenericContainer implements TestContainer {
       await this.preCreate(boundPorts);
     }
 
-    if (!this.dockerImageName.isHelperContainer() && PortForwarderInstance.isRunning()) {
+    if (!this.imageName.isHelperContainer() && PortForwarderInstance.isRunning()) {
       const portForwarder = await PortForwarderInstance.getInstance();
       this.extraHosts.push({ host: "host.testcontainers.internal", ipAddress: portForwarder.getIpAddress() });
     }
 
     const container = await createContainer({
-      imageName: this.dockerImageName,
+      imageName: this.imageName,
       env: this.env,
       cmd: this.cmd,
       bindMounts: this.bindMounts,
@@ -202,7 +202,7 @@ export class GenericContainer implements TestContainer {
       user: this.user,
     });
 
-    if (!this.dockerImageName.isHelperContainer() && PortForwarderInstance.isRunning()) {
+    if (!this.imageName.isHelperContainer() && PortForwarderInstance.isRunning()) {
       const portForwarder = await PortForwarderInstance.getInstance();
       const portForwarderNetworkId = portForwarder.getNetworkId();
       const excludedNetworks = [portForwarderNetworkId, "none", "host"];
@@ -225,7 +225,7 @@ export class GenericContainer implements TestContainer {
       await putContainerArchive({ container, stream: this.tarToCopy, containerPath: "/" });
     }
 
-    log.info(`Starting container ${this.dockerImageName} with ID: ${container.id}`);
+    log.info(`Starting container ${this.imageName} with ID: ${container.id}`);
     await startContainer(container);
 
     const logs = await containerLogs(container);

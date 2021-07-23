@@ -3,7 +3,7 @@ import { log } from "../logger";
 import { logSystemDiagnostics } from "../log-system-diagnostics";
 import Dockerode, { NetworkInspectInfo } from "dockerode";
 import { Host } from "./types";
-import { runInContainer } from "../run-in-container";
+import { runInContainer } from "./run-in-container";
 import fs from "fs";
 
 export const getDockerHost = async (dockerode: Dockerode): Promise<Host> => {
@@ -41,11 +41,7 @@ export const getDockerHost = async (dockerode: Dockerode): Promise<Host> => {
           return host;
         } else {
           log.debug("Starting container in attempt to query gateway");
-          const host = await runInContainer(dockerode, "alpine:3.5", [
-            "sh",
-            "-c",
-            "ip route|awk '/default/ { print $3 }'",
-          ]);
+          const host = await runInContainer("alpine:3.5", ["sh", "-c", "ip route|awk '/default/ { print $3 }'"]);
           if (host) {
             log.info(`Using Docker host from gateway with IPAM with gateway: ${host}, socket path: ${socketPath}`);
             return host;
