@@ -1,15 +1,13 @@
 import { log } from "../logger";
-import * as dockerCompose from "docker-compose";
+import { stop } from "docker-compose";
 import { defaultDockerComposeOptions } from "./default-docker-compose-options";
+import { DockerComposeOptions } from "./docker-compose-options";
 
-export const dockerComposeStop = async (
-  filePath: string,
-  files: string | string[],
-  projectName: string
-): Promise<void> => {
+export const dockerComposeStop = async (options: DockerComposeOptions): Promise<void> => {
   log.info(`Stopping DockerCompose environment`);
+
   try {
-    await dockerCompose.stop(defaultDockerComposeOptions(filePath, files, projectName));
+    await stop(defaultDockerComposeOptions(options));
     log.info(`Stopped DockerCompose environment`);
   } catch ({ err }) {
     log.error(`Failed to stop DockerCompose environment: ${err}`);

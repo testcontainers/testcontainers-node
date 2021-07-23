@@ -1,23 +1,16 @@
-import * as dockerCompose from "docker-compose";
+import { down } from "docker-compose";
 import { log } from "../logger";
 import { defaultDockerComposeOptions } from "./default-docker-compose-options";
+import { DockerComposeOptions } from "./docker-compose-options";
 
-export const dockerComposeDown = async (
-  filePath: string,
-  files: string | string[],
-  projectName: string
-): Promise<void> => {
-  const createOptions = (): dockerCompose.IDockerComposeOptions => ({
-    ...defaultDockerComposeOptions(filePath, files, projectName),
-    commandOptions: ["-v"],
-  });
-
+export const dockerComposeDown = async (options: DockerComposeOptions): Promise<void> => {
   log.info(`Downing DockerCompose environment`);
+
   try {
-    await dockerCompose.down(createOptions());
+    await down({ ...defaultDockerComposeOptions(options), commandOptions: ["-v"] });
     log.info(`Downed DockerCompose environment`);
   } catch ({ err }) {
-    log.error(`Failed to down DockerCompose environment: ${err}`);
+    log.error(`Failed to down DockerCompose environment: ${err.trim()}`);
     throw new Error(err.trim());
   }
 };

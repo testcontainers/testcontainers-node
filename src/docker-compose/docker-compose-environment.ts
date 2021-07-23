@@ -1,4 +1,4 @@
-import * as dockerCompose from "docker-compose";
+import { upAll } from "docker-compose";
 import Dockerode, { ContainerInfo } from "dockerode";
 import { BoundPorts } from "../bound-ports";
 import { resolveContainerName } from "./container-name-resolver";
@@ -17,21 +17,20 @@ import { containerLogs } from "../docker/functions/container/container-logs";
 import { StartedDockerComposeEnvironment } from "./started-docker-compose-environment";
 import { dockerComposeDown } from "./docker-compose-down";
 import { defaultDockerComposeOptions } from "./default-docker-compose-options";
+import { DockerComposeOptions } from "./docker-compose-options";
 
 export class DockerComposeEnvironment {
   private readonly projectName: string;
+  private readonly options: DockerComposeOptions;
 
   private build = false;
   private env: Env = {};
   private waitStrategy: { [containerName: string]: WaitStrategy } = {};
   private startupTimeout = 60_000;
 
-  constructor(
-    private readonly composeFilePath: string,
-    private readonly composeFiles: string | string[],
-    uuid: Uuid = new RandomUuid()
-  ) {
+  constructor(composeFilePath: string, composeFiles: string | string[], uuid: Uuid = new RandomUuid()) {
     this.projectName = `testcontainers-${uuid.nextUuid()}`;
+    this.options = { filePath: composeFilePath, files: composeFiles, projectName: this.projectName };
   }
 
   public withBuild(): this {
@@ -95,7 +94,7 @@ export class DockerComposeEnvironment {
             log.error(`Container ${containerName} failed to be ready: ${err}`);
 
             try {
-              await dockerComposeDown(this.composeFilePath, this.composeFiles, this.projectName);
+              await dockerComposeDown(this.options);
             } catch {
               log.warn(`Failed to stop DockerCompose environment after failed up`);
             }
@@ -112,12 +111,7 @@ export class DockerComposeEnvironment {
 
     log.info(`DockerCompose environment started: ${Object.keys(startedGenericContainers).join(", ")}`);
 
-    return new StartedDockerComposeEnvironment(
-      this.composeFilePath,
-      this.composeFiles,
-      this.projectName,
-      startedGenericContainers
-    );
+    return new StartedDockerComposeEnvironment(startedGenericContainers, this.options);
   }
 
   private async upAll() {
@@ -126,22 +120,15 @@ export class DockerComposeEnvironment {
       commandOptions.push("--build");
     }
 
-    const defaultOptions = defaultDockerComposeOptions(this.composeFilePath, this.composeFiles, this.projectName);
-    const options = {
-      ...defaultOptions,
-      commandOptions,
-      env: { ...defaultOptions.env, ...this.env },
-    };
-
     log.info(`Upping DockerCompose environment`);
     try {
-      await dockerCompose.upAll(options);
+      await upAll(defaultDockerComposeOptions({ ...this.options, commandOptions, env: this.env }));
       log.info(`Upped DockerCompose environment`);
     } catch (err) {
       const errorMessage = err.err ? err.err.trim() : err;
       log.error(`Failed to up DockerCompose environment: ${errorMessage}`);
       try {
-        await dockerComposeDown(this.composeFilePath, this.composeFiles, this.projectName);
+        await dockerComposeDown(this.options);
       } catch {
         log.warn(`Failed to stop DockerCompose environment after failed up`);
       }

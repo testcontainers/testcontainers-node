@@ -11,7 +11,7 @@ export interface PortCheck {
 export class HostPortCheck implements PortCheck {
   constructor(private readonly host: Host) {}
 
-  public async isBound(port: Port): Promise<boolean> {
+  public isBound(port: Port): Promise<boolean> {
     return new Promise((resolve) => {
       const socket = new Socket();
       socket

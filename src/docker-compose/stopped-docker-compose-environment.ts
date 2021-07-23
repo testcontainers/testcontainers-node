@@ -1,15 +1,12 @@
 import { dockerComposeDown } from "./docker-compose-down";
 import { DownedDockerComposeEnvironment } from "./downed-docker-compose-environment";
+import { DockerComposeOptions } from "./docker-compose-options";
 
 export class StoppedDockerComposeEnvironment {
-  constructor(
-    private readonly composeFilePath: string,
-    private readonly composeFiles: string | string[],
-    private readonly projectName: string
-  ) {}
+  constructor(private readonly options: DockerComposeOptions) {}
 
   public async down(): Promise<DownedDockerComposeEnvironment> {
-    await dockerComposeDown(this.composeFilePath, this.composeFiles, this.projectName);
+    await dockerComposeDown(this.options);
     return new DownedDockerComposeEnvironment();
   }
 }
