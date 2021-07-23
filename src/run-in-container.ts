@@ -24,8 +24,8 @@ export const runInContainer = async (
     const promise = new Promise<void>((resolve) => {
       stream.on("end", () => resolve());
 
-      const out = new PassThrough({ encoding: "utf-8" }).on("data", (chunk) => chunks.push(chunk));
-      const err = new PassThrough({ encoding: "utf-8" }).on("data", () => resolve(undefined));
+      const out = new PassThrough({ autoDestroy: true, encoding: "utf-8" }).on("data", (chunk) => chunks.push(chunk));
+      const err = new PassThrough({ autoDestroy: true, encoding: "utf-8" }).on("data", () => resolve(undefined));
 
       container.modem.demuxStream(stream, out, err);
     });

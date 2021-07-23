@@ -2,7 +2,7 @@ import dockerode, { ContainerInspectInfo } from "dockerode";
 import { log } from "./logger";
 import { Command, ContainerName, ExitCode } from "./docker-client";
 import { Port } from "./port";
-import { Duplex, Readable } from "stream";
+import { Duplex, PassThrough, Readable } from "stream";
 import { IncomingMessage } from "http";
 
 export type Id = string;
@@ -54,7 +54,7 @@ export interface Container {
   stop(options: StopOptions): Promise<void>;
   remove(options: RemoveOptions): Promise<void>;
   exec(options: ExecOptions): Promise<Exec>;
-  logs(): Promise<IncomingMessage>;
+  logs(): Promise<Readable>;
   inspect(): Promise<InspectResult>;
   putArchive(stream: Readable, containerPath: string): Promise<void>;
 }
@@ -101,13 +101,24 @@ export class DockerodeContainer implements Container {
     );
   }
 
-  public async logs(): Promise<IncomingMessage> {
-    const options = {
-      follow: true,
-      stdout: true,
-      stderr: true,
-    };
-    return (await this.container.logs(options)).setEncoding("utf-8") as IncomingMessage;
+  public async logs(): Promise<Readable> {
+    try {
+      const options = {
+        follow: true,
+        stdout: true,
+        stderr: true,
+      };
+      const rawStream = (await this.container.logs(options)) as IncomingMessage;
+      rawStream.socket.unref();
+
+      const stream = new PassThrough({ autoDestroy: true, encoding: "utf-8" });
+      this.container.modem.demuxStream(rawStream, stream, stream);
+      rawStream.on("end", () => stream.end());
+      return stream;
+    } catch (err) {
+      log.error(`Failed to get container logs: ${err}`);
+      throw err;
+    }
   }
 
   public async inspect(): Promise<InspectResult> {
