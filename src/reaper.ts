@@ -50,8 +50,6 @@ class DisabledReaper implements Reaper {
 }
 
 export class ReaperInstance {
-  private static DEFAULT_IMAGE = "cristianrgreco/ryuk:0.4.0";
-
   private static instance?: Promise<Reaper>;
 
   public static async getInstance(): Promise<Reaper> {

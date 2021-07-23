@@ -32,8 +32,6 @@ export class PortForwarder {
 }
 
 export class PortForwarderInstance {
-  private static DEFAULT_IMAGE = "testcontainers/sshd:1.0.0";
-
   private static instance: Promise<PortForwarder>;
 
   public static isRunning(): boolean {
