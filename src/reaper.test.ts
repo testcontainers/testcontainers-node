@@ -12,7 +12,7 @@ import { RandomUuid } from "./uuid";
 import waitForExpect from "wait-for-expect";
 
 describe("Reaper", () => {
-  jest.setTimeout(60_000);
+  jest.setTimeout(180_000);
 
   it("should remove containers", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12").start();
