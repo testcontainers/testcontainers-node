@@ -11,17 +11,17 @@ describe("runInContainer", () => {
     expect(output).toBe("hello world");
   });
 
-  it("should return undefined when the container exits without output", async () => {
-    const output = await runInContainer(dockerode, "cristianrgreco/testcontainer:1.1.12", ["test"]);
-    expect(output).toBe(undefined);
-  });
-
-  it("should return undefined when STDERR is written to", async () => {
+  it("should return the command output from stderr", async () => {
     const output = await runInContainer(dockerode, "cristianrgreco/testcontainer:1.1.12", [
       "sh",
       "-c",
-      '>&2 echo "error"',
+      '>&2 echo "hello world"',
     ]);
+    expect(output).toBe("hello world");
+  });
+
+  it("should return undefined when the container exits without output", async () => {
+    const output = await runInContainer(dockerode, "cristianrgreco/testcontainer:1.1.12", ["test"]);
     expect(output).toBe(undefined);
   });
 });

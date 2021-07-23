@@ -1,9 +1,9 @@
 import { log } from "./logger";
 import Dockerode from "dockerode";
-import { PassThrough } from "stream";
 import { DockerImageName } from "./docker-image-name";
 import { PullStreamParser } from "./pull-stream-parser";
 import { Command } from "./docker/types";
+import {demuxStream} from "./docker/functions/demux-stream";
 
 export const runInContainer = async (
   dockerode: Dockerode,
@@ -17,26 +17,21 @@ export const runInContainer = async (
       await pull(dockerode, dockerImageName);
     }
     const container = await dockerode.createContainer({ Image: image, Cmd: command });
-    const stream = await container.attach({ stream: true, stdout: true, stderr: true });
+    const stream = demuxStream(await container.attach({ stream: true, stdout: true, stderr: true }));
 
-    const chunks: string[] = [];
-
-    const promise = new Promise<void>((resolve) => {
-      stream.on("end", () => resolve());
-
-      const out = new PassThrough({ autoDestroy: true, encoding: "utf-8" }).on("data", (chunk) => chunks.push(chunk));
-      const err = new PassThrough({ autoDestroy: true, encoding: "utf-8" }).on("data", () => resolve(undefined));
-
-      container.modem.demuxStream(stream, out, err);
+    const promise = new Promise<string>(resolve => {
+      const chunks: string[] = [];
+      stream.on('data', chunk => chunks.push(chunk));
+      stream.on('end', () => resolve(chunks.join("").trim()));
     });
 
     await container.start();
-    await promise;
+    const output = await promise;
 
-    if (chunks.length === 0) {
+    if (output.length === 0) {
       return undefined;
     } else {
-      return chunks.join("").trim();
+      return output;
     }
   } catch (err) {
     log.error(`Failed to run command in container: "${command.join(" ")}", error: "${err}"`);
