@@ -39,11 +39,6 @@ export interface StopOptions {
   removeVolumes: boolean;
 }
 
-export const DEFAULT_STOP_OPTIONS: StopOptions = {
-  timeout: 0,
-  removeVolumes: true,
-};
-
 export interface StartedTestContainer {
   stop(options?: Partial<StopOptions>): Promise<StoppedTestContainer>;
   getHost(): Host;

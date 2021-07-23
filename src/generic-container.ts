@@ -8,13 +8,7 @@ import { PortBinder } from "./port-binder";
 import { HostPortCheck, InternalPortCheck } from "./port-check";
 import { DefaultPullPolicy, PullPolicy } from "./pull-policy";
 import { DockerImageName } from "./docker-image-name";
-import {
-  DEFAULT_STOP_OPTIONS,
-  StartedTestContainer,
-  StopOptions,
-  StoppedTestContainer,
-  TestContainer,
-} from "./test-container";
+import { StartedTestContainer, StopOptions, StoppedTestContainer, TestContainer } from "./test-container";
 import { RandomUuid, Uuid } from "./uuid";
 import { HostPortWaitStrategy, WaitStrategy } from "./wait-strategy";
 import { ReaperInstance } from "./reaper";
@@ -395,7 +389,7 @@ export class StartedGenericContainer implements StartedTestContainer {
 
   private async stopContainer(options: Partial<StopOptions> = {}): Promise<StoppedGenericContainer> {
     log.info(`Stopping container with ID: ${this.container.id}`);
-    const resolvedOptions = { ...DEFAULT_STOP_OPTIONS, ...options };
+    const resolvedOptions: StopOptions = { timeout: 0, removeVolumes: true, ...options };
     await stopContainer(this.container, { timeout: resolvedOptions.timeout });
     await removeContainer(this.container, { removeVolumes: resolvedOptions.removeVolumes });
     return new StoppedGenericContainer();
