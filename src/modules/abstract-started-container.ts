@@ -2,6 +2,7 @@ import { StartedTestContainer, StopOptions, StoppedTestContainer } from "../test
 import { Port } from "../port";
 import { ContainerName, Host, Id } from "../docker/types";
 import { Command, ExecResult } from "../docker/types";
+import { Readable } from "stream";
 
 export class AbstractStartedContainer {
   constructor(protected readonly startedTestContainer: StartedTestContainer) {}
@@ -42,7 +43,7 @@ export class AbstractStartedContainer {
     return this.startedTestContainer.exec(command);
   }
 
-  public logs(): Promise<NodeJS.ReadableStream> {
+  public logs(): Promise<Readable> {
     return this.startedTestContainer.logs();
   }
 }

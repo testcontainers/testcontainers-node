@@ -54,7 +54,7 @@ export interface StartedTestContainer {
   getNetworkId(networkName: string): string;
   getIpAddress(networkName: string): string;
   exec(command: Command[]): Promise<ExecResult>;
-  logs(): Promise<NodeJS.ReadableStream>;
+  logs(): Promise<Readable>;
 }
 
 export interface StoppedTestContainer {}

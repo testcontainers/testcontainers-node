@@ -433,7 +433,7 @@ export class StartedGenericContainer implements StartedTestContainer {
     return execContainer(this.container, command);
   }
 
-  public logs(): Promise<NodeJS.ReadableStream> {
+  public logs(): Promise<Readable> {
     return containerLogs(this.container);
   }
 }
