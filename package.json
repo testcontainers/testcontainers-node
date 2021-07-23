@@ -73,11 +73,6 @@
     "typescript": "^4.3.5",
     "wait-for-expect": "^3.0.2"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
   "lint-staged": {
     "src/**/*.ts": [
       "prettier --write",
