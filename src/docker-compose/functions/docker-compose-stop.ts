@@ -10,7 +10,7 @@ export const dockerComposeStop = async (options: DockerComposeOptions): Promise<
     await stop(defaultDockerComposeOptions(options));
     log.info(`Stopped DockerCompose environment`);
   } catch ({ err }) {
-    log.error(`Failed to stop DockerCompose environment: ${err}`);
+    log.error(`Failed to stop DockerCompose environment: ${err.trim()}`);
     throw new Error(err.trim());
   }
 };
