@@ -1,4 +1,7 @@
-import { Id } from "./container";
+import { Port } from "./port";
+import { PullPolicy } from "./pull-policy";
+import { WaitStrategy } from "./wait-strategy";
+import { Readable } from "stream";
 import {
   BindMode,
   Command,
@@ -7,14 +10,11 @@ import {
   EnvKey,
   EnvValue,
   ExecResult,
+  Host,
+  Id,
   NetworkMode,
   TmpFs,
-} from "./docker-client";
-import { Host } from "./docker-client-instance";
-import { Port } from "./port";
-import { PullPolicy } from "./pull-policy";
-import { WaitStrategy } from "./wait-strategy";
-import { Readable } from "stream";
+} from "./docker/types";
 
 export interface TestContainer {
   start(): Promise<StartedTestContainer>;
@@ -38,11 +38,6 @@ export interface StopOptions {
   timeout: number;
   removeVolumes: boolean;
 }
-
-export const DEFAULT_STOP_OPTIONS: StopOptions = {
-  timeout: 0,
-  removeVolumes: true,
-};
 
 export interface StartedTestContainer {
   stop(options?: Partial<StopOptions>): Promise<StoppedTestContainer>;

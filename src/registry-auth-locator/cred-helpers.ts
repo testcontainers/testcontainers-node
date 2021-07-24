@@ -2,16 +2,13 @@ import { CredentialProvider } from "./credential-provider";
 import { DockerConfig } from "./types";
 
 export class CredHelpers extends CredentialProvider {
-  getName(): string {
+  public getName(): string {
     return "CredHelpers";
   }
 
-  isApplicable(registry: string, dockerConfig: DockerConfig): boolean {
-    return dockerConfig.credHelpers !== undefined && dockerConfig.credHelpers[registry] !== undefined;
-  }
-
-  getCredentialProviderName(registry: string, dockerConfig: DockerConfig): string {
-    // @ts-ignore
-    return dockerConfig.credHelpers[registry];
+  public getCredentialProviderName(registry: string, dockerConfig: DockerConfig): string | undefined {
+    if (dockerConfig.credHelpers !== undefined && dockerConfig.credHelpers[registry] !== undefined) {
+      return dockerConfig.credHelpers[registry];
+    }
   }
 }

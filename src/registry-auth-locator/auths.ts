@@ -1,34 +1,19 @@
 import { Auth, DockerConfig } from "./types";
-import { AuthConfig } from "../docker-client";
 import { RegistryAuthLocator } from "./registry-auth-locator";
+import { AuthConfig } from "../docker/types";
 
 export class Auths implements RegistryAuthLocator {
-  getName(): string {
+  public getName(): string {
     return "Auths";
   }
 
-  findAuthEntry(registry: string, dockerConfig: DockerConfig): Auth | null {
-    const authEntries = dockerConfig.auths ?? {};
-    for (const key in authEntries) {
-      if (key === registry || key.includes(`://${registry}`)) {
-        return authEntries[key];
-      }
-    }
-    return null;
-  }
-
-  isApplicable(registry: string, dockerConfig: DockerConfig): boolean {
-    return this.findAuthEntry(registry, dockerConfig) !== null;
-  }
-
-  async getAuthConfig(registry: string, dockerConfig: DockerConfig): Promise<AuthConfig | undefined> {
-    const authConfig: Partial<AuthConfig> = { registryAddress: registry };
-
+  public async getAuthConfig(registry: string, dockerConfig: DockerConfig): Promise<AuthConfig | undefined> {
     const auth = this.findAuthEntry(registry, dockerConfig);
-
-    if (auth === null) {
+    if (!auth) {
       return undefined;
     }
+
+    const authConfig: Partial<AuthConfig> = { registryAddress: registry };
 
     if (auth.email) {
       authConfig.email = auth.email;
@@ -49,5 +34,17 @@ export class Auths implements RegistryAuthLocator {
     }
 
     return authConfig as AuthConfig;
+  }
+
+  private findAuthEntry(registry: string, dockerConfig: DockerConfig): Auth | undefined {
+    const authEntries = dockerConfig.auths ?? {};
+
+    for (const key in authEntries) {
+      if (key === registry || key.includes(`://${registry}`)) {
+        return authEntries[key];
+      }
+    }
+
+    return undefined;
   }
 }

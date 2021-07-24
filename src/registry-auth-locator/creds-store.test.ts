@@ -1,28 +1,21 @@
 import { DockerConfig } from "./types";
-import { AuthConfig } from "../docker-client";
 import { CredsStore } from "./creds-store";
+import { AuthConfig } from "../docker/types";
 
 describe("CredsStore", () => {
   const locator = new CredsStore();
 
-  describe("isApplicable", () => {
-    it("should return false when config does not contain creds store", () => {
-      const dockerConfig: DockerConfig = {};
-      expect(locator.isApplicable("registry-name", dockerConfig)).toBe(false);
-    });
-
-    it("should return false when creds store is empty", () => {
-      const dockerConfig: DockerConfig = { credsStore: "" };
-      expect(locator.isApplicable("registry-name", dockerConfig)).toBe(false);
-    });
-
-    it("should return true when config does contain cred store", () => {
-      const dockerConfig: DockerConfig = { credsStore: "storeName" };
-      expect(locator.isApplicable("registry-name", dockerConfig)).toBe(true);
-    });
-  });
-
   describe("getAuthConfig", () => {
+    it("should return undefined when config does not contain creds store", async () => {
+      const dockerConfig: DockerConfig = {};
+      expect(await locator.getAuthConfig("registry-name", dockerConfig)).toBe(undefined);
+    });
+
+    it("should return undefined when when creds store is empty", async () => {
+      const dockerConfig: DockerConfig = { credsStore: "" };
+      expect(await locator.getAuthConfig("registry-name", dockerConfig)).toBe(undefined);
+    });
+
     xit("should work", async () => {
       const dockerConfig: DockerConfig = { credsStore: "desktop" };
       const authConfig: AuthConfig = {

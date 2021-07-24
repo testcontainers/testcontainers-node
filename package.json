@@ -22,7 +22,8 @@
     "url": "https://github.com/testcontainers/testcontainers-node/issues"
   },
   "scripts": {
-    "prepare": "npm run build",
+    "prepare": "npm run build && husky install",
+    "pre-commit": "lint-staged",
     "build": "npm run clean && tsc",
     "clean": "rimraf dist",
     "test": "cross-env DEBUG=testcontainers jest --maxWorkers=3",
@@ -59,10 +60,10 @@
     "cross-env": "^7.0.3",
     "eslint": "^7.30.0",
     "eslint-config-prettier": "^8.3.0",
-    "husky": "^7.0.1",
+    "husky": "^7.0.0",
     "jest": "^27.0.6",
     "kafkajs": "^1.15.0",
-    "lint-staged": "^11.0.1",
+    "lint-staged": "^10.5.4",
     "neo4j-driver": "^4.3.1",
     "node-fetch": "^2.6.1",
     "prettier": "^2.3.2",
@@ -71,11 +72,6 @@
     "ts-node": "^10.1.0",
     "typescript": "^4.3.5",
     "wait-for-expect": "^3.0.2"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
   },
   "lint-staged": {
     "src/**/*.ts": [

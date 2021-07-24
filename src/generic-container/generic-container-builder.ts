@@ -1,0 +1,85 @@
+import { AuthConfig, BuildArgs, BuildContext, RegistryConfig } from "../docker/types";
+import { DefaultPullPolicy, PullPolicy } from "../pull-policy";
+import { RandomUuid, Uuid } from "../uuid";
+import { ReaperInstance } from "../reaper";
+import { DockerImageName } from "../docker-image-name";
+import path from "path";
+import { log } from "../logger";
+import { getDockerfileImages } from "../dockerfile-parser";
+import { buildImage } from "../docker/functions/image/build-image";
+import { imageExists } from "../docker/functions/image/image-exists";
+import { getAuthConfig } from "../registry-auth-locator";
+import { GenericContainer } from "./generic-container";
+
+export class GenericContainerBuilder {
+  private buildArgs: BuildArgs = {};
+  private pullPolicy: PullPolicy = new DefaultPullPolicy();
+
+  constructor(
+    private readonly context: BuildContext,
+    private readonly dockerfileName: string,
+    private readonly uuid: Uuid = new RandomUuid()
+  ) {}
+
+  public withBuildArg(key: string, value: string): GenericContainerBuilder {
+    this.buildArgs[key] = value;
+    return this;
+  }
+
+  public withPullPolicy(pullPolicy: PullPolicy): this {
+    this.pullPolicy = pullPolicy;
+    return this;
+  }
+
+  public async build(image = `${this.uuid.nextUuid()}:${this.uuid.nextUuid()}`): Promise<GenericContainer> {
+    const imageName = DockerImageName.fromString(image);
+
+    await ReaperInstance.getInstance();
+
+    const dockerfile = path.resolve(this.context, this.dockerfileName);
+    log.debug(`Preparing to build Dockerfile: ${dockerfile}`);
+    const imageNames = await getDockerfileImages(dockerfile);
+    const registryConfig = await this.getRegistryConfig(imageNames);
+
+    await buildImage({
+      imageName: imageName,
+      context: this.context,
+      dockerfileName: this.dockerfileName,
+      buildArgs: this.buildArgs,
+      pullPolicy: this.pullPolicy,
+      registryConfig,
+    });
+    const container = new GenericContainer(imageName.toString());
+
+    if (!(await imageExists(imageName))) {
+      throw new Error("Failed to build image");
+    }
+
+    return Promise.resolve(container);
+  }
+
+  private async getRegistryConfig(imageNames: DockerImageName[]): Promise<RegistryConfig> {
+    const authConfigs: AuthConfig[] = [];
+
+    await Promise.all(
+      imageNames.map(async (imageName) => {
+        const authConfig = await getAuthConfig(imageName.registry);
+
+        if (authConfig !== undefined) {
+          authConfigs.push(authConfig);
+        }
+      })
+    );
+
+    return authConfigs
+      .map((authConfig) => {
+        return {
+          [authConfig.registryAddress]: {
+            username: authConfig.username,
+            password: authConfig.password,
+          },
+        };
+      })
+      .reduce((prev, next) => ({ ...prev, ...next }), {} as RegistryConfig);
+  }
+}

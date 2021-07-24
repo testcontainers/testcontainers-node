@@ -1,21 +1,23 @@
 import byline from "byline";
 import { BoundPorts } from "./bound-ports";
-import { Container, HealthCheckStatus } from "./container";
-import { DockerClient } from "./docker-client";
 import { log } from "./logger";
 import { Port } from "./port";
 import { PortCheck } from "./port-check";
 import { IntervalRetryStrategy } from "./retry-strategy";
+import { HealthCheckStatus } from "./docker/types";
+import Dockerode from "dockerode";
+import { containerLogs } from "./docker/functions/container/container-logs";
+import { inspectContainer } from "./docker/functions/container/inspect-container";
 
 export interface WaitStrategy {
-  waitUntilReady(container: Container, boundPorts: BoundPorts): Promise<void>;
+  waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void>;
   withStartupTimeout(startupTimeout: number): WaitStrategy;
 }
 
 abstract class AbstractWaitStrategy implements WaitStrategy {
   protected startupTimeout = 60_000;
 
-  public abstract waitUntilReady(container: Container, boundPorts: BoundPorts): Promise<void>;
+  public abstract waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void>;
 
   public withStartupTimeout(startupTimeout: number): WaitStrategy {
     this.startupTimeout = startupTimeout;
@@ -24,35 +26,31 @@ abstract class AbstractWaitStrategy implements WaitStrategy {
 }
 
 export class HostPortWaitStrategy extends AbstractWaitStrategy {
-  constructor(
-    private readonly dockerClient: DockerClient,
-    private readonly hostPortCheck: PortCheck,
-    private readonly internalPortCheck: PortCheck
-  ) {
+  constructor(private readonly hostPortCheck: PortCheck, private readonly internalPortCheck: PortCheck) {
     super();
   }
 
-  public async waitUntilReady(container: Container, boundPorts: BoundPorts): Promise<void> {
+  public async waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void> {
     await Promise.all([this.waitForHostPorts(container, boundPorts), this.waitForInternalPorts(container, boundPorts)]);
   }
 
-  private async waitForHostPorts(container: Container, boundPorts: BoundPorts): Promise<void> {
+  private async waitForHostPorts(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void> {
     for (const [, hostPort] of boundPorts.iterator()) {
-      log.debug(`Waiting for host port ${hostPort} for ${container.getId()}`);
+      log.debug(`Waiting for host port ${hostPort} for ${container.id}`);
       await this.waitForPort(container, hostPort, this.hostPortCheck);
-      log.debug(`Host port ${hostPort} ready for ${container.getId()}`);
+      log.debug(`Host port ${hostPort} ready for ${container.id}`);
     }
   }
 
-  private async waitForInternalPorts(container: Container, boundPorts: BoundPorts): Promise<void> {
+  private async waitForInternalPorts(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void> {
     for (const [internalPort] of boundPorts.iterator()) {
-      log.debug(`Waiting for internal port ${internalPort} for ${container.getId()}`);
+      log.debug(`Waiting for internal port ${internalPort} for ${container.id}`);
       await this.waitForPort(container, internalPort, this.internalPortCheck);
-      log.debug(`Internal port ${internalPort} ready for ${container.getId()}`);
+      log.debug(`Internal port ${internalPort} ready for ${container.id}`);
     }
   }
 
-  private async waitForPort(container: Container, port: Port, portCheck: PortCheck): Promise<void> {
+  private async waitForPort(container: Dockerode.Container, port: Port, portCheck: PortCheck): Promise<void> {
     const retryStrategy = new IntervalRetryStrategy<boolean, Error>(100);
 
     await retryStrategy.retryUntil(
@@ -60,7 +58,7 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
       (isBound) => isBound,
       () => {
         const timeout = this.startupTimeout;
-        throw new Error(`Port ${port} not bound after ${timeout}ms for ${container.getId()}`);
+        throw new Error(`Port ${port} not bound after ${timeout}ms for ${container.id}`);
       },
       this.startupTimeout
     );
@@ -74,14 +72,14 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
     super();
   }
 
-  public async waitUntilReady(container: Container): Promise<void> {
+  public async waitUntilReady(container: Dockerode.Container): Promise<void> {
     log.debug(`Waiting for log message "${this.message}"`);
-    const stream = await container.logs();
+    const stream = await containerLogs(container);
 
     return new Promise((resolve, reject) => {
       const startupTimeout = this.startupTimeout;
       const timeout = setTimeout(() => {
-        const message = `Log message "${this.message}" not received after ${startupTimeout}ms for ${container.getId()}`;
+        const message = `Log message "${this.message}" not received after ${startupTimeout}ms for ${container.id}`;
         log.error(message);
         reject(new Error(message));
       }, startupTimeout);
@@ -112,30 +110,30 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
         .on("end", () => {
           stream.destroy();
           clearTimeout(timeout);
-          reject(new Error(`Log stream ended and message "${this.message}" was not received for ${container.getId()}`));
+          reject(new Error(`Log stream ended and message "${this.message}" was not received for ${container.id}`));
         });
     });
   }
 }
 
 export class HealthCheckWaitStrategy extends AbstractWaitStrategy {
-  public async waitUntilReady(container: Container): Promise<void> {
+  public async waitUntilReady(container: Dockerode.Container): Promise<void> {
     log.debug(`Waiting for health check`);
 
     const retryStrategy = new IntervalRetryStrategy<HealthCheckStatus, Error>(100);
 
     const status = await retryStrategy.retryUntil(
-      async () => (await container.inspect()).healthCheckStatus,
+      async () => (await inspectContainer(container)).healthCheckStatus,
       (status) => status === "healthy" || status === "unhealthy",
       () => {
         const timeout = this.startupTimeout;
-        throw new Error(`Health check not healthy after ${timeout}ms for ${container.getId()}`);
+        throw new Error(`Health check not healthy after ${timeout}ms for ${container.id}`);
       },
       this.startupTimeout
     );
 
     if (status !== "healthy") {
-      throw new Error(`Health check failed: ${status} for ${container.getId()}`);
+      throw new Error(`Health check failed: ${status} for ${container.id}`);
     }
   }
 }

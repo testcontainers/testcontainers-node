@@ -1,11 +1,11 @@
 import { log } from "./logger";
 import * as dockerCompose from "docker-compose";
-import Dockerode from "dockerode";
+import { getDockerInfo } from "./docker/functions/get-info";
 
-export const logSystemDiagnostics = async (dockerode: Dockerode): Promise<void> => {
+export const logSystemDiagnostics = async (): Promise<void> => {
   const info = {
     node: getNodeInfo(),
-    docker: await getDockerInfo(dockerode),
+    docker: await getDockerInfo(),
     dockerCompose: await getDockerComposeInfo(),
   };
 
@@ -17,19 +17,6 @@ const getNodeInfo = () => {
     version: process.version,
     architecture: process.arch,
     platform: process.platform,
-  };
-};
-
-const getDockerInfo = async (dockerode: Dockerode) => {
-  const info = await dockerode.info();
-
-  return {
-    serverVersion: info.ServerVersion,
-    operatingSystem: info.OperatingSystem,
-    operatingSystemType: info.OSType,
-    architecture: info.Architecture,
-    cpus: info.NCPU,
-    memory: info.MemTotal,
   };
 };
 

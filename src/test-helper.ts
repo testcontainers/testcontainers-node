@@ -1,11 +1,6 @@
-import Dockerode from "dockerode";
 import { Readable } from "stream";
 import { ReaperInstance } from "./reaper";
-import { DockerClientInstance } from "./docker-client-instance";
-
-export const dockerode = new Dockerode();
-
-export const getContainerById = (id: string): Dockerode.Container => dockerode.getContainer(id);
+import { dockerode } from "./docker/dockerode";
 
 export const getEvents = async (): Promise<Readable> => {
   const events = (await dockerode.getEvents()) as Readable;
@@ -42,7 +37,7 @@ export const getVolumeNames = async (): Promise<string[]> => {
 };
 
 export const getReaperContainerId = async (): Promise<string> => {
-  return (await ReaperInstance.getInstance(await DockerClientInstance.getInstance())).getContainerId();
+  return (await ReaperInstance.getInstance()).getContainerId();
 };
 
 export const stopReaper = async (): Promise<void> => {

@@ -1,6 +1,6 @@
-import { GenericContainer } from "./generic-container";
+import { GenericContainer } from "./generic-container/generic-container";
 import { Network } from "./network";
-import { getContainerById } from "./test-helper";
+import { getContainerById } from "./docker/functions/container/get-container";
 
 describe("Network", () => {
   jest.setTimeout(180_000);

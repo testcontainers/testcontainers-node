@@ -1,13 +1,12 @@
 export { TestContainer, StartedTestContainer, StoppedTestContainer } from "./test-container";
-export { GenericContainer, GenericContainerBuilder } from "./generic-container";
+export { GenericContainer } from "./generic-container/generic-container";
+export { GenericContainerBuilder } from "./generic-container/generic-container-builder";
 export { TestContainers } from "./test-containers";
 
-export {
-  DockerComposeEnvironment,
-  StartedDockerComposeEnvironment,
-  StoppedDockerComposeEnvironment,
-  DownedDockerComposeEnvironment,
-} from "./docker-compose-environment";
+export { DockerComposeEnvironment } from "./docker-compose-environment/docker-compose-environment";
+export { StartedDockerComposeEnvironment } from "./docker-compose-environment/started-docker-compose-environment";
+export { StoppedDockerComposeEnvironment } from "./docker-compose-environment/stopped-docker-compose-environment";
+export { DownedDockerComposeEnvironment } from "./docker-compose-environment/downed-docker-compose-environment";
 
 export { Network, StartedNetwork, StoppedNetwork } from "./network";
 

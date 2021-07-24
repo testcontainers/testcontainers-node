@@ -1,8 +1,7 @@
 import { StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
-import { Host } from "../docker-client-instance";
 import { Port } from "../port";
-import { Command, ContainerName, ExecResult } from "../docker-client";
-import { Id as ContainerId } from "../container";
+import { ContainerName, Host, Id } from "../docker/types";
+import { Command, ExecResult } from "../docker/types";
 import { Readable } from "stream";
 
 export class AbstractStartedContainer {
@@ -24,7 +23,7 @@ export class AbstractStartedContainer {
     return this.startedTestContainer.getName();
   }
 
-  public getId(): ContainerId {
+  public getId(): Id {
     return this.startedTestContainer.getId();
   }
 

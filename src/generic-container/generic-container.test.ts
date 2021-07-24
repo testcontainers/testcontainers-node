@@ -1,16 +1,17 @@
 import fetch from "node-fetch";
 import path from "path";
 import { GenericContainer } from "./generic-container";
-import { AlwaysPullPolicy } from "./pull-policy";
-import { Wait } from "./wait";
-import { RandomUuid } from "./uuid";
-import { getContainerById, getEvents, getRunningContainerNames } from "./test-helper";
-import { Network } from "./network";
+import { AlwaysPullPolicy } from "../pull-policy";
+import { Wait } from "../wait";
+import { RandomUuid } from "../uuid";
+import { getEvents, getRunningContainerNames } from "../test-helper";
+import { Network } from "../network";
+import { getContainerById } from "../docker/functions/container/get-container";
 
 describe("GenericContainer", () => {
   jest.setTimeout(180_000);
 
-  const fixtures = path.resolve(__dirname, "..", "fixtures", "docker");
+  const fixtures = path.resolve(__dirname, "..", "..", "fixtures", "docker");
 
   it("should wait for port", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12").withExposedPorts(8080).start();
@@ -231,10 +232,14 @@ describe("GenericContainer", () => {
   it("should use pull policy", async () => {
     const container1 = await new GenericContainer("cristianrgreco/testcontainer:1.1.12").withExposedPorts(8080).start();
     const events = await getEvents();
-    const pullPromise = new Promise<void>((resolve) => {
+    const pullPromise = new Promise<void>((resolve, reject) => {
       events.on("data", (data) => {
-        if (JSON.parse(data).status === "pull") {
-          resolve();
+        try {
+          if (JSON.parse(data).status === "pull") {
+            resolve();
+          }
+        } catch (err) {
+          reject(`Unexpected err: ${err}`);
         }
       });
     });

@@ -1,8 +1,6 @@
-import { GenericContainer } from "../../generic-container";
+import { GenericContainer } from "../../generic-container/generic-container";
 import { BoundPorts } from "../../bound-ports";
-import { DockerClient } from "../../docker-client";
 import { Network, StartedNetwork } from "../../network";
-import { Host } from "../../docker-client-instance";
 import { Port } from "../../port";
 import { RandomUuid, Uuid } from "../../uuid";
 import { StartedTestContainer, StoppedTestContainer } from "../..";
@@ -10,6 +8,8 @@ import { StopOptions } from "../../test-container";
 import { log } from "../../logger";
 import { AbstractStartedContainer } from "../abstract-started-container";
 import { PortGenerator, RandomUniquePortGenerator } from "../../port-generator";
+import { Host } from "../../docker/types";
+import { dockerHost } from "../../docker/docker-host";
 
 export const KAFKA_IMAGE = "confluentinc/cp-kafka:5.5.4";
 export const ZK_IMAGE = "confluentinc/cp-zookeeper:5.5.4";
@@ -46,7 +46,7 @@ export class KafkaContainer extends GenericContainer {
     return this;
   }
 
-  protected async preCreate(dockerClient: DockerClient, boundPorts: BoundPorts): Promise<void> {
+  protected async preCreate(boundPorts: BoundPorts): Promise<void> {
     const kafkaPort = 9093;
     const kafkaInternalPort = boundPorts.getBinding(9093);
     const kafkaBrokerPort = 9092;
@@ -54,7 +54,7 @@ export class KafkaContainer extends GenericContainer {
     this.withEnv("KAFKA_LISTENERS", `EXTERNAL_LISTENER://0.0.0.0:${kafkaPort},BROKER://0.0.0.0:${kafkaBrokerPort}`);
     this.withEnv(
       "KAFKA_ADVERTISED_LISTENERS",
-      `EXTERNAL_LISTENER://${dockerClient.getHost()}:${kafkaInternalPort},BROKER://${this.host}:${kafkaBrokerPort}`
+      `EXTERNAL_LISTENER://${await dockerHost}:${kafkaInternalPort},BROKER://${this.host}:${kafkaBrokerPort}`
     );
 
     if (this.isZooKeeperProvided) {
