@@ -4,4 +4,4 @@
 
 ## Usage
 
-Look at the [test](postgresql-container.test.ts) for examples.
+Look at the [test](./postgresql-container.test.ts) for examples.
