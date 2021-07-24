@@ -32,7 +32,7 @@ const dockerConfig = readDockerConfig();
 
 const registryAuthLocators: RegistryAuthLocator[] = [new CredHelpers(), new CredsStore(), new Auths()];
 
-export async function getAuthConfig(registry = DEFAULT_REGISTRY): Promise<AuthConfig | undefined> {
+export const getAuthConfig = async (registry = DEFAULT_REGISTRY): Promise<AuthConfig | undefined> => {
   for (const registryAuthLocator of registryAuthLocators) {
     const authConfig = await registryAuthLocator.getAuthConfig(registry, await dockerConfig);
 
@@ -44,4 +44,4 @@ export async function getAuthConfig(registry = DEFAULT_REGISTRY): Promise<AuthCo
 
   log.debug(`No registry auth locator found for registry: "${registry}"`);
   return undefined;
-}
+};
