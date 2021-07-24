@@ -4,7 +4,7 @@ import { RandomUuid } from "../../uuid";
 import { AbstractStartedContainer } from "../abstract-started-container";
 import { Port } from "../../port";
 
-export class PostgresContainer extends GenericContainer {
+export class PostgreSqlContainer extends GenericContainer {
   private database = "test";
   private username = new RandomUuid().nextUuid();
   private password = new RandomUuid().nextUuid();
@@ -33,12 +33,12 @@ export class PostgresContainer extends GenericContainer {
     return this;
   }
 
-  public async start(): Promise<StartedPostgresContainer> {
-    return new StartedPostgresContainer(await super.start(), this.database, this.username, this.password);
+  public async start(): Promise<StartedPostgreSqlContainer> {
+    return new StartedPostgreSqlContainer(await super.start(), this.database, this.username, this.password);
   }
 }
 
-export class StartedPostgresContainer extends AbstractStartedContainer {
+export class StartedPostgreSqlContainer extends AbstractStartedContainer {
   private readonly port: Port;
 
   constructor(

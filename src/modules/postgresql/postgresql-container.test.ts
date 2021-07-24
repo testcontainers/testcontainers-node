@@ -1,11 +1,11 @@
 import { Client } from "pg";
-import { PostgresContainer } from "./postgres-container";
+import { PostgreSqlContainer } from "./postgresql-container";
 
-describe("PostgresContainer", () => {
+describe("PostgreSqlContainer", () => {
   jest.setTimeout(180_000);
 
   it("should work", async () => {
-    const container = await new PostgresContainer().start();
+    const container = await new PostgreSqlContainer().start();
 
     const client = new Client({
       host: container.getHost(),
