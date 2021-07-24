@@ -26,11 +26,6 @@ export const getRunningNetworkIds = async (): Promise<string[]> => {
   return networks.map((network) => network.Id);
 };
 
-export const getImagesRepoTags = async (): Promise<string[]> => {
-  const images = await dockerode.listImages();
-  return images.map((image) => image.RepoTags[0]);
-};
-
 export const getVolumeNames = async (): Promise<string[]> => {
   const { Volumes: volumes } = await dockerode.listVolumes();
   return volumes.map((volume) => volume.Name);
