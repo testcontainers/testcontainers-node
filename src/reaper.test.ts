@@ -24,7 +24,7 @@ describe("Reaper", () => {
     await waitForExpect(async () => {
       expect(await getRunningContainerIds()).not.toContain(container.getId());
       expect(await getRunningContainerIds()).not.toContain(reaperContainerId);
-    }, 20_000);
+    }, 30_000);
   });
 
   it("should remove networks", async () => {
@@ -37,7 +37,7 @@ describe("Reaper", () => {
     await waitForExpect(async () => {
       expect(await getRunningNetworkIds()).not.toContain(network.getId());
       expect(await getRunningContainerIds()).not.toContain(reaperContainerId);
-    }, 20_000);
+    }, 30_000);
   });
 
   it("should remove images", async () => {
@@ -52,6 +52,6 @@ describe("Reaper", () => {
     await waitForExpect(async () => {
       expect(await getImagesRepoTags()).not.toContain(imageId);
       expect(await getRunningContainerIds()).not.toContain(reaperContainerId);
-    }, 20_000);
+    }, 30_000);
   });
 });
