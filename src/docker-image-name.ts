@@ -1,14 +1,14 @@
 import { REAPER_IMAGE, SSHD_IMAGE } from "./images";
 
-export type Registry = string;
-export type Image = string;
-export type Tag = string;
-
 export class DockerImageName {
   private readonly string: string;
   private static readonly HELPER_CONTAINERS = new Set([REAPER_IMAGE, SSHD_IMAGE]);
 
-  constructor(public readonly registry: Registry | undefined, public readonly image: Image, public readonly tag: Tag) {
+  constructor(
+    public readonly registry: string | undefined,
+    public readonly image: string,
+    public readonly tag: string
+  ) {
     if (this.registry) {
       this.string = `${this.registry}/${this.image}:${this.tag}`;
     } else {
