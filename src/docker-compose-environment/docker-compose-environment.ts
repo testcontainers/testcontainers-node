@@ -1,7 +1,6 @@
-import { upAll } from "docker-compose";
 import Dockerode, { ContainerInfo } from "dockerode";
 import { BoundPorts } from "../bound-ports";
-import { resolveContainerName } from "./container-name-resolver";
+import { resolveContainerName } from "../docker-compose/functions/container-name-resolver";
 import { StartedGenericContainer } from "../generic-container/started-generic-container";
 import { containerLog, log } from "../logger";
 import { HostPortCheck, InternalPortCheck } from "../port-check";
@@ -15,9 +14,9 @@ import { dockerHost } from "../docker/docker-host";
 import { inspectContainer } from "../docker/functions/container/inspect-container";
 import { containerLogs } from "../docker/functions/container/container-logs";
 import { StartedDockerComposeEnvironment } from "./started-docker-compose-environment";
-import { dockerComposeDown } from "./docker-compose-down";
-import { defaultDockerComposeOptions } from "./default-docker-compose-options";
-import { DockerComposeOptions } from "./docker-compose-options";
+import { dockerComposeDown } from "../docker-compose/functions/docker-compose-down";
+import { DockerComposeOptions } from "../docker-compose/docker-compose-options";
+import { dockerComposeUp } from "../docker-compose/functions/docker-compose-up";
 
 export class DockerComposeEnvironment {
   private readonly projectName: string;
@@ -58,7 +57,12 @@ export class DockerComposeEnvironment {
 
     (await ReaperInstance.getInstance()).addProject(this.projectName);
 
-    await this.upAll();
+    const commandOptions = [];
+    if (this.build) {
+      commandOptions.push("--build");
+    }
+    await dockerComposeUp({ ...this.options, commandOptions, env: this.env });
+
     const startedContainers = (await listContainers()).filter(
       (container) => container.Labels["com.docker.compose.project"] === this.projectName
     );
@@ -112,28 +116,6 @@ export class DockerComposeEnvironment {
     log.info(`DockerCompose environment started: ${Object.keys(startedGenericContainers).join(", ")}`);
 
     return new StartedDockerComposeEnvironment(startedGenericContainers, this.options);
-  }
-
-  private async upAll() {
-    const commandOptions = [];
-    if (this.build) {
-      commandOptions.push("--build");
-    }
-
-    log.info(`Upping DockerCompose environment`);
-    try {
-      await upAll(defaultDockerComposeOptions({ ...this.options, commandOptions, env: this.env }));
-      log.info(`Upped DockerCompose environment`);
-    } catch (err) {
-      const errorMessage = err.err ? err.err.trim() : err;
-      log.error(`Failed to up DockerCompose environment: ${errorMessage}`);
-      try {
-        await dockerComposeDown(this.options);
-      } catch {
-        log.warn(`Failed to stop DockerCompose environment after failed up`);
-      }
-      throw new Error(errorMessage);
-    }
   }
 
   private getBoundPorts(containerInfo: Dockerode.ContainerInfo): BoundPorts {

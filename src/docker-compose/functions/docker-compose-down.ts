@@ -1,7 +1,7 @@
 import { down } from "docker-compose";
-import { log } from "../logger";
-import { defaultDockerComposeOptions } from "./default-docker-compose-options";
-import { DockerComposeOptions } from "./docker-compose-options";
+import { log } from "../../logger";
+import { defaultDockerComposeOptions } from "../default-docker-compose-options";
+import { DockerComposeOptions } from "../docker-compose-options";
 
 export const dockerComposeDown = async (options: DockerComposeOptions): Promise<void> => {
   log.info(`Downing DockerCompose environment`);

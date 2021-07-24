@@ -1,10 +1,10 @@
 import { StartedGenericContainer } from "../generic-container/started-generic-container";
 import { log } from "../logger";
-import { dockerComposeDown } from "./docker-compose-down";
-import { dockerComposeStop } from "./docker-compose-stop";
+import { dockerComposeDown } from "../docker-compose/functions/docker-compose-down";
+import { dockerComposeStop } from "../docker-compose/functions/docker-compose-stop";
 import { StoppedDockerComposeEnvironment } from "./stopped-docker-compose-environment";
 import { DownedDockerComposeEnvironment } from "./downed-docker-compose-environment";
-import { DockerComposeOptions } from "./docker-compose-options";
+import { DockerComposeOptions } from "../docker-compose/docker-compose-options";
 
 export class StartedDockerComposeEnvironment {
   constructor(

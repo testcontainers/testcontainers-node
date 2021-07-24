@@ -5,7 +5,7 @@ import { Wait } from "../wait";
 import { getRunningContainerNames, getVolumeNames } from "../test-helper";
 
 describe("DockerComposeEnvironment", () => {
-  jest.setTimeout(60000);
+  jest.setTimeout(180_000);
 
   const fixtures = path.resolve(__dirname, "..", "..", "fixtures", "docker-compose");
 
