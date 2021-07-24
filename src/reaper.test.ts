@@ -1,15 +1,11 @@
 import { GenericContainer } from "./generic-container/generic-container";
-import {
-  getImagesRepoTags,
-  getReaperContainerId,
-  getRunningContainerIds,
-  getRunningNetworkIds,
-  stopReaper,
-} from "./test-helper";
+import { getReaperContainerId, getRunningContainerIds, getRunningNetworkIds, stopReaper } from "./test-helper";
 import { Network } from "./network";
 import path from "path";
 import { RandomUuid } from "./uuid";
 import waitForExpect from "wait-for-expect";
+import { listImages } from "./docker/functions/image/list-images";
+import { DockerImageName } from "./docker-image-name";
 
 describe("Reaper", () => {
   jest.setTimeout(180_000);
@@ -48,9 +44,9 @@ describe("Reaper", () => {
     const reaperContainerId = await getReaperContainerId();
     await stopReaper();
 
-    expect(await getImagesRepoTags()).toContain(imageId);
+    expect(await listImages()).toContainEqual(DockerImageName.fromString(imageId));
     await waitForExpect(async () => {
-      expect(await getImagesRepoTags()).not.toContain(imageId);
+      expect(await listImages()).not.toContainEqual(DockerImageName.fromString(imageId));
       expect(await getRunningContainerIds()).not.toContain(reaperContainerId);
     }, 30_000);
   });

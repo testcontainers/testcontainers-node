@@ -10,9 +10,7 @@ describe("DockerComposeEnvironment", () => {
   const fixtures = path.resolve(__dirname, "..", "..", "fixtures", "docker-compose");
 
   it("should throw error when compose file is malformed", async () => {
-    await expect(new DockerComposeEnvironment(fixtures, "docker-compose-malformed.yml").up()).rejects.toThrowError(
-      `Version in ".${path.sep}docker-compose-malformed.yml" is invalid - it should be a string.`
-    );
+    await expect(new DockerComposeEnvironment(fixtures, "docker-compose-malformed.yml").up()).rejects.toThrowError();
   });
 
   it("should start all containers in the compose file", async () => {

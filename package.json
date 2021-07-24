@@ -27,8 +27,8 @@
     "build": "npm run clean && tsc",
     "clean": "rimraf dist",
     "test": "cross-env DEBUG=testcontainers jest --maxWorkers=3",
-    "format": "prettier --write package.json 'src/**/*.ts'",
-    "lint": "eslint --fix package.json 'src/**/*.ts'",
+    "format": "prettier --write package.json \"src/**/*.ts\"",
+    "lint": "eslint --fix package.json \"src/**/*.ts\"",
     "updateDeps": "npx npm-check-updates -u"
   },
   "dependencies": {
