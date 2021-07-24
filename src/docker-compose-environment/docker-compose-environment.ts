@@ -96,7 +96,6 @@ export class DockerComposeEnvironment {
             log.info(`Container ${containerName} is ready`);
           } catch (err) {
             log.error(`Container ${containerName} failed to be ready: ${err}`);
-
             try {
               await dockerComposeDown(this.options);
             } catch {
