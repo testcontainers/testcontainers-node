@@ -5,29 +5,17 @@ import { AuthConfig } from "../docker/types";
 describe("Auths", () => {
   const locator = new Auths();
 
-  describe("isApplicable", () => {
-    it("should return false when auths is undefined", () => {
-      const dockerConfig: DockerConfig = {};
-      expect(locator.isApplicable("registry-name", dockerConfig)).toBe(false);
-    });
-
-    it("should return false when auths does not contain registry name", () => {
-      const dockerConfig: DockerConfig = { auths: {} };
-      expect(locator.isApplicable("registry-name", dockerConfig)).toBe(false);
-    });
-
-    it("should return true when auths does contain registry name", () => {
-      const dockerConfig: DockerConfig = { auths: { "registry-name": { auth: "value" } } };
-      expect(locator.isApplicable("registry-name", dockerConfig)).toBe(true);
-    });
-
-    it("should return true when auths contains url for registry", () => {
-      const dockerConfig: DockerConfig = { auths: { "https://index.docker.io/v1/": { auth: "value" } } };
-      expect(locator.isApplicable("index.docker.io", dockerConfig)).toBe(true);
-    });
-  });
-
   describe("getAuthConfig", () => {
+    it("should return undefined when auths is undefined", async () => {
+      const dockerConfig: DockerConfig = {};
+      expect(await locator.getAuthConfig("registry-name", dockerConfig)).toBe(undefined);
+    });
+
+    it("should return undefined when auths does not contain registry name", async () => {
+      const dockerConfig: DockerConfig = { auths: {} };
+      expect(await locator.getAuthConfig("registry-name", dockerConfig)).toBe(undefined);
+    });
+
     it("should return credentials from username and password", async () => {
       const dockerConfig: DockerConfig = {
         auths: {

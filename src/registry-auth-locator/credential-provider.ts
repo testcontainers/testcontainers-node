@@ -7,12 +7,15 @@ import { AuthConfig } from "../docker/types";
 export abstract class CredentialProvider implements RegistryAuthLocator {
   abstract getName(): string;
 
-  abstract isApplicable(registry: string, dockerConfig: DockerConfig): boolean;
-
-  abstract getCredentialProviderName(registry: string, dockerConfig: DockerConfig): string;
+  abstract getCredentialProviderName(registry: string, dockerConfig: DockerConfig): string | undefined;
 
   async getAuthConfig(registry: string, dockerConfig: DockerConfig): Promise<AuthConfig | undefined> {
-    const programName = `docker-credential-${this.getCredentialProviderName(registry, dockerConfig)}`;
+    const credentialProviderName = this.getCredentialProviderName(registry, dockerConfig);
+    if (!credentialProviderName) {
+      return undefined;
+    }
+
+    const programName = `docker-credential-${credentialProviderName}`;
     log.debug(`Executing Docker credential provider: ${programName}`);
 
     const credentials = await this.listCredentials(programName);
