@@ -62,7 +62,6 @@ export class GenericContainer implements TestContainer {
   protected startupTimeout = 60_000;
   protected useDefaultLogDriver = false;
   protected privilegedMode = false;
-  protected daemonMode = false;
   protected ipcMode?: string;
   protected user?: string;
   protected pullPolicy: PullPolicy = new DefaultPullPolicy();
@@ -108,7 +107,7 @@ export class GenericContainer implements TestContainer {
       healthCheck: this.healthCheck,
       useDefaultLogDriver: this.useDefaultLogDriver,
       privilegedMode: this.privilegedMode,
-      autoRemove: this.daemonMode,
+      autoRemove: this.imageName.isReaper(),
       extraHosts: this.extraHosts,
       ipcMode: this.ipcMode,
       user: this.user,
@@ -223,11 +222,6 @@ export class GenericContainer implements TestContainer {
 
   public withPullPolicy(pullPolicy: PullPolicy): this {
     this.pullPolicy = pullPolicy;
-    return this;
-  }
-
-  public withDaemonMode(): this {
-    this.daemonMode = true;
     return this;
   }
 

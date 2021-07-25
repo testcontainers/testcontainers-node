@@ -14,15 +14,11 @@ export const runInContainer = async (image: string, command: Command[]): Promise
     await pullImage({ imageName, force: false });
 
     log.debug(`Creating container: ${image} with command: ${command.join(" ")}`);
-    const container = await dockerode.createContainer({ Image: image, Cmd: command });
+    const container = await dockerode.createContainer({ Image: image, Cmd: command, HostConfig: { AutoRemove: true } });
     log.debug(`Attaching to container: ${container.id}`);
     const stream = await attachContainer(container);
 
     const promise = new Promise<string>((resolve) => {
-      const chunks: string[] = [];
-      stream.on("data", (chunk) => chunks.push(chunk));
-      stream.on("end", () => resolve(chunks.join("").trim()));
-
       const interval = setInterval(async () => {
         const inspect = await inspectContainer(container);
 
@@ -31,6 +27,13 @@ export const runInContainer = async (image: string, command: Command[]): Promise
           stream.destroy();
         }
       }, 50);
+
+      const chunks: string[] = [];
+      stream.on("data", (chunk) => chunks.push(chunk));
+      stream.on("end", () => {
+        clearInterval(interval);
+        resolve(chunks.join("").trim());
+      });
     });
 
     log.debug(`Starting container: ${container.id}`);

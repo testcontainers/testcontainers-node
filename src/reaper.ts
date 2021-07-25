@@ -87,7 +87,6 @@ export class ReaperInstance {
       .withName(`testcontainers-ryuk-${sessionId}`)
       .withExposedPorts(8080)
       .withBindMount(dockerSocket, "/var/run/docker.sock")
-      .withDaemonMode()
       .withPrivilegedMode()
       .start();
 
