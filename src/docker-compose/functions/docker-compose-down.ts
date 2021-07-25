@@ -9,8 +9,8 @@ export const dockerComposeDown = async (options: DockerComposeOptions): Promise<
   try {
     await down({ ...defaultDockerComposeOptions(options), commandOptions: ["-v"] });
     log.info(`Downed DockerCompose environment`);
-  } catch ({ err }) {
-    log.error(`Failed to down DockerCompose environment: ${err.trim()}`);
-    throw new Error(err.trim());
+  } catch (err) {
+    log.error(`Failed to down DockerCompose environment: ${err}`);
+    throw new Error(err);
   }
 };

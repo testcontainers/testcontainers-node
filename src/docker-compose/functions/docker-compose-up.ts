@@ -10,8 +10,8 @@ export const dockerComposeUp = async (options: DockerComposeOptions): Promise<vo
   try {
     await upAll(defaultDockerComposeOptions(options));
     log.info(`Upped DockerCompose environment`);
-  } catch ({ err }) {
-    log.error(`Failed to up DockerCompose environment: ${err.trim()}`);
+  } catch (err) {
+    log.error(`Failed to up DockerCompose environment: ${err}`);
 
     try {
       await dockerComposeDown(options);
@@ -19,6 +19,6 @@ export const dockerComposeUp = async (options: DockerComposeOptions): Promise<vo
       log.warn(`Failed to down DockerCompose environment after failed up`);
     }
 
-    throw new Error(err.trim());
+    throw new Error(err);
   }
 };
