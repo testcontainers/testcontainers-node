@@ -3,16 +3,18 @@ import { StartedTestContainer } from "../../test-container";
 import { Port } from "../../port";
 import { RandomUuid } from "../../uuid";
 import { AbstractStartedContainer } from "../abstract-started-container";
-import { Host } from "../../docker/types";
+
+const BOLT_PORT = 7687;
+const HTTP_PORT = 7474;
+const USERNAME = "neo4j";
 
 export class Neo4jContainer extends GenericContainer {
-  private readonly defaultBoltPort = 7687;
-  private readonly defaultHttpPort = 7474;
-  private readonly defaultUsername = "neo4j";
+  private password = new RandomUuid().nextUuid();
+  private apoc = false;
+  private ttl?: number;
 
-  constructor(image = "neo4j:latest", private password = new RandomUuid().nextUuid()) {
+  constructor(image = "neo4j:latest") {
     super(image);
-    this.withExposedPorts(this.defaultBoltPort, this.defaultHttpPort).withWaitStrategy(Wait.forLogMessage("Started."));
   }
 
   public withPassword(password: string): this {
@@ -21,55 +23,49 @@ export class Neo4jContainer extends GenericContainer {
   }
 
   public withApoc(): this {
-    return this.withEnv("NEO4JLABS_PLUGINS", '["apoc"]').withEnv(
-      "NEO4J_dbms_security_procedures_unrestricted",
-      "apoc.*"
-    );
+    this.apoc = true;
+    return this;
   }
 
   public withTtl(schedule = 5): this {
-    return this.withEnv("NEO4J_apoc_ttl_enabled", "true").withEnv("NEO4J_apoc_ttl_schedule", schedule.toString());
-  }
-
-  protected async preCreate(): Promise<void> {
-    this.withEnv("NEO4J_AUTH", `${this.defaultUsername}/${this.password}`);
+    this.ttl = schedule;
+    return this;
   }
 
   public async start(): Promise<StartedNeo4jContainer> {
-    return new StartedNeo4jContainer(
-      await super.start(),
-      this.defaultBoltPort,
-      this.defaultHttpPort,
-      this.defaultUsername,
-      this.password
-    );
+    this.withExposedPorts(BOLT_PORT, HTTP_PORT)
+      .withWaitStrategy(Wait.forLogMessage("Started."))
+      .withEnv("NEO4J_AUTH", `${USERNAME}/${this.password}`)
+      .withStartupTimeout(120_000);
+
+    if (this.apoc) {
+      this.withEnv("NEO4JLABS_PLUGINS", '["apoc"]').withEnv("NEO4J_dbms_security_procedures_unrestricted", "apoc.*");
+    }
+
+    if (this.ttl) {
+      this.withEnv("NEO4J_apoc_ttl_enabled", "true").withEnv("NEO4J_apoc_ttl_schedule", this.ttl.toString());
+    }
+
+    return new StartedNeo4jContainer(await super.start(), this.password);
   }
 }
 
 export class StartedNeo4jContainer extends AbstractStartedContainer {
-  private readonly host: Host;
   private readonly boltPort: Port;
   private readonly httpPort: Port;
 
-  constructor(
-    startedTestContainer: StartedTestContainer,
-    boltPort: Port,
-    httpPort: Port,
-    private readonly username: string,
-    private readonly password: string
-  ) {
+  constructor(startedTestContainer: StartedTestContainer, private readonly password: string) {
     super(startedTestContainer);
-    this.host = this.startedTestContainer.getHost();
-    this.boltPort = this.startedTestContainer.getMappedPort(boltPort);
-    this.httpPort = this.startedTestContainer.getMappedPort(httpPort);
+    this.boltPort = this.startedTestContainer.getMappedPort(BOLT_PORT);
+    this.httpPort = this.startedTestContainer.getMappedPort(HTTP_PORT);
   }
 
   public getBoltUri(): string {
-    return `bolt://${this.host}:${this.boltPort}/`;
+    return `bolt://${this.getHost()}:${this.boltPort}/`;
   }
 
   public getHttpUri(): string {
-    return `http://${this.host}:${this.httpPort}/`;
+    return `http://${this.getHost()}:${this.httpPort}/`;
   }
 
   public getPassword(): string {
@@ -77,6 +73,6 @@ export class StartedNeo4jContainer extends AbstractStartedContainer {
   }
 
   public getUsername(): string {
-    return this.username;
+    return USERNAME;
   }
 }

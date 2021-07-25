@@ -5,7 +5,7 @@ import { GenericContainer } from "../../generic-container/generic-container";
 import { StartedTestContainer } from "../../test-container";
 
 describe("KafkaContainer", () => {
-  jest.setTimeout(180_000);
+  jest.setTimeout(240_000);
 
   it("should connect to kafka using in-built zoo-keeper", async () => {
     const kafkaContainer = await new KafkaContainer().withExposedPorts(9093).start();
