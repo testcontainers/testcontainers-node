@@ -16,8 +16,8 @@ export const getRunningContainerNames = async (): Promise<string[]> => {
     .map((containerName) => containerName.replace("/", ""));
 };
 
-export const getRunningContainerIds = async (): Promise<string[]> => {
-  const containers = await dockerode.listContainers();
+export const getContainerIds = async (): Promise<string[]> => {
+  const containers = await dockerode.listContainers({ all: true });
   return containers.map((container) => container.Id);
 };
 

@@ -26,7 +26,7 @@ export const runInContainer = async (image: string, command: Command[]): Promise
           clearInterval(interval);
           stream.destroy();
         }
-      }, 50);
+      }, 100);
 
       const chunks: string[] = [];
       stream.on("data", (chunk) => chunks.push(chunk));

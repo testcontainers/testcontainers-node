@@ -1,5 +1,5 @@
 import { GenericContainer } from "./generic-container/generic-container";
-import { getReaperContainerId, getRunningContainerIds, getRunningNetworkIds, stopReaper } from "./test-helper";
+import { getReaperContainerId, getContainerIds, getRunningNetworkIds, stopReaper } from "./test-helper";
 import { Network } from "./network";
 import path from "path";
 import { RandomUuid } from "./uuid";
@@ -16,10 +16,10 @@ describe("Reaper", () => {
     const reaperContainerId = await getReaperContainerId();
     await stopReaper();
 
-    expect(await getRunningContainerIds()).toContain(container.getId());
+    expect(await getContainerIds()).toContain(container.getId());
     await waitForExpect(async () => {
-      expect(await getRunningContainerIds()).not.toContain(container.getId());
-      expect(await getRunningContainerIds()).not.toContain(reaperContainerId);
+      expect(await getContainerIds()).not.toContain(container.getId());
+      expect(await getContainerIds()).not.toContain(reaperContainerId);
     }, 30_000);
   });
 
@@ -32,7 +32,7 @@ describe("Reaper", () => {
     expect(await getRunningNetworkIds()).toContain(network.getId());
     await waitForExpect(async () => {
       expect(await getRunningNetworkIds()).not.toContain(network.getId());
-      expect(await getRunningContainerIds()).not.toContain(reaperContainerId);
+      expect(await getContainerIds()).not.toContain(reaperContainerId);
     }, 30_000);
   });
 
@@ -47,7 +47,7 @@ describe("Reaper", () => {
     expect(await listImages()).toContainEqual(DockerImageName.fromString(imageId));
     await waitForExpect(async () => {
       expect(await listImages()).not.toContainEqual(DockerImageName.fromString(imageId));
-      expect(await getRunningContainerIds()).not.toContain(reaperContainerId);
+      expect(await getContainerIds()).not.toContain(reaperContainerId);
     }, 30_000);
   });
 });
