@@ -13,7 +13,7 @@ export class Neo4jContainer extends GenericContainer {
   private apoc = false;
   private ttl?: number;
 
-  constructor(image = "neo4j:latest") {
+  constructor(image = "neo4j:4.3.2") {
     super(image);
   }
 
