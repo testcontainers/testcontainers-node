@@ -19,10 +19,6 @@ export const runInContainer = async (image: string, command: Command[]): Promise
     const stream = await attachContainer(container);
 
     const promise = new Promise<string>((resolve) => {
-      const chunks: string[] = [];
-      stream.on("data", (chunk) => chunks.push(chunk));
-      stream.on("end", () => resolve(chunks.join("").trim()));
-
       const interval = setInterval(async () => {
         const inspect = await inspectContainer(container);
 
@@ -31,6 +27,13 @@ export const runInContainer = async (image: string, command: Command[]): Promise
           stream.destroy();
         }
       }, 50);
+
+      const chunks: string[] = [];
+      stream.on("data", (chunk) => chunks.push(chunk));
+      stream.on("end", () => {
+        clearInterval(interval);
+        resolve(chunks.join("").trim());
+      });
     });
 
     log.debug(`Starting container: ${container.id}`);
