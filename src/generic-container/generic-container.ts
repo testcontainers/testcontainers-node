@@ -264,13 +264,6 @@ export class GenericContainer implements TestContainer {
       log.info("Container is ready");
     } catch (err) {
       log.error(`Container failed to be ready: ${err}`);
-
-      if (this.daemonMode) {
-        (await containerLogs(container))
-          .on("data", (data) => containerLog.trace(`${container.id}: ${data}`))
-          .on("err", (data) => containerLog.error(`${container.id}: ${data}`));
-      }
-
       try {
         await stopContainer(container, { timeout: 0 });
         await removeContainer(container, { removeVolumes: true });
