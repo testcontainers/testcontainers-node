@@ -5,13 +5,12 @@ import { RandomUuid } from "../../uuid";
 import { AbstractStartedContainer } from "../abstract-started-container";
 import { Host } from "../../docker/types";
 
-export class ArangoDBContainer extends GenericContainer {
-  private readonly defaultPort = 8529;
-  private readonly defaultUsername = "root";
+const PORT = 8529;
+const USERNAME = "root";
 
+export class ArangoDBContainer extends GenericContainer {
   constructor(image = "arangodb:latest", private password = new RandomUuid().nextUuid()) {
     super(image);
-    this.withExposedPorts(this.defaultPort).withWaitStrategy(Wait.forLogMessage("Have fun!"));
   }
 
   public withPassword(password: string): this {
@@ -19,27 +18,24 @@ export class ArangoDBContainer extends GenericContainer {
     return this;
   }
 
-  protected async preCreate(): Promise<void> {
-    this.withEnv("ARANGO_ROOT_PASSWORD", this.password);
-  }
-
   public async start(): Promise<StartedArangoContainer> {
-    return new StartedArangoContainer(await super.start(), this.defaultPort, this.defaultUsername, this.password);
+    this.withExposedPorts(PORT)
+      .withWaitStrategy(Wait.forLogMessage("Have fun!"))
+      .withEnv("ARANGO_ROOT_PASSWORD", this.password)
+      .withStartupTimeout(120_000);
+
+    return new StartedArangoContainer(await super.start(), this.password);
   }
 }
 
 export class StartedArangoContainer extends AbstractStartedContainer {
   private readonly host: Host;
+  private readonly port: Port;
 
-  constructor(
-    startedTestContainer: StartedTestContainer,
-    private readonly port: Port,
-    private readonly username: string,
-    private readonly password: string
-  ) {
+  constructor(startedTestContainer: StartedTestContainer, private readonly password: string) {
     super(startedTestContainer);
     this.host = this.startedTestContainer.getHost();
-    this.port = this.startedTestContainer.getMappedPort(port);
+    this.port = this.startedTestContainer.getMappedPort(PORT);
   }
 
   public getTcpUrl(): string {
@@ -55,6 +51,6 @@ export class StartedArangoContainer extends AbstractStartedContainer {
   }
 
   public getUsername(): string {
-    return this.username;
+    return USERNAME;
   }
 }
