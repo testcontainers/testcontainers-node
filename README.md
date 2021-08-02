@@ -151,6 +151,7 @@ Execute commands inside a running container:
 const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
+  .withCmd(["top"])
   .start();
 
 const { output, exitCode } = await container.exec(["echo", "hello", "world"]);
@@ -267,10 +268,12 @@ const network = await new Network()
     .start();
 
 const container = await new GenericContainer("alpine")
+  .withCmd(["top"])
   .withNetworkMode(network.getName())
   .start();
 
 const fooContainer = await new GenericContainer("alpine")
+  .withCmd(["top"])
   .withNetworkMode(network.getName())
   .withNetworkAliases("foo", "bar")
   .start();
