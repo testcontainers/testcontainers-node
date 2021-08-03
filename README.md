@@ -599,7 +599,7 @@ To avoid Docker pull limits, you can host your own images and use them by settin
 
 | Container | Environment Variable | Default
 | --- | --- | --- |
-| ryuk | `RYUK_CONTAINER_IMAGE` | `cristianrgreco/ryuk:0.4.0` |
+| ryuk | `RYUK_CONTAINER_IMAGE` | `testcontainers/ryuk:0.3.2` |
 | SSHd | `SSHD_CONTAINER_IMAGE` | `testcontainers/sshd:1.0.0` |
 
 ### ryuk
