@@ -467,6 +467,19 @@ describe("DockerComposeEnvironment", () => {
 });
 ```
 
+You can supply a list of service names to only start those services:
+
+```javascript
+const { DockerComposeEnvironment } = require("testcontainers");
+
+const environment = await new DockerComposeEnvironment(composeFilePath, composeFile).up(["database_service", "queue_service"]);
+
+// only database_service and queue_service will be started and available
+
+await environment.stop();
+
+```
+
 Create the containers with their own wait strategies:
 
 ```javascript
