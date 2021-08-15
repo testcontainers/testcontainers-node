@@ -31,8 +31,7 @@ export abstract class CredentialProvider implements RegistryAuthLocator {
       registryAddress: response.ServerURL,
     };
 
-    const obfuscatedAuthConfig = JSON.stringify({ ...authConfig, password: "*".repeat(10) });
-    log.debug(`Docker credential provider found auth config for ${registry}: ${obfuscatedAuthConfig}`);
+    log.debug(`Docker credential provider found auth config for ${registry}`);
 
     return authConfig;
   }
