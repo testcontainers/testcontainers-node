@@ -9,19 +9,3 @@ services:
     image: cristianrgreco/testcontainer:1.1.12
     ports:
       - 8080
-  service_3:
-    image: cristianrgreco/testcontainer:1.1.12
-    ports:
-      - 8080
-  service_4:
-    image: cristianrgreco/testcontainer:1.1.12
-    ports:
-      - 8080
-  service_5:
-    image: cristianrgreco/testcontainer:1.1.12
-    ports:
-      - 8080
-  service_6:
-    image: cristianrgreco/testcontainer:1.1.12
-    ports:
-      - 8080

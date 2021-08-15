@@ -161,28 +161,16 @@ describe("DockerComposeEnvironment", () => {
   });
 
   it("should support starting a subset of services defined in the docker-compose file", async () => {
-    const servicesToStart = ["service_2", "service_4", "service_6"];
     const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-many-services.yml").up(
-      servicesToStart
+      ["service_2"]
     );
 
-    await Promise.all(
-      servicesToStart.map(async (serviceName) => {
-        const containerName = `${serviceName}_1`;
-        const container = startedEnvironment.getContainer(containerName);
-        const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
-        const response = await fetch(`${url}/hello-world`);
-        expect(response.status).toBe(200);
-      })
-    );
+    const container = startedEnvironment.getContainer(`service_2_1`);
+    const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
+    const response = await fetch(`${url}/hello-world`);
+    expect(response.status).toBe(200);
     expect(() => startedEnvironment.getContainer("service_1")).toThrowError(
       `Cannot get container "service_1" as it is not running`
-    );
-    expect(() => startedEnvironment.getContainer("service_3")).toThrowError(
-      `Cannot get container "service_3" as it is not running`
-    );
-    expect(() => startedEnvironment.getContainer("service_5")).toThrowError(
-      `Cannot get container "service_5" as it is not running`
     );
     await startedEnvironment.down();
   });

@@ -474,7 +474,6 @@ const { DockerComposeEnvironment } = require("testcontainers");
 
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
   .up(["database_service", "queue_service"]);
-// only database_service and queue_service will be started and available
 ```
 
 Create the containers with their own wait strategies:
