@@ -10,7 +10,7 @@ export type Env = { [key in EnvKey]: EnvValue };
 
 export type Dir = string;
 
-export type BindMode = "rw" | "ro";
+export type BindMode = "rw" | "ro" | "z" | "Z";
 
 export type BindMount = {
   source: Dir;
