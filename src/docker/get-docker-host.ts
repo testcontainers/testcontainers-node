@@ -28,6 +28,7 @@ type HostStrategy = () => Promise<{ host: Host | undefined; callback: () => void
 
 const hostStrategies = (dockerode: Dockerode): Array<HostStrategy> => [
   async () => {
+    // @ts-ignore
     const host = dockerode.modem.host;
     return { host, callback: () => log.info(`Using Docker host from modem: ${host}`) };
   },
