@@ -46,28 +46,26 @@ export class KafkaContainer extends GenericContainer {
 
     this.withEnv(
       "KAFKA_ADVERTISED_LISTENERS",
-      `EXTERNAL_LISTENER://${await dockerHost}:${kafkaInternalPort},BROKER://${this.host}:${KAFKA_BROKER_PORT}`
+      `PLAINTEXT://${this.host}:${KAFKA_BROKER_PORT},EXTERNAL_LISTENER://${await dockerHost}:${kafkaInternalPort}`
     );
   }
 
   public async start(): Promise<StartedKafkaContainer> {
     this.withName(this.host)
       .withStartupTimeout(180_000)
-      .withEnv(
-        "KAFKA_LISTENER_SECURITY_PROTOCOL_MAP",
-        "BROKER:PLAINTEXT,EXTERNAL_LISTENER:PLAINTEXT,PLAINTEXT:PLAINTEXT"
-      )
-      .withEnv("KAFKA_INTER_BROKER_LISTENER_NAME", "BROKER")
+      .withEnv("KAFKA_LISTENER_SECURITY_PROTOCOL_MAP", "PLAINTEXT:PLAINTEXT,EXTERNAL_LISTENER:PLAINTEXT")
+      .withEnv("KAFKA_INTER_BROKER_LISTENER_NAME", "PLAINTEXT")
       .withEnv("KAFKA_BROKER_ID", "1")
       .withEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1")
       .withEnv("KAFKA_CONFLUENT_SUPPORT_METRICS_ENABLE", "false")
-      .withEnv("KAFKA_LISTENERS", `EXTERNAL_LISTENER://0.0.0.0:${KAFKA_PORT},BROKER://0.0.0.0:${KAFKA_BROKER_PORT}`);
+      .withEnv("KAFKA_LISTENERS", `PLAINTEXT://0.0.0.0:${KAFKA_BROKER_PORT},EXTERNAL_LISTENER://0.0.0.0:${KAFKA_PORT}`);
 
+    let zooKeeperPort;
     if (this.isZooKeeperProvided) {
       this.withEnv("KAFKA_ZOOKEEPER_CONNECT", `${this.zooKeeperHost}:${this.zooKeeperPort}`);
     } else {
       const zooKeeperHost = this.uuid.nextUuid();
-      const zooKeeperPort = await this.portGenerator.generatePort();
+      zooKeeperPort = await this.portGenerator.generatePort();
 
       this.withEnv("KAFKA_ZOOKEEPER_CONNECT", `${zooKeeperHost}:${zooKeeperPort}`);
 
@@ -86,7 +84,7 @@ export class KafkaContainer extends GenericContainer {
       this.zooKeeperContainer = await zookeeperContainer.start();
     }
 
-    return new StartedKafkaContainer(await super.start(), this.network, this.zooKeeperContainer);
+    return new StartedKafkaContainer(await super.start(), this.network, this.zooKeeperContainer, zooKeeperPort);
   }
 }
 
@@ -94,7 +92,8 @@ export class StartedKafkaContainer extends AbstractStartedContainer {
   constructor(
     startedTestContainer: StartedTestContainer,
     private readonly network?: StartedNetwork,
-    private readonly zooKeeperContainer?: StartedTestContainer
+    private readonly zooKeeperContainer?: StartedTestContainer,
+    private readonly zooKeeperPort?: number
   ) {
     super(startedTestContainer);
   }
@@ -115,5 +114,13 @@ export class StartedKafkaContainer extends AbstractStartedContainer {
     }
 
     return stoppedContainer;
+  }
+
+  public getZookeeperName(): string | undefined {
+    return this.zooKeeperContainer?.getName();
+  }
+
+  public getZookeeperPort(): number | undefined {
+    return this.zooKeeperPort;
   }
 }

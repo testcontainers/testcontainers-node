@@ -59,6 +59,22 @@ describe("KafkaContainer", () => {
     await network.stop();
   });
 
+  it("should return in-built zoo-keeper name", async () => {
+    const kafkaContainer = await new KafkaContainer().withExposedPorts(9093).start();
+
+    expect(kafkaContainer.getZookeeperName()).toBeDefined();
+
+    await kafkaContainer.stop();
+  });
+
+  it("should return in-built zoo-keeper port", async () => {
+    const kafkaContainer = await new KafkaContainer().withExposedPorts(9093).start();
+
+    expect(kafkaContainer.getZookeeperPort()).toBeDefined();
+
+    await kafkaContainer.stop();
+  });
+
   const testPubSub = async (kafkaContainer: StartedTestContainer) => {
     const kafka = new Kafka({
       logLevel: logLevel.NOTHING,
