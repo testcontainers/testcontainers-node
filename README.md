@@ -16,15 +16,15 @@ npm i -D testcontainers
 
 The following environment variables are supported:
 
-- `DEBUG` | `testcontainers` | See output
-- `DEBUG` | `testcontainers:containers` | See container output
-- `DEBUG` | `testcontainers*` | See all output
-- `DOCKER_HOST` | `tcp://docker:2375` | Daemon socket to connect to
-- `TESTCONTAINERS_HOST_OVERRIDE` | `docker.svc.local` | Docker's host on which ports are exposed
-- `TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE` | `/var/run/docker.sock` | Path to Docker's socket. Used by Ryuk and a few other containers that need to perform Docker actions
-- `TESTCONTAINERS_RYUK_DISABLED` | `true` | Disable [ryuk](#ryuk)
-- `RYUK_CONTAINER_IMAGE` | `registry.mycompany.com/mirror/ryuk:0.3.0` | Custom image for [ryuk](#ryuk)
-- `SSHD_CONTAINER_IMAGE` | `registry.mycompany.com/mirror/sshd:1.0.0` | Custom image for [SSHd](#SSHd)
+- `DEBUG=testcontainers` See output
+- `DEBUG=testcontainers:containers` See container output
+- `DEBUG=testcontainers*` See all output
+- `DOCKER_HOST=tcp://docker:2375` Daemon socket to connect to
+- `TESTCONTAINERS_HOST_OVERRIDE=docker.svc.local` Docker's host on which ports are exposed
+- `TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock` Path to Docker's socket. Used by Ryuk and a few other containers that need to perform Docker actions
+- `TESTCONTAINERS_RYUK_DISABLED=true` Disable [ryuk](#ryuk)
+- `RYUK_CONTAINER_IMAGE=registry.mycompany.com/mirror/ryuk:0.3.0` Custom image for [ryuk](#ryuk)
+- `SSHD_CONTAINER_IMAGE=registry.mycompany.com/mirror/sshd:1.0.0` Custom image for [SSHd](#SSHd)
 
 ## Modules
 
