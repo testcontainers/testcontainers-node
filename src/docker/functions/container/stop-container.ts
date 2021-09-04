@@ -9,6 +9,7 @@ export const stopContainer = async (container: Dockerode.Container, options: Sto
   try {
     await container.stop({ t: options.timeout / 1000 });
   } catch (err) {
+    // @ts-ignore
     if (err.statusCode === 304) {
       log.info(`Container has already been stopped: ${container.id}`);
     } else {

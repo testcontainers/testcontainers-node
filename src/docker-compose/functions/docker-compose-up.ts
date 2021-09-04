@@ -23,6 +23,6 @@ export const dockerComposeUp = async (options: DockerComposeOptions, services?: 
       log.warn(`Failed to down DockerCompose environment after failed up`);
     }
 
-    throw new Error(err);
+    throw err;
   }
 };
