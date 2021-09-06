@@ -125,6 +125,15 @@ describe("DockerComposeEnvironment", () => {
     expect(testVolumes).toHaveLength(0);
   });
 
+  it("should not wait for non-public ports", async () => {
+    const startedEnvironment = await new DockerComposeEnvironment(
+      fixtures,
+      "docker-compose-with-private-port.yml"
+    ).up();
+
+    await startedEnvironment.down();
+  });
+
   it("should re-build the Dockerfiles", async () => {
     const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml").withBuild().up();
 

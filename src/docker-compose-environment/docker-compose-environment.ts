@@ -119,7 +119,9 @@ export class DockerComposeEnvironment {
 
   private getBoundPorts(containerInfo: Dockerode.ContainerInfo): BoundPorts {
     const boundPorts = new BoundPorts();
-    containerInfo.Ports.forEach((port) => boundPorts.setBinding(port.PrivatePort, port.PublicPort));
+    containerInfo.Ports.filter((port) => port.PublicPort !== undefined).forEach((port) =>
+      boundPorts.setBinding(port.PrivatePort, port.PublicPort)
+    );
     return boundPorts;
   }
 
