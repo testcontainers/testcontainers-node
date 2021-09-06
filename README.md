@@ -332,6 +332,15 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+Creating a container with volumes associated:
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await new GenericContainer("alpine")
+  .withVolumes("volumes/new-volume")
+  .start();
+```
 Creating a container with [IPC mode](https://docs.docker.com/engine/reference/run/#ipc-settings---ipc):
 
 ```javascript
