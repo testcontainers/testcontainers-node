@@ -202,7 +202,7 @@ describe("GenericContainer", () => {
 
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
       .withExposedPorts(8080)
-      .withVolumes(volumes)
+      .withVolumes(...volumes)
       .start();
 
     const dockerContainer = getContainerById(container.getId());

@@ -23,7 +23,7 @@ export type CreateContainerOptions = {
   extraHosts: ExtraHost[];
   ipcMode?: string;
   user?: string;
-  volumes?: string | string[];
+  volumes?: string[];
 };
 
 export const createContainer = async (options: CreateContainerOptions): Promise<Dockerode.Container> => {
@@ -50,7 +50,7 @@ export const createContainer = async (options: CreateContainerOptions): Promise<
         LogConfig: getLogConfig(options.useDefaultLogDriver),
         Privileged: options.privilegedMode,
       },
-      Volumes: getVolumes(options.volumes),
+      Volumes: options.volumes ? getVolumes(...options.volumes) : undefined,
     });
   } catch (err) {
     log.error(`Failed to create container for image ${options.imageName}: ${err}`);
@@ -61,16 +61,9 @@ export const createContainer = async (options: CreateContainerOptions): Promise<
 type DockerodeEnvironment = string[];
 
 type Volumes = { [volumes in string]: Record<string, unknown> };
-const getVolumes = (volumeNames: string | string[] | undefined) => {
+const getVolumes = (...volumeNames: string[]) => {
   const volumeArray: Volumes = {};
-  if (!volumeNames) {
-    return;
-  }
-  if (volumeNames instanceof Array) {
-    volumeNames.forEach((name) => (volumeArray[name] = {}));
-  } else {
-    volumeArray[volumeNames] = {};
-  }
+  volumeNames.forEach((name) => (volumeArray[name] = {}));
   return volumeArray;
 };
 const getEnv = (env: Env): DockerodeEnvironment =>

@@ -32,6 +32,7 @@ export interface TestContainer {
   withPullPolicy(pullPolicy: PullPolicy): this;
   withCopyFileToContainer(sourcePath: string, containerPath: string): this;
   withCopyContentToContainer(content: string | Buffer | Readable, containerPath: string): this;
+  withVolumes(...volume: string[]): this;
 }
 
 export interface StopOptions {

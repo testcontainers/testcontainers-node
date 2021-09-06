@@ -68,7 +68,7 @@ export class GenericContainer implements TestContainer {
   protected tarToCopy?: archiver.Archiver;
   private extraHosts: ExtraHost[] = [];
   protected entryPoint?: string | string[];
-  protected volumes?: string | string[];
+  protected volumes?: string[];
 
   constructor(readonly image: string) {
     this.imageName = DockerImageName.fromString(image);
@@ -186,7 +186,7 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
-  public withVolumes(volumes: string | string[]): this {
+  public withVolumes(...volumes: string[]): this {
     this.volumes = volumes;
     return this;
   }
