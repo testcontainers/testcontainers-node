@@ -23,12 +23,12 @@ export type CreateContainerOptions = {
   extraHosts: ExtraHost[];
   ipcMode?: string;
   user?: string;
+  volumes?: string | string[];
 };
 
 export const createContainer = async (options: CreateContainerOptions): Promise<Dockerode.Container> => {
   try {
     log.info(`Creating container for image: ${options.imageName}`);
-
     return await dockerode.createContainer({
       name: options.name,
       User: options.user,
@@ -50,6 +50,7 @@ export const createContainer = async (options: CreateContainerOptions): Promise<
         LogConfig: getLogConfig(options.useDefaultLogDriver),
         Privileged: options.privilegedMode,
       },
+      Volumes: getVolumes(options.volumes),
     });
   } catch (err) {
     log.error(`Failed to create container for image ${options.imageName}: ${err}`);
@@ -59,6 +60,19 @@ export const createContainer = async (options: CreateContainerOptions): Promise<
 
 type DockerodeEnvironment = string[];
 
+type Volumes = { [volumes in string]: Record<string, unknown> };
+const getVolumes = (volumeNames: string | string[] | undefined) => {
+  const volumeArray: Volumes = {};
+  if (!volumeNames) {
+    return;
+  }
+  if (volumeNames instanceof Array) {
+    volumeNames.forEach((name) => (volumeArray[name] = {}));
+  } else {
+    volumeArray[volumeNames] = {};
+  }
+  return volumeArray;
+};
 const getEnv = (env: Env): DockerodeEnvironment =>
   Object.entries(env).reduce(
     (dockerodeEnvironment, [key, value]) => [...dockerodeEnvironment, `${key}=${value}`],

@@ -182,6 +182,37 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
+  it("should create container with volume", async () => {
+    const volume = "/volumes/new-volume";
+
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
+      .withExposedPorts(8080)
+      .withVolumes(volume)
+      .start();
+
+    const dockerContainer = getContainerById(container.getId());
+    const containerInfo = await dockerContainer.inspect();
+    await container.stop();
+    expect(containerInfo.Mounts.length).toBe(1);
+    expect(containerInfo.Mounts[0].Destination).toBe(volume);
+  });
+
+  it("should create container with array of volumes", async () => {
+    const volumes = ["/volumes/new-volume", "/volumes/another-volume"];
+
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
+      .withExposedPorts(8080)
+      .withVolumes(volumes)
+      .start();
+
+    const dockerContainer = getContainerById(container.getId());
+    const containerInfo = await dockerContainer.inspect();
+    await container.stop();
+    expect(containerInfo.Mounts.length).toBe(2);
+    expect(containerInfo.Mounts[0].Destination).toBe(volumes[0]);
+    expect(containerInfo.Mounts[1].Destination).toBe(volumes[1]);
+  });
+
   it("should set tmpfs", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
       .withTmpFs({ "/testtmpfs": "rw" })

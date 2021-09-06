@@ -66,8 +66,9 @@ export class GenericContainer implements TestContainer {
   protected user?: string;
   protected pullPolicy: PullPolicy = new DefaultPullPolicy();
   protected tarToCopy?: archiver.Archiver;
-
   private extraHosts: ExtraHost[] = [];
+  protected entryPoint?: string | string[];
+  protected volumes?: string | string[];
 
   constructor(readonly image: string) {
     this.imageName = DockerImageName.fromString(image);
@@ -111,6 +112,7 @@ export class GenericContainer implements TestContainer {
       extraHosts: this.extraHosts,
       ipcMode: this.ipcMode,
       user: this.user,
+      volumes: this.volumes,
     });
 
     if (!this.imageName.isHelperContainer() && PortForwarderInstance.isRunning()) {
@@ -146,7 +148,6 @@ export class GenericContainer implements TestContainer {
     const inspectResult = await inspectContainer(container);
 
     await this.waitForContainer(container, boundPorts);
-
     return new StartedGenericContainer(container, await dockerHost, inspectResult, boundPorts, inspectResult.name);
   }
 
@@ -182,6 +183,11 @@ export class GenericContainer implements TestContainer {
 
   public withExposedPorts(...ports: Port[]): this {
     this.ports = ports;
+    return this;
+  }
+
+  public withVolumes(volumes: string | string[]): this {
+    this.volumes = volumes;
     return this;
   }
 
