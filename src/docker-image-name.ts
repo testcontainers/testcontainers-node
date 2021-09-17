@@ -11,6 +11,8 @@ export class DockerImageName {
   ) {
     if (this.registry) {
       this.string = `${this.registry}/${this.image}:${this.tag}`;
+    } else if (this.tag.startsWith("sha256:")) {
+      this.string = `${this.image}@${this.tag}`;
     } else {
       this.string = `${this.image}:${this.tag}`;
     }
