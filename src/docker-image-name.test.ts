@@ -44,6 +44,11 @@ describe("DockerImageName", () => {
       const imageName = new DockerImageName(undefined, "image", "sha256:1234abcd1234abcd1234abcd1234abcd");
       expect(imageName.toString()).toBe("image@sha256:1234abcd1234abcd1234abcd1234abcd");
     });
+
+    it("should work with registry and tag being a hash", () => {
+      const imageName = new DockerImageName("registry", "image", "sha256:1234abcd1234abcd1234abcd1234abcd");
+      expect(imageName.toString()).toBe("registry/image@sha256:1234abcd1234abcd1234abcd1234abcd");
+    });
   });
 
   describe("fromString", () => {
