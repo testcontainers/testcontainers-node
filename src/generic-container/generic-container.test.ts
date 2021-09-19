@@ -262,7 +262,7 @@ describe("GenericContainer", () => {
     const { output, exitCode } = await container.exec(["echo", "hello", "world"]);
 
     expect(exitCode).toBe(0);
-    expect(output).toContain("hello world");
+    expect(output.trim()).toBe("hello world");
 
     await container.stop();
   });

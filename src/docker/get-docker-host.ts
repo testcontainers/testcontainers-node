@@ -11,58 +11,46 @@ export const getDockerHost = async (dockerode: Dockerode): Promise<Host> => {
     log.info(`Detected DOCKER_HOST environment variable: ${process.env.DOCKER_HOST}`);
   }
 
-  for (const hostStrategy of hostStrategies(dockerode)) {
+  for (const [hostStrategyName, hostStrategy] of Object.entries(hostStrategies(dockerode))) {
     const result = await hostStrategy();
 
-    if (result && result.host) {
-      result.callback();
-      return result.host;
+    if (result) {
+      log.info(`Docker host strategy ${hostStrategyName}: ${result}`);
+      return result;
     }
   }
 
-  log.info(`Using fallback Docker host: ${DEFAULT_HOST}`);
+  log.info(`Docker host strategy FALLBACK: ${DEFAULT_HOST}`);
   return DEFAULT_HOST;
 };
 
-type HostStrategy = () => Promise<{ host: Host | undefined; callback: () => void } | undefined>;
+type HostStrategy = () => Promise<Host | undefined>;
 
-const hostStrategies = (dockerode: Dockerode): Array<HostStrategy> => [
-  async () => {
-    const host = dockerode.modem.host;
-    return { host, callback: () => log.info(`Using Docker host from modem: ${host}`) };
-  },
-
-  async () => {
-    const host = process.env["TESTCONTAINERS_HOST_OVERRIDE"];
-    return { host, callback: () => log.info(`Using TESTCONTAINERS_HOST_OVERRIDE: ${host}`) };
-  },
-
-  async () => {
+const hostStrategies = (dockerode: Dockerode): { [hostStrategyName: string]: HostStrategy } => ({
+  MODEM: async () => dockerode.modem.host,
+  TESTCONTAINERS_HOST_OVERRIDE: async () => process.env["TESTCONTAINERS_HOST_OVERRIDE"],
+  OUTSIDE_CONTAINER: async () => {
     if (!isInContainer()) {
-      return { host: DEFAULT_HOST, callback: () => log.info(`Using default Docker host: ${DEFAULT_HOST}`) };
+      return DEFAULT_HOST;
     }
   },
-
-  async () => {
+  INSIDE_CONTAINER_NO_IPAM: async () => {
     const network: NetworkInspectInfo = await dockerode.getNetwork("bridge").inspect();
     if (!network.IPAM || !network.IPAM.Config) {
-      return {
-        host: DEFAULT_HOST,
-        callback: () => log.info(`Using default Docker host from within container: ${DEFAULT_HOST}`),
-      };
-    }
-
-    const gateways = network.IPAM.Config.filter((config) => !!config.Gateway);
-    if (gateways.length > 0) {
-      const host = gateways[0].Gateway;
-      return { host, callback: () => log.info(`Using Docker host from network gateway within container: ${host}`) };
+      return DEFAULT_HOST;
     }
   },
-
-  async () => {
-    const host = await runInContainer("alpine:3.5", ["sh", "-c", "ip route|awk '/default/ { print $3 }'"]);
-    return { host, callback: () => log.info(`Using Docker host from evaluated gateway within container: ${host}`) };
+  INSIDE_CONTAINER_IPAM: async () => {
+    const network: NetworkInspectInfo = await dockerode.getNetwork("bridge").inspect();
+    if (network.IPAM && network.IPAM.Config) {
+      const gateways = network.IPAM.Config.filter((config) => !!config.Gateway);
+      if (gateways.length > 0) {
+        return gateways[0].Gateway;
+      }
+    }
   },
-];
+  CONTAINER_GATEWAY: async () =>
+    await runInContainer("alpine:3.5", ["sh", "-c", "ip route|awk '/default/ { print $3 }'"]),
+});
 
 const isInContainer = () => fs.existsSync("/.dockerenv");

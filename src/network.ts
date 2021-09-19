@@ -7,12 +7,9 @@ import { removeNetwork } from "./docker/functions/network/remove-network";
 export class Network {
   private readonly createNetworkOptions: CreateNetworkOptions;
 
-  constructor(
-    createNetworkOptions: Partial<CreateNetworkOptions> = {},
-    private readonly uuid: Uuid = new RandomUuid()
-  ) {
+  constructor(createNetworkOptions: Partial<CreateNetworkOptions> = {}, uuid: Uuid = new RandomUuid()) {
     this.createNetworkOptions = {
-      name: this.uuid.nextUuid(),
+      name: uuid.nextUuid(),
       driver: "bridge",
       checkDuplicate: true,
       internal: false,
