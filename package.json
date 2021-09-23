@@ -40,9 +40,9 @@
     "docker-compose": "^0.23.13",
     "dockerode": "^3.3.1",
     "get-port": "^5.1.1",
-    "glob": "^7.1.7",
+    "glob": "^7.2.0",
     "slash": "^3.0.0",
-    "ssh-remote-port-forward": "^1.0.3",
+    "ssh-remote-port-forward": "^1.0.4",
     "tar-fs": "^2.1.1"
   },
   "devDependencies": {
@@ -51,7 +51,7 @@
     "@types/debug": "4.1.7",
     "@types/glob": "^7.1.4",
     "@types/jest": "^27.0.2",
-    "@types/node": "^16.9.4",
+    "@types/node": "^16.9.6",
     "@types/node-fetch": "^2.5.11",
     "@types/pg": "^8.6.1",
     "@types/tar-fs": "^2.0.1",
