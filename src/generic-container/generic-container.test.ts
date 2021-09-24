@@ -21,7 +21,6 @@ describe("GenericContainer", () => {
 
     expect(response.status).toBe(200);
     await container.stop();
-    await container.stop();
   });
 
   it("should pull an image from a private registry", async () => {
