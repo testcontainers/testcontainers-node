@@ -8,8 +8,8 @@ export type StopContainerOptions = {
 export const stopContainer = async (container: Dockerode.Container, options: StopContainerOptions): Promise<void> => {
   try {
     await container.stop({ t: options.timeout / 1000 });
-  } catch (err) {
-    if (err.statusCode === 304) {
+  } catch (err: any) {
+    if (err.statusCode === 304 || err.statusCode === 404) {
       log.info(`Container has already been stopped: ${container.id}`);
     } else {
       log.error(`Failed to stop container ${container.id}: ${err}`);

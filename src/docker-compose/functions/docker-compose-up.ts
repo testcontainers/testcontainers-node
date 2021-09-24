@@ -14,7 +14,7 @@ export const dockerComposeUp = async (options: DockerComposeOptions, services?: 
       await upAll(defaultDockerComposeOptions(options));
     }
     log.info(`Upped DockerCompose environment`);
-  } catch (err) {
+  } catch (err: any) {
     const errorMessage = err.err || err.message || err;
     log.error(`Failed to up DockerCompose environment: ${errorMessage}`);
 
