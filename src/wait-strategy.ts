@@ -92,21 +92,17 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
         }
       };
 
+      const lineProcessor = (line: string) => {
+        if (comparisonFn(line)) {
+          stream.destroy();
+          clearTimeout(timeout);
+          resolve();
+        }
+      };
+
       byline(stream)
-        .on("data", (line) => {
-          if (comparisonFn(line)) {
-            stream.destroy();
-            clearTimeout(timeout);
-            resolve();
-          }
-        })
-        .on("err", (line) => {
-          if (comparisonFn(line)) {
-            stream.destroy();
-            clearTimeout(timeout);
-            resolve();
-          }
-        })
+        .on("data", lineProcessor)
+        .on("err", lineProcessor)
         .on("end", () => {
           stream.destroy();
           clearTimeout(timeout);
@@ -124,7 +120,7 @@ export class HealthCheckWaitStrategy extends AbstractWaitStrategy {
 
     const status = await retryStrategy.retryUntil(
       async () => (await inspectContainer(container)).healthCheckStatus,
-      (status) => status === "healthy" || status === "unhealthy",
+      (healthCheckStatus) => healthCheckStatus === "healthy" || healthCheckStatus === "unhealthy",
       () => {
         const timeout = this.startupTimeout;
         throw new Error(`Health check not healthy after ${timeout}ms for ${container.id}`);

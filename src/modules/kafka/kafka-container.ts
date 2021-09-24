@@ -69,7 +69,7 @@ export class KafkaContainer extends GenericContainer {
 
       this.withEnv("KAFKA_ZOOKEEPER_CONNECT", `${zooKeeperHost}:${zooKeeperPort}`);
 
-      const zookeeperContainer = await new GenericContainer(this.zooKeeperImage)
+      const zookeeperContainer = new GenericContainer(this.zooKeeperImage)
         .withName(zooKeeperHost)
         .withEnv("ZOOKEEPER_CLIENT_PORT", zooKeeperPort.toString());
 

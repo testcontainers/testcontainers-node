@@ -4,7 +4,6 @@ import { GenericContainer } from "./generic-container/generic-container";
 import { StartedTestContainer } from "./test-container";
 import { sessionId } from "./docker/session-id";
 import { dockerHost } from "./docker/docker-host";
-import { Id } from "./docker/types";
 import { REAPER_IMAGE } from "./images";
 
 export interface Reaper {
@@ -14,11 +13,7 @@ export interface Reaper {
 }
 
 class RealReaper implements Reaper {
-  constructor(
-    private readonly sessionId: Id,
-    private readonly container: StartedTestContainer,
-    private readonly socket: Socket
-  ) {}
+  constructor(private readonly container: StartedTestContainer, private readonly socket: Socket) {}
 
   public addProject(projectName: string): void {
     this.socket.write(`label=com.docker.compose.project=${projectName}\r\n`);
@@ -109,11 +104,11 @@ export class ReaperInstance {
         }
       });
 
-    return await new Promise((resolve) => {
+    return new Promise((resolve) => {
       socket.connect(port, host, () => {
         log.debug(`Connected to Reaper ${container.getId()}`);
         socket.write(`label=org.testcontainers.session-id=${sessionId}\r\n`);
-        const reaper = new RealReaper(sessionId, container, socket);
+        const reaper = new RealReaper(container, socket);
         resolve(reaper);
       });
     });

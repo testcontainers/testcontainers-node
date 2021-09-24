@@ -1,7 +1,6 @@
 import { StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
 import { Port } from "../port";
-import { ContainerName, Host, Id } from "../docker/types";
-import { Command, ExecResult } from "../docker/types";
+import { ContainerName, Host, Id, Command, ExecResult } from "../docker/types";
 import { Readable } from "stream";
 
 export class AbstractStartedContainer {
