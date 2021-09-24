@@ -15,9 +15,11 @@ export const findDockerIgnoreFiles = async (context: string): Promise<Set<string
     .split(os.EOL)
     .map((dockerIgnorePattern) => path.resolve(context, dockerIgnorePattern));
 
-  const dockerIgnoreMatches: string[][] = await Promise.all(dockerIgnorePatterns.map(findIgnoredFilesForPattern));
+  const dockerIgnoreMatches: string[] = (
+    await Promise.all(dockerIgnorePatterns.map(findIgnoredFilesForPattern))
+  ).reduce((prev, next) => [...prev, ...next]);
 
-  return new Set<string>(dockerIgnoreMatches.flat());
+  return new Set<string>(dockerIgnoreMatches);
 };
 
 const findIgnoredFilesForPattern = (dockerIgnorePattern: string): Promise<string[]> =>
