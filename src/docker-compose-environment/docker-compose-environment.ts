@@ -80,7 +80,7 @@ export class DockerComposeEnvironment {
     const startedGenericContainers = (
       await Promise.all(
         startedContainers.map(async (startedContainer) => {
-          const container = await getContainerById(startedContainer.Id);
+          const container = getContainerById(startedContainer.Id);
           const containerName = resolveContainerName(this.projectName, startedContainer.Names[0]);
 
           (await containerLogs(container))

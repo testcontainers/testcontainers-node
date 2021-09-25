@@ -49,8 +49,7 @@ const hostStrategies = (dockerode: Dockerode): { [hostStrategyName: string]: Hos
       }
     }
   },
-  CONTAINER_GATEWAY: async () =>
-    await runInContainer("alpine:3.5", ["sh", "-c", "ip route|awk '/default/ { print $3 }'"]),
+  CONTAINER_GATEWAY: async () => runInContainer("alpine:3.5", ["sh", "-c", "ip route|awk '/default/ { print $3 }'"]),
 });
 
 const isInContainer = () => fs.existsSync("/.dockerenv");

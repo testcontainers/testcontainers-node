@@ -22,7 +22,7 @@ export class StartedGenericContainer implements StartedTestContainer {
   ) {}
 
   public async stop(options: Partial<StopOptions> = {}): Promise<StoppedTestContainer> {
-    return await this.stopContainer(options);
+    return this.stopContainer(options);
   }
 
   private async stopContainer(options: Partial<StopOptions> = {}): Promise<StoppedGenericContainer> {

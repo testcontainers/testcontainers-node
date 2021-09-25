@@ -5,9 +5,12 @@ export type RemoveContainerOptions = {
   removeVolumes: boolean;
 };
 
-export const removeContainer = (container: Dockerode.Container, options: RemoveContainerOptions): Promise<void> => {
+export const removeContainer = async (
+  container: Dockerode.Container,
+  options: RemoveContainerOptions
+): Promise<void> => {
   try {
-    return container.remove({ v: options.removeVolumes });
+    await container.remove({ v: options.removeVolumes });
   } catch (err) {
     log.error(`Failed to remove container ${container.id}: ${err}`);
     throw err;
