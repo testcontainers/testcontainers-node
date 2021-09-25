@@ -10,7 +10,7 @@ on:
     branches: [ master ]
 
 jobs:
-  native:
+  test:
     runs-on: ${{ matrix.os-version }}
     strategy:
       matrix:
@@ -29,22 +29,3 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: npm ci
     - run: npm test
-
-  wormhole:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [14.x]
-        node-image-version: [14-alpine]
-    steps:
-    - uses: actions/checkout@v2
-    - name: Login to Docker Hub
-      uses: docker/login-action@v1
-      with:
-        username: ${{ secrets.dockerhub_username }}
-        password: ${{ secrets.dockerhub_password }}
-    - name: Test wormhole ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-    - run: docker run -i --rm -v /var/run/docker.sock:/var/run/docker.sock -v "$HOME:$HOME" -v "$PWD:$PWD" -w "$PWD" node:${{ matrix.node-image-version }} npm ci && npm test
