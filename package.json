@@ -65,6 +65,7 @@
     "jest": "^27.2.1",
     "kafkajs": "^1.15.0",
     "lint-staged": "^11.1.2",
+    "mysql2": "^2.3.0",
     "neo4j-driver": "^4.3.3",
     "node-fetch": "^2.6.1",
     "pg": "^8.7.1",
