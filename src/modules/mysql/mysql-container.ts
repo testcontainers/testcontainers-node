@@ -1,3 +1,4 @@
+import { ExecResult } from "./../../docker/types";
 import { GenericContainer } from "../../generic-container/generic-container";
 import { StartedTestContainer } from "../../test-container";
 import { RandomUuid } from "../../uuid";
@@ -84,5 +85,21 @@ export class StartedMySqlContainer extends AbstractStartedContainer {
 
   public getRootPassword(): string {
     return this.rootPassword;
+  }
+
+  public async executeQuery(query: string, additionalFlags: string[] = []): Promise<string> {
+    const result = await this.startedTestContainer.exec([
+      "mysql",
+      "-u",
+      this.username,
+      `-p${this.userPassword}`,
+      "-e",
+      `${query};`,
+      ...additionalFlags,
+    ]);
+    if (result.exitCode !== 0) {
+      throw new Error(`executeQuery failed with exit code ${result.exitCode} for query: ${query}`);
+    }
+    return result.output;
   }
 }

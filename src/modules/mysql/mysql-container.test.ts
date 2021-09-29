@@ -57,4 +57,12 @@ describe("MySqlContainer", () => {
     await client.end();
     await container.stop();
   });
+  it("should execute a query and return the result", async () => {
+    const container = await new MySqlContainer().start();
+
+    const queryResult = await container.executeQuery("SELECT 1 as res");
+    expect(queryResult).toEqual("res\n1\n");
+
+    await container.stop();
+  });
 });
