@@ -1,4 +1,3 @@
-import { ExecResult } from "./../../docker/types";
 import { GenericContainer } from "../../generic-container/generic-container";
 import { StartedTestContainer } from "../../test-container";
 import { RandomUuid } from "../../uuid";

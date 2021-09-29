@@ -2,7 +2,7 @@ import { createConnection } from "mysql2/promise";
 import { MySqlContainer } from "./mysql-container";
 
 describe("MySqlContainer", () => {
-  jest.setTimeout(180_000);
+  jest.setTimeout(240_000);
 
   it("should work", async () => {
     const container = await new MySqlContainer().start();
@@ -57,6 +57,7 @@ describe("MySqlContainer", () => {
     await client.end();
     await container.stop();
   });
+
   it("should execute a query and return the result", async () => {
     const container = await new MySqlContainer().start();
 
