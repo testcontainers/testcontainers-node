@@ -12,6 +12,7 @@ on:
 jobs:
   test:
     runs-on: ${{ matrix.os-version }}
+    environment: test
     strategy:
       matrix:
         os-version: [ubuntu-latest]
