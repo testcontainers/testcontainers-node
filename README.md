@@ -115,7 +115,7 @@ Creating a container explicit port mapping:
 ```javascript
 const { GenericContainer } = require("testcontainers");
 
-const container = await new GenericContainer("alpine").withPortMapping({ 3000: 8080, 3001: 8081 }).start();
+const container = await new GenericContainer("alpine").withPortMappings({ 3000: 8080, 3001: 8081 }).start();
 ```
 
 Creating a container with multiple exposed ports:

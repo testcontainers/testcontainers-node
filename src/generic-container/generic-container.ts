@@ -189,7 +189,7 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
-  public withPortMapping(portMappings: PortMappings): this {
+  public withPortMappings(portMappings: PortMappings): this {
     this.portMappings = portMappings;
     return this;
   }
