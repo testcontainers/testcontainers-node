@@ -41,6 +41,7 @@ import { removeContainer } from "../docker/functions/container/remove-container"
 import { putContainerArchive } from "../docker/functions/container/put-container-archive";
 import { GenericContainerBuilder } from "./generic-container-builder";
 import { StartedGenericContainer } from "./started-generic-container";
+import { PortMappings } from "../port-mappings";
 
 export class GenericContainer implements TestContainer {
   public static fromDockerfile(context: BuildContext, dockerfileName = "Dockerfile"): GenericContainerBuilder {
@@ -53,6 +54,7 @@ export class GenericContainer implements TestContainer {
   protected networkMode?: NetworkMode;
   protected networkAliases: string[] = [];
   protected ports: Port[] = [];
+  protected portMappings: PortMappings = {};
   protected cmd: Command[] = [];
   protected bindMounts: BindMount[] = [];
   protected name?: ContainerName;
@@ -81,6 +83,8 @@ export class GenericContainer implements TestContainer {
     });
 
     const boundPorts = await new PortBinder().bind(this.ports);
+
+    this.setExplicitPortMappings(boundPorts);
 
     if (!this.imageName.isReaper()) {
       await ReaperInstance.getInstance();
@@ -185,6 +189,11 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
+  public withPortMapping(portMappings: PortMappings): this {
+    this.portMappings = portMappings;
+    return this;
+  }
+
   public withBindMount(source: Dir, target: Dir, bindMode: BindMode = "rw"): this {
     this.bindMounts.push({ source, target, bindMode });
     return this;
@@ -275,5 +284,11 @@ export class GenericContainer implements TestContainer {
     const hostPortCheck = new HostPortCheck(host);
     const internalPortCheck = new InternalPortCheck(container);
     return new HostPortWaitStrategy(hostPortCheck, internalPortCheck);
+  }
+
+  private setExplicitPortMappings(boundPorts: BoundPorts) {
+    for (const [key, value] of Object.entries(this.portMappings)) {
+      boundPorts.setBinding(Number(key), Number(value));
+    }
   }
 }

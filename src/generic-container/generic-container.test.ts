@@ -496,5 +496,18 @@ describe("GenericContainer", () => {
 
       await startedContainer.stop();
     });
+
+    it("should set port mapping", async () => {
+      const context = path.resolve(fixtures, "docker-with-custom-filename");
+      const container = await GenericContainer.fromDockerfile(context, "Dockerfile-A").build();
+      const fixedPort = 10_000;
+      const startedContainer = await container.withPortMapping({ 8080: fixedPort }).start();
+
+      const url = `http://${startedContainer.getHost()}:${fixedPort}`;
+      const response = await fetch(`${url}/hello-world`);
+
+      expect(response.status).toBe(200);
+      await startedContainer.stop();
+    });
   });
 });
