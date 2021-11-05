@@ -523,6 +523,16 @@ const environment = await new DockerComposeEnvironment(composeFilePath, composeF
   .up();
 ```
 
+If containers already exist, you can specify not to re-create them. This may be useful for example if you up the environment before each test: 
+
+```javascript
+const { DockerComposeEnvironment } = require("testcontainers");
+
+const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
+  .withNoRecreate()
+  .up();
+```
+
 Bind environment variables to the docker-compose file. For example if we have the following docker-compose file:
 
 ```yaml
