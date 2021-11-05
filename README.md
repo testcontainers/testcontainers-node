@@ -523,7 +523,7 @@ const environment = await new DockerComposeEnvironment(composeFilePath, composeF
   .up();
 ```
 
-If containers already exist, you can specify not to re-create them. This may be useful for example if you up the environment before each test: 
+Specify not to re-create containers that are already running: 
 
 ```javascript
 const { DockerComposeEnvironment } = require("testcontainers");
