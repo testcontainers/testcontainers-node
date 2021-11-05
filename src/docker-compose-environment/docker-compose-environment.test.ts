@@ -175,12 +175,12 @@ describe("DockerComposeEnvironment", () => {
   });
 
   it("should not recreate the containers when option is specified", async () => {
-    const environment = new DockerComposeEnvironment(fixtures, "docker-compose-with-name.yml").withNoRecreate();
-
-    const startedEnvironment1 = await environment.up();
-    await checkContainerIsHealthy(startedEnvironment1, "custom_container_name");
-    const startedEnvironment2 = await environment.up();
-    await checkContainerIsHealthy(startedEnvironment2, "custom_container_name");
+    const startedEnvironment1 = await new DockerComposeEnvironment(fixtures, "docker-compose-with-name.yml")
+      .withNoRecreate()
+      .up();
+    const startedEnvironment2 = await new DockerComposeEnvironment(fixtures, "docker-compose-with-name.yml")
+      .withNoRecreate()
+      .up();
 
     await startedEnvironment1.down();
     await startedEnvironment2.down();

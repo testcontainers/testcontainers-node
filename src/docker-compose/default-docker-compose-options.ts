@@ -1,3 +1,4 @@
+import { sessionId } from "../docker/session-id";
 import { IDockerComposeOptions } from "docker-compose";
 import { DockerComposeOptions } from "./docker-compose-options";
 
@@ -12,7 +13,7 @@ export const defaultDockerComposeOptions = ({
     commandOptions: options.commandOptions,
     env: {
       ...process.env,
-      COMPOSE_PROJECT_NAME: options.projectName,
+      COMPOSE_PROJECT_NAME: sessionId,
       ...env,
     },
   };

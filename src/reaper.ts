@@ -108,6 +108,7 @@ export class ReaperInstance {
       socket.connect(port, host, () => {
         log.debug(`Connected to Reaper ${container.getId()}`);
         socket.write(`label=org.testcontainers.session-id=${sessionId}\r\n`);
+        socket.write(`label=com.docker.compose.project=${sessionId}\r\n`);
         const reaper = new RealReaper(container, socket);
         resolve(reaper);
       });

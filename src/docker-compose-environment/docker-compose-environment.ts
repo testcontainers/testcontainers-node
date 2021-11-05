@@ -6,7 +6,6 @@ import { containerLog, log } from "../logger";
 import { HostPortCheck, InternalPortCheck } from "../port-check";
 import { HostPortWaitStrategy, WaitStrategy } from "../wait-strategy";
 import { ReaperInstance } from "../reaper";
-import { RandomUuid, Uuid } from "../uuid";
 import { Env, EnvKey, EnvValue, Host } from "../docker/types";
 import { listContainers } from "../docker/functions/container/list-containers";
 import { getContainerById } from "../docker/functions/container/get-container";
@@ -17,9 +16,9 @@ import { StartedDockerComposeEnvironment } from "./started-docker-compose-enviro
 import { dockerComposeDown } from "../docker-compose/functions/docker-compose-down";
 import { DockerComposeOptions } from "../docker-compose/docker-compose-options";
 import { dockerComposeUp } from "../docker-compose/functions/docker-compose-up";
+import { sessionId } from "../docker/session-id";
 
 export class DockerComposeEnvironment {
-  private readonly projectName: string;
   private readonly options: DockerComposeOptions;
 
   private build = false;
@@ -28,9 +27,8 @@ export class DockerComposeEnvironment {
   private waitStrategy: { [containerName: string]: WaitStrategy } = {};
   private startupTimeout = 60_000;
 
-  constructor(composeFilePath: string, composeFiles: string | string[], uuid: Uuid = new RandomUuid()) {
-    this.projectName = `testcontainers-${uuid.nextUuid()}`;
-    this.options = { filePath: composeFilePath, files: composeFiles, projectName: this.projectName };
+  constructor(composeFilePath: string, composeFiles: string | string[]) {
+    this.options = { filePath: composeFilePath, files: composeFiles };
   }
 
   public withBuild(): this {
@@ -59,9 +57,9 @@ export class DockerComposeEnvironment {
   }
 
   public async up(services?: Array<string>): Promise<StartedDockerComposeEnvironment> {
-    log.info(`Starting DockerCompose environment ${this.projectName}`);
+    log.info(`Starting DockerCompose environment`);
 
-    (await ReaperInstance.getInstance()).addProject(this.projectName);
+    await ReaperInstance.getInstance();
 
     const commandOptions = [];
     if (this.build) {
@@ -73,7 +71,7 @@ export class DockerComposeEnvironment {
     await dockerComposeUp({ ...this.options, commandOptions, env: this.env }, services);
 
     const startedContainers = (await listContainers()).filter(
-      (container) => container.Labels["com.docker.compose.project"] === this.projectName
+      (container) => container.Labels["com.docker.compose.project"] === sessionId
     );
 
     const startedContainerNames = startedContainers.reduce(
@@ -90,7 +88,7 @@ export class DockerComposeEnvironment {
       await Promise.all(
         startedContainers.map(async (startedContainer) => {
           const container = getContainerById(startedContainer.Id);
-          const containerName = resolveContainerName(this.projectName, startedContainer.Names[0]);
+          const containerName = resolveContainerName(startedContainer.Names[0]);
 
           (await containerLogs(container))
             .on("data", (data) => containerLog.trace(`${containerName}: ${data}`))
