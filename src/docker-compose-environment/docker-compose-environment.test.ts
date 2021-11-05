@@ -174,7 +174,7 @@ describe("DockerComposeEnvironment", () => {
     await startedEnvironment.down();
   });
 
-  it("should not recreate the containers when option is specified", async () => {
+  it("should not recreate the containers when no recreate option is set", async () => {
     const startedEnvironment1 = await new DockerComposeEnvironment(fixtures, "docker-compose-with-name.yml")
       .withNoRecreate()
       .up();
