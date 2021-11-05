@@ -2,8 +2,7 @@ import fetch from "node-fetch";
 import path from "path";
 import { DockerComposeEnvironment } from "./docker-compose-environment";
 import { Wait } from "../wait";
-import { getRunningContainerNames, getVolumeNames } from "../test-helper";
-import { StartedDockerComposeEnvironment } from "./started-docker-compose-environment";
+import { checkEnvironmentContainerIsHealthy, getRunningContainerNames, getVolumeNames } from "../test-helper";
 
 describe("DockerComposeEnvironment", () => {
   jest.setTimeout(180_000);
@@ -19,7 +18,7 @@ describe("DockerComposeEnvironment", () => {
 
     await Promise.all(
       ["container_1", "another_container_1"].map(
-        async (containerName) => await checkContainerIsHealthy(startedEnvironment, containerName)
+        async (containerName) => await checkEnvironmentContainerIsHealthy(startedEnvironment, containerName)
       )
     );
 
@@ -29,7 +28,7 @@ describe("DockerComposeEnvironment", () => {
   it("should start container with a given name", async () => {
     const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-name.yml").up();
 
-    await checkContainerIsHealthy(startedEnvironment, "custom_container_name");
+    await checkEnvironmentContainerIsHealthy(startedEnvironment, "custom_container_name");
 
     await startedEnvironment.down();
   });
@@ -48,6 +47,7 @@ describe("DockerComposeEnvironment", () => {
     const responseBody = await response.json();
 
     expect(responseBody["IS_OVERRIDDEN"]).toBe("true");
+
     await startedEnvironment.down();
   });
 
@@ -59,7 +59,7 @@ describe("DockerComposeEnvironment", () => {
 
     await Promise.all(
       ["container_1", "another_container_1"].map(
-        async (containerName) => await checkContainerIsHealthy(startedEnvironment, containerName)
+        async (containerName) => await checkEnvironmentContainerIsHealthy(startedEnvironment, containerName)
       )
     );
 
@@ -93,7 +93,7 @@ describe("DockerComposeEnvironment", () => {
       .withWaitStrategy("container_1", Wait.forHealthCheck())
       .up();
 
-    await checkContainerIsHealthy(startedEnvironment, "container_1");
+    await checkEnvironmentContainerIsHealthy(startedEnvironment, "container_1");
 
     await startedEnvironment.down();
   });
@@ -131,7 +131,7 @@ describe("DockerComposeEnvironment", () => {
 
     await Promise.all(
       ["container_1", "another_container_1"].map(
-        async (containerName) => await checkContainerIsHealthy(startedEnvironment, containerName)
+        async (containerName) => await checkEnvironmentContainerIsHealthy(startedEnvironment, containerName)
       )
     );
 
@@ -166,7 +166,7 @@ describe("DockerComposeEnvironment", () => {
       ["service_2"]
     );
 
-    await checkContainerIsHealthy(startedEnvironment, `service_2_1`);
+    await checkEnvironmentContainerIsHealthy(startedEnvironment, `service_2_1`);
     expect(() => startedEnvironment.getContainer("service_1")).toThrowError(
       `Cannot get container "service_1" as it is not running`
     );
@@ -185,11 +185,4 @@ describe("DockerComposeEnvironment", () => {
     await startedEnvironment1.down();
     await startedEnvironment2.down();
   });
-
-  async function checkContainerIsHealthy(startedEnvironment: StartedDockerComposeEnvironment, containerName: string) {
-    const container = startedEnvironment.getContainer(containerName);
-    const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
-    const response = await fetch(`${url}/hello-world`);
-    expect(response.status).toBe(200);
-  }
 });
