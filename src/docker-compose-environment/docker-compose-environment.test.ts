@@ -3,6 +3,7 @@ import path from "path";
 import { DockerComposeEnvironment } from "./docker-compose-environment";
 import { Wait } from "../wait";
 import { getRunningContainerNames, getVolumeNames } from "../test-helper";
+import { StartedDockerComposeEnvironment } from "./started-docker-compose-environment";
 
 describe("DockerComposeEnvironment", () => {
   jest.setTimeout(180_000);
@@ -17,23 +18,19 @@ describe("DockerComposeEnvironment", () => {
     const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml").up();
 
     await Promise.all(
-      ["container_1", "another_container_1"].map(async (containerName) => {
-        const container = startedEnvironment.getContainer(containerName);
-        const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
-        const response = await fetch(`${url}/hello-world`);
-        expect(response.status).toBe(200);
-      })
+      ["container-1", "another_container-1"].map(
+        async (containerName) => await checkContainerIsHealthy(startedEnvironment, containerName)
+      )
     );
+
     await startedEnvironment.down();
   });
 
   it("should start container with a given name", async () => {
     const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-name.yml").up();
-    const container = startedEnvironment.getContainer("custom_container_name");
 
-    const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
-    const response = await fetch(`${url}/hello-world`);
-    expect(response.status).toBe(200);
+    await checkContainerIsHealthy(startedEnvironment, "custom_container_name");
+
     await startedEnvironment.down();
   });
 
@@ -44,7 +41,7 @@ describe("DockerComposeEnvironment", () => {
       "docker-compose.yml",
       "docker-compose-update.yml",
     ]).up();
-    const container = startedEnvironment.getContainer("container_1");
+    const container = startedEnvironment.getContainer("container-1");
 
     const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
     const response = await fetch(`${url}/env`);
@@ -56,18 +53,16 @@ describe("DockerComposeEnvironment", () => {
 
   it("should support log message wait strategy", async () => {
     const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml")
-      .withWaitStrategy("container_1", Wait.forLogMessage("Listening on port 8080"))
-      .withWaitStrategy("another_container_1", Wait.forLogMessage("Listening on port 8080"))
+      .withWaitStrategy("container-1", Wait.forLogMessage("Listening on port 8080"))
+      .withWaitStrategy("another_container-1", Wait.forLogMessage("Listening on port 8080"))
       .up();
 
     await Promise.all(
-      ["container_1", "another_container_1"].map(async (containerName) => {
-        const container = startedEnvironment.getContainer(containerName);
-        const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
-        const response = await fetch(`${url}/hello-world`);
-        expect(response.status).toBe(200);
-      })
+      ["container-1", "another_container-1"].map(
+        async (containerName) => await checkContainerIsHealthy(startedEnvironment, containerName)
+      )
     );
+
     await startedEnvironment.down();
   });
 
@@ -85,23 +80,20 @@ describe("DockerComposeEnvironment", () => {
   it("should stop the container when the health check wait strategy times out", async () => {
     await expect(
       new DockerComposeEnvironment(fixtures, "docker-compose-with-healthcheck.yml")
-        .withWaitStrategy("container_1", Wait.forHealthCheck())
+        .withWaitStrategy("container-1", Wait.forHealthCheck())
         .withStartupTimeout(0)
         .up()
     ).rejects.toThrowError(`Health check not healthy after 0ms`);
 
-    expect(await getRunningContainerNames()).not.toContain("container_1");
+    expect(await getRunningContainerNames()).not.toContain("container-1");
   });
 
   it("should support health check wait strategy", async () => {
     const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-healthcheck.yml")
-      .withWaitStrategy("container_1", Wait.forHealthCheck())
+      .withWaitStrategy("container-1", Wait.forHealthCheck())
       .up();
 
-    const container = startedEnvironment.getContainer("container_1");
-    const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
-    const response = await fetch(`${url}/hello-world`);
-    expect(response.status).toBe(200);
+    await checkContainerIsHealthy(startedEnvironment, "container-1");
 
     await startedEnvironment.down();
   });
@@ -138,13 +130,11 @@ describe("DockerComposeEnvironment", () => {
     const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml").withBuild().up();
 
     await Promise.all(
-      ["container_1", "another_container_1"].map(async (containerName) => {
-        const container = startedEnvironment.getContainer(containerName);
-        const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
-        const response = await fetch(`${url}/hello-world`);
-        expect(response.status).toBe(200);
-      })
+      ["container-1", "another_container-1"].map(
+        async (containerName) => await checkContainerIsHealthy(startedEnvironment, containerName)
+      )
     );
+
     await startedEnvironment.down();
   });
 
@@ -153,10 +143,11 @@ describe("DockerComposeEnvironment", () => {
       .withEnv("ENV_VAR", "ENV_VAR_VALUE")
       .up();
 
-    const container = startedEnvironment.getContainer("container_1");
+    const container = startedEnvironment.getContainer("container-1");
     const response = await fetch(`http://${container.getHost()}:${container.getMappedPort(8080)}/env`);
     const responseBody = await response.json();
     expect(responseBody["ENV_VAR"]).toBe("ENV_VAR_VALUE");
+
     await startedEnvironment.down();
   });
 
@@ -166,6 +157,7 @@ describe("DockerComposeEnvironment", () => {
     expect(() => startedEnvironment.getContainer("non_existent_container")).toThrowError(
       `Cannot get container "non_existent_container" as it is not running`
     );
+
     await startedEnvironment.down();
   });
 
@@ -174,13 +166,33 @@ describe("DockerComposeEnvironment", () => {
       ["service_2"]
     );
 
-    const container = startedEnvironment.getContainer(`service_2_1`);
-    const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
-    const response = await fetch(`${url}/hello-world`);
-    expect(response.status).toBe(200);
+    await checkContainerIsHealthy(startedEnvironment, `service_2-1`);
     expect(() => startedEnvironment.getContainer("service_1")).toThrowError(
       `Cannot get container "service_1" as it is not running`
     );
+
     await startedEnvironment.down();
   });
+
+  it("should not recreate the containers when option is specified", async () => {
+    const startedEnvironment1 = await new DockerComposeEnvironment(fixtures, "docker-compose-with-name.yml")
+      .withNoRecreate()
+      .up();
+    await checkContainerIsHealthy(startedEnvironment1, "custom_container_name");
+
+    const startedEnvironment2 = await new DockerComposeEnvironment(fixtures, "docker-compose-with-name.yml")
+      .withNoRecreate()
+      .up();
+    await checkContainerIsHealthy(startedEnvironment2, "custom_container_name");
+
+    await startedEnvironment1.down();
+    await startedEnvironment2.down();
+  });
+
+  async function checkContainerIsHealthy(startedEnvironment: StartedDockerComposeEnvironment, containerName: string) {
+    const container = startedEnvironment.getContainer(containerName);
+    const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
+    const response = await fetch(`${url}/hello-world`);
+    expect(response.status).toBe(200);
+  }
 });

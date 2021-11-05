@@ -23,6 +23,7 @@ export class DockerComposeEnvironment {
   private readonly options: DockerComposeOptions;
 
   private build = false;
+  private recreate = true;
   private env: Env = {};
   private waitStrategy: { [containerName: string]: WaitStrategy } = {};
   private startupTimeout = 60_000;
@@ -39,6 +40,11 @@ export class DockerComposeEnvironment {
 
   public withEnv(key: EnvKey, value: EnvValue): this {
     this.env[key] = value;
+    return this;
+  }
+
+  public withNoRecreate(): this {
+    this.recreate = false;
     return this;
   }
 
@@ -60,6 +66,9 @@ export class DockerComposeEnvironment {
     const commandOptions = [];
     if (this.build) {
       commandOptions.push("--build");
+    }
+    if (!this.recreate) {
+      commandOptions.push("--no-recreate");
     }
     await dockerComposeUp({ ...this.options, commandOptions, env: this.env }, services);
 
