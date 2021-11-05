@@ -7,17 +7,12 @@ import { dockerHost } from "./docker/docker-host";
 import { REAPER_IMAGE } from "./images";
 
 export interface Reaper {
-  addProject(projectName: string): void;
   getContainerId(): string;
   stop(): void;
 }
 
 class RealReaper implements Reaper {
   constructor(private readonly container: StartedTestContainer, private readonly socket: Socket) {}
-
-  public addProject(projectName: string): void {
-    this.socket.write(`label=com.docker.compose.project=${projectName}\r\n`);
-  }
 
   public getContainerId(): string {
     return this.container.getId();
@@ -29,10 +24,6 @@ class RealReaper implements Reaper {
 }
 
 class DisabledReaper implements Reaper {
-  public addProject(): void {
-    // noop
-  }
-
   public stop(): void {
     // noop
   }

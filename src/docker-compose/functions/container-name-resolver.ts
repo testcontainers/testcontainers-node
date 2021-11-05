@@ -7,7 +7,7 @@ export const resolveContainerName = (containerName: string): string => {
     return containerName.substring(1);
   } else {
     throw new Error(
-      `Unable to resolve container name for container name: "${containerName}", project name: "${sessionId}"`
+      `Unable to resolve container name for container name: "${containerName}", session ID: "${sessionId}"`
     );
   }
 };
