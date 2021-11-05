@@ -31,8 +31,8 @@ describe("Reaper", () => {
       path.resolve(fixtures, "docker-compose"),
       "docker-compose.yml"
     ).up();
-    const container = startedEnvironment.getContainer("container-1");
-    const anotherContainer = startedEnvironment.getContainer("another_container-1");
+    const container = startedEnvironment.getContainer("container_1");
+    const anotherContainer = startedEnvironment.getContainer("another_container_1");
 
     const reaperContainerId = await getReaperContainerId();
     await stopReaper();
