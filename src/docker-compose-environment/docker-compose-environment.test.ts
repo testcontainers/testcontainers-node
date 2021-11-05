@@ -18,7 +18,7 @@ describe("DockerComposeEnvironment", () => {
     const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml").up();
 
     await Promise.all(
-      ["container-1", "another_container-1"].map(
+      ["container_1", "another_container_1"].map(
         async (containerName) => await checkContainerIsHealthy(startedEnvironment, containerName)
       )
     );
@@ -41,7 +41,7 @@ describe("DockerComposeEnvironment", () => {
       "docker-compose.yml",
       "docker-compose-update.yml",
     ]).up();
-    const container = startedEnvironment.getContainer("container-1");
+    const container = startedEnvironment.getContainer("container_1");
 
     const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
     const response = await fetch(`${url}/env`);
@@ -53,12 +53,12 @@ describe("DockerComposeEnvironment", () => {
 
   it("should support log message wait strategy", async () => {
     const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml")
-      .withWaitStrategy("container-1", Wait.forLogMessage("Listening on port 8080"))
-      .withWaitStrategy("another_container-1", Wait.forLogMessage("Listening on port 8080"))
+      .withWaitStrategy("container_1", Wait.forLogMessage("Listening on port 8080"))
+      .withWaitStrategy("another_container_1", Wait.forLogMessage("Listening on port 8080"))
       .up();
 
     await Promise.all(
-      ["container-1", "another_container-1"].map(
+      ["container_1", "another_container_1"].map(
         async (containerName) => await checkContainerIsHealthy(startedEnvironment, containerName)
       )
     );
@@ -80,20 +80,20 @@ describe("DockerComposeEnvironment", () => {
   it("should stop the container when the health check wait strategy times out", async () => {
     await expect(
       new DockerComposeEnvironment(fixtures, "docker-compose-with-healthcheck.yml")
-        .withWaitStrategy("container-1", Wait.forHealthCheck())
+        .withWaitStrategy("container_1", Wait.forHealthCheck())
         .withStartupTimeout(0)
         .up()
     ).rejects.toThrowError(`Health check not healthy after 0ms`);
 
-    expect(await getRunningContainerNames()).not.toContain("container-1");
+    expect(await getRunningContainerNames()).not.toContain("container_1");
   });
 
   it("should support health check wait strategy", async () => {
     const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-healthcheck.yml")
-      .withWaitStrategy("container-1", Wait.forHealthCheck())
+      .withWaitStrategy("container_1", Wait.forHealthCheck())
       .up();
 
-    await checkContainerIsHealthy(startedEnvironment, "container-1");
+    await checkContainerIsHealthy(startedEnvironment, "container_1");
 
     await startedEnvironment.down();
   });
@@ -130,7 +130,7 @@ describe("DockerComposeEnvironment", () => {
     const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml").withBuild().up();
 
     await Promise.all(
-      ["container-1", "another_container-1"].map(
+      ["container_1", "another_container_1"].map(
         async (containerName) => await checkContainerIsHealthy(startedEnvironment, containerName)
       )
     );
@@ -143,7 +143,7 @@ describe("DockerComposeEnvironment", () => {
       .withEnv("ENV_VAR", "ENV_VAR_VALUE")
       .up();
 
-    const container = startedEnvironment.getContainer("container-1");
+    const container = startedEnvironment.getContainer("container_1");
     const response = await fetch(`http://${container.getHost()}:${container.getMappedPort(8080)}/env`);
     const responseBody = await response.json();
     expect(responseBody["ENV_VAR"]).toBe("ENV_VAR_VALUE");
@@ -166,7 +166,7 @@ describe("DockerComposeEnvironment", () => {
       ["service_2"]
     );
 
-    await checkContainerIsHealthy(startedEnvironment, `service_2-1`);
+    await checkContainerIsHealthy(startedEnvironment, `service_2_1`);
     expect(() => startedEnvironment.getContainer("service_1")).toThrowError(
       `Cannot get container "service_1" as it is not running`
     );
