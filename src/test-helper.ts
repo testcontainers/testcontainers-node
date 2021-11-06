@@ -1,6 +1,23 @@
 import { Readable } from "stream";
 import { ReaperInstance } from "./reaper";
 import { dockerode } from "./docker/dockerode";
+import { StartedDockerComposeEnvironment } from "./docker-compose-environment/started-docker-compose-environment";
+import fetch from "node-fetch";
+import { StartedTestContainer } from "./test-container";
+
+export const checkContainerIsHealthy = async (container: StartedTestContainer): Promise<void> => {
+  const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
+  const response = await fetch(`${url}/hello-world`);
+  expect(response.status).toBe(200);
+};
+
+export const checkEnvironmentContainerIsHealthy = async (
+  startedEnvironment: StartedDockerComposeEnvironment,
+  containerName: string
+): Promise<void> => {
+  const container = startedEnvironment.getContainer(containerName);
+  await checkContainerIsHealthy(container);
+};
 
 export const getEvents = async (): Promise<Readable> => {
   const events = (await dockerode.getEvents()) as Readable;

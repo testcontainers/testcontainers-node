@@ -4,7 +4,7 @@ import { GenericContainer } from "./generic-container";
 import { AlwaysPullPolicy } from "../pull-policy";
 import { Wait } from "../wait";
 import { RandomUuid } from "../uuid";
-import { getEvents, getRunningContainerNames } from "../test-helper";
+import { checkContainerIsHealthy, getEvents, getRunningContainerNames } from "../test-helper";
 import { Network } from "../network";
 import { getContainerById } from "../docker/functions/container/get-container";
 
@@ -16,10 +16,8 @@ describe("GenericContainer", () => {
   it("should wait for port", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12").withExposedPorts(8080).start();
 
-    const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
-    const response = await fetch(`${url}/hello-world`);
+    await checkContainerIsHealthy(container);
 
-    expect(response.status).toBe(200);
     await container.stop();
   });
 
@@ -29,10 +27,8 @@ describe("GenericContainer", () => {
       .withExposedPorts(8080)
       .start();
 
-    const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
-    const response = await fetch(`${url}/hello-world`);
+    await checkContainerIsHealthy(container);
 
-    expect(response.status).toBe(200);
     await container.stop();
   });
 
@@ -42,10 +38,8 @@ describe("GenericContainer", () => {
       .withWaitStrategy(Wait.forLogMessage("Listening on port 8080"))
       .start();
 
-    const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
-    const response = await fetch(`${url}/hello-world`);
+    await checkContainerIsHealthy(container);
 
-    expect(response.status).toBe(200);
     await container.stop();
   });
 
@@ -55,10 +49,8 @@ describe("GenericContainer", () => {
       .withWaitStrategy(Wait.forLogMessage(/Listening on port [0-9]+/))
       .start();
 
-    const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
-    const response = await fetch(`${url}/hello-world`);
+    await checkContainerIsHealthy(container);
 
-    expect(response.status).toBe(200);
     await container.stop();
   });
 
@@ -70,10 +62,8 @@ describe("GenericContainer", () => {
       .withWaitStrategy(Wait.forHealthCheck())
       .start();
 
-    const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
-    const response = await fetch(`${url}/hello-world`);
+    await checkContainerIsHealthy(container);
 
-    expect(response.status).toBe(200);
     await container.stop();
   });
 
@@ -90,20 +80,18 @@ describe("GenericContainer", () => {
       .withWaitStrategy(Wait.forHealthCheck())
       .start();
 
-    const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
-    const response = await fetch(`${url}/hello-world`);
+    await checkContainerIsHealthy(container);
 
-    expect(response.status).toBe(200);
     await container.stop();
   });
 
   it("should set network mode", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12").withNetworkMode("host").start();
     const dockerContainer = getContainerById(container.getId());
-
     const containerInfo = await dockerContainer.inspect();
 
     expect(containerInfo.HostConfig.NetworkMode).toBe("host");
+
     await container.stop();
   });
 
@@ -137,8 +125,8 @@ describe("GenericContainer", () => {
     const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
     const response = await fetch(`${url}/env`);
     const responseBody = await response.json();
-
     expect(responseBody.customKey).toBe("customValue");
+
     await container.stop();
   });
 
@@ -151,18 +139,18 @@ describe("GenericContainer", () => {
     const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
     const response = await fetch(`${url}/cmd`);
     const responseBody = await response.json();
-
     expect(responseBody).toEqual(["/usr/local/bin/node", "/index.js", "one", "two", "three"]);
+
     await container.stop();
   });
 
   it("should set name", async () => {
     const containerName = "special-test-container";
     const expectedContainerName = "/special-test-container";
-
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12").withName(containerName).start();
 
     expect(container.getName()).toEqual(expectedContainerName);
+
     await container.stop();
   });
 
@@ -202,14 +190,14 @@ describe("GenericContainer", () => {
 
   it("should set default log driver", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12").withDefaultLogDriver().start();
+
     const dockerContainer = getContainerById(container.getId());
-
     const containerInfo = await dockerContainer.inspect();
-
     expect(containerInfo.HostConfig.LogConfig).toEqual({
       Type: "json-file",
       Config: {},
     });
+
     await container.stop();
   });
 
@@ -218,13 +206,11 @@ describe("GenericContainer", () => {
       .withPrivilegedMode()
       .withExposedPorts(8080)
       .start();
+
     const dockerContainer = getContainerById(container.getId());
     const containerInfo = await dockerContainer.inspect();
     expect(containerInfo.HostConfig.Privileged).toBe(true);
-
-    const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
-    const response = await fetch(`${url}/hello-world`);
-    expect(response.status).toBe(200);
+    await checkContainerIsHealthy(container);
 
     await container.stop();
   });
@@ -272,8 +258,8 @@ describe("GenericContainer", () => {
 
     const stream = await container.logs();
     const log = await new Promise((resolve) => stream.on("data", (line) => resolve(line)));
-
     expect(log).toContain("Listening on port 8080");
+
     await container.stop();
   });
 
@@ -283,10 +269,8 @@ describe("GenericContainer", () => {
       .withExposedPorts(8080)
       .start();
 
-    const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
-    const response = await fetch(`${url}/hello-world`);
+    await checkContainerIsHealthy(container);
 
-    expect(response.status).toBe(200);
     await container.stop();
   });
 
@@ -395,6 +379,7 @@ describe("GenericContainer", () => {
     const { output } = await container.exec(["cat", target]);
 
     expect(output).toBe("hello world");
+
     await container.stop();
   });
 
@@ -408,6 +393,7 @@ describe("GenericContainer", () => {
     const { output } = await container.exec(["cat", target]);
 
     expect(output).toBe(content);
+
     await container.stop();
   });
 
@@ -417,10 +403,8 @@ describe("GenericContainer", () => {
       const container = await GenericContainer.fromDockerfile(context).build();
       const startedContainer = await container.withExposedPorts(8080).start();
 
-      const url = `http://${startedContainer.getHost()}:${startedContainer.getMappedPort(8080)}`;
-      const response = await fetch(`${url}/hello-world`);
+      await checkContainerIsHealthy(startedContainer);
 
-      expect(response.status).toBe(200);
       await startedContainer.stop();
     });
 
@@ -455,10 +439,8 @@ describe("GenericContainer", () => {
       const container = await GenericContainer.fromDockerfile(context).withPullPolicy(new AlwaysPullPolicy()).build();
       const startedContainer = await container.withExposedPorts(8080).start();
 
-      const url = `http://${startedContainer.getHost()}:${startedContainer.getMappedPort(8080)}`;
-      const response = await fetch(`${url}/hello-world`);
+      await checkContainerIsHealthy(startedContainer);
 
-      expect(response.status).toBe(200);
       await startedContainer.stop();
     });
 
@@ -467,10 +449,8 @@ describe("GenericContainer", () => {
       const container = await GenericContainer.fromDockerfile(context, "Dockerfile-A").build();
       const startedContainer = await container.withExposedPorts(8080).start();
 
-      const url = `http://${startedContainer.getHost()}:${startedContainer.getMappedPort(8080)}`;
-      const response = await fetch(`${url}/hello-world`);
+      await checkContainerIsHealthy(startedContainer);
 
-      expect(response.status).toBe(200);
       await startedContainer.stop();
     });
 
@@ -479,10 +459,8 @@ describe("GenericContainer", () => {
       const container = await GenericContainer.fromDockerfile(context).withBuildArg("VERSION", "10-alpine").build();
       const startedContainer = await container.withExposedPorts(8080).start();
 
-      const url = `http://${startedContainer.getHost()}:${startedContainer.getMappedPort(8080)}`;
-      const response = await fetch(`${url}/hello-world`);
+      await checkContainerIsHealthy(startedContainer);
 
-      expect(response.status).toBe(200);
       await startedContainer.stop();
     });
 
