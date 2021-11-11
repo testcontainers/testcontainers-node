@@ -6,6 +6,7 @@ import { containerLog, log } from "../logger";
 import { HostPortCheck, InternalPortCheck } from "../port-check";
 import { HostPortWaitStrategy, WaitStrategy } from "../wait-strategy";
 import { ReaperInstance } from "../reaper";
+import { RandomUuid, Uuid } from "../uuid";
 import { Env, EnvKey, EnvValue, Host } from "../docker/types";
 import { listContainers } from "../docker/functions/container/list-containers";
 import { getContainerById } from "../docker/functions/container/get-container";
@@ -14,21 +15,23 @@ import { inspectContainer } from "../docker/functions/container/inspect-containe
 import { containerLogs } from "../docker/functions/container/container-logs";
 import { StartedDockerComposeEnvironment } from "./started-docker-compose-environment";
 import { dockerComposeDown } from "../docker-compose/functions/docker-compose-down";
-import { DockerComposeOptions } from "../docker-compose/docker-compose-options";
 import { dockerComposeUp } from "../docker-compose/functions/docker-compose-up";
-import { sessionId } from "../docker/session-id";
 
 export class DockerComposeEnvironment {
-  private readonly options: DockerComposeOptions;
+  private readonly composeFilePath: string;
+  private readonly composeFiles: string | string[];
 
+  private projectName: string;
   private build = false;
   private recreate = true;
   private env: Env = {};
   private waitStrategy: { [containerName: string]: WaitStrategy } = {};
   private startupTimeout = 60_000;
 
-  constructor(composeFilePath: string, composeFiles: string | string[]) {
-    this.options = { filePath: composeFilePath, files: composeFiles };
+  constructor(composeFilePath: string, composeFiles: string | string[], uuid: Uuid = new RandomUuid()) {
+    this.composeFilePath = composeFilePath;
+    this.composeFiles = composeFiles;
+    this.projectName = `testcontainers-${uuid.nextUuid()}`;
   }
 
   public withBuild(): this {
@@ -43,6 +46,7 @@ export class DockerComposeEnvironment {
 
   public withNoRecreate(): this {
     this.recreate = false;
+    this.projectName = "testcontainers-node";
     return this;
   }
 
@@ -57,9 +61,15 @@ export class DockerComposeEnvironment {
   }
 
   public async up(services?: Array<string>): Promise<StartedDockerComposeEnvironment> {
-    log.info(`Starting DockerCompose environment`);
+    log.info(`Starting DockerCompose environment: ${this.projectName}`);
 
-    await ReaperInstance.getInstance();
+    (await ReaperInstance.getInstance()).addProject(this.projectName);
+
+    const options = {
+      filePath: this.composeFilePath,
+      files: this.composeFiles,
+      projectName: this.projectName,
+    };
 
     const commandOptions = [];
     if (this.build) {
@@ -68,10 +78,11 @@ export class DockerComposeEnvironment {
     if (!this.recreate) {
       commandOptions.push("--no-recreate");
     }
-    await dockerComposeUp({ ...this.options, commandOptions, env: this.env }, services);
+
+    await dockerComposeUp({ ...options, commandOptions, env: this.env }, services);
 
     const startedContainers = (await listContainers()).filter(
-      (container) => container.Labels["com.docker.compose.project"] === sessionId
+      (container) => container.Labels["com.docker.compose.project"] === this.projectName
     );
 
     const startedContainerNames = startedContainers.reduce(
@@ -88,7 +99,7 @@ export class DockerComposeEnvironment {
       await Promise.all(
         startedContainers.map(async (startedContainer) => {
           const container = getContainerById(startedContainer.Id);
-          const containerName = resolveContainerName(startedContainer.Names[0]);
+          const containerName = resolveContainerName(this.projectName, startedContainer.Names[0]);
 
           (await containerLogs(container))
             .on("data", (data) => containerLog.trace(`${containerName}: ${data}`))
@@ -104,7 +115,7 @@ export class DockerComposeEnvironment {
           } catch (err) {
             log.error(`Container ${containerName} failed to be ready: ${err}`);
             try {
-              await dockerComposeDown(this.options);
+              await dockerComposeDown(options);
             } catch {
               log.warn(`Failed to stop DockerCompose environment after failed up`);
             }
@@ -121,7 +132,7 @@ export class DockerComposeEnvironment {
 
     log.info(`DockerCompose environment started: ${Object.keys(startedGenericContainers).join(", ")}`);
 
-    return new StartedDockerComposeEnvironment(startedGenericContainers, this.options);
+    return new StartedDockerComposeEnvironment(startedGenericContainers, options);
   }
 
   private getBoundPorts(containerInfo: Dockerode.ContainerInfo): BoundPorts {
