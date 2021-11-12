@@ -55,7 +55,7 @@ export abstract class CredentialProvider implements RegistryAuthLocator {
 
   private runCredentialProvider(registry: string, providerName: string): Promise<CredentialProviderGetResponse> {
     return new Promise((resolve) => {
-      const sink = spawn(providerName, ["get"]);
+      const sink = spawn(providerName, ["get"], { shell: process.platform === "win32" });
 
       const chunks: string[] = [];
       sink.stdout.on("data", (chunk) => chunks.push(chunk));
