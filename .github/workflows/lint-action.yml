@@ -18,7 +18,7 @@ jobs:
         with:
           node-version: 14
       - run: npm ci
-      - run: npm run lint
+      - run: './node_modules/.bin/eslint package.json "src/**/*.ts"'
 
   prettier:
     name: prettier
@@ -31,4 +31,4 @@ jobs:
         with:
           node-version: 14
       - run: npm ci
-      - run: npm run format
+      - run: './node_modules/.bin/prettier package.json "src/**/*.ts"'
