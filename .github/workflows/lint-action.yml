@@ -7,8 +7,8 @@ on:
     branches: [ master ]
 
 jobs:
-  setup:
-    name: Run linters
+  eslint:
+    name: eslint
     runs-on: ubuntu-latest
     steps:
       - name: Check out Git repository
@@ -17,15 +17,18 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 14
-
-  run-linter:
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
+      - run: npm ci
       - run: npm run lint
 
-  run-prettier:
-    needs: setup
+  prettier:
+    name: prettier
     runs-on: ubuntu-latest
     steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+      - run: npm ci
       - run: npm run format
