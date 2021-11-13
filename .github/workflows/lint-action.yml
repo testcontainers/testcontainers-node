@@ -31,4 +31,4 @@ jobs:
         with:
           node-version: 14
       - run: npm ci
-      - run: './node_modules/.bin/prettier package.json "src/**/*.ts"'
+      - run: './node_modules/.bin/prettier -c package.json "src/**/*.ts"'
