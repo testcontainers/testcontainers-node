@@ -185,4 +185,18 @@ describe("DockerComposeEnvironment", () => {
     await startedEnvironment1.down();
     await startedEnvironment2.down();
   });
+
+  it("should start containers with a profile if profile option is set", async () => {
+    const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-profile.yml")
+      .withProfiles("debug")
+      .up();
+
+    await Promise.all(
+      ["container_1", "another_container_1"].map(
+        async (containerName) => await checkEnvironmentContainerIsHealthy(startedEnvironment, containerName)
+      )
+    );
+
+    await startedEnvironment.down();
+  });
 });

@@ -24,6 +24,7 @@ export class DockerComposeEnvironment {
   private projectName: string;
   private build = false;
   private recreate = true;
+  private profiles: string[] = [];
   private env: Env = {};
   private waitStrategy: { [containerName: string]: WaitStrategy } = {};
   private startupTimeout = 60_000;
@@ -41,6 +42,11 @@ export class DockerComposeEnvironment {
 
   public withEnv(key: EnvKey, value: EnvValue): this {
     this.env[key] = value;
+    return this;
+  }
+
+  public withProfiles(...profiles: string[]): this {
+    this.profiles = profiles;
     return this;
   }
 
@@ -79,7 +85,13 @@ export class DockerComposeEnvironment {
       commandOptions.push("--no-recreate");
     }
 
-    await dockerComposeUp({ ...options, commandOptions, env: this.env }, services);
+    const composeOptions: string[] = [];
+    this.profiles.forEach((profile) => {
+      composeOptions.push("--profile");
+      composeOptions.push(profile);
+    });
+
+    await dockerComposeUp({ ...options, commandOptions, composeOptions, env: this.env }, services);
 
     const startedContainers = (await listContainers()).filter(
       (container) => container.Labels["com.docker.compose.project"] === this.projectName
