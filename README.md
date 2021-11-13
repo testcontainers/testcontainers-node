@@ -523,6 +523,16 @@ const environment = await new DockerComposeEnvironment(composeFilePath, composeF
   .up();
 ```
 
+Specify [profiles](https://docs.docker.com/compose/profiles/):
+
+```javascript
+const { DockerComposeEnvironment } = require("testcontainers");
+
+const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
+    .withProfiles("profile1", "profile2")
+    .up();
+```
+
 Specify not to re-create containers that are already running: 
 
 ```javascript

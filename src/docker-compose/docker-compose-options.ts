@@ -5,5 +5,6 @@ export type DockerComposeOptions = {
   files: string | string[];
   projectName: string;
   commandOptions?: string[];
+  composeOptions?: string[];
   env?: Env;
 };

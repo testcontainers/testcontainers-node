@@ -1,0 +1,13 @@
+version: "3.9"
+
+services:
+  container:
+    image: cristianrgreco/testcontainer:1.1.12
+    ports:
+      - 8080
+  another_container:
+    image: cristianrgreco/testcontainer:1.1.12
+    profiles:
+      - debug
+    ports:
+      - 8080

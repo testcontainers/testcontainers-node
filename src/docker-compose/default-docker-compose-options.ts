@@ -9,6 +9,7 @@ export const defaultDockerComposeOptions = ({
     log: false,
     cwd: options.filePath,
     config: options.files,
+    composeOptions: options.composeOptions,
     commandOptions: options.commandOptions,
     env: {
       ...process.env,
