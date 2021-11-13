@@ -28,6 +28,6 @@ jobs:
         uses: wearerequired/lint-action@v1
         with:
           eslint: true
-          estlint_dir: "src/**/*.ts"
+          eslint_dir: "src/**/*.ts"
           prettier: true
           prettier_dir: "src/**/*.ts"
