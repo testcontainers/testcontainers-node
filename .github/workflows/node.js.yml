@@ -28,4 +28,12 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm ci
-    - run: npm test
+    - name: Thundra Foresight JS Action
+      uses: thundra-io/thundra-foresight-js-action@v1
+      id: thundra-foresight-run
+      with:
+        apikey: ${{ secrets.THUNDRA_API_KEY }}
+        project_id: ${{ secrets.THUNDRA_TESTCONTAINERS_JEST_PROJECTID }}
+    - run: npm test -- ${THUNDRA_JEST_ARGUMENTS}
+      env:
+        THUNDRA_AGENT_REPORT_REST_BASEURL: https://collector.thundra.us/v1
