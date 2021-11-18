@@ -22,7 +22,7 @@ export const buildImage = async (options: BuildImageOptions): Promise<void> => {
   try {
     log.info(`Building image '${options.imageName.toString()}' with context '${options.context}'`);
 
-    const dockerIgnoreFiles = await findDockerIgnoreFiles(options.context);
+    const dockerIgnoreFiles = await findDockerIgnoreFiles(options.context, options.dockerfileName);
     const tarStream = tar.pack(options.context, { ignore: (name) => dockerIgnoreFiles.has(slash(name)) });
 
     return new Promise((resolve) =>
