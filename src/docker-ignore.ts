@@ -3,7 +3,7 @@ import os from "os";
 import glob from "glob";
 import path from "path";
 
-export const findDockerIgnoreFiles = async (context: string): Promise<Set<string>> => {
+export const findDockerIgnoreFiles = async (context: string, dockerfileName: string): Promise<Set<string>> => {
   const dockerIgnoreFilePath = path.join(context, ".dockerignore");
 
   if (!existsSync(dockerIgnoreFilePath)) {
@@ -13,6 +13,7 @@ export const findDockerIgnoreFiles = async (context: string): Promise<Set<string
   const dockerIgnorePatterns = (await fs.readFile(dockerIgnoreFilePath, { encoding: "utf-8" }))
     .toString()
     .split(os.EOL)
+    .filter((dockerIgnorePattern) => dockerIgnorePattern !== dockerfileName)
     .map((dockerIgnorePattern) => path.resolve(context, dockerIgnorePattern));
 
   const dockerIgnoreMatches: string[] = (
