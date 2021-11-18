@@ -144,7 +144,11 @@ export class DockerComposeEnvironment {
 
     log.info(`DockerCompose environment started: ${Object.keys(startedGenericContainers).join(", ")}`);
 
-    return new StartedDockerComposeEnvironment(startedGenericContainers, options);
+    return new StartedDockerComposeEnvironment(startedGenericContainers, {
+      ...options,
+      composeOptions,
+      env: this.env,
+    });
   }
 
   private getBoundPorts(containerInfo: Dockerode.ContainerInfo): BoundPorts {
