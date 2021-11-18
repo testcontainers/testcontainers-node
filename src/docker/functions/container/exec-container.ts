@@ -13,21 +13,14 @@ export const execContainer = async (container: Dockerode.Container, command: Com
 
     const stream = await startExec(exec);
 
-    return await new Promise((resolve) => {
-      const chunks: string[] = [];
+    const chunks: string[] = [];
+    stream.on("data", (chunk) => chunks.push(chunk));
 
-      stream.on("data", (chunk) => chunks.push(chunk));
+    const exitCode = await waitForExec(exec);
 
-      const interval = setInterval(async () => {
-        const { running, exitCode } = await inspectExec(exec);
+    stream.destroy();
 
-        if (!running) {
-          clearInterval(interval);
-          stream.destroy();
-          resolve({ output: chunks.join(""), exitCode });
-        }
-      }, 100);
-    });
+    return { output: chunks.join(""), exitCode };
   } catch (err) {
     log.error(`Failed to exec container ${container.id} with command "${command.join(" ")}": ${err}`);
     throw err;
@@ -75,3 +68,15 @@ const inspectExec = async (exec: Dockerode.Exec): Promise<ExecInspectResult> => 
     throw err;
   }
 };
+
+const waitForExec = async (exec: Dockerode.Exec): Promise<number> =>
+  new Promise((resolve) => {
+    const interval = setInterval(async () => {
+      const { running, exitCode } = await inspectExec(exec);
+
+      if (!running) {
+        clearInterval(interval);
+        resolve(exitCode);
+      }
+    }, 100);
+  });
