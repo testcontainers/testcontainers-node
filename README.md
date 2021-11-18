@@ -5,6 +5,8 @@
 [![Node.js CI](https://github.com/testcontainers/testcontainers-node/actions/workflows/node.js.yml/badge.svg?branch=master)](https://github.com/testcontainers/testcontainers-node/actions/workflows/node.js.yml)
 [![npm version](https://badge.fury.io/js/testcontainers.svg)](https://www.npmjs.com/package/testcontainers)
 [![npm version](https://img.shields.io/npm/dm/testcontainers.svg)](https://www.npmjs.com/package/testcontainers)
+[![Thundra Foresight](https://thundra-assets-prod.s3.us-west-2.amazonaws.com/images/badges/thundra-foresight-badge-enabled.svg)](https://foresight.thundra.live/testRuns/57175ecb-d5ac-4129-957a-9dd617fd27d0)
+[![Foresight Test Summary](https://foresight.service.thundra.us/public/api/v1/badge/test/57175ecb-d5ac-4129-957a-9dd617fd27d0)](https://foresight.thundra.live/testruns/57175ecb-d5ac-4129-957a-9dd617fd27d0)
 
 ## Install
 
