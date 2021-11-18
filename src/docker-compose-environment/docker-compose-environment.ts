@@ -146,7 +146,6 @@ export class DockerComposeEnvironment {
 
     return new StartedDockerComposeEnvironment(startedGenericContainers, {
       ...options,
-      commandOptions,
       composeOptions,
       env: this.env,
     });
