@@ -13,7 +13,17 @@ const mockedRunInContainer = runInContainer as jest.Mock;
 
 describe("getDockerHost", () => {
   beforeEach(() => {
+    delete process.env["DOCKER_HOST"];
     delete process.env["TESTCONTAINERS_HOST_OVERRIDE"];
+  });
+
+  it("should return the host from DOCKER_HOST", async () => {
+    process.env.DOCKER_HOST = "dockerHost";
+    const fakeDockerode = {} as Dockerode;
+
+    const host = await getDockerHost(fakeDockerode);
+
+    expect(host).toBe("dockerHost");
   });
 
   it("should return the host from the modem", async () => {
