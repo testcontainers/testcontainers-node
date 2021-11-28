@@ -18,11 +18,6 @@ npm i -D testcontainers
 
 The following environment variables are supported:
 
-- `DEBUG=testcontainers` See output
-- `DEBUG=testcontainers:containers` See container output
-- `DEBUG=testcontainers*` See all output
-
-
 - `DOCKER_HOST=tcp://docker:2375` Sets the URL of the docker daemon
 - `DOCKER_TLS_VERIFY=1` When set to anything other than an empty string, enables TLS communication with the docker
   daemon
@@ -49,39 +44,39 @@ Using a pre-built Docker image, note that omitting the tag will use `latest`:
 
 ```javascript
 const redis = require("async-redis");
-const {GenericContainer} = require("testcontainers");
+const { GenericContainer } = require("testcontainers");
 
 describe("GenericContainer", () => {
-    let container;
-    let redisClient;
+  let container;
+  let redisClient;
 
-    beforeAll(async () => {
-        container = await new GenericContainer("redis")
-            .withExposedPorts(6379)
-            .start();
+  beforeAll(async () => {
+    container = await new GenericContainer("redis")
+      .withExposedPorts(6379)
+      .start();
 
-        redisClient = redis.createClient(
-            container.getMappedPort(6379),
-            container.getHost(),
-        );
-    });
+    redisClient = redis.createClient(
+      container.getMappedPort(6379),
+      container.getHost(),
+    );
+  });
 
-    afterAll(async () => {
-        await redisClient.quit();
-        await container.stop();
-    });
+  afterAll(async () => {
+    await redisClient.quit();
+    await container.stop();
+  });
 
-    it("works", async () => {
-        await redisClient.set("key", "val");
-        expect(await redisClient.get("key")).toBe("val");
-    });
+  it("works", async () => {
+    await redisClient.set("key", "val");
+    expect(await redisClient.get("key")).toBe("val");
+  });
 });
 ```
 
 Using TypeScript:
 
 ```typescript
-import {TestContainer, StartedTestContainer, StoppedTestContainer, GenericContainer} from "testcontainers";
+import { TestContainer, StartedTestContainer, StoppedTestContainer, GenericContainer } from "testcontainers";
 
 const container: TestContainer = new GenericContainer("alpine");
 const startedContainer: StartedTestContainer = await container.start();
@@ -91,87 +86,86 @@ const stoppedContainer: StoppedTestContainer = await startedContainer.stop();
 Using a specific image version:
 
 ```javascript
-const {GenericContainer} = require("testcontainers");
+const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("alpine:3.10")
-    .start();
+  .start();
 ```
 
 Building and using your own Docker image:
 
 ```javascript
 const path = require("path");
-const {GenericContainer} = require("testcontainers");
+const { GenericContainer } = require("testcontainers");
 
 const buildContext = path.resolve(__dirname, "dir-containing-dockerfile");
 
 const container = await GenericContainer.fromDockerfile(buildContext)
-    .withBuildArg("ARG_KEY", "ARG_VALUE")
-    .build();
+  .withBuildArg("ARG_KEY", "ARG_VALUE")
+  .build();
 
 const startedContainer = await container
-    .withExposedPorts(8080)
-    .start();
+  .withExposedPorts(8080)
+  .start();
 ```
 
 Using a custom Dockerfile name:
 
 ```javascript
-const {GenericContainer} = require("testcontainers");
+const { GenericContainer } = require("testcontainers");
 
 const container = await GenericContainer.fromDockerfile(buildContext, "my-dockerfile")
-    .build();
+  .build();
 ```
 
 Creating a container with multiple exposed ports:
 
 ```javascript
-const {GenericContainer} = require("testcontainers");
+const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
-    .withExposedPorts(22, 80, 443)
-    .start();
+  .withExposedPorts(22, 80, 443)
+  .start();
 ```
 
 Creating a container with a specified name:
 
 ```javascript
-const {GenericContainer} = require("testcontainers");
+const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
-    .withName("custom-container-name")
-    .start();
+  .withName("custom-container-name")
+  .start();
 ```
 
 Creating a container with a command:
 
 ```javascript
-const {GenericContainer} = require("testcontainers");
+const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
-    .withCmd(["top"])
-    .start();
+  .withCmd(["top"])
+  .start();
 ```
 
 Execute commands inside a running container:
 
 ```javascript
-const {GenericContainer} = require("testcontainers");
+const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
-    .withCmd(["top"])
-    .start();
+  .withCmd(["top"])
+  .start();
 
-const {output, exitCode} = await container.exec(["echo", "hello", "world"]);
+const { output, exitCode } = await container.exec(["echo", "hello", "world"]);
 ```
 
 Stream logs from a running container:
-
 ```javascript
-const {GenericContainer} = require("testcontainers");
+const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
-    .start();
+  .start();
 
 const stream = await container.logs();
 stream
@@ -184,87 +178,85 @@ stream
 Creating a container with bind mounts:
 
 ```javascript
-const {GenericContainer} = require("testcontainers");
+const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
-    .withBindMount("/local/file.txt", "/remote/file.txt")
-    .withBindMount("/local/dir", "/remote/dir", "ro")
-    .start();
+  .withBindMount("/local/file.txt", "/remote/file.txt")
+  .withBindMount("/local/dir", "/remote/dir", "ro")
+  .start();
 ```
 
 Creating a container with a `tmpfs` mount:
 
 ```javascript
-const {GenericContainer} = require("testcontainers");
+const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("postgres")
-    .withExposedPorts(5432)
-    .withTmpFs({"/temp_pgdata": "rw,noexec,nosuid,size=65536k"})
-    .start();
+  .withExposedPorts(5432)
+  .withTmpFs({ "/temp_pgdata": "rw,noexec,nosuid,size=65536k" })
+  .start();
 ```
 
 Copy a file to a container before it is started:
 
 ```javascript
-const {GenericContainer} = require("testcontainers");
+const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("postgres")
-    .withExposedPorts(5432)
-    .withCopyFileToContainer("/local/file.txt", "/remote/file1.txt")
-    .withCopyContentToContainer("hello world", "/remote/file2.txt")
-    .start();
+  .withExposedPorts(5432)
+  .withCopyFileToContainer("/local/file.txt", "/remote/file1.txt")
+  .withCopyContentToContainer("hello world", "/remote/file2.txt")
+  .start();
 ```
 
 Creating a container with environment variables:
 
 ```javascript
-const {GenericContainer} = require("testcontainers");
+const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
-    .withEnv("ENV_KEY", "ENV_VALUE")
-    .start();
+  .withEnv("ENV_KEY", "ENV_VALUE")
+  .start();
 ```
 
-Creating a container with a custom health check command. Note that `interval`, `timeout`, `retries` and `startPeriod`
-are optional; the values will be inherited from the image or parent image if omitted. Also note that the wait strategy
-should be set to `Wait.forHealthCheck()` for this option to take effect:
+Creating a container with a custom health check command. Note that `interval`, `timeout`, `retries` and `startPeriod` are optional; the values will be inherited from the image or parent image if omitted. Also note that the wait strategy should be set to `Wait.forHealthCheck()` for this option to take effect:
 
 ```javascript
-const {GenericContainer, Wait} = require("testcontainers");
+const { GenericContainer, Wait } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
-    .withHealthCheck({
-        test: "curl -f http://localhost || exit 1",
-        interval: 1000,
-        timeout: 3000,
-        retries: 5,
-        startPeriod: 1000
-    })
-    .withWaitStrategy(Wait.forHealthCheck())
-    .start();
+  .withHealthCheck({
+    test: "curl -f http://localhost || exit 1",
+    interval: 1000,
+    timeout: 3000,
+    retries: 5,
+    startPeriod: 1000
+  })
+  .withWaitStrategy(Wait.forHealthCheck())
+  .start();
 ```
 
 Creating a container that connects to a specific network:
 
 ```javascript
-const {GenericContainer} = require("testcontainers");
+const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
-    .withNetworkMode("network_name")
-    .start();
+  .withNetworkMode("network_name")
+  .start();
 ```
 
 Create user-defined bridge network and attach the container to it:
 
 ```javascript
-const {GenericContainer, Network} = require("testcontainers");
+const { GenericContainer, Network } = require("testcontainers");
 
 const network = await new Network()
     .start();
 
 const container = await new GenericContainer("alpine")
-    .withNetworkMode(network.getName())
-    .start();
+  .withNetworkMode(network.getName())
+  .start();
 
 await container.stop();
 await network.stop();
@@ -273,132 +265,131 @@ await network.stop();
 Communicate to containers on the same network via aliases:
 
 ```javascript
-const {GenericContainer, Network} = require("testcontainers");
+const { GenericContainer, Network } = require("testcontainers");
 
 const network = await new Network()
     .start();
 
 const container = await new GenericContainer("alpine")
-    .withCmd(["top"])
-    .withNetworkMode(network.getName())
-    .start();
+  .withCmd(["top"])
+  .withNetworkMode(network.getName())
+  .start();
 
 const fooContainer = await new GenericContainer("alpine")
-    .withCmd(["top"])
-    .withNetworkMode(network.getName())
-    .withNetworkAliases("foo", "bar")
-    .start();
+  .withCmd(["top"])
+  .withNetworkMode(network.getName())
+  .withNetworkAliases("foo", "bar")
+  .start();
 
 expect((await container.exec(["nslookup", "foo"])).exitCode).toBe(0);
 ```
 
-Specifying a pull policy. Note that if omitted will use the `DefaultPullPolicy` which will use a locally cached image if
-one already exists, this is usually the preferred option. In cases where there is a local image for a given tag but the
-remote image with the same tag may have changed (for example when using the `latest` tag), you can tell testcontainers
-to pull the image again by specifying an `AlwaysPullPolicy`:
+Specifying a pull policy. Note that if omitted will use the `DefaultPullPolicy` which will use a locally cached image 
+if one already exists, this is usually the preferred option. In cases where there is a local image for a given tag 
+but the remote image with the same tag may have changed (for example when using the `latest` tag), you can tell 
+testcontainers to pull the image again by specifying an `AlwaysPullPolicy`: 
 
 ```javascript
-const {GenericContainer, AlwaysPullPolicy} = require("testcontainers");
+const { GenericContainer, AlwaysPullPolicy } = require("testcontainers");
 
 const container = await new GenericContainer("alpine:latest")
-    .withPullPolicy(new AlwaysPullPolicy())
-    .start();
+  .withPullPolicy(new AlwaysPullPolicy())
+  .start();
 ```
 
 Same for images in a Dockerfile:
 
 ```javascript
-const {GenericContainer, AlwaysPullPolicy} = require("testcontainers");
+const { GenericContainer, AlwaysPullPolicy } = require("testcontainers");
 
 const container = await GenericContainer.fromDockerfile(buildContext)
-    .withPullPolicy(new AlwaysPullPolicy())
-    .build();
+  .withPullPolicy(new AlwaysPullPolicy())
+  .build();
 ```
 
 Specifying a default log driver. You can override the logging driver used by Docker to be the default one (json-file).
-This might be necessary when the driver of your docker host does not support reading logs and you want to use
-the `Wait.forLogMessage` wait strategy. This is the same as
-[--log-driver json-file on docker run](https://docs.docker.com/config/containers/logging/configure/#configure-the-logging-driver-for-a-container)
-.
+This might be necessary when the driver of your docker host does not support reading logs
+and you want to use the `Wait.forLogMessage` wait strategy. This is the same as 
+[--log-driver json-file on docker run](https://docs.docker.com/config/containers/logging/configure/#configure-the-logging-driver-for-a-container).
 
 ```javascript
-const {GenericContainer} = require("testcontainers");
+const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("redis")
-    .withDefaultLogDriver()
-    .start();
+  .withDefaultLogDriver()
+  .start();
 ```
 
-Creating and running a container with a specific user, note that the value can be a username or UID (
-format: `<name|uid>[:<group|gid>]`):
+Creating and running a container with a specific user, note that the value can be a username or UID (format: `<name|uid>[:<group|gid>]`):
 
 ```javascript
-const {GenericContainer} = require("testcontainers");
+const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
-    .withUser("bob")
-    .start();
+  .withUser("bob")
+  .start();
 ```
 
 Creating a container with privileged mode:
 
 ```javascript
-const {GenericContainer} = require("testcontainers");
+const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
-    .withPrivilegedMode()
-    .start();
+  .withPrivilegedMode()
+  .start();
 ```
 
 Creating a container with [IPC mode](https://docs.docker.com/engine/reference/run/#ipc-settings---ipc):
 
 ```javascript
-const {GenericContainer} = require("testcontainers");
+const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
-    .withIpcMode("host")
-    .start();
+  .withIpcMode("host")
+  .start();
 ```
 
 Testcontainers will not wait for a container to stop, to override:
 
 ```javascript
-const {GenericContainer} = require("testcontainers");
+const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("postgres")
-    .withExposedPorts(5432)
-    .start();
+  .withExposedPorts(5432)
+  .start();
 
-await container.stop({
-    timeout: 10000
+await container.stop({ 
+  timeout: 10000 
 });
 ```
 
-Testcontainers will remove associated volumes created by the container when stopped, to override:
+Testcontainers will remove associated volumes created
+by the container when stopped, to override:
 
 ```javascript
-const {GenericContainer} = require("testcontainers");
+const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("postgres")
-    .withExposedPorts(5432)
-    .start();
+  .withExposedPorts(5432)
+  .start();
 
-await container.stop({
-    removeVolumes: false
+await container.stop({ 
+  removeVolumes: false
 });
 ```
 
 Finding a container's IP address in a given network:
 
 ```javascript
-const {GenericContainer, Network} = require("testcontainers");
+const { GenericContainer, Network } = require("testcontainers");
 
 const network = await new Network()
-    .start();
+  .start();
 
 const container = await new GenericContainer("alpine")
-    .withNetworkMode(network.getName())
-    .start();
+  .withNetworkMode(network.getName())
+  .start();
 
 const networkIpAddress = container.getIpAddress(network.getName());
 ```
@@ -406,22 +397,22 @@ const networkIpAddress = container.getIpAddress(network.getName());
 [Exposing host ports to the container:](https://www.testcontainers.org/features/networking/#exposing-host-ports-to-the-container)
 
 ```javascript
-const {GenericContainer, TestContainers} = require("testcontainers");
-const {createServer} = require("http");
+const { GenericContainer, TestContainers } = require("testcontainers");
+const { createServer } = require("http");
 
 const server = createServer((req, res) => {
-    res.writeHead(200);
-    res.end("hello world");
+  res.writeHead(200);
+  res.end("hello world");
 });
 server.listen(8000);
 
 await TestContainers.exposeHostPorts(8000);
 
 const container = await new GenericContainer("alpine")
-    .withCmd(["top"])
-    .start();
+  .withCmd(["top"])
+  .start();
 
-const {output} = await container.exec(["curl", `http://host.testcontainers.internal:8000`]);
+const { output } = await container.exec(["curl", `http://host.testcontainers.internal:8000`]);
 assert(output === "hello world");
 ```
 
@@ -448,84 +439,82 @@ You can start and stop the environment, and interact with its containers:
 ```javascript
 const path = require("path");
 const redis = require("async-redis");
-const {DockerComposeEnvironment} = require("testcontainers");
+const { DockerComposeEnvironment } = require("testcontainers");
 
 describe("DockerComposeEnvironment", () => {
-    let environment;
-    let redisClient;
+  let environment;
+  let redisClient;
 
-    beforeAll(async () => {
-        const composeFilePath = path.resolve(__dirname, "dir-containing-docker-compose-yml");
-        const composeFile = "docker-compose.yml";
+  beforeAll(async () => {
+    const composeFilePath = path.resolve(__dirname, "dir-containing-docker-compose-yml");
+    const composeFile = "docker-compose.yml";
 
-        environment = await new DockerComposeEnvironment(composeFilePath, composeFile).up();
+    environment = await new DockerComposeEnvironment(composeFilePath, composeFile).up();
 
-        const redisContainer = environment.getContainer("redis_1");
-        redisClient = redis.createClient(
-            redisContainer.getMappedPort(6379),
-            redisContainer.getHost(),
-        );
-    });
+    const redisContainer = environment.getContainer("redis_1");
+    redisClient = redis.createClient(
+      redisContainer.getMappedPort(6379),
+      redisContainer.getHost(),
+    );
+  });
 
-    afterAll(async () => {
-        await redisClient.quit();
-        await environment.down();
-    });
+  afterAll(async () => {
+    await redisClient.quit();
+    await environment.down();
+  });
 
-    it("works", async () => {
-        await redisClient.set("key", "val");
-        expect(await redisClient.get("key")).toBe("val");
-    });
+  it("works", async () => {
+    await redisClient.set("key", "val");
+    expect(await redisClient.get("key")).toBe("val");
+  });
 });
 ```
 
 You can supply a list of service names to only start those services:
 
 ```javascript
-const {DockerComposeEnvironment} = require("testcontainers");
+const { DockerComposeEnvironment } = require("testcontainers");
 
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
-    .up(["database_service", "queue_service"]);
+  .up(["database_service", "queue_service"]);
 ```
 
 Create the containers with their own wait strategies:
 
 ```javascript
-const {DockerComposeEnvironment, Wait} = require("testcontainers");
+const { DockerComposeEnvironment, Wait } = require("testcontainers");
 
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
-    .withWaitStrategy("redis_1", Wait.forLogMessage("Ready to accept connections"))
-    .withWaitStrategy("postgres_1", Wait.forHealthCheck())
-    .up();
+  .withWaitStrategy("redis_1", Wait.forLogMessage("Ready to accept connections"))
+  .withWaitStrategy("postgres_1", Wait.forHealthCheck())
+  .up();
 ```
 
 Once the environment has started, you can interact with the containers as you would any other `GenericContainer`:
 
 ```javascript
-const {DockerComposeEnvironment} = require("testcontainers");
+const { DockerComposeEnvironment } = require("testcontainers");
 
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile).up();
 
 const container = environment.getContainer("alpine_1");
-const {output, exitCode} = await container.exec(["echo", "hello", "world"]);
+const { output, exitCode } = await container.exec(["echo", "hello", "world"]);
 ```
 
-You can supply [multiple compose files](https://docs.docker.com/compose/extends/#multiple-compose-files) to support
-overriding:
+You can supply [multiple compose files](https://docs.docker.com/compose/extends/#multiple-compose-files) to support overriding:
 
 ```javascript
-const {DockerComposeEnvironment} = require("testcontainers");
+const { DockerComposeEnvironment } = require("testcontainers");
 
 const environment = await new DockerComposeEnvironment(composeFilePath, [composeFile1, composeFile2]).up();
 
 await environment.stop();
 ```
 
-If you have multiple docker-compose environments which share dependencies such as networks, you can stop the environment
-instead of downing it:
+If you have multiple docker-compose environments which share dependencies such as networks, you can stop the environment instead of downing it:
 
 ```javascript
-const {DockerComposeEnvironment} = require("testcontainers");
+const { DockerComposeEnvironment } = require("testcontainers");
 
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile).up();
 
@@ -535,31 +524,31 @@ await environment.stop();
 By default, docker-compose does not re-build Dockerfiles, but you can override this behaviour:
 
 ```javascript
-const {DockerComposeEnvironment} = require("testcontainers");
+const { DockerComposeEnvironment } = require("testcontainers");
 
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
-    .withBuild()
-    .up();
+  .withBuild()
+  .up();
 ```
 
 Specify [profiles](https://docs.docker.com/compose/profiles/):
 
 ```javascript
-const {DockerComposeEnvironment} = require("testcontainers");
+const { DockerComposeEnvironment } = require("testcontainers");
 
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
     .withProfiles("profile1", "profile2")
     .up();
 ```
 
-Specify not to re-create containers that are already running:
+Specify not to re-create containers that are already running: 
 
 ```javascript
-const {DockerComposeEnvironment} = require("testcontainers");
+const { DockerComposeEnvironment } = require("testcontainers");
 
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
-    .withNoRecreate()
-    .up();
+  .withNoRecreate()
+  .up();
 ```
 
 Bind environment variables to the docker-compose file. For example if we have the following docker-compose file:
@@ -573,25 +562,25 @@ services:
 Then we can set `TAG` as follows:
 
 ```javascript
-const {DockerComposeEnvironment} = require("testcontainers");
+const { DockerComposeEnvironment } = require("testcontainers");
 
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
-    .withEnv("TAG", "value")
-    .up();
+  .withEnv("TAG", "value")
+  .up();
 ```
 
 ## Wait Strategies
 
-Ordinarily Testcontainers will wait for up to 60 seconds for the container's mapped network ports to start listening. If
-the default 60s timeout is not sufficient, it can be altered with the `withStartupTimeout()` method:
+Ordinarily Testcontainers will wait for up to 60 seconds for the container's mapped network ports to start listening. 
+If the default 60s timeout is not sufficient, it can be altered with the `withStartupTimeout()` method:
 
 ```javascript
-const {GenericContainer} = require("testcontainers");
+const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("redis")
-    .withExposedPorts(6379)
-    .withStartupTimeout(120000)
-    .start();
+  .withExposedPorts(6379)
+  .withStartupTimeout(120000)
+  .start();
 ```
 
 ### Log output
@@ -599,44 +588,44 @@ const container = await new GenericContainer("redis")
 Plain text:
 
 ```javascript
-const {GenericContainer, Wait} = require("testcontainers");
+const { GenericContainer, Wait } = require("testcontainers");
 
 const container = await new GenericContainer("redis")
-    .withExposedPorts(6379)
-    .withWaitStrategy(Wait.forLogMessage("Ready to accept connections"))
-    .start();
+  .withExposedPorts(6379)
+  .withWaitStrategy(Wait.forLogMessage("Ready to accept connections"))
+  .start();
 ```
 
 Regular expression:
 
 ```javascript
-const {GenericContainer, Wait} = require("testcontainers");
+const { GenericContainer, Wait } = require("testcontainers");
 
 const container = await new GenericContainer("redis")
-    .withExposedPorts(6379)
-    .withWaitStrategy(Wait.forLogMessage(/Listening on port [0-9]+/))
-    .start();
+  .withExposedPorts(6379)
+  .withWaitStrategy(Wait.forLogMessage(/Listening on port [0-9]+/))
+  .start();
 ```
 
 ### Health check
 
 ```javascript
-const {GenericContainer, Wait} = require("testcontainers");
+const { GenericContainer, Wait } = require("testcontainers");
 
 const container = await new GenericContainer("redis")
-    .withExposedPorts(6379)
-    .withWaitStrategy(Wait.forHealthCheck())
-    .start();
+  .withExposedPorts(6379)
+  .withWaitStrategy(Wait.forHealthCheck())
+  .start();
 ```
 
 ## Authentication
 
-Testcontainers will automatically pick up and use credentials from `$HOME/.docker/config.json`, using credential
-helpers, credential stores, or raw auth as necessary and in that order.
+Testcontainers will automatically pick up and use credentials from `$HOME/.docker/config.json`, using
+credential helpers, credential stores, or raw auth as necessary and in that order.
 
 ## Auxiliary Containers
 
-Testcontainers may need to create auxiliary containers to provide its functionality.
+Testcontainers may need to create auxiliary containers to provide its functionality. 
 
 To avoid Docker pull limits, you can host your own images and use them by setting the appropriate environment variables:
 
@@ -647,38 +636,41 @@ To avoid Docker pull limits, you can host your own images and use them by settin
 
 ### ryuk
 
-Testcontainers will start ryuk whenever a container, docker-compose environment or network is started.
+Testcontainers will start ryuk whenever a container, docker-compose environment or network is started. 
 
-Once started, this container keeps track of containers/images/networks/volumes created by testcontainers and will
-automatically clean them up 10s after connectivity with testcontainers is lost. This is useful for example if a test
+Once started, this container keeps track of containers/images/networks/volumes created by testcontainers and will 
+automatically clean them up 10s after connectivity with testcontainers is lost. This is useful for example if a test 
 starts a container and then terminates unexpectedly, as it will be automatically removed.
 
-ryuk must be run with privileged mode; in CI environments such as Bit Bucket where this isn't supported, ryuk can be
+ryuk must be run with privileged mode; in CI environments such as Bit Bucket where this isn't supported, ryuk can be 
 disabled by setting the environment variable `TESTCONTAINERS_RYUK_DISABLED` to `true`.
 
 ### SSHd
 
-Testcontainers will start SSHd when using the expose host port functionality.
+Testcontainers will start SSHd when using the expose host port functionality. 
 
-Once started, any container that is created will have a host mapping of `host.testcontainers.internal` that points to
+Once started, any container that is created will have a host mapping of `host.testcontainers.internal` that points to 
 the SSHd container, as well as being connected to its network.
 
-When we then expose a host port, we remote port forward our local port to the SSHd container, which the other containers
-will then be able to access at `host.testcontainers.internal:<exposed-port>`.
+When we then expose a host port, we remote port forward our local port to the SSHd container, which the other
+containers will then be able to access at `host.testcontainers.internal:<exposed-port>`.
 
 ## Common Issues
 
 1. **Insufficient Docker memory**
 
-By default, Docker sets CPU and memory limits, with a default memory limit of 2GB. If exceeded, you will be unable to
-pull/run Docker images. To see how much memory Docker has used, you can run ```docker system info```
+By default, Docker sets CPU and memory limits, with a default memory limit 
+of 2GB. If exceeded, you will be unable to pull/run Docker images. 
+To see how much memory Docker has  used, you can run ```docker system info```
 
 - To remove existing containers and images to clear some space you can run ```docker system prune```
 - Alternatively you can increase the memory limit via Docker's settings under the Advanced pane.
 
-2. **Insufficient test timeouts**
+2. **Insufficient test timeouts** 
 
-It can take a few seconds up to a few minutes to pull and run certain Docker images, depending on file sizes and network
-constraints. It's unlikely that the default timeouts set by test frameworks are sufficient.
+It can take a few seconds up to a few minutes to pull and run certain Docker images, 
+depending on file sizes and network constraints. It's unlikely that the default
+timeouts set by test frameworks are sufficient.
 
 - Increase the test timeout via the methods provided by the testing framework.
+
