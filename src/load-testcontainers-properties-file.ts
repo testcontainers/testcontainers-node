@@ -4,13 +4,7 @@ import { homedir } from "os";
 import { existsSync, readFileSync } from "fs";
 import propertiesReader from "properties-reader";
 
-let hasLoaded = false;
-
 export const loadTestcontainersPropertiesFile = (): void => {
-  if (hasLoaded) {
-    return;
-  }
-
   const file = path.resolve(homedir(), ".testcontainers.properties");
 
   if (existsSync(file)) {
@@ -36,6 +30,4 @@ export const loadTestcontainersPropertiesFile = (): void => {
       process.env.DOCKER_CERT_PATH = certPath;
     }
   }
-
-  hasLoaded = true;
 };

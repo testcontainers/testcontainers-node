@@ -7,6 +7,12 @@ const mockedExistsSync = existsSync as jest.Mock;
 const mockedReadFileSync = readFileSync as jest.Mock;
 
 describe("load testcontainers properties file", () => {
+  afterEach(() => {
+    delete process.env["DOCKER_HOST"];
+    delete process.env["DOCKER_TLS_VERIFY"];
+    delete process.env["DOCKER_CERT_PATH"];
+  });
+
   describe("does not exist", () => {
     beforeEach(() => {
       mockedExistsSync.mockReturnValue(false);
