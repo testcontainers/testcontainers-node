@@ -1,5 +1,5 @@
 import { log } from "../../logger";
-import { stop } from "docker-compose";
+import { stop } from "../docker-compose";
 import { defaultDockerComposeOptions } from "../default-docker-compose-options";
 import { DockerComposeOptions } from "../docker-compose-options";
 
