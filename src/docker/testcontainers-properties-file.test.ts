@@ -7,51 +7,56 @@ const mockedExistsSync = existsSync as jest.Mock;
 const mockedReadFileSync = readFileSync as jest.Mock;
 
 describe("testcontainers properties file", () => {
-  it("should return undefined when properties file does not exist", () => {
-    mockedExistsSync.mockReturnValueOnce(false);
+  describe("does not exist", () => {
+    beforeEach(() => {
+      mockedExistsSync.mockReturnValue(false);
+    });
 
-    const properties = readTestcontainersPropertiesFile();
-
-    expect(properties).toBeUndefined();
+    it("should return undefined", () => {
+      expect(readTestcontainersPropertiesFile()).toBeUndefined();
+    });
   });
 
-  it("should return the host", () => {
-    mockedExistsSync.mockReturnValueOnce(true);
-    mockedReadFileSync.mockReturnValueOnce("docker.host=tcp://my.docker.host:1234");
+  describe("exists", () => {
+    beforeEach(() => {
+      mockedExistsSync.mockReturnValue(true);
+    });
 
-    const properties = readTestcontainersPropertiesFile();
+    it("should return the host", () => {
+      mockedReadFileSync.mockReturnValueOnce("docker.host=tcp://my.docker.host:1234");
 
-    expect(properties).toStrictEqual({ host: "tcp://my.docker.host:1234" });
-  });
+      const properties = readTestcontainersPropertiesFile();
 
-  it("should return the host without certificate if tls verify is disabled", () => {
-    mockedExistsSync.mockReturnValueOnce(true);
-    mockedReadFileSync.mockReturnValueOnce(`
+      expect(properties).toStrictEqual({ host: "tcp://my.docker.host:1234" });
+    });
+
+    it("should return the host without certificate if tls verify is disabled", () => {
+      mockedReadFileSync.mockReturnValueOnce(`
         docker.host=tcp://my.docker.host:1234
         docker.tls.verify=0
         docker.cert.path=/some/path
       `);
 
-    const properties = readTestcontainersPropertiesFile();
+      const properties = readTestcontainersPropertiesFile();
 
-    expect(properties).toStrictEqual({ host: "tcp://my.docker.host:1234" });
-  });
+      expect(properties).toStrictEqual({ host: "tcp://my.docker.host:1234" });
+    });
 
-  it("should return the host and certificate", () => {
-    mockedExistsSync.mockReturnValueOnce(true);
-    mockedReadFileSync.mockReturnValueOnce(`
+    it("should return the host and certificate if tls verify is enabled", () => {
+      mockedReadFileSync.mockReturnValueOnce(`
         docker.host=tcp://my.docker.host:1234
         docker.tls.verify=1
         docker.cert.path=/some/path
       `);
 
-    const properties = readTestcontainersPropertiesFile();
+      const properties = readTestcontainersPropertiesFile();
 
-    expect(properties).toStrictEqual({
-      host: "tcp://my.docker.host:1234",
-      ca: "/some/path/ca.pem",
-      cert: "/some/path/cert.pem",
-      key: "/some/path/key.pem",
+      expect(properties).toStrictEqual({
+        host: "tcp://my.docker.host:1234",
+        ca: "/some/path/ca.pem",
+        cert: "/some/path/cert.pem",
+        key: "/some/path/key.pem",
+      });
     });
   });
 });
