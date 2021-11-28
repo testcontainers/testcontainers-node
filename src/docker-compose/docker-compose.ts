@@ -1,4 +1,4 @@
-import { loadTestcontainersPropertiesFile } from "../load-testcontainers-properties-file";
+import { loadTestcontainersPropertiesFile } from "../testcontainers-properties-file";
 
 loadTestcontainersPropertiesFile();
 

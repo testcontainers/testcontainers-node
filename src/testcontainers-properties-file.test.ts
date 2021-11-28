@@ -1,12 +1,12 @@
 import { existsSync, readFileSync } from "fs";
-import { loadTestcontainersPropertiesFile } from "./load-testcontainers-properties-file";
+import { loadTestcontainersPropertiesFile } from "./testcontainers-properties-file";
 
 jest.mock("fs", () => ({ existsSync: jest.fn(), readFileSync: jest.fn() }));
 
 const mockedExistsSync = existsSync as jest.Mock;
 const mockedReadFileSync = readFileSync as jest.Mock;
 
-describe("load testcontainers properties file", () => {
+describe("testcontainers properties file", () => {
   afterEach(() => {
     delete process.env["DOCKER_HOST"];
     delete process.env["DOCKER_TLS_VERIFY"];
