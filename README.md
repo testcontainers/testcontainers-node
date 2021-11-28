@@ -18,6 +18,11 @@ npm i -D testcontainers
 
 The following environment variables are supported:
 
+- `DEBUG=testcontainers` See output
+- `DEBUG=testcontainers:containers` See container output
+- `DEBUG=testcontainers*` See all output
+
+
 - `DOCKER_HOST=tcp://docker:2375` Sets the URL of the docker daemon
 - `DOCKER_TLS_VERIFY=1` When set to anything other than an empty string, enables TLS communication with the docker
   daemon
