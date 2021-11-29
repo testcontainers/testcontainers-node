@@ -116,6 +116,20 @@ describe("GenericContainer", () => {
     await network.stop();
   });
 
+  it("should set extra hosts", async () => {
+    const fooContainer = await new GenericContainer("cristianrgreco/testcontainer:1.1.12").start();
+
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
+      .withExtraHosts({ host: "foo", ipAddress: fooContainer.getIpAddress(fooContainer.getNetworkNames()[0]) })
+      .start();
+
+    expect((await container.exec(["nslookup", "foo"])).exitCode).toBe(0);
+    expect((await container.exec(["nslookup", "unknown"])).exitCode).toBe(1);
+
+    await container.stop();
+    await fooContainer.stop();
+  });
+
   it("should set environment variables", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
       .withEnv("customKey", "customValue")
