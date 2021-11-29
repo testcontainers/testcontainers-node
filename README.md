@@ -283,6 +283,22 @@ const fooContainer = await new GenericContainer("alpine")
 expect((await container.exec(["nslookup", "foo"])).exitCode).toBe(0);
 ```
 
+Add hostname mappings:
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await new GenericContainer("alpine")
+  .withExtraHosts([
+    { host: "foo", ipAddress: "10.11.12.13" },
+    { host: "bar", ipAddress: "11.12.13.14" }
+  ])
+  .start();
+
+expect((await container.exec(["nslookup", "foo"])).exitCode).toBe(0);
+expect((await container.exec(["nslookup", "bar"])).exitCode).toBe(0);
+```
+
 Specifying a pull policy. Note that if omitted will use the `DefaultPullPolicy` which will use a locally cached image 
 if one already exists, this is usually the preferred option. In cases where there is a local image for a given tag 
 but the remote image with the same tag may have changed (for example when using the `latest` tag), you can tell 

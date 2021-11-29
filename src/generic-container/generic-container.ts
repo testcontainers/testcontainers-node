@@ -119,7 +119,11 @@ export class GenericContainer implements TestContainer {
       const excludedNetworks = [portForwarderNetworkId, "none", "host"];
 
       if (!this.networkMode || !excludedNetworks.includes(this.networkMode)) {
-        await connectNetwork({ containerId: container.id, networkId: portForwarderNetworkId, networkAliases: [] });
+        await connectNetwork({
+          containerId: container.id,
+          networkId: portForwarderNetworkId,
+          networkAliases: [],
+        });
       }
     }
 
@@ -177,6 +181,11 @@ export class GenericContainer implements TestContainer {
 
   public withNetworkAliases(...networkAliases: string[]): this {
     this.networkAliases = networkAliases;
+    return this;
+  }
+
+  public withExtraHosts(...extraHosts: ExtraHost[]): this {
+    this.extraHosts.push(...extraHosts);
     return this;
   }
 
