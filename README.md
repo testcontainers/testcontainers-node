@@ -284,10 +284,10 @@ Add hostname mappings:
 const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
-  .withExtraHosts([
+  .withExtraHosts(
     { host: "foo", ipAddress: "10.11.12.13" },
     { host: "bar", ipAddress: "11.12.13.14" }
-  ])
+  )
   .start();
 
 expect((await container.exec(["nslookup", "foo"])).exitCode).toBe(0);
