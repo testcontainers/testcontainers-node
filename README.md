@@ -138,7 +138,7 @@ Creating a container with a command:
 const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
-  .withCmd(["top"])
+  .withCmd(["sleep", "infinity"])
   .start();
 ```
 
@@ -148,7 +148,7 @@ Execute commands inside a running container:
 const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
-  .withCmd(["top"])
+  .withCmd(["sleep", "infinity"])
   .start();
 
 const { output, exitCode } = await container.exec(["echo", "hello", "world"]);
@@ -265,12 +265,12 @@ const network = await new Network()
     .start();
 
 const container = await new GenericContainer("alpine")
-  .withCmd(["top"])
+  .withCmd(["sleep", "infinity"])
   .withNetworkMode(network.getName())
   .start();
 
 const fooContainer = await new GenericContainer("alpine")
-  .withCmd(["top"])
+  .withCmd(["sleep", "infinity"])
   .withNetworkMode(network.getName())
   .withNetworkAliases("foo", "bar")
   .start();
@@ -419,7 +419,7 @@ server.listen(8000);
 await TestContainers.exposeHostPorts(8000);
 
 const container = await new GenericContainer("alpine")
-  .withCmd(["top"])
+  .withCmd(["sleep", "infinity"])
   .start();
 
 const { output } = await container.exec(["curl", `http://host.testcontainers.internal:8000`]);
