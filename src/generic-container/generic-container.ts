@@ -2,7 +2,6 @@ import archiver from "archiver";
 import { BoundPorts } from "../bound-ports";
 import { containerLog, log } from "../logger";
 import { Port } from "../port";
-import { PortBinder } from "../port-binder";
 import { HostPortCheck, InternalPortCheck } from "../port-check";
 import { DefaultPullPolicy, PullPolicy } from "../pull-policy";
 import { ReaperInstance } from "../reaper";
@@ -80,15 +79,14 @@ export class GenericContainer implements TestContainer {
       authConfig: await getAuthConfig(this.imageName.registry),
     });
 
-    const boundPorts = await new PortBinder().bind(this.ports);
-
     if (!this.imageName.isReaper()) {
       await ReaperInstance.getInstance();
     }
 
-    if (this.preCreate) {
-      await this.preCreate(boundPorts);
-    }
+    // todo kafka module broken without this, but boundPorts are only available when container starts
+    // if (this.preCreate) {
+    //   await this.preCreate(boundPorts);
+    // }
 
     if (!this.imageName.isHelperContainer() && PortForwarderInstance.isRunning()) {
       const portForwarder = await PortForwarderInstance.getInstance();
@@ -101,7 +99,7 @@ export class GenericContainer implements TestContainer {
       cmd: this.cmd,
       bindMounts: this.bindMounts,
       tmpFs: this.tmpFs,
-      boundPorts,
+      exposedPorts: this.ports,
       name: this.name,
       networkMode: this.networkAliases.length > 0 ? undefined : this.networkMode,
       healthCheck: this.healthCheck,
@@ -148,7 +146,7 @@ export class GenericContainer implements TestContainer {
       .on("err", (data) => containerLog.error(`${container.id}: ${data.trim()}`));
 
     const inspectResult = await inspectContainer(container);
-
+    const boundPorts = BoundPorts.fromInspectResult(inspectResult).filter(this.ports);
     await this.waitForContainer(container, boundPorts);
 
     return new StartedGenericContainer(container, await dockerHost, inspectResult, boundPorts, inspectResult.name);

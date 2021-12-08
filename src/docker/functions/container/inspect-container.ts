@@ -1,12 +1,10 @@
-import { ContainerName, HealthCheckStatus, NetworkSettings } from "../../types";
-import { Port } from "../../../port";
+import { ContainerName, HealthCheckStatus, NetworkSettings, Ports } from "../../types";
 import Dockerode, { ContainerInspectInfo } from "dockerode";
 import { log } from "../../../logger";
 
 export type InspectResult = {
   name: ContainerName;
-  internalPorts: Port[];
-  hostPorts: Port[];
+  ports: Ports;
   healthCheckStatus: HealthCheckStatus;
   networkSettings: { [networkName: string]: NetworkSettings };
   state: { status: string; running: boolean };
@@ -17,8 +15,7 @@ export const inspectContainer = async (container: Dockerode.Container): Promise<
     const inspectResult = await container.inspect();
 
     return {
-      hostPorts: getHostPorts(inspectResult),
-      internalPorts: getInternalPorts(inspectResult),
+      ports: getPorts(inspectResult),
       name: getName(inspectResult),
       healthCheckStatus: getHealthCheckStatus(inspectResult),
       networkSettings: getNetworkSettings(inspectResult),
@@ -30,13 +27,14 @@ export const inspectContainer = async (container: Dockerode.Container): Promise<
   }
 };
 
-const getHostPorts = (inspectInfo: ContainerInspectInfo): Port[] =>
-  Object.values(inspectInfo.NetworkSettings.Ports)
-    .filter((portsArray) => portsArray !== null)
-    .map((portsArray) => Number(portsArray[0].HostPort));
-
-const getInternalPorts = (inspectInfo: ContainerInspectInfo): Port[] =>
-  Object.keys(inspectInfo.NetworkSettings.Ports).map((port) => Number(port.split("/")[0]));
+const getPorts = (inspectInfo: ContainerInspectInfo): Ports =>
+  Object.entries(inspectInfo.NetworkSettings.Ports)
+    .filter(([, hostPorts]) => hostPorts !== null)
+    .map(([internalPort, hostPorts]) => {
+      const hostPort = hostPorts[0].HostPort;
+      return { [parseInt(internalPort.split("/")[0])]: parseInt(hostPort) };
+    })
+    .reduce((acc, curr) => ({ ...acc, ...curr }), {});
 
 const getName = (inspectInfo: ContainerInspectInfo): ContainerName => inspectInfo.Name;
 
