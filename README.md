@@ -29,6 +29,7 @@ The following environment variables are supported:
 - `TESTCONTAINERS_HOST_OVERRIDE=docker.svc.local` Docker's host on which ports are exposed
 - `TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock` Path to Docker's socket. Used by [ryuk](#ryuk) and
   other [auxiliary containers](#auxiliary-containers) that need to perform Docker actions
+- `TESTCONTAINERS_RYUK_PRIVILEGED=true` Run [ryuk](#ryuk) as a privileged container
 - `TESTCONTAINERS_RYUK_DISABLED=true` Disable [ryuk](#ryuk)
 - `RYUK_CONTAINER_IMAGE=registry.mycompany.com/mirror/ryuk:0.3.0` Custom image for [ryuk](#ryuk)
 - `SSHD_CONTAINER_IMAGE=registry.mycompany.com/mirror/sshd:1.0.0` Custom image for [SSHd](#SSHd)
@@ -657,8 +658,9 @@ Once started, this container keeps track of containers/images/networks/volumes c
 automatically clean them up 10s after connectivity with testcontainers is lost. This is useful for example if a test 
 starts a container and then terminates unexpectedly, as it will be automatically removed.
 
-ryuk must be run with privileged mode; in CI environments such as Bit Bucket where this isn't supported, ryuk can be 
-disabled by setting the environment variable `TESTCONTAINERS_RYUK_DISABLED` to `true`.
+ryuk by default does not run privileged, if necessary this can be overridden by setting the environment variable 
+`TESTCONTAINERS_RYUK_PRIVILEGED` to `true`. If necessary, ryuk can be disabled enirely by setting the environment 
+variable `TESTCONTAINERS_RYUK_DISABLED` to `true`.
 
 ### SSHd
 
