@@ -4,6 +4,7 @@ import { log } from "../../../logger";
 
 export type InspectResult = {
   name: ContainerName;
+  hostname: string;
   ports: Ports;
   healthCheckStatus: HealthCheckStatus;
   networkSettings: { [networkName: string]: NetworkSettings };
@@ -15,8 +16,9 @@ export const inspectContainer = async (container: Dockerode.Container): Promise<
     const inspectResult = await container.inspect();
 
     return {
+      name: inspectResult.Name,
+      hostname: inspectResult.Config.Hostname,
       ports: getPorts(inspectResult),
-      name: getName(inspectResult),
       healthCheckStatus: getHealthCheckStatus(inspectResult),
       networkSettings: getNetworkSettings(inspectResult),
       state: { status: inspectResult.State.Status, running: inspectResult.State.Running },
@@ -35,8 +37,6 @@ const getPorts = (inspectInfo: ContainerInspectInfo): Ports =>
       return { [parseInt(internalPort.split("/")[0])]: parseInt(hostPort) };
     })
     .reduce((acc, curr) => ({ ...acc, ...curr }), {});
-
-const getName = (inspectInfo: ContainerInspectInfo): ContainerName => inspectInfo.Name;
 
 const getHealthCheckStatus = (inspectResult: ContainerInspectInfo): HealthCheckStatus => {
   const health = inspectResult.State.Health;
