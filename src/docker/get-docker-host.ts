@@ -3,6 +3,7 @@ import Dockerode, { NetworkInspectInfo } from "dockerode";
 import { Host } from "./types";
 import { runInContainer } from "./functions/run-in-container";
 import fs from "fs";
+import { URL } from "url";
 
 const DEFAULT_HOST = "localhost";
 
@@ -11,8 +12,9 @@ export const getDockerHost = async (dockerode: Dockerode): Promise<Host> => {
     const result = await hostStrategy();
 
     if (result) {
-      log.info(`Docker host strategy ${hostStrategyName}: ${result}`);
-      return result;
+      const hostname = result === DEFAULT_HOST ? DEFAULT_HOST : new URL(result).hostname;
+      log.info(`Docker host strategy ${hostStrategyName}: ${hostname}`);
+      return hostname;
     }
   }
 
