@@ -41,8 +41,6 @@ const getDockerClient = async (): Promise<DockerClient> => {
   throw new Error("No Docker client strategy found");
 };
 
-export const dockerClient: Promise<DockerClient> = getDockerClient();
-
 const createDockerodeOptions = (dockerConfig: DockerConfig) => {
   const dockerOptions: DockerOptions = {};
 
@@ -179,3 +177,5 @@ const findDefaultGateway = async (dockerode: Dockerode): Promise<string | undefi
   runInContainer(dockerode, "alpine:3.5", ["sh", "-c", "ip route|awk '/default/ { print $3 }'"]);
 
 const isInContainer = () => fs.existsSync("/.dockerenv");
+
+export const dockerClient: Promise<DockerClient> = getDockerClient();
