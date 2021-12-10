@@ -142,6 +142,10 @@ class NpipeSocketStrategy implements DockerClientStrategy {
 }
 
 const resolveHost = async (dockerode: Dockerode, uri: string): Promise<string> => {
+  if (process.env.TESTCONTAINERS_HOST_OVERRIDE !== undefined) {
+    return process.env.TESTCONTAINERS_HOST_OVERRIDE;
+  }
+
   const { protocol, hostname } = new URL(uri);
 
   switch (protocol) {
@@ -153,11 +157,11 @@ const resolveHost = async (dockerode: Dockerode, uri: string): Promise<string> =
     case "npipe:": {
       if (isInContainer()) {
         const gateway = await findGateway(dockerode);
-        if (gateway) {
+        if (gateway !== undefined) {
           return gateway;
         }
         const defaultGateway = await findDefaultGateway(dockerode);
-        if (defaultGateway) {
+        if (defaultGateway !== undefined) {
           return defaultGateway;
         }
       }
