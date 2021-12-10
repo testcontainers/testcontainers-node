@@ -1,6 +1,6 @@
 import { log } from "../../../logger";
 import { DockerImageName } from "../../../docker-image-name";
-import { dockerode } from "../../dockerode";
+import { dockerClient } from "../../docker-client";
 import Dockerode, { PortMap as DockerodePortBindings } from "dockerode";
 import { Port, PortString } from "../../../port";
 import { createLabels } from "../create-labels";
@@ -27,6 +27,7 @@ export type CreateContainerOptions = {
 export const createContainer = async (options: CreateContainerOptions): Promise<Dockerode.Container> => {
   try {
     log.info(`Creating container for image: ${options.imageName}`);
+    const { dockerode } = await dockerClient;
 
     return await dockerode.createContainer({
       name: options.name,

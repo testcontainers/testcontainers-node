@@ -1,10 +1,11 @@
 import { log } from "../../../logger";
-import { dockerode } from "../../dockerode";
+import { dockerClient } from "../../docker-client";
 
 export const removeNetwork = async (id: string): Promise<void> => {
   try {
     log.info(`Removing network ${id}`);
 
+    const { dockerode } = await dockerClient;
     const network = dockerode.getNetwork(id);
 
     const { message } = await network.remove();

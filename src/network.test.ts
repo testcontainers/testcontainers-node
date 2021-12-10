@@ -12,7 +12,7 @@ describe("Network", () => {
       .withNetworkMode(network.getName())
       .start();
 
-    const dockerContainer = getContainerById(container.getId());
+    const dockerContainer = await getContainerById(container.getId());
     const containerInfo = await dockerContainer.inspect();
     expect(containerInfo.HostConfig.NetworkMode).toBe(network.getName());
 

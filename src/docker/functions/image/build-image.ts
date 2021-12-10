@@ -5,7 +5,7 @@ import { findDockerIgnoreFiles } from "../../../docker-ignore";
 import tar from "tar-fs";
 import slash from "slash";
 import byline from "byline";
-import { dockerode } from "../../dockerode";
+import { dockerClient } from "../../docker-client";
 import { createLabels } from "../create-labels";
 import { BuildArgs, BuildContext, RegistryConfig } from "../../types";
 
@@ -24,6 +24,7 @@ export const buildImage = async (options: BuildImageOptions): Promise<void> => {
 
     const dockerIgnoreFiles = await findDockerIgnoreFiles(options.context, options.dockerfileName);
     const tarStream = tar.pack(options.context, { ignore: (name) => dockerIgnoreFiles.has(slash(name)) });
+    const { dockerode } = await dockerClient;
 
     return new Promise((resolve) =>
       dockerode

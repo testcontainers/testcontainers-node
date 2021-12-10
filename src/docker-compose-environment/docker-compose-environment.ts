@@ -10,7 +10,7 @@ import { RandomUuid, Uuid } from "../uuid";
 import { Env, EnvKey, EnvValue, Host } from "../docker/types";
 import { listContainers } from "../docker/functions/container/list-containers";
 import { getContainerById } from "../docker/functions/container/get-container";
-import { dockerHost } from "../docker/docker-host";
+import { dockerClient } from "../docker/docker-client";
 import { inspectContainer } from "../docker/functions/container/inspect-container";
 import { containerLogs } from "../docker/functions/container/container-logs";
 import { StartedDockerComposeEnvironment } from "./started-docker-compose-environment";
@@ -107,7 +107,7 @@ export class DockerComposeEnvironment {
     const startedGenericContainers = (
       await Promise.all(
         startedContainers.map(async (startedContainer) => {
-          const container = getContainerById(startedContainer.Id);
+          const container = await getContainerById(startedContainer.Id);
           const containerName = resolveContainerName(this.projectName, startedContainer.Names[0]);
 
           (await containerLogs(container))
@@ -131,7 +131,13 @@ export class DockerComposeEnvironment {
             throw err;
           }
 
-          return new StartedGenericContainer(container, await dockerHost, inspectResult, boundPorts, containerName);
+          return new StartedGenericContainer(
+            container,
+            (await dockerClient).host,
+            inspectResult,
+            boundPorts,
+            containerName
+          );
         })
       )
     ).reduce((map, startedGenericContainer) => {
@@ -153,7 +159,7 @@ export class DockerComposeEnvironment {
     containerName: string,
     boundPorts: BoundPorts
   ): Promise<void> {
-    const waitStrategy = this.getWaitStrategy(await dockerHost, container, containerName);
+    const waitStrategy = this.getWaitStrategy((await dockerClient).host, container, containerName);
     await waitStrategy.withStartupTimeout(this.startupTimeout).waitUntilReady(container, boundPorts);
   }
 

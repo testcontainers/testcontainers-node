@@ -1,10 +1,11 @@
 import { DockerImageName } from "../../../docker-image-name";
-import { dockerode } from "../../dockerode";
+import { dockerClient } from "../../docker-client";
 import Dockerode from "dockerode";
 import { log } from "../../../logger";
 
 export const listImages = async (): Promise<DockerImageName[]> => {
   try {
+    const { dockerode } = await dockerClient;
     const images = await dockerode.listImages();
 
     return images.reduce((dockerImageNames: DockerImageName[], image) => {

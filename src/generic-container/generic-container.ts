@@ -30,7 +30,7 @@ import {
 import { pullImage } from "../docker/functions/image/pull-image";
 import { createContainer } from "../docker/functions/container/create-container";
 import { connectNetwork } from "../docker/functions/network/connect-network";
-import { dockerHost } from "../docker/docker-host";
+import { dockerClient } from "../docker/docker-client";
 import { inspectContainer, InspectResult } from "../docker/functions/container/inspect-container";
 import Dockerode from "dockerode";
 import { startContainer } from "../docker/functions/container/start-container";
@@ -152,7 +152,7 @@ export class GenericContainer implements TestContainer {
 
     const startedContainer = new StartedGenericContainer(
       container,
-      await dockerHost,
+      (await dockerClient).host,
       inspectResult,
       boundPorts,
       inspectResult.name
@@ -280,7 +280,7 @@ export class GenericContainer implements TestContainer {
 
   private async waitForContainer(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void> {
     log.debug(`Waiting for container to be ready: ${container.id}`);
-    const waitStrategy = this.getWaitStrategy(await dockerHost, container);
+    const waitStrategy = this.getWaitStrategy((await dockerClient).host, container);
 
     try {
       await waitStrategy.withStartupTimeout(this.startupTimeout).waitUntilReady(container, boundPorts);

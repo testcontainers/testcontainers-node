@@ -3,7 +3,7 @@ import { log } from "./logger";
 import { GenericContainer } from "./generic-container/generic-container";
 import { StartedTestContainer } from "./test-container";
 import { sessionId } from "./docker/session-id";
-import { dockerHost } from "./docker/docker-host";
+import { dockerClient } from "./docker/docker-client";
 import { REAPER_IMAGE } from "./images";
 
 export interface Reaper {
@@ -94,7 +94,7 @@ export class ReaperInstance {
     const startedContainer = await container.start();
     const containerId = startedContainer.getId();
 
-    const host = await dockerHost;
+    const host = (await dockerClient).host;
     const port = startedContainer.getMappedPort(8080);
 
     log.debug(`Connecting to Reaper ${containerId} on ${host}:${port}`);
