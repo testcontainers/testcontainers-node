@@ -4,7 +4,6 @@ import { Host } from "./types";
 import { runInContainer } from "./functions/run-in-container";
 import fs from "fs";
 import { URL } from "url";
-import { promise as ping } from "ping";
 
 const DEFAULT_HOST = "localhost";
 
@@ -14,20 +13,14 @@ export const getDockerHost = async (dockerode: Dockerode): Promise<Host> => {
 
     if (result) {
       const hostname = result === DEFAULT_HOST ? DEFAULT_HOST : new URL(result).hostname;
-      if (await isHostAvailable(hostname)) {
-        log.info(`Docker host strategy ${hostStrategyName}: ${hostname}`);
-        return hostname;
-      } else {
-        log.warn(`Docker host strategy ${hostStrategyName}: ${hostname} is not available`);
-      }
+      log.info(`Docker host strategy ${hostStrategyName}: ${hostname}`);
+      return hostname;
     }
   }
 
   log.info(`Docker host strategy FALLBACK: ${DEFAULT_HOST}`);
   return DEFAULT_HOST;
 };
-
-const isHostAvailable = async (host: Host): Promise<boolean> => (await ping.probe(host, { timeout: 10_000 })).alive;
 
 type HostStrategy = () => Promise<Host | undefined>;
 
