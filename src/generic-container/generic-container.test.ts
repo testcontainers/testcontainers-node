@@ -87,7 +87,7 @@ describe("GenericContainer", () => {
 
   it("should set network mode", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12").withNetworkMode("host").start();
-    const dockerContainer = getContainerById(container.getId());
+    const dockerContainer = await getContainerById(container.getId());
     const containerInfo = await dockerContainer.inspect();
 
     expect(containerInfo.HostConfig.NetworkMode).toBe("host");
@@ -205,7 +205,7 @@ describe("GenericContainer", () => {
   it("should set default log driver", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12").withDefaultLogDriver().start();
 
-    const dockerContainer = getContainerById(container.getId());
+    const dockerContainer = await getContainerById(container.getId());
     const containerInfo = await dockerContainer.inspect();
     expect(containerInfo.HostConfig.LogConfig).toEqual({
       Type: "json-file",
@@ -221,7 +221,7 @@ describe("GenericContainer", () => {
       .withExposedPorts(8080)
       .start();
 
-    const dockerContainer = getContainerById(container.getId());
+    const dockerContainer = await getContainerById(container.getId());
     const containerInfo = await dockerContainer.inspect();
     expect(containerInfo.HostConfig.Privileged).toBe(true);
     await checkContainerIsHealthy(container);

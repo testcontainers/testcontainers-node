@@ -5,7 +5,7 @@ import { Port } from "./port";
 import { StartedTestContainer } from "./test-container";
 import { RandomUuid } from "./uuid";
 import { sessionId } from "./docker/session-id";
-import { dockerHost } from "./docker/docker-host";
+import { dockerClient } from "./docker/docker-client";
 import { SSHD_IMAGE } from "./images";
 
 export class PortForwarder {
@@ -60,7 +60,7 @@ export class PortForwarderInstance {
       ])
       .start();
 
-    const host = await dockerHost;
+    const host = (await dockerClient).host;
     const port = container.getMappedPort(22);
 
     log.debug(`Connecting to Port Forwarder on ${host}:${port}`);

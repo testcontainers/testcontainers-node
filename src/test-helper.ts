@@ -1,6 +1,6 @@
 import { Readable } from "stream";
 import { ReaperInstance } from "./reaper";
-import { dockerode } from "./docker/dockerode";
+import { dockerClient } from "./docker/docker-client";
 import { StartedDockerComposeEnvironment } from "./docker-compose-environment/started-docker-compose-environment";
 import fetch from "node-fetch";
 import { StartedTestContainer } from "./test-container";
@@ -20,12 +20,14 @@ export const checkEnvironmentContainerIsHealthy = async (
 };
 
 export const getEvents = async (): Promise<Readable> => {
+  const { dockerode } = await dockerClient;
   const events = (await dockerode.getEvents()) as Readable;
   events.setEncoding("utf-8");
   return events;
 };
 
 export const getRunningContainerNames = async (): Promise<string[]> => {
+  const { dockerode } = await dockerClient;
   const containers = await dockerode.listContainers();
   return containers
     .map((container) => container.Names)
@@ -34,16 +36,19 @@ export const getRunningContainerNames = async (): Promise<string[]> => {
 };
 
 export const getContainerIds = async (): Promise<string[]> => {
+  const { dockerode } = await dockerClient;
   const containers = await dockerode.listContainers({ all: true });
   return containers.map((container) => container.Id);
 };
 
 export const getRunningNetworkIds = async (): Promise<string[]> => {
+  const { dockerode } = await dockerClient;
   const networks = await dockerode.listNetworks();
   return networks.map((network) => network.Id);
 };
 
 export const getVolumeNames = async (): Promise<string[]> => {
+  const { dockerode } = await dockerClient;
   const { Volumes: volumes } = await dockerode.listVolumes();
   return volumes.map((volume) => volume.Name);
 };

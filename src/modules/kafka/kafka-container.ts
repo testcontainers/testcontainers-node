@@ -7,7 +7,7 @@ import { AbstractStartedContainer } from "../abstract-started-container";
 import { PortGenerator, RandomUniquePortGenerator } from "../../port-generator";
 import { Host } from "../../docker/types";
 import { InspectResult } from "../../docker/functions/container/inspect-container";
-import { dockerHost } from "../../docker/docker-host";
+import { dockerClient } from "../../docker/docker-client";
 
 const KAFKA_PORT = 9093;
 const KAFKA_BROKER_PORT = 9092;
@@ -80,7 +80,7 @@ export class KafkaContainer extends GenericContainer {
     boundPorts: BoundPorts
   ): Promise<void> {
     const brokerAdvertisedListener = `BROKER://${inspectResult.hostname}:${KAFKA_BROKER_PORT}`;
-    const bootstrapServers = `PLAINTEXT://${await dockerHost}:${boundPorts.getBinding(KAFKA_PORT)}`;
+    const bootstrapServers = `PLAINTEXT://${(await dockerClient).host}:${boundPorts.getBinding(KAFKA_PORT)}`;
 
     const { output, exitCode } = await container.exec([
       "kafka-configs",
