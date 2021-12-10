@@ -5,8 +5,8 @@ import { Host } from "./types";
 import { URL } from "url";
 import fs from "fs";
 import { runInContainer } from "./functions/run-in-container";
-import "../testcontainers-properties-file";
 import { logSystemDiagnostics } from "../log-system-diagnostics";
+import "../testcontainers-properties-file";
 
 type DockerClient = {
   host: Host;
@@ -23,16 +23,15 @@ const getDockerClient = async (): Promise<DockerClient> => {
   for (const strategy of strategies) {
     if (strategy.isApplicable()) {
       log.debug(`Found applicable Docker client strategy: ${strategy.getName()}`);
-      const dockerConfig = await strategy.getDockerConfig();
-      const strategyDockerode = new Dockerode(createDockerodeOptions(dockerConfig));
+      const dockerConfig = strategy.getDockerConfig();
+      const dockerode = new Dockerode(createDockerodeOptions(dockerConfig));
 
       log.debug(`Testing Docker client strategy URI: ${dockerConfig.uri}`);
-      const isHostReachable = (await strategyDockerode.ping()).toString() === "OK";
-      if (isHostReachable) {
-        const host = await resolveHost(strategyDockerode, dockerConfig.uri);
+      if (await isDockerDaemonReachable(dockerode)) {
+        const host = await resolveHost(dockerode, dockerConfig.uri);
         log.info(`Using Docker client strategy: ${strategy.getName()}, Docker host: ${host}`);
         logSystemDiagnostics();
-        return { host, dockerode: strategyDockerode };
+        return { host, dockerode };
       } else {
         log.warn(`Docker client strategy ${strategy.getName()} is not reachable`);
       }
@@ -41,6 +40,8 @@ const getDockerClient = async (): Promise<DockerClient> => {
 
   throw new Error("No Docker client strategy found");
 };
+
+export const dockerClient: Promise<DockerClient> = getDockerClient();
 
 const createDockerodeOptions = (dockerConfig: DockerConfig) => {
   const dockerOptions: DockerOptions = {};
@@ -59,6 +60,9 @@ const createDockerodeOptions = (dockerConfig: DockerConfig) => {
 
   return dockerOptions;
 };
+
+const isDockerDaemonReachable = async (dockerode: Dockerode): Promise<boolean> =>
+  (await dockerode.ping()).toString() === "OK";
 
 type DockerConfig = {
   uri: string;
@@ -140,40 +144,38 @@ class NpipeSocketStrategy implements DockerClientStrategy {
 }
 
 const resolveHost = async (dockerode: Dockerode, uri: string): Promise<string> => {
-  const url = new URL(uri);
+  const { protocol, hostname } = new URL(uri);
 
-  switch (url.protocol) {
+  switch (protocol) {
     case "http:":
     case "https:":
     case "tcp:":
-      return url.hostname;
+      return hostname;
     case "unix:":
     case "npipe:": {
       if (isInContainer()) {
-        const inspectResult: NetworkInspectInfo = await dockerode.getNetwork("bridge").inspect();
-        const gateway = inspectResult?.IPAM?.Config?.find((config) => config.Gateway !== undefined)?.Gateway;
-        if (gateway !== undefined) {
+        const gateway = await findGateway(dockerode);
+        if (gateway) {
           return gateway;
-        } else {
-          const defaultGateway = await runInContainer(dockerode, "alpine:3.5", [
-            "sh",
-            "-c",
-            "ip route|awk '/default/ { print $3 }'",
-          ]);
-          if (defaultGateway) {
-            return defaultGateway;
-          } else {
-            return "localhost";
-          }
+        }
+        const defaultGateway = await findDefaultGateway(dockerode);
+        if (defaultGateway) {
+          return defaultGateway;
         }
       }
       return "localhost";
     }
     default:
-      throw new Error(`Unsupported protocol: ${url.protocol}`);
+      throw new Error(`Unsupported protocol: ${protocol}`);
   }
 };
 
-const isInContainer = () => fs.existsSync("/.dockerenv");
+const findGateway = async (dockerode: Dockerode): Promise<string | undefined> => {
+  const inspectResult: NetworkInspectInfo = await dockerode.getNetwork("bridge").inspect();
+  return inspectResult?.IPAM?.Config?.find((config) => config.Gateway !== undefined)?.Gateway;
+};
 
-export const dockerClient: Promise<DockerClient> = getDockerClient();
+const findDefaultGateway = async (dockerode: Dockerode): Promise<string | undefined> =>
+  runInContainer(dockerode, "alpine:3.5", ["sh", "-c", "ip route|awk '/default/ { print $3 }'"]);
+
+const isInContainer = () => fs.existsSync("/.dockerenv");
