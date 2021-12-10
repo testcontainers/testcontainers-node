@@ -40,9 +40,9 @@ describe("KafkaContainer", () => {
     const zooKeeperHost = "zookeeper";
     const zooKeeperPort = 2181;
     const zookeeperContainer = await new GenericContainer("confluentinc/cp-zookeeper:5.5.4")
-      .withName(zooKeeperHost)
-      .withEnv("ZOOKEEPER_CLIENT_PORT", zooKeeperPort.toString())
       .withNetworkMode(network.getName())
+      .withNetworkAliases("zookeeper")
+      .withEnv("ZOOKEEPER_CLIENT_PORT", zooKeeperPort.toString())
       .withExposedPorts(zooKeeperPort)
       .start();
 
