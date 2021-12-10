@@ -1,5 +1,5 @@
 import { log } from "./logger";
-import * as dockerCompose from "docker-compose";
+import { version as dockerComposeVersion } from "./docker-compose/docker-compose";
 import { getDockerInfo } from "./docker/functions/get-info";
 
 export const logSystemDiagnostics = async (): Promise<void> => {
@@ -27,7 +27,7 @@ type DockerComposeInfo = {
 const getDockerComposeInfo = async (): Promise<DockerComposeInfo | undefined> => {
   try {
     return {
-      version: (await dockerCompose.version()).data.version,
+      version: (await dockerComposeVersion()).data.version,
     };
   } catch (err) {
     log.warn(`Unable to detect docker-compose version, is it installed? ${err}`);

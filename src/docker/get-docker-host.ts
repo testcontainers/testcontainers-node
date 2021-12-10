@@ -3,20 +3,18 @@ import Dockerode, { NetworkInspectInfo } from "dockerode";
 import { Host } from "./types";
 import { runInContainer } from "./functions/run-in-container";
 import fs from "fs";
+import { URL } from "url";
 
 const DEFAULT_HOST = "localhost";
 
 export const getDockerHost = async (dockerode: Dockerode): Promise<Host> => {
-  if (process.env.DOCKER_HOST) {
-    log.info(`Detected DOCKER_HOST environment variable: ${process.env.DOCKER_HOST}`);
-  }
-
   for (const [hostStrategyName, hostStrategy] of Object.entries(hostStrategies(dockerode))) {
     const result = await hostStrategy();
 
     if (result) {
-      log.info(`Docker host strategy ${hostStrategyName}: ${result}`);
-      return result;
+      const hostname = result === DEFAULT_HOST ? DEFAULT_HOST : new URL(result).hostname;
+      log.info(`Docker host strategy ${hostStrategyName}: ${hostname}`);
+      return hostname;
     }
   }
 
@@ -27,6 +25,11 @@ export const getDockerHost = async (dockerode: Dockerode): Promise<Host> => {
 type HostStrategy = () => Promise<Host | undefined>;
 
 const hostStrategies = (dockerode: Dockerode): { [hostStrategyName: string]: HostStrategy } => ({
+  DOCKER_HOST: async () => {
+    if (process.env.DOCKER_HOST) {
+      return process.env.DOCKER_HOST;
+    }
+  },
   MODEM: async () => dockerode.modem.host,
   TESTCONTAINERS_HOST_OVERRIDE: async () => process.env["TESTCONTAINERS_HOST_OVERRIDE"],
   OUTSIDE_CONTAINER: async () => {

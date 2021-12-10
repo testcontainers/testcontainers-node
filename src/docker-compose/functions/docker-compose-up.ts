@@ -1,5 +1,5 @@
 import { log } from "../../logger";
-import { upAll, upMany } from "docker-compose";
+import { upAll, upMany } from "../docker-compose";
 import { defaultDockerComposeOptions } from "../default-docker-compose-options";
 import { DockerComposeOptions } from "../docker-compose-options";
 import { dockerComposeDown } from "./docker-compose-down";

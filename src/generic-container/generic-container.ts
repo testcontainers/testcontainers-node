@@ -2,7 +2,6 @@ import archiver from "archiver";
 import { BoundPorts } from "../bound-ports";
 import { containerLog, log } from "../logger";
 import { Port } from "../port";
-import { PortBinder } from "../port-binder";
 import { HostPortCheck, InternalPortCheck } from "../port-check";
 import { DefaultPullPolicy, PullPolicy } from "../pull-policy";
 import { ReaperInstance } from "../reaper";
@@ -32,7 +31,7 @@ import { pullImage } from "../docker/functions/image/pull-image";
 import { createContainer } from "../docker/functions/container/create-container";
 import { connectNetwork } from "../docker/functions/network/connect-network";
 import { dockerHost } from "../docker/docker-host";
-import { inspectContainer } from "../docker/functions/container/inspect-container";
+import { inspectContainer, InspectResult } from "../docker/functions/container/inspect-container";
 import Dockerode from "dockerode";
 import { startContainer } from "../docker/functions/container/start-container";
 import { containerLogs } from "../docker/functions/container/container-logs";
@@ -73,6 +72,8 @@ export class GenericContainer implements TestContainer {
     this.imageName = DockerImageName.fromString(image);
   }
 
+  protected preStart?(): Promise<void>;
+
   public async start(): Promise<StartedTestContainer> {
     await pullImage({
       imageName: this.imageName,
@@ -80,14 +81,12 @@ export class GenericContainer implements TestContainer {
       authConfig: await getAuthConfig(this.imageName.registry),
     });
 
-    const boundPorts = await new PortBinder().bind(this.ports);
-
     if (!this.imageName.isReaper()) {
       await ReaperInstance.getInstance();
     }
 
-    if (this.preCreate) {
-      await this.preCreate(boundPorts);
+    if (this.preStart) {
+      await this.preStart();
     }
 
     if (!this.imageName.isHelperContainer() && PortForwarderInstance.isRunning()) {
@@ -101,7 +100,7 @@ export class GenericContainer implements TestContainer {
       cmd: this.cmd,
       bindMounts: this.bindMounts,
       tmpFs: this.tmpFs,
-      boundPorts,
+      exposedPorts: this.ports,
       name: this.name,
       networkMode: this.networkAliases.length > 0 ? undefined : this.networkMode,
       healthCheck: this.healthCheck,
@@ -148,11 +147,29 @@ export class GenericContainer implements TestContainer {
       .on("err", (data) => containerLog.error(`${container.id}: ${data.trim()}`));
 
     const inspectResult = await inspectContainer(container);
-
+    const boundPorts = BoundPorts.fromInspectResult(inspectResult).filter(this.ports);
     await this.waitForContainer(container, boundPorts);
 
-    return new StartedGenericContainer(container, await dockerHost, inspectResult, boundPorts, inspectResult.name);
+    const startedContainer = new StartedGenericContainer(
+      container,
+      await dockerHost,
+      inspectResult,
+      boundPorts,
+      inspectResult.name
+    );
+
+    if (this.postStart) {
+      await this.postStart(startedContainer, inspectResult, boundPorts);
+    }
+
+    return startedContainer;
   }
+
+  protected postStart?(
+    container: StartedTestContainer,
+    inspectResult: InspectResult,
+    boundPorts: BoundPorts
+  ): Promise<void>;
 
   public withCmd(cmd: Command[]): this {
     this.cmd = cmd;
@@ -191,6 +208,11 @@ export class GenericContainer implements TestContainer {
 
   public withExposedPorts(...ports: Port[]): this {
     this.ports = ports;
+    return this;
+  }
+
+  protected addExposedPorts(...ports: Port[]): this {
+    this.ports.push(...ports);
     return this;
   }
 
@@ -255,8 +277,6 @@ export class GenericContainer implements TestContainer {
     }
     return this.tarToCopy;
   }
-
-  protected preCreate?(boundPorts: BoundPorts): Promise<void>;
 
   private async waitForContainer(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void> {
     log.debug(`Waiting for container to be ready: ${container.id}`);

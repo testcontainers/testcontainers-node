@@ -1,9 +1,8 @@
 import { log } from "../../../logger";
 import { DockerImageName } from "../../../docker-image-name";
-import { BoundPorts } from "../../../bound-ports";
 import { dockerode } from "../../dockerode";
 import Dockerode, { PortMap as DockerodePortBindings } from "dockerode";
-import { PortString } from "../../../port";
+import { Port, PortString } from "../../../port";
 import { createLabels } from "../create-labels";
 import { BindMount, Command, ContainerName, Env, ExtraHost, HealthCheck, NetworkMode, TmpFs } from "../../types";
 
@@ -13,7 +12,7 @@ export type CreateContainerOptions = {
   cmd: Command[];
   bindMounts: BindMount[];
   tmpFs: TmpFs;
-  boundPorts: BoundPorts;
+  exposedPorts: Port[];
   name?: ContainerName;
   networkMode?: NetworkMode;
   healthCheck?: HealthCheck;
@@ -34,7 +33,7 @@ export const createContainer = async (options: CreateContainerOptions): Promise<
       User: options.user,
       Image: options.imageName.toString(),
       Env: getEnv(options.env),
-      ExposedPorts: getExposedPorts(options.boundPorts),
+      ExposedPorts: getExposedPorts(options.exposedPorts),
       Cmd: options.cmd,
       Labels: createLabels(options.imageName),
       // @ts-ignore
@@ -44,7 +43,7 @@ export const createContainer = async (options: CreateContainerOptions): Promise<
         ExtraHosts: getExtraHosts(options.extraHosts),
         AutoRemove: options.autoRemove,
         NetworkMode: options.networkMode,
-        PortBindings: getPortBindings(options.boundPorts),
+        PortBindings: getPortBindings(options.exposedPorts),
         Binds: getBindMounts(options.bindMounts),
         Tmpfs: options.tmpFs,
         LogConfig: getLogConfig(options.useDefaultLogDriver),
@@ -67,10 +66,10 @@ const getEnv = (env: Env): DockerodeEnvironment =>
 
 type DockerodeExposedPorts = { [port in PortString]: Record<string, unknown> };
 
-const getExposedPorts = (boundPorts: BoundPorts): DockerodeExposedPorts => {
+const getExposedPorts = (exposedPorts: Port[]): DockerodeExposedPorts => {
   const dockerodeExposedPorts: DockerodeExposedPorts = {};
-  for (const [internalPort] of boundPorts.iterator()) {
-    dockerodeExposedPorts[internalPort.toString()] = {};
+  for (const exposedPort of exposedPorts) {
+    dockerodeExposedPorts[exposedPort.toString()] = {};
   }
   return dockerodeExposedPorts;
 };
@@ -79,10 +78,10 @@ const getExtraHosts = (extraHosts: ExtraHost[]): string[] => {
   return extraHosts.map((extraHost) => `${extraHost.host}:${extraHost.ipAddress}`);
 };
 
-const getPortBindings = (boundPorts: BoundPorts): DockerodePortBindings => {
+const getPortBindings = (exposedPorts: Port[]): DockerodePortBindings => {
   const dockerodePortBindings: DockerodePortBindings = {};
-  for (const [internalPort, hostPort] of boundPorts.iterator()) {
-    dockerodePortBindings[internalPort.toString()] = [{ HostPort: hostPort.toString() }];
+  for (const exposedPort of exposedPorts) {
+    dockerodePortBindings[exposedPort] = [{ HostPort: "0" }];
   }
   return dockerodePortBindings;
 };

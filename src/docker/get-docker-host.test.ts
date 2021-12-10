@@ -13,11 +13,21 @@ const mockedRunInContainer = runInContainer as jest.Mock;
 
 describe("getDockerHost", () => {
   beforeEach(() => {
+    delete process.env["DOCKER_HOST"];
     delete process.env["TESTCONTAINERS_HOST_OVERRIDE"];
   });
 
+  it("should return the host from DOCKER_HOST", async () => {
+    process.env.DOCKER_HOST = "tcp://dockerHost:1000";
+    const fakeDockerode = {} as Dockerode;
+
+    const host = await getDockerHost(fakeDockerode);
+
+    expect(host).toBe("dockerHost");
+  });
+
   it("should return the host from the modem", async () => {
-    const fakeDockerode = { modem: { host: "modemHost" } } as Dockerode;
+    const fakeDockerode = { modem: { host: "tcp://modemHost:1000" } } as Dockerode;
 
     const host = await getDockerHost(fakeDockerode);
 
@@ -25,7 +35,7 @@ describe("getDockerHost", () => {
   });
 
   it("should return the TESTCONTAINERS_HOST_OVERRIDE if it is set", async () => {
-    process.env["TESTCONTAINERS_HOST_OVERRIDE"] = "testcontainersHostOverride";
+    process.env["TESTCONTAINERS_HOST_OVERRIDE"] = "tcp://testcontainersHostOverride:1000";
     const fakeDockerode = { modem: {} } as Dockerode;
 
     const host = await getDockerHost(fakeDockerode);
@@ -65,7 +75,7 @@ describe("getDockerHost", () => {
   });
 
   it("should return gateway from IPAM if running in container with IPAM", async () => {
-    const fakeInspect = { IPAM: { Config: [{ Gateway: "ipamGateway" }] } };
+    const fakeInspect = { IPAM: { Config: [{ Gateway: "tcp://ipamGateway:1000" }] } };
     const fakeNetwork = { inspect: () => Promise.resolve(fakeInspect) } as Dockerode.Network;
     mockedExistsSync.mockReturnValueOnce(true);
     const fakeDockerode = { modem: {}, getNetwork: (networkName: string) => fakeNetwork } as Dockerode;
@@ -79,7 +89,7 @@ describe("getDockerHost", () => {
     const fakeInspect = { IPAM: { Config: [] } };
     const fakeNetwork = { inspect: () => Promise.resolve(fakeInspect) } as Dockerode.Network;
     mockedExistsSync.mockReturnValueOnce(true);
-    mockedRunInContainer.mockReturnValueOnce(Promise.resolve("gatewayFromContainer"));
+    mockedRunInContainer.mockReturnValueOnce(Promise.resolve("tcp://gatewayFromContainer:1000"));
     const fakeDockerode = { modem: {}, getNetwork: (networkName: string) => fakeNetwork } as Dockerode;
 
     const host = await getDockerHost(fakeDockerode);

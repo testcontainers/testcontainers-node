@@ -86,10 +86,7 @@ export class DockerComposeEnvironment {
     }
 
     const composeOptions: string[] = [];
-    this.profiles.forEach((profile) => {
-      composeOptions.push("--profile");
-      composeOptions.push(profile);
-    });
+    this.profiles.forEach((profile) => composeOptions.push("--profile", profile));
 
     await dockerComposeUp({ ...options, commandOptions, composeOptions, env: this.env }, services);
 
@@ -118,7 +115,7 @@ export class DockerComposeEnvironment {
             .on("err", (data) => containerLog.error(`${containerName}: ${data}`));
 
           const inspectResult = await inspectContainer(container);
-          const boundPorts = this.getBoundPorts(startedContainer);
+          const boundPorts = BoundPorts.fromInspectResult(inspectResult);
 
           try {
             log.info(`Waiting for container ${containerName} to be ready`);
@@ -149,14 +146,6 @@ export class DockerComposeEnvironment {
       composeOptions,
       env: this.env,
     });
-  }
-
-  private getBoundPorts(containerInfo: Dockerode.ContainerInfo): BoundPorts {
-    const boundPorts = new BoundPorts();
-    containerInfo.Ports.filter((port) => port.PublicPort !== undefined).forEach((port) =>
-      boundPorts.setBinding(port.PrivatePort, port.PublicPort)
-    );
-    return boundPorts;
   }
 
   private async waitForContainer(

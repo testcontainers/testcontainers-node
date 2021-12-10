@@ -1,5 +1,5 @@
 import { Kafka, logLevel } from "kafkajs";
-import { KafkaContainer, KAFKA_IMAGE, ZK_IMAGE } from "./kafka-container";
+import { KafkaContainer, KAFKA_IMAGE } from "./kafka-container";
 import { Network } from "../../network";
 import { GenericContainer } from "../../generic-container/generic-container";
 import { StartedTestContainer } from "../../test-container";
@@ -16,7 +16,7 @@ describe("KafkaContainer", () => {
   });
 
   it("should connect to kafka using in-built zoo-keeper and custom images", async () => {
-    const kafkaContainer = await new KafkaContainer(KAFKA_IMAGE, undefined, ZK_IMAGE).withExposedPorts(9093).start();
+    const kafkaContainer = await new KafkaContainer(KAFKA_IMAGE).withExposedPorts(9093).start();
 
     await testPubSub(kafkaContainer);
 
@@ -39,10 +39,10 @@ describe("KafkaContainer", () => {
 
     const zooKeeperHost = "zookeeper";
     const zooKeeperPort = 2181;
-    const zookeeperContainer = await new GenericContainer(ZK_IMAGE)
-      .withName(zooKeeperHost)
-      .withEnv("ZOOKEEPER_CLIENT_PORT", zooKeeperPort.toString())
+    const zookeeperContainer = await new GenericContainer("confluentinc/cp-zookeeper:5.5.4")
       .withNetworkMode(network.getName())
+      .withNetworkAliases("zookeeper")
+      .withEnv("ZOOKEEPER_CLIENT_PORT", zooKeeperPort.toString())
       .withExposedPorts(zooKeeperPort)
       .start();
 
@@ -57,22 +57,6 @@ describe("KafkaContainer", () => {
     await zookeeperContainer.stop();
     await kafkaContainer.stop();
     await network.stop();
-  });
-
-  it("should return in-built zoo-keeper name", async () => {
-    const kafkaContainer = await new KafkaContainer().withExposedPorts(9093).start();
-
-    expect(kafkaContainer.getZookeeperName()).toBeDefined();
-
-    await kafkaContainer.stop();
-  });
-
-  it("should return in-built zoo-keeper port", async () => {
-    const kafkaContainer = await new KafkaContainer().withExposedPorts(9093).start();
-
-    expect(kafkaContainer.getZookeeperPort()).toBeDefined();
-
-    await kafkaContainer.stop();
   });
 
   const testPubSub = async (kafkaContainer: StartedTestContainer) => {

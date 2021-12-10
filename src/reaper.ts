@@ -69,6 +69,10 @@ export class ReaperInstance {
     return process.env.TESTCONTAINERS_RYUK_DISABLED !== "true";
   }
 
+  private static isPrivileged(): boolean {
+    return process.env.TESTCONTAINERS_RYUK_PRIVILEGED === "true";
+  }
+
   private static createDisabledInstance(): Promise<Reaper> {
     log.debug(`Not creating new Reaper for session: ${sessionId}`);
     return Promise.resolve(new DisabledReaper());
@@ -78,37 +82,42 @@ export class ReaperInstance {
     const dockerSocket = process.env["TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE"] ?? "/var/run/docker.sock";
 
     log.debug(`Creating new Reaper for session: ${sessionId}`);
-    const container = await new GenericContainer(REAPER_IMAGE)
+    const container = new GenericContainer(REAPER_IMAGE)
       .withName(`testcontainers-ryuk-${sessionId}`)
       .withExposedPorts(8080)
-      .withBindMount(dockerSocket, "/var/run/docker.sock")
-      .withPrivilegedMode()
-      .start();
+      .withBindMount(dockerSocket, "/var/run/docker.sock");
+
+    if (this.isPrivileged()) {
+      container.withPrivilegedMode();
+    }
+
+    const startedContainer = await container.start();
+    const containerId = startedContainer.getId();
 
     const host = await dockerHost;
-    const port = container.getMappedPort(8080);
+    const port = startedContainer.getMappedPort(8080);
 
-    log.debug(`Connecting to Reaper ${container.getId()} on ${host}:${port}`);
+    log.debug(`Connecting to Reaper ${containerId} on ${host}:${port}`);
     const socket = new Socket();
 
     socket.unref();
 
     socket
-      .on("timeout", () => log.error(`Reaper ${container.getId()} socket timed out`))
-      .on("error", (err) => log.error(`Reaper ${container.getId()} socket error: ${err}`))
+      .on("timeout", () => log.error(`Reaper ${containerId} socket timed out`))
+      .on("error", (err) => log.error(`Reaper ${containerId} socket error: ${err}`))
       .on("close", (hadError) => {
         if (hadError) {
-          log.error(`Connection to Reaper ${container.getId()} closed with error`);
+          log.error(`Connection to Reaper ${containerId} closed with error`);
         } else {
-          log.warn(`Connection to Reaper ${container.getId()} closed`);
+          log.warn(`Connection to Reaper ${containerId} closed`);
         }
       });
 
     return new Promise((resolve) => {
       socket.connect(port, host, () => {
-        log.debug(`Connected to Reaper ${container.getId()}`);
+        log.debug(`Connected to Reaper ${containerId}`);
         socket.write(`label=org.testcontainers.session-id=${sessionId}\r\n`);
-        const reaper = new RealReaper(container, socket);
+        const reaper = new RealReaper(startedContainer, socket);
         resolve(reaper);
       });
     });

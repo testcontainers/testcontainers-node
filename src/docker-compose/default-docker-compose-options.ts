@@ -1,4 +1,4 @@
-import { IDockerComposeOptions } from "docker-compose";
+import { IDockerComposeOptions } from "./docker-compose";
 import { DockerComposeOptions } from "./docker-compose-options";
 
 export const defaultDockerComposeOptions = ({
