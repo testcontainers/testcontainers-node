@@ -44,8 +44,8 @@ const getDockerClient = async (): Promise<DockerClient> => {
 const createDockerodeOptions = (dockerConfig: DockerConfig) => {
   const dockerOptions: DockerOptions = {};
 
-  if (dockerConfig.isSocket) {
-    dockerOptions.socketPath = new URL(dockerConfig.uri).pathname;
+  if (dockerConfig.socketPath) {
+    dockerOptions.socketPath = dockerConfig.socketPath;
   } else {
     dockerOptions.host = dockerConfig.uri;
   }
@@ -64,7 +64,7 @@ const isDockerDaemonReachable = async (dockerode: Dockerode): Promise<boolean> =
 
 type DockerConfig = {
   uri: string;
-  isSocket: boolean;
+  socketPath?: string;
   ssl?: {
     ca: string;
     cert: string;
@@ -86,7 +86,6 @@ class ConfigurationStrategy implements DockerClientStrategy {
 
     return {
       uri: DOCKER_HOST!,
-      isSocket: false,
       ssl:
         DOCKER_TLS_VERIFY === "1" && DOCKER_CERT_PATH !== undefined
           ? {
@@ -111,7 +110,7 @@ class UnixSocketStrategy implements DockerClientStrategy {
   getDockerConfig(): DockerConfig {
     return {
       uri: "unix:///var/run/docker.sock",
-      isSocket: true,
+      socketPath: "/var/run/docker.sock",
     };
   }
 
@@ -128,7 +127,7 @@ class NpipeSocketStrategy implements DockerClientStrategy {
   getDockerConfig(): DockerConfig {
     return {
       uri: "npipe:////./pipe/docker_engine",
-      isSocket: true,
+      socketPath: "//./pipe/docker_engine",
     };
   }
 
