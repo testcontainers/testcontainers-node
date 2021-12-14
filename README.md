@@ -18,14 +18,14 @@ npm i -D testcontainers
 
 The following environment variables are supported:
 
-- `DEBUG=testcontainers` See testcontainers logs
-- `DEBUG=testcontainers:containers` See container logs
-- `DEBUG=testcontainers*` See all logs
+- `DEBUG=testcontainers` Enable testcontainers logs
+- `DEBUG=testcontainers:containers` Enable container logs
+- `DEBUG=testcontainers*` Enable all logs
 - `DOCKER_HOST=tcp://docker:2375` Sets the URL of the docker daemon
-- `DOCKER_TLS_VERIFY=1` When set to anything other than an empty string, enables TLS communication with the docker
+- `DOCKER_TLS_VERIFY=1` When set to `1`, enables TLS communication with the docker
   daemon
-- `DOCKER_CERT_PATH=/some/path` Configures the path to the ca.pem, cert.pem, and key.pem files used for TLS
-  verification. Defaults to ~/.docker
+- `DOCKER_CERT_PATH=/some/path` Configures the path to the `ca.pem`, `cert.pem`, and `key.pem` files used for TLS
+  verification. Defaults to `~/.docker`
 - `TESTCONTAINERS_HOST_OVERRIDE=docker.svc.local` Docker's host on which ports are exposed
 - `TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock` Path to Docker's socket. Used by [ryuk](#ryuk) and
   other [auxiliary containers](#auxiliary-containers) that need to perform Docker actions
