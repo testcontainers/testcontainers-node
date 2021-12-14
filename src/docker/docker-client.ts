@@ -47,7 +47,11 @@ const createDockerodeOptions = (dockerConfig: DockerConfig) => {
   if (dockerConfig.socketPath) {
     dockerOptions.socketPath = dockerConfig.socketPath;
   } else {
-    dockerOptions.host = dockerConfig.uri;
+    const { protocol, hostname, port } = new URL(dockerConfig.uri);
+    // @ts-ignore
+    dockerOptions.protocol = protocol;
+    dockerOptions.host = hostname;
+    dockerOptions.port = port;
   }
 
   if (dockerConfig.ssl) {

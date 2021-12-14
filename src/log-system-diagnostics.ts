@@ -9,7 +9,7 @@ export const logSystemDiagnostics = async (): Promise<void> => {
     dockerCompose: await getDockerComposeInfo(),
   };
 
-  log.debug(`System diagnostics: ${JSON.stringify(info, null, 2)}`);
+  log.debug(`System diagnostics: ${JSON.stringify(info)}`);
 };
 
 const getNodeInfo = () => {
