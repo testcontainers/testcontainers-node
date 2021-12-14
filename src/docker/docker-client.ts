@@ -47,7 +47,9 @@ const createDockerodeOptions = (dockerConfig: DockerConfig) => {
   if (dockerConfig.socketPath) {
     dockerOptions.socketPath = dockerConfig.socketPath;
   } else {
-    dockerOptions.host = dockerConfig.uri;
+    const { hostname, port } = new URL(dockerConfig.uri);
+    dockerOptions.host = hostname;
+    dockerOptions.port = port;
   }
 
   if (dockerConfig.ssl) {
@@ -59,8 +61,15 @@ const createDockerodeOptions = (dockerConfig: DockerConfig) => {
   return dockerOptions;
 };
 
-const isDockerDaemonReachable = async (dockerode: Dockerode): Promise<boolean> =>
-  (await dockerode.ping()).toString() === "OK";
+const isDockerDaemonReachable = async (dockerode: Dockerode): Promise<boolean> => {
+  try {
+    const response = await dockerode.ping();
+    return response.toString() === "OK";
+  } catch (err) {
+    log.warn(`Docker daemon is not reachable: ${err}`);
+    return false;
+  }
+};
 
 type DockerConfig = {
   uri: string;
