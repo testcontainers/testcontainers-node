@@ -27,14 +27,14 @@ const getDockerClient = async (): Promise<DockerClient> => {
       const dockerode = new Dockerode(createDockerodeOptions(dockerConfig));
 
       log.debug(`Testing Docker client strategy URI: ${dockerConfig.uri}`);
-      // if (await isDockerDaemonReachable(dockerode)) {
-      const host = await resolveHost(dockerode, dockerConfig.uri);
-      log.info(`Using Docker client strategy: ${strategy.getName()}, Docker host: ${host}`);
-      logSystemDiagnostics();
-      return { host, dockerode };
-      // } else {
-      //   log.warn(`Docker client strategy ${strategy.getName()} is not reachable`);
-      // }
+      if (await isDockerDaemonReachable(dockerode)) {
+        const host = await resolveHost(dockerode, dockerConfig.uri);
+        log.info(`Using Docker client strategy: ${strategy.getName()}, Docker host: ${host}`);
+        logSystemDiagnostics();
+        return { host, dockerode };
+      } else {
+        log.warn(`Docker client strategy ${strategy.getName()} is not reachable`);
+      }
     }
   }
 
@@ -47,9 +47,7 @@ const createDockerodeOptions = (dockerConfig: DockerConfig) => {
   if (dockerConfig.socketPath) {
     dockerOptions.socketPath = dockerConfig.socketPath;
   } else {
-    const { protocol, hostname, port } = new URL(dockerConfig.uri);
-    // @ts-ignore
-    // dockerOptions.protocol = protocol.slice(0, -1);
+    const { hostname, port } = new URL(dockerConfig.uri);
     dockerOptions.host = hostname;
     dockerOptions.port = port;
   }
@@ -63,15 +61,15 @@ const createDockerodeOptions = (dockerConfig: DockerConfig) => {
   return dockerOptions;
 };
 
-// const isDockerDaemonReachable = async (dockerode: Dockerode): Promise<boolean> => {
-//   try {
-//     const response = await dockerode.ping();
-//     return response.toString() === "OK";
-//   } catch (err) {
-//     log.warn(`Docker daemon is not reachable: ${err}`);
-//     return false;
-//   }
-// };
+const isDockerDaemonReachable = async (dockerode: Dockerode): Promise<boolean> => {
+  try {
+    const response = await dockerode.ping();
+    return response.toString() === "OK";
+  } catch (err) {
+    log.warn(`Docker daemon is not reachable: ${err}`);
+    return false;
+  }
+};
 
 type DockerConfig = {
   uri: string;
