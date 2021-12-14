@@ -49,7 +49,7 @@ const createDockerodeOptions = (dockerConfig: DockerConfig) => {
   } else {
     const { protocol, hostname, port } = new URL(dockerConfig.uri);
     // @ts-ignore
-    dockerOptions.protocol = protocol;
+    dockerOptions.protocol = protocol.slice(0, -1);
     dockerOptions.host = hostname;
     dockerOptions.port = port;
   }
