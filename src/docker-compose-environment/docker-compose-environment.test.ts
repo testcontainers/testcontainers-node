@@ -186,6 +186,34 @@ describe("DockerComposeEnvironment", () => {
     await startedEnvironment2.down();
   });
 
+  it("should load .env if no environment file option given", async () => {
+    const overrideFixtures = path.resolve(fixtures, "docker-compose-with-env-file");
+
+    const startedEnvironment = await new DockerComposeEnvironment(overrideFixtures, "docker-compose.yml").up();
+
+    const container = startedEnvironment.getContainer("container_1");
+    const response = await fetch(`http://${container.getHost()}:${container.getMappedPort(8080)}/env`);
+    const responseBody = await response.json();
+    expect(responseBody["ENV_VAR"]).toBe("default");
+
+    await startedEnvironment.down();
+  });
+
+  it("should load the values in the environment file if the environment file option is set", async () => {
+    const overrideFixtures = path.resolve(fixtures, "docker-compose-with-env-file");
+
+    const startedEnvironment = await new DockerComposeEnvironment(overrideFixtures, "docker-compose.yml")
+      .withEnvFile(".env.override")
+      .up();
+
+    const container = startedEnvironment.getContainer("container_1");
+    const response = await fetch(`http://${container.getHost()}:${container.getMappedPort(8080)}/env`);
+    const responseBody = await response.json();
+    expect(responseBody["ENV_VAR"]).toBe("override");
+
+    await startedEnvironment.down();
+  });
+
   it("should start containers with a profile if profile option is set", async () => {
     const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-profile.yml")
       .withProfiles("debug")
