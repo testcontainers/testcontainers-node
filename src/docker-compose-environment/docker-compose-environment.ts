@@ -24,6 +24,7 @@ export class DockerComposeEnvironment {
   private projectName: string;
   private build = false;
   private recreate = true;
+  private envFile = "";
   private profiles: string[] = [];
   private env: Env = {};
   private waitStrategy: { [containerName: string]: WaitStrategy } = {};
@@ -42,6 +43,11 @@ export class DockerComposeEnvironment {
 
   public withEnv(key: EnvKey, value: EnvValue): this {
     this.env[key] = value;
+    return this;
+  }
+
+  public withEnvFile(envFile: string): this {
+    this.envFile = envFile;
     return this;
   }
 
@@ -86,6 +92,9 @@ export class DockerComposeEnvironment {
     }
 
     const composeOptions: string[] = [];
+    if (this.envFile) {
+      composeOptions.push("--env-file", this.envFile);
+    }
     this.profiles.forEach((profile) => composeOptions.push("--profile", profile));
 
     await dockerComposeUp({ ...options, commandOptions, composeOptions, env: this.env }, services);

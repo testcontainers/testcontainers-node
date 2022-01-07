@@ -547,6 +547,16 @@ const environment = await new DockerComposeEnvironment(composeFilePath, composeF
   .up();
 ```
 
+Specify the [environment file](https://docs.docker.com/compose/environment-variables/#using-the---env-file--option):
+
+```javascript
+const { DockerComposeEnvironment } = require("testcontainers");
+
+const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
+    .withEnvFile(".env.custom")
+    .up();
+```
+
 Specify [profiles](https://docs.docker.com/compose/profiles/):
 
 ```javascript
