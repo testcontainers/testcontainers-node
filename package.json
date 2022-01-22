@@ -69,7 +69,7 @@
     "lint-staged": "^11.1.2",
     "mysql2": "^2.3.0",
     "neo4j-driver": "^4.3.3",
-    "node-fetch": "^2.6.1",
+    "node-fetch": "^3.1.1",
     "pg": "^8.7.1",
     "prettier": "^2.4.1",
     "rimraf": "^3.0.2",
