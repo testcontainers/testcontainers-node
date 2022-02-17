@@ -330,6 +330,18 @@ describe("GenericContainer", () => {
     expect(await getRunningContainerNames()).not.toContain(containerName);
   });
 
+  it("should read TESTCONTAINERS_DEFAULT_STARTUP_TIMEOUT to setup the startup variable", async () => {
+    process.env.TESTCONTAINERS_DEFAULT_STARTUP_TIMEOUT = "0";
+    const containerName = `container-${new RandomUuid().nextUuid()}`;
+
+    await expect(
+      new GenericContainer("cristianrgreco/testcontainer:1.1.12").withName(containerName).withExposedPorts(8081).start()
+    ).rejects.toThrowError("Port 8081 not bound after 0ms");
+
+    expect(await getRunningContainerNames()).not.toContain(containerName);
+    process.env.TESTCONTAINERS_DEFAULT_STARTUP_TIMEOUT = "";
+  });
+
   it("should stop the container when the health check wait strategy times out", async () => {
     const containerName = `container-${new RandomUuid().nextUuid()}`;
 
