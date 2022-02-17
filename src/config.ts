@@ -1,13 +1,13 @@
 export class EnvConfig {
-  public static isHostOverriden(): string {
+  public static getHostOverride(): string {
     return EnvConfig.string("TESTCONTAINERS_HOST_OVERRIDE", "");
   }
 
-  public static riukContainerImage(): string {
+  public static getRyukContainerImage(): string {
     return EnvConfig.string("RYUK_CONTAINER_IMAGE", "testcontainers/ryuk:0.3.2");
   }
 
-  public static sshdContainerImage(): string {
+  public static getSshdContainerImage(): string {
     return EnvConfig.string("SSHD_CONTAINER_IMAGE", "testcontainers/sshd:1.0.0");
   }
 
@@ -19,11 +19,11 @@ export class EnvConfig {
     return EnvConfig.boolean("TESTCONTAINERS_RYUK_PRIVILEGED");
   }
 
-  public static dockerSocketOverride(): string {
+  public static getDockerSocket(): string {
     return EnvConfig.string("TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE", "/var/run/docker.sock");
   }
 
-  public static defaultSetupTimeout(): number {
+  public static getStartupTimeout(): number {
     return EnvConfig.integer("TESTCONTAINERS_DEFAULT_STARTUP_TIMEOUT", 60_000);
   }
 

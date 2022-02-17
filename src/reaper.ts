@@ -67,7 +67,7 @@ export class ReaperInstance {
   }
 
   private static isEnabled(): boolean {
-    return EnvConfig.isRyukDisabled();
+    return !EnvConfig.isRyukDisabled();
   }
 
   private static isPrivileged(): boolean {
@@ -80,7 +80,7 @@ export class ReaperInstance {
   }
 
   private static async createRealInstance(): Promise<Reaper> {
-    const dockerSocket = EnvConfig.dockerSocketOverride();
+    const dockerSocket = EnvConfig.getDockerSocket();
 
     log.debug(`Creating new Reaper for session: ${sessionId}`);
     const container = new GenericContainer(REAPER_IMAGE)

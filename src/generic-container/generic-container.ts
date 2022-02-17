@@ -59,7 +59,7 @@ export class GenericContainer implements TestContainer {
   protected tmpFs: TmpFs = {};
   protected healthCheck?: HealthCheck;
   protected waitStrategy?: WaitStrategy;
-  protected startupTimeout = EnvConfig.defaultSetupTimeout();
+  protected startupTimeout = EnvConfig.getStartupTimeout();
   protected useDefaultLogDriver = false;
   protected privilegedMode = false;
   protected ipcMode?: string;

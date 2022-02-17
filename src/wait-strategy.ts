@@ -16,7 +16,7 @@ export interface WaitStrategy {
 }
 
 abstract class AbstractWaitStrategy implements WaitStrategy {
-  protected startupTimeout = EnvConfig.defaultSetupTimeout();
+  protected startupTimeout = EnvConfig.getStartupTimeout();
 
   public abstract waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void>;
 

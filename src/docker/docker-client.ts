@@ -151,8 +151,8 @@ class NpipeSocketStrategy implements DockerClientStrategy {
 }
 
 const resolveHost = async (dockerode: Dockerode, uri: string): Promise<string> => {
-  if (EnvConfig.isHostOverriden()) {
-    return EnvConfig.isHostOverriden();
+  if (EnvConfig.getHostOverride()) {
+    return EnvConfig.getHostOverride();
   }
 
   const { protocol, hostname } = new URL(uri);
