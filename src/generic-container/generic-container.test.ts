@@ -330,7 +330,7 @@ describe("GenericContainer", () => {
     expect(await getRunningContainerNames()).not.toContain(containerName);
   });
 
-  it("should read TESTCONTAINERS_DEFAULT_STARTUP_TIMEOUT to setup the startup variable", async () => {
+  it("should read TESTCONTAINERS_DEFAULT_STARTUP_TIMEOUT to setup the startup timeout", async () => {
     process.env.TESTCONTAINERS_DEFAULT_STARTUP_TIMEOUT = "0";
     const containerName = `container-${new RandomUuid().nextUuid()}`;
 
