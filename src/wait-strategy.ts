@@ -15,7 +15,12 @@ export interface WaitStrategy {
 }
 
 abstract class AbstractWaitStrategy implements WaitStrategy {
-  protected startupTimeout = 60_000;
+  protected startupTimeout = AbstractWaitStrategy.getDefaultStartupTimeout();
+
+  private static getDefaultStartupTimeout(): number {
+    const envValue = process.env["TESTCONTAINERS_DEFAULT_STARTUP_TIMEOUT"] || "";
+    return parseInt(envValue) ?? 60_000;
+  }
 
   public abstract waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void>;
 

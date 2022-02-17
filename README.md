@@ -29,6 +29,8 @@ The following environment variables are supported:
 - `TESTCONTAINERS_HOST_OVERRIDE=docker.svc.local` Docker's host on which ports are exposed
 - `TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock` Path to Docker's socket. Used by [ryuk](#ryuk) and
   other [auxiliary containers](#auxiliary-containers) that need to perform Docker actions
+- `TESTCONTAINERS_DEFAULT_STARTUP_TIMEOUT=60000` Overrides the default startup timeout for all containers,
+  useful on slower systems
 - `TESTCONTAINERS_RYUK_PRIVILEGED=true` Run [ryuk](#ryuk) as a privileged container
 - `TESTCONTAINERS_RYUK_DISABLED=true` Disable [ryuk](#ryuk)
 - `RYUK_CONTAINER_IMAGE=registry.mycompany.com/mirror/ryuk:0.3.0` Custom image for [ryuk](#ryuk)
