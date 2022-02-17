@@ -5,6 +5,7 @@ import { StartedTestContainer } from "./test-container";
 import { sessionId } from "./docker/session-id";
 import { dockerClient } from "./docker/docker-client";
 import { REAPER_IMAGE } from "./images";
+import { EnvConfig } from "./config";
 
 export interface Reaper {
   addProject(projectName: string): void;
@@ -66,11 +67,11 @@ export class ReaperInstance {
   }
 
   private static isEnabled(): boolean {
-    return process.env.TESTCONTAINERS_RYUK_DISABLED !== "true";
+    return EnvConfig.isRyukDisabled();
   }
 
   private static isPrivileged(): boolean {
-    return process.env.TESTCONTAINERS_RYUK_PRIVILEGED === "true";
+    return EnvConfig.isRyukPrivileged();
   }
 
   private static createDisabledInstance(): Promise<Reaper> {
@@ -79,7 +80,7 @@ export class ReaperInstance {
   }
 
   private static async createRealInstance(): Promise<Reaper> {
-    const dockerSocket = process.env["TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE"] ?? "/var/run/docker.sock";
+    const dockerSocket = EnvConfig.dockerSocketOverride();
 
     log.debug(`Creating new Reaper for session: ${sessionId}`);
     const container = new GenericContainer(REAPER_IMAGE)

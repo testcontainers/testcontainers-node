@@ -40,6 +40,7 @@ import { removeContainer } from "../docker/functions/container/remove-container"
 import { putContainerArchive } from "../docker/functions/container/put-container-archive";
 import { GenericContainerBuilder } from "./generic-container-builder";
 import { StartedGenericContainer } from "./started-generic-container";
+import { EnvConfig } from "../config";
 
 export class GenericContainer implements TestContainer {
   public static fromDockerfile(context: BuildContext, dockerfileName = "Dockerfile"): GenericContainerBuilder {
@@ -58,7 +59,7 @@ export class GenericContainer implements TestContainer {
   protected tmpFs: TmpFs = {};
   protected healthCheck?: HealthCheck;
   protected waitStrategy?: WaitStrategy;
-  protected startupTimeout = 60_000;
+  protected startupTimeout = EnvConfig.defaultSetupTimeout();
   protected useDefaultLogDriver = false;
   protected privilegedMode = false;
   protected ipcMode?: string;

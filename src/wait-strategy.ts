@@ -8,6 +8,7 @@ import { HealthCheckStatus } from "./docker/types";
 import Dockerode from "dockerode";
 import { containerLogs } from "./docker/functions/container/container-logs";
 import { inspectContainer } from "./docker/functions/container/inspect-container";
+import { EnvConfig } from "./config";
 
 export interface WaitStrategy {
   waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void>;
@@ -15,7 +16,7 @@ export interface WaitStrategy {
 }
 
 abstract class AbstractWaitStrategy implements WaitStrategy {
-  protected startupTimeout = 60_000;
+  protected startupTimeout = EnvConfig.defaultSetupTimeout();
 
   public abstract waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void>;
 

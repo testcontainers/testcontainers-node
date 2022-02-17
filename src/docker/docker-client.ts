@@ -7,6 +7,7 @@ import fs from "fs";
 import { runInContainer } from "./functions/run-in-container";
 import { logSystemDiagnostics } from "../log-system-diagnostics";
 import "../testcontainers-properties-file";
+import { EnvConfig } from "../config";
 
 type DockerClient = {
   host: Host;
@@ -150,8 +151,8 @@ class NpipeSocketStrategy implements DockerClientStrategy {
 }
 
 const resolveHost = async (dockerode: Dockerode, uri: string): Promise<string> => {
-  if (process.env.TESTCONTAINERS_HOST_OVERRIDE !== undefined) {
-    return process.env.TESTCONTAINERS_HOST_OVERRIDE;
+  if (EnvConfig.isHostOverriden()) {
+    return EnvConfig.isHostOverriden();
   }
 
   const { protocol, hostname } = new URL(uri);
