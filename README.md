@@ -24,6 +24,7 @@ The following environment variables are supported:
 - `DOCKER_HOST=tcp://docker:2375` Sets the URL of the docker daemon
 - `DOCKER_TLS_VERIFY=1` When set to `1`, enables TLS communication with the docker
   daemon
+- `DOCKER_CONFIG=/some/path` Configures the path to the `config.json`. Defaults to `~/.docker`
 - `DOCKER_CERT_PATH=/some/path` Configures the path to the `ca.pem`, `cert.pem`, and `key.pem` files used for TLS
   verification. Defaults to `~/.docker`
 - `TESTCONTAINERS_HOST_OVERRIDE=docker.svc.local` Docker's host on which ports are exposed
