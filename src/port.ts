@@ -4,8 +4,8 @@ export type PortString = string;
 export type PortWithOptionalBinding =
   | Port
   | {
-      container: number;
-      host: number;
+      container: Port;
+      host: Port;
     };
 
 export const getContainerPort = (port: PortWithOptionalBinding): number =>
