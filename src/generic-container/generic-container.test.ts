@@ -33,6 +33,8 @@ describe("GenericContainer", () => {
 
     await checkContainerIsHealthy(container);
 
+    expect(container.getMappedPort(8080)).toBe(hostPort);
+
     await container.stop();
   });
 
