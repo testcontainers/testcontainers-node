@@ -301,10 +301,10 @@ expect((await container.exec(["nslookup", "foo"])).exitCode).toBe(0);
 expect((await container.exec(["nslookup", "bar"])).exitCode).toBe(0);
 ```
 
-Specifying a pull policy. Note that if omitted will use the `DefaultPullPolicy` which will use a locally cached image 
-if one already exists, this is usually the preferred option. In cases where there is a local image for a given tag 
-but the remote image with the same tag may have changed (for example when using the `latest` tag), you can tell 
-testcontainers to pull the image again by specifying an `AlwaysPullPolicy`: 
+Specifying a pull policy. Note that if omitted will use the `DefaultPullPolicy` which will use a locally cached image
+if one already exists, this is usually the preferred option. In cases where there is a local image for a given tag
+but the remote image with the same tag may have changed (for example when using the `latest` tag), you can tell
+testcontainers to pull the image again by specifying an `AlwaysPullPolicy`:
 
 ```javascript
 const { GenericContainer, AlwaysPullPolicy } = require("testcontainers");
@@ -326,7 +326,7 @@ const container = await GenericContainer.fromDockerfile(buildContext)
 
 Specifying a default log driver. You can override the logging driver used by Docker to be the default one (json-file).
 This might be necessary when the driver of your docker host does not support reading logs
-and you want to use the `Wait.forLogMessage` wait strategy. This is the same as 
+and you want to use the `Wait.forLogMessage` wait strategy. This is the same as
 [--log-driver json-file on docker run](https://docs.docker.com/config/containers/logging/configure/#configure-the-logging-driver-for-a-container).
 
 ```javascript
@@ -376,8 +376,8 @@ const container = await new GenericContainer("postgres")
   .withExposedPorts(5432)
   .start();
 
-await container.stop({ 
-  timeout: 10000 
+await container.stop({
+  timeout: 10000
 });
 ```
 
@@ -391,7 +391,7 @@ const container = await new GenericContainer("postgres")
   .withExposedPorts(5432)
   .start();
 
-await container.stop({ 
+await container.stop({
   removeVolumes: false
 });
 ```
@@ -431,6 +431,20 @@ const container = await new GenericContainer("alpine")
 
 const { output } = await container.exec(["curl", `http://host.testcontainers.internal:8000`]);
 assert(output === "hello world");
+```
+
+Specifying an exact host port to bind to (not recommended, Testcontainers will automatically find an available port):
+
+```javascript
+const { GenericContainer, Network } = require("testcontainers");
+
+const container = await new GenericContainer("alpine")
+  .withExposedPorts({
+    container: 8000,
+    host: 8080
+  })
+  .withNetworkMode(network.getName())
+  .start();
 ```
 
 ## Docker Compose
@@ -568,7 +582,7 @@ const environment = await new DockerComposeEnvironment(composeFilePath, composeF
     .up();
 ```
 
-Specify not to re-create containers that are already running: 
+Specify not to re-create containers that are already running:
 
 ```javascript
 const { DockerComposeEnvironment } = require("testcontainers");
@@ -598,7 +612,7 @@ const environment = await new DockerComposeEnvironment(composeFilePath, composeF
 
 ## Wait Strategies
 
-Ordinarily Testcontainers will wait for up to 60 seconds for the container's mapped network ports to start listening. 
+Ordinarily Testcontainers will wait for up to 60 seconds for the container's mapped network ports to start listening.
 If the default 60s timeout is not sufficient, it can be altered with the `withStartupTimeout()` method:
 
 ```javascript
@@ -652,7 +666,7 @@ credential helpers, credential stores, or raw auth as necessary and in that orde
 
 ## Auxiliary Containers
 
-Testcontainers may need to create auxiliary containers to provide its functionality. 
+Testcontainers may need to create auxiliary containers to provide its functionality.
 
 To avoid Docker pull limits, you can host your own images and use them by setting the appropriate environment variables:
 
@@ -663,21 +677,21 @@ To avoid Docker pull limits, you can host your own images and use them by settin
 
 ### ryuk
 
-Testcontainers will start ryuk whenever a container, docker-compose environment or network is started. 
+Testcontainers will start ryuk whenever a container, docker-compose environment or network is started.
 
-Once started, this container keeps track of containers/images/networks/volumes created by testcontainers and will 
-automatically clean them up 10s after connectivity with testcontainers is lost. This is useful for example if a test 
+Once started, this container keeps track of containers/images/networks/volumes created by testcontainers and will
+automatically clean them up 10s after connectivity with testcontainers is lost. This is useful for example if a test
 starts a container and then terminates unexpectedly, as it will be automatically removed.
 
-ryuk by default does not run privileged, if necessary this can be overridden by setting the environment variable 
-`TESTCONTAINERS_RYUK_PRIVILEGED` to `true`. If necessary, ryuk can be disabled enirely by setting the environment 
+ryuk by default does not run privileged, if necessary this can be overridden by setting the environment variable
+`TESTCONTAINERS_RYUK_PRIVILEGED` to `true`. If necessary, ryuk can be disabled enirely by setting the environment
 variable `TESTCONTAINERS_RYUK_DISABLED` to `true`.
 
 ### SSHd
 
-Testcontainers will start SSHd when using the expose host port functionality. 
+Testcontainers will start SSHd when using the expose host port functionality.
 
-Once started, any container that is created will have a host mapping of `host.testcontainers.internal` that points to 
+Once started, any container that is created will have a host mapping of `host.testcontainers.internal` that points to
 the SSHd container, as well as being connected to its network.
 
 When we then expose a host port, we remote port forward our local port to the SSHd container, which the other
@@ -687,18 +701,17 @@ containers will then be able to access at `host.testcontainers.internal:<exposed
 
 1. **Insufficient Docker memory**
 
-By default, Docker sets CPU and memory limits, with a default memory limit 
-of 2GB. If exceeded, you will be unable to pull/run Docker images. 
+By default, Docker sets CPU and memory limits, with a default memory limit
+of 2GB. If exceeded, you will be unable to pull/run Docker images.
 To see how much memory Docker has  used, you can run ```docker system info```
 
 - To remove existing containers and images to clear some space you can run ```docker system prune```
 - Alternatively you can increase the memory limit via Docker's settings under the Advanced pane.
 
-2. **Insufficient test timeouts** 
+2. **Insufficient test timeouts**
 
-It can take a few seconds up to a few minutes to pull and run certain Docker images, 
+It can take a few seconds up to a few minutes to pull and run certain Docker images,
 depending on file sizes and network constraints. It's unlikely that the default
 timeouts set by test frameworks are sufficient.
 
 - Increase the test timeout via the methods provided by the testing framework.
-
