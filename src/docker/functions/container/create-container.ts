@@ -2,7 +2,7 @@ import { log } from "../../../logger";
 import { DockerImageName } from "../../../docker-image-name";
 import { dockerClient } from "../../docker-client";
 import Dockerode, { PortMap as DockerodePortBindings } from "dockerode";
-import { Port, PortString } from "../../../port";
+import { getContainerPort, PortString, PortWithOptionalBinding } from "../../../port";
 import { createLabels } from "../create-labels";
 import { BindMount, Command, ContainerName, Env, ExtraHost, HealthCheck, NetworkMode, TmpFs } from "../../types";
 
@@ -12,7 +12,7 @@ export type CreateContainerOptions = {
   cmd: Command[];
   bindMounts: BindMount[];
   tmpFs: TmpFs;
-  exposedPorts: Port[];
+  exposedPorts: PortWithOptionalBinding[];
   name?: ContainerName;
   networkMode?: NetworkMode;
   healthCheck?: HealthCheck;
@@ -67,10 +67,10 @@ const getEnv = (env: Env): DockerodeEnvironment =>
 
 type DockerodeExposedPorts = { [port in PortString]: Record<string, unknown> };
 
-const getExposedPorts = (exposedPorts: Port[]): DockerodeExposedPorts => {
+const getExposedPorts = (exposedPorts: PortWithOptionalBinding[]): DockerodeExposedPorts => {
   const dockerodeExposedPorts: DockerodeExposedPorts = {};
   for (const exposedPort of exposedPorts) {
-    dockerodeExposedPorts[exposedPort.toString()] = {};
+    dockerodeExposedPorts[getContainerPort(exposedPort).toString()] = {};
   }
   return dockerodeExposedPorts;
 };
@@ -79,10 +79,14 @@ const getExtraHosts = (extraHosts: ExtraHost[]): string[] => {
   return extraHosts.map((extraHost) => `${extraHost.host}:${extraHost.ipAddress}`);
 };
 
-const getPortBindings = (exposedPorts: Port[]): DockerodePortBindings => {
+const getPortBindings = (exposedPorts: PortWithOptionalBinding[]): DockerodePortBindings => {
   const dockerodePortBindings: DockerodePortBindings = {};
   for (const exposedPort of exposedPorts) {
-    dockerodePortBindings[exposedPort] = [{ HostPort: "0" }];
+    if (typeof exposedPort === "number") {
+      dockerodePortBindings[exposedPort] = [{ HostPort: "0" }];
+    } else {
+      dockerodePortBindings[exposedPort.container] = [{ HostPort: exposedPort.host.toString() }];
+    }
   }
   return dockerodePortBindings;
 };

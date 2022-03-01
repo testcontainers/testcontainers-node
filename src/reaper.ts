@@ -5,6 +5,7 @@ import { StartedTestContainer } from "./test-container";
 import { sessionId } from "./docker/session-id";
 import { dockerClient } from "./docker/docker-client";
 import { REAPER_IMAGE } from "./images";
+import { getContainerPort } from "./port";
 
 export interface Reaper {
   addProject(projectName: string): void;
@@ -114,7 +115,7 @@ export class ReaperInstance {
       });
 
     return new Promise((resolve) => {
-      socket.connect(port, host, () => {
+      socket.connect(getContainerPort(port), host, () => {
         log.debug(`Connected to Reaper ${containerId}`);
         socket.write(`label=org.testcontainers.session-id=${sessionId}\r\n`);
         const reaper = new RealReaper(startedContainer, socket);

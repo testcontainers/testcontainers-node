@@ -1,5 +1,6 @@
 import fetch from "node-fetch";
 import path from "path";
+import getPort from "get-port";
 import { GenericContainer } from "./generic-container";
 import { AlwaysPullPolicy } from "../pull-policy";
 import { Wait } from "../wait";
@@ -15,6 +16,20 @@ describe("GenericContainer", () => {
 
   it("should wait for port", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12").withExposedPorts(8080).start();
+
+    await checkContainerIsHealthy(container);
+
+    await container.stop();
+  });
+
+  it("should bind to specified host port", async () => {
+    const hostPort = await getPort();
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
+      .withExposedPorts({
+        container: 8080,
+        host: hostPort,
+      })
+      .start();
 
     await checkContainerIsHealthy(container);
 

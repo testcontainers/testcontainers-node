@@ -1,4 +1,4 @@
-import { Port } from "./port";
+import { getContainerPort, Port, PortWithOptionalBinding } from "./port";
 import { InspectResult } from "./docker/functions/container/inspect-container";
 
 export class BoundPorts {
@@ -22,11 +22,13 @@ export class BoundPorts {
     return this.ports;
   }
 
-  public filter(ports: Port[]): BoundPorts {
+  public filter(ports: PortWithOptionalBinding[]): BoundPorts {
     const boundPorts = new BoundPorts();
 
+    const containerPorts = ports.map((port) => getContainerPort(port));
+
     for (const [internalPort, hostPort] of this.iterator()) {
-      if (ports.includes(internalPort)) {
+      if (containerPorts.includes(internalPort)) {
         boundPorts.setBinding(internalPort, hostPort);
       }
     }

@@ -1,7 +1,7 @@
 import archiver from "archiver";
 import { BoundPorts } from "../bound-ports";
 import { containerLog, log } from "../logger";
-import { Port } from "../port";
+import { PortWithOptionalBinding } from "../port";
 import { HostPortCheck, InternalPortCheck } from "../port-check";
 import { DefaultPullPolicy, PullPolicy } from "../pull-policy";
 import { ReaperInstance } from "../reaper";
@@ -51,7 +51,7 @@ export class GenericContainer implements TestContainer {
   protected env: Env = {};
   protected networkMode?: NetworkMode;
   protected networkAliases: string[] = [];
-  protected ports: Port[] = [];
+  protected ports: PortWithOptionalBinding[] = [];
   protected cmd: Command[] = [];
   protected bindMounts: BindMount[] = [];
   protected name?: ContainerName;
@@ -206,12 +206,12 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
-  public withExposedPorts(...ports: Port[]): this {
+  public withExposedPorts(...ports: PortWithOptionalBinding[]): this {
     this.ports = ports;
     return this;
   }
 
-  protected addExposedPorts(...ports: Port[]): this {
+  protected addExposedPorts(...ports: PortWithOptionalBinding[]): this {
     this.ports.push(...ports);
     return this;
   }
