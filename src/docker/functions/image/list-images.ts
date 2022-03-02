@@ -12,7 +12,8 @@ export const listImages = async (): Promise<DockerImageName[]> => {
       if (isDanglingImage(image)) {
         return dockerImageNames;
       }
-      const dockerImageNamesForImage = image.RepoTags.map((imageRepoTag) => DockerImageName.fromString(imageRepoTag));
+      const repoTags = image.RepoTags ?? [];
+      const dockerImageNamesForImage = repoTags.map((imageRepoTag) => DockerImageName.fromString(imageRepoTag));
       return [...dockerImageNames, ...dockerImageNamesForImage];
     }, []);
   } catch (err) {
