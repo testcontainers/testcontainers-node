@@ -2,7 +2,7 @@ import { log } from "../../../logger";
 import { DockerImageName } from "../../../docker-image-name";
 import { dockerClient } from "../../docker-client";
 import Dockerode, { PortMap as DockerodePortBindings } from "dockerode";
-import { getContainerPort, PortString, PortWithOptionalBinding } from "../../../port";
+import { getContainerPort, hasHostBinding, PortString, PortWithOptionalBinding } from "../../../port";
 import { createLabels } from "../create-labels";
 import { BindMount, Command, ContainerName, Env, ExtraHost, HealthCheck, NetworkMode, TmpFs } from "../../types";
 
@@ -82,10 +82,10 @@ const getExtraHosts = (extraHosts: ExtraHost[]): string[] => {
 const getPortBindings = (exposedPorts: PortWithOptionalBinding[]): DockerodePortBindings => {
   const dockerodePortBindings: DockerodePortBindings = {};
   for (const exposedPort of exposedPorts) {
-    if (typeof exposedPort === "number") {
-      dockerodePortBindings[exposedPort] = [{ HostPort: "0" }];
-    } else {
+    if (hasHostBinding(exposedPort)) {
       dockerodePortBindings[exposedPort.container] = [{ HostPort: exposedPort.host.toString() }];
+    } else {
+      dockerodePortBindings[exposedPort] = [{ HostPort: "0" }];
     }
   }
   return dockerodePortBindings;
