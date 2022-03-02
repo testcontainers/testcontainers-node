@@ -1,4 +1,4 @@
-import { Port } from "./port";
+import { Port, PortWithOptionalBinding } from "./port";
 import { PullPolicy } from "./pull-policy";
 import { WaitStrategy } from "./wait-strategy";
 import { Readable } from "stream";
@@ -26,7 +26,7 @@ export interface TestContainer {
 
   withTmpFs(tmpFs: TmpFs): this;
 
-  withExposedPorts(...ports: Port[]): this;
+  withExposedPorts(...ports: PortWithOptionalBinding[]): this;
 
   withBindMount(source: Dir, target: Dir, bindMode: BindMode): this;
 
