@@ -436,14 +436,13 @@ assert(output === "hello world");
 Specifying an exact host port to bind to (not recommended, Testcontainers will automatically find an available port):
 
 ```javascript
-const { GenericContainer, Network } = require("testcontainers");
+const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
   .withExposedPorts({
     container: 8000,
     host: 8080
   })
-  .withNetworkMode(network.getName())
   .start();
 ```
 
