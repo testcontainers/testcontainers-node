@@ -1,9 +1,23 @@
 import { DockerImageName } from "../../docker-image-name";
 import { sessionId } from "../session-id";
+import { LABEL_SESSION_ID } from "../../labels";
 
-export const createLabels = (dockerImageName?: DockerImageName): { [label: string]: string } => {
+export type Labels = { [key: string]: string };
+
+export const createLabels = (
+  reusable: boolean,
+  dockerImageName?: DockerImageName,
+  extraLabels: Labels = {}
+): Labels => {
+  const labels: Labels = { ...extraLabels };
+
   if (dockerImageName && dockerImageName.isReaper()) {
-    return {};
+    return labels;
   }
-  return { "org.testcontainers.session-id": sessionId };
+
+  if (!reusable) {
+    labels[LABEL_SESSION_ID] = sessionId;
+  }
+
+  return labels;
 };

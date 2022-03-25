@@ -41,13 +41,13 @@ import { putContainerArchive } from "../docker/functions/container/put-container
 import { GenericContainerBuilder } from "./generic-container-builder";
 import { StartedGenericContainer } from "./started-generic-container";
 import { hash } from "../hash";
+import { getContainerByHash } from "../docker/functions/container/get-container";
+import { LABEL_CONTAINER_HASH } from "../labels";
 
 export class GenericContainer implements TestContainer {
   public static fromDockerfile(context: BuildContext, dockerfileName = "Dockerfile"): GenericContainerBuilder {
     return new GenericContainerBuilder(context, dockerfileName);
   }
-
-  private static readonly CONTAINERS = new Map<string, StartedTestContainer>();
 
   private readonly imageName: DockerImageName;
 
@@ -106,6 +106,7 @@ export class GenericContainer implements TestContainer {
       tmpFs: this.tmpFs,
       exposedPorts: this.ports,
       name: this.name,
+      reusable: this.reuse,
       networkMode: this.networkAliases.length > 0 ? undefined : this.networkMode,
       healthCheck: this.healthCheck,
       useDefaultLogDriver: this.useDefaultLogDriver,
@@ -116,21 +117,36 @@ export class GenericContainer implements TestContainer {
       user: this.user,
     };
 
-    const containerHash = hash(JSON.stringify(createContainerOptions));
-    if (this.reuse && GenericContainer.CONTAINERS.has(containerHash)) {
-      const startedContainer = GenericContainer.CONTAINERS.get(containerHash)!;
-      if (startedContainer.isStopped()) {
-        const newStartedContainer = await this.startContainer(createContainerOptions);
-        GenericContainer.CONTAINERS.set(containerHash, newStartedContainer);
-        return newStartedContainer;
+    if (this.reuse) {
+      const containerHash = hash(JSON.stringify(createContainerOptions));
+      createContainerOptions.labels = { [LABEL_CONTAINER_HASH]: containerHash };
+      log.debug(`Container reuse has been enabled, hash: ${containerHash}`);
+
+      const container = await getContainerByHash(containerHash);
+      if (container !== undefined) {
+        log.debug(`Found container to reuse with hash: ${containerHash}`);
+        return this.reuseContainer(container);
       } else {
-        return startedContainer;
+        log.debug("No container found to reuse");
+        return this.startContainer(createContainerOptions);
       }
     } else {
-      const startedContainer = await this.startContainer(createContainerOptions);
-      GenericContainer.CONTAINERS.set(containerHash, startedContainer);
-      return startedContainer;
+      return this.startContainer(createContainerOptions);
     }
+  }
+
+  private async reuseContainer(startedContainer: Dockerode.Container) {
+    const inspectResult = await inspectContainer(startedContainer);
+    const boundPorts = BoundPorts.fromInspectResult(inspectResult).filter(this.ports);
+    await this.waitForContainer(startedContainer, boundPorts);
+
+    return new StartedGenericContainer(
+      startedContainer,
+      (await dockerClient).host,
+      inspectResult,
+      boundPorts,
+      inspectResult.name
+    );
   }
 
   private async startContainer(createContainerOptions: CreateContainerOptions): Promise<StartedTestContainer> {

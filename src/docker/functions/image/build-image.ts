@@ -32,7 +32,7 @@ export const buildImage = async (options: BuildImageOptions): Promise<void> => {
           dockerfile: options.dockerfileName,
           buildargs: options.buildArgs,
           t: options.imageName.toString(),
-          labels: createLabels(options.imageName),
+          labels: createLabels(false, options.imageName),
           registryconfig: options.registryConfig,
           pull: options.pullPolicy.shouldPull() ? "any" : undefined,
         })
