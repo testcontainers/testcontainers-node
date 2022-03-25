@@ -446,6 +446,42 @@ describe("GenericContainer", () => {
       await container.stop();
     });
 
+    it("should not reuse the container even when there is a candidate 1", async () => {
+      const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
+        .withName("there_can_only_be_one")
+        .withExposedPorts(8080)
+        .withReuse()
+        .start();
+      await checkContainerIsHealthy(container);
+
+      await expect(() =>
+        new GenericContainer("cristianrgreco/testcontainer:1.1.12")
+          .withName("there_can_only_be_one")
+          .withExposedPorts(8080)
+          .start()
+      ).rejects.toThrowError();
+
+      await container.stop();
+    });
+
+    it("should not reuse the container even when there is a candidate 2", async () => {
+      const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
+        .withName("there_can_only_be_one")
+        .withExposedPorts(8080)
+        .start();
+      await checkContainerIsHealthy(container);
+
+      await expect(() =>
+        new GenericContainer("cristianrgreco/testcontainer:1.1.12")
+          .withName("there_can_only_be_one")
+          .withExposedPorts(8080)
+          .withReuse()
+          .start()
+      ).rejects.toThrowError();
+
+      await container.stop();
+    });
+
     it("should reuse the container", async () => {
       const container1 = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
         .withName("there_can_only_be_one")

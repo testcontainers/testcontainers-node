@@ -61,8 +61,6 @@ export interface StopOptions {
 export interface StartedTestContainer {
   stop(options?: Partial<StopOptions>): Promise<StoppedTestContainer>;
 
-  isStopped(): boolean;
-
   getHost(): Host;
 
   getMappedPort(port: Port): Port;

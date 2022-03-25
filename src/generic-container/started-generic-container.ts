@@ -13,8 +13,6 @@ import { StoppedGenericContainer } from "./stopped-generic-container";
 import { stopContainer } from "../docker/functions/container/stop-container";
 
 export class StartedGenericContainer implements StartedTestContainer {
-  private stopped = false;
-
   constructor(
     private readonly container: Dockerode.Container,
     private readonly host: Host,
@@ -29,17 +27,12 @@ export class StartedGenericContainer implements StartedTestContainer {
 
   private async stopContainer(options: Partial<StopOptions> = {}): Promise<StoppedGenericContainer> {
     log.info(`Stopping container with ID: ${this.container.id}`);
-    this.stopped = true;
 
     const resolvedOptions: StopOptions = { timeout: 0, removeVolumes: true, ...options };
     await stopContainer(this.container, { timeout: resolvedOptions.timeout });
     await removeContainer(this.container, { removeVolumes: resolvedOptions.removeVolumes });
 
     return new StoppedGenericContainer();
-  }
-
-  public isStopped(): boolean {
-    return this.stopped;
   }
 
   public getHost(): Host {
