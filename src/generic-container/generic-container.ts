@@ -28,7 +28,7 @@ import {
   TmpFs,
 } from "../docker/types";
 import { pullImage } from "../docker/functions/image/pull-image";
-import { createContainer } from "../docker/functions/container/create-container";
+import { createContainer, CreateContainerOptions } from "../docker/functions/container/create-container";
 import { connectNetwork } from "../docker/functions/network/connect-network";
 import { dockerClient } from "../docker/docker-client";
 import { inspectContainer, InspectResult } from "../docker/functions/container/inspect-container";
@@ -40,6 +40,9 @@ import { removeContainer } from "../docker/functions/container/remove-container"
 import { putContainerArchive } from "../docker/functions/container/put-container-archive";
 import { GenericContainerBuilder } from "./generic-container-builder";
 import { StartedGenericContainer } from "./started-generic-container";
+import { hash } from "../hash";
+import { getContainerByHash } from "../docker/functions/container/get-container";
+import { LABEL_CONTAINER_HASH } from "../labels";
 
 export class GenericContainer implements TestContainer {
   public static fromDockerfile(context: BuildContext, dockerfileName = "Dockerfile"): GenericContainerBuilder {
@@ -64,6 +67,7 @@ export class GenericContainer implements TestContainer {
   protected ipcMode?: string;
   protected user?: string;
   protected pullPolicy: PullPolicy = new DefaultPullPolicy();
+  protected reuse = false;
   protected tarToCopy?: archiver.Archiver;
 
   private extraHosts: ExtraHost[] = [];
@@ -94,7 +98,7 @@ export class GenericContainer implements TestContainer {
       this.extraHosts.push({ host: "host.testcontainers.internal", ipAddress: portForwarder.getIpAddress() });
     }
 
-    const container = await createContainer({
+    const createContainerOptions: CreateContainerOptions = {
       imageName: this.imageName,
       env: this.env,
       cmd: this.cmd,
@@ -102,6 +106,7 @@ export class GenericContainer implements TestContainer {
       tmpFs: this.tmpFs,
       exposedPorts: this.ports,
       name: this.name,
+      reusable: this.reuse,
       networkMode: this.networkAliases.length > 0 ? undefined : this.networkMode,
       healthCheck: this.healthCheck,
       useDefaultLogDriver: this.useDefaultLogDriver,
@@ -110,7 +115,42 @@ export class GenericContainer implements TestContainer {
       extraHosts: this.extraHosts,
       ipcMode: this.ipcMode,
       user: this.user,
-    });
+    };
+
+    if (this.reuse) {
+      const containerHash = hash(JSON.stringify(createContainerOptions));
+      createContainerOptions.labels = { [LABEL_CONTAINER_HASH]: containerHash };
+      log.debug(`Container reuse has been enabled, hash: ${containerHash}`);
+
+      const container = await getContainerByHash(containerHash);
+      if (container !== undefined) {
+        log.debug(`Found container to reuse with hash: ${containerHash}`);
+        return this.reuseContainer(container);
+      } else {
+        log.debug("No container found to reuse");
+        return this.startContainer(createContainerOptions);
+      }
+    } else {
+      return this.startContainer(createContainerOptions);
+    }
+  }
+
+  private async reuseContainer(startedContainer: Dockerode.Container) {
+    const inspectResult = await inspectContainer(startedContainer);
+    const boundPorts = BoundPorts.fromInspectResult(inspectResult).filter(this.ports);
+    await this.waitForContainer(startedContainer, boundPorts);
+
+    return new StartedGenericContainer(
+      startedContainer,
+      (await dockerClient).host,
+      inspectResult,
+      boundPorts,
+      inspectResult.name
+    );
+  }
+
+  private async startContainer(createContainerOptions: CreateContainerOptions): Promise<StartedTestContainer> {
+    const container = await createContainer(createContainerOptions);
 
     if (!this.imageName.isHelperContainer() && PortForwarderInstance.isRunning()) {
       const portForwarder = await PortForwarderInstance.getInstance();
@@ -248,6 +288,11 @@ export class GenericContainer implements TestContainer {
 
   public withUser(user: string): this {
     this.user = user;
+    return this;
+  }
+
+  public withReuse(): this {
+    this.reuse = true;
     return this;
   }
 

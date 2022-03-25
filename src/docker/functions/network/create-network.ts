@@ -29,7 +29,7 @@ export const createNetwork = async (options: CreateNetworkOptions): Promise<stri
       Ingress: options.ingress,
       EnableIPv6: options.enableIPv6,
       Options: options.options,
-      Labels: { ...options.labels, ...createLabels() },
+      Labels: { ...options.labels, ...createLabels(false) },
     });
 
     return network.id;

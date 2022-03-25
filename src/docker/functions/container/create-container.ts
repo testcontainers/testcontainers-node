@@ -3,7 +3,7 @@ import { DockerImageName } from "../../../docker-image-name";
 import { dockerClient } from "../../docker-client";
 import Dockerode, { PortMap as DockerodePortBindings } from "dockerode";
 import { getContainerPort, hasHostBinding, PortString, PortWithOptionalBinding } from "../../../port";
-import { createLabels } from "../create-labels";
+import { createLabels, Labels } from "../create-labels";
 import { BindMount, Command, ContainerName, Env, ExtraHost, HealthCheck, NetworkMode, TmpFs } from "../../types";
 
 export type CreateContainerOptions = {
@@ -14,6 +14,8 @@ export type CreateContainerOptions = {
   tmpFs: TmpFs;
   exposedPorts: PortWithOptionalBinding[];
   name?: ContainerName;
+  reusable: boolean;
+  labels?: Labels;
   networkMode?: NetworkMode;
   healthCheck?: HealthCheck;
   useDefaultLogDriver: boolean;
@@ -36,7 +38,7 @@ export const createContainer = async (options: CreateContainerOptions): Promise<
       Env: getEnv(options.env),
       ExposedPorts: getExposedPorts(options.exposedPorts),
       Cmd: options.cmd,
-      Labels: createLabels(options.imageName),
+      Labels: createLabels(options.reusable, options.imageName, options.labels),
       // @ts-ignore
       Healthcheck: getHealthCheck(options.healthCheck),
       HostConfig: {

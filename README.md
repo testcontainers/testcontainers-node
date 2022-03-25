@@ -129,6 +129,24 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+Enabling container reuse, note that two containers are considered equal if their options (exposed ports, commands, mounts, etc) match:
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container1 = await new GenericContainer("alpine")
+  .withCmd(["sleep", "infinity"])
+  .withReuse()
+  .start();
+
+const container2 = await new GenericContainer("alpine")
+  .withCmd(["sleep", "infinity"])
+  .withReuse()
+  .start();
+
+assert(container1.getId() === container2.getId());
+```
+
 Creating a container with a specified name:
 
 ```javascript
