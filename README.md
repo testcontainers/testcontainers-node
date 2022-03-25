@@ -135,10 +135,12 @@ Enabling container reuse, note that two containers are considered equal if their
 const { GenericContainer } = require("testcontainers");
 
 const container1 = await new GenericContainer("alpine")
+  .withCmd(["sleep", "infinity"])
   .withReuse()
   .start();
 
 const container2 = await new GenericContainer("alpine")
+  .withCmd(["sleep", "infinity"])
   .withReuse()
   .start();
 
