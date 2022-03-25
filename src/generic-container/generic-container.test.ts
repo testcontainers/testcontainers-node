@@ -497,6 +497,8 @@ describe("GenericContainer", () => {
         .start();
       await checkContainerIsHealthy(container2);
 
+      expect(container1.getId()).toBe(container2.getId());
+
       await container1.stop();
     });
 
@@ -514,6 +516,8 @@ describe("GenericContainer", () => {
         .withReuse()
         .start();
       await checkContainerIsHealthy(container2);
+
+      expect(container1.getId()).not.toBe(container2.getId());
     });
   });
 
