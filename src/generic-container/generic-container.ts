@@ -28,7 +28,7 @@ import {
   TmpFs,
 } from "../docker/types";
 import { pullImage } from "../docker/functions/image/pull-image";
-import { createContainer } from "../docker/functions/container/create-container";
+import { createContainer, CreateContainerOptions } from "../docker/functions/container/create-container";
 import { connectNetwork } from "../docker/functions/network/connect-network";
 import { dockerClient } from "../docker/docker-client";
 import { inspectContainer, InspectResult } from "../docker/functions/container/inspect-container";
@@ -40,11 +40,14 @@ import { removeContainer } from "../docker/functions/container/remove-container"
 import { putContainerArchive } from "../docker/functions/container/put-container-archive";
 import { GenericContainerBuilder } from "./generic-container-builder";
 import { StartedGenericContainer } from "./started-generic-container";
+import { hash } from "../hash";
 
 export class GenericContainer implements TestContainer {
   public static fromDockerfile(context: BuildContext, dockerfileName = "Dockerfile"): GenericContainerBuilder {
     return new GenericContainerBuilder(context, dockerfileName);
   }
+
+  private static readonly CONTAINERS = new Map<string, StartedTestContainer>();
 
   private readonly imageName: DockerImageName;
 
@@ -64,6 +67,7 @@ export class GenericContainer implements TestContainer {
   protected ipcMode?: string;
   protected user?: string;
   protected pullPolicy: PullPolicy = new DefaultPullPolicy();
+  protected reuse = false;
   protected tarToCopy?: archiver.Archiver;
 
   private extraHosts: ExtraHost[] = [];
@@ -94,7 +98,7 @@ export class GenericContainer implements TestContainer {
       this.extraHosts.push({ host: "host.testcontainers.internal", ipAddress: portForwarder.getIpAddress() });
     }
 
-    const container = await createContainer({
+    const createContainerOptions: CreateContainerOptions = {
       imageName: this.imageName,
       env: this.env,
       cmd: this.cmd,
@@ -110,7 +114,27 @@ export class GenericContainer implements TestContainer {
       extraHosts: this.extraHosts,
       ipcMode: this.ipcMode,
       user: this.user,
-    });
+    };
+
+    const containerHash = hash(JSON.stringify(createContainerOptions));
+    if (this.reuse && GenericContainer.CONTAINERS.has(containerHash)) {
+      const startedContainer = GenericContainer.CONTAINERS.get(containerHash)!;
+      if (startedContainer.isStopped()) {
+        const newStartedContainer = await this.startContainer(createContainerOptions);
+        GenericContainer.CONTAINERS.set(containerHash, newStartedContainer);
+        return newStartedContainer;
+      } else {
+        return startedContainer;
+      }
+    } else {
+      const startedContainer = await this.startContainer(createContainerOptions);
+      GenericContainer.CONTAINERS.set(containerHash, startedContainer);
+      return startedContainer;
+    }
+  }
+
+  private async startContainer(createContainerOptions: CreateContainerOptions): Promise<StartedTestContainer> {
+    const container = await createContainer(createContainerOptions);
 
     if (!this.imageName.isHelperContainer() && PortForwarderInstance.isRunning()) {
       const portForwarder = await PortForwarderInstance.getInstance();
@@ -248,6 +272,11 @@ export class GenericContainer implements TestContainer {
 
   public withUser(user: string): this {
     this.user = user;
+    return this;
+  }
+
+  public withReuse(): this {
+    this.reuse = true;
     return this;
   }
 

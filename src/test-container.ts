@@ -46,6 +46,8 @@ export interface TestContainer {
 
   withPullPolicy(pullPolicy: PullPolicy): this;
 
+  withReuse(): this;
+
   withCopyFileToContainer(sourcePath: string, containerPath: string): this;
 
   withCopyContentToContainer(content: string | Buffer | Readable, containerPath: string): this;
@@ -58,6 +60,8 @@ export interface StopOptions {
 
 export interface StartedTestContainer {
   stop(options?: Partial<StopOptions>): Promise<StoppedTestContainer>;
+
+  isStopped(): boolean;
 
   getHost(): Host;
 

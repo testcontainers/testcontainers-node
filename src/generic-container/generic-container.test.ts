@@ -32,7 +32,6 @@ describe("GenericContainer", () => {
       .start();
 
     await checkContainerIsHealthy(container);
-
     expect(container.getMappedPort(8080)).toBe(hostPort);
 
     await container.stop();
@@ -427,6 +426,59 @@ describe("GenericContainer", () => {
     expect(output).toBe(content);
 
     await container.stop();
+  });
+
+  describe("reuse", () => {
+    it("should not reuse the container by default", async () => {
+      const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
+        .withName("there_can_only_be_one")
+        .withExposedPorts(8080)
+        .start();
+      await checkContainerIsHealthy(container);
+
+      await expect(() =>
+        new GenericContainer("cristianrgreco/testcontainer:1.1.12")
+          .withName("there_can_only_be_one")
+          .withExposedPorts(8080)
+          .start()
+      ).rejects.toThrowError();
+
+      await container.stop();
+    });
+
+    it("should reuse the container", async () => {
+      const container1 = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
+        .withName("there_can_only_be_one")
+        .withExposedPorts(8080)
+        .withReuse()
+        .start();
+      await checkContainerIsHealthy(container1);
+
+      const container2 = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
+        .withName("there_can_only_be_one")
+        .withExposedPorts(8080)
+        .withReuse()
+        .start();
+      await checkContainerIsHealthy(container2);
+
+      await container1.stop();
+    });
+
+    it("should create a new container when an existing reusable container has stopped", async () => {
+      const container1 = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
+        .withName("there_can_only_be_one")
+        .withExposedPorts(8080)
+        .withReuse()
+        .start();
+      await container1.stop();
+
+      const container2 = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
+        .withName("there_can_only_be_one")
+        .withExposedPorts(8080)
+        .withReuse()
+        .start();
+      await checkContainerIsHealthy(container2);
+    });
   });
 
   describe("from Dockerfile", () => {
