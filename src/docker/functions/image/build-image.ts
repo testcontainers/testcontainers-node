@@ -1,13 +1,14 @@
 import { DockerImageName } from "../../../docker-image-name";
 import { PullPolicy } from "../../../pull-policy";
 import { log } from "../../../logger";
-import { findDockerIgnoreFiles } from "../../../docker-ignore";
 import tar from "tar-fs";
-import slash from "slash";
 import byline from "byline";
 import { dockerClient } from "../../docker-client";
 import { createLabels } from "../create-labels";
 import { BuildArgs, BuildContext, RegistryConfig } from "../../types";
+import path from "path";
+import { existsSync, promises as fs } from "fs";
+import dockerIgnore from "@balena/dockerignore";
 
 export type BuildImageOptions = {
   imageName: DockerImageName;
@@ -22,8 +23,20 @@ export const buildImage = async (options: BuildImageOptions): Promise<void> => {
   try {
     log.info(`Building image '${options.imageName.toString()}' with context '${options.context}'`);
 
-    const dockerIgnoreFiles = await findDockerIgnoreFiles(options.context, options.dockerfileName);
-    const tarStream = tar.pack(options.context, { ignore: (name) => dockerIgnoreFiles.has(slash(name)) });
+    const dockerIgnoreFilter = await createDockerIgnoreFilter(options.context);
+
+    const tarStream = tar.pack(options.context, {
+      ignore: (aPath) => {
+        const relativePath = path.relative(options.context, aPath);
+
+        if (relativePath === options.dockerfileName) {
+          return false;
+        }
+
+        return !dockerIgnoreFilter(relativePath);
+      },
+    });
+
     const { dockerode } = await dockerClient;
 
     return new Promise((resolve) =>
@@ -47,4 +60,19 @@ export const buildImage = async (options: BuildImageOptions): Promise<void> => {
     log.error(`Failed to build image: ${err}`);
     throw err;
   }
+};
+
+const createDockerIgnoreFilter = async (context: BuildContext): Promise<(path: string) => boolean> => {
+  const dockerIgnoreFilePath = path.join(context, ".dockerignore");
+
+  if (!existsSync(dockerIgnoreFilePath)) {
+    return () => true;
+  }
+
+  const instance = dockerIgnore({ ignorecase: false });
+
+  const dockerIgnorePatterns = await fs.readFile(dockerIgnoreFilePath, { encoding: "utf-8" });
+  instance.add(dockerIgnorePatterns);
+
+  return instance.createFilter();
 };

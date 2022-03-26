@@ -32,6 +32,7 @@
     "updateDeps": "npx npm-check-updates -u"
   },
   "dependencies": {
+    "@balena/dockerignore": "^1.0.2",
     "@types/archiver": "^5.1.1",
     "@types/dockerode": "^3.2.7",
     "archiver": "^5.3.0",
@@ -40,7 +41,6 @@
     "docker-compose": "^0.23.17",
     "dockerode": "^3.3.1",
     "get-port": "^5.1.1",
-    "glob": "^7.2.0",
     "properties-reader": "^2.2.0",
     "slash": "^3.0.0",
     "ssh-remote-port-forward": "^1.0.4",
@@ -50,7 +50,6 @@
     "@elastic/elasticsearch": "^7.14.1",
     "@types/byline": "^4.2.33",
     "@types/debug": "4.1.7",
-    "@types/glob": "^7.1.4",
     "@types/jest": "^27.0.3",
     "@types/node": "^16.9.6",
     "@types/node-fetch": "^2.5.12",
