@@ -23,17 +23,16 @@ export const buildImage = async (options: BuildImageOptions): Promise<void> => {
   try {
     log.info(`Building image '${options.imageName.toString()}' with context '${options.context}'`);
 
-    const dockerIgnoreFilter = await createDockerIgnoreFilter(options.context);
+    const isDockerIgnored = await isDockerIgnoredFilter(options.context);
 
     const tarStream = tar.pack(options.context, {
       ignore: (aPath) => {
         const relativePath = path.relative(options.context, aPath);
-
         if (relativePath === options.dockerfileName) {
           return false;
+        } else {
+          return isDockerIgnored(relativePath);
         }
-
-        return !dockerIgnoreFilter(relativePath);
       },
     });
 
@@ -62,7 +61,7 @@ export const buildImage = async (options: BuildImageOptions): Promise<void> => {
   }
 };
 
-const createDockerIgnoreFilter = async (context: BuildContext): Promise<(path: string) => boolean> => {
+const isDockerIgnoredFilter = async (context: BuildContext): Promise<(path: string) => boolean> => {
   const dockerIgnoreFilePath = path.join(context, ".dockerignore");
 
   if (!existsSync(dockerIgnoreFilePath)) {
@@ -74,5 +73,7 @@ const createDockerIgnoreFilter = async (context: BuildContext): Promise<(path: s
   const dockerIgnorePatterns = await fs.readFile(dockerIgnoreFilePath, { encoding: "utf-8" });
   instance.add(dockerIgnorePatterns);
 
-  return instance.createFilter();
+  const filter = instance.createFilter();
+
+  return (aPath: string) => !filter(aPath);
 };
