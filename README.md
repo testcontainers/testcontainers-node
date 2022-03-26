@@ -77,7 +77,12 @@ describe("GenericContainer", () => {
 Using TypeScript:
 
 ```typescript
-import { TestContainer, StartedTestContainer, StoppedTestContainer, GenericContainer } from "testcontainers";
+import { 
+  TestContainer, 
+  StartedTestContainer, 
+  StoppedTestContainer, 
+  GenericContainer
+} from "testcontainers";
 
 const container: TestContainer = new GenericContainer("alpine");
 const startedContainer: StartedTestContainer = await container.start();
@@ -129,7 +134,7 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
-Enabling container reuse, note that two containers are considered equal if their options (exposed ports, commands, mounts, etc) match:
+Enabling container reuse, note that two containers are considered equal if their options (exposed ports, commands, mounts, etc) match. This also works across multiple processes:
 
 ```javascript
 const { GenericContainer } = require("testcontainers");
