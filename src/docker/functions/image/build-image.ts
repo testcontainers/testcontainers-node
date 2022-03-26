@@ -65,7 +65,7 @@ const createIsDockerIgnoredFunction = async (context: BuildContext): Promise<(pa
   const dockerIgnoreFilePath = path.join(context, ".dockerignore");
 
   if (!existsSync(dockerIgnoreFilePath)) {
-    return () => true;
+    return () => false;
   }
 
   const instance = dockerIgnore({ ignorecase: false });
