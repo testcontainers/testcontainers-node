@@ -389,12 +389,14 @@ describe("GenericContainer", () => {
 
     expect(output).toContain("exist1.txt");
     expect(output).toContain("exist2.txt");
+    expect(output).toContain("exist7.txt");
     expect(output).not.toContain("example1.txt");
     expect(output).not.toContain("example2.txt");
     expect(output).not.toContain("example3.txt");
     expect(output).not.toContain("example4.txt");
     expect(output).not.toContain("example5.txt");
     expect(output).not.toContain("example6.txt");
+    expect(output).not.toContain("example7.txt");
     expect(output).not.toContain("Dockerfile");
 
     await startedContainer.stop();
