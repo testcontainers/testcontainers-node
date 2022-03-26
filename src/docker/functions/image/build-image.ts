@@ -23,7 +23,7 @@ export const buildImage = async (options: BuildImageOptions): Promise<void> => {
   try {
     log.info(`Building image '${options.imageName.toString()}' with context '${options.context}'`);
 
-    const isDockerIgnored = await isDockerIgnoredFilter(options.context);
+    const isDockerIgnored = await createIsDockerIgnoredFunction(options.context);
 
     const tarStream = tar.pack(options.context, {
       ignore: (aPath) => {
@@ -61,7 +61,7 @@ export const buildImage = async (options: BuildImageOptions): Promise<void> => {
   }
 };
 
-const isDockerIgnoredFilter = async (context: BuildContext): Promise<(path: string) => boolean> => {
+const createIsDockerIgnoredFunction = async (context: BuildContext): Promise<(path: string) => boolean> => {
   const dockerIgnoreFilePath = path.join(context, ".dockerignore");
 
   if (!existsSync(dockerIgnoreFilePath)) {
