@@ -65,9 +65,9 @@ describe("GenericContainer", () => {
     const container = await new GenericContainer("docker")
       .withCmd(["sleep", "infinity"])
       .withNetworkMode(network.getName())
-      .withEnv("DOCKER_HOST", `tcp://docker-tls:${dockerTls.getMappedPort(2376)}`)
+      .withEnv("DOCKER_HOST", `tcp://docker-tls:2376`)
       .withEnv("DOCKER_TLS_VERIFY", "1")
-      .withEnv("DOCKER_CERT_PATH", "/certs")
+      .withEnv("DOCKER_CERT_PATH", "/certs/client")
       .withBindMount(certsDir, "/certs")
       .start();
 
