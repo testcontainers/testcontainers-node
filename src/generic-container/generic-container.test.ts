@@ -48,6 +48,37 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
+  it("should connect to the Docker daemon over TLS", async () => {
+    const certsDir = path.resolve(__dirname, "..", "..", "fixtures", "certs");
+
+    const network = await new Network().start();
+
+    const dockerTls = await new GenericContainer("docker:dind")
+      .withPrivilegedMode()
+      .withExposedPorts(2376)
+      .withNetworkMode(network.getName())
+      .withNetworkAliases("docker-tls")
+      .withBindMount(certsDir, "/certs")
+      .withEnv("DOCKER_TLS_CERTDIR", "/certs")
+      .start();
+
+    const container = await new GenericContainer("docker")
+      .withCmd(["sleep", "infinity"])
+      .withNetworkMode(network.getName())
+      .withEnv("DOCKER_HOST", `tcp://docker-tls:${dockerTls.getMappedPort(2376)}`)
+      .withEnv("DOCKER_TLS_VERIFY", "1")
+      .withEnv("DOCKER_CERT_PATH", "/certs")
+      .withBindMount(certsDir, "/certs")
+      .start();
+
+    const { output } = await container.exec(["docker", "run", "hello-world"]);
+    expect(output).toContain("Hello from Docker!");
+
+    await container.stop();
+    await dockerTls.stop();
+    await network.stop();
+  });
+
   it("should wait for log", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
       .withExposedPorts(8080)

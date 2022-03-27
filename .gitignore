@@ -16,3 +16,7 @@ node_modules/
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+fixtures/certs/ca
+fixtures/certs/client
+fixtures/certs/server
