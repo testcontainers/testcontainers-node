@@ -3,7 +3,7 @@ import path from "path";
 import { log } from "../logger";
 import { Host } from "./types";
 import { URL } from "url";
-import fs from "fs";
+import { existsSync, promises as fs } from "fs";
 import { runInContainer } from "./functions/run-in-container";
 import { logSystemDiagnostics } from "../log-system-diagnostics";
 import "../testcontainers-properties-file";
@@ -23,12 +23,10 @@ const getDockerClient = async (): Promise<DockerClient> => {
   for (const strategy of strategies) {
     if (strategy.isApplicable()) {
       log.debug(`Found applicable Docker client strategy: ${strategy.getName()}`);
-      const dockerConfig = strategy.getDockerConfig();
-      const dockerode = new Dockerode(createDockerodeOptions(dockerConfig));
-
-      log.debug(`Testing Docker client strategy URI: ${dockerConfig.uri}`);
+      const { uri, dockerode } = await strategy.initialise();
+      log.debug(`Testing Docker client strategy URI: ${uri}`);
       if (await isDockerDaemonReachable(dockerode)) {
-        const host = await resolveHost(dockerode, dockerConfig.uri);
+        const host = await resolveHost(dockerode, uri);
         log.info(`Using Docker client strategy: ${strategy.getName()}, Docker host: ${host}`);
         logSystemDiagnostics();
         return { host, dockerode };
@@ -41,26 +39,6 @@ const getDockerClient = async (): Promise<DockerClient> => {
   throw new Error("No Docker client strategy found");
 };
 
-const createDockerodeOptions = (dockerConfig: DockerConfig) => {
-  const dockerOptions: DockerOptions = {};
-
-  if (dockerConfig.socketPath) {
-    dockerOptions.socketPath = dockerConfig.socketPath;
-  } else {
-    const { hostname, port } = new URL(dockerConfig.uri);
-    dockerOptions.host = hostname;
-    dockerOptions.port = port;
-  }
-
-  if (dockerConfig.ssl) {
-    dockerOptions.ca = dockerConfig.ssl.ca;
-    dockerOptions.cert = dockerConfig.ssl.cert;
-    dockerOptions.key = dockerConfig.ssl.key;
-  }
-
-  return dockerOptions;
-};
-
 const isDockerDaemonReachable = async (dockerode: Dockerode): Promise<boolean> => {
   try {
     const response = await dockerode.ping();
@@ -71,38 +49,35 @@ const isDockerDaemonReachable = async (dockerode: Dockerode): Promise<boolean> =
   }
 };
 
-type DockerConfig = {
-  uri: string;
-  socketPath?: string;
-  ssl?: {
-    ca: string;
-    cert: string;
-    key: string;
-  };
-};
-
 interface DockerClientStrategy {
   isApplicable(): boolean;
 
-  getDockerConfig(): DockerConfig;
+  initialise(): Promise<{ uri: string; dockerode: Dockerode }>;
 
   getName(): string;
 }
 
 class ConfigurationStrategy implements DockerClientStrategy {
-  getDockerConfig(): DockerConfig {
+  async initialise(): Promise<{ uri: string; dockerode: Dockerode }> {
     const { DOCKER_HOST, DOCKER_TLS_VERIFY, DOCKER_CERT_PATH } = process.env;
 
+    const dockerOptions: DockerOptions = {};
+
+    const url = new URL(DOCKER_HOST!);
+    const dockerHost = url.host === "" ? `tcp://${DOCKER_HOST}` : DOCKER_HOST!;
+    const { hostname, port } = new URL(dockerHost);
+    dockerOptions.host = hostname;
+    dockerOptions.port = port;
+
+    if (DOCKER_TLS_VERIFY === "1" && DOCKER_CERT_PATH !== undefined) {
+      dockerOptions.ca = await fs.readFile(path.resolve(DOCKER_CERT_PATH, "ca.pem"));
+      dockerOptions.cert = await fs.readFile(path.resolve(DOCKER_CERT_PATH, "cert.pem"));
+      dockerOptions.key = await fs.readFile(path.resolve(DOCKER_CERT_PATH, "key.pem"));
+    }
+
     return {
-      uri: DOCKER_HOST!,
-      ssl:
-        DOCKER_TLS_VERIFY === "1" && DOCKER_CERT_PATH !== undefined
-          ? {
-              ca: path.resolve(DOCKER_CERT_PATH, "ca.pem"),
-              cert: path.resolve(DOCKER_CERT_PATH, "cert.pem"),
-              key: path.resolve(DOCKER_CERT_PATH, "key.pem"),
-            }
-          : undefined,
+      uri: dockerHost,
+      dockerode: new Dockerode(dockerOptions),
     };
   }
 
@@ -116,10 +91,10 @@ class ConfigurationStrategy implements DockerClientStrategy {
 }
 
 class UnixSocketStrategy implements DockerClientStrategy {
-  getDockerConfig(): DockerConfig {
+  async initialise(): Promise<{ uri: string; dockerode: Dockerode }> {
     return {
       uri: "unix:///var/run/docker.sock",
-      socketPath: "/var/run/docker.sock",
+      dockerode: new Dockerode({ socketPath: "/var/run/docker.sock" }),
     };
   }
 
@@ -133,10 +108,10 @@ class UnixSocketStrategy implements DockerClientStrategy {
 }
 
 class NpipeSocketStrategy implements DockerClientStrategy {
-  getDockerConfig(): DockerConfig {
+  async initialise(): Promise<{ uri: string; dockerode: Dockerode }> {
     return {
       uri: "npipe:////./pipe/docker_engine",
-      socketPath: "//./pipe/docker_engine",
+      dockerode: new Dockerode({ socketPath: "//./pipe/docker_engine" }),
     };
   }
 
@@ -188,6 +163,6 @@ const findGateway = async (dockerode: Dockerode): Promise<string | undefined> =>
 const findDefaultGateway = async (dockerode: Dockerode): Promise<string | undefined> =>
   runInContainer(dockerode, "alpine:3.5", ["sh", "-c", "ip route|awk '/default/ { print $3 }'"]);
 
-const isInContainer = () => fs.existsSync("/.dockerenv");
+const isInContainer = () => existsSync("/.dockerenv");
 
 export const dockerClient: Promise<DockerClient> = getDockerClient();
