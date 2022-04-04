@@ -3,14 +3,16 @@ import { log } from "./logger";
 import { GenericContainer } from "./generic-container/generic-container";
 import { StartedTestContainer } from "./test-container";
 import { sessionId } from "./docker/session-id";
-import { dockerClient } from "./docker/docker-client";
 import { REAPER_IMAGE } from "./images";
 import { getContainerPort } from "./port";
 import { LABEL_SESSION_ID } from "./labels";
+import { Wait } from "./wait";
 
 export interface Reaper {
   addProject(projectName: string): void;
+
   getContainerId(): string;
+
   stop(): void;
 }
 
@@ -87,7 +89,8 @@ export class ReaperInstance {
     const container = new GenericContainer(REAPER_IMAGE)
       .withName(`testcontainers-ryuk-${sessionId}`)
       .withExposedPorts(8080)
-      .withBindMount(dockerSocket, "/var/run/docker.sock");
+      .withBindMount(dockerSocket, "/var/run/docker.sock")
+      .withWaitStrategy(Wait.forLogMessage(/.+ Started!/));
 
     if (this.isPrivileged()) {
       container.withPrivilegedMode();
@@ -96,7 +99,7 @@ export class ReaperInstance {
     const startedContainer = await container.start();
     const containerId = startedContainer.getId();
 
-    const host = (await dockerClient).host;
+    const host = startedContainer.getHost();
     const port = startedContainer.getMappedPort(8080);
 
     log.debug(`Connecting to Reaper ${containerId} on ${host}:${port}`);

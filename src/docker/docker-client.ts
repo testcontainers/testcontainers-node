@@ -161,7 +161,7 @@ const findGateway = async (dockerode: Dockerode): Promise<string | undefined> =>
 };
 
 const findDefaultGateway = async (dockerode: Dockerode): Promise<string | undefined> =>
-  runInContainer(dockerode, "alpine:3.5", ["sh", "-c", "ip route|awk '/default/ { print $3 }'"]);
+  runInContainer(dockerode, "alpine:3.14", ["sh", "-c", "ip route|awk '/default/ { print $3 }'"]);
 
 const isInContainer = () => existsSync("/.dockerenv");
 
