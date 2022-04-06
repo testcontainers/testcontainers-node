@@ -250,7 +250,7 @@ const { GenericContainer, Wait } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
   .withHealthCheck({
-    test: "curl -f http://localhost || exit 1",
+    test: ["CMD-SHELL", "curl -f http://localhost || exit 1"],
     interval: 1000,
     timeout: 3000,
     retries: 5,
@@ -259,6 +259,8 @@ const container = await new GenericContainer("alpine")
   .withWaitStrategy(Wait.forHealthCheck())
   .start();
 ```
+
+`test` can either be `["CMD-SHELL", "some-shell --command || exit 1"]` which executes the health check using the shell in the container or `["CMD", "/path/to/command", "--arg1", "arg2", "--arg3"]` which executes the health check without using a shell to execute it. Note that this is a breaking change from v8.x.x, to upgrade from v8.x.x replace `test: "curl -f http://localhost || exit 1"` with `test: ["CMD-SHELL", "curl -f http://localhost || exit 1"]`.
 
 Creating a container that connects to a specific network:
 

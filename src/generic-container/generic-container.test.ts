@@ -87,7 +87,7 @@ describe("GenericContainer", () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
       .withExposedPorts(8080)
       .withHealthCheck({
-        test: "curl -f http://localhost:8080/hello-world || exit 1",
+        test: ["CMD-SHELL", "curl -f http://localhost:8080/hello-world || exit 1"],
         interval: 1000,
         timeout: 3000,
         retries: 5,
@@ -372,7 +372,7 @@ describe("GenericContainer", () => {
       customGenericContainer
         .withName(containerName)
         .withExposedPorts(8080)
-        .withHealthCheck({ test: "exit 1" })
+        .withHealthCheck({ test: ["CMD-SHELL", "exit 1"] })
         .withWaitStrategy(Wait.forHealthCheck())
         .start()
     ).rejects.toThrowError("Health check failed");
@@ -380,13 +380,15 @@ describe("GenericContainer", () => {
     expect(await getRunningContainerNames()).not.toContain(containerName);
   });
 
-  it("should handle health checks without the need of a shell", async () => {
-    const context = path.resolve(fixtures, "docker-with-health-check");
-    const customGenericContainer = await GenericContainer.fromDockerfile(context).build();
-    const container = await customGenericContainer
+  it("should wait for custom health check using CMD to run the command directly without a shell", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
       .withExposedPorts(8080)
       .withHealthCheck({
-        test: ["/usr/bin/wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/hello-world"],
+        test: ["CMD", "/usr/bin/wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/hello-world"],
+        interval: 1000,
+        timeout: 3000,
+        retries: 5,
+        startPeriod: 1000,
       })
       .withWaitStrategy(Wait.forHealthCheck())
       .start();

@@ -21,7 +21,7 @@ export type BindMount = {
 export type TmpFs = { [dir in Dir]: Dir };
 
 export type HealthCheck = {
-  test: string | string[];
+  test: ["CMD-SHELL", string] | ["CMD", ...string[]];
   interval?: number;
   timeout?: number;
   retries?: number;
