@@ -56,9 +56,9 @@ export class DockerComposeEnvironment {
     return this;
   }
 
-  public withNoRecreate(): this {
+  public withNoRecreate(projectName = "testcontainers-node"): this {
     this.recreate = false;
-    this.projectName = "testcontainers-node";
+    this.projectName = projectName;
     return this;
   }
 
