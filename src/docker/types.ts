@@ -21,7 +21,7 @@ export type BindMount = {
 export type TmpFs = { [dir in Dir]: Dir };
 
 export type HealthCheck = {
-  test: string;
+  test: string | string[];
   interval?: number;
   timeout?: number;
   retries?: number;

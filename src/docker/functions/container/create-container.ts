@@ -111,7 +111,7 @@ const getHealthCheck = (healthCheck?: HealthCheck): DockerodeHealthCheck | undef
   }
 
   return {
-    Test: ["CMD-SHELL", healthCheck.test],
+    Test: typeof healthCheck.test === "string" ? ["CMD-SHELL", healthCheck.test] : ["CMD", ...healthCheck.test],
     Interval: healthCheck.interval ? toNanos(healthCheck.interval) : 0,
     Timeout: healthCheck.timeout ? toNanos(healthCheck.timeout) : 0,
     Retries: healthCheck.retries || 0,

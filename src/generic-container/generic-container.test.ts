@@ -380,6 +380,22 @@ describe("GenericContainer", () => {
     expect(await getRunningContainerNames()).not.toContain(containerName);
   });
 
+  it("should handle health checks without the need of a shell", async () => {
+    const context = path.resolve(fixtures, "docker-with-health-check");
+    const customGenericContainer = await GenericContainer.fromDockerfile(context).build();
+    const container = await customGenericContainer
+      .withExposedPorts(8080)
+      .withHealthCheck({
+        test: ["/usr/bin/wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/hello-world"],
+      })
+      .withWaitStrategy(Wait.forHealthCheck())
+      .start();
+
+    await checkContainerIsHealthy(container);
+
+    await container.stop();
+  });
+
   it("should honour .dockerignore file", async () => {
     const context = path.resolve(fixtures, "docker-with-dockerignore");
     const container = await GenericContainer.fromDockerfile(context).build();
