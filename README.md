@@ -260,7 +260,17 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
-`test` can either be `["CMD-SHELL", "some-shell --command || exit 1"]` which executes the health check using the shell in the container or `["CMD", "/path/to/command", "--arg1", "arg2", "--arg3"]` which executes the health check without using a shell to execute it. Note that this is a breaking change from v8.x.x, to upgrade from v8.x.x replace `test: "curl -f http://localhost || exit 1"` with `test: ["CMD-SHELL", "curl -f http://localhost || exit 1"]`.
+To execute the `test` in a shell use the form `["CMD-SHELL", "command"]`, for example:
+
+```javascript
+["CMD-SHELL", "curl -f http://localhost:8000 || exit 1"]
+```
+
+To execute the `test` without a shell, use the form: `["CMD", "command", "arg1", "arg2"]`, for example:
+
+```javascript
+["CMD", "/usr/bin/wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/hello-world"]
+```
 
 Creating a container that connects to a specific network:
 
