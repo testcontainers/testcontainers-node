@@ -7,32 +7,26 @@ assignees: ''
 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+Thanks for reporting an issue. Please review the task list below before submitting the issue. 
+Your issue report will be closed if the issue is incomplete and the below tasks not completed.
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+**Expected Behaviour**
+A concise description of what you expected to happen.
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+**Actual Behaviour**
+A concise description of what you're experiencing.
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+**Logs**
+Run your scenario with the environment variable `DEBUG=testcontainers*` and paste the logs here.
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
+**Steps to Reproduce**
+1. In this environment...
+2. With this config...
+3. Run '...'
+4. See error...
 
-**Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
-
-**Additional context**
-Add any other context about the problem here.
+**Environment Information**
+- Operating System:
+- Docker Version:
+- Node version:
+- Testcontainers version:
