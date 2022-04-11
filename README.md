@@ -243,6 +243,20 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+Creating a container with labels:
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await new GenericContainer("alpine")
+  .withLabels({
+    label1: "value1",
+    label2: "value2",
+  })
+  .addLabels({ label3: "value3" })
+  .start();
+```
+
 Creating a container with a custom health check command. Note that `interval`, `timeout`, `retries` and `startPeriod` are optional; the values will be inherited from the image or parent image if omitted. Also note that the wait strategy should be set to `Wait.forHealthCheck()` for this option to take effect:
 
 ```javascript

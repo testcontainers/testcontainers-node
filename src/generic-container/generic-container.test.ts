@@ -184,6 +184,25 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
+  it("should set label", async () => {
+    const labels1 = {
+      ["label-1"]: "value-1",
+      ["label-2"]: "value-2",
+    };
+    const labels2 = {
+      ["label-3"]: "value-3",
+    };
+
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
+      .withLabels(labels1)
+      .addLabels(labels2)
+      .start();
+
+    expect(container.getLabels()).toMatchObject({ ...labels1, ...labels2 });
+
+    await container.stop();
+  });
+
   it("should set bind mounts", async () => {
     const filename = "test.txt";
     const source = path.resolve(fixtures, "docker", filename);

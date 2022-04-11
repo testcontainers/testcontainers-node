@@ -37,6 +37,8 @@ export type NetworkMode = string;
 
 export type ContainerName = string;
 
+export type Labels = { [key: string]: string };
+
 export type Ports = { [internalPort: number]: number };
 
 export type AuthConfig = {

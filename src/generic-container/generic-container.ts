@@ -26,6 +26,7 @@ import {
   Host,
   NetworkMode,
   TmpFs,
+  Labels,
 } from "../docker/types";
 import { pullImage } from "../docker/functions/image/pull-image";
 import { createContainer, CreateContainerOptions } from "../docker/functions/container/create-container";
@@ -58,6 +59,7 @@ export class GenericContainer implements TestContainer {
   protected cmd: Command[] = [];
   protected bindMounts: BindMount[] = [];
   protected name?: ContainerName;
+  protected labels: Labels = {};
   protected tmpFs: TmpFs = {};
   protected healthCheck?: HealthCheck;
   protected waitStrategy?: WaitStrategy;
@@ -106,6 +108,7 @@ export class GenericContainer implements TestContainer {
       tmpFs: this.tmpFs,
       exposedPorts: this.ports,
       name: this.name,
+      labels: this.labels,
       reusable: this.reuse,
       networkMode: this.networkAliases.length > 0 ? undefined : this.networkMode,
       healthCheck: this.healthCheck,
@@ -218,6 +221,16 @@ export class GenericContainer implements TestContainer {
 
   public withName(name: ContainerName): this {
     this.name = name;
+    return this;
+  }
+
+  public withLabels(labels: Labels): this {
+    this.labels = { ...labels };
+    return this;
+  }
+
+  public addLabels(labels: Labels): this {
+    this.labels = { ...this.labels, ...labels };
     return this;
   }
 
