@@ -1,6 +1,6 @@
 import { StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
 import Dockerode from "dockerode";
-import { Command, ContainerName, ExecResult, Host, Id as ContainerId } from "../docker/types";
+import { Command, ContainerName, ExecResult, Host, Id as ContainerId, Labels } from "../docker/types";
 import { InspectResult } from "../docker/functions/container/inspect-container";
 import { BoundPorts } from "../bound-ports";
 import { log } from "../logger";
@@ -49,6 +49,10 @@ export class StartedGenericContainer implements StartedTestContainer {
 
   public getName(): ContainerName {
     return this.name;
+  }
+
+  public getLabels(): Labels {
+    return this.inspectResult.labels;
   }
 
   public getNetworkNames(): string[] {

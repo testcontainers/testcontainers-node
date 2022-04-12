@@ -1,4 +1,4 @@
-import { ContainerName, HealthCheckStatus, NetworkSettings, Ports } from "../../types";
+import { ContainerName, HealthCheckStatus, Labels, NetworkSettings, Ports } from "../../types";
 import Dockerode, { ContainerInspectInfo } from "dockerode";
 import { log } from "../../../logger";
 
@@ -9,6 +9,7 @@ export type InspectResult = {
   healthCheckStatus: HealthCheckStatus;
   networkSettings: { [networkName: string]: NetworkSettings };
   state: { status: string; running: boolean };
+  labels: Labels;
 };
 
 export const inspectContainer = async (container: Dockerode.Container): Promise<InspectResult> => {
@@ -22,6 +23,7 @@ export const inspectContainer = async (container: Dockerode.Container): Promise<
       healthCheckStatus: getHealthCheckStatus(inspectResult),
       networkSettings: getNetworkSettings(inspectResult),
       state: { status: inspectResult.State.Status, running: inspectResult.State.Running },
+      labels: inspectResult.Config.Labels,
     };
   } catch (err) {
     log.error(`Failed to inspect container ${container.id}: ${err}`);

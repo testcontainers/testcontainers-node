@@ -15,6 +15,7 @@ import {
   Id,
   NetworkMode,
   TmpFs,
+  Labels,
 } from "./docker/types";
 
 export interface TestContainer {
@@ -66,6 +67,8 @@ export interface StartedTestContainer {
   getMappedPort(port: Port): Port;
 
   getName(): ContainerName;
+
+  getLabels(): Labels;
 
   getId(): Id;
 

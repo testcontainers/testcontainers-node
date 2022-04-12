@@ -3,8 +3,18 @@ import { DockerImageName } from "../../../docker-image-name";
 import { dockerClient } from "../../docker-client";
 import Dockerode, { PortMap as DockerodePortBindings } from "dockerode";
 import { getContainerPort, hasHostBinding, PortString, PortWithOptionalBinding } from "../../../port";
-import { createLabels, Labels } from "../create-labels";
-import { BindMount, Command, ContainerName, Env, ExtraHost, HealthCheck, NetworkMode, TmpFs } from "../../types";
+import { createLabels } from "../create-labels";
+import {
+  BindMount,
+  Command,
+  ContainerName,
+  Env,
+  ExtraHost,
+  HealthCheck,
+  Labels,
+  NetworkMode,
+  TmpFs,
+} from "../../types";
 
 export type CreateContainerOptions = {
   imageName: DockerImageName;
