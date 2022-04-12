@@ -253,7 +253,6 @@ const container = await new GenericContainer("alpine")
     label1: "value1",
     label2: "value2",
   })
-  .addLabels({ label3: "value3" })
   .start();
 ```
 
