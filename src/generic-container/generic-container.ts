@@ -229,11 +229,6 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
-  public addLabels(labels: Labels): this {
-    this.labels = { ...this.labels, ...labels };
-    return this;
-  }
-
   public withEnv(key: EnvKey, value: EnvValue): this {
     this.env[key] = value;
     return this;

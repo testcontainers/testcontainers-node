@@ -185,20 +185,14 @@ describe("GenericContainer", () => {
   });
 
   it("should set label", async () => {
-    const labels1 = {
+    const labels = {
       ["label-1"]: "value-1",
       ["label-2"]: "value-2",
     };
-    const labels2 = {
-      ["label-3"]: "value-3",
-    };
 
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
-      .withLabels(labels1)
-      .addLabels(labels2)
-      .start();
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12").withLabels(labels).start();
 
-    expect(container.getLabels()).toMatchObject({ ...labels1, ...labels2 });
+    expect(container.getLabels()).toMatchObject(labels);
 
     await container.stop();
   });
