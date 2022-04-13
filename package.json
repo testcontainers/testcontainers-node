@@ -46,7 +46,7 @@
     "tar-fs": "^2.1.1"
   },
   "devDependencies": {
-    "@elastic/elasticsearch": "^8.1.0",
+    "@elastic/elasticsearch": "^7.17.0",
     "@types/byline": "^4.2.33",
     "@types/debug": "4.1.7",
     "@types/jest": "^27.4.1",
