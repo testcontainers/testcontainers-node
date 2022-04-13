@@ -6,12 +6,13 @@
     "outDir": "dist",
     "strict": true,
     "esModuleInterop": true,
-    "lib": ["es2017"]
+    "lib": ["es2017"],
+    "skipLibCheck": true
   },
   "exclude": [
     "dist",
     "node_modules",
     "src/**/*.test.ts",
-    "src/test-helper.ts",
+    "src/test-helper.ts"
   ]
 }
