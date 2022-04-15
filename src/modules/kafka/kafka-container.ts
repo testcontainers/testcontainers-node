@@ -4,19 +4,18 @@ import { Port } from "../../port";
 import { RandomUuid, Uuid } from "../../uuid";
 import { StartedTestContainer } from "../..";
 import { AbstractStartedContainer } from "../abstract-started-container";
-import { PortGenerator, RandomUniquePortGenerator } from "../../port-generator";
 import { Host } from "../../docker/types";
 import { InspectResult } from "../../docker/functions/container/inspect-container";
 import { dockerClient } from "../../docker/docker-client";
 
 const KAFKA_PORT = 9093;
 const KAFKA_BROKER_PORT = 9092;
+const DEFAULT_ZOOKEEPER_PORT = 2181;
 
 export const KAFKA_IMAGE = "confluentinc/cp-kafka:5.5.4";
 
 export class KafkaContainer extends GenericContainer {
   private readonly uuid: Uuid = new RandomUuid();
-  private readonly portGenerator: PortGenerator = new RandomUniquePortGenerator();
 
   private isZooKeeperProvided = false;
   private zooKeeperHost?: Host;
@@ -56,7 +55,7 @@ export class KafkaContainer extends GenericContainer {
       this.withEnv("KAFKA_ZOOKEEPER_CONNECT", `${this.zooKeeperHost}:${this.zooKeeperPort}`);
     } else {
       this.zooKeeperHost = this.uuid.nextUuid();
-      this.zooKeeperPort = await this.portGenerator.generatePort();
+      this.zooKeeperPort = DEFAULT_ZOOKEEPER_PORT;
       this.addExposedPorts(this.zooKeeperPort);
       this.withEnv("KAFKA_ZOOKEEPER_CONNECT", `localhost:${this.zooKeeperPort}`);
       command += "echo 'clientPort=" + this.zooKeeperPort + "' > zookeeper.properties\n";

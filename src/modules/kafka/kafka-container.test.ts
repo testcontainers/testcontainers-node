@@ -59,6 +59,15 @@ describe("KafkaContainer", () => {
     await network.stop();
   });
 
+  it("should be reusable", async () => {
+    const originalKafkaContainer = await new KafkaContainer().withReuse().start();
+    const newKafkaContainer = await new KafkaContainer().withReuse().start();
+
+    expect(newKafkaContainer.getId()).toBe(originalKafkaContainer.getId());
+
+    await originalKafkaContainer.stop();
+  });
+
   const testPubSub = async (kafkaContainer: StartedTestContainer) => {
     const kafka = new Kafka({
       logLevel: logLevel.NOTHING,
