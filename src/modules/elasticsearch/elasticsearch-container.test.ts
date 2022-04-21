@@ -11,7 +11,6 @@ describe("ElasticsearchContainer", () => {
     await client.indices.create({ index: "people" });
 
     expect((await client.indices.exists({ index: "people" })).statusCode).toBe(200);
-
     await container.stop();
   });
 
@@ -30,7 +29,6 @@ describe("ElasticsearchContainer", () => {
     });
 
     expect((await client.get({ index: "people", id: document.id })).body._source).toStrictEqual(document);
-
     await container.stop();
   });
 });
