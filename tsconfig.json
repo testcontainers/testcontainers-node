@@ -13,6 +13,7 @@
     "dist",
     "node_modules",
     "src/**/*.test.ts",
-    "src/test-helper.ts"
+    "src/test-helper.ts",
+    "src/modules/kafka/test-certs/**/*"
   ]
 }
