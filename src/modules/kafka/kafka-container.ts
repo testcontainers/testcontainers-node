@@ -43,10 +43,10 @@ export class KafkaContainer extends GenericContainer {
   private zooKeeperPort?: Port;
   private saslSslConfig?: SaslSslListenerOptions;
 
-  constructor(image = KAFKA_IMAGE) {
+  constructor(image = KAFKA_IMAGE, hostPort?: number) {
     super(image);
 
-    this.withExposedPorts(KAFKA_PORT)
+    this.withExposedPorts(hostPort ? { container: KAFKA_PORT, host: hostPort } : KAFKA_PORT)
       .withStartupTimeout(180_000)
       .withEnv("KAFKA_LISTENER_SECURITY_PROTOCOL_MAP", "BROKER:PLAINTEXT,PLAINTEXT:PLAINTEXT")
       .withEnv("KAFKA_INTER_BROKER_LISTENER_NAME", "BROKER")

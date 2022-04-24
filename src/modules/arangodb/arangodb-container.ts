@@ -5,10 +5,12 @@ import { RandomUuid } from "../../uuid";
 import { AbstractStartedContainer } from "../abstract-started-container";
 import { Host } from "../../docker/types";
 
-const PORT = 8529;
+const ARANGODB_PORT = 8529;
 const USERNAME = "root";
 
 export class ArangoDBContainer extends GenericContainer {
+  private hostPort: number | null = null;
+
   constructor(image = "arangodb:3.7.13", private password = new RandomUuid().nextUuid()) {
     super(image);
   }
@@ -18,8 +20,13 @@ export class ArangoDBContainer extends GenericContainer {
     return this;
   }
 
+  public withHostPort(hostPort: number): this {
+    this.hostPort = hostPort;
+    return this;
+  }
+
   public async start(): Promise<StartedArangoContainer> {
-    this.withExposedPorts(PORT)
+    this.withExposedPorts(this.hostPort ? { container: ARANGODB_PORT, host: this.hostPort } : ARANGODB_PORT)
       .withWaitStrategy(Wait.forLogMessage("Have fun!"))
       .withEnv("ARANGO_ROOT_PASSWORD", this.password)
       .withStartupTimeout(120_000);
@@ -35,7 +42,7 @@ export class StartedArangoContainer extends AbstractStartedContainer {
   constructor(startedTestContainer: StartedTestContainer, private readonly password: string) {
     super(startedTestContainer);
     this.host = this.startedTestContainer.getHost();
-    this.port = this.startedTestContainer.getMappedPort(PORT);
+    this.port = this.startedTestContainer.getMappedPort(ARANGODB_PORT);
   }
 
   public getTcpUrl(): string {

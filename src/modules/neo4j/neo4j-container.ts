@@ -12,6 +12,8 @@ export class Neo4jContainer extends GenericContainer {
   private password = new RandomUuid().nextUuid();
   private apoc = false;
   private ttl?: number;
+  private hostBoltPort: number | null = null;
+  private hostHttpPort: number | null = null;
 
   constructor(image = "neo4j:4.3.2") {
     super(image);
@@ -32,8 +34,21 @@ export class Neo4jContainer extends GenericContainer {
     return this;
   }
 
+  public withHostBoltPort(hostBoltPort: number): this {
+    this.hostBoltPort = hostBoltPort;
+    return this;
+  }
+
+  public withHostHttpPort(hostHttpPort: number): this {
+    this.hostHttpPort = hostHttpPort;
+    return this;
+  }
+
   public async start(): Promise<StartedNeo4jContainer> {
-    this.withExposedPorts(BOLT_PORT, HTTP_PORT)
+    this.withExposedPorts(
+      this.hostBoltPort ? { container: BOLT_PORT, host: this.hostBoltPort } : BOLT_PORT,
+      this.hostHttpPort ? { container: HTTP_PORT, host: this.hostHttpPort } : HTTP_PORT
+    )
       .withWaitStrategy(Wait.forLogMessage("Started."))
       .withEnv("NEO4J_AUTH", `${USERNAME}/${this.password}`)
       .withStartupTimeout(120_000);

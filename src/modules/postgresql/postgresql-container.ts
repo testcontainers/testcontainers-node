@@ -4,10 +4,13 @@ import { RandomUuid } from "../../uuid";
 import { AbstractStartedContainer } from "../abstract-started-container";
 import { Port } from "../../port";
 
+const POSTGRES_PORT = 5432;
+
 export class PostgreSqlContainer extends GenericContainer {
   private database = "test";
   private username = new RandomUuid().nextUuid();
   private password = new RandomUuid().nextUuid();
+  private hostPort: number | null = null;
 
   constructor(image = "postgres:13.3-alpine") {
     super(image);
@@ -28,8 +31,13 @@ export class PostgreSqlContainer extends GenericContainer {
     return this;
   }
 
+  public withHostPort(port: number): this {
+    this.hostPort = port;
+    return this;
+  }
+
   public async start(): Promise<StartedPostgreSqlContainer> {
-    this.withExposedPorts(5432)
+    this.withExposedPorts(this.hostPort ? { container: POSTGRES_PORT, host: this.hostPort } : POSTGRES_PORT)
       .withEnv("POSTGRES_DB", this.database)
       .withEnv("POSTGRES_USER", this.username)
       .withEnv("POSTGRES_PASSWORD", this.password)
