@@ -5,21 +5,12 @@ import { Port } from "../../port";
 const ELASTIC_SEARCH_HTTP_PORT = 9200;
 
 export class ElasticsearchContainer extends GenericContainer {
-  private hostPort: number | null = null;
-
   constructor(image = "docker.elastic.co/elasticsearch/elasticsearch:7.9.2") {
     super(image);
   }
 
-  public withHostPort(hostPort: number): this {
-    this.hostPort = hostPort;
-    return this;
-  }
-
   public async start(): Promise<StartedElasticsearchContainer> {
-    this.withExposedPorts(
-      this.hostPort ? { container: ELASTIC_SEARCH_HTTP_PORT, host: this.hostPort } : ELASTIC_SEARCH_HTTP_PORT
-    )
+    this.withExposedPorts(...(this.hasExposedPorts ? this.ports : [ELASTIC_SEARCH_HTTP_PORT]))
       .withEnv("discovery.type", "single-node")
       .withStartupTimeout(120_000);
 

@@ -214,6 +214,10 @@ export class GenericContainer implements TestContainer {
     boundPorts: BoundPorts
   ): Promise<void>;
 
+  protected get hasExposedPorts(): boolean {
+    return Boolean(this.ports.length);
+  }
+
   public withCmd(cmd: Command[]): this {
     this.cmd = cmd;
     return this;

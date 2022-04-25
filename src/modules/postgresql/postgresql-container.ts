@@ -10,7 +10,6 @@ export class PostgreSqlContainer extends GenericContainer {
   private database = "test";
   private username = new RandomUuid().nextUuid();
   private password = new RandomUuid().nextUuid();
-  private hostPort: number | null = null;
 
   constructor(image = "postgres:13.3-alpine") {
     super(image);
@@ -31,13 +30,8 @@ export class PostgreSqlContainer extends GenericContainer {
     return this;
   }
 
-  public withHostPort(port: number): this {
-    this.hostPort = port;
-    return this;
-  }
-
   public async start(): Promise<StartedPostgreSqlContainer> {
-    this.withExposedPorts(this.hostPort ? { container: POSTGRES_PORT, host: this.hostPort } : POSTGRES_PORT)
+    this.withExposedPorts(...(this.hasExposedPorts ? this.ports : [POSTGRES_PORT]))
       .withEnv("POSTGRES_DB", this.database)
       .withEnv("POSTGRES_USER", this.username)
       .withEnv("POSTGRES_PASSWORD", this.password)

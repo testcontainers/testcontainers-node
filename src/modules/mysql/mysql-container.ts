@@ -11,7 +11,6 @@ export class MySqlContainer extends GenericContainer {
   private username = new RandomUuid().nextUuid();
   private userPassword = new RandomUuid().nextUuid();
   private rootPassword = new RandomUuid().nextUuid();
-  private hostPort: number | null = null;
 
   constructor(image = "mysql:8.0.26") {
     super(image);
@@ -37,13 +36,8 @@ export class MySqlContainer extends GenericContainer {
     return this;
   }
 
-  public withHostPort(hostPort: number): this {
-    this.hostPort = hostPort;
-    return this;
-  }
-
   public async start(): Promise<StartedMySqlContainer> {
-    this.withExposedPorts(this.hostPort ? { container: MYSQL_PORT, host: this.hostPort } : MYSQL_PORT)
+    this.withExposedPorts(...(this.hasExposedPorts ? this.ports : [MYSQL_PORT]))
       .withEnv("MYSQL_DATABASE", this.database)
       .withEnv("MYSQL_ROOT_PASSWORD", this.rootPassword)
       .withEnv("MYSQL_USER", this.username)

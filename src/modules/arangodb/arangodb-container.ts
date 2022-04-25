@@ -9,8 +9,6 @@ const ARANGODB_PORT = 8529;
 const USERNAME = "root";
 
 export class ArangoDBContainer extends GenericContainer {
-  private hostPort: number | null = null;
-
   constructor(image = "arangodb:3.7.13", private password = new RandomUuid().nextUuid()) {
     super(image);
   }
@@ -20,13 +18,8 @@ export class ArangoDBContainer extends GenericContainer {
     return this;
   }
 
-  public withHostPort(hostPort: number): this {
-    this.hostPort = hostPort;
-    return this;
-  }
-
   public async start(): Promise<StartedArangoContainer> {
-    this.withExposedPorts(this.hostPort ? { container: ARANGODB_PORT, host: this.hostPort } : ARANGODB_PORT)
+    this.withExposedPorts(...(this.hasExposedPorts ? this.ports : [ARANGODB_PORT]))
       .withWaitStrategy(Wait.forLogMessage("Have fun!"))
       .withEnv("ARANGO_ROOT_PASSWORD", this.password)
       .withStartupTimeout(120_000);
