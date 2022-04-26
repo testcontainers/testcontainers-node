@@ -148,7 +148,8 @@ export class GenericContainer implements TestContainer {
       (await dockerClient()).host,
       inspectResult,
       boundPorts,
-      inspectResult.name
+      inspectResult.name,
+      this.getWaitStrategy((await dockerClient).host, startedContainer).withStartupTimeout(this.startupTimeout)
     );
   }
 
@@ -198,7 +199,8 @@ export class GenericContainer implements TestContainer {
       (await dockerClient()).host,
       inspectResult,
       boundPorts,
-      inspectResult.name
+      inspectResult.name,
+      this.getWaitStrategy((await dockerClient).host, container).withStartupTimeout(this.startupTimeout)
     );
 
     if (this.postStart) {

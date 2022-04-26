@@ -54,6 +54,10 @@ export interface TestContainer {
   withCopyContentToContainer(content: string | Buffer | Readable, containerPath: string): this;
 }
 
+export interface RestartOptions {
+  timeout: number;
+}
+
 export interface StopOptions {
   timeout: number;
   removeVolumes: boolean;
@@ -61,6 +65,8 @@ export interface StopOptions {
 
 export interface StartedTestContainer {
   stop(options?: Partial<StopOptions>): Promise<StoppedTestContainer>;
+
+  restart(options?: Partial<RestartOptions>): Promise<StartedTestContainer>;
 
   getHost(): Host;
 

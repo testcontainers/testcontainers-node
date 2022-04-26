@@ -624,4 +624,39 @@ describe("GenericContainer", () => {
       await startedContainer.stop();
     });
   });
+
+  describe("restart", () => {
+    it("should restart", async () => {
+      const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
+        .withName("restartingContainer")
+        .withExposedPorts(8080)
+        .start();
+      await checkContainerIsHealthy(container);
+
+      const restartedContainer = await container.restart();
+      await checkContainerIsHealthy(restartedContainer);
+
+      expect(container.getId()).toStrictEqual(restartedContainer.getId());
+      expect(container.getName()).toStrictEqual(restartedContainer.getName());
+
+      await container.stop();
+    });
+
+    it("should restart persisting state", async () => {
+      const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
+        .withName("restartingContainer2")
+        .withExposedPorts(8080)
+        .start();
+      await checkContainerIsHealthy(container);
+      await container.exec(["sh", "-c", "echo 'testconfig' >> config.txt"]);
+
+      const restartedContainer = await container.restart();
+      await checkContainerIsHealthy(restartedContainer);
+      const result = await restartedContainer.exec(["cat", "config.txt"]);
+
+      expect(result.output.trim()).toStrictEqual("testconfig");
+
+      await container.stop();
+    });
+  });
 });
