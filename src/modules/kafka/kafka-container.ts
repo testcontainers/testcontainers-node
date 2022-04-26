@@ -1,6 +1,6 @@
 import { GenericContainer } from "../../generic-container/generic-container";
 import { BoundPorts } from "../../bound-ports";
-import { Port, PortWithOptionalBinding } from "../../port";
+import { Port } from "../../port";
 import { RandomUuid, Uuid } from "../../uuid";
 import { StartedTestContainer } from "../..";
 import { AbstractStartedContainer } from "../abstract-started-container";
@@ -43,10 +43,10 @@ export class KafkaContainer extends GenericContainer {
   private zooKeeperPort?: Port;
   private saslSslConfig?: SaslSslListenerOptions;
 
-  constructor(image = KAFKA_IMAGE, ports?: PortWithOptionalBinding[]) {
+  constructor(image = KAFKA_IMAGE) {
     super(image);
 
-    this.withExposedPorts(...(ports || [KAFKA_PORT]))
+    this.withExposedPorts(KAFKA_PORT)
       .withStartupTimeout(180_000)
       .withEnv("KAFKA_LISTENER_SECURITY_PROTOCOL_MAP", "BROKER:PLAINTEXT,PLAINTEXT:PLAINTEXT")
       .withEnv("KAFKA_INTER_BROKER_LISTENER_NAME", "BROKER")
