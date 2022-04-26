@@ -215,7 +215,7 @@ export class GenericContainer implements TestContainer {
   ): Promise<void>;
 
   protected get hasExposedPorts(): boolean {
-    return Boolean(this.ports.length);
+    return this.ports.length !== 0;
   }
 
   public withCmd(cmd: Command[]): this {
