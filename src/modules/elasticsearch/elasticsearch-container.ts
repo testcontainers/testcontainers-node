@@ -10,7 +10,7 @@ export class ElasticsearchContainer extends GenericContainer {
   }
 
   public async start(): Promise<StartedElasticsearchContainer> {
-    this.withExposedPorts(ELASTIC_SEARCH_HTTP_PORT)
+    this.withExposedPorts(...(this.hasExposedPorts ? this.ports : [ELASTIC_SEARCH_HTTP_PORT]))
       .withEnv("discovery.type", "single-node")
       .withStartupTimeout(120_000);
 

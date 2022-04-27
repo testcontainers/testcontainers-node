@@ -4,6 +4,8 @@ import { RandomUuid } from "../../uuid";
 import { AbstractStartedContainer } from "../abstract-started-container";
 import { Port } from "../../port";
 
+const MYSQL_PORT = 3306;
+
 export class MySqlContainer extends GenericContainer {
   private database = "test";
   private username = new RandomUuid().nextUuid();
@@ -35,7 +37,7 @@ export class MySqlContainer extends GenericContainer {
   }
 
   public async start(): Promise<StartedMySqlContainer> {
-    this.withExposedPorts(3306)
+    this.withExposedPorts(...(this.hasExposedPorts ? this.ports : [MYSQL_PORT]))
       .withEnv("MYSQL_DATABASE", this.database)
       .withEnv("MYSQL_ROOT_PASSWORD", this.rootPassword)
       .withEnv("MYSQL_USER", this.username)

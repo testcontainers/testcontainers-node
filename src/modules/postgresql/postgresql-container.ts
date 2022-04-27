@@ -4,6 +4,8 @@ import { RandomUuid } from "../../uuid";
 import { AbstractStartedContainer } from "../abstract-started-container";
 import { Port } from "../../port";
 
+const POSTGRES_PORT = 5432;
+
 export class PostgreSqlContainer extends GenericContainer {
   private database = "test";
   private username = new RandomUuid().nextUuid();
@@ -29,7 +31,7 @@ export class PostgreSqlContainer extends GenericContainer {
   }
 
   public async start(): Promise<StartedPostgreSqlContainer> {
-    this.withExposedPorts(5432)
+    this.withExposedPorts(...(this.hasExposedPorts ? this.ports : [POSTGRES_PORT]))
       .withEnv("POSTGRES_DB", this.database)
       .withEnv("POSTGRES_USER", this.username)
       .withEnv("POSTGRES_PASSWORD", this.password)

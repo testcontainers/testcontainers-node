@@ -33,7 +33,7 @@ export class Neo4jContainer extends GenericContainer {
   }
 
   public async start(): Promise<StartedNeo4jContainer> {
-    this.withExposedPorts(BOLT_PORT, HTTP_PORT)
+    this.withExposedPorts(...(this.hasExposedPorts ? this.ports : [BOLT_PORT, HTTP_PORT]))
       .withWaitStrategy(Wait.forLogMessage("Started."))
       .withEnv("NEO4J_AUTH", `${USERNAME}/${this.password}`)
       .withStartupTimeout(120_000);
