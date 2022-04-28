@@ -63,12 +63,12 @@ class ConfigurationStrategy implements DockerClientStrategy {
 
     const dockerOptions: DockerOptions = {};
 
-    const { hostname, port } = new URL(DOCKER_HOST!);
+    const { pathname, hostname, port } = new URL(DOCKER_HOST!);
     if (hostname !== "") {
       dockerOptions.host = hostname;
       dockerOptions.port = port;
     } else {
-      dockerOptions.socketPath = DOCKER_HOST!;
+      dockerOptions.socketPath = pathname;
     }
 
     if (DOCKER_TLS_VERIFY === "1" && DOCKER_CERT_PATH !== undefined) {
