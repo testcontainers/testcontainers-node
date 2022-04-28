@@ -63,11 +63,13 @@ class ConfigurationStrategy implements DockerClientStrategy {
 
     const dockerOptions: DockerOptions = {};
 
-    const url = new URL(DOCKER_HOST!);
-    const dockerHost = url.host === "" ? `tcp://${DOCKER_HOST}` : DOCKER_HOST!;
-    const { hostname, port } = new URL(dockerHost);
-    dockerOptions.host = hostname;
-    dockerOptions.port = port;
+    const { pathname, hostname, port } = new URL(DOCKER_HOST!);
+    if (hostname !== "") {
+      dockerOptions.host = hostname;
+      dockerOptions.port = port;
+    } else {
+      dockerOptions.socketPath = pathname;
+    }
 
     if (DOCKER_TLS_VERIFY === "1" && DOCKER_CERT_PATH !== undefined) {
       dockerOptions.ca = await fs.readFile(path.resolve(DOCKER_CERT_PATH, "ca.pem"));
@@ -76,7 +78,7 @@ class ConfigurationStrategy implements DockerClientStrategy {
     }
 
     return {
-      uri: dockerHost,
+      uri: DOCKER_HOST!,
       dockerode: new Dockerode(dockerOptions),
     };
   }
