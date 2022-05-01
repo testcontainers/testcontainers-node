@@ -4,7 +4,7 @@ import { GenericContainer } from "./generic-container/generic-container";
 import { StartedTestContainer } from "./test-container";
 import { sessionId } from "./docker/session-id";
 import { REAPER_IMAGE } from "./images";
-import { getContainerPort } from "./port";
+import { getContainerPort, PortWithOptionalBinding } from "./port";
 import { LABEL_SESSION_ID } from "./labels";
 import { Wait } from "./wait";
 
@@ -85,10 +85,14 @@ export class ReaperInstance {
   private static async createRealInstance(): Promise<Reaper> {
     const dockerSocket = process.env["TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE"] ?? "/var/run/docker.sock";
 
+    const reaperPort: PortWithOptionalBinding = process.env["TESTCONTAINERS_RYUK_PORT"]
+      ? { container: 8080, host: Number(process.env["TESTCONTAINERS_RYUK_PORT"]) }
+      : 8080;
+
     log.debug(`Creating new Reaper for session: ${sessionId}`);
     const container = new GenericContainer(REAPER_IMAGE)
       .withName(`testcontainers-ryuk-${sessionId}`)
-      .withExposedPorts(8080)
+      .withExposedPorts(reaperPort)
       .withBindMount(dockerSocket, "/var/run/docker.sock")
       .withWaitStrategy(Wait.forLogMessage(/.+ Started!/));
 

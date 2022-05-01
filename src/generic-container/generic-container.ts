@@ -185,9 +185,9 @@ export class GenericContainer implements TestContainer {
     log.info(`Starting container ${this.imageName} with ID: ${container.id}`);
     await startContainer(container);
 
-    (await containerLogs(container))
-      .on("data", (data) => containerLog.trace(`${container.id}: ${data.trim()}`))
-      .on("err", (data) => containerLog.error(`${container.id}: ${data.trim()}`));
+    // (await containerLogs(container))
+    //   .on("data", (data) => containerLog.trace(`${container.id}: ${data.trim()}`))
+    //   .on("err", (data) => containerLog.error(`${container.id}: ${data.trim()}`));
 
     const inspectResult = await inspectContainer(container);
     const boundPorts = BoundPorts.fromInspectResult(inspectResult).filter(this.ports);
