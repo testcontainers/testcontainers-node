@@ -1,7 +1,7 @@
 import { createSshConnection, SshConnection } from "ssh-remote-port-forward";
 import { log } from "./logger";
 import { GenericContainer } from "./generic-container/generic-container";
-import { Port } from "./port";
+import { Port, PortWithOptionalBinding } from "./port";
 import { StartedTestContainer } from "./test-container";
 import { RandomUuid } from "./uuid";
 import { sessionId } from "./docker/session-id";
@@ -49,9 +49,13 @@ export class PortForwarderInstance {
     const username = "root";
     const password = new RandomUuid().nextUuid();
 
+    const containerPort: PortWithOptionalBinding = process.env["TESTCONTAINERS_SSHD_PORT"]
+      ? { container: 22, host: Number(process.env["TESTCONTAINERS_SSHD_PORT"]) }
+      : 22;
+
     const container = await new GenericContainer(SSHD_IMAGE)
       .withName(`testcontainers-port-forwarder-${sessionId}`)
-      .withExposedPorts(22)
+      .withExposedPorts(containerPort)
       .withEnv("PASSWORD", password)
       .withCmd([
         "sh",

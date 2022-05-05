@@ -40,6 +40,8 @@ The following environment variables are supported:
 
 - `TESTCONTAINERS_RYUK_PRIVILEGED=true` Run [ryuk](#ryuk) as a privileged container
 - `TESTCONTAINERS_RYUK_DISABLED=true` Disable [ryuk](#ryuk)
+- `TESTCONTAINERS_RYUK_PORT=65515` Explicitly set [ryuk](#ryuk) host port (not recommended)
+- `TESTCONTAINERS_SSHD_PORT=65515` Explicitly set [SSHd](#SSHd) host port (not recommended)
 - `RYUK_CONTAINER_IMAGE=registry.mycompany.com/mirror/ryuk:0.3.0` Custom image for [ryuk](#ryuk)
 - `SSHD_CONTAINER_IMAGE=registry.mycompany.com/mirror/sshd:1.0.0` Custom image for [SSHd](#SSHd)
 
