@@ -1,13 +1,17 @@
-import { StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
+import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
 import { Port } from "../port";
 import { ContainerName, Host, Id, Command, ExecResult, Labels } from "../docker/types";
 import { Readable } from "stream";
 
 export class AbstractStartedContainer {
-  constructor(protected readonly startedTestContainer: StartedTestContainer) {}
+  constructor(protected startedTestContainer: StartedTestContainer) {}
 
   public stop(options?: Partial<StopOptions>): Promise<StoppedTestContainer> {
     return this.startedTestContainer.stop(options);
+  }
+
+  public async restart(options?: Partial<RestartOptions>): Promise<void> {
+    this.startedTestContainer = await this.startedTestContainer.restart(options);
   }
 
   public getHost(): Host {
