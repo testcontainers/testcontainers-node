@@ -10,8 +10,8 @@ export const getDockerfileImages = async (dockerfile: string): Promise<DockerIma
         .split(EOL)
         .filter((line) => line.toUpperCase().startsWith("FROM"))
         .map((line) => {
-          const parts = line.split(" ");
-          return parts[parts.length - 1];
+          const parts = line.split(" ").filter((part) => part !== "");
+          return parts[1];
         })
         .reduce((prev, next) => prev.add(next), new Set<string>())
         .values()
