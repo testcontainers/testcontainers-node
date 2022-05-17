@@ -583,6 +583,16 @@ describe("GenericContainer", () => {
       await startedContainer.stop();
     });
 
+    it("should pull an image from a private registry in a multistage Dockerfile", async () => {
+      const context = path.resolve(fixtures, "docker-private-multistage");
+      const container = await GenericContainer.fromDockerfile(context).withPullPolicy(new AlwaysPullPolicy()).build();
+      const startedContainer = await container.withExposedPorts(8080).start();
+
+      await checkContainerIsHealthy(startedContainer);
+
+      await startedContainer.stop();
+    });
+
     it("should build and start with custom file name", async () => {
       const context = path.resolve(fixtures, "docker-with-custom-filename");
       const container = await GenericContainer.fromDockerfile(context, "Dockerfile-A").build();
