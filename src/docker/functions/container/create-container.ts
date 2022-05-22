@@ -39,7 +39,7 @@ export type CreateContainerOptions = {
 export const createContainer = async (options: CreateContainerOptions): Promise<Dockerode.Container> => {
   try {
     log.info(`Creating container for image: ${options.imageName}`);
-    const { dockerode } = await dockerClient;
+    const { dockerode } = await dockerClient();
 
     return await dockerode.createContainer({
       name: options.name,

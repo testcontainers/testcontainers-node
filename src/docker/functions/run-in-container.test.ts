@@ -8,7 +8,7 @@ describe("runInContainer", () => {
   let dockerode: Dockerode;
 
   beforeAll(async () => {
-    dockerode = (await dockerClient).dockerode;
+    dockerode = (await dockerClient()).dockerode;
   });
 
   it("should return the command output", async () => {

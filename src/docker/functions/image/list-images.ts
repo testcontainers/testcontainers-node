@@ -5,7 +5,7 @@ import { log } from "../../../logger";
 
 export const listImages = async (): Promise<DockerImageName[]> => {
   try {
-    const { dockerode } = await dockerClient;
+    const { dockerode } = await dockerClient();
     const images = await dockerode.listImages();
 
     return images.reduce((dockerImageNames: DockerImageName[], image) => {

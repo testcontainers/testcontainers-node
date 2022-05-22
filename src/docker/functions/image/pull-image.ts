@@ -19,7 +19,7 @@ export const pullImage = async (options: PullImageOptions): Promise<void> => {
     }
 
     log.info(`Pulling image: ${options.imageName}`);
-    const { dockerode } = await dockerClient;
+    const { dockerode } = await dockerClient();
     const stream = await dockerode.pull(options.imageName.toString(), { authconfig: options.authConfig });
 
     await new PullStreamParser(options.imageName, log).consume(stream);

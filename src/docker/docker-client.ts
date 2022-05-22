@@ -167,4 +167,4 @@ const findDefaultGateway = async (dockerode: Dockerode): Promise<string | undefi
 
 const isInContainer = () => existsSync("/.dockerenv");
 
-export const dockerClient: Promise<DockerClient> = getDockerClient();
+export const dockerClient: () => Promise<DockerClient> = getDockerClient;

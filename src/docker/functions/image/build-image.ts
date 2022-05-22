@@ -36,7 +36,7 @@ export const buildImage = async (options: BuildImageOptions): Promise<void> => {
       },
     });
 
-    const { dockerode } = await dockerClient;
+    const { dockerode } = await dockerClient();
 
     return new Promise((resolve) =>
       dockerode
