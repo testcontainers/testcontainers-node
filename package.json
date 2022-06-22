@@ -41,6 +41,7 @@
     "docker-compose": "^0.23.17",
     "dockerode": "^3.3.1",
     "get-port": "^5.1.1",
+    "nats": "^2.7.1",
     "properties-reader": "^2.2.0",
     "ssh-remote-port-forward": "^1.0.4",
     "tar-fs": "^2.1.1"
