@@ -2,9 +2,8 @@ import { GenericContainer } from "../../generic-container/generic-container";
 import { StartedTestContainer } from "../../test-container";
 import { RandomUuid } from "../../uuid";
 import { AbstractStartedContainer } from "../abstract-started-container";
-import { ConnectionOptions } from "nats/lib/nats-base-client/types";
 import { Port } from "../../port";
-import { LogWaitStrategy } from "../../wait-strategy";
+import { Wait } from "../../wait";
 
 const CLIENT_PORT = 4222;
 const ROUTING_PORT_FOR_CLUSTERING = 6222;
@@ -65,7 +64,7 @@ export class NatsContainer extends GenericContainer {
       .withExposedPorts(
         ...(this.hasExposedPorts ? this.ports : [CLIENT_PORT, ROUTING_PORT_FOR_CLUSTERING, HTTP_MANAGEMENT_PORT])
       )
-      .withWaitStrategy(new LogWaitStrategy(new RegExp(".*Server is ready.*")))
+      .withWaitStrategy(Wait.forLogMessage(new RegExp(".*Server is ready.*")))
       .withStartupTimeout(120_000);
 
     return new StartedNatsContainer(await super.start(), this.getUser(), this.getPass());
@@ -81,7 +80,7 @@ export class NatsContainer extends GenericContainer {
 }
 
 export class StartedNatsContainer extends AbstractStartedContainer {
-  private readonly connectionOptions: ConnectionOptions;
+  private readonly connectionOptions: NatsConnectionOptions;
 
   constructor(startedTestContainer: StartedTestContainer, readonly username: string, readonly password: string) {
     super(startedTestContainer);
@@ -93,7 +92,42 @@ export class StartedNatsContainer extends AbstractStartedContainer {
     };
   }
 
-  public getConnectionOptions(): ConnectionOptions {
+  public getConnectionOptions(): NatsConnectionOptions {
     return this.connectionOptions;
   }
+}
+
+export interface NatsConnectionOptions {
+  debug?: boolean;
+  maxPingOut?: number;
+  maxReconnectAttempts?: number;
+  name?: string;
+  noEcho?: boolean;
+  noRandomize?: boolean;
+  pass?: string;
+  pedantic?: boolean;
+  pingInterval?: number;
+  port?: number;
+  reconnect?: boolean;
+  reconnectDelayHandler?: () => number;
+  reconnectJitter?: number;
+  reconnectJitterTLS?: number;
+  reconnectTimeWait?: number;
+  servers?: Array<string> | string;
+  timeout?: number;
+  tls?: NatsTlsOptions;
+  token?: string;
+  user?: string;
+  verbose?: boolean;
+  waitOnFirstConnect?: boolean;
+  ignoreClusterUpdates?: boolean;
+  inboxPrefix?: string;
+}
+export interface NatsTlsOptions {
+  certFile?: string;
+  cert?: string;
+  caFile?: string;
+  ca?: string;
+  keyFile?: string;
+  key?: string;
 }

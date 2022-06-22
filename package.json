@@ -41,7 +41,6 @@
     "docker-compose": "^0.23.17",
     "dockerode": "^3.3.1",
     "get-port": "^5.1.1",
-    "nats": "^2.7.1",
     "properties-reader": "^2.2.0",
     "ssh-remote-port-forward": "^1.0.4",
     "tar-fs": "^2.1.1"
@@ -75,7 +74,8 @@
     "ts-jest": "^27.1.4",
     "ts-node": "^10.7.0",
     "typescript": "^4.6.3",
-    "wait-for-expect": "^3.0.2"
+    "wait-for-expect": "^3.0.2",
+    "nats": "^2.7.1"
   },
   "lint-staged": {
     "src/**/*.ts": [

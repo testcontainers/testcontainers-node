@@ -31,7 +31,6 @@ describe("NatsContainer", () => {
     (async () => {
       for await (const m of sub) {
         const actual: string = sc.decode(m.data);
-        console.log(actual);
         expect(actual).toEqual(PAYLOAD);
       }
     })().then();
