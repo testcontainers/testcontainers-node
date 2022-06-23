@@ -19,3 +19,9 @@ export { Neo4jContainer, StartedNeo4jContainer } from "./modules/neo4j/neo4j-con
 export { ArangoDBContainer, StartedArangoContainer } from "./modules/arangodb/arangodb-container";
 export { ElasticsearchContainer, StartedElasticsearchContainer } from "./modules/elasticsearch/elasticsearch-container";
 export { MySqlContainer, StartedMySqlContainer } from "./modules/mysql/mysql-container";
+export {
+  NatsContainer,
+  StartedNatsContainer,
+  NatsConnectionOptions,
+  NatsTlsOptions,
+} from "./modules/nats/nats-container";
