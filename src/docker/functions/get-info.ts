@@ -10,7 +10,7 @@ type DockerInfo = {
 };
 
 export const getDockerInfo = async (): Promise<DockerInfo> => {
-  const { dockerode } = await dockerClient;
+  const { dockerode } = await dockerClient();
   const info = await dockerode.info();
 
   return {

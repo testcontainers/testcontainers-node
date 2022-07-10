@@ -145,7 +145,7 @@ export class GenericContainer implements TestContainer {
 
     return new StartedGenericContainer(
       startedContainer,
-      (await dockerClient).host,
+      (await dockerClient()).host,
       inspectResult,
       boundPorts,
       inspectResult.name
@@ -195,7 +195,7 @@ export class GenericContainer implements TestContainer {
 
     const startedContainer = new StartedGenericContainer(
       container,
-      (await dockerClient).host,
+      (await dockerClient()).host,
       inspectResult,
       boundPorts,
       inspectResult.name
@@ -337,7 +337,7 @@ export class GenericContainer implements TestContainer {
 
   private async waitForContainer(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void> {
     log.debug(`Waiting for container to be ready: ${container.id}`);
-    const waitStrategy = this.getWaitStrategy((await dockerClient).host, container);
+    const waitStrategy = this.getWaitStrategy((await dockerClient()).host, container);
 
     try {
       await waitStrategy.withStartupTimeout(this.startupTimeout).waitUntilReady(container, boundPorts);

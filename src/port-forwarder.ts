@@ -64,7 +64,7 @@ export class PortForwarderInstance {
       ])
       .start();
 
-    const host = (await dockerClient).host;
+    const host = (await dockerClient()).host;
     const port = container.getMappedPort(22);
 
     log.debug(`Connecting to Port Forwarder on ${host}:${port}`);

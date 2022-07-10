@@ -142,7 +142,7 @@ export class DockerComposeEnvironment {
 
           return new StartedGenericContainer(
             container,
-            (await dockerClient).host,
+            (await dockerClient()).host,
             inspectResult,
             boundPorts,
             containerName
@@ -168,7 +168,7 @@ export class DockerComposeEnvironment {
     containerName: string,
     boundPorts: BoundPorts
   ): Promise<void> {
-    const waitStrategy = this.getWaitStrategy((await dockerClient).host, container, containerName);
+    const waitStrategy = this.getWaitStrategy((await dockerClient()).host, container, containerName);
     await waitStrategy.withStartupTimeout(this.startupTimeout).waitUntilReady(container, boundPorts);
   }
 
