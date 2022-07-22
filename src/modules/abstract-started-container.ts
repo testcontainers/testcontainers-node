@@ -4,13 +4,13 @@ import { ContainerName, Host, Id, Command, ExecResult, Labels } from "../docker/
 import { Readable } from "stream";
 
 export class AbstractStartedContainer {
-  constructor(protected startedTestContainer: StartedTestContainer) {}
+  constructor(protected readonly startedTestContainer: StartedTestContainer) {}
 
   public stop(options?: Partial<StopOptions>): Promise<StoppedTestContainer> {
     return this.startedTestContainer.stop(options);
   }
 
-  public async restart(options?: Partial<RestartOptions>): Promise<StartedTestContainer> {
+  public async restart(options?: Partial<RestartOptions>): Promise<void> {
     return this.startedTestContainer.restart(options);
   }
 

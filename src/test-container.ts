@@ -66,7 +66,7 @@ export interface StopOptions {
 export interface StartedTestContainer {
   stop(options?: Partial<StopOptions>): Promise<StoppedTestContainer>;
 
-  restart(options?: Partial<RestartOptions>): Promise<StartedTestContainer>;
+  restart(options?: Partial<RestartOptions>): Promise<void>;
 
   getHost(): Host;
 

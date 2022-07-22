@@ -99,16 +99,6 @@ const startedContainer: StartedTestContainer = await container.start();
 const stoppedContainer: StoppedTestContainer = await startedContainer.stop();
 ```
 
-Restarting a container:
-
-```javascript
-const { GenericContainer } = require("testcontainers");
-
-const container = await new GenericContainer("alpine")
-  .start();
-const restartedContainer = container.restart();
-```
-
 Using a specific image version:
 
 ```javascript
@@ -170,6 +160,16 @@ const container2 = await new GenericContainer("alpine")
   .start();
 
 assert(container1.getId() === container2.getId());
+```
+
+Restarting a container:
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await new GenericContainer("alpine")
+  .start();
+const restartedContainer = await container.restart();
 ```
 
 Creating a container with a specified name:

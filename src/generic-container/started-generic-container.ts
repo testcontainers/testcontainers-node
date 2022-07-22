@@ -18,8 +18,8 @@ export class StartedGenericContainer implements StartedTestContainer {
   constructor(
     private readonly container: Dockerode.Container,
     private readonly host: Host,
-    private readonly inspectResult: InspectResult,
-    private readonly boundPorts: BoundPorts,
+    private inspectResult: InspectResult,
+    private boundPorts: BoundPorts,
     private readonly name: ContainerName,
     private readonly waitStrategy: WaitStrategy
   ) {}
@@ -28,23 +28,16 @@ export class StartedGenericContainer implements StartedTestContainer {
     return this.stopContainer(options);
   }
 
-  public async restart(options: Partial<RestartOptions> = {}): Promise<StartedGenericContainer> {
+  public async restart(options: Partial<RestartOptions> = {}): Promise<void> {
     const resolvedOptions: RestartOptions = { timeout: 0, ...options };
     await restartContainer(this.container, resolvedOptions);
-    const newInspectRes = await inspectContainer(this.container);
-    const newBoundPorts = await BoundPorts.fromInspectResult(newInspectRes).filter(
+
+    // Get the restart container with its new bound ports and update it
+    this.inspectResult = await inspectContainer(this.container);
+    this.boundPorts = await BoundPorts.fromInspectResult(this.inspectResult).filter(
       Array.from(this.boundPorts.iterator()).map((port) => port[0])
     );
-    await this.waitForContainer(this.container, newBoundPorts);
-
-    return new StartedGenericContainer(
-      this.container,
-      this.host,
-      newInspectRes,
-      newBoundPorts,
-      this.name,
-      this.waitStrategy
-    );
+    await this.waitForContainer(this.container, this.boundPorts);
   }
 
   private async stopContainer(options: Partial<StopOptions> = {}): Promise<StoppedGenericContainer> {

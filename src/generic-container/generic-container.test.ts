@@ -633,11 +633,11 @@ describe("GenericContainer", () => {
         .start();
       await checkContainerIsHealthy(container);
 
-      const restartedContainer = await container.restart();
-      await checkContainerIsHealthy(restartedContainer);
+      await container.restart();
+      await checkContainerIsHealthy(container);
 
-      expect(container.getId()).toStrictEqual(restartedContainer.getId());
-      expect(container.getName()).toStrictEqual(restartedContainer.getName());
+      expect(container.getId()).toStrictEqual(container.getId());
+      expect(container.getName()).toStrictEqual(container.getName());
 
       await container.stop();
     });
@@ -650,9 +650,9 @@ describe("GenericContainer", () => {
       await checkContainerIsHealthy(container);
       await container.exec(["sh", "-c", "echo 'testconfig' >> config.txt"]);
 
-      const restartedContainer = await container.restart();
-      await checkContainerIsHealthy(restartedContainer);
-      const result = await restartedContainer.exec(["cat", "config.txt"]);
+      await container.restart();
+      await checkContainerIsHealthy(container);
+      const result = await container.exec(["cat", "config.txt"]);
 
       expect(result.output.trim()).toStrictEqual("testconfig");
 
