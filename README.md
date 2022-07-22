@@ -162,6 +162,16 @@ const container2 = await new GenericContainer("alpine")
 assert(container1.getId() === container2.getId());
 ```
 
+Restarting a container:
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await new GenericContainer("alpine")
+  .start();
+const restartedContainer = await container.restart();
+```
+
 Creating a container with a specified name:
 
 ```javascript
