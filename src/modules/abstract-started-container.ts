@@ -10,8 +10,8 @@ export class AbstractStartedContainer {
     return this.startedTestContainer.stop(options);
   }
 
-  public async restart(options?: Partial<RestartOptions>): Promise<void> {
-    this.startedTestContainer = await this.startedTestContainer.restart(options);
+  public async restart(options?: Partial<RestartOptions>): Promise<StartedTestContainer> {
+    return this.startedTestContainer.restart(options);
   }
 
   public getHost(): Host {
