@@ -146,7 +146,7 @@ export class DockerComposeEnvironment {
             inspectResult,
             boundPorts,
             containerName,
-            this.getWaitStrategy((await dockerClient).host, container, containerName).withStartupTimeout(
+            this.getWaitStrategy((await dockerClient()).host, container, containerName).withStartupTimeout(
               this.startupTimeout
             )
           );
