@@ -169,7 +169,8 @@ const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
   .start();
-const restartedContainer = await container.restart();
+  
+await container.restart();
 ```
 
 Creating a container with a specified name:
