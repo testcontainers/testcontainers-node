@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import { MongoDBContainer } from "./mongodb-container";
 import mongoose from "mongoose";
 import { StartedTestContainer } from "../../test-container";
