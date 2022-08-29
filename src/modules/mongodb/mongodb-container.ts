@@ -52,18 +52,24 @@ export class MongoDBContainer extends GenericContainer {
   }
 
   private buildMongoWaitCommand() {
-    return (
-      "var attempt = 0;" +
-      "while(db.runCommand( { isMaster: 1 } ).ismaster==false) {" +
-      "if (attempt > 60) {" +
-      "quit(1);" +
-      "} print(attempt); sleep(100); attempt++; }"
-    );
+    return `
+    var attempt = 0;
+    while(db.runCommand({isMaster: 1}).ismaster==false) {
+      if (attempt > 60) {
+        quit(1);
+      }
+      print(attempt); sleep(100); attempt++; 
+    }
+    `;
   }
 }
 
 export class StartedMongoDBContainer extends AbstractStartedContainer {
   constructor(startedTestContainer: StartedTestContainer) {
     super(startedTestContainer);
+  }
+
+  public getConnectionString(): string {
+    return `mongodb://${this.getHost()}:${this.getMappedPort(MONGODB_PORT)}`;
   }
 }

@@ -25,3 +25,5 @@ export {
   NatsConnectionOptions,
   NatsTlsOptions,
 } from "./modules/nats/nats-container";
+
+export { MongoDBContainer, StartedMongoDBContainer } from "./modules/mongodb/mongodb-container";

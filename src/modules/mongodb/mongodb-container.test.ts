@@ -1,9 +1,5 @@
-/**
- * @jest-environment node
- */
-import { MongoDBContainer } from "./mongodb-container";
+import { MongoDBContainer, StartedMongoDBContainer } from "./mongodb-container";
 import mongoose from "mongoose";
-import { StartedTestContainer } from "../../test-container";
 
 describe("MongodbContainer", () => {
   jest.setTimeout(240_000);
@@ -26,19 +22,16 @@ describe("MongodbContainer", () => {
     await mongodbContainer.stop();
   });
 
-  async function checkMongo(mongodbContainer: StartedTestContainer, port = 27017) {
-    const db = await mongoose.createConnection(
-      `mongodb://${mongodbContainer.getHost()}:${mongodbContainer.getMappedPort(port)}`,
-      {
-        directConnection: true,
-      }
-    );
+  async function checkMongo(mongodbContainer: StartedMongoDBContainer, port = 27017) {
+    const db = await mongoose.createConnection(mongodbContainer.getConnectionString(), {
+      directConnection: true,
+    });
     const fooCollection = db.collection("foo");
     const obj = { value: 1 };
 
     const session = await db.startSession();
-    await session.withTransaction(() => {
-      return fooCollection.insertOne(obj);
+    await session.withTransaction(async () => {
+      await fooCollection.insertOne(obj);
     });
 
     expect(
