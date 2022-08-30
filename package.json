@@ -1,7 +1,7 @@
 {
   "name": "testcontainers",
   "author": "Cristian Greco",
-  "version": "8.12.0",
+  "version": "8.13.0",
   "main": "dist/index",
   "types": "dist/index",
   "keywords": [
