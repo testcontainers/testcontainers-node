@@ -1,4 +1,4 @@
-import { MongoDBContainer, StartedMongoDBContainer } from "./mongodb-container";
+import { MongoDBContainer } from "./mongodb-container";
 import { MongoClient } from "mongodb";
 
 describe("MongoDBContainer", () => {
