@@ -27,7 +27,7 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - run: npm ci
+    - run: npm ci --no-optional
     - name: Thundra Foresight JS Action
       uses: thundra-io/thundra-foresight-js-action@v1
       id: thundra-foresight-run
