@@ -9,36 +9,36 @@ const TWO_MINUTES = 120_000;
 
 export class MongoDBContainer extends GenericContainer {
   private database = "test";
-  private username = new RandomUuid().nextUuid();
-  private password = new RandomUuid().nextUuid();
+  private rootUsername = new RandomUuid().nextUuid();
+  private rootPassword = new RandomUuid().nextUuid();
 
-  constructor(image = "mongo:4.2.22") {
+  constructor(image = "mongo:6.0.1") {
     super(image);
   }
 
-  public withDatabaase(database: string): this {
+  public withDatabase(database: string): this {
     this.database = database;
     return this;
   }
 
-  public withUsername(username: string): this {
-    this.username = username;
+  public withRootUsername(rootUsername: string): this {
+    this.rootUsername = rootUsername;
     return this;
   }
 
-  public withPassword(password: string): this {
-    this.password = password;
+  public withRootPassword(rootPassword: string): this {
+    this.rootPassword = rootPassword;
     return this;
   }
-
   public async start(): Promise<StartedMongoDBContainer> {
     this.withExposedPorts(...(this.hasExposedPorts ? this.ports : [MONGODB_INTERNAL_PORT]))
+      .withEnv("MONGO_INITDB_DATABASE", this.database)
+      .withEnv("MONGO_INITDB_ROOT_USERNAME", this.rootUsername)
+      .withEnv("MONGO_INITDB_ROOT_PASSWORD", this.rootPassword)
       .withStartupTimeout(TWO_MINUTES)
-      .withEnv("MONGO_DB", this.database)
-      .withEnv("MONGO_USER", this.username)
-      .withEnv("MONGO_PASSWORD", this.password);
+      .withCmd(["--auth"]);
 
-    return new StartedMongoDBContainer(await super.start(), this.database, this.username, this.password);
+    return new StartedMongoDBContainer(await super.start(), this.database, this.rootUsername, this.rootPassword);
   }
 }
 
@@ -48,8 +48,8 @@ export class StartedMongoDBContainer extends AbstractStartedContainer {
   constructor(
     startedTestContainer: StartedTestContainer,
     private readonly database: string,
-    private readonly username: string,
-    private readonly password: string
+    private readonly rootUserName: string,
+    private readonly rootPassword: string
   ) {
     super(startedTestContainer);
     this.port = startedTestContainer.getMappedPort(MONGODB_INTERNAL_PORT);
@@ -63,11 +63,11 @@ export class StartedMongoDBContainer extends AbstractStartedContainer {
     return this.database;
   }
 
-  public getUsername(): string {
-    return this.username;
+  public getRootUsername(): string {
+    return this.rootUserName;
   }
 
-  public getPassword(): string {
-    return this.password;
+  public getRootPassword(): string {
+    return this.rootPassword;
   }
 }

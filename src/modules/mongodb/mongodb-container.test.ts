@@ -1,5 +1,4 @@
-import mongoose from "mongoose";
-import { MongoDBContainer } from "./mongodb-container";
+import { MongoDBContainer, StartedMongoDBContainer } from "./mongodb-container";
 import { MongoClient } from "mongodb";
 
 describe("MongoDBContainer", () => {
@@ -8,20 +7,19 @@ describe("MongoDBContainer", () => {
   it("Starts a MongoDB with default image", async function () {
     const container = await new MongoDBContainer().start();
 
-    const userName = container.getUsername();
-    const password = container.getPassword();
-    const host = "127.0.0.1";
+    const username = container.getRootUsername();
+    const password = container.getRootPassword();
+    const host = container.getHost();
     const port = container.getPort();
     const database = container.getDatabase();
 
-    //const uri = `mongodb://${userName}:${password}@${host}:${port}/${database}`
-    const uri = `mongodb://${host}:${port}/${database}`;
+    const uri = `mongodb://${username}:${password}@${host}:${port}/${database}?authSource=admin&w=1`;
 
     await MongoClient.connect(uri).then(async function (client) {
       const adminDb = client?.db(database).admin();
       await adminDb.buildInfo().then(async function (info) {
         if (info) {
-          expect(info?.version).toBe("4.2.22");
+          expect(info?.version).toBe("6.0.1");
         }
       });
       await client?.close();
@@ -31,19 +29,25 @@ describe("MongoDBContainer", () => {
   });
 
   it("Starts a MongoDB with requested image", async function () {
-    const container = await new MongoDBContainer("mongo:6.0.1").start();
+    const container = await new MongoDBContainer("mongo:4.2.22")
+      .withDatabase("myDB")
+      .withRootUsername("MyMongoUser")
+      .withRootPassword("SomePassword")
+      .start();
 
-    const host = "127.0.0.1";
+    const username = container.getRootUsername();
+    const password = container.getRootPassword();
+    const host = container.getHost();
     const port = container.getPort();
     const database = container.getDatabase();
 
-    const uri = `mongodb://${host}:${port}/${database}`;
+    const uri = `mongodb://${username}:${password}@${host}:${port}/${database}?authSource=admin&w=1`;
 
     await MongoClient.connect(uri).then(async function (client) {
       const adminDb = client?.db(database).admin();
       await adminDb.buildInfo().then(async function (info) {
         if (info) {
-          expect(info?.version).toBe("6.0.1");
+          expect(info?.version).toBe("4.2.22");
         }
       });
       await client?.close();
