@@ -15,7 +15,7 @@ export const runInContainer = async (
   try {
     const imageName = DockerImageName.fromString(image);
 
-    await pullImage({ imageName, force: false });
+    await pullImage(dockerode, { imageName, force: false });
 
     log.debug(`Creating container: ${image} with command: ${command.join(" ")}`);
     const container = await dockerode.createContainer({ Image: image, Cmd: command, HostConfig: { AutoRemove: true } });

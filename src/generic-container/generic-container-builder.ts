@@ -10,6 +10,7 @@ import { buildImage } from "../docker/functions/image/build-image";
 import { imageExists } from "../docker/functions/image/image-exists";
 import { getAuthConfig } from "../registry-auth-locator";
 import { GenericContainer } from "./generic-container";
+import { dockerClient } from "../docker/docker-client";
 
 export class GenericContainerBuilder {
   private buildArgs: BuildArgs = {};
@@ -51,7 +52,7 @@ export class GenericContainerBuilder {
     });
     const container = new GenericContainer(imageName.toString());
 
-    if (!(await imageExists(imageName))) {
+    if (!(await imageExists((await dockerClient()).dockerode, imageName))) {
       throw new Error("Failed to build image");
     }
 
