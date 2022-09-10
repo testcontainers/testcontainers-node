@@ -81,7 +81,7 @@ export class GenericContainer implements TestContainer {
   protected preStart?(): Promise<void>;
 
   public async start(): Promise<StartedTestContainer> {
-    await pullImage({
+    await pullImage((await dockerClient()).dockerode, {
       imageName: this.imageName,
       force: this.pullPolicy.shouldPull(),
       authConfig: await getAuthConfig(this.imageName.registry),

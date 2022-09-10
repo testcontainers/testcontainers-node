@@ -1,11 +1,10 @@
 import { PassThrough, Readable } from "stream";
 import { log } from "../../logger";
-import { dockerClient } from "../docker-client";
+import Dockerode from "dockerode";
 
-export const demuxStream = async (stream: Readable): Promise<Readable> => {
+export const demuxStream = async (dockerode: Dockerode, stream: Readable): Promise<Readable> => {
   try {
     const demuxedStream = new PassThrough({ autoDestroy: true, encoding: "utf-8" });
-    const { dockerode } = await dockerClient();
     dockerode.modem.demuxStream(stream, demuxedStream, demuxedStream);
     stream.on("end", () => demuxedStream.end());
     demuxedStream.on("close", () => {
