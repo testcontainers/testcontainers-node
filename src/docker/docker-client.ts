@@ -25,14 +25,14 @@ const getDockerClient = async (): Promise<DockerClient> => {
       log.debug(`Found applicable Docker client strategy: ${strategy.getName()}`);
       const { uri, dockerode } = await strategy.initialise();
       log.debug(`Testing Docker client strategy URI: ${uri}`);
-      // if (await isDockerDaemonReachable(dockerode)) {
-      const host = await resolveHost(dockerode, uri);
-      log.info(`Using Docker client strategy: ${strategy.getName()}, Docker host: ${host}`);
-      logSystemDiagnostics(dockerode);
-      return { host, dockerode };
-      // } else {
-      //   log.warn(`Docker client strategy ${strategy.getName()} is not reachable`);
-      // }
+      if (await isDockerDaemonReachable(dockerode)) {
+        const host = await resolveHost(dockerode, uri);
+        log.info(`Using Docker client strategy: ${strategy.getName()}, Docker host: ${host}`);
+        logSystemDiagnostics(dockerode);
+        return { host, dockerode };
+      } else {
+        log.warn(`Docker client strategy ${strategy.getName()} is not reachable`);
+      }
     }
   }
 
