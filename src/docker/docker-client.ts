@@ -28,7 +28,7 @@ const getDockerClient = async (): Promise<DockerClient> => {
       // if (await isDockerDaemonReachable(dockerode)) {
       const host = await resolveHost(dockerode, uri);
       log.info(`Using Docker client strategy: ${strategy.getName()}, Docker host: ${host}`);
-      logSystemDiagnostics();
+      logSystemDiagnostics(dockerode);
       return { host, dockerode };
       // } else {
       //   log.warn(`Docker client strategy ${strategy.getName()} is not reachable`);

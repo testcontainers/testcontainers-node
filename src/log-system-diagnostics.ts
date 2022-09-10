@@ -1,13 +1,14 @@
 import { log } from "./logger";
 import { version as dockerComposeVersion } from "./docker-compose/docker-compose";
 import { getDockerInfo } from "./docker/functions/get-info";
+import Dockerode from "dockerode";
 
-export const logSystemDiagnostics = async (): Promise<void> => {
+export const logSystemDiagnostics = async (dockerode: Dockerode): Promise<void> => {
   log.debug("Fetching system diagnostics");
 
   const info = {
     node: getNodeInfo(),
-    docker: await getDockerInfo(),
+    docker: await getDockerInfo(dockerode),
     dockerCompose: await getDockerComposeInfo(),
   };
 

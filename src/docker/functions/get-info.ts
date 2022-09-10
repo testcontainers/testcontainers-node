@@ -1,4 +1,4 @@
-import { dockerClient } from "../docker-client";
+import Dockerode from "dockerode";
 
 type DockerInfo = {
   serverVersion: number;
@@ -9,8 +9,7 @@ type DockerInfo = {
   memory: number;
 };
 
-export const getDockerInfo = async (): Promise<DockerInfo> => {
-  const { dockerode } = await dockerClient();
+export const getDockerInfo = async (dockerode: Dockerode): Promise<DockerInfo> => {
   const info = await dockerode.info();
 
   return {
