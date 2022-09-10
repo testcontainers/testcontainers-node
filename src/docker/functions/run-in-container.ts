@@ -20,7 +20,7 @@ export const runInContainer = async (
     log.debug(`Creating container: ${image} with command: ${command.join(" ")}`);
     const container = await dockerode.createContainer({ Image: image, Cmd: command, HostConfig: { AutoRemove: true } });
     log.debug(`Attaching to container: ${container.id}`);
-    const stream = await attachContainer(container);
+    const stream = await attachContainer(dockerode, container);
 
     const promise = new Promise<string>((resolve) => {
       const interval = setInterval(async () => {
