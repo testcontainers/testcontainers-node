@@ -3,6 +3,8 @@ import { version as dockerComposeVersion } from "./docker-compose/docker-compose
 import { getDockerInfo } from "./docker/functions/get-info";
 
 export const logSystemDiagnostics = async (): Promise<void> => {
+  log.debug("Fetching system diagnostics");
+
   const info = {
     node: getNodeInfo(),
     docker: await getDockerInfo(),

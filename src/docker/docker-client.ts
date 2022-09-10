@@ -158,12 +158,15 @@ const resolveHost = async (dockerode: Dockerode, uri: string): Promise<string> =
 };
 
 const findGateway = async (dockerode: Dockerode): Promise<string | undefined> => {
+  log.debug(`Checking gateway for Docker host`);
   const inspectResult: NetworkInspectInfo = await dockerode.getNetwork("bridge").inspect();
   return inspectResult?.IPAM?.Config?.find((config) => config.Gateway !== undefined)?.Gateway;
 };
 
-const findDefaultGateway = async (dockerode: Dockerode): Promise<string | undefined> =>
-  runInContainer(dockerode, "alpine:3.14", ["sh", "-c", "ip route|awk '/default/ { print $3 }'"]);
+const findDefaultGateway = async (dockerode: Dockerode): Promise<string | undefined> => {
+  log.debug(`Checking default gateway for Docker host`);
+  return runInContainer(dockerode, "alpine:3.14", ["sh", "-c", "ip route|awk '/default/ { print $3 }'"]);
+};
 
 const isInContainer = () => existsSync("/.dockerenv");
 
