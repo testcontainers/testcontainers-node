@@ -41,6 +41,7 @@ const startExec = async (exec: Dockerode.Exec, options?: Dockerode.ExecStartOpti
       stdout: true,
       stderr: true,
     };
+
     const stream = await exec.start(options || defaultOptions);
     stream.setEncoding("utf-8");
     return stream;
