@@ -3,7 +3,11 @@ import { Command, ExecResult, ExitCode } from "../../types";
 import Dockerode from "dockerode";
 import { log } from "../../../logger";
 
-export const execContainer = async (container: Dockerode.Container, command: Command[]): Promise<ExecResult> => {
+export const execContainer = async (
+  container: Dockerode.Container,
+  command: Command[],
+  options?: Dockerode.ExecStartOptions
+): Promise<ExecResult> => {
   try {
     const exec = await container.exec({
       Cmd: command,
@@ -11,7 +15,7 @@ export const execContainer = async (container: Dockerode.Container, command: Com
       AttachStderr: true,
     });
 
-    const stream = await startExec(exec);
+    const stream = await startExec(exec, options);
 
     const chunks: string[] = [];
     stream.on("data", (chunk) => chunks.push(chunk));
@@ -27,9 +31,9 @@ export const execContainer = async (container: Dockerode.Container, command: Com
   }
 };
 
-const startExec = async (exec: Dockerode.Exec): Promise<Readable> => {
+const startExec = async (exec: Dockerode.Exec, options?: Dockerode.ExecStartOptions): Promise<Readable> => {
   try {
-    const options = {
+    const defaultOptions = {
       Detach: false,
       Tty: true,
       stream: true,
@@ -37,7 +41,7 @@ const startExec = async (exec: Dockerode.Exec): Promise<Readable> => {
       stdout: true,
       stderr: true,
     };
-    const stream = await exec.start(options);
+    const stream = await exec.start(options || defaultOptions);
     stream.setEncoding("utf-8");
     return stream;
   } catch (err) {

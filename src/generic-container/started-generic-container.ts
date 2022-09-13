@@ -100,8 +100,8 @@ export class StartedGenericContainer implements StartedTestContainer {
     return this.inspectResult.networkSettings[networkName].ipAddress;
   }
 
-  public exec(command: Command[]): Promise<ExecResult> {
-    return execContainer(this.container, command);
+  public exec(command: Command[], options?: Dockerode.ExecStartOptions): Promise<ExecResult> {
+    return execContainer(this.container, command, options);
   }
 
   public logs(): Promise<Readable> {
