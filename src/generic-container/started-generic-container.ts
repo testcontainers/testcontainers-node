@@ -12,7 +12,7 @@ import { BoundPorts } from "../bound-ports";
 import { log } from "../logger";
 import { removeContainer } from "../docker/functions/container/remove-container";
 import { Port } from "../port";
-import { execContainer, ExecContainerOptions } from "../docker/functions/container/exec-container";
+import { execContainer } from "../docker/functions/container/exec-container";
 import { Readable } from "stream";
 import { containerLogs } from "../docker/functions/container/container-logs";
 import { StoppedGenericContainer } from "./stopped-generic-container";
@@ -111,7 +111,7 @@ export class StartedGenericContainer implements StartedTestContainer {
     return this.inspectResult.networkSettings[networkName].ipAddress;
   }
 
-  public exec(command: Command[], options?: ExecContainerOptions): Promise<ExecResult> {
+  public exec(command: Command[], options: Partial<ExecOptions> = {}): Promise<ExecResult> {
     return this.execContainer(command, options);
   }
 

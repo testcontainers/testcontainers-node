@@ -3,8 +3,10 @@ import { Command, ExecResult, ExitCode } from "../../types";
 import Dockerode from "dockerode";
 import { log } from "../../../logger";
 
-export type ExecContainerOptions = {
+type ExecContainerOptions = {
   Tty: boolean;
+  stdin: boolean;
+  Detach: boolean;
 };
 
 export const execContainer = async (
