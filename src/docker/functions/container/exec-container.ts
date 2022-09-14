@@ -3,10 +3,14 @@ import { Command, ExecResult, ExitCode } from "../../types";
 import Dockerode from "dockerode";
 import { log } from "../../../logger";
 
+export type ExecContainerOptions = {
+  Tty: boolean;
+};
+
 export const execContainer = async (
   container: Dockerode.Container,
   command: Command[],
-  options?: Dockerode.ExecStartOptions
+  options: ExecContainerOptions
 ): Promise<ExecResult> => {
   try {
     const exec = await container.exec({
@@ -31,18 +35,9 @@ export const execContainer = async (
   }
 };
 
-const startExec = async (exec: Dockerode.Exec, options?: Dockerode.ExecStartOptions): Promise<Readable> => {
+const startExec = async (exec: Dockerode.Exec, options: ExecContainerOptions): Promise<Readable> => {
   try {
-    const defaultOptions = {
-      Detach: false,
-      Tty: true,
-      stream: true,
-      stdin: true,
-      stdout: true,
-      stderr: true,
-    };
-
-    const stream = await exec.start(options || defaultOptions);
+    const stream = await exec.start(options);
     stream.setEncoding("utf-8");
     return stream;
   } catch (err) {

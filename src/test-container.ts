@@ -63,6 +63,12 @@ export interface StopOptions {
   removeVolumes: boolean;
 }
 
+export interface ExecOptions {
+  Tty: boolean;
+  Detach: boolean;
+  stdin: boolean;
+}
+
 export interface StartedTestContainer {
   stop(options?: Partial<StopOptions>): Promise<StoppedTestContainer>;
 

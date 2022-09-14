@@ -1,4 +1,10 @@
-import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
+import {
+  RestartOptions,
+  StartedTestContainer,
+  StopOptions,
+  ExecOptions,
+  StoppedTestContainer,
+} from "../test-container";
 import Dockerode from "dockerode";
 import { Command, ContainerName, ExecResult, Host, Id as ContainerId, Labels } from "../docker/types";
 import { inspectContainer, InspectResult } from "../docker/functions/container/inspect-container";
@@ -6,7 +12,7 @@ import { BoundPorts } from "../bound-ports";
 import { log } from "../logger";
 import { removeContainer } from "../docker/functions/container/remove-container";
 import { Port } from "../port";
-import { execContainer } from "../docker/functions/container/exec-container";
+import { execContainer, ExecContainerOptions } from "../docker/functions/container/exec-container";
 import { Readable } from "stream";
 import { containerLogs } from "../docker/functions/container/container-logs";
 import { StoppedGenericContainer } from "./stopped-generic-container";
@@ -48,6 +54,11 @@ export class StartedGenericContainer implements StartedTestContainer {
     await removeContainer(this.container, { removeVolumes: resolvedOptions.removeVolumes });
 
     return new StoppedGenericContainer();
+  }
+
+  private async execContainer(command: Command[], options: Partial<ExecOptions> = {}): Promise<ExecResult> {
+    const resolvedOptions: ExecOptions = { stdin: true, Detach: false, Tty: true, ...options };
+    return execContainer(this.container, command, resolvedOptions);
   }
 
   private async waitForContainer(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void> {
@@ -100,8 +111,8 @@ export class StartedGenericContainer implements StartedTestContainer {
     return this.inspectResult.networkSettings[networkName].ipAddress;
   }
 
-  public exec(command: Command[], options?: Dockerode.ExecStartOptions): Promise<ExecResult> {
-    return execContainer(this.container, command, options);
+  public exec(command: Command[], options?: ExecContainerOptions): Promise<ExecResult> {
+    return this.execContainer(command, options);
   }
 
   public logs(): Promise<Readable> {
