@@ -90,7 +90,7 @@ export interface StartedTestContainer {
 
   getIpAddress(networkName: string): string;
 
-  exec(command: Command[]): Promise<ExecResult>;
+  exec(command: Command[], options?: Partial<ExecOptions>): Promise<ExecResult>;
 
   logs(): Promise<Readable>;
 }
