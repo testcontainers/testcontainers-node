@@ -57,7 +57,7 @@ export class StartedGenericContainer implements StartedTestContainer {
   }
 
   private async execContainer(command: Command[], options: Partial<ExecOptions> = {}): Promise<ExecResult> {
-    const resolvedOptions: ExecOptions = { stdin: true, Detach: false, Tty: true, ...options };
+    const resolvedOptions: ExecOptions = { stdin: true, detach: false, tty: true, ...options };
     return execContainer(this.container, command, resolvedOptions);
   }
 

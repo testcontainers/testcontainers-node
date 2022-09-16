@@ -4,9 +4,9 @@ import Dockerode from "dockerode";
 import { log } from "../../../logger";
 
 type ExecContainerOptions = {
-  Tty: boolean;
+  tty: boolean;
   stdin: boolean;
-  Detach: boolean;
+  detach: boolean;
 };
 
 export const execContainer = async (

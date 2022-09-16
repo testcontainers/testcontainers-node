@@ -43,7 +43,7 @@ export class InternalPortCheck implements PortCheck {
       ["/bin/bash", "-c", `</dev/tcp/localhost/${port}`],
     ];
     const commandResults = await Promise.all(
-      commands.map((command) => execContainer(this.container, command, { stdin: true, Detach: false, Tty: true }))
+      commands.map((command) => execContainer(this.container, command, { stdin: true, detach: false, tty: true }))
     );
     return commandResults.some((result) => result.exitCode === 0);
   }

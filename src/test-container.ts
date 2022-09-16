@@ -64,8 +64,8 @@ export interface StopOptions {
 }
 
 export interface ExecOptions {
-  Tty: boolean;
-  Detach: boolean;
+  tty: boolean;
+  detach: boolean;
   stdin: boolean;
 }
 
