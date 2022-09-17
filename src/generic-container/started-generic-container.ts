@@ -56,11 +56,6 @@ export class StartedGenericContainer implements StartedTestContainer {
     return new StoppedGenericContainer();
   }
 
-  private async execContainer(command: Command[], options: Partial<ExecOptions> = {}): Promise<ExecResult> {
-    const resolvedOptions: ExecOptions = { stdin: true, detach: false, tty: true, ...options };
-    return execContainer(this.container, command, resolvedOptions);
-  }
-
   private async waitForContainer(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void> {
     log.debug(`Waiting for container to be ready: ${container.id}`);
 
@@ -112,7 +107,8 @@ export class StartedGenericContainer implements StartedTestContainer {
   }
 
   public exec(command: Command[], options: Partial<ExecOptions> = {}): Promise<ExecResult> {
-    return this.execContainer(command, options);
+    const resolvedOptions: ExecOptions = { stdin: true, detach: false, tty: true, ...options };
+    return execContainer(this.container, command, resolvedOptions);
   }
 
   public logs(): Promise<Readable> {
