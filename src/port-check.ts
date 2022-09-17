@@ -35,7 +35,7 @@ export class HostPortCheck implements PortCheck {
 
 export class InternalPortCheck implements PortCheck {
   private isDistroless = false;
-  private uniqueCommandOutputs = new Set<string>();
+  private commandOutputs = new Set<string>();
 
   constructor(private readonly container: Dockerode.Container) {}
 
@@ -64,16 +64,20 @@ export class InternalPortCheck implements PortCheck {
           .map((result) => ({ ...result, output: result.output.trim() }))
           .filter((result) => result.exitCode !== 126 && result.output.length > 0)
           .forEach((result) => {
-            if (!this.uniqueCommandOutputs.has(`${this.container.id}:${result.output}`)) {
+            if (!this.commandOutputs.has(this.commandOutputsKey(result.output))) {
               log.trace(
                 `Port check result for container ${this.container.id} exit code ${result.exitCode}: ${result.output}`
               );
-              this.uniqueCommandOutputs.add(`${this.container.id}:${result.output}`);
+              this.commandOutputs.add(this.commandOutputsKey(result.output));
             }
           });
       }
     }
 
     return isBound;
+  }
+
+  private commandOutputsKey(output: string) {
+    return `${this.container.id}:${output}`;
   }
 }
