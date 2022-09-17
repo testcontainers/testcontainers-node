@@ -33,7 +33,7 @@ const getDockerComposeInfo = async (): Promise<DockerComposeInfo | undefined> =>
       version: (await dockerComposeVersion()).data.version,
     };
   } catch (err) {
-    log.warn(`Unable to detect docker-compose version, is it installed? ${err}`);
+    log.info(`Unable to detect docker-compose version, is it installed? ${err}`);
     return undefined;
   }
 };
