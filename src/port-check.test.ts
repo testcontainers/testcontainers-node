@@ -31,7 +31,7 @@ describe("PortCheck", () => {
       expect(result).toBe(true);
     });
 
-    it("should log unique error messages", async () => {
+    it("should trace log unique error messages", async () => {
       mockExecContainer
         .mockReturnValueOnce(Promise.resolve({ output: "ERROR 1", exitCode: 1 }))
         .mockReturnValueOnce(Promise.resolve({ output: "ERROR 2", exitCode: 1 }))
@@ -45,7 +45,7 @@ describe("PortCheck", () => {
       ]);
     });
 
-    it("should log unique error messages across multiple invocations", async () => {
+    it("should trace log unique error messages across multiple invocations", async () => {
       mockExecContainer
         .mockReturnValueOnce(Promise.resolve({ output: "ERROR 1", exitCode: 1 }))
         .mockReturnValueOnce(Promise.resolve({ output: "ERROR 2", exitCode: 1 }))
@@ -63,7 +63,7 @@ describe("PortCheck", () => {
       ]);
     });
 
-    it("should not log error messages with empty output", async () => {
+    it("should not trace log error messages with empty output", async () => {
       mockExecContainer
         .mockReturnValueOnce(Promise.resolve({ output: "ERROR 1", exitCode: 1 }))
         .mockReturnValueOnce(Promise.resolve({ output: "ERROR 1", exitCode: 1 }))
@@ -76,7 +76,7 @@ describe("PortCheck", () => {
       ]);
     });
 
-    it("should not log error messages where the shell is missing if another shell exists", async () => {
+    it("should not trace log error messages where the shell is missing if another shell exists", async () => {
       mockExecContainer
         .mockReturnValueOnce(Promise.resolve({ output: "ERROR 1", exitCode: 1 }))
         .mockReturnValueOnce(Promise.resolve({ output: "ERROR 1", exitCode: 1 }))
@@ -89,7 +89,7 @@ describe("PortCheck", () => {
       ]);
     });
 
-    it("should log an error message when the port-check will fail due to missing shells (distroless)", async () => {
+    it("should error log when the port-check will fail due to missing shells (distroless)", async () => {
       mockExecContainer
         .mockReturnValueOnce(Promise.resolve({ output: "ERROR 1", exitCode: 126 }))
         .mockReturnValueOnce(Promise.resolve({ output: "ERROR 2", exitCode: 126 }))
@@ -104,7 +104,7 @@ describe("PortCheck", () => {
       ]);
     });
 
-    it("should log the distroless error message once", async () => {
+    it("should error log the distroless image once", async () => {
       mockExecContainer
         .mockReturnValueOnce(Promise.resolve({ output: "ERROR 1", exitCode: 126 }))
         .mockReturnValueOnce(Promise.resolve({ output: "ERROR 2", exitCode: 126 }))
