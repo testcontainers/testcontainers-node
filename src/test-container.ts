@@ -63,6 +63,12 @@ export interface StopOptions {
   removeVolumes: boolean;
 }
 
+export interface ExecOptions {
+  tty: boolean;
+  detach: boolean;
+  stdin: boolean;
+}
+
 export interface StartedTestContainer {
   stop(options?: Partial<StopOptions>): Promise<StoppedTestContainer>;
 
@@ -84,7 +90,7 @@ export interface StartedTestContainer {
 
   getIpAddress(networkName: string): string;
 
-  exec(command: Command[]): Promise<ExecResult>;
+  exec(command: Command[], options?: Partial<ExecOptions>): Promise<ExecResult>;
 
   logs(): Promise<Readable>;
 }

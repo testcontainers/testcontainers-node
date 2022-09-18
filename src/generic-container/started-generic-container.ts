@@ -1,4 +1,10 @@
-import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
+import {
+  RestartOptions,
+  StartedTestContainer,
+  StopOptions,
+  ExecOptions,
+  StoppedTestContainer,
+} from "../test-container";
 import Dockerode from "dockerode";
 import { Command, ContainerName, ExecResult, Host, Id as ContainerId, Labels } from "../docker/types";
 import { inspectContainer, InspectResult } from "../docker/functions/container/inspect-container";
@@ -100,8 +106,9 @@ export class StartedGenericContainer implements StartedTestContainer {
     return this.inspectResult.networkSettings[networkName].ipAddress;
   }
 
-  public exec(command: Command[]): Promise<ExecResult> {
-    return execContainer(this.container, command);
+  public exec(command: Command[], options: Partial<ExecOptions> = {}): Promise<ExecResult> {
+    const resolvedOptions: ExecOptions = { stdin: true, detach: false, tty: true, ...options };
+    return execContainer(this.container, command, resolvedOptions);
   }
 
   public logs(): Promise<Readable> {
