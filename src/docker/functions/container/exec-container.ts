@@ -7,6 +7,7 @@ type ExecContainerOptions = {
   tty: boolean;
   stdin: boolean;
   detach: boolean;
+  debug: boolean;
 };
 
 export const execContainer = async (
@@ -24,7 +25,10 @@ export const execContainer = async (
     const stream = await startExec(exec, options);
 
     const chunks: string[] = [];
-    stream.on("data", (chunk) => chunks.push(chunk));
+    stream.on("data", (chunk) => {
+      if (options.debug) log.debug(chunk);
+      chunks.push(chunk)
+    });
 
     const exitCode = await waitForExec(exec);
 

@@ -67,6 +67,7 @@ export interface ExecOptions {
   tty: boolean;
   detach: boolean;
   stdin: boolean;
+  debug: boolean;
 }
 
 export interface StartedTestContainer {

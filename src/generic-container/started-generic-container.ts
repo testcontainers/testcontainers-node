@@ -107,7 +107,7 @@ export class StartedGenericContainer implements StartedTestContainer {
   }
 
   public exec(command: Command[], options: Partial<ExecOptions> = {}): Promise<ExecResult> {
-    const resolvedOptions: ExecOptions = { stdin: true, detach: false, tty: true, ...options };
+    const resolvedOptions: ExecOptions = { stdin: true, detach: false, tty: true, debug: false, ...options };
     return execContainer(this.container, command, resolvedOptions);
   }
 
