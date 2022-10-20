@@ -1,13 +1,13 @@
 import { Readable } from "stream";
+import byline from "byline";
 import { Command, ExecResult, ExitCode } from "../../types";
 import Dockerode from "dockerode";
-import { log } from "../../../logger";
+import { log, execLog } from "../../../logger";
 
 type ExecContainerOptions = {
   tty: boolean;
   stdin: boolean;
   detach: boolean;
-  debug: boolean;
 };
 
 export const execContainer = async (
@@ -15,6 +15,8 @@ export const execContainer = async (
   command: Command[],
   options: ExecContainerOptions
 ): Promise<ExecResult> => {
+  const chunks: string[] = [];
+
   try {
     const exec = await container.exec({
       Cmd: command,
@@ -24,19 +26,22 @@ export const execContainer = async (
 
     const stream = await startExec(exec, options);
 
-    const chunks: string[] = [];
-    stream.on("data", (chunk) => {
-      if (options.debug) log.debug(chunk);
-      chunks.push(chunk)
+    byline(stream).on("data", (chunk) => {
+      execLog.debug(chunk);
+      chunks.push(chunk);
     });
 
     const exitCode = await waitForExec(exec);
 
     stream.destroy();
 
-    return { output: chunks.join(""), exitCode };
+    return { output: chunks.join("\n"), exitCode };
   } catch (err) {
-    log.error(`Failed to exec container ${container.id} with command "${command.join(" ")}": ${err}`);
+    log.error(
+      `Failed to exec container ${container.id} with command "${command.join(
+        " "
+      )}": ${err}, command output: ${chunks.join("\n")}`
+    );
     throw err;
   }
 };
