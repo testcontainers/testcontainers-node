@@ -122,14 +122,10 @@ describe("GenericContainer", () => {
       .withNetworkAliases("bar", "baz")
       .start();
 
-    const { output, exitCode } = await fooContainer.exec(["nslookup", "bar"]);
-
-    console.log("OUTPUT IS ", output);
-
-    expect(exitCode).toBe(0);
-    expect((await fooContainer.exec(["nslookup", "baz"])).exitCode).toBe(0);
-    expect((await barContainer.exec(["nslookup", "foo"])).exitCode).toBe(0);
-    expect((await barContainer.exec(["nslookup", "unknown"])).exitCode).toBe(1);
+    expect((await fooContainer.exec(["getent", "hosts", "bar"])).exitCode).toBe(0);
+    expect((await fooContainer.exec(["getent", "hosts", "baz"])).exitCode).toBe(0);
+    expect((await barContainer.exec(["getent", "hosts", "foo"])).exitCode).toBe(0);
+    expect((await barContainer.exec(["getent", "hosts", "unknown"])).exitCode).not.toBe(0);
 
     await barContainer.stop();
     await fooContainer.stop();
@@ -143,8 +139,8 @@ describe("GenericContainer", () => {
       .withExtraHosts({ host: "foo", ipAddress: fooContainer.getIpAddress(fooContainer.getNetworkNames()[0]) })
       .start();
 
-    expect((await container.exec(["nslookup", "foo"])).exitCode).toBe(0);
-    expect((await container.exec(["nslookup", "unknown"])).exitCode).toBe(1);
+    expect((await container.exec(["getent", "hosts", "foo"])).exitCode).toBe(0);
+    expect((await container.exec(["getent", "hosts", "unknown"])).exitCode).not.toBe(0);
 
     await container.stop();
     await fooContainer.stop();
