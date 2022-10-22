@@ -674,6 +674,30 @@ const environment = await new DockerComposeEnvironment(composeFilePath, composeF
   .up();
 ```
 
+Testcontainers will not wait for an environment to down, to override:
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+
+const environment = await new DockerComposeEnvironment(composeFilePath, composeFile).up();
+
+await environment.down({ 
+  timeout: 10000 
+});
+```
+
+Testcontainers will remove associated volumes created by the environment when downed, to override:
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+
+const environment = await new DockerComposeEnvironment(composeFilePath, composeFile).up();
+
+await environment.down({
+  removeVolumes: false
+});
+```
+
 ## Wait Strategies
 
 Ordinarily Testcontainers will wait for up to 60 seconds for the container's mapped network ports to start listening.

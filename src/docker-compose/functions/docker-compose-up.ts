@@ -19,7 +19,7 @@ export const dockerComposeUp = async (options: DockerComposeOptions, services?: 
     log.error(`Failed to up DockerCompose environment: ${errorMessage}`);
 
     try {
-      await dockerComposeDown(options);
+      await dockerComposeDown(options, { removeVolumes: true, timeout: 0 });
     } catch {
       log.warn(`Failed to down DockerCompose environment after failed up`);
     }

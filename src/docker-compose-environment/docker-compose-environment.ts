@@ -133,7 +133,7 @@ export class DockerComposeEnvironment {
           } catch (err) {
             log.error(`Container ${containerName} failed to be ready: ${err}`);
             try {
-              await dockerComposeDown(options);
+              await dockerComposeDown(options, { removeVolumes: true, timeout: 0 });
             } catch {
               log.warn(`Failed to stop DockerCompose environment after failed up`);
             }

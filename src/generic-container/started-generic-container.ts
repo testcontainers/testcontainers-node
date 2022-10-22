@@ -38,9 +38,8 @@ export class StartedGenericContainer implements StartedTestContainer {
     const resolvedOptions: RestartOptions = { timeout: 0, ...options };
     await restartContainer(this.container, resolvedOptions);
 
-    // Inspect the restarted container and update the bound ports
     this.inspectResult = await inspectContainer(this.container);
-    this.boundPorts = await BoundPorts.fromInspectResult(this.inspectResult).filter(
+    this.boundPorts = BoundPorts.fromInspectResult(this.inspectResult).filter(
       Array.from(this.boundPorts.iterator()).map((port) => port[0])
     );
     await this.waitForContainer(this.container, this.boundPorts);

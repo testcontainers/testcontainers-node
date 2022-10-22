@@ -65,6 +65,11 @@ export interface StopOptions {
   removeVolumes: boolean;
 }
 
+export interface DockerComposeDownOptions {
+  timeout: number;
+  removeVolumes: boolean;
+}
+
 export interface ExecOptions {
   tty: boolean;
   detach: boolean;
