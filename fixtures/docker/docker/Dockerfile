@@ -4,7 +4,7 @@ MAINTAINER Cristian Greco
 
 EXPOSE 8080
 
-RUN apk add --no-cache curl dumb-init
+RUN apk add --no-cache curl dumb-init libcap
 
 RUN npm init -y \
     && npm install express@4.16.4

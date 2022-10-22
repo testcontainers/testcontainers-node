@@ -2,4 +2,4 @@ version: "3.5"
 
 services:
   container:
-    image: cristianrgreco/testcontainer:1.1.12
+    image: cristianrgreco/testcontainer:1.1.13

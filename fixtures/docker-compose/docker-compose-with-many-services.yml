@@ -2,10 +2,10 @@ version: "3.5"
 
 services:
   service_1:
-    image: cristianrgreco/testcontainer:1.1.12
+    image: cristianrgreco/testcontainer:1.1.13
     ports:
       - 8080
   service_2:
-    image: cristianrgreco/testcontainer:1.1.12
+    image: cristianrgreco/testcontainer:1.1.13
     ports:
       - 8080

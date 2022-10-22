@@ -29,7 +29,7 @@ describe("PortForwarder", () => {
   it("should expose host ports to the container", async () => {
     await TestContainers.exposeHostPorts(randomPort);
 
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12").start();
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.13").start();
 
     const { output } = await container.exec(["curl", `http://host.testcontainers.internal:${randomPort}`]);
     expect(output).toBe("hello world");
@@ -41,7 +41,7 @@ describe("PortForwarder", () => {
     await TestContainers.exposeHostPorts(randomPort);
 
     const network = await new Network().start();
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.13")
       .withNetworkMode(network.getName())
       .start();
 
@@ -56,7 +56,7 @@ describe("PortForwarder", () => {
     await TestContainers.exposeHostPorts(randomPort);
 
     const network = await new Network().start();
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.13")
       .withNetworkMode(network.getName())
       .withNetworkAliases("foo")
       .start();
