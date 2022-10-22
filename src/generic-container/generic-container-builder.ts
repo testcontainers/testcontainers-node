@@ -15,6 +15,7 @@ import { dockerClient } from "../docker/docker-client";
 export class GenericContainerBuilder {
   private buildArgs: BuildArgs = {};
   private pullPolicy: PullPolicy = new DefaultPullPolicy();
+  private cache = true;
 
   constructor(
     private readonly context: BuildContext,
@@ -29,6 +30,11 @@ export class GenericContainerBuilder {
 
   public withPullPolicy(pullPolicy: PullPolicy): this {
     this.pullPolicy = pullPolicy;
+    return this;
+  }
+
+  public withCache(cache: boolean): this {
+    this.cache = cache;
     return this;
   }
 
@@ -48,6 +54,7 @@ export class GenericContainerBuilder {
       dockerfileName: this.dockerfileName,
       buildArgs: this.buildArgs,
       pullPolicy: this.pullPolicy,
+      cache: this.cache,
       registryConfig,
     });
     const container = new GenericContainer(imageName.toString());

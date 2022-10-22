@@ -9,6 +9,7 @@ import { BuildArgs, BuildContext, RegistryConfig } from "../../types";
 import path from "path";
 import { existsSync, promises as fs } from "fs";
 import dockerIgnore from "@balena/dockerignore";
+import { ImageBuildOptions } from "dockerode";
 
 export type BuildImageOptions = {
   imageName: DockerImageName;
@@ -17,6 +18,7 @@ export type BuildImageOptions = {
   buildArgs: BuildArgs;
   pullPolicy: PullPolicy;
   registryConfig: RegistryConfig;
+  cache: boolean;
 };
 
 export const buildImage = async (options: BuildImageOptions): Promise<void> => {
@@ -38,23 +40,26 @@ export const buildImage = async (options: BuildImageOptions): Promise<void> => {
 
     const { dockerode } = await dockerClient();
 
-    return new Promise((resolve) =>
+    const buildImageOptions: ImageBuildOptions = {
+      dockerfile: options.dockerfileName,
+      // @ts-ignore
+      nocache: !options.cache,
+      buildargs: options.buildArgs,
+      t: options.imageName.toString(),
+      labels: createLabels(false, options.imageName),
+      registryconfig: options.registryConfig,
+      pull: options.pullPolicy.shouldPull() ? "any" : undefined,
+    };
+    return new Promise((resolve) => {
       dockerode
-        .buildImage(tarStream, {
-          dockerfile: options.dockerfileName,
-          buildargs: options.buildArgs,
-          t: options.imageName.toString(),
-          labels: createLabels(false, options.imageName),
-          registryconfig: options.registryConfig,
-          pull: options.pullPolicy.shouldPull() ? "any" : undefined,
-        })
+        .buildImage(tarStream, buildImageOptions)
         .then((stream) => byline(stream))
         .then((stream) => {
           stream.setEncoding("utf-8");
           stream.on("data", (line) => log.trace(`${options.imageName.toString()}: ${line}`));
           stream.on("end", () => resolve());
-        })
-    );
+        });
+    });
   } catch (err) {
     log.error(`Failed to build image: ${err}`);
     throw err;

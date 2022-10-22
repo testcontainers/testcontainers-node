@@ -132,6 +132,16 @@ const container = await GenericContainer.fromDockerfile(buildContext, "my-docker
   .build();
 ```
 
+Build the image without using the cache:
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await GenericContainer.fromDockerfile(buildContext, "my-dockerfile")
+  .withCache(false)
+  .build();
+```
+
 Creating a container with multiple exposed ports:
 
 ```javascript
