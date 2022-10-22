@@ -191,6 +191,16 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+Creating a container with entrypoint:
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await new GenericContainer("alpine")
+  .withEntrypoint(["cat"])
+  .start();
+```
+
 Execute commands inside a running container:
 
 ```javascript

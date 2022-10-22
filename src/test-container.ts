@@ -25,6 +25,8 @@ export interface TestContainer {
 
   withCmd(cmd: Command[]): this;
 
+  withEntrypoint(entrypoint: string[]): this;
+
   withTmpFs(tmpFs: TmpFs): this;
 
   withExposedPorts(...ports: PortWithOptionalBinding[]): this;

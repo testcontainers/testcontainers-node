@@ -20,6 +20,7 @@ export type CreateContainerOptions = {
   imageName: DockerImageName;
   env: Env;
   cmd: Command[];
+  entrypoint?: string[];
   bindMounts: BindMount[];
   tmpFs: TmpFs;
   exposedPorts: PortWithOptionalBinding[];
@@ -48,6 +49,7 @@ export const createContainer = async (options: CreateContainerOptions): Promise<
       Env: getEnv(options.env),
       ExposedPorts: getExposedPorts(options.exposedPorts),
       Cmd: options.cmd,
+      Entrypoint: options.entrypoint,
       Labels: createLabels(options.reusable, options.imageName, options.labels),
       // @ts-ignore
       Healthcheck: getHealthCheck(options.healthCheck),

@@ -174,6 +174,18 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
+  it("should set entrypoint", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
+      .withEntrypoint(["node"])
+      .withCmd(["index.js"])
+      .withExposedPorts(8080)
+      .start();
+
+    await checkContainerIsHealthy(container);
+
+    await container.stop();
+  });
+
   it("should set name", async () => {
     const containerName = "special-test-container";
     const expectedContainerName = "/special-test-container";
