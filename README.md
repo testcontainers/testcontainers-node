@@ -250,6 +250,21 @@ const container = await new GenericContainer("postgres")
   .start();
 ```
 
+Creating a container with ulimits:
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await new GenericContainer("aline")
+  .withUlimits({ 
+    memlock: { 
+      hard: -1, 
+      soft: -1 
+    }
+  })
+  .start();
+```
+
 Copy a file to a container before it is started:
 
 ```javascript

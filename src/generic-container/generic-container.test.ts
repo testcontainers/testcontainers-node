@@ -243,6 +243,18 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
+  it("should set ulimits", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
+      .withUlimits({ memlock: { hard: -1, soft: -1 } })
+      .withExposedPorts(8080)
+      .start();
+
+    const { output } = await container.exec(["sh", "-c", "ulimit -l"]);
+    expect(output.trim()).toBe("unlimited");
+
+    await container.stop();
+  });
+
   it("should set default log driver", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12").withDefaultLogDriver().start();
 

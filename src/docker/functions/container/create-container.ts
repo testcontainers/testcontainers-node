@@ -1,7 +1,7 @@
 import { log } from "../../../logger";
 import { DockerImageName } from "../../../docker-image-name";
 import { dockerClient } from "../../docker-client";
-import Dockerode, { PortMap as DockerodePortBindings } from "dockerode";
+import Dockerode, { PortMap as DockerodePortBindings, Ulimit } from "dockerode";
 import { getContainerPort, hasHostBinding, PortString, PortWithOptionalBinding } from "../../../port";
 import { createLabels } from "../create-labels";
 import {
@@ -14,6 +14,7 @@ import {
   Labels,
   NetworkMode,
   TmpFs,
+  Ulimits,
 } from "../../types";
 
 export type CreateContainerOptions = {
@@ -34,6 +35,7 @@ export type CreateContainerOptions = {
   autoRemove: boolean;
   extraHosts: ExtraHost[];
   ipcMode?: string;
+  ulimits?: Ulimits;
   user?: string;
 };
 
@@ -63,6 +65,7 @@ export const createContainer = async (options: CreateContainerOptions): Promise<
         Tmpfs: options.tmpFs,
         LogConfig: getLogConfig(options.useDefaultLogDriver),
         Privileged: options.privilegedMode,
+        Ulimits: getUlimits(options.ulimits),
       },
     });
   } catch (err) {
@@ -147,4 +150,22 @@ const getLogConfig = (useDefaultLogDriver: boolean): DockerodeLogConfig | undefi
     Type: "json-file",
     Config: {},
   };
+};
+
+type DockerodeUlimit = {
+  Name?: string;
+  Hard?: number;
+  Soft?: number;
+};
+
+const getUlimits = (ulimits: Ulimits | undefined): DockerodeUlimit[] | undefined => {
+  if (!ulimits) {
+    return undefined;
+  }
+
+  return Object.entries(ulimits).map(([key, value]) => ({
+    Name: key,
+    Hard: value.hard,
+    Soft: value.soft,
+  }));
 };
