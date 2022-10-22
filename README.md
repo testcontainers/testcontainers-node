@@ -20,7 +20,10 @@ The following environment variables are supported:
 
 - `DEBUG=testcontainers` Enable testcontainers logs
 - `DEBUG=testcontainers:containers` Enable container logs
+- `DEBUG=testcontainers:exec` Enable container exec logs
 - `DEBUG=testcontainers*` Enable all logs
+
+Note that you can enable specific loggers, e.g: `DEBUG=testcontainers,testcontainers:exec`.
 
 ### Docker
 
