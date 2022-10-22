@@ -70,6 +70,8 @@ export class GenericContainer implements TestContainer {
   protected privilegedMode = false;
   protected ipcMode?: string;
   protected ulimits?: Ulimits;
+  protected addedCapabilities?: string[];
+  protected droppedCapabilities?: string[];
   protected user?: string;
   protected pullPolicy: PullPolicy = new DefaultPullPolicy();
   protected reuse = false;
@@ -122,6 +124,8 @@ export class GenericContainer implements TestContainer {
       extraHosts: this.extraHosts,
       ipcMode: this.ipcMode,
       ulimits: this.ulimits,
+      addedCapabilities: this.addedCapabilities,
+      droppedCapabilities: this.droppedCapabilities,
       user: this.user,
     };
 
@@ -257,6 +261,16 @@ export class GenericContainer implements TestContainer {
 
   public withUlimits(ulimits: Ulimits): this {
     this.ulimits = ulimits;
+    return this;
+  }
+
+  public withAddedCapabilities(...capabilities: string[]): this {
+    this.addedCapabilities = capabilities;
+    return this;
+  }
+
+  public withDroppedCapabilities(...capabilities: string[]): this {
+    this.droppedCapabilities = capabilities;
     return this;
   }
 

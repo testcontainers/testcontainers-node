@@ -265,6 +265,26 @@ const container = await new GenericContainer("aline")
   .start();
 ```
 
+Creating a container with added [capabilities](https://man7.org/linux/man-pages/man7/capabilities.7.html):
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await new GenericContainer("aline")
+  .withAddedCapabilities("NET_ADMIN", "IPC_LOCK")
+  .start();
+```
+
+Creating a container with dropped [capabilities](https://man7.org/linux/man-pages/man7/capabilities.7.html):
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await new GenericContainer("aline")
+  .withDroppedCapabilities("NET_ADMIN", "IPC_LOCK")
+  .start();
+```
+
 Copy a file to a container before it is started:
 
 ```javascript

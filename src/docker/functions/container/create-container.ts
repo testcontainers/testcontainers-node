@@ -1,7 +1,7 @@
 import { log } from "../../../logger";
 import { DockerImageName } from "../../../docker-image-name";
 import { dockerClient } from "../../docker-client";
-import Dockerode, { PortMap as DockerodePortBindings, Ulimit } from "dockerode";
+import Dockerode, { PortMap as DockerodePortBindings } from "dockerode";
 import { getContainerPort, hasHostBinding, PortString, PortWithOptionalBinding } from "../../../port";
 import { createLabels } from "../create-labels";
 import {
@@ -36,6 +36,8 @@ export type CreateContainerOptions = {
   extraHosts: ExtraHost[];
   ipcMode?: string;
   ulimits?: Ulimits;
+  addedCapabilities?: string[];
+  droppedCapabilities?: string[];
   user?: string;
 };
 
@@ -66,6 +68,8 @@ export const createContainer = async (options: CreateContainerOptions): Promise<
         LogConfig: getLogConfig(options.useDefaultLogDriver),
         Privileged: options.privilegedMode,
         Ulimits: getUlimits(options.ulimits),
+        CapAdd: options.addedCapabilities,
+        CapDrop: options.droppedCapabilities,
       },
     });
   } catch (err) {

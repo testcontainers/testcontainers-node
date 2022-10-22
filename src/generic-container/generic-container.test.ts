@@ -255,6 +255,32 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
+  it("should add capabilities", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
+      .withAddedCapabilities("IPC_LOCK")
+      .withExposedPorts(8080)
+      .start();
+
+    await container.exec(["sh", "-c", "apk --no-cache add libcap"]);
+    const { output } = await container.exec(["sh", "-c", "getpcaps 1 2>&1"]);
+    expect(output).toContain("cap_ipc_lock");
+
+    await container.stop();
+  });
+
+  it("should drop capabilities", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
+      .withDroppedCapabilities("CHOWN")
+      .withExposedPorts(8080)
+      .start();
+
+    await container.exec(["sh", "-c", "apk --no-cache add libcap"]);
+    const { output } = await container.exec(["sh", "-c", "getpcaps 1 2>&1"]);
+    expect(output).not.toContain("cap_chown");
+
+    await container.stop();
+  });
+
   it("should set default log driver", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12").withDefaultLogDriver().start();
 
