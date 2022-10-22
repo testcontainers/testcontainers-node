@@ -57,6 +57,7 @@ export class GenericContainer implements TestContainer {
   protected networkAliases: string[] = [];
   protected ports: PortWithOptionalBinding[] = [];
   protected cmd: Command[] = [];
+  protected entrypoint: string[] = [];
   protected bindMounts: BindMount[] = [];
   protected name?: ContainerName;
   protected labels: Labels = {};
@@ -104,6 +105,7 @@ export class GenericContainer implements TestContainer {
       imageName: this.imageName,
       env: this.env,
       cmd: this.cmd,
+      entrypoint: this.entrypoint,
       bindMounts: this.bindMounts,
       tmpFs: this.tmpFs,
       exposedPorts: this.ports,
@@ -222,6 +224,11 @@ export class GenericContainer implements TestContainer {
 
   public withCmd(cmd: Command[]): this {
     this.cmd = cmd;
+    return this;
+  }
+
+  public withEntrypoint(entrypoint: string[]): this {
+    this.entrypoint = entrypoint;
     return this;
   }
 
