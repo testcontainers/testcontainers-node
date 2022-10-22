@@ -122,7 +122,11 @@ describe("GenericContainer", () => {
       .withNetworkAliases("bar", "baz")
       .start();
 
-    expect((await fooContainer.exec(["nslookup", "bar"])).exitCode).toBe(0);
+    const { output, exitCode } = await fooContainer.exec(["nslookup", "bar"]);
+
+    console.log("OUTPUT IS ", output);
+
+    expect(exitCode).toBe(0);
     expect((await fooContainer.exec(["nslookup", "baz"])).exitCode).toBe(0);
     expect((await barContainer.exec(["nslookup", "foo"])).exitCode).toBe(0);
     expect((await barContainer.exec(["nslookup", "unknown"])).exitCode).toBe(1);
