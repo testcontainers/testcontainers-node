@@ -118,7 +118,10 @@ const { GenericContainer } = require("testcontainers");
 const buildContext = path.resolve(__dirname, "dir-containing-dockerfile");
 
 const container = await GenericContainer.fromDockerfile(buildContext)
-  .withBuildArg("ARG_KEY", "ARG_VALUE")
+  .withBuildArgs({
+    ARG_1: "ARG_VALUE_1",    
+    ARG_2: "ARG_VALUE_2",    
+  })
   .build();
 
 const startedContainer = await container
@@ -161,12 +164,12 @@ Enabling container reuse, note that two containers are considered equal if their
 const { GenericContainer } = require("testcontainers");
 
 const container1 = await new GenericContainer("alpine")
-  .withCmd(["sleep", "infinity"])
+  .withCommand(["sleep", "infinity"])
   .withReuse()
   .start();
 
 const container2 = await new GenericContainer("alpine")
-  .withCmd(["sleep", "infinity"])
+  .withCommand(["sleep", "infinity"])
   .withReuse()
   .start();
 
@@ -200,7 +203,7 @@ Creating a container with a command:
 const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
-  .withCmd(["sleep", "infinity"])
+  .withCommand(["sleep", "infinity"])
   .start();
 ```
 
@@ -220,7 +223,7 @@ Execute commands inside a running container:
 const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
-  .withCmd(["sleep", "infinity"])
+  .withCommand(["sleep", "infinity"])
   .start();
 
 const { output, exitCode } = await container.exec(["echo", "hello", "world"]);
@@ -238,7 +241,6 @@ stream
     .on("data", line => console.log(line))
     .on("err", line => console.error(line))
     .on("end", () => console.log("Stream closed"));
-
 ```
 
 Creating a container with bind mounts:
@@ -247,8 +249,14 @@ Creating a container with bind mounts:
 const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
-  .withBindMount("/local/file.txt", "/remote/file.txt")
-  .withBindMount("/local/dir", "/remote/dir", "ro")
+  .withBindMounts([{ 
+    source: "/local/file.txt", 
+    destination:"/remote/file.txt" 
+  }, {
+    source: "/local/dir",
+    destination:"/remote/dir",
+    mode: "ro"
+  }])
   .start();
 ```
 
@@ -263,41 +271,6 @@ const container = await new GenericContainer("postgres")
   .start();
 ```
 
-Creating a container with ulimits:
-
-```javascript
-const { GenericContainer } = require("testcontainers");
-
-const container = await new GenericContainer("aline")
-  .withUlimits({ 
-    memlock: { 
-      hard: -1, 
-      soft: -1 
-    }
-  })
-  .start();
-```
-
-Creating a container with added [capabilities](https://man7.org/linux/man-pages/man7/capabilities.7.html):
-
-```javascript
-const { GenericContainer } = require("testcontainers");
-
-const container = await new GenericContainer("aline")
-  .withAddedCapabilities("NET_ADMIN", "IPC_LOCK")
-  .start();
-```
-
-Creating a container with dropped [capabilities](https://man7.org/linux/man-pages/man7/capabilities.7.html):
-
-```javascript
-const { GenericContainer } = require("testcontainers");
-
-const container = await new GenericContainer("aline")
-  .withDroppedCapabilities("NET_ADMIN", "IPC_LOCK")
-  .start();
-```
-
 Copy a file to a container before it is started:
 
 ```javascript
@@ -305,8 +278,14 @@ const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("postgres")
   .withExposedPorts(5432)
-  .withCopyFileToContainer("/local/file.txt", "/remote/file1.txt")
-  .withCopyContentToContainer("hello world", "/remote/file2.txt")
+  .withCopyFilesToContainer([{ 
+    source: "/local/file.txt", 
+    destination: "/remote/file1.txt"
+  }])
+  .withCopyContentToContainer([{ 
+    content: "hello world", 
+    destination: "/remote/file2.txt"
+  }])
   .start();
 ```
 
@@ -316,7 +295,10 @@ Creating a container with environment variables:
 const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
-  .withEnv("ENV_KEY", "ENV_VALUE")
+  .withEnvironment({ 
+    ENV_1: "ENV_VALUE_1", 
+    ENV_2: "ENV_VALUE_2", 
+  })
   .start();
 ```
 
@@ -350,30 +332,30 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
-Creating a container that connects to a specific network:
-
-```javascript
-const { GenericContainer } = require("testcontainers");
-
-const container = await new GenericContainer("alpine")
-  .withNetworkMode("network_name")
-  .start();
-```
-
-Create user-defined bridge network and attach the container to it:
+Creating a container within a network:
 
 ```javascript
 const { GenericContainer, Network } = require("testcontainers");
 
 const network = await new Network()
-    .start();
+  .start();
 
 const container = await new GenericContainer("alpine")
-  .withNetworkMode(network.getName())
+  .withNetwork(network)
   .start();
 
 await container.stop();
 await network.stop();
+```
+
+Creating a container with a network mode:
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await new GenericContainer("alpine")
+  .withNetworkMode("bridge")
+  .start();
 ```
 
 Communicate to containers on the same network via aliases:
@@ -385,17 +367,17 @@ const network = await new Network()
     .start();
 
 const container = await new GenericContainer("alpine")
-  .withCmd(["sleep", "infinity"])
+  .withCommand(["sleep", "infinity"])
   .withNetworkMode(network.getName())
   .start();
 
 const fooContainer = await new GenericContainer("alpine")
-  .withCmd(["sleep", "infinity"])
+  .withCommand(["sleep", "infinity"])
   .withNetworkMode(network.getName())
   .withNetworkAliases("foo", "bar")
   .start();
 
-expect((await container.exec(["nslookup", "foo"])).exitCode).toBe(0);
+expect((await container.exec(["getent", "hosts", "foo"])).exitCode).toBe(0);
 ```
 
 Add hostname mappings:
@@ -404,14 +386,17 @@ Add hostname mappings:
 const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
-  .withExtraHosts(
-    { host: "foo", ipAddress: "10.11.12.13" },
-    { host: "bar", ipAddress: "11.12.13.14" }
-  )
+  .withExtraHosts([{ 
+      host: "foo", 
+      ipAddress: "10.11.12.13" 
+    }, { 
+      host: "bar", 
+      ipAddress: "11.12.13.14" 
+  }])
   .start();
 
-expect((await container.exec(["nslookup", "foo"])).exitCode).toBe(0);
-expect((await container.exec(["nslookup", "bar"])).exitCode).toBe(0);
+expect((await container.exec(["getent", "hosts", "foo"])).exitCode).toBe(0);
+expect((await container.exec(["getent", "hosts", "bar"])).exitCode).toBe(0);
 ```
 
 Specifying a pull policy. Note that if omitted will use the `DefaultPullPolicy` which will use a locally cached image
@@ -470,6 +455,41 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+Creating a container with added [capabilities](https://man7.org/linux/man-pages/man7/capabilities.7.html):
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await new GenericContainer("aline")
+  .withAddedCapabilities("NET_ADMIN", "IPC_LOCK")
+  .start();
+```
+
+Creating a container with dropped [capabilities](https://man7.org/linux/man-pages/man7/capabilities.7.html):
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await new GenericContainer("aline")
+  .withDroppedCapabilities("NET_ADMIN", "IPC_LOCK")
+  .start();
+```
+
+Creating a container with ulimits:
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await new GenericContainer("aline")
+  .withUlimits({ 
+    memlock: { 
+      hard: -1, 
+      soft: -1 
+    }
+  })
+  .start();
+```
+
 Creating a container with [IPC mode](https://docs.docker.com/engine/reference/run/#ipc-settings---ipc):
 
 ```javascript
@@ -518,7 +538,7 @@ const network = await new Network()
   .start();
 
 const container = await new GenericContainer("alpine")
-  .withNetworkMode(network.getName())
+  .withNetwork(network)
   .start();
 
 const networkIpAddress = container.getIpAddress(network.getName());
@@ -539,7 +559,7 @@ server.listen(8000);
 await TestContainers.exposeHostPorts(8000);
 
 const container = await new GenericContainer("alpine")
-  .withCmd(["sleep", "infinity"])
+  .withCommand(["sleep", "infinity"])
   .start();
 
 const { output } = await container.exec(["curl", `http://host.testcontainers.internal:8000`]);
@@ -638,7 +658,8 @@ Once the environment has started, you can interact with the containers as you wo
 ```javascript
 const { DockerComposeEnvironment } = require("testcontainers");
 
-const environment = await new DockerComposeEnvironment(composeFilePath, composeFile).up();
+const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
+  .up();
 
 const container = environment.getContainer("alpine_1");
 const { output, exitCode } = await container.exec(["echo", "hello", "world"]);
@@ -649,7 +670,8 @@ You can supply [multiple compose files](https://docs.docker.com/compose/extends/
 ```javascript
 const { DockerComposeEnvironment } = require("testcontainers");
 
-const environment = await new DockerComposeEnvironment(composeFilePath, [composeFile1, composeFile2]).up();
+const environment = await new DockerComposeEnvironment(composeFilePath, [composeFile1, composeFile2])
+  .up();
 
 await environment.stop();
 ```
@@ -659,7 +681,8 @@ If you have multiple docker-compose environments which share dependencies such a
 ```javascript
 const { DockerComposeEnvironment } = require("testcontainers");
 
-const environment = await new DockerComposeEnvironment(composeFilePath, composeFile).up();
+const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
+  .up();
 
 await environment.stop();
 ```
@@ -718,7 +741,7 @@ Then we can set `TAG` as follows:
 const { DockerComposeEnvironment } = require("testcontainers");
 
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
-  .withEnv("TAG", "value")
+  .withEnvironment({ "TAG": "VALUE" })
   .up();
 ```
 
@@ -727,7 +750,8 @@ Testcontainers will not wait for an environment to down, to override:
 ```javascript
 const { GenericContainer } = require("testcontainers");
 
-const environment = await new DockerComposeEnvironment(composeFilePath, composeFile).up();
+const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
+  .up();
 
 await environment.down({ 
   timeout: 10000 
@@ -739,7 +763,8 @@ Testcontainers will remove associated volumes created by the environment when do
 ```javascript
 const { GenericContainer } = require("testcontainers");
 
-const environment = await new DockerComposeEnvironment(composeFilePath, composeFile).up();
+const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
+  .up();
 
 await environment.down({
   removeVolumes: false
@@ -806,10 +831,10 @@ Testcontainers may need to create auxiliary containers to provide its functional
 
 To avoid Docker pull limits, you can host your own images and use them by setting the appropriate environment variables:
 
-| Container | Environment Variable | Default
-| --- | --- | --- |
-| ryuk | `RYUK_CONTAINER_IMAGE` | `testcontainers/ryuk:0.3.2` |
-| SSHd | `SSHD_CONTAINER_IMAGE` | `testcontainers/sshd:1.0.0` |
+| Container | Environment Variable   | Default                     |
+|-----------|------------------------|-----------------------------|
+| ryuk      | `RYUK_CONTAINER_IMAGE` | `testcontainers/ryuk:0.3.2` |
+| SSHd      | `SSHD_CONTAINER_IMAGE` | `testcontainers/sshd:1.0.0` |
 
 ### ryuk
 
