@@ -20,7 +20,7 @@ export type CreateContainerOptions = {
   imageName: DockerImageName;
   env: Env;
   cmd: Command[];
-  entrypoint: string[];
+  entrypoint?: string[];
   bindMounts: BindMount[];
   tmpFs: TmpFs;
   exposedPorts: PortWithOptionalBinding[];

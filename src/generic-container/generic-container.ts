@@ -57,7 +57,7 @@ export class GenericContainer implements TestContainer {
   protected networkAliases: string[] = [];
   protected ports: PortWithOptionalBinding[] = [];
   protected cmd: Command[] = [];
-  protected entrypoint: string[] = [];
+  protected entrypoint?: string[];
   protected bindMounts: BindMount[] = [];
   protected name?: ContainerName;
   protected labels: Labels = {};
