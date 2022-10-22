@@ -3,6 +3,6 @@ version: "3.5"
 services:
   db:
     container_name: custom_container_name
-    image: cristianrgreco/testcontainer:1.1.12
+    image: cristianrgreco/testcontainer:1.1.13
     ports:
       - 8080

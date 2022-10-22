@@ -20,6 +20,8 @@ export type BindMount = {
 
 export type TmpFs = { [dir in Dir]: Dir };
 
+export type Ulimits = { [name: string]: { hard: number | undefined; soft: number | undefined } };
+
 export type HealthCheck = {
   test: string;
   interval?: number;

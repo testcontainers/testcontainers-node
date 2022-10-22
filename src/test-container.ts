@@ -16,6 +16,7 @@ import {
   NetworkMode,
   TmpFs,
   Labels,
+  Ulimits,
 } from "./docker/types";
 
 export interface TestContainer {
@@ -28,6 +29,12 @@ export interface TestContainer {
   withEntrypoint(entrypoint: string[]): this;
 
   withTmpFs(tmpFs: TmpFs): this;
+
+  withUlimits(ulimits: Ulimits): this;
+
+  withAddedCapabilities(...capabilities: string[]): this;
+
+  withDroppedCapabilities(...capabilities: string[]): this;
 
   withExposedPorts(...ports: PortWithOptionalBinding[]): this;
 

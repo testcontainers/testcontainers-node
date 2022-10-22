@@ -27,6 +27,7 @@ import {
   NetworkMode,
   TmpFs,
   Labels,
+  Ulimits,
 } from "../docker/types";
 import { pullImage } from "../docker/functions/image/pull-image";
 import { createContainer, CreateContainerOptions } from "../docker/functions/container/create-container";
@@ -68,6 +69,9 @@ export class GenericContainer implements TestContainer {
   protected useDefaultLogDriver = false;
   protected privilegedMode = false;
   protected ipcMode?: string;
+  protected ulimits?: Ulimits;
+  protected addedCapabilities?: string[];
+  protected droppedCapabilities?: string[];
   protected user?: string;
   protected pullPolicy: PullPolicy = new DefaultPullPolicy();
   protected reuse = false;
@@ -119,6 +123,9 @@ export class GenericContainer implements TestContainer {
       autoRemove: this.imageName.isReaper(),
       extraHosts: this.extraHosts,
       ipcMode: this.ipcMode,
+      ulimits: this.ulimits,
+      addedCapabilities: this.addedCapabilities,
+      droppedCapabilities: this.droppedCapabilities,
       user: this.user,
     };
 
@@ -249,6 +256,21 @@ export class GenericContainer implements TestContainer {
 
   public withTmpFs(tmpFs: TmpFs): this {
     this.tmpFs = tmpFs;
+    return this;
+  }
+
+  public withUlimits(ulimits: Ulimits): this {
+    this.ulimits = ulimits;
+    return this;
+  }
+
+  public withAddedCapabilities(...capabilities: string[]): this {
+    this.addedCapabilities = capabilities;
+    return this;
+  }
+
+  public withDroppedCapabilities(...capabilities: string[]): this {
+    this.droppedCapabilities = capabilities;
     return this;
   }
 
