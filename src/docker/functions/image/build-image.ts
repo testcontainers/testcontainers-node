@@ -6,7 +6,7 @@ import byline from "byline";
 import { dockerClient } from "../../docker-client.js";
 import { createLabels } from "../create-labels.js";
 import { BuildArgs, RegistryConfig } from "../../types.js";
-import path from "path";
+import * as path from "path";
 import { existsSync, promises as fs } from "fs";
 import dockerIgnore from "@balena/dockerignore";
 import { ImageBuildOptions } from "dockerode";

@@ -1,5 +1,6 @@
+import { jest } from "@jest/globals";
 import axios from "axios";
-import path from "path";
+import * as path from "path";
 import { DockerComposeEnvironment } from "./docker-compose-environment.js";
 import { Wait } from "../wait.js";
 import { checkEnvironmentContainerIsHealthy, getRunningContainerNames, getVolumeNames } from "../test-helper.js";
@@ -7,7 +8,7 @@ import { checkEnvironmentContainerIsHealthy, getRunningContainerNames, getVolume
 describe("DockerComposeEnvironment", () => {
   jest.setTimeout(180_000);
 
-  const fixtures = path.resolve(__dirname, "..", "..", "fixtures", "docker-compose");
+  const fixtures = path.resolve("fixtures", "docker-compose");
 
   it("should throw error when compose file is malformed", async () => {
     await expect(new DockerComposeEnvironment(fixtures, "docker-compose-malformed.yml").up()).rejects.toThrowError();

@@ -112,10 +112,9 @@ const container = await new GenericContainer("alpine:3.10")
 Building and using your own Docker image:
 
 ```javascript
-const path = require("path");
 const { GenericContainer } = require("testcontainers");
 
-const buildContext = path.resolve(__dirname, "dir-containing-dockerfile");
+const buildContext = "dir-containing-dockerfile";
 
 const container = await GenericContainer.fromDockerfile(buildContext)
   .withBuildArgs({
@@ -612,7 +611,6 @@ services:
 You can start and stop the environment, and interact with its containers:
 
 ```javascript
-const path = require("path");
 const redis = require("async-redis");
 const { DockerComposeEnvironment } = require("testcontainers");
 
@@ -621,7 +619,7 @@ describe("DockerComposeEnvironment", () => {
   let redisClient;
 
   beforeAll(async () => {
-    const composeFilePath = path.resolve(__dirname, "dir-containing-docker-compose-yml");
+    const composeFilePath = "dir-containing-dockerfile";
     const composeFile = "docker-compose.yml";
 
     environment = await new DockerComposeEnvironment(composeFilePath, composeFile).up();

@@ -2,7 +2,7 @@ import { jest } from "@jest/globals";
 import { GenericContainer } from "./generic-container/generic-container.js";
 import { getReaperContainerId, getContainerIds, getRunningNetworkIds, stopReaper } from "./test-helper.js";
 import { Network } from "./network.js";
-import path from "path";
+import * as path from "path";
 import { RandomUuid } from "./uuid.js";
 import waitForExpect from "wait-for-expect";
 import { listImages } from "./docker/functions/image/list-images.js";

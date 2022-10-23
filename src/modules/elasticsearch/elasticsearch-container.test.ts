@@ -1,3 +1,4 @@
+import { jest } from "@jest/globals";
 import { ElasticsearchContainer } from "./elasticsearch-container.js";
 import { Client } from "@elastic/elasticsearch";
 

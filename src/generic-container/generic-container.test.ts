@@ -1,6 +1,6 @@
 import { jest } from "@jest/globals";
 import axios from "axios";
-import path from "path";
+import * as path from "path";
 import getPort from "get-port";
 import { GenericContainer } from "./generic-container.js";
 import { AlwaysPullPolicy } from "../pull-policy.js";

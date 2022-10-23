@@ -1,3 +1,4 @@
+import { jest } from "@jest/globals";
 import { MongoDBContainer, StartedMongoDBContainer } from "./mongodb-container.js";
 import mongoose from "mongoose";
 

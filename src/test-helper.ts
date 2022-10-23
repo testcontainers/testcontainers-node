@@ -5,6 +5,8 @@ import { StartedDockerComposeEnvironment } from "./docker-compose-environment/st
 import axios from "axios";
 import { StartedTestContainer } from "./test-container.js";
 
+export const itif = (condition: boolean) => (condition ? it : it.skip);
+
 export const checkContainerIsHealthy = async (container: StartedTestContainer): Promise<void> => {
   const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
   const response = await axios.get(`${url}/hello-world`);

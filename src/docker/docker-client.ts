@@ -1,5 +1,5 @@
 import Dockerode, { DockerOptions, NetworkInspectInfo } from "dockerode";
-import path from "path";
+import * as path from "path";
 import { log } from "../logger.js";
 import { URL } from "url";
 import { existsSync, promises as fs } from "fs";

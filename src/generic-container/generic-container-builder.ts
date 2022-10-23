@@ -3,7 +3,7 @@ import { DefaultPullPolicy, PullPolicy } from "../pull-policy.js";
 import { RandomUuid, Uuid } from "../uuid.js";
 import { ReaperInstance } from "../reaper.js";
 import { DockerImageName } from "../docker-image-name.js";
-import path from "path";
+import * as path from "path";
 import { log } from "../logger.js";
 import { getDockerfileImages } from "../dockerfile-parser.js";
 import { buildImage } from "../docker/functions/image/build-image.js";

@@ -1,3 +1,4 @@
+import { jest } from "@jest/globals";
 import { createConnection } from "mysql2/promise";
 import { MySqlContainer } from "./mysql-container.js";
 

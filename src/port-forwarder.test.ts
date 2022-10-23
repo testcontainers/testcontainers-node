@@ -1,3 +1,4 @@
+import { jest } from "@jest/globals";
 import { createServer, Server } from "http";
 import { GenericContainer } from "./generic-container/generic-container.js";
 import { TestContainers } from "./test-containers.js";

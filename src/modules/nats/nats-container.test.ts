@@ -1,3 +1,4 @@
+import { jest } from "@jest/globals";
 import { connect, StringCodec } from "nats";
 import { NatsContainer } from "./nats-container.js";
 

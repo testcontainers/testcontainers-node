@@ -1,3 +1,4 @@
+import { jest } from "@jest/globals";
 import { runInContainer } from "./run-in-container.js";
 import { dockerClient } from "../docker-client.js";
 import Dockerode from "dockerode";
