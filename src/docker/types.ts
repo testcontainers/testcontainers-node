@@ -5,7 +5,7 @@ export type BindMode = "rw" | "ro" | "z" | "Z";
 export type BindMount = {
   source: string;
   target: string;
-  bindMode: BindMode;
+  mode?: BindMode;
 };
 
 export type TmpFs = { [dir in string]: string };

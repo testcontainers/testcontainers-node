@@ -2,7 +2,7 @@ import { PortWithOptionalBinding } from "./port";
 import { PullPolicy } from "./pull-policy";
 import { WaitStrategy } from "./wait-strategy";
 import { Readable } from "stream";
-import { BindMode, ExecResult, ExtraHost, TmpFs, Labels, Ulimits } from "./docker/types";
+import { BindMode, ExecResult, ExtraHost, TmpFs, Labels, Ulimits, BindMount } from "./docker/types";
 
 export interface TestContainer {
   start(): Promise<StartedTestContainer>;
@@ -23,7 +23,7 @@ export interface TestContainer {
 
   withExposedPorts(...ports: PortWithOptionalBinding[]): this;
 
-  withBindMount(source: string, target: string, bindMode: BindMode): this;
+  withBindMounts(bindMounts: BindMount[]): this;
 
   withWaitStrategy(waitStrategy: WaitStrategy): this;
 

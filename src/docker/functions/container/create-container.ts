@@ -102,7 +102,7 @@ const getPortBindings = (exposedPorts: PortWithOptionalBinding[]): DockerodePort
 };
 
 const getBindMounts = (bindMounts: BindMount[]): string[] => {
-  return bindMounts.map(({ source, target, bindMode }) => `${source}:${target}:${bindMode}`);
+  return bindMounts.map(({ source, target, mode }) => `${source}:${target}:${mode}`);
 };
 
 type DockerodeHealthCheck = {

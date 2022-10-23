@@ -282,8 +282,8 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
-  public withBindMount(source: string, target: string, bindMode: BindMode = "rw"): this {
-    this.bindMounts.push({ source, target, bindMode });
+  public withBindMounts(bindMounts: BindMount[]): this {
+    this.bindMounts = bindMounts.map((bindMount) => ({ mode: "rw", ...bindMount }));
     return this;
   }
 

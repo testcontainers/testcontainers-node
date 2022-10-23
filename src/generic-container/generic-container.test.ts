@@ -215,7 +215,7 @@ describe("GenericContainer", () => {
     const target = `/tmp/${filename}`;
 
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.13")
-      .withBindMount(source, target)
+      .withBindMounts([{ source, target }])
       .withExposedPorts(8080)
       .start();
 
