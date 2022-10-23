@@ -148,7 +148,7 @@ describe("GenericContainer", () => {
 
   it("should set environment variables", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.13")
-      .withEnv("customKey", "customValue")
+      .withEnvironment("customKey", "customValue")
       .withExposedPorts(8080)
       .start();
 

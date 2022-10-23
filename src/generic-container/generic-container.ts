@@ -11,7 +11,7 @@ import { HostPortWaitStrategy, WaitStrategy } from "../wait-strategy";
 import { Readable } from "stream";
 import { PortForwarderInstance } from "../port-forwarder";
 import { getAuthConfig } from "../registry-auth-locator";
-import { BindMode, BindMount, Environment, ExtraHost, HealthCheck, TmpFs, Labels, Ulimits } from "../docker/types";
+import { BindMode, BindMount, Environment, ExtraHost, HealthCheck, Labels, TmpFs, Ulimits } from "../docker/types";
 import { pullImage } from "../docker/functions/image/pull-image";
 import { createContainer, CreateContainerOptions } from "../docker/functions/container/create-container";
 import { connectNetwork } from "../docker/functions/network/connect-network";
@@ -232,7 +232,7 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
-  public withEnv(key: string, value: string): this {
+  public withEnvironment(key: string, value: string): this {
     this.environment[key] = value;
     return this;
   }

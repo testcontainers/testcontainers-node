@@ -56,7 +56,7 @@ export class PortForwarderInstance {
     const container = await new GenericContainer(SSHD_IMAGE)
       .withName(`testcontainers-port-forwarder-${sessionId}`)
       .withExposedPorts(containerPort)
-      .withEnv("PASSWORD", password)
+      .withEnvironment("PASSWORD", password)
       .withCommand([
         "sh",
         "-c",

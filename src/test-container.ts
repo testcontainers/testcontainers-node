@@ -7,7 +7,7 @@ import { BindMode, ExecResult, ExtraHost, TmpFs, Labels, Ulimits } from "./docke
 export interface TestContainer {
   start(): Promise<StartedTestContainer>;
 
-  withEnv(key: string, value: string): this;
+  withEnvironment(key: string, value: string): this;
 
   withCommand(command: string[]): this;
 

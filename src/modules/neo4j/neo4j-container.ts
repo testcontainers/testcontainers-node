@@ -34,15 +34,21 @@ export class Neo4jContainer extends GenericContainer {
   public async start(): Promise<StartedNeo4jContainer> {
     this.withExposedPorts(...(this.hasExposedPorts ? this.ports : [BOLT_PORT, HTTP_PORT]))
       .withWaitStrategy(Wait.forLogMessage("Started."))
-      .withEnv("NEO4J_AUTH", `${USERNAME}/${this.password}`)
+      .withEnvironment("NEO4J_AUTH", `${USERNAME}/${this.password}`)
       .withStartupTimeout(120_000);
 
     if (this.apoc) {
-      this.withEnv("NEO4JLABS_PLUGINS", '["apoc"]').withEnv("NEO4J_dbms_security_procedures_unrestricted", "apoc.*");
+      this.withEnvironment("NEO4JLABS_PLUGINS", '["apoc"]').withEnvironment(
+        "NEO4J_dbms_security_procedures_unrestricted",
+        "apoc.*"
+      );
     }
 
     if (this.ttl) {
-      this.withEnv("NEO4J_apoc_ttl_enabled", "true").withEnv("NEO4J_apoc_ttl_schedule", this.ttl.toString());
+      this.withEnvironment("NEO4J_apoc_ttl_enabled", "true").withEnvironment(
+        "NEO4J_apoc_ttl_schedule",
+        this.ttl.toString()
+      );
     }
 
     return new StartedNeo4jContainer(await super.start(), this.password);
