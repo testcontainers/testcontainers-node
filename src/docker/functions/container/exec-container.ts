@@ -1,5 +1,5 @@
 import { Readable } from "stream";
-import { Command, ExecResult, ExitCode } from "../../types";
+import { ExecResult } from "../../types";
 import Dockerode from "dockerode";
 import { log, execLog } from "../../../logger";
 import byline from "byline";
@@ -12,7 +12,7 @@ type ExecContainerOptions = {
 
 export const execContainer = async (
   container: Dockerode.Container,
-  command: Command[],
+  command: string[],
   options: ExecContainerOptions,
   shouldLog = true
 ): Promise<ExecResult> => {
@@ -60,7 +60,7 @@ const startExec = async (exec: Dockerode.Exec, options: ExecContainerOptions): P
 };
 
 type ExecInspectResult = {
-  exitCode: ExitCode;
+  exitCode: number;
   running: boolean;
   entrypoint: string;
   arguments: string[];

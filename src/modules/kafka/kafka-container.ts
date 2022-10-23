@@ -1,10 +1,8 @@
 import { GenericContainer } from "../../generic-container/generic-container";
 import { BoundPorts } from "../../bound-ports";
-import { Port } from "../../port";
 import { RandomUuid, Uuid } from "../../uuid";
 import { StartedTestContainer } from "../..";
 import { AbstractStartedContainer } from "../abstract-started-container";
-import { Host } from "../../docker/types";
 import { InspectResult } from "../../docker/functions/container/inspect-container";
 
 const KAFKA_PORT = 9093;
@@ -39,8 +37,8 @@ export class KafkaContainer extends GenericContainer {
   private readonly uuid: Uuid = new RandomUuid();
 
   private isZooKeeperProvided = false;
-  private zooKeeperHost?: Host;
-  private zooKeeperPort?: Port;
+  private zooKeeperHost?: string;
+  private zooKeeperPort?: number;
   private saslSslConfig?: SaslSslListenerOptions;
 
   constructor(image = KAFKA_IMAGE) {
@@ -59,7 +57,7 @@ export class KafkaContainer extends GenericContainer {
       .withEnv("KAFKA_CONFLUENT_SUPPORT_METRICS_ENABLE", "false");
   }
 
-  public withZooKeeper(host: Host, port: Port): this {
+  public withZooKeeper(host: string, port: number): this {
     this.isZooKeeperProvided = true;
     this.zooKeeperHost = host;
     this.zooKeeperPort = port;
@@ -98,7 +96,7 @@ export class KafkaContainer extends GenericContainer {
 
     command += "echo '' > /etc/confluent/docker/ensure \n";
     command += "/etc/confluent/docker/run \n";
-    this.withCmd(["sh", "-c", command]);
+    this.withCommand(["sh", "-c", command]);
   }
 
   public async start(): Promise<StartedKafkaContainer> {
@@ -170,7 +168,7 @@ export class KafkaContainer extends GenericContainer {
       "--entity-type",
       "brokers",
       "--entity-name",
-      this.env["KAFKA_BROKER_ID"],
+      this.environment["KAFKA_BROKER_ID"],
       "--add-config",
       `advertised.listeners=[${bootstrapServers},${brokerAdvertisedListener}]`,
     ]);
@@ -187,7 +185,7 @@ export class KafkaContainer extends GenericContainer {
       // At the time of writing kafka-configs displays a warning stating that the 'zookeeper' flag is deprecated in favor of 'bootstrap-server'.
       // Unfortunately, 'bootstrap-server' can only be used to set quotas and not to create a user.
       "--zookeeper",
-      this.env["KAFKA_ZOOKEEPER_CONNECT"],
+      this.environment["KAFKA_ZOOKEEPER_CONNECT"],
       "--entity-type",
       "users",
       "--entity-name",

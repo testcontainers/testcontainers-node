@@ -1,9 +1,7 @@
 import { GenericContainer, Wait } from "../..";
 import { StartedTestContainer } from "../../test-container";
-import { Port } from "../../port";
 import { RandomUuid } from "../../uuid";
 import { AbstractStartedContainer } from "../abstract-started-container";
-import { Host } from "../../docker/types";
 
 const ARANGODB_PORT = 8529;
 const USERNAME = "root";
@@ -29,8 +27,8 @@ export class ArangoDBContainer extends GenericContainer {
 }
 
 export class StartedArangoContainer extends AbstractStartedContainer {
-  private readonly host: Host;
-  private readonly port: Port;
+  private readonly host: string;
+  private readonly port: number;
 
   constructor(startedTestContainer: StartedTestContainer, private readonly password: string) {
     super(startedTestContainer);

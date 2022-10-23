@@ -2,7 +2,6 @@ import { GenericContainer } from "../../generic-container/generic-container";
 import { StartedTestContainer } from "../../test-container";
 import { RandomUuid } from "../../uuid";
 import { AbstractStartedContainer } from "../abstract-started-container";
-import { Port } from "../../port";
 
 const MYSQL_PORT = 3306;
 
@@ -55,7 +54,7 @@ export class MySqlContainer extends GenericContainer {
 }
 
 export class StartedMySqlContainer extends AbstractStartedContainer {
-  private readonly port: Port;
+  private readonly port: number;
 
   constructor(
     startedTestContainer: StartedTestContainer,
@@ -68,7 +67,7 @@ export class StartedMySqlContainer extends AbstractStartedContainer {
     this.port = startedTestContainer.getMappedPort(3306);
   }
 
-  public getPort(): Port {
+  public getPort(): number {
     return this.port;
   }
 

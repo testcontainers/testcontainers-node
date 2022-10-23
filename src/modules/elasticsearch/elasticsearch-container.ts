@@ -1,6 +1,5 @@
 import { GenericContainer, StartedTestContainer } from "../..";
 import { AbstractStartedContainer } from "../abstract-started-container";
-import { Port } from "../../port";
 
 const ELASTIC_SEARCH_HTTP_PORT = 9200;
 
@@ -19,7 +18,7 @@ export class ElasticsearchContainer extends GenericContainer {
 }
 
 export class StartedElasticsearchContainer extends AbstractStartedContainer {
-  private readonly httpPort: Port;
+  private readonly httpPort: number;
 
   constructor(readonly startedTestContainer: StartedTestContainer) {
     super(startedTestContainer);

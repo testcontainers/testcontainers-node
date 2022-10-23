@@ -11,24 +11,7 @@ import { HostPortWaitStrategy, WaitStrategy } from "../wait-strategy";
 import { Readable } from "stream";
 import { PortForwarderInstance } from "../port-forwarder";
 import { getAuthConfig } from "../registry-auth-locator";
-import {
-  BindMode,
-  BindMount,
-  BuildContext,
-  Command,
-  ContainerName,
-  Dir,
-  Env,
-  EnvKey,
-  EnvValue,
-  ExtraHost,
-  HealthCheck,
-  Host,
-  NetworkMode,
-  TmpFs,
-  Labels,
-  Ulimits,
-} from "../docker/types";
+import { BindMode, BindMount, Environment, ExtraHost, HealthCheck, TmpFs, Labels, Ulimits } from "../docker/types";
 import { pullImage } from "../docker/functions/image/pull-image";
 import { createContainer, CreateContainerOptions } from "../docker/functions/container/create-container";
 import { connectNetwork } from "../docker/functions/network/connect-network";
@@ -47,20 +30,20 @@ import { getContainerByHash } from "../docker/functions/container/get-container"
 import { LABEL_CONTAINER_HASH } from "../labels";
 
 export class GenericContainer implements TestContainer {
-  public static fromDockerfile(context: BuildContext, dockerfileName = "Dockerfile"): GenericContainerBuilder {
+  public static fromDockerfile(context: string, dockerfileName = "Dockerfile"): GenericContainerBuilder {
     return new GenericContainerBuilder(context, dockerfileName);
   }
 
   private readonly imageName: DockerImageName;
 
-  protected env: Env = {};
-  protected networkMode?: NetworkMode;
+  protected environment: Environment = {};
+  protected networkMode?: string;
   protected networkAliases: string[] = [];
   protected ports: PortWithOptionalBinding[] = [];
-  protected cmd: Command[] = [];
+  protected command: string[] = [];
   protected entrypoint?: string[];
   protected bindMounts: BindMount[] = [];
-  protected name?: ContainerName;
+  protected name?: string;
   protected labels: Labels = {};
   protected tmpFs: TmpFs = {};
   protected healthCheck?: HealthCheck;
@@ -107,8 +90,8 @@ export class GenericContainer implements TestContainer {
 
     const createContainerOptions: CreateContainerOptions = {
       imageName: this.imageName,
-      env: this.env,
-      cmd: this.cmd,
+      environment: this.environment,
+      command: this.command,
       entrypoint: this.entrypoint,
       bindMounts: this.bindMounts,
       tmpFs: this.tmpFs,
@@ -229,8 +212,8 @@ export class GenericContainer implements TestContainer {
     return this.ports.length !== 0;
   }
 
-  public withCmd(cmd: Command[]): this {
-    this.cmd = cmd;
+  public withCommand(command: string[]): this {
+    this.command = command;
     return this;
   }
 
@@ -239,7 +222,7 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
-  public withName(name: ContainerName): this {
+  public withName(name: string): this {
     this.name = name;
     return this;
   }
@@ -249,8 +232,8 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
-  public withEnv(key: EnvKey, value: EnvValue): this {
-    this.env[key] = value;
+  public withEnv(key: string, value: string): this {
+    this.environment[key] = value;
     return this;
   }
 
@@ -274,7 +257,7 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
-  public withNetworkMode(networkMode: NetworkMode): this {
+  public withNetworkMode(networkMode: string): this {
     this.networkMode = networkMode;
     return this;
   }
@@ -299,7 +282,7 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
-  public withBindMount(source: Dir, target: Dir, bindMode: BindMode = "rw"): this {
+  public withBindMount(source: string, target: string, bindMode: BindMode = "rw"): this {
     this.bindMounts.push({ source, target, bindMode });
     return this;
   }
@@ -385,7 +368,7 @@ export class GenericContainer implements TestContainer {
     }
   }
 
-  private getWaitStrategy(host: Host, container: Dockerode.Container): WaitStrategy {
+  private getWaitStrategy(host: string, container: Dockerode.Container): WaitStrategy {
     if (this.waitStrategy) {
       return this.waitStrategy;
     }

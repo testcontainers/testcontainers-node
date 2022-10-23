@@ -6,12 +6,11 @@ import {
   StoppedTestContainer,
 } from "../test-container";
 import Dockerode from "dockerode";
-import { Command, ContainerName, ExecResult, Host, Id as ContainerId, Labels } from "../docker/types";
+import { ExecResult, Labels } from "../docker/types";
 import { inspectContainer, InspectResult } from "../docker/functions/container/inspect-container";
 import { BoundPorts } from "../bound-ports";
 import { log } from "../logger";
 import { removeContainer } from "../docker/functions/container/remove-container";
-import { Port } from "../port";
 import { execContainer } from "../docker/functions/container/exec-container";
 import { Readable } from "stream";
 import { containerLogs } from "../docker/functions/container/container-logs";
@@ -23,10 +22,10 @@ import { WaitStrategy } from "../wait-strategy";
 export class StartedGenericContainer implements StartedTestContainer {
   constructor(
     private readonly container: Dockerode.Container,
-    private readonly host: Host,
+    private readonly host: string,
     private inspectResult: InspectResult,
     private boundPorts: BoundPorts,
-    private readonly name: ContainerName,
+    private readonly name: string,
     private readonly waitStrategy: WaitStrategy
   ) {}
 
@@ -73,19 +72,19 @@ export class StartedGenericContainer implements StartedTestContainer {
     }
   }
 
-  public getHost(): Host {
+  public getHost(): string {
     return this.host;
   }
 
-  public getMappedPort(port: Port): Port {
+  public getMappedPort(port: number): number {
     return this.boundPorts.getBinding(port);
   }
 
-  public getId(): ContainerId {
+  public getId(): string {
     return this.container.id;
   }
 
-  public getName(): ContainerName {
+  public getName(): string {
     return this.name;
   }
 
@@ -105,7 +104,7 @@ export class StartedGenericContainer implements StartedTestContainer {
     return this.inspectResult.networkSettings[networkName].ipAddress;
   }
 
-  public exec(command: Command[], options: Partial<ExecOptions> = {}): Promise<ExecResult> {
+  public exec(command: string[], options: Partial<ExecOptions> = {}): Promise<ExecResult> {
     const resolvedOptions: ExecOptions = { stdin: true, detach: false, tty: true, ...options };
     return execContainer(this.container, command, resolvedOptions);
   }

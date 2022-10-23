@@ -1,30 +1,15 @@
-import { Port, PortWithOptionalBinding } from "./port";
+import { PortWithOptionalBinding } from "./port";
 import { PullPolicy } from "./pull-policy";
 import { WaitStrategy } from "./wait-strategy";
 import { Readable } from "stream";
-import {
-  BindMode,
-  Command,
-  ContainerName,
-  Dir,
-  EnvKey,
-  EnvValue,
-  ExecResult,
-  ExtraHost,
-  Host,
-  Id,
-  NetworkMode,
-  TmpFs,
-  Labels,
-  Ulimits,
-} from "./docker/types";
+import { BindMode, ExecResult, ExtraHost, TmpFs, Labels, Ulimits } from "./docker/types";
 
 export interface TestContainer {
   start(): Promise<StartedTestContainer>;
 
-  withEnv(key: EnvKey, value: EnvValue): this;
+  withEnv(key: string, value: string): this;
 
-  withCmd(cmd: Command[]): this;
+  withCommand(command: string[]): this;
 
   withEntrypoint(entrypoint: string[]): this;
 
@@ -38,13 +23,13 @@ export interface TestContainer {
 
   withExposedPorts(...ports: PortWithOptionalBinding[]): this;
 
-  withBindMount(source: Dir, target: Dir, bindMode: BindMode): this;
+  withBindMount(source: string, target: string, bindMode: BindMode): this;
 
   withWaitStrategy(waitStrategy: WaitStrategy): this;
 
   withStartupTimeout(startupTimeout: number): this;
 
-  withNetworkMode(networkMode: NetworkMode): this;
+  withNetworkMode(networkMode: string): this;
 
   withExtraHosts(...extraHosts: ExtraHost[]): this;
 
@@ -88,15 +73,15 @@ export interface StartedTestContainer {
 
   restart(options?: Partial<RestartOptions>): Promise<void>;
 
-  getHost(): Host;
+  getHost(): string;
 
-  getMappedPort(port: Port): Port;
+  getMappedPort(port: number): number;
 
-  getName(): ContainerName;
+  getName(): string;
 
   getLabels(): Labels;
 
-  getId(): Id;
+  getId(): string;
 
   getNetworkNames(): string[];
 
@@ -104,7 +89,7 @@ export interface StartedTestContainer {
 
   getIpAddress(networkName: string): string;
 
-  exec(command: Command[], options?: Partial<ExecOptions>): Promise<ExecResult>;
+  exec(command: string[], options?: Partial<ExecOptions>): Promise<ExecResult>;
 
   logs(): Promise<Readable>;
 }

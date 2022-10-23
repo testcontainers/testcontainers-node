@@ -162,7 +162,7 @@ describe("GenericContainer", () => {
 
   it("should set command", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.13")
-      .withCmd(["node", "index.js", "one", "two", "three"])
+      .withCommand(["node", "index.js", "one", "two", "three"])
       .withExposedPorts(8080)
       .start();
 
@@ -177,7 +177,7 @@ describe("GenericContainer", () => {
   it("should set entrypoint", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.13")
       .withEntrypoint(["node"])
-      .withCmd(["index.js"])
+      .withCommand(["index.js"])
       .withExposedPorts(8080)
       .start();
 

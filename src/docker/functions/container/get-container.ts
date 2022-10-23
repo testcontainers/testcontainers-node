@@ -1,10 +1,9 @@
 import { dockerClient } from "../../docker-client";
 import Dockerode from "dockerode";
-import { Id } from "../../types";
 import { log } from "../../../logger";
 import { LABEL_CONTAINER_HASH } from "../../../labels";
 
-export const getContainerById = async (id: Id): Promise<Dockerode.Container> => {
+export const getContainerById = async (id: string): Promise<Dockerode.Container> => {
   try {
     const { dockerode } = await dockerClient();
     return dockerode.getContainer(id);

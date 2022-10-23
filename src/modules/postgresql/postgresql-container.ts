@@ -2,7 +2,6 @@ import { GenericContainer } from "../../generic-container/generic-container";
 import { StartedTestContainer } from "../../test-container";
 import { RandomUuid } from "../../uuid";
 import { AbstractStartedContainer } from "../abstract-started-container";
-import { Port } from "../../port";
 
 const POSTGRES_PORT = 5432;
 
@@ -42,7 +41,7 @@ export class PostgreSqlContainer extends GenericContainer {
 }
 
 export class StartedPostgreSqlContainer extends AbstractStartedContainer {
-  private readonly port: Port;
+  private readonly port: number;
 
   constructor(
     startedTestContainer: StartedTestContainer,
@@ -54,7 +53,7 @@ export class StartedPostgreSqlContainer extends AbstractStartedContainer {
     this.port = startedTestContainer.getMappedPort(5432);
   }
 
-  public getPort(): Port {
+  public getPort(): number {
     return this.port;
   }
 

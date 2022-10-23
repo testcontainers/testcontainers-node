@@ -1,4 +1,4 @@
-import { AuthConfig, BuildArgs, BuildContext, RegistryConfig } from "../docker/types";
+import { AuthConfig, BuildArgs, RegistryConfig } from "../docker/types";
 import { DefaultPullPolicy, PullPolicy } from "../pull-policy";
 import { RandomUuid, Uuid } from "../uuid";
 import { ReaperInstance } from "../reaper";
@@ -18,7 +18,7 @@ export class GenericContainerBuilder {
   private cache = true;
 
   constructor(
-    private readonly context: BuildContext,
+    private readonly context: string,
     private readonly dockerfileName: string,
     private readonly uuid: Uuid = new RandomUuid()
   ) {}

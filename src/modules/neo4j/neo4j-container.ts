@@ -1,6 +1,5 @@
 import { GenericContainer, Wait } from "../..";
 import { StartedTestContainer } from "../../test-container";
-import { Port } from "../../port";
 import { RandomUuid } from "../../uuid";
 import { AbstractStartedContainer } from "../abstract-started-container";
 
@@ -51,8 +50,8 @@ export class Neo4jContainer extends GenericContainer {
 }
 
 export class StartedNeo4jContainer extends AbstractStartedContainer {
-  private readonly boltPort: Port;
-  private readonly httpPort: Port;
+  private readonly boltPort: number;
+  private readonly httpPort: number;
 
   constructor(startedTestContainer: StartedTestContainer, private readonly password: string) {
     super(startedTestContainer);

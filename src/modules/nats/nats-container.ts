@@ -2,7 +2,6 @@ import { GenericContainer } from "../../generic-container/generic-container";
 import { StartedTestContainer } from "../../test-container";
 import { RandomUuid } from "../../uuid";
 import { AbstractStartedContainer } from "../abstract-started-container";
-import { Port } from "../../port";
 import { Wait } from "../../wait";
 
 const CLIENT_PORT = 4222;
@@ -60,7 +59,7 @@ export class NatsContainer extends GenericContainer {
       return result;
     }
 
-    this.withCmd(buildCmdsFromArgs(this.args))
+    this.withCommand(buildCmdsFromArgs(this.args))
       .withExposedPorts(
         ...(this.hasExposedPorts ? this.ports : [CLIENT_PORT, ROUTING_PORT_FOR_CLUSTERING, HTTP_MANAGEMENT_PORT])
       )
@@ -84,7 +83,7 @@ export class StartedNatsContainer extends AbstractStartedContainer {
 
   constructor(startedTestContainer: StartedTestContainer, readonly username: string, readonly password: string) {
     super(startedTestContainer);
-    const port: Port = startedTestContainer.getMappedPort(CLIENT_PORT);
+    const port = startedTestContainer.getMappedPort(CLIENT_PORT);
     this.connectionOptions = {
       servers: `${this.startedTestContainer.getHost()}:${port}`,
       user: this.username,
