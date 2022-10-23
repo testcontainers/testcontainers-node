@@ -22,7 +22,7 @@ describe("MongodbContainer", () => {
     await mongodbContainer.stop();
   });
 
-  async function checkMongo(mongodbContainer: StartedMongoDBContainer, port = 27017) {
+  async function checkMongo(mongodbContainer: StartedMongoDBContainer) {
     const db = await mongoose.createConnection(mongodbContainer.getConnectionString(), {
       directConnection: true,
     });
