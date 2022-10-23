@@ -11,7 +11,18 @@ import { HostPortWaitStrategy, WaitStrategy } from "../wait-strategy";
 import { Readable } from "stream";
 import { PortForwarderInstance } from "../port-forwarder";
 import { getAuthConfig } from "../registry-auth-locator";
-import { BindMode, BindMount, Environment, ExtraHost, HealthCheck, Labels, TmpFs, Ulimits } from "../docker/types";
+import {
+  BindMode,
+  BindMount,
+  ContentToCopy,
+  Environment,
+  ExtraHost,
+  FileToCopy,
+  HealthCheck,
+  Labels,
+  TmpFs,
+  Ulimits,
+} from "../docker/types";
 import { pullImage } from "../docker/functions/image/pull-image";
 import { createContainer, CreateContainerOptions } from "../docker/functions/container/create-container";
 import { connectNetwork } from "../docker/functions/network/connect-network";
@@ -332,13 +343,15 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
-  public withCopyFileToContainer(sourcePath: string, containerPath: string): this {
-    this.getTarToCopy().file(sourcePath, { name: containerPath });
+  public withCopyFilesToContainer(filesToCopy: FileToCopy[]): this {
+    const tar = this.getTarToCopy();
+    filesToCopy.forEach(({ source, target }) => tar.file(source, { name: target }));
     return this;
   }
 
-  public withCopyContentToContainer(content: string | Buffer | Readable, containerPath: string): this {
-    this.getTarToCopy().append(content, { name: containerPath });
+  public withCopyContentToContainer(contentsToCopy: ContentToCopy[]): this {
+    const tar = this.getTarToCopy();
+    contentsToCopy.forEach(({ content, target }) => tar.append(content, { name: target }));
     return this;
   }
 

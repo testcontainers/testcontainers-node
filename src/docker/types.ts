@@ -1,3 +1,5 @@
+import { Readable } from "stream";
+
 export type Environment = { [key in string]: string };
 
 export type BindMode = "rw" | "ro" | "z" | "Z";
@@ -6,6 +8,18 @@ export type BindMount = {
   source: string;
   target: string;
   mode?: BindMode;
+};
+
+export type FileToCopy = {
+  source: string;
+  target: string;
+};
+
+export type Content = string | Buffer | Readable;
+
+export type ContentToCopy = {
+  content: Content;
+  target: string;
 };
 
 export type TmpFs = { [dir in string]: string };

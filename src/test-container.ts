@@ -2,7 +2,17 @@ import { PortWithOptionalBinding } from "./port";
 import { PullPolicy } from "./pull-policy";
 import { WaitStrategy } from "./wait-strategy";
 import { Readable } from "stream";
-import { BindMode, ExecResult, ExtraHost, TmpFs, Labels, Ulimits, BindMount } from "./docker/types";
+import {
+  BindMode,
+  ExecResult,
+  ExtraHost,
+  TmpFs,
+  Labels,
+  Ulimits,
+  BindMount,
+  FileToCopy,
+  ContentToCopy,
+} from "./docker/types";
 
 export interface TestContainer {
   start(): Promise<StartedTestContainer>;
@@ -43,9 +53,9 @@ export interface TestContainer {
 
   withReuse(): this;
 
-  withCopyFileToContainer(sourcePath: string, containerPath: string): this;
+  withCopyFilesToContainer(filesToCopy: FileToCopy[]): this;
 
-  withCopyContentToContainer(content: string | Buffer | Readable, containerPath: string): this;
+  withCopyContentToContainer(contentsToCopy: ContentToCopy[]): this;
 }
 
 export interface RestartOptions {

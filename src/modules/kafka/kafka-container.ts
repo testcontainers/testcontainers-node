@@ -4,6 +4,7 @@ import { RandomUuid, Uuid } from "../../uuid";
 import { StartedTestContainer } from "../..";
 import { AbstractStartedContainer } from "../abstract-started-container";
 import { InspectResult } from "../../docker/functions/container/inspect-container";
+import { Content } from "../../docker/types";
 
 const KAFKA_PORT = 9093;
 const KAFKA_BROKER_PORT = 9092;
@@ -29,7 +30,7 @@ interface User {
 }
 
 interface PKCS12CertificateStore {
-  content: Parameters<GenericContainer["withCopyContentToContainer"]>[0];
+  content: Content;
   passphrase: string;
 }
 
@@ -121,7 +122,7 @@ export class KafkaContainer extends GenericContainer {
     )
       .withEnvironment("KAFKA_LISTENER_SECURITY_PROTOCOL_MAP", "BROKER:PLAINTEXT,PLAINTEXT:PLAINTEXT,SECURE:SASL_SSL")
       .withEnvironment("KAFKA_SSL_PROTOCOL", "TLSv1.2")
-      .withCopyContentToContainer(keystore.content, "/etc/kafka/secrets/server.keystore.pfx")
+      .withCopyContentToContainer([{ content: keystore.content, target: "/etc/kafka/secrets/server.keystore.pfx" }])
       .withEnvironment("KAFKA_SSL_KEYSTORE_LOCATION", "/etc/kafka/secrets/server.keystore.pfx")
       .withEnvironment("KAFKA_SSL_KEYSTORE_PASSWORD", keystore.passphrase)
       .withEnvironment("KAFKA_SSL_KEYSTORE_TYPE", "PKCS12")
@@ -133,7 +134,9 @@ export class KafkaContainer extends GenericContainer {
       .addExposedPorts(KAFKA_PORT, port);
 
     if (truststore) {
-      this.withCopyContentToContainer(truststore.content, "/etc/kafka/secrets/server.truststore.pfx")
+      this.withCopyContentToContainer([
+        { content: truststore.content, target: "/etc/kafka/secrets/server.truststore.pfx" },
+      ])
         .withEnvironment("KAFKA_SSL_TRUSTSTORE_LOCATION", "/etc/kafka/secrets/server.truststore.pfx")
         .withEnvironment("KAFKA_SSL_TRUSTSTORE_PASSWORD", truststore.passphrase)
         .withEnvironment("KAFKA_SSL_TRUSTSTORE_TYPE", "PKCS12");

@@ -280,11 +280,11 @@ const container = await new GenericContainer("postgres")
   .withExposedPorts(5432)
   .withCopyFilesToContainer([{ 
     source: "/local/file.txt", 
-    destination: "/remote/file1.txt"
+    target: "/remote/file1.txt"
   }])
   .withCopyContentToContainer([{ 
-    content: "hello world", 
-    destination: "/remote/file2.txt"
+    content: "hello world",
+    target: "/remote/file2.txt"
   }])
   .start();
 ```
