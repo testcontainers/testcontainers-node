@@ -239,12 +239,12 @@ export class GenericContainer implements TestContainer {
   }
 
   public withLabels(labels: Labels): this {
-    this.labels = { ...labels };
+    this.labels = { ...this.labels, ...labels };
     return this;
   }
 
-  public withEnvironment(key: string, value: string): this {
-    this.environment[key] = value;
+  public withEnvironment(environment: Environment): this {
+    this.environment = { ...this.environment, ...environment };
     return this;
   }
 
@@ -278,18 +278,13 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
-  public withExtraHosts(...extraHosts: ExtraHost[]): this {
-    this.extraHosts.push(...extraHosts);
+  public withExtraHosts(extraHosts: ExtraHost[]): this {
+    this.extraHosts = extraHosts;
     return this;
   }
 
   public withExposedPorts(...ports: PortWithOptionalBinding[]): this {
-    this.ports = ports;
-    return this;
-  }
-
-  protected addExposedPorts(...ports: PortWithOptionalBinding[]): this {
-    this.ports.push(...ports);
+    this.ports = [...this.ports, ...ports];
     return this;
   }
 

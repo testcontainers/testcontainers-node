@@ -37,10 +37,12 @@ export class MySqlContainer extends GenericContainer {
 
   public async start(): Promise<StartedMySqlContainer> {
     this.withExposedPorts(...(this.hasExposedPorts ? this.ports : [MYSQL_PORT]))
-      .withEnvironment("MYSQL_DATABASE", this.database)
-      .withEnvironment("MYSQL_ROOT_PASSWORD", this.rootPassword)
-      .withEnvironment("MYSQL_USER", this.username)
-      .withEnvironment("MYSQL_PASSWORD", this.userPassword)
+      .withEnvironment({
+        MYSQL_DATABASE: this.database,
+        MYSQL_ROOT_PASSWORD: this.rootPassword,
+        MYSQL_USER: this.username,
+        MYSQL_PASSWORD: this.userPassword,
+      })
       .withStartupTimeout(120_000);
 
     return new StartedMySqlContainer(

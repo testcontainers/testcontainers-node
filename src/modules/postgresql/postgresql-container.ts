@@ -31,9 +31,11 @@ export class PostgreSqlContainer extends GenericContainer {
 
   public async start(): Promise<StartedPostgreSqlContainer> {
     this.withExposedPorts(...(this.hasExposedPorts ? this.ports : [POSTGRES_PORT]))
-      .withEnvironment("POSTGRES_DB", this.database)
-      .withEnvironment("POSTGRES_USER", this.username)
-      .withEnvironment("POSTGRES_PASSWORD", this.password)
+      .withEnvironment({
+        POSTGRES_DB: this.database,
+        POSTGRES_USER: this.username,
+        POSTGRES_PASSWORD: this.password,
+      })
       .withStartupTimeout(120_000);
 
     return new StartedPostgreSqlContainer(await super.start(), this.database, this.username, this.password);

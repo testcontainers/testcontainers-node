@@ -12,12 +12,13 @@ import {
   BindMount,
   FileToCopy,
   ContentToCopy,
+  Environment,
 } from "./docker/types";
 
 export interface TestContainer {
   start(): Promise<StartedTestContainer>;
 
-  withEnvironment(key: string, value: string): this;
+  withEnvironment(environment: Environment): this;
 
   withCommand(command: string[]): this;
 
@@ -41,7 +42,7 @@ export interface TestContainer {
 
   withNetworkMode(networkMode: string): this;
 
-  withExtraHosts(...extraHosts: ExtraHost[]): this;
+  withExtraHosts(extraHosts: ExtraHost[]): this;
 
   withDefaultLogDriver(): this;
 

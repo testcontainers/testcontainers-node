@@ -45,17 +45,17 @@ export class KafkaContainer extends GenericContainer {
   constructor(image = KAFKA_IMAGE) {
     super(image);
 
-    this.withExposedPorts(KAFKA_PORT)
-      .withStartupTimeout(180_000)
-      .withEnvironment("KAFKA_LISTENER_SECURITY_PROTOCOL_MAP", "BROKER:PLAINTEXT,PLAINTEXT:PLAINTEXT")
-      .withEnvironment("KAFKA_INTER_BROKER_LISTENER_NAME", "BROKER")
-      .withEnvironment("KAFKA_BROKER_ID", "1")
-      .withEnvironment("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1")
-      .withEnvironment("KAFKA_OFFSETS_TOPIC_NUM_PARTITIONS", "1")
-      .withEnvironment("KAFKA_TRANSACTION_STATE_LOG_MIN_ISR", "1")
-      .withEnvironment("KAFKA_LOG_FLUSH_INTERVAL_MESSAGES", "9223372036854775807")
-      .withEnvironment("KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS", "0")
-      .withEnvironment("KAFKA_CONFLUENT_SUPPORT_METRICS_ENABLE", "false");
+    this.withExposedPorts(KAFKA_PORT).withStartupTimeout(180_000).withEnvironment({
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "BROKER:PLAINTEXT,PLAINTEXT:PLAINTEXT",
+      KAFKA_INTER_BROKER_LISTENER_NAME: "BROKER",
+      KAFKA_BROKER_ID: "1",
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1",
+      KAFKA_OFFSETS_TOPIC_NUM_PARTITIONS: "1",
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1",
+      KAFKA_LOG_FLUSH_INTERVAL_MESSAGES: "9223372036854775807",
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: "0",
+      KAFKA_CONFLUENT_SUPPORT_METRICS_ENABLE: "false",
+    });
   }
 
   public withZooKeeper(host: string, port: number): this {
@@ -73,7 +73,7 @@ export class KafkaContainer extends GenericContainer {
 
   protected async preStart(): Promise<void> {
     const network = this.networkMode && this.networkAliases.length > 0 ? this.networkAliases[0] : "localhost";
-    this.withEnvironment("KAFKA_ADVERTISED_LISTENERS", `BROKER://${network}:${KAFKA_BROKER_PORT}`);
+    this.withEnvironment({ KAFKA_ADVERTISED_LISTENERS: `BROKER://${network}:${KAFKA_BROKER_PORT}` });
 
     if (this.saslSslConfig) {
       this.addPlaintextAndSecureListener(this.saslSslConfig);
@@ -83,12 +83,12 @@ export class KafkaContainer extends GenericContainer {
 
     let command = "#!/bin/bash\n";
     if (this.isZooKeeperProvided) {
-      this.withEnvironment("KAFKA_ZOOKEEPER_CONNECT", `${this.zooKeeperHost}:${this.zooKeeperPort}`);
+      this.withEnvironment({ KAFKA_ZOOKEEPER_CONNECT: `${this.zooKeeperHost}:${this.zooKeeperPort}` });
     } else {
       this.zooKeeperHost = this.uuid.nextUuid();
       this.zooKeeperPort = DEFAULT_ZOOKEEPER_PORT;
-      this.addExposedPorts(this.zooKeeperPort);
-      this.withEnvironment("KAFKA_ZOOKEEPER_CONNECT", `localhost:${this.zooKeeperPort}`);
+      this.withExposedPorts(this.zooKeeperPort);
+      this.withEnvironment({ KAFKA_ZOOKEEPER_CONNECT: `localhost:${this.zooKeeperPort}` });
       command += "echo 'clientPort=" + this.zooKeeperPort + "' > zookeeper.properties\n";
       command += "echo 'dataDir=/var/lib/zookeeper/data' >> zookeeper.properties\n";
       command += "echo 'dataLogDir=/var/lib/zookeeper/log' >> zookeeper.properties\n";
@@ -116,38 +116,35 @@ export class KafkaContainer extends GenericContainer {
   }
 
   private addPlaintextAndSecureListener({ port, sasl, keystore, truststore }: SaslSslListenerOptions) {
-    this.withEnvironment(
-      "KAFKA_LISTENERS",
-      `SECURE://0.0.0.0:${port},PLAINTEXT://0.0.0.0:${KAFKA_PORT},BROKER://0.0.0.0:${KAFKA_BROKER_PORT}`
-    )
-      .withEnvironment("KAFKA_LISTENER_SECURITY_PROTOCOL_MAP", "BROKER:PLAINTEXT,PLAINTEXT:PLAINTEXT,SECURE:SASL_SSL")
-      .withEnvironment("KAFKA_SSL_PROTOCOL", "TLSv1.2")
+    this.withEnvironment({
+      KAFKA_LISTENERS: `SECURE://0.0.0.0:${port},PLAINTEXT://0.0.0.0:${KAFKA_PORT},BROKER://0.0.0.0:${KAFKA_BROKER_PORT}`,
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "BROKER:PLAINTEXT,PLAINTEXT:PLAINTEXT,SECURE:SASL_SSL",
+      KAFKA_SSL_PROTOCOL: "TLSv1.2",
+      KAFKA_SSL_KEYSTORE_LOCATION: "/etc/kafka/secrets/server.keystore.pfx",
+      KAFKA_SSL_KEYSTORE_PASSWORD: keystore.passphrase,
+      KAFKA_SSL_KEYSTORE_TYPE: "PKCS12",
+      KAFKA_SASL_ENABLED_MECHANISMS: sasl.mechanism,
+      [`KAFKA_LISTENER_NAME_SECURE_$:sasl.mechanism}_SASL_JAAS_CONFIG`]:
+        "org.apache.kafka.common.security.scram.ScramLoginModule required;",
+    })
       .withCopyContentToContainer([{ content: keystore.content, target: "/etc/kafka/secrets/server.keystore.pfx" }])
-      .withEnvironment("KAFKA_SSL_KEYSTORE_LOCATION", "/etc/kafka/secrets/server.keystore.pfx")
-      .withEnvironment("KAFKA_SSL_KEYSTORE_PASSWORD", keystore.passphrase)
-      .withEnvironment("KAFKA_SSL_KEYSTORE_TYPE", "PKCS12")
-      .withEnvironment("KAFKA_SASL_ENABLED_MECHANISMS", sasl.mechanism)
-      .withEnvironment(
-        `KAFKA_LISTENER_NAME_SECURE_${sasl.mechanism}_SASL_JAAS_CONFIG`,
-        "org.apache.kafka.common.security.scram.ScramLoginModule required;"
-      )
-      .addExposedPorts(KAFKA_PORT, port);
+      .withExposedPorts(KAFKA_PORT, port);
 
     if (truststore) {
       this.withCopyContentToContainer([
         { content: truststore.content, target: "/etc/kafka/secrets/server.truststore.pfx" },
-      ])
-        .withEnvironment("KAFKA_SSL_TRUSTSTORE_LOCATION", "/etc/kafka/secrets/server.truststore.pfx")
-        .withEnvironment("KAFKA_SSL_TRUSTSTORE_PASSWORD", truststore.passphrase)
-        .withEnvironment("KAFKA_SSL_TRUSTSTORE_TYPE", "PKCS12");
+      ]).withEnvironment({
+        KAFKA_SSL_TRUSTSTORE_LOCATION: "/etc/kafka/secrets/server.truststore.pfx",
+        KAFKA_SSL_TRUSTSTORE_PASSWORD: truststore.passphrase,
+        KAFKA_SSL_TRUSTSTORE_TYPE: "PKCS12",
+      });
     }
   }
 
   private addPlaintextListener() {
-    this.withEnvironment(
-      "KAFKA_LISTENERS",
-      `PLAINTEXT://0.0.0.0:${KAFKA_PORT},BROKER://0.0.0.0:${KAFKA_BROKER_PORT}`
-    ).addExposedPorts(KAFKA_PORT);
+    this.withEnvironment({
+      KAFKA_LISTENERS: `PLAINTEXT://0.0.0.0:${KAFKA_PORT},BROKER://0.0.0.0:${KAFKA_BROKER_PORT}`,
+    }).withExposedPorts(KAFKA_PORT);
   }
 
   private async updateAdvertisedListeners(
