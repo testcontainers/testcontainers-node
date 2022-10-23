@@ -59,7 +59,7 @@ export type RegistryConfig = {
 
 export type BuildContext = string;
 
-export type BuildArgs = { [key in EnvKey]: EnvValue };
+export type BuildArgs = { [key in string]: string };
 
 export type StreamOutput = string;
 

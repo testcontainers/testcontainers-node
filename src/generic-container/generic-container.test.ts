@@ -653,7 +653,7 @@ describe("GenericContainer", () => {
 
     it("should set build arguments", async () => {
       const context = path.resolve(fixtures, "docker-with-buildargs");
-      const container = await GenericContainer.fromDockerfile(context).withBuildArg("VERSION", "10-alpine").build();
+      const container = await GenericContainer.fromDockerfile(context).withBuildArgs({ VERSION: "10-alpine" }).build();
       const startedContainer = await container.withExposedPorts(8080).start();
 
       await checkContainerIsHealthy(startedContainer);
