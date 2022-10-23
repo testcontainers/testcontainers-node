@@ -1,5 +1,6 @@
+import { jest } from "@jest/globals";
 import { Database } from "arangojs";
-import { ArangoDBContainer } from "./arangodb-container";
+import { ArangoDBContainer } from "./arangodb-container.js";
 
 describe("ArangoDB", () => {
   jest.setTimeout(180_000);

@@ -1,4 +1,4 @@
-import { hash } from "./hash";
+import { hash } from "./hash.js";
 
 test("should return a hash", () => {
   const str = "Hello, world!";

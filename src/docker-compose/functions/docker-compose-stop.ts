@@ -1,7 +1,7 @@
-import { log } from "../../logger";
-import { stop } from "../docker-compose";
-import { defaultDockerComposeOptions } from "../default-docker-compose-options";
-import { DockerComposeOptions } from "../docker-compose-options";
+import { log } from "../../logger.js";
+import { stop } from "../docker-compose.js";
+import { defaultDockerComposeOptions } from "../default-docker-compose-options.js";
+import { DockerComposeOptions } from "../docker-compose-options.js";
 
 export const dockerComposeStop = async (options: DockerComposeOptions): Promise<void> => {
   log.info(`Stopping DockerCompose environment`);

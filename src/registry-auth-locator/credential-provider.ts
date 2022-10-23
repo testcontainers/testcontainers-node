@@ -1,8 +1,8 @@
-import { CredentialProviderGetResponse, CredentialProviderListResponse, DockerConfig } from "./types";
-import { log } from "../logger";
+import { CredentialProviderGetResponse, CredentialProviderListResponse, DockerConfig } from "./types.js";
+import { log } from "../logger.js";
 import { exec, spawn } from "child_process";
-import { RegistryAuthLocator } from "./registry-auth-locator";
-import { AuthConfig } from "../docker/types";
+import { RegistryAuthLocator } from "./registry-auth-locator.js";
+import { AuthConfig } from "../docker/types.js";
 
 export abstract class CredentialProvider implements RegistryAuthLocator {
   abstract getName(): string;

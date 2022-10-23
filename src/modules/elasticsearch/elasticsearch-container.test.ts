@@ -1,4 +1,4 @@
-import { ElasticsearchContainer } from "./elasticsearch-container";
+import { ElasticsearchContainer } from "./elasticsearch-container.js";
 import { Client } from "@elastic/elasticsearch";
 
 describe("ElasticsearchContainer", () => {
@@ -10,7 +10,7 @@ describe("ElasticsearchContainer", () => {
 
     await client.indices.create({ index: "people" });
 
-    expect((await client.indices.exists({ index: "people" })).statusCode).toBe(200);
+    expect(await client.indices.exists({ index: "people" })).toBe(true);
     await container.stop();
   });
 
@@ -28,7 +28,7 @@ describe("ElasticsearchContainer", () => {
       id: document.id,
     });
 
-    expect((await client.get({ index: "people", id: document.id })).body._source).toStrictEqual(document);
+    expect((await client.get({ index: "people", id: document.id }))._source).toStrictEqual(document);
     await container.stop();
   });
 });

@@ -1,4 +1,4 @@
-import { resolveContainerName } from "./container-name-resolver";
+import { resolveContainerName } from "./container-name-resolver.js";
 
 describe("resolveContainerName", () => {
   it("should remove project name label", () => {

@@ -1,5 +1,5 @@
-import { BoundPorts } from "./bound-ports";
-import { InspectResult } from "./docker/functions/container/inspect-container";
+import { BoundPorts } from "./bound-ports.js";
+import { InspectResult } from "./docker/functions/container/inspect-container.js";
 
 describe("BoundPorts", () => {
   it("should return a binding", () => {

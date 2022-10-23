@@ -1,7 +1,7 @@
 import { Readable } from "stream";
-import { ExecResult } from "../../types";
+import { ExecResult } from "../../types.js";
 import Dockerode from "dockerode";
-import { log, execLog } from "../../../logger";
+import { log, execLog } from "../../../logger.js";
 import byline from "byline";
 
 type ExecContainerOptions = {

@@ -1,6 +1,6 @@
-import { DockerImageName } from "../../../docker-image-name";
-import { listImages } from "./list-images";
-import { log } from "../../../logger";
+import { DockerImageName } from "../../../docker-image-name.js";
+import { listImages } from "./list-images.js";
+import { log } from "../../../logger.js";
 import Dockerode from "dockerode";
 
 export const imageExists = async (dockerode: Dockerode, imageName: DockerImageName): Promise<boolean> => {

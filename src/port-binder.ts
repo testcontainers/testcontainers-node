@@ -1,5 +1,5 @@
-import { BoundPorts } from "./bound-ports";
-import { PortGenerator, RandomUniquePortGenerator } from "./port-generator";
+import { BoundPorts } from "./bound-ports.js";
+import { PortGenerator, RandomUniquePortGenerator } from "./port-generator.js";
 
 export class PortBinder {
   constructor(private readonly portGenerator: PortGenerator = new RandomUniquePortGenerator()) {}

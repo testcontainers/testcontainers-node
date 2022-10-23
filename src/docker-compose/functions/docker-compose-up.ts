@@ -1,8 +1,8 @@
-import { log } from "../../logger";
-import { upAll, upMany } from "../docker-compose";
-import { defaultDockerComposeOptions } from "../default-docker-compose-options";
-import { DockerComposeOptions } from "../docker-compose-options";
-import { dockerComposeDown } from "./docker-compose-down";
+import { log } from "../../logger.js";
+import { upAll, upMany } from "../docker-compose.js";
+import { defaultDockerComposeOptions } from "../default-docker-compose-options.js";
+import { DockerComposeOptions } from "../docker-compose-options.js";
+import { dockerComposeDown } from "./docker-compose-down.js";
 
 export const dockerComposeUp = async (options: DockerComposeOptions, services?: Array<string>): Promise<void> => {
   log.info(`Upping DockerCompose environment`);

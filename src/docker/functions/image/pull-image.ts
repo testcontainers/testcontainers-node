@@ -1,9 +1,9 @@
-import { DockerImageName } from "../../../docker-image-name";
-import { log } from "../../../logger";
-import { PullStreamParser } from "../../pull-stream-parser";
-import { dockerClient } from "../../docker-client";
-import { AuthConfig } from "../../types";
-import { imageExists } from "./image-exists";
+import { DockerImageName } from "../../../docker-image-name.js";
+import { log } from "../../../logger.js";
+import { PullStreamParser } from "../../pull-stream-parser.js";
+import { dockerClient } from "../../docker-client.js";
+import { AuthConfig } from "../../types.js";
+import { imageExists } from "./image-exists.js";
 import Dockerode from "dockerode";
 
 export type PullImageOptions = {

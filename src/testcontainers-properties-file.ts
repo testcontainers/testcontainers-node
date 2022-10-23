@@ -1,5 +1,5 @@
 import path from "path";
-import { log } from "./logger";
+import { log } from "./logger.js";
 import { homedir } from "os";
 import { existsSync, readFileSync } from "fs";
 import propertiesReader from "properties-reader";

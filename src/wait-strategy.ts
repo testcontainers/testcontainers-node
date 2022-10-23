@@ -1,12 +1,12 @@
 import byline from "byline";
-import { BoundPorts } from "./bound-ports";
-import { log } from "./logger";
-import { PortCheck } from "./port-check";
-import { IntervalRetryStrategy } from "./retry-strategy";
-import { HealthCheckStatus } from "./docker/types";
+import { BoundPorts } from "./bound-ports.js";
+import { log } from "./logger.js";
+import { PortCheck } from "./port-check.js";
+import { IntervalRetryStrategy } from "./retry-strategy.js";
+import { HealthCheckStatus } from "./docker/types.js";
 import Dockerode from "dockerode";
-import { containerLogs } from "./docker/functions/container/container-logs";
-import { inspectContainer } from "./docker/functions/container/inspect-container";
+import { containerLogs } from "./docker/functions/container/container-logs.js";
+import { inspectContainer } from "./docker/functions/container/inspect-container.js";
 
 export interface WaitStrategy {
   waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void>;

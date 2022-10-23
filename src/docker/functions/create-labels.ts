@@ -1,7 +1,7 @@
-import { DockerImageName } from "../../docker-image-name";
-import { sessionId } from "../session-id";
-import { LABEL_SESSION_ID } from "../../labels";
-import { Labels } from "../types";
+import { DockerImageName } from "../../docker-image-name.js";
+import { sessionId } from "../session-id.js";
+import { LABEL_SESSION_ID } from "../../labels.js";
+import { Labels } from "../types.js";
 
 export const createLabels = (
   reusable: boolean,

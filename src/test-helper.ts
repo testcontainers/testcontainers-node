@@ -1,13 +1,13 @@
 import { Readable } from "stream";
-import { ReaperInstance } from "./reaper";
-import { dockerClient } from "./docker/docker-client";
-import { StartedDockerComposeEnvironment } from "./docker-compose-environment/started-docker-compose-environment";
-import fetch from "node-fetch";
-import { StartedTestContainer } from "./test-container";
+import { ReaperInstance } from "./reaper.js";
+import { dockerClient } from "./docker/docker-client.js";
+import { StartedDockerComposeEnvironment } from "./docker-compose-environment/started-docker-compose-environment.js";
+import axios from "axios";
+import { StartedTestContainer } from "./test-container.js";
 
 export const checkContainerIsHealthy = async (container: StartedTestContainer): Promise<void> => {
   const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
-  const response = await fetch(`${url}/hello-world`);
+  const response = await axios.get(`${url}/hello-world`);
   expect(response.status).toBe(200);
 };
 

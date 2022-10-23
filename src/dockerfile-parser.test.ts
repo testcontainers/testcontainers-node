@@ -1,6 +1,6 @@
 import path from "path";
-import { getDockerfileImages } from "./dockerfile-parser";
-import { DockerImageName } from "./docker-image-name";
+import { getDockerfileImages } from "./dockerfile-parser.js";
+import { DockerImageName } from "./docker-image-name.js";
 
 const dockerfileParserFixtures = path.resolve(__dirname, "..", "fixtures", "docker", "dockerfile-parser");
 

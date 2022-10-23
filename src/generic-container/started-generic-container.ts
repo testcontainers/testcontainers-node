@@ -4,20 +4,20 @@ import {
   StopOptions,
   ExecOptions,
   StoppedTestContainer,
-} from "../test-container";
+} from "../test-container.js";
 import Dockerode from "dockerode";
-import { ExecResult, Labels } from "../docker/types";
-import { inspectContainer, InspectResult } from "../docker/functions/container/inspect-container";
-import { BoundPorts } from "../bound-ports";
-import { log } from "../logger";
-import { removeContainer } from "../docker/functions/container/remove-container";
-import { execContainer } from "../docker/functions/container/exec-container";
+import { ExecResult, Labels } from "../docker/types.js";
+import { inspectContainer, InspectResult } from "../docker/functions/container/inspect-container.js";
+import { BoundPorts } from "../bound-ports.js";
+import { log } from "../logger.js";
+import { removeContainer } from "../docker/functions/container/remove-container.js";
+import { execContainer } from "../docker/functions/container/exec-container.js";
 import { Readable } from "stream";
-import { containerLogs } from "../docker/functions/container/container-logs";
-import { StoppedGenericContainer } from "./stopped-generic-container";
-import { stopContainer } from "../docker/functions/container/stop-container";
-import { restartContainer } from "../docker/functions/container/restart-container";
-import { WaitStrategy } from "../wait-strategy";
+import { containerLogs } from "../docker/functions/container/container-logs.js";
+import { StoppedGenericContainer } from "./stopped-generic-container.js";
+import { stopContainer } from "../docker/functions/container/stop-container.js";
+import { restartContainer } from "../docker/functions/container/restart-container.js";
+import { WaitStrategy } from "../wait-strategy.js";
 
 export class StartedGenericContainer implements StartedTestContainer {
   constructor(

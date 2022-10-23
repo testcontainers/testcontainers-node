@@ -1,4 +1,4 @@
-import { MongoDBContainer, StartedMongoDBContainer } from "./mongodb-container";
+import { MongoDBContainer, StartedMongoDBContainer } from "./mongodb-container.js";
 import mongoose from "mongoose";
 
 describe("MongodbContainer", () => {

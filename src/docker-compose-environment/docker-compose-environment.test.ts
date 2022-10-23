@@ -1,8 +1,8 @@
-import fetch from "node-fetch";
+import axios from "axios";
 import path from "path";
-import { DockerComposeEnvironment } from "./docker-compose-environment";
-import { Wait } from "../wait";
-import { checkEnvironmentContainerIsHealthy, getRunningContainerNames, getVolumeNames } from "../test-helper";
+import { DockerComposeEnvironment } from "./docker-compose-environment.js";
+import { Wait } from "../wait.js";
+import { checkEnvironmentContainerIsHealthy, getRunningContainerNames, getVolumeNames } from "../test-helper.js";
 
 describe("DockerComposeEnvironment", () => {
   jest.setTimeout(180_000);
@@ -43,10 +43,9 @@ describe("DockerComposeEnvironment", () => {
     const container = startedEnvironment.getContainer("container_1");
 
     const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
-    const response = await fetch(`${url}/env`);
-    const responseBody = await response.json();
+    const response = await axios.get(`${url}/env`);
 
-    expect(responseBody["IS_OVERRIDDEN"]).toBe("true");
+    expect(response.data["IS_OVERRIDDEN"]).toBe("true");
 
     await startedEnvironment.down();
   });
@@ -144,9 +143,8 @@ describe("DockerComposeEnvironment", () => {
       .up();
 
     const container = startedEnvironment.getContainer("container_1");
-    const response = await fetch(`http://${container.getHost()}:${container.getMappedPort(8080)}/env`);
-    const responseBody = await response.json();
-    expect(responseBody["ENV_VAR"]).toBe("ENV_VAR_VALUE");
+    const response = await axios.get(`http://${container.getHost()}:${container.getMappedPort(8080)}/env`);
+    expect(response.data["ENV_VAR"]).toBe("ENV_VAR_VALUE");
 
     await startedEnvironment.down();
   });
@@ -192,9 +190,8 @@ describe("DockerComposeEnvironment", () => {
     const startedEnvironment = await new DockerComposeEnvironment(overrideFixtures, "docker-compose.yml").up();
 
     const container = startedEnvironment.getContainer("container_1");
-    const response = await fetch(`http://${container.getHost()}:${container.getMappedPort(8080)}/env`);
-    const responseBody = await response.json();
-    expect(responseBody["ENV_VAR"]).toBe("default");
+    const response = await axios.get(`http://${container.getHost()}:${container.getMappedPort(8080)}/env`);
+    expect(response.data["ENV_VAR"]).toBe("default");
 
     await startedEnvironment.down();
   });
@@ -207,9 +204,8 @@ describe("DockerComposeEnvironment", () => {
       .up();
 
     const container = startedEnvironment.getContainer("container_1");
-    const response = await fetch(`http://${container.getHost()}:${container.getMappedPort(8080)}/env`);
-    const responseBody = await response.json();
-    expect(responseBody["ENV_VAR"]).toBe("override");
+    const response = await axios.get(`http://${container.getHost()}:${container.getMappedPort(8080)}/env`);
+    expect(response.data["ENV_VAR"]).toBe("override");
 
     await startedEnvironment.down();
   });

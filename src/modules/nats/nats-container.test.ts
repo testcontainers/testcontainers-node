@@ -1,5 +1,5 @@
 import { connect, StringCodec } from "nats";
-import { NatsContainer } from "./nats-container";
+import { NatsContainer } from "./nats-container.js";
 
 describe("NatsContainer", () => {
   jest.setTimeout(180_000);

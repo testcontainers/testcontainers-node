@@ -1,6 +1,6 @@
-import { DockerImageName } from "../../../docker-image-name";
+import { DockerImageName } from "../../../docker-image-name.js";
 import Dockerode from "dockerode";
-import { log } from "../../../logger";
+import { log } from "../../../logger.js";
 
 export const listImages = async (dockerode: Dockerode): Promise<DockerImageName[]> => {
   try {

@@ -1,3 +1,3 @@
-import { StoppedTestContainer } from "../test-container";
+import { StoppedTestContainer } from "../test-container.js";
 
 export class StoppedGenericContainer implements StoppedTestContainer {}

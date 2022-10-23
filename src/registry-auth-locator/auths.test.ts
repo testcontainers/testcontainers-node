@@ -1,6 +1,6 @@
-import { DockerConfig } from "./types";
-import { Auths } from "./auths";
-import { AuthConfig } from "../docker/types";
+import { DockerConfig } from "./types.js";
+import { Auths } from "./auths.js";
+import { AuthConfig } from "../docker/types.js";
 
 describe("Auths", () => {
   const locator = new Auths();

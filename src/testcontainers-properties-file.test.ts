@@ -1,3 +1,5 @@
+import { jest } from "@jest/globals";
+
 describe("testcontainers properties file", () => {
   let mockedExistsSync: jest.Mock;
   let mockedReadFileSync: jest.Mock;
@@ -22,7 +24,7 @@ describe("testcontainers properties file", () => {
     });
 
     it("should not set anything", async () => {
-      await import("./testcontainers-properties-file");
+      await import("./testcontainers-properties-file.js");
 
       expect(process.env.DOCKER_HOST).toBeUndefined();
       expect(process.env.DOCKER_TLS_VERIFY).toBeUndefined();
@@ -40,7 +42,7 @@ describe("testcontainers properties file", () => {
     it("should set the host", async () => {
       mockedReadFileSync.mockReturnValueOnce("docker.host=tcp://my.docker.host:1234");
 
-      await import("./testcontainers-properties-file");
+      await import("./testcontainers-properties-file.js");
 
       expect(process.env.DOCKER_HOST).toBe("tcp://my.docker.host:1234");
       expect(process.env.DOCKER_TLS_VERIFY).toBeUndefined();
@@ -53,7 +55,7 @@ describe("testcontainers properties file", () => {
         docker.tls.verify=1
       `);
 
-      await import("./testcontainers-properties-file");
+      await import("./testcontainers-properties-file.js");
 
       expect(process.env.DOCKER_HOST).toBe("tcp://my.docker.host:1234");
       expect(process.env.DOCKER_TLS_VERIFY).toBe("1");
@@ -67,7 +69,7 @@ describe("testcontainers properties file", () => {
         docker.cert.path=/some/path
       `);
 
-      await import("./testcontainers-properties-file");
+      await import("./testcontainers-properties-file.js");
 
       expect(process.env.DOCKER_HOST).toBe("tcp://my.docker.host:1234");
       expect(process.env.DOCKER_TLS_VERIFY).toBe("1");

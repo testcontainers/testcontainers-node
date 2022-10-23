@@ -1,6 +1,6 @@
-import { log } from "./logger";
-import { version as dockerComposeVersion } from "./docker-compose/docker-compose";
-import { getDockerInfo } from "./docker/functions/get-info";
+import { log } from "./logger.js";
+import { version as dockerComposeVersion } from "./docker-compose/docker-compose.js";
+import { getDockerInfo } from "./docker/functions/get-info.js";
 import Dockerode from "dockerode";
 
 export const logSystemDiagnostics = async (dockerode: Dockerode): Promise<void> => {

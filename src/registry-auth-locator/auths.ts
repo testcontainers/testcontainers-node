@@ -1,6 +1,6 @@
-import { Auth, DockerConfig } from "./types";
-import { RegistryAuthLocator } from "./registry-auth-locator";
-import { AuthConfig } from "../docker/types";
+import { Auth, DockerConfig } from "./types.js";
+import { RegistryAuthLocator } from "./registry-auth-locator.js";
+import { AuthConfig } from "../docker/types.js";
 
 export class Auths implements RegistryAuthLocator {
   public getName(): string {

@@ -1,9 +1,9 @@
 import { IncomingMessage } from "http";
-import { log } from "../../../logger";
+import { log } from "../../../logger.js";
 import Dockerode from "dockerode";
-import { demuxStream } from "../demux-stream";
+import { demuxStream } from "../demux-stream.js";
 import { Readable } from "stream";
-import { dockerClient } from "../../docker-client";
+import { dockerClient } from "../../docker-client.js";
 
 export const containerLogs = async (container: Dockerode.Container): Promise<Readable> => {
   try {

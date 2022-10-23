@@ -1,8 +1,8 @@
 import { createServer, Server } from "http";
-import { GenericContainer } from "./generic-container/generic-container";
-import { TestContainers } from "./test-containers";
-import { RandomUniquePortGenerator } from "./port-generator";
-import { Network } from "./network";
+import { GenericContainer } from "./generic-container/generic-container.js";
+import { TestContainers } from "./test-containers.js";
+import { RandomUniquePortGenerator } from "./port-generator.js";
+import { Network } from "./network.js";
 
 describe("PortForwarder", () => {
   jest.setTimeout(180_000);

@@ -1,5 +1,5 @@
 import neo4j from "neo4j-driver";
-import { Neo4jContainer } from "./neo4j-container";
+import { Neo4jContainer } from "./neo4j-container.js";
 
 describe("Neo4jContainer", () => {
   jest.setTimeout(180_000);

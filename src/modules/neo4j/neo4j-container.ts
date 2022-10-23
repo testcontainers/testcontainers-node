@@ -1,7 +1,7 @@
-import { GenericContainer, Wait } from "../..";
-import { StartedTestContainer } from "../../test-container";
-import { RandomUuid } from "../../uuid";
-import { AbstractStartedContainer } from "../abstract-started-container";
+import { GenericContainer, Wait } from "../../index.js";
+import { StartedTestContainer } from "../../test-container.js";
+import { RandomUuid } from "../../uuid.js";
+import { AbstractStartedContainer } from "../abstract-started-container.js";
 
 const BOLT_PORT = 7687;
 const HTTP_PORT = 7474;

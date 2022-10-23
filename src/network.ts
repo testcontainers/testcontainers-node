@@ -1,8 +1,8 @@
-import { RandomUuid, Uuid } from "./uuid";
-import { log } from "./logger";
-import { ReaperInstance } from "./reaper";
-import { createNetwork, CreateNetworkOptions } from "./docker/functions/network/create-network";
-import { removeNetwork } from "./docker/functions/network/remove-network";
+import { RandomUuid, Uuid } from "./uuid.js";
+import { log } from "./logger.js";
+import { ReaperInstance } from "./reaper.js";
+import { createNetwork, CreateNetworkOptions } from "./docker/functions/network/create-network.js";
+import { removeNetwork } from "./docker/functions/network/remove-network.js";
 
 export class Network {
   private readonly createNetworkOptions: CreateNetworkOptions;

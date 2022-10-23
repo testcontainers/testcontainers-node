@@ -1,13 +1,13 @@
-import { log } from "./logger";
-import { execContainer } from "./docker/functions/container/exec-container";
+import { log } from "./logger.js";
+import { execContainer } from "./docker/functions/container/exec-container.js";
 import Dockerode from "dockerode";
-import { InternalPortCheck } from "./port-check";
+import { InternalPortCheck } from "./port-check.js";
 
 jest.mock("./logger");
 jest.mock("./docker/functions/container/exec-container");
 
-const mockLogger = jest.mocked(log, true);
-const mockExecContainer = jest.mocked(execContainer, true);
+const mockLogger = jest.mocked(log, { shallow: true });
+const mockExecContainer = jest.mocked(execContainer, { shallow: true });
 
 describe("PortCheck", () => {
   describe("InternalPortCheck", () => {

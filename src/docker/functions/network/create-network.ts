@@ -1,7 +1,7 @@
-import { log } from "../../../logger";
+import { log } from "../../../logger.js";
 import { Network } from "dockerode";
-import { dockerClient } from "../../docker-client";
-import { createLabels } from "../create-labels";
+import { dockerClient } from "../../docker-client.js";
+import { createLabels } from "../create-labels.js";
 
 export type CreateNetworkOptions = {
   name: string;

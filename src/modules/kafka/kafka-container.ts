@@ -1,10 +1,10 @@
-import { GenericContainer } from "../../generic-container/generic-container";
-import { BoundPorts } from "../../bound-ports";
-import { RandomUuid, Uuid } from "../../uuid";
-import { StartedTestContainer } from "../..";
-import { AbstractStartedContainer } from "../abstract-started-container";
-import { InspectResult } from "../../docker/functions/container/inspect-container";
-import { Content } from "../../docker/types";
+import { GenericContainer } from "../../generic-container/generic-container.js";
+import { BoundPorts } from "../../bound-ports.js";
+import { RandomUuid, Uuid } from "../../uuid.js";
+import { StartedTestContainer } from "../../index.js";
+import { AbstractStartedContainer } from "../abstract-started-container.js";
+import { InspectResult } from "../../docker/functions/container/inspect-container.js";
+import { Content } from "../../docker/types.js";
 
 const KAFKA_PORT = 9093;
 const KAFKA_BROKER_PORT = 9092;

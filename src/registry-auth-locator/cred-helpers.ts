@@ -1,5 +1,5 @@
-import { CredentialProvider } from "./credential-provider";
-import { DockerConfig } from "./types";
+import { CredentialProvider } from "./credential-provider.js";
+import { DockerConfig } from "./types.js";
 
 export class CredHelpers extends CredentialProvider {
   public getName(): string {

@@ -1,4 +1,4 @@
-import { FixedPortGenerator, RandomUniquePortGenerator } from "./port-generator";
+import { FixedPortGenerator, RandomUniquePortGenerator } from "./port-generator.js";
 
 describe("PortGenerator", () => {
   describe("RandomUniquePortGenerator", () => {

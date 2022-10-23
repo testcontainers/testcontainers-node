@@ -1,5 +1,5 @@
 import { PassThrough, Readable } from "stream";
-import { log } from "../../logger";
+import { log } from "../../logger.js";
 import Dockerode from "dockerode";
 
 export const demuxStream = async (dockerode: Dockerode, stream: Readable): Promise<Readable> => {

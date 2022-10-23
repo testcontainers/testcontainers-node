@@ -1,10 +1,10 @@
-import { log } from "../../../logger";
-import { DockerImageName } from "../../../docker-image-name";
-import { dockerClient } from "../../docker-client";
+import { log } from "../../../logger.js";
+import { DockerImageName } from "../../../docker-image-name.js";
+import { dockerClient } from "../../docker-client.js";
 import Dockerode, { PortMap as DockerodePortBindings } from "dockerode";
-import { getContainerPort, hasHostBinding, PortWithOptionalBinding } from "../../../port";
-import { createLabels } from "../create-labels";
-import { BindMount, Environment, ExtraHost, HealthCheck, Labels, TmpFs, Ulimits } from "../../types";
+import { getContainerPort, hasHostBinding, PortWithOptionalBinding } from "../../../port.js";
+import { createLabels } from "../create-labels.js";
+import { BindMount, Environment, ExtraHost, HealthCheck, Labels, TmpFs, Ulimits } from "../../types.js";
 
 export type CreateContainerOptions = {
   imageName: DockerImageName;

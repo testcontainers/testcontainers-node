@@ -1,6 +1,6 @@
 import { Readable } from "stream";
 import Dockerode from "dockerode";
-import { log } from "../../../logger";
+import { log } from "../../../logger.js";
 
 export type PutContainerArchiveOptions = {
   container: Dockerode.Container;

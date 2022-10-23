@@ -1,15 +1,16 @@
-import { GenericContainer, StartedTestContainer } from "../..";
-import { AbstractStartedContainer } from "../abstract-started-container";
+import { GenericContainer, StartedTestContainer } from "../../index.js";
+import { AbstractStartedContainer } from "../abstract-started-container.js";
 
 const ELASTIC_SEARCH_HTTP_PORT = 9200;
 
 export class ElasticsearchContainer extends GenericContainer {
-  constructor(image = "docker.elastic.co/elasticsearch/elasticsearch:7.9.2") {
+  constructor(image = "docker.elastic.co/elasticsearch/elasticsearch:8.4.3") {
     super(image);
   }
 
   public override async start(): Promise<StartedElasticsearchContainer> {
-    this.withExposedPorts(...(this.hasExposedPorts ? this.ports : [ELASTIC_SEARCH_HTTP_PORT]))
+    super
+      .withExposedPorts(...(super.hasExposedPorts ? super.ports : [ELASTIC_SEARCH_HTTP_PORT]))
       .withEnvironment({ "discovery.type": "single-node" })
       .withStartupTimeout(120_000);
 

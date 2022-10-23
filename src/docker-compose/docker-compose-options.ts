@@ -1,4 +1,4 @@
-import { Environment } from "../docker/types";
+import { Environment } from "../docker/types.js";
 
 export type DockerComposeOptions = {
   filePath: string;

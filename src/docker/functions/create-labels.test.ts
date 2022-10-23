@@ -1,7 +1,7 @@
-import { createLabels } from "./create-labels";
-import { DockerImageName } from "../../docker-image-name";
-import { REAPER_IMAGE } from "../../images";
-import { LABEL_SESSION_ID } from "../../labels";
+import { createLabels } from "./create-labels.js";
+import { DockerImageName } from "../../docker-image-name.js";
+import { REAPER_IMAGE } from "../../images.js";
+import { LABEL_SESSION_ID } from "../../labels.js";
 
 test("should add session ID label when not reusable (for the Reaper)", () => {
   expect(createLabels(false)).toEqual({ [LABEL_SESSION_ID]: expect.any(String) });

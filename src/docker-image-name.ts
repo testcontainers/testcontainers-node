@@ -1,4 +1,4 @@
-import { REAPER_IMAGE, SSHD_IMAGE } from "./images";
+import { REAPER_IMAGE, SSHD_IMAGE } from "./images.js";
 
 export class DockerImageName {
   private readonly string: string;

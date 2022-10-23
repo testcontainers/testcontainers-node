@@ -1,9 +1,9 @@
-import { GenericContainer } from "../../generic-container/generic-container";
-import { AbstractStartedContainer } from "../abstract-started-container";
-import { StartedTestContainer } from "../../test-container";
-import { Wait } from "../../wait";
-import { ExecResult } from "../../docker/types";
-import { DockerImageName } from "../../docker-image-name";
+import { GenericContainer } from "../../generic-container/generic-container.js";
+import { AbstractStartedContainer } from "../abstract-started-container.js";
+import { StartedTestContainer } from "../../test-container.js";
+import { Wait } from "../../wait.js";
+import { ExecResult } from "../../docker/types.js";
+import { DockerImageName } from "../../docker-image-name.js";
 
 const MONGODB_PORT = 27017;
 

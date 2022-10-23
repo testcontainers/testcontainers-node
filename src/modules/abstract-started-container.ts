@@ -1,5 +1,5 @@
-import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
-import { ExecResult, Labels } from "../docker/types";
+import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container.js";
+import { ExecResult, Labels } from "../docker/types.js";
 import { Readable } from "stream";
 
 export class AbstractStartedContainer {

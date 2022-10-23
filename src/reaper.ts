@@ -1,12 +1,12 @@
 import { Socket } from "net";
-import { log } from "./logger";
-import { GenericContainer } from "./generic-container/generic-container";
-import { StartedTestContainer } from "./test-container";
-import { sessionId } from "./docker/session-id";
-import { REAPER_IMAGE } from "./images";
-import { getContainerPort, PortWithOptionalBinding } from "./port";
-import { LABEL_SESSION_ID } from "./labels";
-import { Wait } from "./wait";
+import { log } from "./logger.js";
+import { GenericContainer } from "./generic-container/generic-container.js";
+import { StartedTestContainer } from "./test-container.js";
+import { sessionId } from "./docker/session-id.js";
+import { REAPER_IMAGE } from "./images.js";
+import { getContainerPort, PortWithOptionalBinding } from "./port.js";
+import { LABEL_SESSION_ID } from "./labels.js";
+import { Wait } from "./wait.js";
 
 export interface Reaper {
   addProject(projectName: string): void;

@@ -1,14 +1,15 @@
 {
   "compilerOptions": {
     "target": "es6",
-    "module": "commonjs",
+    "module": "esnext",
+    "moduleResolution": "NodeNext",
     "declaration": true,
     "outDir": "dist",
     "strict": true,
     "esModuleInterop": true,
     "lib": ["es2017"],
     "skipLibCheck": true,
-    "noImplicitOverride": true
+    "noImplicitOverride": true,
   },
   "exclude": [
     "dist",

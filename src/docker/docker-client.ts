@@ -1,10 +1,10 @@
 import Dockerode, { DockerOptions, NetworkInspectInfo } from "dockerode";
 import path from "path";
-import { log } from "../logger";
+import { log } from "../logger.js";
 import { URL } from "url";
 import { existsSync, promises as fs } from "fs";
-import { runInContainer } from "./functions/run-in-container";
-import { logSystemDiagnostics } from "../log-system-diagnostics";
+import { runInContainer } from "./functions/run-in-container.js";
+import { logSystemDiagnostics } from "../log-system-diagnostics.js";
 import "../testcontainers-properties-file";
 
 type DockerClient = {

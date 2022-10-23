@@ -1,5 +1,5 @@
 import { createConnection } from "mysql2/promise";
-import { MySqlContainer } from "./mysql-container";
+import { MySqlContainer } from "./mysql-container.js";
 
 describe("MySqlContainer", () => {
   jest.setTimeout(240_000);

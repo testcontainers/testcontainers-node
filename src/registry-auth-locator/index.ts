@@ -1,13 +1,13 @@
 import path from "path";
 import os from "os";
-import { DockerConfig } from "./types";
+import { DockerConfig } from "./types.js";
 import { existsSync, promises as fs } from "fs";
-import { CredHelpers } from "./cred-helpers";
-import { CredsStore } from "./creds-store";
-import { Auths } from "./auths";
-import { RegistryAuthLocator } from "./registry-auth-locator";
-import { log } from "../logger";
-import { AuthConfig } from "../docker/types";
+import { CredHelpers } from "./cred-helpers.js";
+import { CredsStore } from "./creds-store.js";
+import { Auths } from "./auths.js";
+import { RegistryAuthLocator } from "./registry-auth-locator.js";
+import { log } from "../logger.js";
+import { AuthConfig } from "../docker/types.js";
 
 const DEFAULT_REGISTRY = "https://index.docker.io/v1/";
 

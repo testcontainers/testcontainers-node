@@ -1,5 +1,5 @@
-import { log } from "../../../logger";
-import { dockerClient } from "../../docker-client";
+import { log } from "../../../logger.js";
+import { dockerClient } from "../../docker-client.js";
 
 export const removeNetwork = async (id: string): Promise<void> => {
   try {

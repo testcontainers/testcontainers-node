@@ -1,16 +1,16 @@
-import { AuthConfig, BuildArgs, RegistryConfig } from "../docker/types";
-import { DefaultPullPolicy, PullPolicy } from "../pull-policy";
-import { RandomUuid, Uuid } from "../uuid";
-import { ReaperInstance } from "../reaper";
-import { DockerImageName } from "../docker-image-name";
+import { AuthConfig, BuildArgs, RegistryConfig } from "../docker/types.js";
+import { DefaultPullPolicy, PullPolicy } from "../pull-policy.js";
+import { RandomUuid, Uuid } from "../uuid.js";
+import { ReaperInstance } from "../reaper.js";
+import { DockerImageName } from "../docker-image-name.js";
 import path from "path";
-import { log } from "../logger";
-import { getDockerfileImages } from "../dockerfile-parser";
-import { buildImage } from "../docker/functions/image/build-image";
-import { imageExists } from "../docker/functions/image/image-exists";
-import { getAuthConfig } from "../registry-auth-locator";
-import { GenericContainer } from "./generic-container";
-import { dockerClient } from "../docker/docker-client";
+import { log } from "../logger.js";
+import { getDockerfileImages } from "../dockerfile-parser.js";
+import { buildImage } from "../docker/functions/image/build-image.js";
+import { imageExists } from "../docker/functions/image/image-exists.js";
+import { getAuthConfig } from "../registry-auth-locator/index.js";
+import { GenericContainer } from "./generic-container.js";
+import { dockerClient } from "../docker/docker-client.js";
 
 export class GenericContainerBuilder {
   private buildArgs: BuildArgs = {};

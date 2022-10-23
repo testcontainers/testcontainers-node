@@ -1,18 +1,16 @@
 import archiver from "archiver";
-import { BoundPorts } from "../bound-ports";
-import { containerLog, log } from "../logger";
-import { PortWithOptionalBinding } from "../port";
-import { HostPortCheck, InternalPortCheck } from "../port-check";
-import { DefaultPullPolicy, PullPolicy } from "../pull-policy";
-import { ReaperInstance } from "../reaper";
-import { DockerImageName } from "../docker-image-name";
-import { StartedTestContainer, TestContainer } from "../test-container";
-import { HostPortWaitStrategy, WaitStrategy } from "../wait-strategy";
-import { Readable } from "stream";
-import { PortForwarderInstance } from "../port-forwarder";
-import { getAuthConfig } from "../registry-auth-locator";
+import { BoundPorts } from "../bound-ports.js";
+import { containerLog, log } from "../logger.js";
+import { PortWithOptionalBinding } from "../port.js";
+import { HostPortCheck, InternalPortCheck } from "../port-check.js";
+import { DefaultPullPolicy, PullPolicy } from "../pull-policy.js";
+import { ReaperInstance } from "../reaper.js";
+import { DockerImageName } from "../docker-image-name.js";
+import { StartedTestContainer, TestContainer } from "../test-container.js";
+import { HostPortWaitStrategy, WaitStrategy } from "../wait-strategy.js";
+import { PortForwarderInstance } from "../port-forwarder.js";
+import { getAuthConfig } from "../registry-auth-locator/index.js";
 import {
-  BindMode,
   BindMount,
   ContentToCopy,
   Environment,
@@ -22,24 +20,24 @@ import {
   Labels,
   TmpFs,
   Ulimits,
-} from "../docker/types";
-import { pullImage } from "../docker/functions/image/pull-image";
-import { createContainer, CreateContainerOptions } from "../docker/functions/container/create-container";
-import { connectNetwork } from "../docker/functions/network/connect-network";
-import { dockerClient } from "../docker/docker-client";
-import { inspectContainer, InspectResult } from "../docker/functions/container/inspect-container";
+} from "../docker/types.js";
+import { pullImage } from "../docker/functions/image/pull-image.js";
+import { createContainer, CreateContainerOptions } from "../docker/functions/container/create-container.js";
+import { connectNetwork } from "../docker/functions/network/connect-network.js";
+import { dockerClient } from "../docker/docker-client.js";
+import { inspectContainer, InspectResult } from "../docker/functions/container/inspect-container.js";
 import Dockerode from "dockerode";
-import { startContainer } from "../docker/functions/container/start-container";
-import { containerLogs } from "../docker/functions/container/container-logs";
-import { stopContainer } from "../docker/functions/container/stop-container";
-import { removeContainer } from "../docker/functions/container/remove-container";
-import { putContainerArchive } from "../docker/functions/container/put-container-archive";
-import { GenericContainerBuilder } from "./generic-container-builder";
-import { StartedGenericContainer } from "./started-generic-container";
-import { hash } from "../hash";
-import { getContainerByHash } from "../docker/functions/container/get-container";
-import { LABEL_CONTAINER_HASH } from "../labels";
-import { Network, StartedNetwork } from "../network";
+import { startContainer } from "../docker/functions/container/start-container.js";
+import { containerLogs } from "../docker/functions/container/container-logs.js";
+import { stopContainer } from "../docker/functions/container/stop-container.js";
+import { removeContainer } from "../docker/functions/container/remove-container.js";
+import { putContainerArchive } from "../docker/functions/container/put-container-archive.js";
+import { GenericContainerBuilder } from "./generic-container-builder.js";
+import { StartedGenericContainer } from "./started-generic-container.js";
+import { hash } from "../hash.js";
+import { getContainerByHash } from "../docker/functions/container/get-container.js";
+import { LABEL_CONTAINER_HASH } from "../labels.js";
+import { Network, StartedNetwork } from "../network.js";
 
 export class GenericContainer implements TestContainer {
   public static fromDockerfile(context: string, dockerfileName = "Dockerfile"): GenericContainerBuilder {

@@ -1,6 +1,6 @@
-import { DockerConfig } from "./types";
-import { CredHelpers } from "./cred-helpers";
-import { AuthConfig } from "../docker/types";
+import { DockerConfig } from "./types.js";
+import { CredHelpers } from "./cred-helpers.js";
+import { AuthConfig } from "../docker/types.js";
 
 describe("CredHelpers", () => {
   const locator = new CredHelpers();

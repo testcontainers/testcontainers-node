@@ -1,18 +1,19 @@
-import fetch from "node-fetch";
+import { jest } from "@jest/globals";
+import axios from "axios";
 import path from "path";
 import getPort from "get-port";
-import { GenericContainer } from "./generic-container";
-import { AlwaysPullPolicy } from "../pull-policy";
-import { Wait } from "../wait";
-import { RandomUuid } from "../uuid";
-import { checkContainerIsHealthy, getEvents, getRunningContainerNames } from "../test-helper";
-import { Network } from "../network";
-import { getContainerById } from "../docker/functions/container/get-container";
+import { GenericContainer } from "./generic-container.js";
+import { AlwaysPullPolicy } from "../pull-policy.js";
+import { Wait } from "../wait.js";
+import { RandomUuid } from "../uuid.js";
+import { checkContainerIsHealthy, getEvents, getRunningContainerNames } from "../test-helper.js";
+import { Network } from "../network.js";
+import { getContainerById } from "../docker/functions/container/get-container.js";
 
 describe("GenericContainer", () => {
   jest.setTimeout(180_000);
 
-  const fixtures = path.resolve(__dirname, "..", "..", "fixtures", "docker");
+  const fixtures = path.resolve("fixtures", "docker");
 
   it("should wait for port", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.13").withExposedPorts(8080).start();
@@ -153,9 +154,8 @@ describe("GenericContainer", () => {
       .start();
 
     const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
-    const response = await fetch(`${url}/env`);
-    const responseBody = await response.json();
-    expect(responseBody.customKey).toBe("customValue");
+    const response = await axios.get(`${url}/env`);
+    expect(response.data.customKey).toBe("customValue");
 
     await container.stop();
   });
@@ -167,9 +167,8 @@ describe("GenericContainer", () => {
       .start();
 
     const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
-    const response = await fetch(`${url}/cmd`);
-    const responseBody = await response.json();
-    expect(responseBody).toEqual(["/usr/local/bin/node", "/index.js", "one", "two", "three"]);
+    const response = await axios.get(`${url}/cmd`);
+    expect(response.data).toEqual(["/usr/local/bin/node", "/index.js", "one", "two", "three"]);
 
     await container.stop();
   });
@@ -348,7 +347,7 @@ describe("GenericContainer", () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.13").withExposedPorts(8080).start();
 
     const stream = await container.logs();
-    const log = await new Promise((resolve) => stream.on("data", (line) => resolve(line)));
+    const log = await new Promise((resolve) => stream.on("data", (line: string) => resolve(line)));
     expect(log).toContain("Listening on port 8080");
 
     await container.stop();

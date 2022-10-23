@@ -1,5 +1,5 @@
-import { getContainerPort, PortWithOptionalBinding } from "./port";
-import { InspectResult } from "./docker/functions/container/inspect-container";
+import { getContainerPort, PortWithOptionalBinding } from "./port.js";
+import { InspectResult } from "./docker/functions/container/inspect-container.js";
 
 export class BoundPorts {
   private readonly ports = new Map<number, number>();

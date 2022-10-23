@@ -1,7 +1,7 @@
 import { EOL } from "os";
 import { promises as fs } from "fs";
-import { log } from "./logger";
-import { DockerImageName } from "./docker-image-name";
+import { log } from "./logger.js";
+import { DockerImageName } from "./docker-image-name.js";
 
 export const getDockerfileImages = async (dockerfile: string): Promise<DockerImageName[]> => {
   try {

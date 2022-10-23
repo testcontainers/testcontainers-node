@@ -1,6 +1,6 @@
-import { PortWithOptionalBinding } from "./port";
-import { PullPolicy } from "./pull-policy";
-import { WaitStrategy } from "./wait-strategy";
+import { PortWithOptionalBinding } from "./port.js";
+import { PullPolicy } from "./pull-policy.js";
+import { WaitStrategy } from "./wait-strategy.js";
 import { Readable } from "stream";
 import {
   ExecResult,
@@ -12,8 +12,8 @@ import {
   FileToCopy,
   ContentToCopy,
   Environment,
-} from "./docker/types";
-import { Network, StartedNetwork } from "./network";
+} from "./docker/types.js";
+import { StartedNetwork } from "./network.js";
 
 export interface TestContainer {
   start(): Promise<StartedTestContainer>;

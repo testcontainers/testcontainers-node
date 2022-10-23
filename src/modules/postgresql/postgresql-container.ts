@@ -1,7 +1,7 @@
-import { GenericContainer } from "../../generic-container/generic-container";
-import { StartedTestContainer } from "../../test-container";
-import { RandomUuid } from "../../uuid";
-import { AbstractStartedContainer } from "../abstract-started-container";
+import { GenericContainer } from "../../generic-container/generic-container.js";
+import { StartedTestContainer } from "../../test-container.js";
+import { RandomUuid } from "../../uuid.js";
+import { AbstractStartedContainer } from "../abstract-started-container.js";
 
 const POSTGRES_PORT = 5432;
 

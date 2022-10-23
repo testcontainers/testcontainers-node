@@ -1,5 +1,5 @@
-import { PortBinder } from "./port-binder";
-import { FixedPortGenerator } from "./port-generator";
+import { PortBinder } from "./port-binder.js";
+import { FixedPortGenerator } from "./port-generator.js";
 
 describe("PortBinder", () => {
   it("should bind each port to the host", async () => {

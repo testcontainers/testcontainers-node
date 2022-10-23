@@ -1,8 +1,9 @@
+import { jest } from "@jest/globals";
 import { Kafka, KafkaConfig, logLevel } from "kafkajs";
-import { KAFKA_IMAGE, KafkaContainer } from "./kafka-container";
-import { Network } from "../../network";
-import { GenericContainer } from "../../generic-container/generic-container";
-import { StartedTestContainer } from "../../test-container";
+import { KAFKA_IMAGE, KafkaContainer } from "./kafka-container.js";
+import { Network } from "../../network.js";
+import { GenericContainer } from "../../generic-container/generic-container.js";
+import { StartedTestContainer } from "../../test-container.js";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -71,7 +72,7 @@ describe("KafkaContainer", () => {
   });
 
   describe("when a set of certificates is provided", () => {
-    const certificatesDir = path.resolve(__dirname, ".", "test-certs");
+    const certificatesDir = path.resolve("src", "modules", "kafka", "test-certs");
 
     it(`should expose SASL_SSL listener if configured`, async () => {
       const kafkaContainer = await new KafkaContainer()

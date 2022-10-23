@@ -1,5 +1,5 @@
-import { DockerImageName } from "./docker-image-name";
-import { REAPER_IMAGE, SSHD_IMAGE } from "./images";
+import { DockerImageName } from "./docker-image-name.js";
+import { REAPER_IMAGE, SSHD_IMAGE } from "./images.js";
 
 describe("DockerImageName", () => {
   it("should return whether two image names are equal", () => {

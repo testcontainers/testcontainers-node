@@ -1,8 +1,8 @@
-import { GenericContainer } from "../../generic-container/generic-container";
-import { StartedTestContainer } from "../../test-container";
-import { RandomUuid } from "../../uuid";
-import { AbstractStartedContainer } from "../abstract-started-container";
-import { Wait } from "../../wait";
+import { GenericContainer } from "../../generic-container/generic-container.js";
+import { StartedTestContainer } from "../../test-container.js";
+import { RandomUuid } from "../../uuid.js";
+import { AbstractStartedContainer } from "../abstract-started-container.js";
+import { Wait } from "../../wait.js";
 
 const CLIENT_PORT = 4222;
 const ROUTING_PORT_FOR_CLUSTERING = 6222;

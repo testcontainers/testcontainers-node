@@ -1,8 +1,8 @@
-import { log } from "../../logger";
-import { defaultDockerComposeOptions } from "../default-docker-compose-options";
-import { DockerComposeOptions } from "../docker-compose-options";
-import { down } from "../docker-compose";
-import { DockerComposeDownOptions } from "../../test-container";
+import { log } from "../../logger.js";
+import { defaultDockerComposeOptions } from "../default-docker-compose-options.js";
+import { DockerComposeOptions } from "../docker-compose-options.js";
+import { down } from "../docker-compose.js";
+import { DockerComposeDownOptions } from "../../test-container.js";
 
 export const dockerComposeDown = async (
   options: DockerComposeOptions,

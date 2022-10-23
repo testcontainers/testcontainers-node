@@ -1,6 +1,6 @@
 import Dockerode from "dockerode";
-import { dockerClient } from "../../docker-client";
-import { log } from "../../../logger";
+import { dockerClient } from "../../docker-client.js";
+import { log } from "../../../logger.js";
 
 export const listContainers = async (): Promise<Dockerode.ContainerInfo[]> => {
   try {

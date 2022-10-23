@@ -1,7 +1,7 @@
-import { dockerComposeDown } from "../docker-compose/functions/docker-compose-down";
-import { DownedDockerComposeEnvironment } from "./downed-docker-compose-environment";
-import { DockerComposeOptions } from "../docker-compose/docker-compose-options";
-import { DockerComposeDownOptions } from "../test-container";
+import { dockerComposeDown } from "../docker-compose/functions/docker-compose-down.js";
+import { DownedDockerComposeEnvironment } from "./downed-docker-compose-environment.js";
+import { DockerComposeOptions } from "../docker-compose/docker-compose-options.js";
+import { DockerComposeDownOptions } from "../test-container.js";
 
 export class StoppedDockerComposeEnvironment {
   constructor(private readonly options: DockerComposeOptions) {}

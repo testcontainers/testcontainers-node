@@ -1,11 +1,11 @@
-import { DockerImageName } from "../../../docker-image-name";
-import { PullPolicy } from "../../../pull-policy";
-import { log } from "../../../logger";
+import { DockerImageName } from "../../../docker-image-name.js";
+import { PullPolicy } from "../../../pull-policy.js";
+import { log } from "../../../logger.js";
 import tar from "tar-fs";
 import byline from "byline";
-import { dockerClient } from "../../docker-client";
-import { createLabels } from "../create-labels";
-import { BuildArgs, RegistryConfig } from "../../types";
+import { dockerClient } from "../../docker-client.js";
+import { createLabels } from "../create-labels.js";
+import { BuildArgs, RegistryConfig } from "../../types.js";
 import path from "path";
 import { existsSync, promises as fs } from "fs";
 import dockerIgnore from "@balena/dockerignore";
@@ -73,7 +73,7 @@ const createIsDockerIgnoredFunction = async (context: string): Promise<(path: st
     return () => false;
   }
 
-  const instance = dockerIgnore({ ignorecase: false });
+  const instance = dockerIgnore.default({ ignorecase: false });
 
   const dockerIgnorePatterns = await fs.readFile(dockerIgnoreFilePath, { encoding: "utf-8" });
   instance.add(dockerIgnorePatterns);

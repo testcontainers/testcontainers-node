@@ -1,4 +1,4 @@
-import { Clock, SystemClock, Time } from "./clock";
+import { Clock, SystemClock, Time } from "./clock.js";
 
 export interface RetryStrategy<T, U> {
   retryUntil(

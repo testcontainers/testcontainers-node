@@ -1,4 +1,4 @@
-import { HealthCheckWaitStrategy, Log, LogWaitStrategy, WaitStrategy } from "./wait-strategy";
+import { HealthCheckWaitStrategy, Log, LogWaitStrategy, WaitStrategy } from "./wait-strategy.js";
 
 export class Wait {
   public static forLogMessage(message: Log | RegExp): WaitStrategy {

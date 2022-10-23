@@ -1,9 +1,9 @@
-import { log } from "../../logger";
-import { DockerImageName } from "../../docker-image-name";
-import { pullImage } from "./image/pull-image";
-import { startContainer } from "./container/start-container";
-import { attachContainer } from "./container/attach-container";
-import { inspectContainer } from "./container/inspect-container";
+import { log } from "../../logger.js";
+import { DockerImageName } from "../../docker-image-name.js";
+import { pullImage } from "./image/pull-image.js";
+import { startContainer } from "./container/start-container.js";
+import { attachContainer } from "./container/attach-container.js";
+import { inspectContainer } from "./container/inspect-container.js";
 import Dockerode from "dockerode";
 
 export const runInContainer = async (

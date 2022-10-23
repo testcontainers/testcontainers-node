@@ -1,7 +1,7 @@
 import byline from "byline";
 import { Readable } from "stream";
-import { Logger } from "../logger";
-import { DockerImageName } from "../docker-image-name";
+import { Logger } from "../logger.js";
+import { DockerImageName } from "../docker-image-name.js";
 
 export class PullStreamParser {
   constructor(private readonly dockerImageName: DockerImageName, private readonly logger: Logger) {}

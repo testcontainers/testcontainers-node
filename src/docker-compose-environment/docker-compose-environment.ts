@@ -1,21 +1,21 @@
 import Dockerode, { ContainerInfo } from "dockerode";
-import { BoundPorts } from "../bound-ports";
-import { resolveContainerName } from "../docker-compose/functions/container-name-resolver";
-import { StartedGenericContainer } from "../generic-container/started-generic-container";
-import { containerLog, log } from "../logger";
-import { HostPortCheck, InternalPortCheck } from "../port-check";
-import { HostPortWaitStrategy, WaitStrategy } from "../wait-strategy";
-import { ReaperInstance } from "../reaper";
-import { RandomUuid, Uuid } from "../uuid";
-import { Environment } from "../docker/types";
-import { listContainers } from "../docker/functions/container/list-containers";
-import { getContainerById } from "../docker/functions/container/get-container";
-import { dockerClient } from "../docker/docker-client";
-import { inspectContainer } from "../docker/functions/container/inspect-container";
-import { containerLogs } from "../docker/functions/container/container-logs";
-import { StartedDockerComposeEnvironment } from "./started-docker-compose-environment";
-import { dockerComposeDown } from "../docker-compose/functions/docker-compose-down";
-import { dockerComposeUp } from "../docker-compose/functions/docker-compose-up";
+import { BoundPorts } from "../bound-ports.js";
+import { resolveContainerName } from "../docker-compose/functions/container-name-resolver.js";
+import { StartedGenericContainer } from "../generic-container/started-generic-container.js";
+import { containerLog, log } from "../logger.js";
+import { HostPortCheck, InternalPortCheck } from "../port-check.js";
+import { HostPortWaitStrategy, WaitStrategy } from "../wait-strategy.js";
+import { ReaperInstance } from "../reaper.js";
+import { RandomUuid, Uuid } from "../uuid.js";
+import { Environment } from "../docker/types.js";
+import { listContainers } from "../docker/functions/container/list-containers.js";
+import { getContainerById } from "../docker/functions/container/get-container.js";
+import { dockerClient } from "../docker/docker-client.js";
+import { inspectContainer } from "../docker/functions/container/inspect-container.js";
+import { containerLogs } from "../docker/functions/container/container-logs.js";
+import { StartedDockerComposeEnvironment } from "./started-docker-compose-environment.js";
+import { dockerComposeDown } from "../docker-compose/functions/docker-compose-down.js";
+import { dockerComposeUp } from "../docker-compose/functions/docker-compose-up.js";
 
 export class DockerComposeEnvironment {
   private readonly composeFilePath: string;
