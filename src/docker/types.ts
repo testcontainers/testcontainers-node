@@ -27,7 +27,7 @@ export type TmpFs = { [dir in string]: string };
 export type Ulimits = { [name: string]: { hard: number | undefined; soft: number | undefined } };
 
 export type HealthCheck = {
-  test: string;
+  test: ["CMD-SHELL", string] | ["CMD", ...string[]];
   interval?: number;
   timeout?: number;
   retries?: number;

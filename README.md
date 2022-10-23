@@ -322,7 +322,7 @@ const { GenericContainer, Wait } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
   .withHealthCheck({
-    test: "curl -f http://localhost || exit 1",
+    test: ["CMD-SHELL", "curl -f http://localhost || exit 1"],
     interval: 1000,
     timeout: 3000,
     retries: 5,
@@ -330,6 +330,18 @@ const container = await new GenericContainer("alpine")
   })
   .withWaitStrategy(Wait.forHealthCheck())
   .start();
+```
+
+To execute the `test` in a shell use the form `["CMD-SHELL", "command"]`, for example:
+
+```javascript
+["CMD-SHELL", "curl -f http://localhost:8000 || exit 1"]
+```
+
+To execute the `test` without a shell, use the form: `["CMD", "command", "arg1", "arg2"]`, for example:
+
+```javascript
+["CMD", "/usr/bin/wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/hello-world"]
 ```
 
 Creating a container within a network:
