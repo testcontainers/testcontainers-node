@@ -19,7 +19,8 @@ export class NatsContainer extends GenericContainer {
     this.args[USER_ARGUMENT_KEY] = new RandomUuid().nextUuid();
     this.args[PASS_ARGUMENT_KEY] = new RandomUuid().nextUuid();
   }
-  public withUser(user: string): this {
+
+  public withUsername(user: string): this {
     this.args[USER_ARGUMENT_KEY] = user;
     return this;
   }
@@ -47,7 +48,7 @@ export class NatsContainer extends GenericContainer {
     }
   }
 
-  public async start(): Promise<StartedNatsContainer> {
+  public override async start(): Promise<StartedNatsContainer> {
     function buildCmdsFromArgs(args: { [p: string]: string }): string[] {
       const result: string[] = [];
       result.push("nats-server");

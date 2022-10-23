@@ -49,7 +49,7 @@ describe("NatsContainer", () => {
 
   it("should start with alternative username and password ", async () => {
     // set username and password like this
-    const container = await new NatsContainer().withPass("1234").withUser("George").start();
+    const container = await new NatsContainer().withPass("1234").withUsername("George").start();
 
     const nc = await connect(container.getConnectionOptions());
     // close the connection

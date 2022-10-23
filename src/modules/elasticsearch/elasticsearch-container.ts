@@ -8,7 +8,7 @@ export class ElasticsearchContainer extends GenericContainer {
     super(image);
   }
 
-  public async start(): Promise<StartedElasticsearchContainer> {
+  public override async start(): Promise<StartedElasticsearchContainer> {
     this.withExposedPorts(...(this.hasExposedPorts ? this.ports : [ELASTIC_SEARCH_HTTP_PORT]))
       .withEnvironment({ "discovery.type": "single-node" })
       .withStartupTimeout(120_000);
@@ -20,7 +20,7 @@ export class ElasticsearchContainer extends GenericContainer {
 export class StartedElasticsearchContainer extends AbstractStartedContainer {
   private readonly httpPort: number;
 
-  constructor(readonly startedTestContainer: StartedTestContainer) {
+  constructor(override readonly startedTestContainer: StartedTestContainer) {
     super(startedTestContainer);
     this.httpPort = this.getMappedPort(ELASTIC_SEARCH_HTTP_PORT);
   }

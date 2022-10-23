@@ -28,7 +28,7 @@ describe("KafkaContainer", () => {
   it("should connect to kafka using in-built zoo-keeper and custom network", async () => {
     const network = await new Network().start();
 
-    const kafkaContainer = await new KafkaContainer().withNetworkMode(network.getName()).withExposedPorts(9093).start();
+    const kafkaContainer = await new KafkaContainer().withNetwork(network).withExposedPorts(9093).start();
 
     await testPubSub(kafkaContainer);
 
@@ -42,14 +42,14 @@ describe("KafkaContainer", () => {
     const zooKeeperHost = "zookeeper";
     const zooKeeperPort = 2181;
     const zookeeperContainer = await new GenericContainer("confluentinc/cp-zookeeper:5.5.4")
-      .withNetworkMode(network.getName())
+      .withNetwork(network)
       .withNetworkAliases("zookeeper")
-      .withEnvironment("ZOOKEEPER_CLIENT_PORT", zooKeeperPort.toString())
+      .withEnvironment({ ZOOKEEPER_CLIENT_PORT: zooKeeperPort.toString() })
       .withExposedPorts(zooKeeperPort)
       .start();
 
     const kafkaContainer = await new KafkaContainer()
-      .withNetworkMode(network.getName())
+      .withNetwork(network)
       .withZooKeeper(zooKeeperHost, zooKeeperPort)
       .withExposedPorts(9093)
       .start();

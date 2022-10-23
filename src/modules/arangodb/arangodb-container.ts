@@ -16,7 +16,7 @@ export class ArangoDBContainer extends GenericContainer {
     return this;
   }
 
-  public async start(): Promise<StartedArangoContainer> {
+  public override async start(): Promise<StartedArangoContainer> {
     this.withExposedPorts(...(this.hasExposedPorts ? this.ports : [ARANGODB_PORT]))
       .withWaitStrategy(Wait.forLogMessage("Have fun!"))
       .withEnvironment({ ARANGO_ROOT_PASSWORD: this.password })

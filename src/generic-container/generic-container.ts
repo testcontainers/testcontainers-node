@@ -39,6 +39,7 @@ import { StartedGenericContainer } from "./started-generic-container";
 import { hash } from "../hash";
 import { getContainerByHash } from "../docker/functions/container/get-container";
 import { LABEL_CONTAINER_HASH } from "../labels";
+import { Network, StartedNetwork } from "../network";
 
 export class GenericContainer implements TestContainer {
   public static fromDockerfile(context: string, dockerfileName = "Dockerfile"): GenericContainerBuilder {
@@ -265,6 +266,11 @@ export class GenericContainer implements TestContainer {
 
   public withDroppedCapabilities(...capabilities: string[]): this {
     this.droppedCapabilities = capabilities;
+    return this;
+  }
+
+  public withNetwork(network: StartedNetwork): this {
+    this.networkMode = network.getName();
     return this;
   }
 

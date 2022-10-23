@@ -3,7 +3,6 @@ import { PullPolicy } from "./pull-policy";
 import { WaitStrategy } from "./wait-strategy";
 import { Readable } from "stream";
 import {
-  BindMode,
   ExecResult,
   ExtraHost,
   TmpFs,
@@ -14,6 +13,7 @@ import {
   ContentToCopy,
   Environment,
 } from "./docker/types";
+import { Network, StartedNetwork } from "./network";
 
 export interface TestContainer {
   start(): Promise<StartedTestContainer>;
@@ -39,6 +39,8 @@ export interface TestContainer {
   withWaitStrategy(waitStrategy: WaitStrategy): this;
 
   withStartupTimeout(startupTimeout: number): this;
+
+  withNetwork(network: StartedNetwork): this;
 
   withNetworkMode(networkMode: string): this;
 

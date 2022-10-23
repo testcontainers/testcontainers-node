@@ -368,12 +368,12 @@ const network = await new Network()
 
 const container = await new GenericContainer("alpine")
   .withCommand(["sleep", "infinity"])
-  .withNetworkMode(network.getName())
+  .withNetwork(network)
   .start();
 
 const fooContainer = await new GenericContainer("alpine")
   .withCommand(["sleep", "infinity"])
-  .withNetworkMode(network.getName())
+  .withNetwork(network)
   .withNetworkAliases("foo", "bar")
   .start();
 

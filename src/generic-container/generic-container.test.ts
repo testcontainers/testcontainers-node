@@ -114,11 +114,11 @@ describe("GenericContainer", () => {
   it("should set network aliases", async () => {
     const network = await new Network().start();
     const fooContainer = await new GenericContainer("cristianrgreco/testcontainer:1.1.13")
-      .withNetworkMode(network.getName())
+      .withNetwork(network)
       .withNetworkAliases("foo")
       .start();
     const barContainer = await new GenericContainer("cristianrgreco/testcontainer:1.1.13")
-      .withNetworkMode(network.getName())
+      .withNetwork(network)
       .withNetworkAliases("bar", "baz")
       .start();
 
@@ -136,7 +136,7 @@ describe("GenericContainer", () => {
     const fooContainer = await new GenericContainer("cristianrgreco/testcontainer:1.1.13").start();
 
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.13")
-      .withExtraHosts({ host: "foo", ipAddress: fooContainer.getIpAddress(fooContainer.getNetworkNames()[0]) })
+      .withExtraHosts([{ host: "foo", ipAddress: fooContainer.getIpAddress(fooContainer.getNetworkNames()[0]) }])
       .start();
 
     expect((await container.exec(["getent", "hosts", "foo"])).exitCode).toBe(0);
@@ -148,7 +148,7 @@ describe("GenericContainer", () => {
 
   it("should set environment variables", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.13")
-      .withEnvironment("customKey", "customValue")
+      .withEnvironment({ customKey: "customValue" })
       .withExposedPorts(8080)
       .start();
 
@@ -467,7 +467,7 @@ describe("GenericContainer", () => {
     const source = path.resolve(fixtures, "docker", "test.txt");
     const target = "/tmp/test.txt";
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.13")
-      .withCopyFileToContainer(source, target)
+      .withCopyFilesToContainer([{ source, target }])
       .withExposedPorts(8080)
       .start();
     const { output } = await container.exec(["cat", target]);
@@ -481,7 +481,7 @@ describe("GenericContainer", () => {
     const content = "hello world";
     const target = "/tmp/test.txt";
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.13")
-      .withCopyContentToContainer(content, target)
+      .withCopyContentToContainer([{ content, target }])
       .withExposedPorts(8080)
       .start();
     const { output } = await container.exec(["cat", target]);

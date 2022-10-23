@@ -29,7 +29,7 @@ export class PostgreSqlContainer extends GenericContainer {
     return this;
   }
 
-  public async start(): Promise<StartedPostgreSqlContainer> {
+  public override async start(): Promise<StartedPostgreSqlContainer> {
     this.withExposedPorts(...(this.hasExposedPorts ? this.ports : [POSTGRES_PORT]))
       .withEnvironment({
         POSTGRES_DB: this.database,

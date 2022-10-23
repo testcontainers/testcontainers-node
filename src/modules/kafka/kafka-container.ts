@@ -71,7 +71,7 @@ export class KafkaContainer extends GenericContainer {
     return this;
   }
 
-  protected async preStart(): Promise<void> {
+  protected override async preStart(): Promise<void> {
     const network = this.networkMode && this.networkAliases.length > 0 ? this.networkAliases[0] : "localhost";
     this.withEnvironment({ KAFKA_ADVERTISED_LISTENERS: `BROKER://${network}:${KAFKA_BROKER_PORT}` });
 
@@ -100,11 +100,11 @@ export class KafkaContainer extends GenericContainer {
     this.withCommand(["sh", "-c", command]);
   }
 
-  public async start(): Promise<StartedKafkaContainer> {
+  public override async start(): Promise<StartedKafkaContainer> {
     return new StartedKafkaContainer(await super.start());
   }
 
-  protected async postStart(
+  protected override async postStart(
     container: StartedTestContainer,
     inspectResult: InspectResult,
     boundPorts: BoundPorts
