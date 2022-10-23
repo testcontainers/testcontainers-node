@@ -1,12 +1,11 @@
-import { Port } from "./port";
 import getRandomPort from "get-port";
 
 export interface PortGenerator {
-  generatePort(): Promise<Port>;
+  generatePort(): Promise<number>;
 }
 
 class RandomPortGenerator {
-  public generatePort(): Promise<Port> {
+  public generatePort(): Promise<number> {
     return getRandomPort({ port: this.randomBetweenInclusive(10000, 65535) });
   }
 
@@ -20,8 +19,8 @@ export class RandomUniquePortGenerator implements PortGenerator {
 
   constructor(private readonly portGenerator: PortGenerator = new RandomPortGenerator()) {}
 
-  public async generatePort(): Promise<Port> {
-    let port: Port;
+  public async generatePort(): Promise<number> {
+    let port: number;
 
     do {
       port = await this.portGenerator.generatePort();
@@ -36,9 +35,9 @@ export class RandomUniquePortGenerator implements PortGenerator {
 export class FixedPortGenerator implements PortGenerator {
   private portIndex = 0;
 
-  constructor(private readonly ports: Port[]) {}
+  constructor(private readonly ports: number[]) {}
 
-  public generatePort(): Promise<Port> {
+  public generatePort(): Promise<number> {
     return Promise.resolve(this.ports[this.portIndex++]);
   }
 }

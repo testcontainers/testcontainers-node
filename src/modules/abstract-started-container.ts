@@ -1,6 +1,5 @@
-import { StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
-import { Port } from "../port";
-import { ContainerName, Host, Id, Command, ExecResult } from "../docker/types";
+import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
+import { ExecResult, Labels } from "../docker/types";
 import { Readable } from "stream";
 
 export class AbstractStartedContainer {
@@ -10,19 +9,27 @@ export class AbstractStartedContainer {
     return this.startedTestContainer.stop(options);
   }
 
-  public getHost(): Host {
+  public async restart(options?: Partial<RestartOptions>): Promise<void> {
+    return this.startedTestContainer.restart(options);
+  }
+
+  public getHost(): string {
     return this.startedTestContainer.getHost();
   }
 
-  public getMappedPort(port: Port): Port {
+  public getMappedPort(port: number): number {
     return this.startedTestContainer.getMappedPort(port);
   }
 
-  public getName(): ContainerName {
+  public getName(): string {
     return this.startedTestContainer.getName();
   }
 
-  public getId(): Id {
+  public getLabels(): Labels {
+    return this.startedTestContainer.getLabels();
+  }
+
+  public getId(): string {
     return this.startedTestContainer.getId();
   }
 
@@ -38,7 +45,7 @@ export class AbstractStartedContainer {
     return this.startedTestContainer.getIpAddress(networkName);
   }
 
-  public exec(command: Command[]): Promise<ExecResult> {
+  public exec(command: string[]): Promise<ExecResult> {
     return this.startedTestContainer.exec(command);
   }
 

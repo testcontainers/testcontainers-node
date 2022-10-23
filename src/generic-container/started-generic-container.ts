@@ -1,28 +1,47 @@
-import { StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
+import {
+  RestartOptions,
+  StartedTestContainer,
+  StopOptions,
+  ExecOptions,
+  StoppedTestContainer,
+} from "../test-container";
 import Dockerode from "dockerode";
-import { Command, ContainerName, ExecResult, Host, Id as ContainerId } from "../docker/types";
-import { InspectResult } from "../docker/functions/container/inspect-container";
+import { ExecResult, Labels } from "../docker/types";
+import { inspectContainer, InspectResult } from "../docker/functions/container/inspect-container";
 import { BoundPorts } from "../bound-ports";
 import { log } from "../logger";
 import { removeContainer } from "../docker/functions/container/remove-container";
-import { Port } from "../port";
 import { execContainer } from "../docker/functions/container/exec-container";
 import { Readable } from "stream";
 import { containerLogs } from "../docker/functions/container/container-logs";
 import { StoppedGenericContainer } from "./stopped-generic-container";
 import { stopContainer } from "../docker/functions/container/stop-container";
+import { restartContainer } from "../docker/functions/container/restart-container";
+import { WaitStrategy } from "../wait-strategy";
 
 export class StartedGenericContainer implements StartedTestContainer {
   constructor(
     private readonly container: Dockerode.Container,
-    private readonly host: Host,
-    private readonly inspectResult: InspectResult,
-    private readonly boundPorts: BoundPorts,
-    private readonly name: ContainerName
+    private readonly host: string,
+    private inspectResult: InspectResult,
+    private boundPorts: BoundPorts,
+    private readonly name: string,
+    private readonly waitStrategy: WaitStrategy
   ) {}
 
   public async stop(options: Partial<StopOptions> = {}): Promise<StoppedTestContainer> {
     return this.stopContainer(options);
+  }
+
+  public async restart(options: Partial<RestartOptions> = {}): Promise<void> {
+    const resolvedOptions: RestartOptions = { timeout: 0, ...options };
+    await restartContainer(this.container, resolvedOptions);
+
+    this.inspectResult = await inspectContainer(this.container);
+    this.boundPorts = BoundPorts.fromInspectResult(this.inspectResult).filter(
+      Array.from(this.boundPorts.iterator()).map((port) => port[0])
+    );
+    await this.waitForContainer(this.container, this.boundPorts);
   }
 
   private async stopContainer(options: Partial<StopOptions> = {}): Promise<StoppedGenericContainer> {
@@ -35,20 +54,42 @@ export class StartedGenericContainer implements StartedTestContainer {
     return new StoppedGenericContainer();
   }
 
-  public getHost(): Host {
+  private async waitForContainer(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void> {
+    log.debug(`Waiting for container to be ready: ${container.id}`);
+
+    try {
+      await this.waitStrategy.waitUntilReady(container, boundPorts);
+      log.info("Container is ready");
+    } catch (err) {
+      log.error(`Container failed to be ready: ${err}`);
+      try {
+        await stopContainer(container, { timeout: 0 });
+        await removeContainer(container, { removeVolumes: true });
+      } catch (stopErr) {
+        log.error(`Failed to stop container after it failed to be ready: ${stopErr}`);
+      }
+      throw err;
+    }
+  }
+
+  public getHost(): string {
     return this.host;
   }
 
-  public getMappedPort(port: Port): Port {
+  public getMappedPort(port: number): number {
     return this.boundPorts.getBinding(port);
   }
 
-  public getId(): ContainerId {
+  public getId(): string {
     return this.container.id;
   }
 
-  public getName(): ContainerName {
+  public getName(): string {
     return this.name;
+  }
+
+  public getLabels(): Labels {
+    return this.inspectResult.labels;
   }
 
   public getNetworkNames(): string[] {
@@ -63,8 +104,9 @@ export class StartedGenericContainer implements StartedTestContainer {
     return this.inspectResult.networkSettings[networkName].ipAddress;
   }
 
-  public exec(command: Command[]): Promise<ExecResult> {
-    return execContainer(this.container, command);
+  public exec(command: string[], options: Partial<ExecOptions> = {}): Promise<ExecResult> {
+    const resolvedOptions: ExecOptions = { stdin: true, detach: false, tty: true, ...options };
+    return execContainer(this.container, command, resolvedOptions);
   }
 
   public logs(): Promise<Readable> {

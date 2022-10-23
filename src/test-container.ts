@@ -1,42 +1,50 @@
-import { Port, PortWithOptionalBinding } from "./port";
+import { PortWithOptionalBinding } from "./port";
 import { PullPolicy } from "./pull-policy";
 import { WaitStrategy } from "./wait-strategy";
 import { Readable } from "stream";
 import {
-  BindMode,
-  Command,
-  ContainerName,
-  Dir,
-  EnvKey,
-  EnvValue,
   ExecResult,
   ExtraHost,
-  Host,
-  Id,
-  NetworkMode,
   TmpFs,
+  Labels,
+  Ulimits,
+  BindMount,
+  FileToCopy,
+  ContentToCopy,
+  Environment,
 } from "./docker/types";
+import { Network, StartedNetwork } from "./network";
 
 export interface TestContainer {
   start(): Promise<StartedTestContainer>;
 
-  withEnv(key: EnvKey, value: EnvValue): this;
+  withEnvironment(environment: Environment): this;
 
-  withCmd(cmd: Command[]): this;
+  withCommand(command: string[]): this;
+
+  withEntrypoint(entrypoint: string[]): this;
 
   withTmpFs(tmpFs: TmpFs): this;
 
+  withUlimits(ulimits: Ulimits): this;
+
+  withAddedCapabilities(...capabilities: string[]): this;
+
+  withDroppedCapabilities(...capabilities: string[]): this;
+
   withExposedPorts(...ports: PortWithOptionalBinding[]): this;
 
-  withBindMount(source: Dir, target: Dir, bindMode: BindMode): this;
+  withBindMounts(bindMounts: BindMount[]): this;
 
   withWaitStrategy(waitStrategy: WaitStrategy): this;
 
   withStartupTimeout(startupTimeout: number): this;
 
-  withNetworkMode(networkMode: NetworkMode): this;
+  withNetwork(network: StartedNetwork): this;
 
-  withExtraHosts(...extraHosts: ExtraHost[]): this;
+  withNetworkMode(networkMode: string): this;
+
+  withExtraHosts(extraHosts: ExtraHost[]): this;
 
   withDefaultLogDriver(): this;
 
@@ -48,9 +56,13 @@ export interface TestContainer {
 
   withReuse(): this;
 
-  withCopyFileToContainer(sourcePath: string, containerPath: string): this;
+  withCopyFilesToContainer(filesToCopy: FileToCopy[]): this;
 
-  withCopyContentToContainer(content: string | Buffer | Readable, containerPath: string): this;
+  withCopyContentToContainer(contentsToCopy: ContentToCopy[]): this;
+}
+
+export interface RestartOptions {
+  timeout: number;
 }
 
 export interface StopOptions {
@@ -58,16 +70,31 @@ export interface StopOptions {
   removeVolumes: boolean;
 }
 
+export interface DockerComposeDownOptions {
+  timeout: number;
+  removeVolumes: boolean;
+}
+
+export interface ExecOptions {
+  tty: boolean;
+  detach: boolean;
+  stdin: boolean;
+}
+
 export interface StartedTestContainer {
   stop(options?: Partial<StopOptions>): Promise<StoppedTestContainer>;
 
-  getHost(): Host;
+  restart(options?: Partial<RestartOptions>): Promise<void>;
 
-  getMappedPort(port: Port): Port;
+  getHost(): string;
 
-  getName(): ContainerName;
+  getMappedPort(port: number): number;
 
-  getId(): Id;
+  getName(): string;
+
+  getLabels(): Labels;
+
+  getId(): string;
 
   getNetworkNames(): string[];
 
@@ -75,7 +102,7 @@ export interface StartedTestContainer {
 
   getIpAddress(networkName: string): string;
 
-  exec(command: Command[]): Promise<ExecResult>;
+  exec(command: string[], options?: Partial<ExecOptions>): Promise<ExecResult>;
 
   logs(): Promise<Readable>;
 }

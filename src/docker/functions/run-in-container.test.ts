@@ -8,16 +8,16 @@ describe("runInContainer", () => {
   let dockerode: Dockerode;
 
   beforeAll(async () => {
-    dockerode = (await dockerClient).dockerode;
+    dockerode = (await dockerClient()).dockerode;
   });
 
   it("should return the command output", async () => {
-    const output = await runInContainer(dockerode, "cristianrgreco/testcontainer:1.1.12", ["echo", "hello", "world"]);
+    const output = await runInContainer(dockerode, "cristianrgreco/testcontainer:1.1.13", ["echo", "hello", "world"]);
     expect(output).toBe("hello world");
   });
 
   it("should return the command output from stderr", async () => {
-    const output = await runInContainer(dockerode, "cristianrgreco/testcontainer:1.1.12", [
+    const output = await runInContainer(dockerode, "cristianrgreco/testcontainer:1.1.13", [
       "sh",
       "-c",
       '>&2 echo "hello world"',
@@ -26,7 +26,7 @@ describe("runInContainer", () => {
   });
 
   it("should return undefined when the container exits without output", async () => {
-    const output = await runInContainer(dockerode, "cristianrgreco/testcontainer:1.1.12", ["test"]);
+    const output = await runInContainer(dockerode, "cristianrgreco/testcontainer:1.1.13", ["test"]);
     expect(output).toBe(undefined);
   });
 });

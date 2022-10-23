@@ -1,6 +1,5 @@
 import { log } from "../../logger";
 import { DockerImageName } from "../../docker-image-name";
-import { Command } from "../types";
 import { pullImage } from "./image/pull-image";
 import { startContainer } from "./container/start-container";
 import { attachContainer } from "./container/attach-container";
@@ -10,17 +9,17 @@ import Dockerode from "dockerode";
 export const runInContainer = async (
   dockerode: Dockerode,
   image: string,
-  command: Command[]
+  command: string[]
 ): Promise<string | undefined> => {
   try {
     const imageName = DockerImageName.fromString(image);
 
-    await pullImage({ imageName, force: false });
+    await pullImage(dockerode, { imageName, force: false });
 
     log.debug(`Creating container: ${image} with command: ${command.join(" ")}`);
     const container = await dockerode.createContainer({ Image: image, Cmd: command, HostConfig: { AutoRemove: true } });
     log.debug(`Attaching to container: ${container.id}`);
-    const stream = await attachContainer(container);
+    const stream = await attachContainer(dockerode, container);
 
     const promise = new Promise<string>((resolve) => {
       const interval = setInterval(async () => {

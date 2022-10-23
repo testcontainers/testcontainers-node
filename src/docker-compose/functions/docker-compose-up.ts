@@ -14,12 +14,12 @@ export const dockerComposeUp = async (options: DockerComposeOptions, services?: 
       await upAll(defaultDockerComposeOptions(options));
     }
     log.info(`Upped DockerCompose environment`);
-  } catch (err) {
+  } catch (err: any) {
     const errorMessage = err.err || err.message || err;
     log.error(`Failed to up DockerCompose environment: ${errorMessage}`);
 
     try {
-      await dockerComposeDown(options);
+      await dockerComposeDown(options, { removeVolumes: true, timeout: 0 });
     } catch {
       log.warn(`Failed to down DockerCompose environment after failed up`);
     }

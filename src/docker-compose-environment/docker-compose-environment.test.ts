@@ -140,7 +140,7 @@ describe("DockerComposeEnvironment", () => {
 
   it("should bind environment variables to the docker compose file", async () => {
     const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-env.yml")
-      .withEnv("ENV_VAR", "ENV_VAR_VALUE")
+      .withEnvironment("ENV_VAR", "ENV_VAR_VALUE")
       .up();
 
     const container = startedEnvironment.getContainer("container_1");
@@ -203,7 +203,7 @@ describe("DockerComposeEnvironment", () => {
     const overrideFixtures = path.resolve(fixtures, "docker-compose-with-env-file");
 
     const startedEnvironment = await new DockerComposeEnvironment(overrideFixtures, "docker-compose.yml")
-      .withEnvFile(".env.override")
+      .withEnvironmentFile(".env.override")
       .up();
 
     const container = startedEnvironment.getContainer("container_1");

@@ -4,6 +4,7 @@ import { PullStreamParser } from "../../pull-stream-parser";
 import { dockerClient } from "../../docker-client";
 import { AuthConfig } from "../../types";
 import { imageExists } from "./image-exists";
+import Dockerode from "dockerode";
 
 export type PullImageOptions = {
   imageName: DockerImageName;
@@ -11,15 +12,14 @@ export type PullImageOptions = {
   authConfig?: AuthConfig;
 };
 
-export const pullImage = async (options: PullImageOptions): Promise<void> => {
+export const pullImage = async (dockerode: Dockerode, options: PullImageOptions): Promise<void> => {
   try {
-    if ((await imageExists(options.imageName)) && !options.force) {
+    if ((await imageExists(dockerode, options.imageName)) && !options.force) {
       log.debug(`Not pulling image as it already exists: ${options.imageName}`);
       return;
     }
 
     log.info(`Pulling image: ${options.imageName}`);
-    const { dockerode } = await dockerClient;
     const stream = await dockerode.pull(options.imageName.toString(), { authconfig: options.authConfig });
 
     await new PullStreamParser(options.imageName, log).consume(stream);

@@ -7,6 +7,7 @@ import waitForExpect from "wait-for-expect";
 import { listImages } from "./docker/functions/image/list-images";
 import { DockerImageName } from "./docker-image-name";
 import { DockerComposeEnvironment } from "./docker-compose-environment/docker-compose-environment";
+import { dockerClient } from "./docker/docker-client";
 
 const fixtures = path.resolve(__dirname, "..", "fixtures");
 
@@ -14,7 +15,7 @@ describe("Reaper", () => {
   jest.setTimeout(180_000);
 
   it("should remove containers", async () => {
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12").start();
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.13").start();
 
     const reaperContainerId = await getReaperContainerId();
     await stopReaper();
@@ -67,9 +68,10 @@ describe("Reaper", () => {
     const reaperContainerId = await getReaperContainerId();
     await stopReaper();
 
-    expect(await listImages()).toContainEqual(DockerImageName.fromString(imageId));
+    const { dockerode } = await dockerClient();
+    expect(await listImages(dockerode)).toContainEqual(DockerImageName.fromString(imageId));
     await waitForExpect(async () => {
-      expect(await listImages()).not.toContainEqual(DockerImageName.fromString(imageId));
+      expect(await listImages(dockerode)).not.toContainEqual(DockerImageName.fromString(imageId));
       expect(await getContainerIds()).not.toContain(reaperContainerId);
     }, 30_000);
   });

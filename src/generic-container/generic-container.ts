@@ -14,18 +14,14 @@ import { getAuthConfig } from "../registry-auth-locator";
 import {
   BindMode,
   BindMount,
-  BuildContext,
-  Command,
-  ContainerName,
-  Dir,
-  Env,
-  EnvKey,
-  EnvValue,
+  ContentToCopy,
+  Environment,
   ExtraHost,
+  FileToCopy,
   HealthCheck,
-  Host,
-  NetworkMode,
+  Labels,
   TmpFs,
+  Ulimits,
 } from "../docker/types";
 import { pullImage } from "../docker/functions/image/pull-image";
 import { createContainer, CreateContainerOptions } from "../docker/functions/container/create-container";
@@ -43,21 +39,24 @@ import { StartedGenericContainer } from "./started-generic-container";
 import { hash } from "../hash";
 import { getContainerByHash } from "../docker/functions/container/get-container";
 import { LABEL_CONTAINER_HASH } from "../labels";
+import { Network, StartedNetwork } from "../network";
 
 export class GenericContainer implements TestContainer {
-  public static fromDockerfile(context: BuildContext, dockerfileName = "Dockerfile"): GenericContainerBuilder {
+  public static fromDockerfile(context: string, dockerfileName = "Dockerfile"): GenericContainerBuilder {
     return new GenericContainerBuilder(context, dockerfileName);
   }
 
   private readonly imageName: DockerImageName;
 
-  protected env: Env = {};
-  protected networkMode?: NetworkMode;
+  protected environment: Environment = {};
+  protected networkMode?: string;
   protected networkAliases: string[] = [];
   protected ports: PortWithOptionalBinding[] = [];
-  protected cmd: Command[] = [];
+  protected command: string[] = [];
+  protected entrypoint?: string[];
   protected bindMounts: BindMount[] = [];
-  protected name?: ContainerName;
+  protected name?: string;
+  protected labels: Labels = {};
   protected tmpFs: TmpFs = {};
   protected healthCheck?: HealthCheck;
   protected waitStrategy?: WaitStrategy;
@@ -65,6 +64,9 @@ export class GenericContainer implements TestContainer {
   protected useDefaultLogDriver = false;
   protected privilegedMode = false;
   protected ipcMode?: string;
+  protected ulimits?: Ulimits;
+  protected addedCapabilities?: string[];
+  protected droppedCapabilities?: string[];
   protected user?: string;
   protected pullPolicy: PullPolicy = new DefaultPullPolicy();
   protected reuse = false;
@@ -79,7 +81,7 @@ export class GenericContainer implements TestContainer {
   protected preStart?(): Promise<void>;
 
   public async start(): Promise<StartedTestContainer> {
-    await pullImage({
+    await pullImage((await dockerClient()).dockerode, {
       imageName: this.imageName,
       force: this.pullPolicy.shouldPull(),
       authConfig: await getAuthConfig(this.imageName.registry),
@@ -100,12 +102,14 @@ export class GenericContainer implements TestContainer {
 
     const createContainerOptions: CreateContainerOptions = {
       imageName: this.imageName,
-      env: this.env,
-      cmd: this.cmd,
+      environment: this.environment,
+      command: this.command,
+      entrypoint: this.entrypoint,
       bindMounts: this.bindMounts,
       tmpFs: this.tmpFs,
       exposedPorts: this.ports,
       name: this.name,
+      labels: this.labels,
       reusable: this.reuse,
       networkMode: this.networkAliases.length > 0 ? undefined : this.networkMode,
       healthCheck: this.healthCheck,
@@ -114,6 +118,9 @@ export class GenericContainer implements TestContainer {
       autoRemove: this.imageName.isReaper(),
       extraHosts: this.extraHosts,
       ipcMode: this.ipcMode,
+      ulimits: this.ulimits,
+      addedCapabilities: this.addedCapabilities,
+      droppedCapabilities: this.droppedCapabilities,
       user: this.user,
     };
 
@@ -142,10 +149,11 @@ export class GenericContainer implements TestContainer {
 
     return new StartedGenericContainer(
       startedContainer,
-      (await dockerClient).host,
+      (await dockerClient()).host,
       inspectResult,
       boundPorts,
-      inspectResult.name
+      inspectResult.name,
+      this.getWaitStrategy((await dockerClient()).host, startedContainer).withStartupTimeout(this.startupTimeout)
     );
   }
 
@@ -175,7 +183,7 @@ export class GenericContainer implements TestContainer {
     }
 
     if (this.tarToCopy) {
-      await this.tarToCopy.finalize();
+      this.tarToCopy.finalize();
       await putContainerArchive({ container, stream: this.tarToCopy, containerPath: "/" });
     }
 
@@ -192,10 +200,11 @@ export class GenericContainer implements TestContainer {
 
     const startedContainer = new StartedGenericContainer(
       container,
-      (await dockerClient).host,
+      (await dockerClient()).host,
       inspectResult,
       boundPorts,
-      inspectResult.name
+      inspectResult.name,
+      this.getWaitStrategy((await dockerClient()).host, container).withStartupTimeout(this.startupTimeout)
     );
 
     if (this.postStart) {
@@ -211,18 +220,32 @@ export class GenericContainer implements TestContainer {
     boundPorts: BoundPorts
   ): Promise<void>;
 
-  public withCmd(cmd: Command[]): this {
-    this.cmd = cmd;
+  protected get hasExposedPorts(): boolean {
+    return this.ports.length !== 0;
+  }
+
+  public withCommand(command: string[]): this {
+    this.command = command;
     return this;
   }
 
-  public withName(name: ContainerName): this {
+  public withEntrypoint(entrypoint: string[]): this {
+    this.entrypoint = entrypoint;
+    return this;
+  }
+
+  public withName(name: string): this {
     this.name = name;
     return this;
   }
 
-  public withEnv(key: EnvKey, value: EnvValue): this {
-    this.env[key] = value;
+  public withLabels(labels: Labels): this {
+    this.labels = { ...this.labels, ...labels };
+    return this;
+  }
+
+  public withEnvironment(environment: Environment): this {
+    this.environment = { ...this.environment, ...environment };
     return this;
   }
 
@@ -231,7 +254,27 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
-  public withNetworkMode(networkMode: NetworkMode): this {
+  public withUlimits(ulimits: Ulimits): this {
+    this.ulimits = ulimits;
+    return this;
+  }
+
+  public withAddedCapabilities(...capabilities: string[]): this {
+    this.addedCapabilities = capabilities;
+    return this;
+  }
+
+  public withDroppedCapabilities(...capabilities: string[]): this {
+    this.droppedCapabilities = capabilities;
+    return this;
+  }
+
+  public withNetwork(network: StartedNetwork): this {
+    this.networkMode = network.getName();
+    return this;
+  }
+
+  public withNetworkMode(networkMode: string): this {
     this.networkMode = networkMode;
     return this;
   }
@@ -241,23 +284,18 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
-  public withExtraHosts(...extraHosts: ExtraHost[]): this {
-    this.extraHosts.push(...extraHosts);
+  public withExtraHosts(extraHosts: ExtraHost[]): this {
+    this.extraHosts = extraHosts;
     return this;
   }
 
   public withExposedPorts(...ports: PortWithOptionalBinding[]): this {
-    this.ports = ports;
+    this.ports = [...this.ports, ...ports];
     return this;
   }
 
-  protected addExposedPorts(...ports: PortWithOptionalBinding[]): this {
-    this.ports.push(...ports);
-    return this;
-  }
-
-  public withBindMount(source: Dir, target: Dir, bindMode: BindMode = "rw"): this {
-    this.bindMounts.push({ source, target, bindMode });
+  public withBindMounts(bindMounts: BindMount[]): this {
+    this.bindMounts = bindMounts.map((bindMount) => ({ mode: "rw", ...bindMount }));
     return this;
   }
 
@@ -306,13 +344,15 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
-  public withCopyFileToContainer(sourcePath: string, containerPath: string): this {
-    this.getTarToCopy().file(sourcePath, { name: containerPath });
+  public withCopyFilesToContainer(filesToCopy: FileToCopy[]): this {
+    const tar = this.getTarToCopy();
+    filesToCopy.forEach(({ source, target }) => tar.file(source, { name: target }));
     return this;
   }
 
-  public withCopyContentToContainer(content: string | Buffer | Readable, containerPath: string): this {
-    this.getTarToCopy().append(content, { name: containerPath });
+  public withCopyContentToContainer(contentsToCopy: ContentToCopy[]): this {
+    const tar = this.getTarToCopy();
+    contentsToCopy.forEach(({ content, target }) => tar.append(content, { name: target }));
     return this;
   }
 
@@ -325,7 +365,7 @@ export class GenericContainer implements TestContainer {
 
   private async waitForContainer(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void> {
     log.debug(`Waiting for container to be ready: ${container.id}`);
-    const waitStrategy = this.getWaitStrategy((await dockerClient).host, container);
+    const waitStrategy = this.getWaitStrategy((await dockerClient()).host, container);
 
     try {
       await waitStrategy.withStartupTimeout(this.startupTimeout).waitUntilReady(container, boundPorts);
@@ -342,7 +382,7 @@ export class GenericContainer implements TestContainer {
     }
   }
 
-  private getWaitStrategy(host: Host, container: Dockerode.Container): WaitStrategy {
+  private getWaitStrategy(host: string, container: Dockerode.Container): WaitStrategy {
     if (this.waitStrategy) {
       return this.waitStrategy;
     }

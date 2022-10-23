@@ -1,8 +1,7 @@
 import { DockerImageName } from "../../docker-image-name";
 import { sessionId } from "../session-id";
 import { LABEL_SESSION_ID } from "../../labels";
-
-export type Labels = { [key: string]: string };
+import { Labels } from "../types";
 
 export const createLabels = (
   reusable: boolean,

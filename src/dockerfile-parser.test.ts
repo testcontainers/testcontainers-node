@@ -28,4 +28,10 @@ describe("DockerfileParser", () => {
     const images = await getDockerfileImages(dockerfile);
     expect(images).toEqual([DockerImageName.fromString("node:latest")]);
   });
+
+  it("should return images for multi-stage build with named stages", async () => {
+    const dockerfile = path.resolve(dockerfileParserFixtures, "multistage-naming.Dockerfile");
+    const images = await getDockerfileImages(dockerfile);
+    expect(images).toEqual([DockerImageName.fromString("node:latest"), DockerImageName.fromString("alpine:latest")]);
+  });
 });

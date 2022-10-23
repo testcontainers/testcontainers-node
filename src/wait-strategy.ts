@@ -1,7 +1,6 @@
 import byline from "byline";
 import { BoundPorts } from "./bound-ports";
 import { log } from "./logger";
-import { Port } from "./port";
 import { PortCheck } from "./port-check";
 import { IntervalRetryStrategy } from "./retry-strategy";
 import { HealthCheckStatus } from "./docker/types";
@@ -50,7 +49,7 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
     }
   }
 
-  private async waitForPort(container: Dockerode.Container, port: Port, portCheck: PortCheck): Promise<void> {
+  private async waitForPort(container: Dockerode.Container, port: number, portCheck: PortCheck): Promise<void> {
     const retryStrategy = new IntervalRetryStrategy<boolean, Error>(100);
 
     await retryStrategy.retryUntil(

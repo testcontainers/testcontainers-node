@@ -2,10 +2,10 @@ version: 3
 
 services:
   container:
-    image: cristianrgreco/testcontainer:1.1.12
+    image: cristianrgreco/testcontainer:1.1.13
     ports:
       - 8080
   another-container:
-    image: cristianrgreco/testcontainer:1.1.12
+    image: cristianrgreco/testcontainer:1.1.13
     ports:
       - 8080

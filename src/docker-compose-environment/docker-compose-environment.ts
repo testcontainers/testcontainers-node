@@ -7,7 +7,7 @@ import { HostPortCheck, InternalPortCheck } from "../port-check";
 import { HostPortWaitStrategy, WaitStrategy } from "../wait-strategy";
 import { ReaperInstance } from "../reaper";
 import { RandomUuid, Uuid } from "../uuid";
-import { Env, EnvKey, EnvValue, Host } from "../docker/types";
+import { Environment } from "../docker/types";
 import { listContainers } from "../docker/functions/container/list-containers";
 import { getContainerById } from "../docker/functions/container/get-container";
 import { dockerClient } from "../docker/docker-client";
@@ -24,9 +24,9 @@ export class DockerComposeEnvironment {
   private projectName: string;
   private build = false;
   private recreate = true;
-  private envFile = "";
+  private environmentFile = "";
   private profiles: string[] = [];
-  private env: Env = {};
+  private environment: Environment = {};
   private waitStrategy: { [containerName: string]: WaitStrategy } = {};
   private startupTimeout = 60_000;
 
@@ -41,13 +41,13 @@ export class DockerComposeEnvironment {
     return this;
   }
 
-  public withEnv(key: EnvKey, value: EnvValue): this {
-    this.env[key] = value;
+  public withEnvironment(key: string, value: string): this {
+    this.environment[key] = value;
     return this;
   }
 
-  public withEnvFile(envFile: string): this {
-    this.envFile = envFile;
+  public withEnvironmentFile(environmentFile: string): this {
+    this.environmentFile = environmentFile;
     return this;
   }
 
@@ -92,12 +92,12 @@ export class DockerComposeEnvironment {
     }
 
     const composeOptions: string[] = [];
-    if (this.envFile) {
-      composeOptions.push("--env-file", this.envFile);
+    if (this.environmentFile) {
+      composeOptions.push("--env-file", this.environmentFile);
     }
     this.profiles.forEach((profile) => composeOptions.push("--profile", profile));
 
-    await dockerComposeUp({ ...options, commandOptions, composeOptions, env: this.env }, services);
+    await dockerComposeUp({ ...options, commandOptions, composeOptions, env: this.environment }, services);
 
     const startedContainers = (await listContainers()).filter(
       (container) => container.Labels["com.docker.compose.project"] === this.projectName
@@ -133,7 +133,7 @@ export class DockerComposeEnvironment {
           } catch (err) {
             log.error(`Container ${containerName} failed to be ready: ${err}`);
             try {
-              await dockerComposeDown(options);
+              await dockerComposeDown(options, { removeVolumes: true, timeout: 0 });
             } catch {
               log.warn(`Failed to stop DockerCompose environment after failed up`);
             }
@@ -142,10 +142,13 @@ export class DockerComposeEnvironment {
 
           return new StartedGenericContainer(
             container,
-            (await dockerClient).host,
+            (await dockerClient()).host,
             inspectResult,
             boundPorts,
-            containerName
+            containerName,
+            this.getWaitStrategy((await dockerClient()).host, container, containerName).withStartupTimeout(
+              this.startupTimeout
+            )
           );
         })
       )
@@ -159,7 +162,7 @@ export class DockerComposeEnvironment {
     return new StartedDockerComposeEnvironment(startedGenericContainers, {
       ...options,
       composeOptions,
-      env: this.env,
+      env: this.environment,
     });
   }
 
@@ -168,11 +171,11 @@ export class DockerComposeEnvironment {
     containerName: string,
     boundPorts: BoundPorts
   ): Promise<void> {
-    const waitStrategy = this.getWaitStrategy((await dockerClient).host, container, containerName);
+    const waitStrategy = this.getWaitStrategy((await dockerClient()).host, container, containerName);
     await waitStrategy.withStartupTimeout(this.startupTimeout).waitUntilReady(container, boundPorts);
   }
 
-  private getWaitStrategy(host: Host, container: Dockerode.Container, containerName: string): WaitStrategy {
+  private getWaitStrategy(host: string, container: Dockerode.Container, containerName: string): WaitStrategy {
     if (this.waitStrategy[containerName]) {
       return this.waitStrategy[containerName];
     } else {

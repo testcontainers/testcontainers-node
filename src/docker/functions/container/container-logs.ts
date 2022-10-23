@@ -3,6 +3,7 @@ import { log } from "../../../logger";
 import Dockerode from "dockerode";
 import { demuxStream } from "../demux-stream";
 import { Readable } from "stream";
+import { dockerClient } from "../../docker-client";
 
 export const containerLogs = async (container: Dockerode.Container): Promise<Readable> => {
   try {
@@ -15,7 +16,7 @@ export const containerLogs = async (container: Dockerode.Container): Promise<Rea
 
     stream.socket.unref();
 
-    return demuxStream(stream);
+    return demuxStream((await dockerClient()).dockerode, stream);
   } catch (err) {
     log.error(`Failed to get container logs: ${err}`);
     throw err;

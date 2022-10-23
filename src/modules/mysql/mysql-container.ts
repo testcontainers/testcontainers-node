@@ -2,7 +2,8 @@ import { GenericContainer } from "../../generic-container/generic-container";
 import { StartedTestContainer } from "../../test-container";
 import { RandomUuid } from "../../uuid";
 import { AbstractStartedContainer } from "../abstract-started-container";
-import { Port } from "../../port";
+
+const MYSQL_PORT = 3306;
 
 export class MySqlContainer extends GenericContainer {
   private database = "test";
@@ -34,12 +35,14 @@ export class MySqlContainer extends GenericContainer {
     return this;
   }
 
-  public async start(): Promise<StartedMySqlContainer> {
-    this.withExposedPorts(3306)
-      .withEnv("MYSQL_DATABASE", this.database)
-      .withEnv("MYSQL_ROOT_PASSWORD", this.rootPassword)
-      .withEnv("MYSQL_USER", this.username)
-      .withEnv("MYSQL_PASSWORD", this.userPassword)
+  public override async start(): Promise<StartedMySqlContainer> {
+    this.withExposedPorts(...(this.hasExposedPorts ? this.ports : [MYSQL_PORT]))
+      .withEnvironment({
+        MYSQL_DATABASE: this.database,
+        MYSQL_ROOT_PASSWORD: this.rootPassword,
+        MYSQL_USER: this.username,
+        MYSQL_PASSWORD: this.userPassword,
+      })
       .withStartupTimeout(120_000);
 
     return new StartedMySqlContainer(
@@ -53,7 +56,7 @@ export class MySqlContainer extends GenericContainer {
 }
 
 export class StartedMySqlContainer extends AbstractStartedContainer {
-  private readonly port: Port;
+  private readonly port: number;
 
   constructor(
     startedTestContainer: StartedTestContainer,
@@ -66,7 +69,7 @@ export class StartedMySqlContainer extends AbstractStartedContainer {
     this.port = startedTestContainer.getMappedPort(3306);
   }
 
-  public getPort(): Port {
+  public getPort(): number {
     return this.port;
   }
 

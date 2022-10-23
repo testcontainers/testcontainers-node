@@ -1,9 +1,23 @@
 import { Readable } from "stream";
-import { Command, ExecResult, ExitCode } from "../../types";
+import { ExecResult } from "../../types";
 import Dockerode from "dockerode";
-import { log } from "../../../logger";
+import { log, execLog } from "../../../logger";
+import byline from "byline";
 
-export const execContainer = async (container: Dockerode.Container, command: Command[]): Promise<ExecResult> => {
+type ExecContainerOptions = {
+  tty: boolean;
+  stdin: boolean;
+  detach: boolean;
+};
+
+export const execContainer = async (
+  container: Dockerode.Container,
+  command: string[],
+  options: ExecContainerOptions,
+  shouldLog = true
+): Promise<ExecResult> => {
+  const chunks: string[] = [];
+
   try {
     const exec = await container.exec({
       Cmd: command,
@@ -11,10 +25,13 @@ export const execContainer = async (container: Dockerode.Container, command: Com
       AttachStderr: true,
     });
 
-    const stream = await startExec(exec);
+    const stream = await startExec(exec, options);
 
-    const chunks: string[] = [];
     stream.on("data", (chunk) => chunks.push(chunk));
+
+    if (shouldLog) {
+      byline(stream).on("data", (line) => execLog.trace(`${container.id}: ${line}`));
+    }
 
     const exitCode = await waitForExec(exec);
 
@@ -22,21 +39,17 @@ export const execContainer = async (container: Dockerode.Container, command: Com
 
     return { output: chunks.join(""), exitCode };
   } catch (err) {
-    log.error(`Failed to exec container ${container.id} with command "${command.join(" ")}": ${err}`);
+    log.error(
+      `Failed to exec container ${container.id} with command "${command.join(
+        " "
+      )}": ${err}. Container output: ${chunks.join("")}`
+    );
     throw err;
   }
 };
 
-const startExec = async (exec: Dockerode.Exec): Promise<Readable> => {
+const startExec = async (exec: Dockerode.Exec, options: ExecContainerOptions): Promise<Readable> => {
   try {
-    const options = {
-      Detach: false,
-      Tty: true,
-      stream: true,
-      stdin: true,
-      stdout: true,
-      stderr: true,
-    };
     const stream = await exec.start(options);
     stream.setEncoding("utf-8");
     return stream;
@@ -47,7 +60,7 @@ const startExec = async (exec: Dockerode.Exec): Promise<Readable> => {
 };
 
 type ExecInspectResult = {
-  exitCode: ExitCode;
+  exitCode: number;
   running: boolean;
   entrypoint: string;
   arguments: string[];

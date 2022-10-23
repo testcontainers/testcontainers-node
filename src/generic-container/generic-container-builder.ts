@@ -1,4 +1,4 @@
-import { AuthConfig, BuildArgs, BuildContext, RegistryConfig } from "../docker/types";
+import { AuthConfig, BuildArgs, RegistryConfig } from "../docker/types";
 import { DefaultPullPolicy, PullPolicy } from "../pull-policy";
 import { RandomUuid, Uuid } from "../uuid";
 import { ReaperInstance } from "../reaper";
@@ -10,24 +10,31 @@ import { buildImage } from "../docker/functions/image/build-image";
 import { imageExists } from "../docker/functions/image/image-exists";
 import { getAuthConfig } from "../registry-auth-locator";
 import { GenericContainer } from "./generic-container";
+import { dockerClient } from "../docker/docker-client";
 
 export class GenericContainerBuilder {
   private buildArgs: BuildArgs = {};
   private pullPolicy: PullPolicy = new DefaultPullPolicy();
+  private cache = true;
 
   constructor(
-    private readonly context: BuildContext,
+    private readonly context: string,
     private readonly dockerfileName: string,
     private readonly uuid: Uuid = new RandomUuid()
   ) {}
 
-  public withBuildArg(key: string, value: string): GenericContainerBuilder {
-    this.buildArgs[key] = value;
+  public withBuildArgs(buildArgs: BuildArgs): GenericContainerBuilder {
+    this.buildArgs = buildArgs;
     return this;
   }
 
   public withPullPolicy(pullPolicy: PullPolicy): this {
     this.pullPolicy = pullPolicy;
+    return this;
+  }
+
+  public withCache(cache: boolean): this {
+    this.cache = cache;
     return this;
   }
 
@@ -47,11 +54,12 @@ export class GenericContainerBuilder {
       dockerfileName: this.dockerfileName,
       buildArgs: this.buildArgs,
       pullPolicy: this.pullPolicy,
+      cache: this.cache,
       registryConfig,
     });
     const container = new GenericContainer(imageName.toString());
 
-    if (!(await imageExists(imageName))) {
+    if (!(await imageExists((await dockerClient()).dockerode, imageName))) {
       throw new Error("Failed to build image");
     }
 

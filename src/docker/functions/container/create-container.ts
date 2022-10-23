@@ -2,42 +2,47 @@ import { log } from "../../../logger";
 import { DockerImageName } from "../../../docker-image-name";
 import { dockerClient } from "../../docker-client";
 import Dockerode, { PortMap as DockerodePortBindings } from "dockerode";
-import { getContainerPort, hasHostBinding, PortString, PortWithOptionalBinding } from "../../../port";
-import { createLabels, Labels } from "../create-labels";
-import { BindMount, Command, ContainerName, Env, ExtraHost, HealthCheck, NetworkMode, TmpFs } from "../../types";
+import { getContainerPort, hasHostBinding, PortWithOptionalBinding } from "../../../port";
+import { createLabels } from "../create-labels";
+import { BindMount, Environment, ExtraHost, HealthCheck, Labels, TmpFs, Ulimits } from "../../types";
 
 export type CreateContainerOptions = {
   imageName: DockerImageName;
-  env: Env;
-  cmd: Command[];
+  environment: Environment;
+  command: string[];
+  entrypoint?: string[];
   bindMounts: BindMount[];
   tmpFs: TmpFs;
   exposedPorts: PortWithOptionalBinding[];
-  name?: ContainerName;
+  name?: string;
   reusable: boolean;
   labels?: Labels;
-  networkMode?: NetworkMode;
+  networkMode?: string;
   healthCheck?: HealthCheck;
   useDefaultLogDriver: boolean;
   privilegedMode: boolean;
   autoRemove: boolean;
   extraHosts: ExtraHost[];
   ipcMode?: string;
+  ulimits?: Ulimits;
+  addedCapabilities?: string[];
+  droppedCapabilities?: string[];
   user?: string;
 };
 
 export const createContainer = async (options: CreateContainerOptions): Promise<Dockerode.Container> => {
   try {
     log.info(`Creating container for image: ${options.imageName}`);
-    const { dockerode } = await dockerClient;
+    const { dockerode } = await dockerClient();
 
     return await dockerode.createContainer({
       name: options.name,
       User: options.user,
       Image: options.imageName.toString(),
-      Env: getEnv(options.env),
+      Env: getEnv(options.environment),
       ExposedPorts: getExposedPorts(options.exposedPorts),
-      Cmd: options.cmd,
+      Cmd: options.command,
+      Entrypoint: options.entrypoint,
       Labels: createLabels(options.reusable, options.imageName, options.labels),
       // @ts-ignore
       Healthcheck: getHealthCheck(options.healthCheck),
@@ -51,6 +56,9 @@ export const createContainer = async (options: CreateContainerOptions): Promise<
         Tmpfs: options.tmpFs,
         LogConfig: getLogConfig(options.useDefaultLogDriver),
         Privileged: options.privilegedMode,
+        Ulimits: getUlimits(options.ulimits),
+        CapAdd: options.addedCapabilities,
+        CapDrop: options.droppedCapabilities,
       },
     });
   } catch (err) {
@@ -61,13 +69,13 @@ export const createContainer = async (options: CreateContainerOptions): Promise<
 
 type DockerodeEnvironment = string[];
 
-const getEnv = (env: Env): DockerodeEnvironment =>
+const getEnv = (env: Environment): DockerodeEnvironment =>
   Object.entries(env).reduce(
     (dockerodeEnvironment, [key, value]) => [...dockerodeEnvironment, `${key}=${value}`],
     [] as DockerodeEnvironment
   );
 
-type DockerodeExposedPorts = { [port in PortString]: Record<string, unknown> };
+type DockerodeExposedPorts = { [port in string]: Record<string, unknown> };
 
 const getExposedPorts = (exposedPorts: PortWithOptionalBinding[]): DockerodeExposedPorts => {
   const dockerodeExposedPorts: DockerodeExposedPorts = {};
@@ -94,7 +102,7 @@ const getPortBindings = (exposedPorts: PortWithOptionalBinding[]): DockerodePort
 };
 
 const getBindMounts = (bindMounts: BindMount[]): string[] => {
-  return bindMounts.map(({ source, target, bindMode }) => `${source}:${target}:${bindMode}`);
+  return bindMounts.map(({ source, target, mode }) => `${source}:${target}:${mode}`);
 };
 
 type DockerodeHealthCheck = {
@@ -135,4 +143,22 @@ const getLogConfig = (useDefaultLogDriver: boolean): DockerodeLogConfig | undefi
     Type: "json-file",
     Config: {},
   };
+};
+
+type DockerodeUlimit = {
+  Name?: string;
+  Hard?: number;
+  Soft?: number;
+};
+
+const getUlimits = (ulimits: Ulimits | undefined): DockerodeUlimit[] | undefined => {
+  if (!ulimits) {
+    return undefined;
+  }
+
+  return Object.entries(ulimits).map(([key, value]) => ({
+    Name: key,
+    Hard: value.hard,
+    Soft: value.soft,
+  }));
 };
