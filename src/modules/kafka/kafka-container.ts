@@ -124,7 +124,7 @@ export class KafkaContainer extends GenericContainer {
       KAFKA_SSL_KEYSTORE_PASSWORD: keystore.passphrase,
       KAFKA_SSL_KEYSTORE_TYPE: "PKCS12",
       KAFKA_SASL_ENABLED_MECHANISMS: sasl.mechanism,
-      [`KAFKA_LISTENER_NAME_SECURE_$:sasl.mechanism}_SASL_JAAS_CONFIG`]:
+      [`KAFKA_LISTENER_NAME_SECURE_${sasl.mechanism}_SASL_JAAS_CONFIG`]:
         "org.apache.kafka.common.security.scram.ScramLoginModule required;",
     })
       .withCopyContentToContainer([{ content: keystore.content, target: "/etc/kafka/secrets/server.keystore.pfx" }])
