@@ -8,11 +8,9 @@ import { ReaperInstance } from "../reaper";
 import { DockerImageName } from "../docker-image-name";
 import { StartedTestContainer, TestContainer } from "../test-container";
 import { HostPortWaitStrategy, WaitStrategy } from "../wait-strategy";
-import { Readable } from "stream";
 import { PortForwarderInstance } from "../port-forwarder";
 import { getAuthConfig } from "../registry-auth-locator";
 import {
-  BindMode,
   BindMount,
   ContentToCopy,
   Environment,
@@ -39,7 +37,7 @@ import { StartedGenericContainer } from "./started-generic-container";
 import { hash } from "../hash";
 import { getContainerByHash } from "../docker/functions/container/get-container";
 import { LABEL_CONTAINER_HASH } from "../labels";
-import { Network, StartedNetwork } from "../network";
+import { StartedNetwork } from "../network";
 
 export class GenericContainer implements TestContainer {
   public static fromDockerfile(context: string, dockerfileName = "Dockerfile"): GenericContainerBuilder {
@@ -250,22 +248,22 @@ export class GenericContainer implements TestContainer {
   }
 
   public withTmpFs(tmpFs: TmpFs): this {
-    this.tmpFs = tmpFs;
+    this.tmpFs = { ...this.tmpFs, ...tmpFs };
     return this;
   }
 
   public withUlimits(ulimits: Ulimits): this {
-    this.ulimits = ulimits;
+    this.ulimits = { ...this.ulimits, ...ulimits };
     return this;
   }
 
   public withAddedCapabilities(...capabilities: string[]): this {
-    this.addedCapabilities = capabilities;
+    this.addedCapabilities = [...(this.addedCapabilities ?? []), ...capabilities];
     return this;
   }
 
   public withDroppedCapabilities(...capabilities: string[]): this {
-    this.droppedCapabilities = capabilities;
+    this.droppedCapabilities = [...(this.droppedCapabilities ?? []), ...capabilities];
     return this;
   }
 
@@ -280,12 +278,12 @@ export class GenericContainer implements TestContainer {
   }
 
   public withNetworkAliases(...networkAliases: string[]): this {
-    this.networkAliases = networkAliases;
+    this.networkAliases = [...this.networkAliases, ...networkAliases];
     return this;
   }
 
   public withExtraHosts(extraHosts: ExtraHost[]): this {
-    this.extraHosts = extraHosts;
+    this.extraHosts = [...this.extraHosts, ...extraHosts];
     return this;
   }
 
