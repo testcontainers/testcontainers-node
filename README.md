@@ -251,10 +251,10 @@ const { GenericContainer } = require("testcontainers");
 const container = await new GenericContainer("alpine")
   .withBindMounts([{ 
     source: "/local/file.txt", 
-    destination:"/remote/file.txt" 
+    target:"/remote/file.txt" 
   }, {
     source: "/local/dir",
-    destination:"/remote/dir",
+    target:"/remote/dir",
     mode: "ro"
   }])
   .start();
