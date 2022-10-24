@@ -23,11 +23,7 @@ describe("MongodbContainer", () => {
   });
 
   async function checkMongo(mongodbContainer: StartedMongoDBContainer) {
-    const db = await mongoose.createConnection(mongodbContainer.getConnectionString(), {
-      directConnection: true,
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    const db = await mongoose.createConnection(mongodbContainer.getConnectionString(), { directConnection: true });
     const fooCollection = db.collection("foo");
     const obj = { value: 1 };
 

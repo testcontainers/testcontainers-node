@@ -44,7 +44,6 @@ export const createContainer = async (options: CreateContainerOptions): Promise<
       Cmd: options.command,
       Entrypoint: options.entrypoint,
       Labels: createLabels(options.reusable, options.imageName, options.labels),
-      // @ts-ignore
       Healthcheck: getHealthCheck(options.healthCheck),
       HostConfig: {
         IpcMode: options.ipcMode,

@@ -6,8 +6,8 @@ import { InternalPortCheck } from "./port-check";
 jest.mock("./logger");
 jest.mock("./docker/functions/container/exec-container");
 
-const mockLogger = jest.mocked(log, true);
-const mockExecContainer = jest.mocked(execContainer, true);
+const mockLogger = jest.mocked(log, { shallow: true });
+const mockExecContainer = jest.mocked(execContainer, { shallow: true });
 
 describe("PortCheck", () => {
   describe("InternalPortCheck", () => {
