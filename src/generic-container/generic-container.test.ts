@@ -517,14 +517,16 @@ describe("GenericContainer", () => {
         .start();
       await checkContainerIsHealthy(container);
 
-      await expect(() =>
-        new GenericContainer("cristianrgreco/testcontainer:1.1.13")
-          .withName("there_can_only_be_one")
-          .withExposedPorts(8080)
-          .start()
-      ).rejects.toThrowError();
-
-      await container.stop();
+      try {
+        await expect(() =>
+          new GenericContainer("cristianrgreco/testcontainer:1.1.13")
+            .withName("there_can_only_be_one")
+            .withExposedPorts(8080)
+            .start()
+        ).rejects.toThrowError();
+      } finally {
+        await container.stop();
+      }
     });
 
     it("should not reuse the container even when there is a candidate 1", async () => {
