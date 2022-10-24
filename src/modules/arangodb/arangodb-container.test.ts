@@ -1,10 +1,11 @@
 import { Database } from "arangojs";
 import { ArangoDBContainer } from "./arangodb-container";
+import { itif } from "../../test-helper";
 
 describe("ArangoDB", () => {
   jest.setTimeout(180_000);
 
-  it("should connect", async () => {
+  itif(process.arch !== "arm64")("should connect", async () => {
     const container = await new ArangoDBContainer().start();
     const db = new Database({ url: container.getHttpUrl() });
 

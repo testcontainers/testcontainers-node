@@ -10,7 +10,7 @@ const KAFKA_PORT = 9093;
 const KAFKA_BROKER_PORT = 9092;
 const DEFAULT_ZOOKEEPER_PORT = 2181;
 
-export const KAFKA_IMAGE = "confluentinc/cp-kafka:5.5.4";
+export const KAFKA_IMAGE = "confluentinc/cp-kafka:7.2.2";
 
 interface SaslSslListenerOptions {
   sasl: SaslOptions;
