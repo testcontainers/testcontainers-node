@@ -29,7 +29,8 @@
     "test": "cross-env DEBUG=testcontainers,testcontainers:exec jest --runInBand",
     "format": "prettier --write package.json \"src/**/*.ts\"",
     "lint": "eslint --fix package.json \"src/**/*.ts\"",
-    "updateDeps": "npx npm-check-updates -u"
+    "updateDeps": "npx npm-check-updates -u",
+    "validateEngine": "npx ls-engines"
   },
   "dependencies": {
     "@balena/dockerignore": "^1.0.2",
