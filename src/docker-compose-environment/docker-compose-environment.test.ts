@@ -140,7 +140,7 @@ describe("DockerComposeEnvironment", () => {
 
   it("should bind environment variables to the docker compose file", async () => {
     const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-env.yml")
-      .withEnvironment("ENV_VAR", "ENV_VAR_VALUE")
+      .withEnvironment({ ENV_VAR: "ENV_VAR_VALUE" })
       .up();
 
     const container = startedEnvironment.getContainer("container_1");
