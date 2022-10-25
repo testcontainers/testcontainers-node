@@ -398,12 +398,12 @@ Add hostname mappings:
 const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
-  .withExtraHosts([{ 
-      host: "foo", 
-      ipAddress: "10.11.12.13" 
-    }, { 
-      host: "bar", 
-      ipAddress: "11.12.13.14" 
+  .withExtraHosts([{
+    host: "foo",
+    ipAddress: "10.11.12.13"
+  }, {
+    host: "bar",
+    ipAddress: "11.12.13.14"
   }])
   .start();
 

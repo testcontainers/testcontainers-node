@@ -39,7 +39,7 @@ export const createContainer = async (options: CreateContainerOptions): Promise<
       name: options.name,
       User: options.user,
       Image: options.imageName.toString(),
-      Env: getEnv(options.environment),
+      Env: getEnvironment(options.environment),
       ExposedPorts: getExposedPorts(options.exposedPorts),
       Cmd: options.command,
       Entrypoint: options.entrypoint,
@@ -68,8 +68,8 @@ export const createContainer = async (options: CreateContainerOptions): Promise<
 
 type DockerodeEnvironment = string[];
 
-const getEnv = (env: Environment): DockerodeEnvironment =>
-  Object.entries(env).reduce(
+const getEnvironment = (environment: Environment): DockerodeEnvironment =>
+  Object.entries(environment).reduce(
     (dockerodeEnvironment, [key, value]) => [...dockerodeEnvironment, `${key}=${value}`],
     [] as DockerodeEnvironment
   );

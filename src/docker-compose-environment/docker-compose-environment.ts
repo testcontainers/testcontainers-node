@@ -41,8 +41,8 @@ export class DockerComposeEnvironment {
     return this;
   }
 
-  public withEnvironment(key: string, value: string): this {
-    this.environment[key] = value;
+  public withEnvironment(environment: Environment): this {
+    this.environment = { ...this.environment, ...environment };
     return this;
   }
 
@@ -52,7 +52,7 @@ export class DockerComposeEnvironment {
   }
 
   public withProfiles(...profiles: string[]): this {
-    this.profiles = profiles;
+    this.profiles = [...this.profiles, ...profiles];
     return this;
   }
 
@@ -97,7 +97,7 @@ export class DockerComposeEnvironment {
     }
     this.profiles.forEach((profile) => composeOptions.push("--profile", profile));
 
-    await dockerComposeUp({ ...options, commandOptions, composeOptions, env: this.environment }, services);
+    await dockerComposeUp({ ...options, commandOptions, composeOptions, environment: this.environment }, services);
 
     const startedContainers = (await listContainers()).filter(
       (container) => container.Labels["com.docker.compose.project"] === this.projectName
@@ -162,7 +162,7 @@ export class DockerComposeEnvironment {
     return new StartedDockerComposeEnvironment(startedGenericContainers, {
       ...options,
       composeOptions,
-      env: this.environment,
+      environment: this.environment,
     });
   }
 

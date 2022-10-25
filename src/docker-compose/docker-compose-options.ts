@@ -6,5 +6,5 @@ export type DockerComposeOptions = {
   projectName: string;
   commandOptions?: string[];
   composeOptions?: string[];
-  env?: Environment;
+  environment?: Environment;
 };
