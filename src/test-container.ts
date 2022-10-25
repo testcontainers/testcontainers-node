@@ -13,7 +13,7 @@ import {
   ContentToCopy,
   Environment,
 } from "./docker/types";
-import { Network, StartedNetwork } from "./network";
+import { StartedNetwork } from "./network";
 
 export interface TestContainer {
   start(): Promise<StartedTestContainer>;
