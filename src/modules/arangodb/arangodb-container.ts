@@ -7,7 +7,7 @@ const ARANGODB_PORT = 8529;
 const USERNAME = "root";
 
 export class ArangoDBContainer extends GenericContainer {
-  constructor(image = "arangodb:3.7.13", private password = new RandomUuid().nextUuid()) {
+  constructor(image = "arangodb:3.10.0", private password = new RandomUuid().nextUuid()) {
     super(image);
   }
 

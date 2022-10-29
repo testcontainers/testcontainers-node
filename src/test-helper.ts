@@ -5,8 +5,6 @@ import { StartedDockerComposeEnvironment } from "./docker-compose-environment/st
 import fetch from "node-fetch";
 import { StartedTestContainer } from "./test-container";
 
-export const itif = (condition: boolean) => (condition ? it : it.skip);
-
 export const checkContainerIsHealthy = async (container: StartedTestContainer): Promise<void> => {
   const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
   const response = await fetch(`${url}/hello-world`);

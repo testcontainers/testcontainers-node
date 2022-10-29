@@ -4,7 +4,7 @@ import { AbstractStartedContainer } from "../abstract-started-container";
 const ELASTIC_SEARCH_HTTP_PORT = 9200;
 
 export class ElasticsearchContainer extends GenericContainer {
-  constructor(image = "docker.elastic.co/elasticsearch/elasticsearch:7.9.2") {
+  constructor(image = "elasticsearch:7.17.7") {
     super(image);
   }
 
