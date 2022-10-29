@@ -1,15 +1,13 @@
 import { GenericContainer, Wait } from "../..";
 import { StartedTestContainer } from "../../test-container";
-import { Port } from "../../port";
 import { RandomUuid } from "../../uuid";
 import { AbstractStartedContainer } from "../abstract-started-container";
-import { Host } from "../../docker/types";
 
 const ARANGODB_PORT = 8529;
 const USERNAME = "root";
 
 export class ArangoDBContainer extends GenericContainer {
-  constructor(image = "arangodb:3.7.13", private password = new RandomUuid().nextUuid()) {
+  constructor(image = "arangodb:3.10.0", private password = new RandomUuid().nextUuid()) {
     super(image);
   }
 
@@ -18,10 +16,10 @@ export class ArangoDBContainer extends GenericContainer {
     return this;
   }
 
-  public async start(): Promise<StartedArangoContainer> {
+  public override async start(): Promise<StartedArangoContainer> {
     this.withExposedPorts(...(this.hasExposedPorts ? this.ports : [ARANGODB_PORT]))
       .withWaitStrategy(Wait.forLogMessage("Have fun!"))
-      .withEnv("ARANGO_ROOT_PASSWORD", this.password)
+      .withEnvironment({ ARANGO_ROOT_PASSWORD: this.password })
       .withStartupTimeout(120_000);
 
     return new StartedArangoContainer(await super.start(), this.password);
@@ -29,8 +27,8 @@ export class ArangoDBContainer extends GenericContainer {
 }
 
 export class StartedArangoContainer extends AbstractStartedContainer {
-  private readonly host: Host;
-  private readonly port: Port;
+  private readonly host: string;
+  private readonly port: number;
 
   constructor(startedTestContainer: StartedTestContainer, private readonly password: string) {
     super(startedTestContainer);

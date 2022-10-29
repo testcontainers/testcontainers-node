@@ -87,7 +87,7 @@ describe("GenericContainer", () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.13")
       .withExposedPorts(8080)
       .withHealthCheck({
-        test: "curl -f http://localhost:8080/hello-world || exit 1",
+        test: ["CMD-SHELL", "curl -f http://localhost:8080/hello-world || exit 1"],
         interval: 1000,
         timeout: 3000,
         retries: 5,
@@ -114,11 +114,11 @@ describe("GenericContainer", () => {
   it("should set network aliases", async () => {
     const network = await new Network().start();
     const fooContainer = await new GenericContainer("cristianrgreco/testcontainer:1.1.13")
-      .withNetworkMode(network.getName())
+      .withNetwork(network)
       .withNetworkAliases("foo")
       .start();
     const barContainer = await new GenericContainer("cristianrgreco/testcontainer:1.1.13")
-      .withNetworkMode(network.getName())
+      .withNetwork(network)
       .withNetworkAliases("bar", "baz")
       .start();
 
@@ -136,7 +136,7 @@ describe("GenericContainer", () => {
     const fooContainer = await new GenericContainer("cristianrgreco/testcontainer:1.1.13").start();
 
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.13")
-      .withExtraHosts({ host: "foo", ipAddress: fooContainer.getIpAddress(fooContainer.getNetworkNames()[0]) })
+      .withExtraHosts([{ host: "foo", ipAddress: fooContainer.getIpAddress(fooContainer.getNetworkNames()[0]) }])
       .start();
 
     expect((await container.exec(["getent", "hosts", "foo"])).exitCode).toBe(0);
@@ -148,7 +148,7 @@ describe("GenericContainer", () => {
 
   it("should set environment variables", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.13")
-      .withEnv("customKey", "customValue")
+      .withEnvironment({ customKey: "customValue" })
       .withExposedPorts(8080)
       .start();
 
@@ -162,7 +162,7 @@ describe("GenericContainer", () => {
 
   it("should set command", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.13")
-      .withCmd(["node", "index.js", "one", "two", "three"])
+      .withCommand(["node", "index.js", "one", "two", "three"])
       .withExposedPorts(8080)
       .start();
 
@@ -177,7 +177,7 @@ describe("GenericContainer", () => {
   it("should set entrypoint", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.13")
       .withEntrypoint(["node"])
-      .withCmd(["index.js"])
+      .withCommand(["index.js"])
       .withExposedPorts(8080)
       .start();
 
@@ -215,7 +215,7 @@ describe("GenericContainer", () => {
     const target = `/tmp/${filename}`;
 
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.13")
-      .withBindMount(source, target)
+      .withBindMounts([{ source, target }])
       .withExposedPorts(8080)
       .start();
 
@@ -433,12 +433,30 @@ describe("GenericContainer", () => {
       customGenericContainer
         .withName(containerName)
         .withExposedPorts(8080)
-        .withHealthCheck({ test: "exit 1" })
+        .withHealthCheck({ test: ["CMD-SHELL", "exit 1"] })
         .withWaitStrategy(Wait.forHealthCheck())
         .start()
     ).rejects.toThrowError("Health check failed");
 
     expect(await getRunningContainerNames()).not.toContain(containerName);
+  });
+
+  it("should wait for custom health check using CMD to run the command directly without a shell", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
+      .withExposedPorts(8080)
+      .withHealthCheck({
+        test: ["CMD", "/usr/bin/wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/hello-world"],
+        interval: 1000,
+        timeout: 3000,
+        retries: 5,
+        startPeriod: 1000,
+      })
+      .withWaitStrategy(Wait.forHealthCheck())
+      .start();
+
+    await checkContainerIsHealthy(container);
+
+    await container.stop();
   });
 
   it("should honour .dockerignore file", async () => {
@@ -467,7 +485,7 @@ describe("GenericContainer", () => {
     const source = path.resolve(fixtures, "docker", "test.txt");
     const target = "/tmp/test.txt";
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.13")
-      .withCopyFileToContainer(source, target)
+      .withCopyFilesToContainer([{ source, target }])
       .withExposedPorts(8080)
       .start();
     const { output } = await container.exec(["cat", target]);
@@ -481,7 +499,7 @@ describe("GenericContainer", () => {
     const content = "hello world";
     const target = "/tmp/test.txt";
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.13")
-      .withCopyContentToContainer(content, target)
+      .withCopyContentToContainer([{ content, target }])
       .withExposedPorts(8080)
       .start();
     const { output } = await container.exec(["cat", target]);
@@ -499,14 +517,16 @@ describe("GenericContainer", () => {
         .start();
       await checkContainerIsHealthy(container);
 
-      await expect(() =>
-        new GenericContainer("cristianrgreco/testcontainer:1.1.13")
-          .withName("there_can_only_be_one")
-          .withExposedPorts(8080)
-          .start()
-      ).rejects.toThrowError();
-
-      await container.stop();
+      try {
+        await expect(() =>
+          new GenericContainer("cristianrgreco/testcontainer:1.1.13")
+            .withName("there_can_only_be_one")
+            .withExposedPorts(8080)
+            .start()
+        ).rejects.toThrowError();
+      } finally {
+        await container.stop();
+      }
     });
 
     it("should not reuse the container even when there is a candidate 1", async () => {
@@ -517,14 +537,16 @@ describe("GenericContainer", () => {
         .start();
       await checkContainerIsHealthy(container);
 
-      await expect(() =>
-        new GenericContainer("cristianrgreco/testcontainer:1.1.13")
-          .withName("there_can_only_be_one")
-          .withExposedPorts(8080)
-          .start()
-      ).rejects.toThrowError();
-
-      await container.stop();
+      try {
+        await expect(() =>
+          new GenericContainer("cristianrgreco/testcontainer:1.1.13")
+            .withName("there_can_only_be_one")
+            .withExposedPorts(8080)
+            .start()
+        ).rejects.toThrowError();
+      } finally {
+        await container.stop();
+      }
     });
 
     it("should not reuse the container even when there is a candidate 2", async () => {
@@ -534,15 +556,17 @@ describe("GenericContainer", () => {
         .start();
       await checkContainerIsHealthy(container);
 
-      await expect(() =>
-        new GenericContainer("cristianrgreco/testcontainer:1.1.13")
-          .withName("there_can_only_be_one")
-          .withExposedPorts(8080)
-          .withReuse()
-          .start()
-      ).rejects.toThrowError();
-
-      await container.stop();
+      try {
+        await expect(() =>
+          new GenericContainer("cristianrgreco/testcontainer:1.1.13")
+            .withName("there_can_only_be_one")
+            .withExposedPorts(8080)
+            .withReuse()
+            .start()
+        ).rejects.toThrowError();
+      } finally {
+        await container.stop();
+      }
     });
 
     it("should reuse the container", async () => {
@@ -653,7 +677,7 @@ describe("GenericContainer", () => {
 
     it("should set build arguments", async () => {
       const context = path.resolve(fixtures, "docker-with-buildargs");
-      const container = await GenericContainer.fromDockerfile(context).withBuildArg("VERSION", "10-alpine").build();
+      const container = await GenericContainer.fromDockerfile(context).withBuildArgs({ VERSION: "10-alpine" }).build();
       const startedContainer = await container.withExposedPorts(8080).start();
 
       await checkContainerIsHealthy(startedContainer);

@@ -1,6 +1,5 @@
 import { log } from "../../logger";
 import { DockerImageName } from "../../docker-image-name";
-import { Command } from "../types";
 import { pullImage } from "./image/pull-image";
 import { startContainer } from "./container/start-container";
 import { attachContainer } from "./container/attach-container";
@@ -10,7 +9,7 @@ import Dockerode from "dockerode";
 export const runInContainer = async (
   dockerode: Dockerode,
   image: string,
-  command: Command[]
+  command: string[]
 ): Promise<string | undefined> => {
   try {
     const imageName = DockerImageName.fromString(image);

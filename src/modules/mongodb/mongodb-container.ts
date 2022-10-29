@@ -14,15 +14,15 @@ export class MongoDBContainer extends GenericContainer {
     this.dockerImageName = DockerImageName.fromString(this.image);
   }
 
-  public async start(): Promise<StartedMongoDBContainer> {
+  public override async start(): Promise<StartedMongoDBContainer> {
     this.withExposedPorts(MONGODB_PORT)
-      .withCmd(["--replSet", "rs0"])
+      .withCommand(["--replSet", "rs0"])
       .withWaitStrategy(Wait.forLogMessage(new RegExp(".*waiting for connections.*", "i")))
       .withStartupTimeout(120_000);
     return new StartedMongoDBContainer(await super.start());
   }
 
-  protected async postStart(startedTestContainer: StartedTestContainer): Promise<void> {
+  protected override async postStart(startedTestContainer: StartedTestContainer): Promise<void> {
     await this.initReplicaSet(startedTestContainer);
   }
 

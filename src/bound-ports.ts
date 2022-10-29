@@ -1,10 +1,10 @@
-import { getContainerPort, Port, PortWithOptionalBinding } from "./port";
+import { getContainerPort, PortWithOptionalBinding } from "./port";
 import { InspectResult } from "./docker/functions/container/inspect-container";
 
 export class BoundPorts {
-  private readonly ports = new Map<Port, Port>();
+  private readonly ports = new Map<number, number>();
 
-  public getBinding(port: Port): Port {
+  public getBinding(port: number): number {
     const binding = this.ports.get(port);
 
     if (!binding) {
@@ -14,11 +14,11 @@ export class BoundPorts {
     return binding;
   }
 
-  public setBinding(key: Port, value: Port): void {
+  public setBinding(key: number, value: number): void {
     this.ports.set(key, value);
   }
 
-  public iterator(): Iterable<[Port, Port]> {
+  public iterator(): Iterable<[number, number]> {
     return this.ports;
   }
 

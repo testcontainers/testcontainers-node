@@ -7,13 +7,12 @@
     "strict": true,
     "esModuleInterop": true,
     "lib": ["es2017"],
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "noImplicitOverride": true
   },
   "exclude": [
     "dist",
     "node_modules",
-    "src/**/*.test.ts",
-    "src/test-helper.ts",
     "src/modules/kafka/test-certs/**/*"
   ]
 }

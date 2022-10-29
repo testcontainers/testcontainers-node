@@ -5,7 +5,7 @@ import tar from "tar-fs";
 import byline from "byline";
 import { dockerClient } from "../../docker-client";
 import { createLabels } from "../create-labels";
-import { BuildArgs, BuildContext, RegistryConfig } from "../../types";
+import { BuildArgs, RegistryConfig } from "../../types";
 import path from "path";
 import { existsSync, promises as fs } from "fs";
 import dockerIgnore from "@balena/dockerignore";
@@ -13,7 +13,7 @@ import { ImageBuildOptions } from "dockerode";
 
 export type BuildImageOptions = {
   imageName: DockerImageName;
-  context: BuildContext;
+  context: string;
   dockerfileName: string;
   buildArgs: BuildArgs;
   pullPolicy: PullPolicy;
@@ -66,7 +66,7 @@ export const buildImage = async (options: BuildImageOptions): Promise<void> => {
   }
 };
 
-const createIsDockerIgnoredFunction = async (context: BuildContext): Promise<(path: string) => boolean> => {
+const createIsDockerIgnoredFunction = async (context: string): Promise<(path: string) => boolean> => {
   const dockerIgnoreFilePath = path.join(context, ".dockerignore");
 
   if (!existsSync(dockerIgnoreFilePath)) {

@@ -1,7 +1,6 @@
 import Dockerode, { DockerOptions, NetworkInspectInfo } from "dockerode";
 import path from "path";
 import { log } from "../logger";
-import { Host } from "./types";
 import { URL } from "url";
 import { existsSync, promises as fs } from "fs";
 import { runInContainer } from "./functions/run-in-container";
@@ -9,7 +8,7 @@ import { logSystemDiagnostics } from "../log-system-diagnostics";
 import "../testcontainers-properties-file";
 
 type DockerClient = {
-  host: Host;
+  host: string;
   dockerode: Dockerode;
 };
 

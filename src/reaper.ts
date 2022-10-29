@@ -93,7 +93,7 @@ export class ReaperInstance {
     const container = new GenericContainer(REAPER_IMAGE)
       .withName(`testcontainers-ryuk-${sessionId}`)
       .withExposedPorts(containerPort)
-      .withBindMount(dockerSocket, "/var/run/docker.sock")
+      .withBindMounts([{ source: dockerSocket, target: "/var/run/docker.sock" }])
       .withWaitStrategy(Wait.forLogMessage(/.+ Started!/));
 
     if (this.isPrivileged()) {

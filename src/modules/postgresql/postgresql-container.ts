@@ -2,7 +2,6 @@ import { GenericContainer } from "../../generic-container/generic-container";
 import { StartedTestContainer } from "../../test-container";
 import { RandomUuid } from "../../uuid";
 import { AbstractStartedContainer } from "../abstract-started-container";
-import { Port } from "../../port";
 
 const POSTGRES_PORT = 5432;
 
@@ -30,11 +29,13 @@ export class PostgreSqlContainer extends GenericContainer {
     return this;
   }
 
-  public async start(): Promise<StartedPostgreSqlContainer> {
+  public override async start(): Promise<StartedPostgreSqlContainer> {
     this.withExposedPorts(...(this.hasExposedPorts ? this.ports : [POSTGRES_PORT]))
-      .withEnv("POSTGRES_DB", this.database)
-      .withEnv("POSTGRES_USER", this.username)
-      .withEnv("POSTGRES_PASSWORD", this.password)
+      .withEnvironment({
+        POSTGRES_DB: this.database,
+        POSTGRES_USER: this.username,
+        POSTGRES_PASSWORD: this.password,
+      })
       .withStartupTimeout(120_000);
 
     return new StartedPostgreSqlContainer(await super.start(), this.database, this.username, this.password);
@@ -42,7 +43,7 @@ export class PostgreSqlContainer extends GenericContainer {
 }
 
 export class StartedPostgreSqlContainer extends AbstractStartedContainer {
-  private readonly port: Port;
+  private readonly port: number;
 
   constructor(
     startedTestContainer: StartedTestContainer,
@@ -54,7 +55,7 @@ export class StartedPostgreSqlContainer extends AbstractStartedContainer {
     this.port = startedTestContainer.getMappedPort(5432);
   }
 
-  public getPort(): Port {
+  public getPort(): number {
     return this.port;
   }
 

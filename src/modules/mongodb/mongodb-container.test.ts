@@ -22,10 +22,8 @@ describe("MongodbContainer", () => {
     await mongodbContainer.stop();
   });
 
-  async function checkMongo(mongodbContainer: StartedMongoDBContainer, port = 27017) {
-    const db = await mongoose.createConnection(mongodbContainer.getConnectionString(), {
-      directConnection: true,
-    });
+  async function checkMongo(mongodbContainer: StartedMongoDBContainer) {
+    const db = await mongoose.createConnection(mongodbContainer.getConnectionString(), { directConnection: true });
     const fooCollection = db.collection("foo");
     const obj = { value: 1 };
 

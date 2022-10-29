@@ -2,33 +2,22 @@ import { log } from "../../../logger";
 import { DockerImageName } from "../../../docker-image-name";
 import { dockerClient } from "../../docker-client";
 import Dockerode, { PortMap as DockerodePortBindings } from "dockerode";
-import { getContainerPort, hasHostBinding, PortString, PortWithOptionalBinding } from "../../../port";
+import { getContainerPort, hasHostBinding, PortWithOptionalBinding } from "../../../port";
 import { createLabels } from "../create-labels";
-import {
-  BindMount,
-  Command,
-  ContainerName,
-  Env,
-  ExtraHost,
-  HealthCheck,
-  Labels,
-  NetworkMode,
-  TmpFs,
-  Ulimits,
-} from "../../types";
+import { BindMount, Environment, ExtraHost, HealthCheck, Labels, TmpFs, Ulimits } from "../../types";
 
 export type CreateContainerOptions = {
   imageName: DockerImageName;
-  env: Env;
-  cmd: Command[];
+  environment: Environment;
+  command: string[];
   entrypoint?: string[];
   bindMounts: BindMount[];
   tmpFs: TmpFs;
   exposedPorts: PortWithOptionalBinding[];
-  name?: ContainerName;
+  name?: string;
   reusable: boolean;
   labels?: Labels;
-  networkMode?: NetworkMode;
+  networkMode?: string;
   healthCheck?: HealthCheck;
   useDefaultLogDriver: boolean;
   privilegedMode: boolean;
@@ -50,12 +39,11 @@ export const createContainer = async (options: CreateContainerOptions): Promise<
       name: options.name,
       User: options.user,
       Image: options.imageName.toString(),
-      Env: getEnv(options.env),
+      Env: getEnvironment(options.environment),
       ExposedPorts: getExposedPorts(options.exposedPorts),
-      Cmd: options.cmd,
+      Cmd: options.command,
       Entrypoint: options.entrypoint,
       Labels: createLabels(options.reusable, options.imageName, options.labels),
-      // @ts-ignore
       Healthcheck: getHealthCheck(options.healthCheck),
       HostConfig: {
         IpcMode: options.ipcMode,
@@ -80,13 +68,13 @@ export const createContainer = async (options: CreateContainerOptions): Promise<
 
 type DockerodeEnvironment = string[];
 
-const getEnv = (env: Env): DockerodeEnvironment =>
-  Object.entries(env).reduce(
+const getEnvironment = (environment: Environment): DockerodeEnvironment =>
+  Object.entries(environment).reduce(
     (dockerodeEnvironment, [key, value]) => [...dockerodeEnvironment, `${key}=${value}`],
     [] as DockerodeEnvironment
   );
 
-type DockerodeExposedPorts = { [port in PortString]: Record<string, unknown> };
+type DockerodeExposedPorts = { [port in string]: Record<string, unknown> };
 
 const getExposedPorts = (exposedPorts: PortWithOptionalBinding[]): DockerodeExposedPorts => {
   const dockerodeExposedPorts: DockerodeExposedPorts = {};
@@ -113,7 +101,7 @@ const getPortBindings = (exposedPorts: PortWithOptionalBinding[]): DockerodePort
 };
 
 const getBindMounts = (bindMounts: BindMount[]): string[] => {
-  return bindMounts.map(({ source, target, bindMode }) => `${source}:${target}:${bindMode}`);
+  return bindMounts.map(({ source, target, mode }) => `${source}:${target}:${mode}`);
 };
 
 type DockerodeHealthCheck = {
@@ -130,7 +118,7 @@ const getHealthCheck = (healthCheck?: HealthCheck): DockerodeHealthCheck | undef
   }
 
   return {
-    Test: ["CMD-SHELL", healthCheck.test],
+    Test: healthCheck.test,
     Interval: healthCheck.interval ? toNanos(healthCheck.interval) : 0,
     Timeout: healthCheck.timeout ? toNanos(healthCheck.timeout) : 0,
     Retries: healthCheck.retries || 0,

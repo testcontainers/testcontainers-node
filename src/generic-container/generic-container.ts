@@ -8,25 +8,17 @@ import { ReaperInstance } from "../reaper";
 import { DockerImageName } from "../docker-image-name";
 import { StartedTestContainer, TestContainer } from "../test-container";
 import { HostPortWaitStrategy, WaitStrategy } from "../wait-strategy";
-import { Readable } from "stream";
 import { PortForwarderInstance } from "../port-forwarder";
 import { getAuthConfig } from "../registry-auth-locator";
 import {
-  BindMode,
   BindMount,
-  BuildContext,
-  Command,
-  ContainerName,
-  Dir,
-  Env,
-  EnvKey,
-  EnvValue,
+  ContentToCopy,
+  Environment,
   ExtraHost,
+  FileToCopy,
   HealthCheck,
-  Host,
-  NetworkMode,
-  TmpFs,
   Labels,
+  TmpFs,
   Ulimits,
 } from "../docker/types";
 import { pullImage } from "../docker/functions/image/pull-image";
@@ -45,22 +37,23 @@ import { StartedGenericContainer } from "./started-generic-container";
 import { hash } from "../hash";
 import { getContainerByHash } from "../docker/functions/container/get-container";
 import { LABEL_CONTAINER_HASH } from "../labels";
+import { StartedNetwork } from "../network";
 
 export class GenericContainer implements TestContainer {
-  public static fromDockerfile(context: BuildContext, dockerfileName = "Dockerfile"): GenericContainerBuilder {
+  public static fromDockerfile(context: string, dockerfileName = "Dockerfile"): GenericContainerBuilder {
     return new GenericContainerBuilder(context, dockerfileName);
   }
 
   private readonly imageName: DockerImageName;
 
-  protected env: Env = {};
-  protected networkMode?: NetworkMode;
+  protected environment: Environment = {};
+  protected networkMode?: string;
   protected networkAliases: string[] = [];
   protected ports: PortWithOptionalBinding[] = [];
-  protected cmd: Command[] = [];
+  protected command: string[] = [];
   protected entrypoint?: string[];
   protected bindMounts: BindMount[] = [];
-  protected name?: ContainerName;
+  protected name?: string;
   protected labels: Labels = {};
   protected tmpFs: TmpFs = {};
   protected healthCheck?: HealthCheck;
@@ -107,8 +100,8 @@ export class GenericContainer implements TestContainer {
 
     const createContainerOptions: CreateContainerOptions = {
       imageName: this.imageName,
-      env: this.env,
-      cmd: this.cmd,
+      environment: this.environment,
+      command: this.command,
       entrypoint: this.entrypoint,
       bindMounts: this.bindMounts,
       tmpFs: this.tmpFs,
@@ -229,8 +222,8 @@ export class GenericContainer implements TestContainer {
     return this.ports.length !== 0;
   }
 
-  public withCmd(cmd: Command[]): this {
-    this.cmd = cmd;
+  public withCommand(command: string[]): this {
+    this.command = command;
     return this;
   }
 
@@ -239,68 +232,68 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
-  public withName(name: ContainerName): this {
+  public withName(name: string): this {
     this.name = name;
     return this;
   }
 
   public withLabels(labels: Labels): this {
-    this.labels = { ...labels };
+    this.labels = { ...this.labels, ...labels };
     return this;
   }
 
-  public withEnv(key: EnvKey, value: EnvValue): this {
-    this.env[key] = value;
+  public withEnvironment(environment: Environment): this {
+    this.environment = { ...this.environment, ...environment };
     return this;
   }
 
   public withTmpFs(tmpFs: TmpFs): this {
-    this.tmpFs = tmpFs;
+    this.tmpFs = { ...this.tmpFs, ...tmpFs };
     return this;
   }
 
   public withUlimits(ulimits: Ulimits): this {
-    this.ulimits = ulimits;
+    this.ulimits = { ...this.ulimits, ...ulimits };
     return this;
   }
 
   public withAddedCapabilities(...capabilities: string[]): this {
-    this.addedCapabilities = capabilities;
+    this.addedCapabilities = [...(this.addedCapabilities ?? []), ...capabilities];
     return this;
   }
 
   public withDroppedCapabilities(...capabilities: string[]): this {
-    this.droppedCapabilities = capabilities;
+    this.droppedCapabilities = [...(this.droppedCapabilities ?? []), ...capabilities];
     return this;
   }
 
-  public withNetworkMode(networkMode: NetworkMode): this {
+  public withNetwork(network: StartedNetwork): this {
+    this.networkMode = network.getName();
+    return this;
+  }
+
+  public withNetworkMode(networkMode: string): this {
     this.networkMode = networkMode;
     return this;
   }
 
   public withNetworkAliases(...networkAliases: string[]): this {
-    this.networkAliases = networkAliases;
+    this.networkAliases = [...this.networkAliases, ...networkAliases];
     return this;
   }
 
-  public withExtraHosts(...extraHosts: ExtraHost[]): this {
-    this.extraHosts.push(...extraHosts);
+  public withExtraHosts(extraHosts: ExtraHost[]): this {
+    this.extraHosts = [...this.extraHosts, ...extraHosts];
     return this;
   }
 
   public withExposedPorts(...ports: PortWithOptionalBinding[]): this {
-    this.ports = ports;
+    this.ports = [...this.ports, ...ports];
     return this;
   }
 
-  protected addExposedPorts(...ports: PortWithOptionalBinding[]): this {
-    this.ports.push(...ports);
-    return this;
-  }
-
-  public withBindMount(source: Dir, target: Dir, bindMode: BindMode = "rw"): this {
-    this.bindMounts.push({ source, target, bindMode });
+  public withBindMounts(bindMounts: BindMount[]): this {
+    this.bindMounts = bindMounts.map((bindMount) => ({ mode: "rw", ...bindMount }));
     return this;
   }
 
@@ -349,13 +342,15 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
-  public withCopyFileToContainer(sourcePath: string, containerPath: string): this {
-    this.getTarToCopy().file(sourcePath, { name: containerPath });
+  public withCopyFilesToContainer(filesToCopy: FileToCopy[]): this {
+    const tar = this.getTarToCopy();
+    filesToCopy.forEach(({ source, target }) => tar.file(source, { name: target }));
     return this;
   }
 
-  public withCopyContentToContainer(content: string | Buffer | Readable, containerPath: string): this {
-    this.getTarToCopy().append(content, { name: containerPath });
+  public withCopyContentToContainer(contentsToCopy: ContentToCopy[]): this {
+    const tar = this.getTarToCopy();
+    contentsToCopy.forEach(({ content, target }) => tar.append(content, { name: target }));
     return this;
   }
 
@@ -385,7 +380,7 @@ export class GenericContainer implements TestContainer {
     }
   }
 
-  private getWaitStrategy(host: Host, container: Dockerode.Container): WaitStrategy {
+  private getWaitStrategy(host: string, container: Dockerode.Container): WaitStrategy {
     if (this.waitStrategy) {
       return this.waitStrategy;
     }

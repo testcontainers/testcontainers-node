@@ -1,4 +1,4 @@
-import { Env } from "../docker/types";
+import { Environment } from "../docker/types";
 
 export type DockerComposeOptions = {
   filePath: string;
@@ -6,5 +6,5 @@ export type DockerComposeOptions = {
   projectName: string;
   commandOptions?: string[];
   composeOptions?: string[];
-  env?: Env;
+  environment?: Environment;
 };

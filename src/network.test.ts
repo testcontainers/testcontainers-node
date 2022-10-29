@@ -5,7 +5,7 @@ import { getContainerById } from "./docker/functions/container/get-container";
 describe("Network", () => {
   jest.setTimeout(180_000);
 
-  it("should start container in a user-defined network", async () => {
+  it("should start container via network mode", async () => {
     const network = await new Network().start();
 
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.13")
@@ -20,17 +20,30 @@ describe("Network", () => {
     await network.stop();
   });
 
+  it("should start container via network", async () => {
+    const network = await new Network().start();
+
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.13").withNetwork(network).start();
+
+    const dockerContainer = await getContainerById(container.getId());
+    const containerInfo = await dockerContainer.inspect();
+    expect(containerInfo.HostConfig.NetworkMode).toBe(network.getName());
+
+    await container.stop();
+    await network.stop();
+  });
+
   it("two containers in user-defined network should be able to ping each other by name", async () => {
     const network = await new Network().start();
 
     const container1 = await new GenericContainer("cristianrgreco/testcontainer:1.1.13")
       .withName("container1")
-      .withNetworkMode(network.getName())
+      .withNetwork(network)
       .start();
 
     const container2 = await new GenericContainer("cristianrgreco/testcontainer:1.1.13")
       .withName("container2")
-      .withNetworkMode(network.getName())
+      .withNetwork(network)
       .start();
 
     const { exitCode } = await container1.exec(["ping", "-c", "3", "container2"]);
@@ -45,9 +58,7 @@ describe("Network", () => {
   it("should expose the IP address of a container in a given network", async () => {
     const network = await new Network().start();
 
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.13")
-      .withNetworkMode(network.getName())
-      .start();
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.13").withNetwork(network).start();
 
     expect(container.getIpAddress(network.getName())).toEqual(expect.stringMatching(/^\d+\.\d+\.\d+\.\d+$/));
 

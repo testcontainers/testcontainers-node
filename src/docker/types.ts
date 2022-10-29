@@ -1,29 +1,33 @@
-export type Id = string;
+import { Readable } from "stream";
 
-export type Host = string;
-
-export type EnvKey = string;
-
-export type EnvValue = string;
-
-export type Env = { [key in EnvKey]: EnvValue };
-
-export type Dir = string;
+export type Environment = { [key in string]: string };
 
 export type BindMode = "rw" | "ro" | "z" | "Z";
 
 export type BindMount = {
-  source: Dir;
-  target: Dir;
-  bindMode: BindMode;
+  source: string;
+  target: string;
+  mode?: BindMode;
 };
 
-export type TmpFs = { [dir in Dir]: Dir };
+export type FileToCopy = {
+  source: string;
+  target: string;
+};
+
+export type Content = string | Buffer | Readable;
+
+export type ContentToCopy = {
+  content: Content;
+  target: string;
+};
+
+export type TmpFs = { [dir in string]: string };
 
 export type Ulimits = { [name: string]: { hard: number | undefined; soft: number | undefined } };
 
 export type HealthCheck = {
-  test: string;
+  test: ["CMD-SHELL", string] | ["CMD", ...string[]];
   interval?: number;
   timeout?: number;
   retries?: number;
@@ -31,13 +35,9 @@ export type HealthCheck = {
 };
 
 export type ExtraHost = {
-  host: Host;
+  host: string;
   ipAddress: string;
 };
-
-export type NetworkMode = string;
-
-export type ContainerName = string;
 
 export type Labels = { [key: string]: string };
 
@@ -57,17 +57,9 @@ export type RegistryConfig = {
   };
 };
 
-export type BuildContext = string;
+export type BuildArgs = { [key in string]: string };
 
-export type BuildArgs = { [key in EnvKey]: EnvValue };
-
-export type StreamOutput = string;
-
-export type ExitCode = number;
-
-export type Command = string;
-
-export type ExecResult = { output: StreamOutput; exitCode: ExitCode };
+export type ExecResult = { output: string; exitCode: number };
 
 export type HealthCheckStatus = "none" | "starting" | "unhealthy" | "healthy";
 

@@ -1,7 +1,7 @@
 import { createSshConnection, SshConnection } from "ssh-remote-port-forward";
 import { log } from "./logger";
 import { GenericContainer } from "./generic-container/generic-container";
-import { Port, PortWithOptionalBinding } from "./port";
+import { PortWithOptionalBinding } from "./port";
 import { StartedTestContainer } from "./test-container";
 import { RandomUuid } from "./uuid";
 import { sessionId } from "./docker/session-id";
@@ -11,7 +11,7 @@ import { SSHD_IMAGE } from "./images";
 export class PortForwarder {
   constructor(private readonly sshConnection: SshConnection, private readonly container: StartedTestContainer) {}
 
-  public async exposeHostPort(port: Port): Promise<void> {
+  public async exposeHostPort(port: number): Promise<void> {
     log.info(`Exposing host port ${port}`);
     await this.sshConnection.remoteForward("localhost", port);
   }
@@ -56,8 +56,8 @@ export class PortForwarderInstance {
     const container = await new GenericContainer(SSHD_IMAGE)
       .withName(`testcontainers-port-forwarder-${sessionId}`)
       .withExposedPorts(containerPort)
-      .withEnv("PASSWORD", password)
-      .withCmd([
+      .withEnvironment({ PASSWORD: password })
+      .withCommand([
         "sh",
         "-c",
         `echo "${username}:$PASSWORD" | chpasswd && /usr/sbin/sshd -D -o PermitRootLogin=yes -o AddressFamily=inet -o GatewayPorts=yes`,

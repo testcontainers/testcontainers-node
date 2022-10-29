@@ -1,18 +1,16 @@
 import { Socket } from "net";
-import { Port } from "./port";
-import { Host } from "./docker/types";
 import { execContainer } from "./docker/functions/container/exec-container";
 import { log } from "./logger";
 import Dockerode from "dockerode";
 
 export interface PortCheck {
-  isBound(port: Port): Promise<boolean>;
+  isBound(port: number): Promise<boolean>;
 }
 
 export class HostPortCheck implements PortCheck {
-  constructor(private readonly host: Host) {}
+  constructor(private readonly host: string) {}
 
-  public isBound(port: Port): Promise<boolean> {
+  public isBound(port: number): Promise<boolean> {
     return new Promise((resolve) => {
       const socket = new Socket();
       socket
@@ -39,7 +37,7 @@ export class InternalPortCheck implements PortCheck {
 
   constructor(private readonly container: Dockerode.Container) {}
 
-  public async isBound(port: Port): Promise<boolean> {
+  public async isBound(port: number): Promise<boolean> {
     const portHex = port.toString(16).padStart(4, "0");
     const commands = [
       ["/bin/sh", "-c", `cat /proc/net/tcp* | awk '{print $2}' | grep -i :${portHex}`],

@@ -2,7 +2,7 @@ import { IDockerComposeOptions } from "./docker-compose";
 import { DockerComposeOptions } from "./docker-compose-options";
 
 export const defaultDockerComposeOptions = ({
-  env = {},
+  environment = {},
   ...options
 }: DockerComposeOptions): Partial<IDockerComposeOptions> => {
   return {
@@ -14,7 +14,7 @@ export const defaultDockerComposeOptions = ({
     env: {
       ...process.env,
       COMPOSE_PROJECT_NAME: options.projectName,
-      ...env,
+      ...environment,
     },
   };
 };
