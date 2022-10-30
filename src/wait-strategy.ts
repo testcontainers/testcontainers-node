@@ -1,7 +1,7 @@
 import byline from "byline";
 import { BoundPorts } from "./bound-ports";
 import { log } from "./logger";
-import { PortCheck } from "./port-check";
+import { HostPortCheck, InternalPortCheck, PortCheck } from "./port-check";
 import { IntervalRetryStrategy } from "./retry-strategy";
 import { HealthCheckStatus } from "./docker/types";
 import Dockerode from "dockerode";
@@ -10,6 +10,7 @@ import { inspectContainer } from "./docker/functions/container/inspect-container
 
 export interface WaitStrategy {
   waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void>;
+
   withStartupTimeout(startupTimeout: number): WaitStrategy;
 }
 
@@ -132,3 +133,6 @@ export class HealthCheckWaitStrategy extends AbstractWaitStrategy {
     }
   }
 }
+
+export const defaultWaitStrategy = (host: string, container: Dockerode.Container) =>
+  new HostPortWaitStrategy(new HostPortCheck(host), new InternalPortCheck(container));

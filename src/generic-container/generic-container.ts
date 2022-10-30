@@ -2,12 +2,11 @@ import archiver from "archiver";
 import { BoundPorts } from "../bound-ports";
 import { containerLog, log } from "../logger";
 import { PortWithOptionalBinding } from "../port";
-import { HostPortCheck, InternalPortCheck } from "../port-check";
 import { DefaultPullPolicy, PullPolicy } from "../pull-policy";
 import { ReaperInstance } from "../reaper";
 import { DockerImageName } from "../docker-image-name";
 import { StartedTestContainer, TestContainer } from "../test-container";
-import { HostPortWaitStrategy, WaitStrategy } from "../wait-strategy";
+import { defaultWaitStrategy, WaitStrategy } from "../wait-strategy";
 import { PortForwarderInstance } from "../port-forwarder";
 import { getAuthConfig } from "../registry-auth-locator";
 import {
@@ -29,8 +28,6 @@ import { inspectContainer, InspectResult } from "../docker/functions/container/i
 import Dockerode from "dockerode";
 import { startContainer } from "../docker/functions/container/start-container";
 import { containerLogs } from "../docker/functions/container/container-logs";
-import { stopContainer } from "../docker/functions/container/stop-container";
-import { removeContainer } from "../docker/functions/container/remove-container";
 import { putContainerArchive } from "../docker/functions/container/put-container-archive";
 import { GenericContainerBuilder } from "./generic-container-builder";
 import { StartedGenericContainer } from "./started-generic-container";
@@ -38,6 +35,7 @@ import { hash } from "../hash";
 import { getContainerByHash } from "../docker/functions/container/get-container";
 import { LABEL_CONTAINER_HASH } from "../labels";
 import { StartedNetwork } from "../network";
+import { waitForContainer } from "../wait-for-container";
 
 export class GenericContainer implements TestContainer {
   public static fromDockerfile(context: string, dockerfileName = "Dockerfile"): GenericContainerBuilder {
@@ -143,15 +141,19 @@ export class GenericContainer implements TestContainer {
   private async reuseContainer(startedContainer: Dockerode.Container) {
     const inspectResult = await inspectContainer(startedContainer);
     const boundPorts = BoundPorts.fromInspectResult(inspectResult).filter(this.ports);
-    await this.waitForContainer(startedContainer, boundPorts);
+    const host = (await dockerClient()).host;
+    const waitStrategy = (this.waitStrategy ?? defaultWaitStrategy(host, startedContainer)).withStartupTimeout(
+      this.startupTimeout
+    );
+    await waitForContainer(startedContainer, waitStrategy, boundPorts);
 
     return new StartedGenericContainer(
       startedContainer,
-      (await dockerClient()).host,
+      host,
       inspectResult,
       boundPorts,
       inspectResult.name,
-      this.getWaitStrategy((await dockerClient()).host, startedContainer).withStartupTimeout(this.startupTimeout)
+      waitStrategy
     );
   }
 
@@ -194,15 +196,19 @@ export class GenericContainer implements TestContainer {
 
     const inspectResult = await inspectContainer(container);
     const boundPorts = BoundPorts.fromInspectResult(inspectResult).filter(this.ports);
-    await this.waitForContainer(container, boundPorts);
+    const host = (await dockerClient()).host;
+    const waitStrategy = (this.waitStrategy ?? defaultWaitStrategy(host, container)).withStartupTimeout(
+      this.startupTimeout
+    );
+    await waitForContainer(container, waitStrategy, boundPorts);
 
     const startedContainer = new StartedGenericContainer(
       container,
-      (await dockerClient()).host,
+      host,
       inspectResult,
       boundPorts,
       inspectResult.name,
-      this.getWaitStrategy((await dockerClient()).host, container).withStartupTimeout(this.startupTimeout)
+      waitStrategy
     );
 
     if (this.postStart) {
@@ -359,33 +365,5 @@ export class GenericContainer implements TestContainer {
       this.tarToCopy = archiver("tar");
     }
     return this.tarToCopy;
-  }
-
-  private async waitForContainer(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void> {
-    log.debug(`Waiting for container to be ready: ${container.id}`);
-    const waitStrategy = this.getWaitStrategy((await dockerClient()).host, container);
-
-    try {
-      await waitStrategy.withStartupTimeout(this.startupTimeout).waitUntilReady(container, boundPorts);
-      log.info("Container is ready");
-    } catch (err) {
-      log.error(`Container failed to be ready: ${err}`);
-      try {
-        await stopContainer(container, { timeout: 0 });
-        await removeContainer(container, { removeVolumes: true });
-      } catch (stopErr) {
-        log.error(`Failed to stop container after it failed to be ready: ${stopErr}`);
-      }
-      throw err;
-    }
-  }
-
-  private getWaitStrategy(host: string, container: Dockerode.Container): WaitStrategy {
-    if (this.waitStrategy) {
-      return this.waitStrategy;
-    }
-    const hostPortCheck = new HostPortCheck(host);
-    const internalPortCheck = new InternalPortCheck(container);
-    return new HostPortWaitStrategy(hostPortCheck, internalPortCheck);
   }
 }
