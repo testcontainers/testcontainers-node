@@ -1,8 +1,8 @@
 import {
+  ExecOptions,
   RestartOptions,
   StartedTestContainer,
   StopOptions,
-  ExecOptions,
   StoppedTestContainer,
 } from "../test-container";
 import Dockerode from "dockerode";
@@ -18,6 +18,7 @@ import { StoppedGenericContainer } from "./stopped-generic-container";
 import { stopContainer } from "../docker/functions/container/stop-container";
 import { restartContainer } from "../docker/functions/container/restart-container";
 import { WaitStrategy } from "../wait-strategy";
+import { waitForContainer } from "../wait-for-container";
 
 export class StartedGenericContainer implements StartedTestContainer {
   constructor(
@@ -41,7 +42,7 @@ export class StartedGenericContainer implements StartedTestContainer {
     this.boundPorts = BoundPorts.fromInspectResult(this.inspectResult).filter(
       Array.from(this.boundPorts.iterator()).map((port) => port[0])
     );
-    await this.waitForContainer(this.container, this.boundPorts);
+    await waitForContainer(this.container, this.waitStrategy, this.boundPorts);
   }
 
   private async stopContainer(options: Partial<StopOptions> = {}): Promise<StoppedGenericContainer> {
@@ -52,24 +53,6 @@ export class StartedGenericContainer implements StartedTestContainer {
     await removeContainer(this.container, { removeVolumes: resolvedOptions.removeVolumes });
 
     return new StoppedGenericContainer();
-  }
-
-  private async waitForContainer(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void> {
-    log.debug(`Waiting for container to be ready: ${container.id}`);
-
-    try {
-      await this.waitStrategy.waitUntilReady(container, boundPorts);
-      log.info("Container is ready");
-    } catch (err) {
-      log.error(`Container failed to be ready: ${err}`);
-      try {
-        await stopContainer(container, { timeout: 0 });
-        await removeContainer(container, { removeVolumes: true });
-      } catch (stopErr) {
-        log.error(`Failed to stop container after it failed to be ready: ${stopErr}`);
-      }
-      throw err;
-    }
   }
 
   public getHost(): string {

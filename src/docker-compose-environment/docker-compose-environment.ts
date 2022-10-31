@@ -1,10 +1,9 @@
-import Dockerode, { ContainerInfo } from "dockerode";
+import { ContainerInfo } from "dockerode";
 import { BoundPorts } from "../bound-ports";
 import { resolveContainerName } from "../docker-compose/functions/container-name-resolver";
 import { StartedGenericContainer } from "../generic-container/started-generic-container";
 import { containerLog, log } from "../logger";
-import { HostPortCheck, InternalPortCheck } from "../port-check";
-import { HostPortWaitStrategy, WaitStrategy } from "../wait-strategy";
+import { defaultWaitStrategy, WaitStrategy } from "../wait-strategy";
 import { ReaperInstance } from "../reaper";
 import { RandomUuid, Uuid } from "../uuid";
 import { Environment } from "../docker/types";
@@ -16,6 +15,7 @@ import { containerLogs } from "../docker/functions/container/container-logs";
 import { StartedDockerComposeEnvironment } from "./started-docker-compose-environment";
 import { dockerComposeDown } from "../docker-compose/functions/docker-compose-down";
 import { dockerComposeUp } from "../docker-compose/functions/docker-compose-up";
+import { waitForContainer } from "../wait-for-container";
 
 export class DockerComposeEnvironment {
   private readonly composeFilePath: string;
@@ -125,10 +125,14 @@ export class DockerComposeEnvironment {
 
           const inspectResult = await inspectContainer(container);
           const boundPorts = BoundPorts.fromInspectResult(inspectResult);
+          const host = (await dockerClient()).host;
+          const waitStrategy = (
+            this.waitStrategy[containerName] ? this.waitStrategy[containerName] : defaultWaitStrategy(host, container)
+          ).withStartupTimeout(this.startupTimeout);
 
           try {
             log.info(`Waiting for container ${containerName} to be ready`);
-            await this.waitForContainer(container, containerName, boundPorts);
+            await waitForContainer(container, waitStrategy, boundPorts);
             log.info(`Container ${containerName} is ready`);
           } catch (err) {
             log.error(`Container ${containerName} failed to be ready: ${err}`);
@@ -140,16 +144,7 @@ export class DockerComposeEnvironment {
             throw err;
           }
 
-          return new StartedGenericContainer(
-            container,
-            (await dockerClient()).host,
-            inspectResult,
-            boundPorts,
-            containerName,
-            this.getWaitStrategy((await dockerClient()).host, container, containerName).withStartupTimeout(
-              this.startupTimeout
-            )
-          );
+          return new StartedGenericContainer(container, host, inspectResult, boundPorts, containerName, waitStrategy);
         })
       )
     ).reduce((map, startedGenericContainer) => {
@@ -164,24 +159,5 @@ export class DockerComposeEnvironment {
       composeOptions,
       environment: this.environment,
     });
-  }
-
-  private async waitForContainer(
-    container: Dockerode.Container,
-    containerName: string,
-    boundPorts: BoundPorts
-  ): Promise<void> {
-    const waitStrategy = this.getWaitStrategy((await dockerClient()).host, container, containerName);
-    await waitStrategy.withStartupTimeout(this.startupTimeout).waitUntilReady(container, boundPorts);
-  }
-
-  private getWaitStrategy(host: string, container: Dockerode.Container, containerName: string): WaitStrategy {
-    if (this.waitStrategy[containerName]) {
-      return this.waitStrategy[containerName];
-    } else {
-      const hostPortCheck = new HostPortCheck(host);
-      const internalPortCheck = new InternalPortCheck(container);
-      return new HostPortWaitStrategy(hostPortCheck, internalPortCheck);
-    }
   }
 }
