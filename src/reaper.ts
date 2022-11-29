@@ -125,7 +125,7 @@ export class ReaperInstance {
               }
               resolve(undefined);
             })
-            .connect(8080, host, () => {
+            .connect(getContainerPort(port), host, () => {
               log.debug(`Connected to Reaper ${containerId}`);
               socket.write(`label=${LABEL_SESSION_ID}=${sessionId}\r\n`);
               const reaper = new RealReaper(startedContainer, socket);
