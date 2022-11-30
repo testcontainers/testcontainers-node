@@ -7,6 +7,7 @@ import { REAPER_IMAGE } from "./images";
 import { getContainerPort, PortWithOptionalBinding } from "./port";
 import { LABEL_SESSION_ID } from "./labels";
 import { Wait } from "./wait";
+import { IntervalRetryStrategy } from "./retry-strategy";
 
 export interface Reaper {
   addProject(projectName: string): void;
@@ -106,29 +107,41 @@ export class ReaperInstance {
     const host = startedContainer.getHost();
     const port = startedContainer.getMappedPort(8080);
 
-    log.debug(`Connecting to Reaper ${containerId} on ${host}:${port}`);
-    const socket = new Socket();
+    const retryStrategy = new IntervalRetryStrategy<Reaper | undefined, Error>(1000);
+    const retryResult = await retryStrategy.retryUntil(
+      (attempt) => {
+        return new Promise((resolve) => {
+          log.debug(`Connecting to Reaper (attempt ${attempt + 1}) ${containerId} on ${host}:${port}`);
+          const socket = new Socket();
+          socket
+            .unref()
+            .on("timeout", () => log.error(`Reaper ${containerId} socket timed out`))
+            .on("error", (err) => log.error(`Reaper ${containerId} socket error: ${err}`))
+            .on("close", (hadError) => {
+              if (hadError) {
+                log.error(`Connection to Reaper ${containerId} closed with error`);
+              } else {
+                log.warn(`Connection to Reaper ${containerId} closed`);
+              }
+              resolve(undefined);
+            })
+            .connect(getContainerPort(port), host, () => {
+              log.debug(`Connected to Reaper ${containerId}`);
+              socket.write(`label=${LABEL_SESSION_ID}=${sessionId}\r\n`);
+              const reaper = new RealReaper(startedContainer, socket);
+              resolve(reaper);
+            });
+        });
+      },
+      (result) => result !== undefined,
+      () => new Error(`Failed to connect to Reaper ${containerId}`),
+      4000
+    );
 
-    socket.unref();
-
-    socket
-      .on("timeout", () => log.error(`Reaper ${containerId} socket timed out`))
-      .on("error", (err) => log.error(`Reaper ${containerId} socket error: ${err}`))
-      .on("close", (hadError) => {
-        if (hadError) {
-          log.error(`Connection to Reaper ${containerId} closed with error`);
-        } else {
-          log.warn(`Connection to Reaper ${containerId} closed`);
-        }
-      });
-
-    return new Promise((resolve) => {
-      socket.connect(getContainerPort(port), host, () => {
-        log.debug(`Connected to Reaper ${containerId}`);
-        socket.write(`label=${LABEL_SESSION_ID}=${sessionId}\r\n`);
-        const reaper = new RealReaper(startedContainer, socket);
-        resolve(reaper);
-      });
-    });
+    if (retryResult instanceof RealReaper) {
+      return retryResult;
+    } else {
+      throw retryResult;
+    }
   }
 }

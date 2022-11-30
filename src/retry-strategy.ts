@@ -34,21 +34,22 @@ export class IntervalRetryStrategy<T, U> extends AbstractRetryStrategy<T, U> {
   }
 
   public async retryUntil(
-    fn: () => Promise<T>,
+    fn: (attempt: number) => Promise<T>,
     predicate: (result: T) => boolean,
     onTimeout: () => U,
     timeout: number
   ): Promise<T | U> {
     const startTime = this.clock.getTime();
 
-    let result = await fn();
+    let attemptNumber = 0;
+    let result = await fn(attemptNumber++);
 
     while (!predicate(result)) {
       if (this.hasTimedOut(timeout, startTime)) {
         return onTimeout();
       }
       await this.wait(this.interval);
-      result = await fn();
+      result = await fn(attemptNumber++);
     }
 
     return result;
