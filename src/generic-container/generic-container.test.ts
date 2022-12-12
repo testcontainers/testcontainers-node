@@ -8,6 +8,7 @@ import { RandomUuid } from "../uuid";
 import { checkContainerIsHealthy, getEvents, getRunningContainerNames } from "../test-helper";
 import { Network } from "../network";
 import { getContainerById } from "../docker/functions/container/get-container";
+import { Volume } from "../docker/types";
 
 describe("GenericContainer", () => {
   jest.setTimeout(180_000);
@@ -509,6 +510,39 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
+  it("should create container with volume", async () => {
+    const volume: Volume = { name: "/volumes/new-volume" };
+
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
+      .withExposedPorts(8080)
+      .withVolumes(volume)
+      .start();
+
+    const dockerContainer = await getContainerById(container.getId());
+    const containerInfo = await dockerContainer.inspect();
+    await container.stop();
+    expect(containerInfo.Mounts.length).toBe(1);
+    expect(containerInfo.Mounts[0].Destination).toBe(volume.name);
+  });
+
+  it("should create container with array of volumes", async () => {
+    const volumes: Volume[] = [{ name: "/volumes/new-volume" }, { name: "/volumes/another-volume" }];
+
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
+      .withExposedPorts(8080)
+      .withVolumes(...volumes)
+      .start();
+
+    const dockerContainer = await getContainerById(container.getId());
+    const containerInfo = await dockerContainer.inspect();
+    await container.stop();
+
+    const actualVolumeNames = containerInfo.Mounts.map(({ Destination }) => Destination).sort();
+    const expectedlVolumeNames = volumes.map(({ name }) => name).sort();
+
+    expect(containerInfo.Mounts.length).toBe(2);
+    expect(actualVolumeNames).toEqual(expectedlVolumeNames);
+  });
   describe("reuse", () => {
     it("should not reuse the container by default", async () => {
       const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.13")

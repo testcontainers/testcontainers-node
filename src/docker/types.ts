@@ -67,3 +67,5 @@ export type NetworkSettings = {
   networkId: string;
   ipAddress: string;
 };
+
+export type Volume = { name: string };

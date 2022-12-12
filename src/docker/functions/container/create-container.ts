@@ -4,7 +4,7 @@ import { dockerClient } from "../../docker-client";
 import Dockerode, { PortMap as DockerodePortBindings } from "dockerode";
 import { getContainerPort, hasHostBinding, PortWithOptionalBinding } from "../../../port";
 import { createLabels } from "../create-labels";
-import { BindMount, Environment, ExtraHost, HealthCheck, Labels, TmpFs, Ulimits } from "../../types";
+import { BindMount, Environment, ExtraHost, HealthCheck, Labels, TmpFs, Ulimits, Volume } from "../../types";
 
 export type CreateContainerOptions = {
   imageName: DockerImageName;
@@ -28,6 +28,7 @@ export type CreateContainerOptions = {
   addedCapabilities?: string[];
   droppedCapabilities?: string[];
   user?: string;
+  volumes?: Volume[];
 };
 
 export const createContainer = async (options: CreateContainerOptions): Promise<Dockerode.Container> => {
@@ -59,6 +60,7 @@ export const createContainer = async (options: CreateContainerOptions): Promise<
         CapAdd: options.addedCapabilities,
         CapDrop: options.droppedCapabilities,
       },
+      Volumes: options.volumes ? getVolumes(options.volumes) : undefined,
     });
   } catch (err) {
     log.error(`Failed to create container for image ${options.imageName}: ${err}`);
@@ -161,3 +163,9 @@ const getUlimits = (ulimits: Ulimits | undefined): DockerodeUlimit[] | undefined
     Soft: value.soft,
   }));
 };
+
+function getVolumes(volumes: Volume[]): { [volume: string]: Record<string, unknown> } | undefined {
+  const volumeArray: { [x: string]: Record<string, unknown> } = {};
+  volumes.forEach((vol) => (volumeArray[vol.name] = {}));
+  return volumeArray;
+}

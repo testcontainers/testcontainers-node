@@ -19,6 +19,7 @@ import {
   Labels,
   TmpFs,
   Ulimits,
+  Volume,
 } from "../docker/types";
 import { pullImage } from "../docker/functions/image/pull-image";
 import { createContainer, CreateContainerOptions } from "../docker/functions/container/create-container";
@@ -67,7 +68,7 @@ export class GenericContainer implements TestContainer {
   protected pullPolicy: PullPolicy = new DefaultPullPolicy();
   protected reuse = false;
   protected tarToCopy?: archiver.Archiver;
-
+  protected volumes?: Volume[];
   private extraHosts: ExtraHost[] = [];
 
   constructor(readonly image: string) {
@@ -118,6 +119,7 @@ export class GenericContainer implements TestContainer {
       addedCapabilities: this.addedCapabilities,
       droppedCapabilities: this.droppedCapabilities,
       user: this.user,
+      volumes: this.volumes,
     };
 
     if (this.reuse) {
@@ -365,5 +367,10 @@ export class GenericContainer implements TestContainer {
       this.tarToCopy = archiver("tar");
     }
     return this.tarToCopy;
+  }
+
+  public withVolumes(...volumes: Volume[]): this {
+    this.volumes = volumes;
+    return this;
   }
 }
