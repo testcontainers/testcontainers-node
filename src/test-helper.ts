@@ -4,10 +4,18 @@ import { dockerClient } from "./docker/docker-client";
 import { StartedDockerComposeEnvironment } from "./docker-compose-environment/started-docker-compose-environment";
 import fetch from "node-fetch";
 import { StartedTestContainer } from "./test-container";
+import https from "https";
 
 export const checkContainerIsHealthy = async (container: StartedTestContainer): Promise<void> => {
   const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
   const response = await fetch(`${url}/hello-world`);
+  expect(response.status).toBe(200);
+};
+
+export const checkContainerIsHealthyTls = async (container: StartedTestContainer): Promise<void> => {
+  const url = `https://${container.getHost()}:${container.getMappedPort(8443)}`;
+  const agent = new https.Agent({ rejectUnauthorized: false });
+  const response = await fetch(`${url}/hello-world`, { agent });
   expect(response.status).toBe(200);
 };
 

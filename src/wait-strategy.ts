@@ -14,7 +14,7 @@ export interface WaitStrategy {
   withStartupTimeout(startupTimeout: number): WaitStrategy;
 }
 
-abstract class AbstractWaitStrategy implements WaitStrategy {
+export abstract class AbstractWaitStrategy implements WaitStrategy {
   protected startupTimeout = 60_000;
 
   public abstract waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void>;
