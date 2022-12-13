@@ -58,7 +58,7 @@ describe("HttpWaitStrategy", () => {
   it("should set method", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
-      .withWaitStrategy(Wait.forHttp("/hello-world-post", 8080).forMethod("POST"))
+      .withWaitStrategy(Wait.forHttp("/hello-world-post", 8080).withMethod("POST"))
       .start();
 
     await checkContainerIsHealthy(container);

@@ -37,7 +37,7 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
     return this;
   }
 
-  public forMethod(method: string): HttpWaitStrategy {
+  public withMethod(method: string): HttpWaitStrategy {
     this.method = method;
     return this;
   }

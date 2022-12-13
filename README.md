@@ -832,6 +832,61 @@ const container = await new GenericContainer("redis")
   .start();
 ```
 
+### HTTP
+
+Default behaviour of waiting for a 200 response:
+
+```javascript
+const { GenericContainer, Wait } = require("testcontainers");
+
+const container = await new GenericContainer("redis")
+  .withExposedPorts(6379)
+  .withWaitStrategy(Wait.forHttp("/health", 8080))
+  .start();
+```
+
+Specify status code:
+
+```javascript
+.withWaitStrategy(Wait.forHttp("/health", 8080)
+  .forStatusCode(201))
+
+.withWaitStrategy(Wait.forHttp("/health", 8080)
+  .forStatusCodeMatching(statusCode => statusCode === 201))
+```
+
+Specify response body:
+
+```javascript
+.withWaitStrategy(Wait.forHttp("/health", 8080)
+  .forResponsePredicate(response => response === "OK"))
+```
+
+Customise the request:
+
+```javascript
+.withWaitStrategy(Wait.forHttp("/health", 8080)
+  .withMethod("POST")
+  .withHeaders({ X_CUSTOM_VALUE: "custom" })
+  .withBasicCredentials("username", "password")
+  .withReadTimeout(10000))
+```
+
+Use TLS:
+
+```javascript
+.withWaitStrategy(Wait.forHttp("/health", 8443)
+  .useTls())
+```
+
+Allow insecure TLS:
+
+```javascript
+.withWaitStrategy(Wait.forHttp("/health", 8443)
+  .useTls())
+  .insecureTls()
+```
+
 ## Authentication
 
 Testcontainers will automatically pick up and use credentials from `$HOME/.docker/config.json`, using
