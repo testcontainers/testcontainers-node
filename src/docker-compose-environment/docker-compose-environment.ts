@@ -132,7 +132,7 @@ export class DockerComposeEnvironment {
 
           try {
             log.info(`Waiting for container ${containerName} to be ready`);
-            await waitForContainer(container, waitStrategy, boundPorts);
+            await waitForContainer(container, waitStrategy, host, boundPorts);
             log.info(`Container ${containerName} is ready`);
           } catch (err) {
             log.error(`Container ${containerName} failed to be ready: ${err}`);

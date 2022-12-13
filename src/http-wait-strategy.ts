@@ -68,12 +68,11 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
     return this;
   }
 
-  public async waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void> {
+  public async waitUntilReady(container: Dockerode.Container, host: string, boundPorts: BoundPorts): Promise<void> {
     await new IntervalRetryStrategy<Response | undefined, Error>(this.readTimeout).retryUntil(
       async () => {
         try {
-          // todo localhost come from container host
-          const url = `${this.protocol}://localhost:${boundPorts.getBinding(this.port)}${this.path}`;
+          const url = `${this.protocol}://${host}:${boundPorts.getBinding(this.port)}${this.path}`;
           return await fetch(url, {
             method: this.method,
             timeout: this.readTimeout,
