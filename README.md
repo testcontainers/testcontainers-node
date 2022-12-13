@@ -883,8 +883,8 @@ Allow insecure TLS:
 
 ```javascript
 .withWaitStrategy(Wait.forHttp("/health", 8443)
-  .useTls())
-  .insecureTls()
+  .useTls()
+  .insecureTls())
 ```
 
 ## Authentication
