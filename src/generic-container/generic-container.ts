@@ -145,7 +145,7 @@ export class GenericContainer implements TestContainer {
     const waitStrategy = (this.waitStrategy ?? defaultWaitStrategy(host, startedContainer)).withStartupTimeout(
       this.startupTimeout
     );
-    await waitForContainer(startedContainer, waitStrategy, boundPorts);
+    await waitForContainer(startedContainer, waitStrategy, host, boundPorts);
 
     return new StartedGenericContainer(
       startedContainer,
@@ -200,7 +200,7 @@ export class GenericContainer implements TestContainer {
     const waitStrategy = (this.waitStrategy ?? defaultWaitStrategy(host, container)).withStartupTimeout(
       this.startupTimeout
     );
-    await waitForContainer(container, waitStrategy, boundPorts);
+    await waitForContainer(container, waitStrategy, host, boundPorts);
 
     const startedContainer = new StartedGenericContainer(
       container,

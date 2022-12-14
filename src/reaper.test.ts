@@ -15,7 +15,7 @@ describe("Reaper", () => {
   jest.setTimeout(180_000);
 
   it("should remove containers", async () => {
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.13").start();
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").start();
 
     const reaperContainerId = await getReaperContainerId();
     await stopReaper();

@@ -9,15 +9,15 @@ import { containerLogs } from "./docker/functions/container/container-logs";
 import { inspectContainer } from "./docker/functions/container/inspect-container";
 
 export interface WaitStrategy {
-  waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void>;
+  waitUntilReady(container: Dockerode.Container, host: string, boundPorts: BoundPorts): Promise<void>;
 
   withStartupTimeout(startupTimeout: number): WaitStrategy;
 }
 
-abstract class AbstractWaitStrategy implements WaitStrategy {
+export abstract class AbstractWaitStrategy implements WaitStrategy {
   protected startupTimeout = 60_000;
 
-  public abstract waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void>;
+  public abstract waitUntilReady(container: Dockerode.Container, host: string, boundPorts: BoundPorts): Promise<void>;
 
   public withStartupTimeout(startupTimeout: number): WaitStrategy {
     this.startupTimeout = startupTimeout;
@@ -30,7 +30,7 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
     super();
   }
 
-  public async waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void> {
+  public async waitUntilReady(container: Dockerode.Container, host: string, boundPorts: BoundPorts): Promise<void> {
     await Promise.all([this.waitForHostPorts(container, boundPorts), this.waitForInternalPorts(container, boundPorts)]);
   }
 
