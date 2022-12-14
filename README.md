@@ -887,6 +887,30 @@ Allow insecure TLS:
   .insecureTls())
 ```
 
+### Other Startup Strategies
+
+If none of these options meet your requirements, you can create your own subclass of `StartupCheckStrategy`:
+
+```javascript
+const Dockerode = require("dockerode");
+const { 
+  GenericContainer, 
+  StartupCheckStrategy,
+  StartupStatus
+} = require("testcontainers");
+
+class ReadyAfterDelayWaitStrategy extends StartupCheckStrategy {
+  public checkStartupState(dockerClient: Dockerode, containerId: string): Promise<StartupStatus> {
+    return new Promise((resolve) => setTimeout(() => resolve("SUCCESS"), 3000));
+  }
+}
+
+const container = await new GenericContainer("redis")
+  .withExposedPorts(6379)
+  .withWaitStrategy(new ReadyAfterDelayWaitStrategy())
+  .start();
+```
+
 ## Authentication
 
 Testcontainers will automatically pick up and use credentials from `$HOME/.docker/config.json`, using
