@@ -40,16 +40,15 @@ export abstract class CredentialProvider implements RegistryAuthLocator {
     return new Promise((resolve, reject) => {
       exec(`${providerName} list`, (err, stdout) => {
         if (err) {
-          log.error("Unexpected error from Docker credential provider LIST command");
-          reject(new Error("Unexpected error from Docker credential provider LIST command"));
-          return;
+          log.error("An error occurred listing credentials");
+          return reject(new Error("An error occurred listing credentials"));
         }
         try {
           const response = JSON.parse(stdout);
-          resolve(response);
+          return resolve(response);
         } catch (e) {
           log.error(`Unexpected response from Docker credential provider LIST command: "${stdout}"`);
-          reject(new Error("Unexpected response from Docker credential provider LIST command"));
+          return reject(new Error("Unexpected response from Docker credential provider LIST command"));
         }
       });
     });
@@ -64,18 +63,17 @@ export abstract class CredentialProvider implements RegistryAuthLocator {
 
       sink.on("close", (code) => {
         if (code !== 0) {
-          log.error(`Unexpected exit code from Docker credential provider GET command: ${code}`);
-          reject(new Error("Unexpected exit code from Docker credential provider GET command"));
-          return;
+          log.error(`An error occurred getting a credential: ${code}`);
+          return reject(new Error("An error occurred getting a credential"));
         }
 
         const response = chunks.join("");
         try {
           const parsedResponse = JSON.parse(response);
-          resolve(parsedResponse);
+          return resolve(parsedResponse);
         } catch (e) {
           log.error(`Unexpected response from Docker credential provider GET command: "${response}"`);
-          reject(new Error("Unexpected response from Docker credential provider GET command"));
+          return reject(new Error("Unexpected response from Docker credential provider GET command"));
         }
       });
 

@@ -73,7 +73,7 @@ describe("CredentialProvider", () => {
     mockExecThrows();
 
     await expect(() => credentialProvider.getAuthConfig("registry", dockerConfig)).rejects.toThrow(
-      "Unexpected error from Docker credential provider LIST command"
+      "An error occurred listing credentials"
     );
   });
 
@@ -97,7 +97,7 @@ describe("CredentialProvider", () => {
     );
 
     await expect(() => credentialProvider.getAuthConfig("registry", dockerConfig)).rejects.toThrow(
-      "Unexpected exit code from Docker credential provider GET command"
+      "An error occurred getting a credential"
     );
   });
 
