@@ -43,4 +43,5 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: npm ci --no-optional
     - run: npm prune --production
+    - run: npm install cross-env
     - run: npm test production.test.ts
