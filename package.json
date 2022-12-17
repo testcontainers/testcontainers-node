@@ -42,7 +42,6 @@
     "docker-compose": "^0.23.17",
     "dockerode": "^3.3.4",
     "get-port": "^5.1.1",
-    "node-fetch": "^2.6.7",
     "properties-reader": "^2.2.0",
     "ssh-remote-port-forward": "^1.0.4",
     "tar-fs": "^2.1.1"
@@ -52,6 +51,7 @@
     "@types/byline": "^4.2.33",
     "@types/debug": "4.1.7",
     "@types/jest": "^29.2.0",
+    "node-fetch": "^2.6.7",
     "@types/node": "^18.11.7",
     "@types/node-fetch": "^2.6.2",
     "@types/pg": "^8.6.5",
