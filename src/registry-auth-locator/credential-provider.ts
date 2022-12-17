@@ -40,7 +40,7 @@ export abstract class CredentialProvider implements RegistryAuthLocator {
     return new Promise((resolve, reject) => {
       exec(`${providerName} list`, (err, stdout) => {
         if (err) {
-          log.error("An error occurred listing credentials");
+          log.error(`An error occurred listing credentials: ${err}`);
           return reject(new Error("An error occurred listing credentials"));
         }
         try {
