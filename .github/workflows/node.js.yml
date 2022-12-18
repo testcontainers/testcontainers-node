@@ -46,4 +46,4 @@ jobs:
     - run: npm prune --production
     - run: mv testcontainers-*.tgz smoke-test/testcontainers.tgz
     - run: cd smoke-test
-    - run: npm start
+    - run: npm run start
