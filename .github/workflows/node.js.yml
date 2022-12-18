@@ -42,8 +42,8 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm ci --no-optional
-    - run: npm pack --pack-destination ./smoke-test
+    - run: npm pack
     - run: npm prune --production
+    - run: mv testcontainers-*.tgz smoke-test/testcontainers.tgz
     - run: cd smoke-test
-    - run: mv testcontainers-*.tgz testcontainers.tgz
     - run: npm start
