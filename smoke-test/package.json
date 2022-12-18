@@ -1,0 +1,9 @@
+{
+  "name": "smoke-test",
+  "scripts": {
+    "start": "node index.mjs"
+  },
+  "dependencies": {
+    "testcontainers": "file:testcontainers.tgz"
+  }
+}
