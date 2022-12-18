@@ -29,7 +29,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: npm ci --no-optional
     - run: npm test
-  production:
+  smoke-test:
     runs-on: ${{ matrix.os-version }}
     strategy:
       matrix:
