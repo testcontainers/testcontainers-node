@@ -44,5 +44,5 @@ jobs:
     - run: npm ci --no-optional
     - run: npm prune --production
     - run: rm package.json package-lock.json
-    - run: npm --no-save --no-package-lock install jest@29.2.2 ts-jest@29.0.3
+    - run: npm --no-save --no-package-lock install jest@29.2.2 ts-jest@29.0.3 @types/jest@29.2.0
     - run: DEBUG=testcontainers,testcontainers:exec node node_modules/jest/bin/jest.js --runInBand production.test.ts
