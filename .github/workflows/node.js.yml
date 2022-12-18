@@ -41,7 +41,5 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-    - run: npm ci --no-optional
-    - run: npm prune --production
-    - run: npm install cross-env
+    - run: npm ci --no-optional --only=production
     - run: npm test production.test.ts
