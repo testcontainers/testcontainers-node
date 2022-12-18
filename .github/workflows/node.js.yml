@@ -27,7 +27,7 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-    - run: npm ci --no-optional
+    - run: npm ci --omit=optional
     - run: npm test
   smoke-test:
     runs-on: ${{ matrix.os-version }}
@@ -41,9 +41,9 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-    - run: npm ci --no-optional
+    - run: npm ci --omit=optional
     - run: npm pack
-    - run: npm prune --production
+    - run: npm prune --omit=dev
     - run: mv testcontainers-*.tgz smoke-test/testcontainers.tgz
     - run: npm install --prefix smoke-test
     - run: npm start --prefix smoke-test
