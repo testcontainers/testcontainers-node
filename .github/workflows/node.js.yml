@@ -42,7 +42,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm ci --no-optional
-    - run: npm prune --production
-    - run: rm package.json package-lock.json
-    - run: npm --no-save --no-package-lock install jest@29.2.2 ts-jest@29.0.3 @types/jest@29.2.0
-    - run: DEBUG=testcontainers,testcontainers:exec node node_modules/jest/bin/jest.js --runInBand production.test.ts
+    - run: npm pack --pack-destination smoke-test
+    - run: cd smoke-test
+    - run: mv testcontainers-*.tgz testcontainers.tgz
+    - run: npm start
