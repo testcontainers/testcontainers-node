@@ -39,6 +39,13 @@ export class GenericContainerBuilder {
   }
 
   public async build(image = `${this.uuid.nextUuid()}:${this.uuid.nextUuid()}`): Promise<GenericContainer> {
+    return this.buildAs(GenericContainer, image);
+  }
+
+  public async buildAs<T extends GenericContainer>(
+    type: new (image: string) => T,
+    image = `${this.uuid.nextUuid()}:${this.uuid.nextUuid()}`
+  ): Promise<T> {
     const imageName = DockerImageName.fromString(image);
 
     await ReaperInstance.getInstance();
@@ -57,7 +64,7 @@ export class GenericContainerBuilder {
       cache: this.cache,
       registryConfig,
     });
-    const container = new GenericContainer(imageName.toString());
+    const container = new type(imageName.toString());
 
     if (!(await imageExists((await dockerClient()).dockerode, imageName))) {
       throw new Error("Failed to build image");
