@@ -14,18 +14,18 @@ describe("Production", () => {
     await container.stop();
   });
 
-  it("docker compose works", async () => {
-    const fixtures = path.resolve(__dirname, "..", "fixtures", "docker-compose");
-    const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml").up();
-
-    await Promise.all(
-      ["container_1", "another_container_1"].map(
-        async (containerName) => await checkEnvironmentContainerIsHealthy(startedEnvironment, containerName)
-      )
-    );
-
-    await startedEnvironment.down();
-  });
+  // it("docker compose works", async () => {
+  //   const fixtures = path.resolve(__dirname, "..", "fixtures", "docker-compose");
+  //   const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml").up();
+  //
+  //   await Promise.all(
+  //     ["container_1", "another_container_1"].map(
+  //       async (containerName) => await checkEnvironmentContainerIsHealthy(startedEnvironment, containerName)
+  //     )
+  //   );
+  //
+  //   await startedEnvironment.down();
+  // });
 
   it("network works", async () => {
     const network = await new Network().start();
