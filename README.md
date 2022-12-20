@@ -914,7 +914,9 @@ const container = await new GenericContainer("redis")
 ## Authentication
 
 Testcontainers will automatically pick up and use credentials from `$HOME/.docker/config.json`, using
-credential helpers, credential stores, or raw auth as necessary and in that order.
+credential helpers, credential stores, or raw auth as necessary and in that order. It can also pick up credentials
+from the `DOCKER_CONFIG_AUTH` environment variable, the variable should contain the serialized contents of a
+`.docker/config.json` file.
 
 ## Auxiliary Containers
 

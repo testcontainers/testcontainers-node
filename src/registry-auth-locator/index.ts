@@ -1,34 +1,12 @@
-import path from "path";
-import os from "os";
-import { DockerConfig } from "./types";
-import { existsSync, promises as fs } from "fs";
 import { CredHelpers } from "./cred-helpers";
 import { CredsStore } from "./creds-store";
 import { Auths } from "./auths";
 import { RegistryAuthLocator } from "./registry-auth-locator";
 import { log } from "../logger";
 import { AuthConfig } from "../docker/types";
+import { readDockerConfig } from "./config";
 
 const DEFAULT_REGISTRY = "https://index.docker.io/v1/";
-
-const dockerConfigLocation = process.env.DOCKER_CONFIG || `${os.homedir()}/.docker`;
-
-const dockerConfigFile = path.resolve(dockerConfigLocation, "config.json");
-
-const readDockerConfig = async (): Promise<DockerConfig> => {
-  if (!existsSync(dockerConfigFile)) {
-    return Promise.resolve({});
-  }
-
-  const buffer = await fs.readFile(dockerConfigFile);
-  const object = JSON.parse(buffer.toString());
-
-  return {
-    credsStore: object.credsStore,
-    credHelpers: object.credHelpers,
-    auths: object.auths,
-  };
-};
 
 const dockerConfig = readDockerConfig();
 
