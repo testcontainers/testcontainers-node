@@ -49,7 +49,7 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
 
   public withBasicCredentials(username: string, password: string): HttpWaitStrategy {
     const base64Encoded = Buffer.from(`${username}:${password}`).toString("base64");
-    this.headers = { ...this.headers, Authorization: `Bearer ${base64Encoded}` };
+    this.headers = { ...this.headers, Authorization: `Basic ${base64Encoded}` };
     return this;
   }
 
