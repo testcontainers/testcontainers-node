@@ -40,39 +40,40 @@ export abstract class CredentialProvider implements RegistryAuthLocator {
     return new Promise((resolve, reject) => {
       exec(`${providerName} list`, (err, stdout) => {
         if (err) {
-          log.error("An error occurred listing credentials");
-          return reject(err);
+          log.error(`An error occurred listing credentials: ${err}`);
+          return reject(new Error("An error occurred listing credentials"));
         }
         try {
           const response = JSON.parse(stdout);
-          resolve(response);
+          return resolve(response);
         } catch (e) {
           log.error(`Unexpected response from Docker credential provider LIST command: "${stdout}"`);
+          return reject(new Error("Unexpected response from Docker credential provider LIST command"));
         }
       });
     });
   }
 
   private runCredentialProvider(registry: string, providerName: string): Promise<CredentialProviderGetResponse> {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const sink = spawn(providerName, ["get"]);
 
       const chunks: string[] = [];
       sink.stdout.on("data", (chunk) => chunks.push(chunk));
 
       sink.on("close", (code) => {
-        if (code === 0) {
-          log.debug(`Docker credential provider exited with code: ${code}`);
-        } else {
-          log.warn(`Docker credential provider exited with code: ${code}`);
+        if (code !== 0) {
+          log.error(`An error occurred getting a credential: ${code}`);
+          return reject(new Error("An error occurred getting a credential"));
         }
 
         const response = chunks.join("");
         try {
           const parsedResponse = JSON.parse(response);
-          resolve(parsedResponse);
+          return resolve(parsedResponse);
         } catch (e) {
           log.error(`Unexpected response from Docker credential provider GET command: "${response}"`);
+          return reject(new Error("Unexpected response from Docker credential provider GET command"));
         }
       });
 
