@@ -9,7 +9,7 @@ import { RegistryAuthLocator } from "./registry-auth-locator";
 import { log } from "../logger";
 import { AuthConfig } from "../docker/types";
 
-const DEFAULT_REGISTRY = "https://index.docker.io/v1/";
+const DEFAULT_REGISTRY = "https://index.docker.io";
 
 const dockerConfigLocation = process.env.DOCKER_CONFIG || `${os.homedir()}/.docker`;
 

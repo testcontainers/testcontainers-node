@@ -19,12 +19,14 @@ export abstract class CredentialProvider implements RegistryAuthLocator {
     log.debug(`Executing Docker credential provider: ${programName}`);
 
     const credentials = await this.listCredentials(programName);
-    if (!Object.keys(credentials).some((credential) => credential.includes(registry))) {
+
+    const resolvedRegistry = Object.keys(credentials).find((credential) => credential.includes(registry));
+    if (resolvedRegistry === undefined) {
       log.debug(`No credential found for registry: "${registry}"`);
       return undefined;
     }
 
-    const response = await this.runCredentialProvider(registry, programName);
+    const response = await this.runCredentialProvider(resolvedRegistry, programName);
     const authConfig: AuthConfig = {
       username: response.Username,
       password: response.Secret,
@@ -40,15 +42,17 @@ export abstract class CredentialProvider implements RegistryAuthLocator {
     return new Promise((resolve, reject) => {
       exec(`${providerName} list`, (err, stdout) => {
         if (err) {
-          log.error(`An error occurred listing credentials: ${err}`);
-          return reject(new Error("An error occurred listing credentials"));
+          const errorMessage = `An error occurred listing credentials: ${err}`;
+          log.error(errorMessage);
+          return reject(new Error(errorMessage));
         }
         try {
           const response = JSON.parse(stdout);
           return resolve(response);
         } catch (e) {
-          log.error(`Unexpected response from Docker credential provider LIST command: "${stdout}"`);
-          return reject(new Error("Unexpected response from Docker credential provider LIST command"));
+          const errorMessage = `Unexpected response from Docker credential provider LIST command: "${stdout}"`;
+          log.error(errorMessage);
+          return reject(new Error(errorMessage));
         }
       });
     });
@@ -63,8 +67,11 @@ export abstract class CredentialProvider implements RegistryAuthLocator {
 
       sink.on("close", (code) => {
         if (code !== 0) {
-          log.error(`An error occurred getting a credential: ${code}`);
-          return reject(new Error("An error occurred getting a credential"));
+          const errorMessage = `An error occurred getting a credential. Exit code: ${code}. Message: ${chunks.join(
+            ""
+          )}`;
+          log.error(errorMessage);
+          return reject(new Error(errorMessage));
         }
 
         const response = chunks.join("");
@@ -72,8 +79,9 @@ export abstract class CredentialProvider implements RegistryAuthLocator {
           const parsedResponse = JSON.parse(response);
           return resolve(parsedResponse);
         } catch (e) {
-          log.error(`Unexpected response from Docker credential provider GET command: "${response}"`);
-          return reject(new Error("Unexpected response from Docker credential provider GET command"));
+          const errorMessage = `Unexpected response from Docker credential provider GET command: "${response}"`;
+          log.error(errorMessage);
+          return reject(new Error(errorMessage));
         }
       });
 

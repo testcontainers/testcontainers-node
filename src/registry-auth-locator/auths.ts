@@ -40,7 +40,7 @@ export class Auths implements RegistryAuthLocator {
     const authEntries = dockerConfig.auths ?? {};
 
     for (const key in authEntries) {
-      if (key === registry || key.includes(`://${registry}`)) {
+      if (key.includes(registry)) {
         return authEntries[key];
       }
     }
