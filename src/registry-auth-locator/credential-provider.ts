@@ -67,9 +67,7 @@ export abstract class CredentialProvider implements RegistryAuthLocator {
 
       sink.on("close", (code) => {
         if (code !== 0) {
-          const errorMessage = `An error occurred getting a credential. Exit code: ${code}. Message: ${chunks.join(
-            ""
-          )}`;
+          const errorMessage = `An error occurred getting a credential. Code: ${code}. Message: ${chunks.join("")}`;
           log.error(errorMessage);
           return reject(new Error(errorMessage));
         }
