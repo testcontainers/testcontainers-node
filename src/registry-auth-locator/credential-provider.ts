@@ -20,7 +20,7 @@ export abstract class CredentialProvider implements RegistryAuthLocator {
 
     const credentials = await this.listCredentials(programName);
 
-    const resolvedRegistry = Object.keys(credentials).find((credential) => credential.includes(registry));
+    const resolvedRegistry = Object.keys(credentials).find((aRegistry) => aRegistry.includes(registry));
     if (resolvedRegistry === undefined) {
       log.debug(`No credential found for registry: "${registry}"`);
       return undefined;
