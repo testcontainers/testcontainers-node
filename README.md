@@ -793,7 +793,7 @@ const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("redis")
   .withExposedPorts(6379)
-  .withStartupTimeout(120000)
+  .withStartupTimeout(120000) // wait 120s 
   .start();
 ```
 
