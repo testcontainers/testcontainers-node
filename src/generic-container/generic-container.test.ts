@@ -606,17 +606,19 @@ describe("GenericContainer", () => {
       await checkContainerIsHealthy(container2);
 
       expect(container1.getId()).not.toBe(container2.getId());
+      await container2.stop();
     });
 
     it("should keep the labels passed in when a new reusable container is created", async () => {
-      const container1 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
-        .withName("there_can_only_be_one_with_labels")
+      const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+        .withName("there_can_only_be_one")
         .withExposedPorts(8080)
         .withLabels({ test: "foo", bar: "baz" })
         .withReuse()
         .start();
 
-      expect(container1.getLabels()).toEqual({ test: "foo", bar: "baz", [LABEL_CONTAINER_HASH]: expect.any(String) });
+      expect(container.getLabels()).toEqual({ test: "foo", bar: "baz", [LABEL_CONTAINER_HASH]: expect.any(String) });
+      await container.stop();
     });
   });
 
