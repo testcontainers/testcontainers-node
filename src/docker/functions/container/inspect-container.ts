@@ -8,7 +8,7 @@ export type InspectResult = {
   ports: Ports;
   healthCheckStatus: HealthCheckStatus;
   networkSettings: { [networkName: string]: NetworkSettings };
-  state: { status: string; running: boolean };
+  state: { status: string; running: boolean; startedAt: Date };
   labels: Labels;
 };
 
@@ -22,7 +22,11 @@ export const inspectContainer = async (container: Dockerode.Container): Promise<
       ports: getPorts(inspectResult),
       healthCheckStatus: getHealthCheckStatus(inspectResult),
       networkSettings: getNetworkSettings(inspectResult),
-      state: { status: inspectResult.State.Status, running: inspectResult.State.Running },
+      state: {
+        status: inspectResult.State.Status,
+        running: inspectResult.State.Running,
+        startedAt: new Date(inspectResult.State.StartedAt),
+      },
       labels: inspectResult.Config.Labels,
     };
   } catch (err) {
