@@ -75,7 +75,7 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
   public async waitUntilReady(container: Dockerode.Container): Promise<void> {
     log.debug(`Waiting for log message "${this.message}"`);
     const inspect = await inspectContainer(container);
-    const stream = await containerLogs(container, { since: inspect.state.startedAt.getTime() / 1000 });
+    const stream = await containerLogs(container, { since: Math.floor(inspect.state.startedAt.getTime() / 1000) });
 
     return new Promise((resolve, reject) => {
       const startupTimeout = this.startupTimeout;
