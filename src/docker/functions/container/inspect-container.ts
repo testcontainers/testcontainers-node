@@ -8,9 +8,11 @@ export type InspectResult = {
   ports: Ports;
   healthCheckStatus: HealthCheckStatus;
   networkSettings: { [networkName: string]: NetworkSettings };
-  state: { status: string; running: boolean; startedAt: Date };
+  state: { status: string; running: boolean; startedAt: Date; finishedAt: Date | undefined };
   labels: Labels;
 };
+
+const INVALID_FINISHED_AT_DATE = "0001-01-01T00:00:00.00Z";
 
 export const inspectContainer = async (container: Dockerode.Container): Promise<InspectResult> => {
   try {
@@ -26,6 +28,10 @@ export const inspectContainer = async (container: Dockerode.Container): Promise<
         status: inspectResult.State.Status,
         running: inspectResult.State.Running,
         startedAt: new Date(inspectResult.State.StartedAt),
+        finishedAt:
+          inspectResult.State.FinishedAt === INVALID_FINISHED_AT_DATE
+            ? new Date(inspectResult.State.FinishedAt)
+            : undefined,
       },
       labels: inspectResult.Config.Labels,
     };

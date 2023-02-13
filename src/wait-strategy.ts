@@ -75,8 +75,12 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
   public async waitUntilReady(container: Dockerode.Container): Promise<void> {
     log.debug(`Waiting for log message "${this.message}"`);
     const inspect = await inspectContainer(container);
-    const startedAt = inspect.state.startedAt.getTime();
-    const stream = await containerLogs(container, { since: Math.floor(startedAt / 1000), timestamps: true });
+
+    // We should not take logs prior to our last finish time into account
+    // Otherwise we risk reporting the container as ready based on old logs
+    const finishedAt = inspect.state.finishedAt?.getTime();
+    const since = finishedAt !== undefined ? finishedAt / 1000 : undefined;
+    const stream = await containerLogs(container, { since, timestamps: finishedAt !== undefined });
 
     return new Promise((resolve, reject) => {
       const startupTimeout = this.startupTimeout;
@@ -87,10 +91,14 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
       }, startupTimeout);
 
       const comparisonFn: (line: string) => boolean = (line: string) => {
-        const timestamp = new Date(line.split(" ")[0]).getTime();
-        if (!isNaN(timestamp) && timestamp < startedAt) {
-          // We should not be getting this log line, ignore it
-          return false;
+        if (finishedAt !== undefined) {
+          const timestamp = new Date(line.split(" ")[0]).getTime();
+
+          if (!isNaN(timestamp) && timestamp <= finishedAt) {
+            log.debug(`Discard line "${line}" (${timestamp} vs ${finishedAt})`);
+            // We should not be getting this log line, ignore it
+            return false;
+          }
         }
 
         if (this.message instanceof RegExp) {
