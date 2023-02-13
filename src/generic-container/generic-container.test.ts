@@ -620,6 +620,16 @@ describe("GenericContainer", () => {
       expect(container.getLabels()).toEqual({ test: "foo", bar: "baz", [LABEL_CONTAINER_HASH]: expect.any(String) });
       await container.stop();
     });
+
+    it("should not create multiple reusable containers if called in parallel", async () => {
+      const [container1, container2] = await Promise.all([
+        new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).withReuse().start(),
+        new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).withReuse().start(),
+      ]);
+
+      expect(container1.getId()).toBe(container2.getId());
+      await container2.stop();
+    });
   });
 
   describe("from Dockerfile", () => {
