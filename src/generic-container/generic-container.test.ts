@@ -79,12 +79,7 @@ describe("GenericContainer", () => {
       .start();
 
     expect(new Date().getTime() - start.getTime()).toBeGreaterThanOrEqual(2_000);
-
-    // Add a short delay, as otherwise we'll still be too fast and restart the container
-    // on the same second as it previously got ready (which will mess with the log detection)
-    await new Promise((resolve) => setTimeout(resolve, 1_000));
     await container.restart();
-
     expect(new Date().getTime() - start.getTime()).toBeGreaterThanOrEqual(4_000);
 
     await container.stop();

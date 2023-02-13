@@ -75,7 +75,8 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
   public async waitUntilReady(container: Dockerode.Container): Promise<void> {
     log.debug(`Waiting for log message "${this.message}"`);
     const inspect = await inspectContainer(container);
-    const stream = await containerLogs(container, { since: Math.floor(inspect.state.startedAt.getTime() / 1000) });
+    const startedAt = inspect.state.startedAt.getTime();
+    const stream = await containerLogs(container, { since: Math.floor(startedAt / 1000), timestamps: true });
 
     return new Promise((resolve, reject) => {
       const startupTimeout = this.startupTimeout;
@@ -86,6 +87,12 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
       }, startupTimeout);
 
       const comparisonFn: (line: string) => boolean = (line: string) => {
+        const timestamp = new Date(line.split(" ")[0]).getTime();
+        if (!isNaN(timestamp) && timestamp < startedAt) {
+          // We should not be getting this log line, ignore it
+          return false;
+        }
+
         if (this.message instanceof RegExp) {
           return this.message.test(line);
         } else {
