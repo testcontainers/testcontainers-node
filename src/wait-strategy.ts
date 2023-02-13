@@ -78,9 +78,13 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
 
     // We should not take logs prior to our last finish time into account
     // Otherwise we risk reporting the container as ready based on old logs
+    // This does not apply to containers that are currently not running (i.e already exited)
     const finishedAt = inspect.state.finishedAt?.getTime();
-    const since = finishedAt !== undefined ? finishedAt / 1000 : undefined;
-    const stream = await containerLogs(container, { since, timestamps: finishedAt !== undefined });
+    const logsOptions =
+      finishedAt !== undefined && inspect.state.status === "running"
+        ? { since: finishedAt / 1000, timestamps: true }
+        : undefined;
+    const stream = await containerLogs(container, logsOptions);
 
     return new Promise((resolve, reject) => {
       const startupTimeout = this.startupTimeout;
@@ -91,15 +95,6 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
       }, startupTimeout);
 
       const comparisonFn: (line: string) => boolean = (line: string) => {
-        if (finishedAt !== undefined) {
-          const timestamp = new Date(line.split(" ")[0]).getTime();
-
-          if (!isNaN(timestamp) && timestamp <= finishedAt) {
-            // We should not be getting this log line, ignore it
-            return false;
-          }
-        }
-
         if (this.message instanceof RegExp) {
           return this.message.test(line);
         } else {

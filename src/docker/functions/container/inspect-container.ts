@@ -12,11 +12,10 @@ export type InspectResult = {
   labels: Labels;
 };
 
-const INVALID_FINISHED_AT_DATE = "0001-01-01T00:00:00.00Z";
-
 export const inspectContainer = async (container: Dockerode.Container): Promise<InspectResult> => {
   try {
     const inspectResult = await container.inspect();
+    const finishedAt = new Date(inspectResult.State.FinishedAt);
 
     return {
       name: inspectResult.Name,
@@ -28,10 +27,7 @@ export const inspectContainer = async (container: Dockerode.Container): Promise<
         status: inspectResult.State.Status,
         running: inspectResult.State.Running,
         startedAt: new Date(inspectResult.State.StartedAt),
-        finishedAt:
-          inspectResult.State.FinishedAt !== INVALID_FINISHED_AT_DATE
-            ? new Date(inspectResult.State.FinishedAt)
-            : undefined,
+        finishedAt: finishedAt.getTime() < 0 ? undefined : finishedAt,
       },
       labels: inspectResult.Config.Labels,
     };
