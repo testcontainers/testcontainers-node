@@ -27,7 +27,7 @@ describe("HttpWaitStrategy", () => {
     await container.stop();
   });
 
-  it("should timeout for falsy status code", async () => {
+  it("should timeout for mismatching status code", async () => {
     await expect(() =>
       new GenericContainer("cristianrgreco/testcontainer:1.1.14")
         .withExposedPorts(8080)
