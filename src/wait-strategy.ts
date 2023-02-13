@@ -95,7 +95,6 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
           const timestamp = new Date(line.split(" ")[0]).getTime();
 
           if (!isNaN(timestamp) && timestamp <= finishedAt) {
-            log.debug(`Discard line "${line}" (${timestamp} vs ${finishedAt})`);
             // We should not be getting this log line, ignore it
             return false;
           }
