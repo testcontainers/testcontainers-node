@@ -1,4 +1,5 @@
 import archiver from "archiver";
+import AsyncLock from "async-lock";
 import { BoundPorts } from "../bound-ports";
 import { containerLog, log } from "../logger";
 import { PortWithOptionalBinding } from "../port";
@@ -36,6 +37,8 @@ import { getContainerByHash } from "../docker/functions/container/get-container"
 import { LABEL_CONTAINER_HASH } from "../labels";
 import { StartedNetwork } from "../network";
 import { waitForContainer } from "../wait-for-container";
+
+const reusableContainerCreationLock = new AsyncLock();
 
 export class GenericContainer implements TestContainer {
   public static fromDockerfile(context: string, dockerfileName = "Dockerfile"): GenericContainerBuilder {
@@ -125,14 +128,20 @@ export class GenericContainer implements TestContainer {
       createContainerOptions.labels = { ...createContainerOptions.labels, [LABEL_CONTAINER_HASH]: containerHash };
       log.debug(`Container reuse has been enabled, hash: ${containerHash}`);
 
-      const container = await getContainerByHash(containerHash);
-      if (container !== undefined) {
-        log.debug(`Found container to reuse with hash: ${containerHash}`);
-        return this.reuseContainer(container);
-      } else {
-        log.debug("No container found to reuse");
-        return this.startContainer(createContainerOptions);
-      }
+      // We might have several async processes try to create a reusable container
+      // at once, to avoid possibly creating too many of these, use a lock
+      // on the containerHash, this ensures that only single reusable instance is created
+      return reusableContainerCreationLock.acquire(containerHash, async () => {
+        const container = await getContainerByHash(containerHash);
+
+        if (container !== undefined) {
+          log.debug(`Found container to reuse with hash: ${containerHash}`);
+          return this.reuseContainer(container);
+        } else {
+          log.debug("No container found to reuse");
+          return this.startContainer(createContainerOptions);
+        }
+      });
     } else {
       return this.startContainer(createContainerOptions);
     }
