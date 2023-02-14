@@ -71,6 +71,20 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
+  it("should wait for a new log after restart", async () => {
+    const start = new Date();
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withCommand(["/bin/sh", "-c", 'sleep 2; echo "Ready"'])
+      .withWaitStrategy(Wait.forLogMessage("Ready"))
+      .start();
+
+    expect(new Date().getTime() - start.getTime()).toBeGreaterThanOrEqual(2_000);
+    await container.restart();
+    expect(new Date().getTime() - start.getTime()).toBeGreaterThanOrEqual(4_000);
+
+    await container.stop();
+  });
+
   it("should wait for health check", async () => {
     const context = path.resolve(fixtures, "docker-with-health-check");
     const customGenericContainer = await GenericContainer.fromDockerfile(context).build();
