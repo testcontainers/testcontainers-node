@@ -65,4 +65,20 @@ describe("AsyncLock", () => {
     expect(foo).toEqual([1, 4]);
     expect(bar).toEqual([2, 3]);
   });
+
+  it("should keep promise rejections isolated and continue after failure", async () => {
+    const results: number[] = [];
+    const lock = new AsyncLock();
+
+    await Promise.all([
+      lock.acquire("test", async () => results.push(1)),
+      lock.acquire("test", async () => results.push(2)),
+      lock.acquire("test", async () => {
+        throw new Error("Fail");
+      }),
+      lock.acquire("test", async () => results.push(4)),
+    ]).catch(() => undefined); // we ignore the error
+
+    expect(results).toEqual([1, 2, 4]);
+  });
 });
