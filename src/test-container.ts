@@ -38,7 +38,7 @@ export interface TestContainer {
 
   withWaitStrategy(waitStrategy: WaitStrategy): this;
 
-  withStartupTimeout(startupTimeout: number): this;
+  withStartupTimeout(startupTimeoutMs: number): this;
 
   withNetwork(network: StartedNetwork): this;
 
