@@ -10,9 +10,9 @@ export class AsyncLock {
 
   public async acquire<T>(key: string, callback: () => Promise<T>): Promise<T> {
     const ongoing = this.ongoing.get(key) ?? Promise.resolve();
-    const handler = () => {
+    const handler = async () => {
       try {
-        return callback();
+        return await callback();
       } finally {
         if (this.ongoing.get(key) === updated) {
           this.ongoing.delete(key);
