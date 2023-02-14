@@ -122,7 +122,7 @@ export class GenericContainer implements TestContainer {
 
     if (this.reuse) {
       const containerHash = hash(JSON.stringify(createContainerOptions));
-      createContainerOptions.labels = { [LABEL_CONTAINER_HASH]: containerHash };
+      createContainerOptions.labels = { ...createContainerOptions.labels, [LABEL_CONTAINER_HASH]: containerHash };
       log.debug(`Container reuse has been enabled, hash: ${containerHash}`);
 
       const container = await getContainerByHash(containerHash);

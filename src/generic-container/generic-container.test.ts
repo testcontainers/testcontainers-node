@@ -8,6 +8,7 @@ import { RandomUuid } from "../uuid";
 import { checkContainerIsHealthy, getEvents, getRunningContainerNames } from "../test-helper";
 import { Network } from "../network";
 import { getContainerById } from "../docker/functions/container/get-container";
+import { LABEL_CONTAINER_HASH } from "../labels";
 
 describe("GenericContainer", () => {
   jest.setTimeout(180_000);
@@ -605,6 +606,19 @@ describe("GenericContainer", () => {
       await checkContainerIsHealthy(container2);
 
       expect(container1.getId()).not.toBe(container2.getId());
+      await container2.stop();
+    });
+
+    it("should keep the labels passed in when a new reusable container is created", async () => {
+      const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+        .withName("there_can_only_be_one")
+        .withExposedPorts(8080)
+        .withLabels({ test: "foo", bar: "baz" })
+        .withReuse()
+        .start();
+
+      expect(container.getLabels()).toEqual({ test: "foo", bar: "baz", [LABEL_CONTAINER_HASH]: expect.any(String) });
+      await container.stop();
     });
   });
 
