@@ -6,7 +6,7 @@ import { IntervalRetryStrategy } from "./retry-strategy";
 import { HealthCheckStatus } from "./docker/types";
 import Dockerode from "dockerode";
 import { containerLogs } from "./docker/functions/container/container-logs";
-import { inspectContainer } from "./docker/functions/container/inspect-container";
+import { inspectContainer, InspectResult } from "./docker/functions/container/inspect-container";
 
 export interface WaitStrategy {
   waitUntilReady(container: Dockerode.Container, host: string, boundPorts: BoundPorts): Promise<void>;
@@ -72,18 +72,30 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
     super();
   }
 
+  private containerRestartedLogOptions(
+    inspectResult: InspectResult
+  ): Omit<Dockerode.ContainerLogsOptions, "follow" | "stdout" | "stderr"> | undefined {
+    const { finishedAt } = inspectResult.state;
+    if (finishedAt === undefined) {
+      return undefined;
+    }
+
+    return {
+      since: finishedAt.getTime() / 1000,
+      timestamps: true,
+    };
+  }
+
+  private hasContainerRestarted(inspectResult: InspectResult) {
+    const { finishedAt, status } = inspectResult.state;
+    return finishedAt !== undefined && status === "running";
+  }
+
   public async waitUntilReady(container: Dockerode.Container): Promise<void> {
     log.debug(`Waiting for log message "${this.message}"`);
     const inspect = await inspectContainer(container);
 
-    // We should not take logs prior to our last finish time into account
-    // Otherwise we risk reporting the container as ready based on old logs
-    // This does not apply to containers that are currently not running (i.e already exited)
-    const finishedAt = inspect.state.finishedAt?.getTime();
-    const logsOptions =
-      finishedAt !== undefined && inspect.state.status === "running"
-        ? { since: finishedAt / 1000, timestamps: true }
-        : undefined;
+    const logsOptions = this.hasContainerRestarted(inspect) ? this.containerRestartedLogOptions(inspect) : undefined;
     const stream = await containerLogs(container, logsOptions);
 
     return new Promise((resolve, reject) => {
