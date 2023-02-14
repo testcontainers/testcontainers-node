@@ -3,7 +3,7 @@ import { Clock, SystemClock, Time } from "./clock";
 export interface RetryStrategy<T, U> {
   retryUntil(
     fn: () => Promise<T>,
-    predicate: (result: T) => boolean,
+    predicate: (result: T) => boolean | Promise<boolean>,
     onTimeout: () => U,
     timeout: number
   ): Promise<T | U>;
@@ -14,7 +14,7 @@ abstract class AbstractRetryStrategy<T, U> implements RetryStrategy<T, U> {
 
   public abstract retryUntil(
     fn: () => Promise<T>,
-    predicate: (result: T) => boolean,
+    predicate: (result: T) => boolean | Promise<boolean>,
     onTimeout: () => U,
     timeout: number
   ): Promise<T | U>;
@@ -35,7 +35,7 @@ export class IntervalRetryStrategy<T, U> extends AbstractRetryStrategy<T, U> {
 
   public async retryUntil(
     fn: (attempt: number) => Promise<T>,
-    predicate: (result: T) => boolean,
+    predicate: (result: T) => boolean | Promise<boolean>,
     onTimeout: () => U,
     timeout: number
   ): Promise<T | U> {
@@ -44,7 +44,7 @@ export class IntervalRetryStrategy<T, U> extends AbstractRetryStrategy<T, U> {
     let attemptNumber = 0;
     let result = await fn(attemptNumber++);
 
-    while (!predicate(result)) {
+    while (!(await predicate(result))) {
       if (this.hasTimedOut(timeout, startTime)) {
         return onTimeout();
       }

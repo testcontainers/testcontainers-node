@@ -83,13 +83,19 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
           return undefined;
         }
       },
-      (response) => {
+      async (response) => {
         if (response === undefined) {
           return false;
         } else if (!this.predicates.length) {
           return response.ok;
         } else {
-          return this.predicates.every((predicate) => predicate(response));
+          for (const predicate of this.predicates) {
+            const result = await predicate(response);
+            if (!result) {
+              return false;
+            }
+          }
+          return true;
         }
       },
       () => {
