@@ -131,7 +131,7 @@ export class GenericContainer implements TestContainer {
       // We might have several async processes try to create a reusable container
       // at once, to avoid possibly creating too many of these, use a lock
       // on the containerHash, this ensures that only single reusable instance is created
-      return await reusableContainerCreationLock.acquire(containerHash, async () => {
+      return reusableContainerCreationLock.acquire(containerHash, async () => {
         const container = await getContainerByHash(containerHash);
 
         if (container !== undefined) {
