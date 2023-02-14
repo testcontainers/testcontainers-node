@@ -317,8 +317,8 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
-  public withStartupTimeout(startupTimeout: number): this {
-    this.startupTimeout = startupTimeout;
+  public withStartupTimeout(startupTimeoutMs: number): this {
+    this.startupTimeout = startupTimeoutMs;
     return this;
   }
 
