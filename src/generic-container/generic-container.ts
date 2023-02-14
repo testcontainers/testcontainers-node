@@ -1,5 +1,5 @@
 import archiver from "archiver";
-import { AsyncLock } from "../async-lock";
+import AsyncLock from "async-lock";
 import { BoundPorts } from "../bound-ports";
 import { containerLog, log } from "../logger";
 import { PortWithOptionalBinding } from "../port";
