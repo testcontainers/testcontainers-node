@@ -9,7 +9,6 @@ import { DockerImageName } from "../docker-image-name";
 import { StartedTestContainer, TestContainer } from "../test-container";
 import { defaultWaitStrategy, WaitStrategy } from "../wait-strategy";
 import { PortForwarderInstance } from "../port-forwarder";
-import { getAuthConfig } from "../registry-auth-locator";
 import {
   BindMount,
   ContentToCopy,
@@ -83,7 +82,6 @@ export class GenericContainer implements TestContainer {
     await pullImage((await dockerClient()).dockerode, {
       imageName: this.imageName,
       force: this.pullPolicy.shouldPull(),
-      authConfig: await getAuthConfig(this.imageName.registry),
     });
 
     if (!this.imageName.isReaper()) {

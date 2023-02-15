@@ -1,14 +1,13 @@
 import { DockerImageName } from "../../../docker-image-name";
 import { log } from "../../../logger";
 import { PullStreamParser } from "../../pull-stream-parser";
-import { AuthConfig } from "../../types";
 import { imageExists } from "./image-exists";
 import Dockerode from "dockerode";
+import { getAuthConfig } from "../../../registry-auth-locator";
 
 export type PullImageOptions = {
   imageName: DockerImageName;
   force: boolean;
-  authConfig?: AuthConfig;
 };
 
 export const pullImage = async (dockerode: Dockerode, options: PullImageOptions): Promise<void> => {
@@ -19,7 +18,8 @@ export const pullImage = async (dockerode: Dockerode, options: PullImageOptions)
     }
 
     log.info(`Pulling image: ${options.imageName}`);
-    const stream = await dockerode.pull(options.imageName.toString(), { authconfig: options.authConfig });
+    const authconfig = await getAuthConfig(options.imageName.registry);
+    const stream = await dockerode.pull(options.imageName.toString(), { authconfig });
 
     await new PullStreamParser(options.imageName, log).consume(stream);
   } catch (err) {
