@@ -3,6 +3,7 @@ import debug, { IDebugger } from "debug";
 type Message = string;
 
 export interface Logger {
+  enabled(): boolean;
   trace(message: Message): void;
   debug(message: Message): void;
   info(message: Message): void;
@@ -15,6 +16,10 @@ class DebugLogger implements Logger {
 
   constructor(namespace: string) {
     this.logger = debug(namespace);
+  }
+
+  public enabled(): boolean {
+    return this.logger.enabled;
   }
 
   public trace(message: Message): void {
@@ -44,6 +49,10 @@ export class FakeLogger implements Logger {
   public readonly infoLogs: Message[] = [];
   public readonly warnLogs: Message[] = [];
   public readonly errorLogs: Message[] = [];
+
+  public enabled(): boolean {
+    return true;
+  }
 
   public trace(message: Message): void {
     this.traceLogs.push(message);

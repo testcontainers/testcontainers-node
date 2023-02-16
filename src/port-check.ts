@@ -47,7 +47,7 @@ export class InternalPortCheck implements PortCheck {
 
     const commandResults = await Promise.all(
       commands.map((command) =>
-        execContainer(this.container, command, { stdin: true, detach: false, tty: true }, false)
+        execContainer(this.container, command, { stdin: true, detach: false, tty: log.enabled() }, false)
       )
     );
     const isBound = commandResults.some((result) => result.exitCode === 0);
@@ -61,7 +61,7 @@ export class InternalPortCheck implements PortCheck {
             `The HostPortWaitStrategy will not work on a distroless image, use an alternate wait strategy for container ${this.container.id}`
           );
         }
-      } else {
+      } else if (log.enabled()) {
         commandResults
           .map((result) => ({ ...result, output: result.output.trim() }))
           .filter((result) => result.exitCode !== 126 && result.output.length > 0)
