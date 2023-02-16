@@ -52,7 +52,7 @@ export class InternalPortCheck implements PortCheck {
     );
     const isBound = commandResults.some((result) => result.exitCode === 0);
 
-    if (!isBound) {
+    if (!isBound && log.enabled()) {
       const shellExists = commandResults.some((result) => result.exitCode !== 126);
       if (!shellExists) {
         if (!this.isDistroless) {
@@ -61,7 +61,7 @@ export class InternalPortCheck implements PortCheck {
             `The HostPortWaitStrategy will not work on a distroless image, use an alternate wait strategy for container ${this.container.id}`
           );
         }
-      } else if (log.enabled()) {
+      } else {
         commandResults
           .map((result) => ({ ...result, output: result.output.trim() }))
           .filter((result) => result.exitCode !== 126 && result.output.length > 0)
