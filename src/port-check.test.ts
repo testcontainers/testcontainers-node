@@ -18,6 +18,9 @@ describe("PortCheck", () => {
       jest.resetAllMocks();
       mockContainer = { id: "containerId" } as Dockerode.Container;
       portCheck = new InternalPortCheck(mockContainer);
+
+      // Make sure logging is enabled to capture all logs
+      mockLogger.enabled.mockImplementation(() => true);
     });
 
     it("should return true when at least one command returns exit code 0", async () => {
