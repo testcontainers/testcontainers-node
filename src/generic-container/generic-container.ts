@@ -34,7 +34,7 @@ import { GenericContainerBuilder } from "./generic-container-builder";
 import { StartedGenericContainer } from "./started-generic-container";
 import { hash } from "../hash";
 import { getContainerByHash } from "../docker/functions/container/get-container";
-import { LABEL_CONTAINER_HASH } from "../labels";
+import { LABEL_TESTCONTAINERS_CONTAINER_HASH } from "../labels";
 import { StartedNetwork } from "../network";
 import { waitForContainer } from "../wait-for-container";
 
@@ -125,7 +125,10 @@ export class GenericContainer implements TestContainer {
 
     if (this.reuse) {
       const containerHash = hash(JSON.stringify(createContainerOptions));
-      createContainerOptions.labels = { ...createContainerOptions.labels, [LABEL_CONTAINER_HASH]: containerHash };
+      createContainerOptions.labels = {
+        ...createContainerOptions.labels,
+        [LABEL_TESTCONTAINERS_CONTAINER_HASH]: containerHash,
+      };
       log.debug(`Container reuse has been enabled, hash: ${containerHash}`);
 
       // We might have several async processes try to create a reusable container
