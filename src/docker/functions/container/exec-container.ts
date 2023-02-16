@@ -29,7 +29,7 @@ export const execContainer = async (
 
     stream.on("data", (chunk) => chunks.push(chunk));
 
-    if (shouldLog) {
+    if (shouldLog && execLog.enabled()) {
       byline(stream).on("data", (line) => execLog.trace(`${container.id}: ${line}`));
     }
 
