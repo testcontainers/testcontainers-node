@@ -1,7 +1,7 @@
 import { dockerClient } from "../../docker-client";
 import Dockerode from "dockerode";
 import { log } from "../../../logger";
-import { LABEL_CONTAINER_HASH } from "../../../labels";
+import { LABEL_TESTCONTAINERS_CONTAINER_HASH } from "../../../labels";
 
 export const getContainerById = async (id: string): Promise<Dockerode.Container> => {
   try {
@@ -20,7 +20,7 @@ export const getContainerByHash = async (hash: string): Promise<Dockerode.Contai
       limit: 1,
       filters: {
         status: ["running"],
-        label: [`${LABEL_CONTAINER_HASH}=${hash}`],
+        label: [`${LABEL_TESTCONTAINERS_CONTAINER_HASH}=${hash}`],
       },
     });
     if (containers.length === 0) {
