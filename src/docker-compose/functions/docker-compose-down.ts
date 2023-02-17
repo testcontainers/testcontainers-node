@@ -1,7 +1,7 @@
 import { log } from "../../logger";
 import { defaultDockerComposeOptions } from "../default-docker-compose-options";
 import { DockerComposeOptions } from "../docker-compose-options";
-import { down } from "../docker-compose";
+import { down } from "docker-compose";
 import { DockerComposeDownOptions } from "../../test-container";
 
 export const dockerComposeDown = async (

@@ -5,7 +5,7 @@ import { URL } from "url";
 import { existsSync, promises as fs } from "fs";
 import { runInContainer } from "./functions/run-in-container";
 import { logSystemDiagnostics } from "../log-system-diagnostics";
-import "../testcontainers-properties-file";
+import * as propertiesFile from "../testcontainers-properties-file";
 
 type DockerClient = {
   host: string;
@@ -58,11 +58,11 @@ interface DockerClientStrategy {
 
 class ConfigurationStrategy implements DockerClientStrategy {
   async initialise(): Promise<{ uri: string; dockerode: Dockerode }> {
-    const { DOCKER_HOST, DOCKER_TLS_VERIFY, DOCKER_CERT_PATH } = process.env;
+    const { dockerHost, dockerTlsVerify, dockerCertPath } = propertiesFile;
 
     const dockerOptions: DockerOptions = {};
 
-    const { pathname, hostname, port } = new URL(DOCKER_HOST!);
+    const { pathname, hostname, port } = new URL(dockerHost!);
     if (hostname !== "") {
       dockerOptions.host = hostname;
       dockerOptions.port = port;
@@ -70,20 +70,20 @@ class ConfigurationStrategy implements DockerClientStrategy {
       dockerOptions.socketPath = pathname;
     }
 
-    if (DOCKER_TLS_VERIFY === "1" && DOCKER_CERT_PATH !== undefined) {
-      dockerOptions.ca = await fs.readFile(path.resolve(DOCKER_CERT_PATH, "ca.pem"));
-      dockerOptions.cert = await fs.readFile(path.resolve(DOCKER_CERT_PATH, "cert.pem"));
-      dockerOptions.key = await fs.readFile(path.resolve(DOCKER_CERT_PATH, "key.pem"));
+    if (dockerTlsVerify === "1" && dockerCertPath !== undefined) {
+      dockerOptions.ca = await fs.readFile(path.resolve(dockerCertPath, "ca.pem"));
+      dockerOptions.cert = await fs.readFile(path.resolve(dockerCertPath, "cert.pem"));
+      dockerOptions.key = await fs.readFile(path.resolve(dockerCertPath, "key.pem"));
     }
 
     return {
-      uri: DOCKER_HOST!,
+      uri: dockerHost!,
       dockerode: new Dockerode(dockerOptions),
     };
   }
 
   isApplicable(): boolean {
-    return process.env.DOCKER_HOST !== undefined;
+    return propertiesFile.dockerHost !== undefined;
   }
 
   getName(): string {
