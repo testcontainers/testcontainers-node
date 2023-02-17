@@ -1,4 +1,7 @@
-import { GenericContainer } from "./dist/index.js";
+import { GenericContainer } from "./dist/src/index.js";
 
-const container = await new GenericContainer("alpine:3.12").start();
+const container = await new GenericContainer("alpine:3.12")
+  .withCommand(["sleep", "infinity"])
+  .start();
+
 await container.stop();
