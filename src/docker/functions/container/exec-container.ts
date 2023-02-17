@@ -33,8 +33,7 @@ export const execContainer = async (
       byline(stream).on("data", (line) => execLog.trace(`${container.id}: ${line}`));
     }
 
-    const exitCode = await waitForExec(exec);
-
+    const exitCode = await waitForExec(exec, stream);
     stream.destroy();
 
     return { output: chunks.join(""), exitCode };
@@ -59,37 +58,12 @@ const startExec = async (exec: Dockerode.Exec, options: ExecContainerOptions): P
   }
 };
 
-type ExecInspectResult = {
-  exitCode: number;
-  running: boolean;
-  entrypoint: string;
-  arguments: string[];
-};
-
-const inspectExec = async (exec: Dockerode.Exec): Promise<ExecInspectResult> => {
-  try {
-    const inspectResult = await exec.inspect();
-
-    return {
-      exitCode: inspectResult.ExitCode === null ? -1 : inspectResult.ExitCode,
-      running: inspectResult.Running,
-      entrypoint: inspectResult.ProcessConfig.entrypoint,
-      arguments: inspectResult.ProcessConfig.arguments,
-    };
-  } catch (err) {
-    log.error(`Failed to inspect exec: ${err}`);
-    throw err;
-  }
-};
-
-const waitForExec = async (exec: Dockerode.Exec): Promise<number> =>
-  new Promise((resolve) => {
-    const interval = setInterval(async () => {
-      const { running, exitCode } = await inspectExec(exec);
-
-      if (!running) {
-        clearInterval(interval);
-        resolve(exitCode);
-      }
-    }, 100);
+const waitForExec = async (exec: Dockerode.Exec, stream: Readable): Promise<number> => {
+  await new Promise((res, rej) => {
+    stream.on("end", res);
+    stream.on("error", rej);
   });
+
+  const inspectResult = await exec.inspect();
+  return inspectResult.ExitCode === null ? -1 : inspectResult.ExitCode;
+};
