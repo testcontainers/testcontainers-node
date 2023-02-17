@@ -2,8 +2,8 @@
   "name": "testcontainers",
   "author": "Cristian Greco",
   "version": "9.1.4-beta.0",
-  "main": "dist/index",
-  "types": "dist/index",
+  "main": "dist/src/index",
+  "types": "dist/src/index",
   "keywords": [
     "docker",
     "testcontainers"
