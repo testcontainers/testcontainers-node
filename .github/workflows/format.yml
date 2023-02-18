@@ -1,4 +1,4 @@
-name: Lint
+name: Format
 
 on:
   pull_request:
@@ -16,5 +16,5 @@ jobs:
         node-version: 18.x
     - name: Install dependencies
       run: npm ci --omit=optional
-    - name: Code linting
-      run: npm run lint:ci
+    - name: Code formatting
+      run: npm run format:ci

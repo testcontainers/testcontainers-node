@@ -28,7 +28,9 @@
     "clean": "rimraf dist",
     "test": "cross-env DEBUG=testcontainers,testcontainers:exec jest --runInBand",
     "format": "prettier --write package.json \"src/**/*.ts\"",
+    "format:ci": "prettier --check package.json \"src/**/*.ts\"",
     "lint": "eslint --fix package.json \"src/**/*.ts\"",
+    "lint:ci": "eslint package.json \"src/**/*.ts\" --max-warnings=0",
     "updateDeps": "npx npm-check-updates -u",
     "validateEngine": "npx ls-engines"
   },
