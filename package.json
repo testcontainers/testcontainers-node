@@ -26,7 +26,7 @@
     "pre-commit": "lint-staged",
     "build": "npm run clean && tsc -p tsconfig.prod.json",
     "clean": "rimraf dist",
-    "test": "cross-env DEBUG=testcontainers,testcontainers:exec jest --runInBand --coverage",
+    "test": "cross-env DEBUG=testcontainers,testcontainers:exec jest --runInBand",
     "format": "prettier --write package.json \"src/**/*.ts\"",
     "lint": "eslint --fix package.json \"src/**/*.ts\"",
     "updateDeps": "npx npm-check-updates -u",
