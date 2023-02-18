@@ -31,8 +31,6 @@ jobs:
     - run: npm test
 
   # This job simulates using testcontainers via the NPM package, without dev dependencies.
-  # Steps: Build and package the module. Copy the package into the smoke-test directory and npm install it there.
-  # We must prune dev dependencies in the parent because the smoke-test module will include parent node_modules.
   smoke-test:
     runs-on: ${{ matrix.os-version }}
     strategy:

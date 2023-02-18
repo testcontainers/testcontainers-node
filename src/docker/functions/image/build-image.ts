@@ -42,6 +42,7 @@ export const buildImage = async (options: BuildImageOptions): Promise<void> => {
 
     const buildImageOptions: ImageBuildOptions = {
       dockerfile: options.dockerfileName,
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       nocache: !options.cache,
       buildargs: options.buildArgs,

@@ -62,6 +62,7 @@ class ConfigurationStrategy implements DockerClientStrategy {
 
     const dockerOptions: DockerOptions = {};
 
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const { pathname, hostname, port } = new URL(DOCKER_HOST!);
     if (hostname !== "") {
       dockerOptions.host = hostname;
@@ -77,6 +78,7 @@ class ConfigurationStrategy implements DockerClientStrategy {
     }
 
     return {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       uri: DOCKER_HOST!,
       dockerode: new Dockerode(dockerOptions),
     };
