@@ -31,7 +31,7 @@ jobs:
     - name: Run tests
       run: npm run test:ci
     - name: Fetch master code coverage report
-      if: ${{ matrix.node-version == '18.x' }}
+      if: ${{ matrix.node-version == '18.x' && (success() || failure()) }}
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
@@ -39,7 +39,7 @@ jobs:
         gh api /repos/testcontainers/testcontainers-node/actions/artifacts/${artifactId}/zip > master-test-coverage.zip
         unzip -p master-test-coverage.zip coverage-report.json > base-coverage-report.json
     - name: Compare coverage reports
-      if: ${{ matrix.node-version == '18.x' }}
+      if: ${{ matrix.node-version == '18.x' && (success() || failure()) }}
       uses: ArtiomTr/jest-coverage-report-action@v2
       with:
         coverage-file: ./coverage-report.json
