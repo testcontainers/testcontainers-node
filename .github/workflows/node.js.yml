@@ -28,7 +28,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm ci --omit=optional
-    - run: npm test:ci
+    - run: npm run test:ci
     - uses: actions/upload-artifact@v3
       if: ${{ success() && startsWith(matrix.node-version, '18') }}
       with:
