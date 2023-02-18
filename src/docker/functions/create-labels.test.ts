@@ -4,7 +4,7 @@ import { REAPER_IMAGE } from "../../images";
 import { LABEL_SESSION_ID } from "../../labels";
 
 test("should add session ID label when not reusable (for the Reaper)", () => {
-  expect(createLabels(false)).toEqual({ [LABEL_SESSION_ID]: expect.any(String) });
+  expect(createLabels(true)).toEqual({ [LABEL_SESSION_ID]: expect.any(String) });
 });
 
 test("should not add session ID label when reusable (to avoid Reaper)", () => {
