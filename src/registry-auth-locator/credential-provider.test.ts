@@ -122,7 +122,6 @@ function mockExecReturns(stdout: string) {
 
 function mockExecThrows() {
   mockExec.mockImplementationOnce((command, callback) => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     return callback("An error occurred");
   });
