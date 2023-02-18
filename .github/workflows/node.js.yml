@@ -28,7 +28,12 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm ci --omit=optional
-    - run: npm test
+    - run: npm test:ci
+    - uses: actions/upload-artifact@v3
+      if: ${{ success() && startsWith(matrix.node-version, '18') }}
+      with:
+        name: master-test-coverage
+        path: coverage-report.json
 
   # This job simulates using testcontainers via the NPM package, without dev dependencies.
   # Steps: Build and package the module. Copy the package into the smoke-test directory and npm install it there.
