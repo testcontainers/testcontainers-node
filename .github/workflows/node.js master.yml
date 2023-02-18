@@ -4,7 +4,7 @@
 name: Node.js CI
 
 on:
-  pull_request:
+  push:
     branches: [ master ]
 
 jobs:
@@ -27,17 +27,11 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: npm ci --omit=optional
     - run: npm run test:ci
-    - env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        artifactId=$(gh api "/repos/testcontainers/testcontainers-node/actions/artifacts?name=master-test-coverage" | jq -r '.artifacts[0].id')
-        gh api /repos/testcontainers/testcontainers-node/actions/artifacts/${artifactId}/zip > master-test-coverage.zip
-        unzip -p master-test-coverage.zip coverage-report.json > base-coverage-report.json
-    - uses: ArtiomTr/jest-coverage-report-action@v2
+    - uses: actions/upload-artifact@v3
       if: ${{ success() && startsWith(matrix.node-version, '18') }}
       with:
-        coverage-file: ./coverage-report.json
-        base-coverage-file: ./base-coverage-report.json
+        name: master-test-coverage
+        path: coverage-report.json
 
   # This job simulates using testcontainers via the NPM package, without dev dependencies.
   # Steps: Build and package the module. Copy the package into the smoke-test directory and npm install it there.
