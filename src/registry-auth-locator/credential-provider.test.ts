@@ -139,7 +139,7 @@ function mockSpawnReturns(exitCode: number, stdout: string) {
 
   sink.stdin = new Writable({
     write() {
-      sink.stdout!.emit("data", stdout);
+      sink.stdout?.emit("data", stdout);
       sink.emit("close", exitCode);
     },
   });
@@ -152,7 +152,7 @@ class TestCredentialProvider extends CredentialProvider {
     super();
   }
 
-  getCredentialProviderName(registry: string, dockerConfig: DockerConfig): string | undefined {
+  getCredentialProviderName(): string | undefined {
     return this.credentialProviderName;
   }
 
