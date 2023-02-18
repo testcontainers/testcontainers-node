@@ -1,7 +1,7 @@
 # This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
 
-name: Node.js CI
+name: Test
 
 on:
   push:
@@ -15,27 +15,28 @@ jobs:
         os-version: [ubuntu-latest]
         node-version: [14.x, 16.x, 18.x]
     steps:
-    - uses: actions/checkout@v3
+    - name: Code checkout
+      uses: actions/checkout@v3
     - name: Login to Docker Hub
       uses: docker/login-action@v1
       with:
         username: cristianrgreco
         password: b62e3c19-4990-46f6-b221-55cf0bfb6513 # read-only
-    - name: Test ${{ matrix.node-version }}
+    - name: Install NodeJS ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-    - run: npm ci --omit=optional
-    - run: npm run test:ci
-    - uses: actions/upload-artifact@v3
+    - name: Install dependencies
+      run: npm ci --omit=optional
+    - name: Run tests
+      run: npm run test:ci
+    - name: Upload coverage report
       if: ${{ success() && startsWith(matrix.node-version, '18') }}
+      uses: actions/upload-artifact@v3
       with:
         name: master-test-coverage
         path: coverage-report.json
 
-  # This job simulates using testcontainers via the NPM package, without dev dependencies.
-  # Steps: Build and package the module. Copy the package into the smoke-test directory and npm install it there.
-  # We must prune dev dependencies in the parent because the smoke-test module will include parent node_modules.
   smoke-test:
     runs-on: ${{ matrix.os-version }}
     strategy:
@@ -43,11 +44,15 @@ jobs:
         os-version: [ubuntu-latest]
         node-version: [14.x, 16.x, 18.x]
     steps:
-    - uses: actions/checkout@v3
-    - name: Test ${{ matrix.node-version }}
+    - name: Code checkout
+      uses: actions/checkout@v3
+    - name: Install NodeJS ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-    - run: npm ci --omit=optional
-    - run: npm prune --omit=dev
-    - run: node smoke-test.mjs
+    - name: Install dependencies
+      run: npm ci --omit=optional
+    - name: Remove dev dependencies
+      run: npm prune --omit=dev
+    - name: Run tests
+      run: node smoke-test.mjs
