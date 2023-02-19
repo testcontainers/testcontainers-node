@@ -36,16 +36,16 @@ jobs:
       with:
         name: master-test-coverage
         path: coverage-report.json
-    - name: Create coverage badge
-      if: ${{ matrix.node-version == '18.x' }}
-      uses: schneegans/dynamic-badges-action@v1.6.0
-      with:
-        auth: ${{ secrets.GIST_SECRET }}
-        gistID: 40650417da253155c3a1b61da381da37
-        filename: coverage-badge.json
-        label: coverage
-        color: green
-        message: 90%
+#    - name: Create coverage badge
+#      if: ${{ matrix.node-version == '18.x' }}
+#      uses: schneegans/dynamic-badges-action@v1.6.0
+#      with:
+#        auth: ${{ secrets.GIST_SECRET }}
+#        gistID: 40650417da253155c3a1b61da381da37
+#        filename: coverage-badge.json
+#        label: coverage
+#        color: green
+#        message: 90%
 
   smoke-test:
     runs-on: ${{ matrix.os-version }}
