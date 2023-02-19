@@ -11,7 +11,7 @@ export const dockerComposeDown = async (
   log.info(`Downing DockerCompose environment`);
 
   try {
-    await down({ ...defaultDockerComposeOptions(options), commandOptions: commandOptions(downOptions) });
+    await down({ ...(await defaultDockerComposeOptions(options)), commandOptions: commandOptions(downOptions) });
     log.info(`Downed DockerCompose environment`);
   } catch (err: any) {
     const errorMessage = err.err || err.message || err;

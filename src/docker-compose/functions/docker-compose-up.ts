@@ -9,9 +9,9 @@ export const dockerComposeUp = async (options: DockerComposeOptions, services?: 
 
   try {
     if (services) {
-      await upMany(services, defaultDockerComposeOptions(options));
+      await upMany(services, await defaultDockerComposeOptions(options));
     } else {
-      await upAll(defaultDockerComposeOptions(options));
+      await upAll(await defaultDockerComposeOptions(options));
     }
     log.info(`Upped DockerCompose environment`);
   } catch (err: any) {
