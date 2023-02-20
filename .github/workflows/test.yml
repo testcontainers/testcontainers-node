@@ -4,8 +4,6 @@
 name: Test
 
 on:
-  push:
-    branches: [ master ]
   pull_request:
     branches: [ master ]
 
@@ -13,24 +11,41 @@ jobs:
   test:
     runs-on: ${{ matrix.os-version }}
     strategy:
+      fail-fast: false
       matrix:
         os-version: [ubuntu-latest]
         node-version: [14.x, 16.x, 18.x]
     steps:
-    - uses: actions/checkout@v3
+    - name: Code checkout
+      uses: actions/checkout@v3
     - name: Login to Docker Hub
       uses: docker/login-action@v1
       with:
         username: cristianrgreco
         password: b62e3c19-4990-46f6-b221-55cf0bfb6513 # read-only
-    - name: Test ${{ matrix.node-version }}
+    - name: Install NodeJS ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-    - run: npm ci --omit=optional
-    - run: npm test
+    - name: Install dependencies
+      run: npm ci --omit=optional
+    - name: Run tests
+      run: npm run test:ci
+    - name: Fetch master code coverage report
+      if: ${{ matrix.node-version == '18.x' && (success() || failure()) }}
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        artifactId=$(gh api "/repos/testcontainers/testcontainers-node/actions/artifacts?name=master-test-coverage" | jq -r '.artifacts[0].id')
+        gh api /repos/testcontainers/testcontainers-node/actions/artifacts/${artifactId}/zip > master-test-coverage.zip
+        unzip -p master-test-coverage.zip coverage-report.json > base-coverage-report.json
+    - name: Compare coverage reports
+      if: ${{ matrix.node-version == '18.x' && (success() || failure()) }}
+      uses: ArtiomTr/jest-coverage-report-action@v2
+      with:
+        coverage-file: ./coverage-report.json
+        base-coverage-file: ./base-coverage-report.json
 
-  # This job simulates using testcontainers via the NPM package, without dev dependencies.
   smoke-test:
     runs-on: ${{ matrix.os-version }}
     strategy:
@@ -38,11 +53,15 @@ jobs:
         os-version: [ubuntu-latest]
         node-version: [14.x, 16.x, 18.x]
     steps:
-    - uses: actions/checkout@v3
-    - name: Test ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-    - run: npm ci --omit=optional
-    - run: npm prune --omit=dev
-    - run: node smoke-test.mjs
+      - name: Code checkout
+        uses: actions/checkout@v3
+      - name: Install NodeJS ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install dependencies
+        run: npm ci --omit=optional
+      - name: Remove dev dependencies
+        run: npm prune --omit=dev
+      - name: Run tests
+        run: node smoke-test.mjs
