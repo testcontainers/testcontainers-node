@@ -5,11 +5,12 @@ import { URL } from "url";
 import { existsSync, promises as fs } from "fs";
 import { runInContainer } from "./functions/run-in-container";
 import { logSystemDiagnostics } from "../log-system-diagnostics";
-import "../testcontainers-properties-file";
+import * as propertiesFile from "../testcontainers-properties-file";
 
 type DockerClient = {
   host: string;
   dockerode: Dockerode;
+  composeEnvironment: NodeJS.ProcessEnv;
 };
 
 const getDockerClient = async (): Promise<DockerClient> => {
@@ -22,13 +23,13 @@ const getDockerClient = async (): Promise<DockerClient> => {
   for (const strategy of strategies) {
     if (strategy.isApplicable()) {
       log.debug(`Found applicable Docker client strategy: ${strategy.getName()}`);
-      const { uri, dockerode } = await strategy.initialise();
+      const { uri, dockerode, composeEnvironment } = await strategy.initialise();
       log.debug(`Testing Docker client strategy URI: ${uri}`);
       if (await isDockerDaemonReachable(dockerode)) {
         const host = await resolveHost(dockerode, uri);
         log.info(`Using Docker client strategy: ${strategy.getName()}, Docker host: ${host}`);
         logSystemDiagnostics(dockerode);
-        return { host, dockerode };
+        return { host, dockerode, composeEnvironment };
       } else {
         log.warn(`Docker client strategy ${strategy.getName()} is not reachable`);
       }
@@ -48,22 +49,28 @@ const isDockerDaemonReachable = async (dockerode: Dockerode): Promise<boolean> =
   }
 };
 
+type DockerClientInit = {
+  uri: string;
+  dockerode: Dockerode;
+  composeEnvironment: NodeJS.ProcessEnv;
+};
+
 interface DockerClientStrategy {
   isApplicable(): boolean;
 
-  initialise(): Promise<{ uri: string; dockerode: Dockerode }>;
+  initialise(): Promise<DockerClientInit>;
 
   getName(): string;
 }
 
 class ConfigurationStrategy implements DockerClientStrategy {
-  async initialise(): Promise<{ uri: string; dockerode: Dockerode }> {
-    const { DOCKER_HOST, DOCKER_TLS_VERIFY, DOCKER_CERT_PATH } = process.env;
+  async initialise(): Promise<DockerClientInit> {
+    const { dockerHost, dockerTlsVerify, dockerCertPath } = propertiesFile;
 
     const dockerOptions: DockerOptions = {};
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const { pathname, hostname, port } = new URL(DOCKER_HOST!);
+    const { pathname, hostname, port } = new URL(dockerHost!);
     if (hostname !== "") {
       dockerOptions.host = hostname;
       dockerOptions.port = port;
@@ -71,21 +78,27 @@ class ConfigurationStrategy implements DockerClientStrategy {
       dockerOptions.socketPath = pathname;
     }
 
-    if (DOCKER_TLS_VERIFY === "1" && DOCKER_CERT_PATH !== undefined) {
-      dockerOptions.ca = await fs.readFile(path.resolve(DOCKER_CERT_PATH, "ca.pem"));
-      dockerOptions.cert = await fs.readFile(path.resolve(DOCKER_CERT_PATH, "cert.pem"));
-      dockerOptions.key = await fs.readFile(path.resolve(DOCKER_CERT_PATH, "key.pem"));
+    if (dockerTlsVerify === "1" && dockerCertPath !== undefined) {
+      dockerOptions.ca = await fs.readFile(path.resolve(dockerCertPath, "ca.pem"));
+      dockerOptions.cert = await fs.readFile(path.resolve(dockerCertPath, "cert.pem"));
+      dockerOptions.key = await fs.readFile(path.resolve(dockerCertPath, "key.pem"));
     }
 
     return {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      uri: DOCKER_HOST!,
+      uri: dockerHost!,
       dockerode: new Dockerode(dockerOptions),
+      composeEnvironment: {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        DOCKER_HOST: dockerHost!,
+        DOCKER_TLS_VERIFY: dockerTlsVerify,
+        DOCKER_CERT_PATH: dockerCertPath,
+      },
     };
   }
 
   isApplicable(): boolean {
-    return process.env.DOCKER_HOST !== undefined;
+    return propertiesFile.dockerHost !== undefined;
   }
 
   getName(): string {
@@ -94,10 +107,11 @@ class ConfigurationStrategy implements DockerClientStrategy {
 }
 
 class UnixSocketStrategy implements DockerClientStrategy {
-  async initialise(): Promise<{ uri: string; dockerode: Dockerode }> {
+  async initialise(): Promise<DockerClientInit> {
     return {
       uri: "unix:///var/run/docker.sock",
       dockerode: new Dockerode({ socketPath: "/var/run/docker.sock" }),
+      composeEnvironment: {},
     };
   }
 
@@ -111,10 +125,11 @@ class UnixSocketStrategy implements DockerClientStrategy {
 }
 
 class NpipeSocketStrategy implements DockerClientStrategy {
-  async initialise(): Promise<{ uri: string; dockerode: Dockerode }> {
+  async initialise(): Promise<DockerClientInit> {
     return {
       uri: "npipe:////./pipe/docker_engine",
       dockerode: new Dockerode({ socketPath: "//./pipe/docker_engine" }),
+      composeEnvironment: {},
     };
   }
 

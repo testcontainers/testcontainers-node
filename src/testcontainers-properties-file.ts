@@ -6,26 +6,36 @@ import propertiesReader from "properties-reader";
 
 const file = path.resolve(homedir(), ".testcontainers.properties");
 
+let dockerHost: string | undefined;
+let dockerTlsVerify: string | undefined;
+let dockerCertPath: string | undefined;
+
 if (existsSync(file)) {
   log.debug("Found .testcontainers.properties file");
   const string = readFileSync(file, { encoding: "utf-8" });
   const properties = propertiesReader("").read(string);
 
+  let logStr = "Loaded .testcontainers.properties file";
+
   const host = properties.get("docker.host") as string;
   if (host !== null) {
-    log.debug(`Setting DOCKER_HOST to ${host}`);
-    process.env.DOCKER_HOST = host;
+    dockerHost = host;
+    logStr += `, dockerHost: ${dockerHost}`;
   }
 
   const tlsVerify = properties.get("docker.tls.verify") as number;
   if (tlsVerify !== null) {
-    log.debug(`Setting DOCKER_TLS_VERIFY to ${tlsVerify}`);
-    process.env.DOCKER_TLS_VERIFY = `${tlsVerify}`;
+    dockerTlsVerify = `${tlsVerify}`;
+    logStr += `, dockerTlsVerify: ${dockerTlsVerify}`;
   }
 
   const certPath = properties.get("docker.cert.path") as string;
   if (certPath !== null) {
-    log.debug(`Setting DOCKER_CERT_PATH to ${certPath}`);
-    process.env.DOCKER_CERT_PATH = certPath;
+    dockerCertPath = certPath;
+    logStr += `, dockerCertPath: ${dockerCertPath}`;
   }
+
+  log.debug(logStr);
 }
+
+export { dockerHost, dockerTlsVerify, dockerCertPath };

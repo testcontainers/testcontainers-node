@@ -1,5 +1,5 @@
 import { log } from "../../logger";
-import { upAll, upMany } from "../docker-compose";
+import { upAll, upMany } from "docker-compose";
 import { defaultDockerComposeOptions } from "../default-docker-compose-options";
 import { DockerComposeOptions } from "../docker-compose-options";
 import { dockerComposeDown } from "./docker-compose-down";
@@ -9,9 +9,9 @@ export const dockerComposeUp = async (options: DockerComposeOptions, services?: 
 
   try {
     if (services) {
-      await upMany(services, defaultDockerComposeOptions(options));
+      await upMany(services, await defaultDockerComposeOptions(options));
     } else {
-      await upAll(defaultDockerComposeOptions(options));
+      await upAll(await defaultDockerComposeOptions(options));
     }
     log.info(`Upped DockerCompose environment`);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
