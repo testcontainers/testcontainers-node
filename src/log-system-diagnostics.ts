@@ -1,5 +1,5 @@
 import { log } from "./logger";
-import { version as dockerComposeVersion } from "./docker-compose/docker-compose";
+import { version as dockerComposeVersion } from "docker-compose";
 import { getDockerInfo } from "./docker/functions/get-info";
 import Dockerode from "dockerode";
 

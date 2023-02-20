@@ -107,4 +107,5 @@ export interface StartedTestContainer {
   logs(): Promise<Readable>;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StoppedTestContainer {}

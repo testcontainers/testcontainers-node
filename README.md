@@ -2,7 +2,7 @@
 
 > Testcontainers is a NodeJS library that supports tests, providing lightweight, throwaway instances of common databases, Selenium web browsers, or anything else that can run in a Docker container.
 
-[![Node.js CI](https://github.com/testcontainers/testcontainers-node/actions/workflows/node.js.yml/badge.svg?branch=master)](https://github.com/testcontainers/testcontainers-node/actions/workflows/node.js.yml)
+[![Node.js CI](https://github.com/testcontainers/testcontainers-node/actions/workflows/test-master.yml/badge.svg)](https://github.com/testcontainers/testcontainers-node/actions/workflows/node.js.yml)
 [![npm version](https://badge.fury.io/js/testcontainers.svg)](https://www.npmjs.com/package/testcontainers)
 [![npm version](https://img.shields.io/npm/dm/testcontainers.svg)](https://www.npmjs.com/package/testcontainers)
 
@@ -924,8 +924,8 @@ To avoid Docker pull limits, you can host your own images and use them by settin
 
 | Container | Environment Variable   | Default                     |
 |-----------|------------------------|-----------------------------|
-| ryuk      | `RYUK_CONTAINER_IMAGE` | `testcontainers/ryuk:0.3.2` |
-| SSHd      | `SSHD_CONTAINER_IMAGE` | `testcontainers/sshd:1.0.0` |
+| ryuk      | `RYUK_CONTAINER_IMAGE` | `testcontainers/ryuk:0.3.4` |
+| SSHd      | `SSHD_CONTAINER_IMAGE` | `testcontainers/sshd:1.1.0` |
 
 ### ryuk
 

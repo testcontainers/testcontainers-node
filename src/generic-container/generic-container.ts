@@ -86,7 +86,7 @@ export class GenericContainer implements TestContainer {
       authConfig: await getAuthConfig(this.imageName.registry),
     });
 
-    if (!this.imageName.isReaper()) {
+    if (!this.reuse && !this.imageName.isReaper()) {
       await ReaperInstance.getInstance();
     }
 

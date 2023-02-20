@@ -11,9 +11,6 @@ describe("testcontainers properties file", () => {
 
   afterEach(() => {
     jest.resetModules();
-    delete process.env["DOCKER_HOST"];
-    delete process.env["DOCKER_TLS_VERIFY"];
-    delete process.env["DOCKER_CERT_PATH"];
   });
 
   describe("does not exist", () => {
@@ -22,11 +19,11 @@ describe("testcontainers properties file", () => {
     });
 
     it("should not set anything", async () => {
-      await import("./testcontainers-properties-file");
+      const properties = await import("./testcontainers-properties-file");
 
-      expect(process.env.DOCKER_HOST).toBeUndefined();
-      expect(process.env.DOCKER_TLS_VERIFY).toBeUndefined();
-      expect(process.env.DOCKER_CERT_PATH).toBeUndefined();
+      expect(properties.dockerHost).toBeUndefined();
+      expect(properties.dockerTlsVerify).toBeUndefined();
+      expect(properties.dockerCertPath).toBeUndefined();
 
       jest.resetModules();
     });
@@ -40,11 +37,11 @@ describe("testcontainers properties file", () => {
     it("should set the host", async () => {
       mockedReadFileSync.mockReturnValueOnce("docker.host=tcp://my.docker.host:1234");
 
-      await import("./testcontainers-properties-file");
+      const properties = await import("./testcontainers-properties-file");
 
-      expect(process.env.DOCKER_HOST).toBe("tcp://my.docker.host:1234");
-      expect(process.env.DOCKER_TLS_VERIFY).toBeUndefined();
-      expect(process.env.DOCKER_CERT_PATH).toBeUndefined();
+      expect(properties.dockerHost).toBe("tcp://my.docker.host:1234");
+      expect(properties.dockerTlsVerify).toBeUndefined();
+      expect(properties.dockerCertPath).toBeUndefined();
     });
 
     it("should set TLS verify", async () => {
@@ -53,11 +50,11 @@ describe("testcontainers properties file", () => {
         docker.tls.verify=1
       `);
 
-      await import("./testcontainers-properties-file");
+      const properties = await import("./testcontainers-properties-file");
 
-      expect(process.env.DOCKER_HOST).toBe("tcp://my.docker.host:1234");
-      expect(process.env.DOCKER_TLS_VERIFY).toBe("1");
-      expect(process.env.DOCKER_CERT_PATH).toBeUndefined();
+      expect(properties.dockerHost).toBe("tcp://my.docker.host:1234");
+      expect(properties.dockerTlsVerify).toBe("1");
+      expect(properties.dockerCertPath).toBeUndefined();
     });
 
     it("should set the cert path", async () => {
@@ -67,11 +64,11 @@ describe("testcontainers properties file", () => {
         docker.cert.path=/some/path
       `);
 
-      await import("./testcontainers-properties-file");
+      const properties = await import("./testcontainers-properties-file");
 
-      expect(process.env.DOCKER_HOST).toBe("tcp://my.docker.host:1234");
-      expect(process.env.DOCKER_TLS_VERIFY).toBe("1");
-      expect(process.env.DOCKER_CERT_PATH).toBe("/some/path");
+      expect(properties.dockerHost).toBe("tcp://my.docker.host:1234");
+      expect(properties.dockerTlsVerify).toBe("1");
+      expect(properties.dockerCertPath).toBe("/some/path");
     });
   });
 });

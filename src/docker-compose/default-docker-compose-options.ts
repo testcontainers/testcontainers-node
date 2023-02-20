@@ -1,10 +1,13 @@
-import { IDockerComposeOptions } from "./docker-compose";
+import { IDockerComposeOptions } from "docker-compose";
 import { DockerComposeOptions } from "./docker-compose-options";
+import { dockerClient } from "../docker/docker-client";
 
-export const defaultDockerComposeOptions = ({
+export const defaultDockerComposeOptions = async ({
   environment = {},
   ...options
-}: DockerComposeOptions): Partial<IDockerComposeOptions> => {
+}: DockerComposeOptions): Promise<Partial<IDockerComposeOptions>> => {
+  const { composeEnvironment } = await dockerClient();
+
   return {
     log: false,
     cwd: options.filePath,
@@ -14,6 +17,7 @@ export const defaultDockerComposeOptions = ({
     env: {
       ...process.env,
       COMPOSE_PROJECT_NAME: options.projectName,
+      ...composeEnvironment,
       ...environment,
     },
   };
