@@ -9,6 +9,7 @@ export const dockerComposeStop = async (options: DockerComposeOptions): Promise<
   try {
     await stop(await defaultDockerComposeOptions(options));
     log.info(`Stopped DockerCompose environment`);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     const errorMessage = err.err || err.message || err;
     log.error(`Failed to stop DockerCompose environment: ${errorMessage}`);

@@ -13,6 +13,7 @@ export const dockerComposeDown = async (
   try {
     await down({ ...(await defaultDockerComposeOptions(options)), commandOptions: commandOptions(downOptions) });
     log.info(`Downed DockerCompose environment`);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     const errorMessage = err.err || err.message || err;
     log.error(`Failed to down DockerCompose environment: ${errorMessage}`);

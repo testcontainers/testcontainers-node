@@ -14,6 +14,7 @@ export const dockerComposeUp = async (options: DockerComposeOptions, services?: 
       await upAll(await defaultDockerComposeOptions(options));
     }
     log.info(`Upped DockerCompose environment`);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     const errorMessage = err.err || err.message || err;
     log.error(`Failed to up DockerCompose environment: ${errorMessage}`);

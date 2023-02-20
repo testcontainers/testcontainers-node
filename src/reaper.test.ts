@@ -1,5 +1,11 @@
 import { GenericContainer } from "./generic-container/generic-container";
-import { getReaperContainerId, getContainerIds, getRunningNetworkIds, stopReaper } from "./test-helper";
+import {
+  getReaperContainerId,
+  getContainerIds,
+  getRunningNetworkIds,
+  stopReaper,
+  getRunningContainerNames,
+} from "./test-helper";
 import { Network } from "./network";
 import path from "path";
 import { RandomUuid } from "./uuid";
@@ -8,6 +14,7 @@ import { listImages } from "./docker/functions/image/list-images";
 import { DockerImageName } from "./docker-image-name";
 import { DockerComposeEnvironment } from "./docker-compose-environment/docker-compose-environment";
 import { dockerClient } from "./docker/docker-client";
+import { sessionId } from "./docker/session-id";
 
 const fixtures = path.resolve(__dirname, "..", "fixtures");
 
@@ -25,6 +32,17 @@ describe("Reaper", () => {
       expect(await getContainerIds()).not.toContain(container.getId());
       expect(await getContainerIds()).not.toContain(reaperContainerId);
     }, 30_000);
+  });
+
+  it("should not remove reusable containers", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withReuse().start();
+
+    try {
+      const runningContainerNames = await getRunningContainerNames();
+      expect(runningContainerNames).not.toContain(`testcontainers-ryuk-${sessionId}`);
+    } finally {
+      await container.stop();
+    }
   });
 
   it("should remove docker-compose containers", async () => {
