@@ -89,6 +89,7 @@ class ConfigurationStrategy implements DockerClientStrategy {
       uri: dockerHost!,
       dockerode: new Dockerode(dockerOptions),
       composeEnvironment: {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         DOCKER_HOST: dockerHost!,
         DOCKER_TLS_VERIFY: dockerTlsVerify,
         DOCKER_CERT_PATH: dockerCertPath,
