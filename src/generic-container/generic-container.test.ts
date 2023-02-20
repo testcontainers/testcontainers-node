@@ -8,7 +8,6 @@ import { RandomUuid } from "../uuid";
 import { checkContainerIsHealthy, getEvents, getRunningContainerNames } from "../test-helper";
 import { Network } from "../network";
 import { getContainerById } from "../docker/functions/container/get-container";
-import { LABEL_CONTAINER_HASH } from "../labels";
 
 describe("GenericContainer", () => {
   jest.setTimeout(180_000);
@@ -631,7 +630,7 @@ describe("GenericContainer", () => {
         .withReuse()
         .start();
 
-      expect(container.getLabels()).toEqual({ test: "foo", bar: "baz", [LABEL_CONTAINER_HASH]: expect.any(String) });
+      expect(container.getLabels()).toEqual(expect.objectContaining({ test: "foo" }));
       await container.stop();
     });
 

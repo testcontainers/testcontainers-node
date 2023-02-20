@@ -5,7 +5,7 @@ import { StartedTestContainer } from "./test-container";
 import { sessionId } from "./docker/session-id";
 import { REAPER_IMAGE } from "./images";
 import { getContainerPort, PortWithOptionalBinding } from "./port";
-import { LABEL_SESSION_ID } from "./labels";
+import { LABEL_TESTCONTAINERS_SESSION_ID } from "./labels";
 import { Wait } from "./wait";
 import { IntervalRetryStrategy } from "./retry-strategy";
 
@@ -127,7 +127,7 @@ export class ReaperInstance {
             })
             .connect(getContainerPort(port), host, () => {
               log.debug(`Connected to Reaper ${containerId}`);
-              socket.write(`label=${LABEL_SESSION_ID}=${sessionId}\r\n`);
+              socket.write(`label=${LABEL_TESTCONTAINERS_SESSION_ID}=${sessionId}\r\n`);
               const reaper = new RealReaper(startedContainer, socket);
               resolve(reaper);
             });
