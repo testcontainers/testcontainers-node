@@ -8,7 +8,6 @@ import { RandomUuid } from "../uuid";
 import { checkContainerIsHealthy, getEvents, getRunningContainerNames } from "../test-helper";
 import { Network } from "../network";
 import { getContainerById } from "../docker/functions/container/get-container";
-import { LABEL_TESTCONTAINERS_CONTAINER_HASH } from "../labels";
 
 describe("GenericContainer", () => {
   jest.setTimeout(180_000);
