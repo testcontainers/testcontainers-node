@@ -2,7 +2,7 @@
 
 > Testcontainers is a NodeJS library that supports tests, providing lightweight, throwaway instances of common databases, Selenium web browsers, or anything else that can run in a Docker container.
 
-[![Node.js CI](https://github.com/testcontainers/testcontainers-node/actions/workflows/test-master.yml/badge.svg)](https://github.com/testcontainers/testcontainers-node/actions/workflows/node.js.yml)
+[![Node.js CI](https://github.com/testcontainers/testcontainers-node/actions/workflows/test.yml/badge.svg)](https://github.com/testcontainers/testcontainers-node/actions/workflows/node.js.yml)
 [![npm version](https://badge.fury.io/js/testcontainers.svg)](https://www.npmjs.com/package/testcontainers)
 [![npm version](https://img.shields.io/npm/dm/testcontainers.svg)](https://www.npmjs.com/package/testcontainers)
 
