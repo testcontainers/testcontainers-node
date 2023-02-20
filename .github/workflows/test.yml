@@ -4,6 +4,8 @@
 name: Test
 
 on:
+  push:
+    branches: [ master ]
   pull_request:
     branches: [ master ]
 
@@ -31,20 +33,6 @@ jobs:
       run: npm ci --omit=optional
     - name: Run tests
       run: npm run test:ci
-    - name: Fetch master code coverage report
-      if: ${{ matrix.node-version == '18.x' && (success() || failure()) }}
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        artifactId=$(gh api "/repos/testcontainers/testcontainers-node/actions/artifacts?name=master-test-coverage" | jq -r '.artifacts[0].id')
-        gh api /repos/testcontainers/testcontainers-node/actions/artifacts/${artifactId}/zip > master-test-coverage.zip
-        unzip -p master-test-coverage.zip coverage-report.json > base-coverage-report.json
-    - name: Compare coverage reports
-      if: ${{ matrix.node-version == '18.x' && (success() || failure()) }}
-      uses: ArtiomTr/jest-coverage-report-action@v2
-      with:
-        coverage-file: ./coverage-report.json
-        base-coverage-file: ./base-coverage-report.json
 
   smoke-test:
     runs-on: ${{ matrix.os-version }}
