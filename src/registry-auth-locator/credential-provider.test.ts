@@ -64,6 +64,7 @@ describe("CredentialProvider", () => {
   });
 
   it("should return undefined when provider name not provided", async () => {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const credentialProvider = new TestCredentialProvider("name", undefined!);
 
     expect(await credentialProvider.getAuthConfig("registry", dockerConfig)).toBeUndefined();
@@ -113,6 +114,7 @@ describe("CredentialProvider", () => {
 
 function mockExecReturns(stdout: string) {
   mockExec.mockImplementationOnce((command, callback) => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     return callback(null, stdout);
   });
@@ -120,6 +122,7 @@ function mockExecReturns(stdout: string) {
 
 function mockExecThrows() {
   mockExec.mockImplementationOnce((command, callback) => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     return callback("An error occurred");
   });
@@ -136,7 +139,7 @@ function mockSpawnReturns(exitCode: number, stdout: string) {
 
   sink.stdin = new Writable({
     write() {
-      sink.stdout!.emit("data", stdout);
+      sink.stdout?.emit("data", stdout);
       sink.emit("close", exitCode);
     },
   });
@@ -149,7 +152,7 @@ class TestCredentialProvider extends CredentialProvider {
     super();
   }
 
-  getCredentialProviderName(registry: string, dockerConfig: DockerConfig): string | undefined {
+  getCredentialProviderName(): string | undefined {
     return this.credentialProviderName;
   }
 
