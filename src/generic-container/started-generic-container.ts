@@ -7,9 +7,14 @@ import {
 } from "../test-container";
 import Dockerode from "dockerode";
 import { ExecResult, Labels } from "../docker/types";
-import { inspectContainer, InspectResult } from "../docker/functions/container/inspect-container";
+import {
+  containerRestartedLogOptions,
+  hasContainerRestarted,
+  inspectContainer,
+  InspectResult,
+} from "../docker/functions/container/inspect-container";
 import { BoundPorts } from "../bound-ports";
-import { log } from "../logger";
+import { containerLog, log } from "../logger";
 import { removeContainer } from "../docker/functions/container/remove-container";
 import { execContainer } from "../docker/functions/container/exec-container";
 import { Readable } from "stream";
@@ -39,9 +44,18 @@ export class StartedGenericContainer implements StartedTestContainer {
     await restartContainer(this.container, resolvedOptions);
 
     this.inspectResult = await inspectContainer(this.container);
+
+    const logsOptions = hasContainerRestarted(this.inspectResult)
+      ? containerRestartedLogOptions(this.inspectResult)
+      : undefined;
+    (await containerLogs(this.container, logsOptions))
+      .on("data", (data) => containerLog.trace(`${this.container.id}: ${data.trim()}`))
+      .on("err", (data) => containerLog.error(`${this.container.id}: ${data.trim()}`));
+
     this.boundPorts = BoundPorts.fromInspectResult(this.inspectResult).filter(
       Array.from(this.boundPorts.iterator()).map((port) => port[0])
     );
+
     await waitForContainer(this.container, this.waitStrategy, this.host, this.boundPorts);
   }
 

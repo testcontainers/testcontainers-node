@@ -8,6 +8,9 @@ import { RandomUuid } from "../uuid";
 import { checkContainerIsHealthy, getEvents, getRunningContainerNames } from "../test-helper";
 import { Network } from "../network";
 import { getContainerById } from "../docker/functions/container/get-container";
+import { containerLog } from "../logger";
+
+jest.mock("../logger");
 
 describe("GenericContainer", () => {
   jest.setTimeout(180_000);
@@ -364,6 +367,21 @@ describe("GenericContainer", () => {
     const stream = await container.logs();
     const log = await new Promise((resolve) => stream.on("data", (line) => resolve(line)));
     expect(log).toContain("Listening on port 8080");
+
+    await container.stop();
+  });
+
+  it("should stream logs from a running container after restart", async () => {
+    const mock = jest.mocked(containerLog);
+    const traceLogs: string[] = [];
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
+
+    mock.trace.mockImplementation((message: string) => traceLogs.push(message));
+    await container.restart();
+    mock.trace.mockRestore();
+
+    expect(traceLogs.length).toBe(2);
+    expect(traceLogs[0]).toContain("Listening on port 8080");
 
     await container.stop();
   });

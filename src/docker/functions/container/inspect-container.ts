@@ -65,3 +65,22 @@ const getNetworkSettings = (inspectResult: ContainerInspectInfo): { [networkName
       },
     }))
     .reduce((prev, next) => ({ ...prev, ...next }), {});
+
+export const containerRestartedLogOptions = (
+  inspectResult: InspectResult
+): Omit<Dockerode.ContainerLogsOptions, "follow" | "stdout" | "stderr"> | undefined => {
+  const { finishedAt } = inspectResult.state;
+  if (finishedAt === undefined) {
+    return undefined;
+  }
+
+  return {
+    since: finishedAt.getTime() / 1000,
+    timestamps: true,
+  };
+};
+
+export const hasContainerRestarted = (inspectResult: InspectResult) => {
+  const { finishedAt, status } = inspectResult.state;
+  return finishedAt !== undefined && status === "running";
+};
