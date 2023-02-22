@@ -62,7 +62,7 @@ describe("GenericContainer", () => {
   it("should wait for log with regex", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
-      .withWaitStrategy(Wait.forLogMessage(/Listening on port [0-9]+/))
+      .withWaitStrategy(Wait.forLogMessage(/Listening on port \d+/))
       .start();
 
     await checkContainerIsHealthy(container);
@@ -657,7 +657,7 @@ describe("GenericContainer", () => {
     });
 
     it("should use pull policy", async () => {
-      const containerSpec = await GenericContainer.fromDockerfile(path.resolve(fixtures, "docker")).withPullPolicy(
+      const containerSpec = GenericContainer.fromDockerfile(path.resolve(fixtures, "docker")).withPullPolicy(
         new AlwaysPullPolicy()
       );
       await containerSpec.build();

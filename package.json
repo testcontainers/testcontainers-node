@@ -1,7 +1,7 @@
 {
   "name": "testcontainers",
   "author": "Cristian Greco",
-  "version": "9.1.4-beta.1",
+  "version": "9.1.3",
   "main": "dist/src/index",
   "types": "dist/src/index",
   "keywords": [
@@ -27,7 +27,6 @@
     "build": "npm run clean && tsc -p tsconfig.prod.json",
     "clean": "rimraf dist",
     "test": "cross-env DEBUG=testcontainers,testcontainers:exec jest --runInBand --coverage",
-    "test:ci": "cross-env DEBUG=testcontainers,testcontainers:exec jest --runInBand --ci --json --coverage --testLocationInResults --outputFile=coverage-report.json",
     "format": "prettier --write package.json \"src/**/*.ts\"",
     "lint": "eslint --fix package.json \"src/**/*.ts\"",
     "lint:ci": "eslint package.json \"src/**/*.ts\" --max-warnings=0",
