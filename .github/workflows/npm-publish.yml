@@ -21,7 +21,8 @@ jobs:
           git config user.name github-actions
           git config user.email github-actions@github.com
           npm --no-git-tag-version version ${{ github.event.release.tag_name }}
-          git add package.json package-lock.json
+          sed -i -E "s/(sonar.projectVersion)=.+/\1=${{ github.event.release.tag_name }}/" sonar-project.properties
+          git add package.json package-lock.json sonar-project.properties
           git commit -m "${{ github.event.release.tag_name }}"
           git push
 
