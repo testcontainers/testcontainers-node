@@ -64,7 +64,7 @@ export class NatsContainer extends GenericContainer {
       .withExposedPorts(
         ...(this.hasExposedPorts ? this.ports : [CLIENT_PORT, ROUTING_PORT_FOR_CLUSTERING, HTTP_MANAGEMENT_PORT])
       )
-      .withWaitStrategy(Wait.forLogMessage(new RegExp(".*Server is ready.*")))
+      .withWaitStrategy(Wait.forLogMessage(/".*Server is ready.*"/))
       .withStartupTimeout(120_000);
 
     return new StartedNatsContainer(await super.start(), this.getUser(), this.getPass());

@@ -1,1 +1,1 @@
-FROM cristianrgreco/testcontainer-private:1.1.12 as first-stage
+FROM cristianrgreco/testcontainer-private:1.1.12 AS first-stage
