@@ -21,35 +21,35 @@ PubSubEmulatorContainer | [gcr.io/google.com/cloudsdktool/cloud-sdk:emulators](h
 
 Start Bigtable Emulator during a test:
 
-<!--codeinclude-->
-[Starting a Bigtable Emulator container](../../modules/gcloud/src/test/java/org/testcontainers/containers/BigtableEmulatorContainerTest.java) inside_block:emulatorContainer
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Starting a Bigtable Emulator container]&#40;../../modules/gcloud/src/test/java/org/testcontainers/containers/BigtableEmulatorContainerTest.java&#41; inside_block:emulatorContainer)
+[//]: # (<!--/codeinclude-->)
 
 Create a test Bigtable table in the Emulator:
 
-<!--codeinclude-->
-[Create a test table](../../modules/gcloud/src/test/java/org/testcontainers/containers/BigtableEmulatorContainerTest.java) inside_block:createTable
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Create a test table]&#40;../../modules/gcloud/src/test/java/org/testcontainers/containers/BigtableEmulatorContainerTest.java&#41; inside_block:createTable)
+[//]: # (<!--/codeinclude-->)
 
 Test against the Emulator:
 
-<!--codeinclude-->
-[Testing with a Bigtable Emulator container](../../modules/gcloud/src/test/java/org/testcontainers/containers/BigtableEmulatorContainerTest.java) inside_block:testWithEmulatorContainer
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Testing with a Bigtable Emulator container]&#40;../../modules/gcloud/src/test/java/org/testcontainers/containers/BigtableEmulatorContainerTest.java&#41; inside_block:testWithEmulatorContainer)
+[//]: # (<!--/codeinclude-->)
 
 ### Datastore
 
 Start Datastore Emulator during a test:
 
-<!--codeinclude-->
-[Starting a Datastore Emulator container](../../modules/gcloud/src/test/java/org/testcontainers/containers/DatastoreEmulatorContainerTest.java) inside_block:creatingDatastoreEmulatorContainer
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Starting a Datastore Emulator container]&#40;../../modules/gcloud/src/test/java/org/testcontainers/containers/DatastoreEmulatorContainerTest.java&#41; inside_block:creatingDatastoreEmulatorContainer)
+[//]: # (<!--/codeinclude-->)
 
 And test against the Emulator:
 
-<!--codeinclude-->
-[Testing with a Datastore Emulator container](../../modules/gcloud/src/test/java/org/testcontainers/containers/DatastoreEmulatorContainerTest.java) inside_block:startingDatastoreEmulatorContainer
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Testing with a Datastore Emulator container]&#40;../../modules/gcloud/src/test/java/org/testcontainers/containers/DatastoreEmulatorContainerTest.java&#41; inside_block:startingDatastoreEmulatorContainer)
+[//]: # (<!--/codeinclude-->)
 
 See more examples:
 
@@ -60,15 +60,15 @@ See more examples:
 
 Start Firestore Emulator during a test:
 
-<!--codeinclude-->
-[Starting a Firestore Emulator container](../../modules/gcloud/src/test/java/org/testcontainers/containers/FirestoreEmulatorContainerTest.java) inside_block:emulatorContainer
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Starting a Firestore Emulator container]&#40;../../modules/gcloud/src/test/java/org/testcontainers/containers/FirestoreEmulatorContainerTest.java&#41; inside_block:emulatorContainer)
+[//]: # (<!--/codeinclude-->)
 
 And test against the Emulator:
 
-<!--codeinclude-->
-[Testing with a Firestore Emulator container](../../modules/gcloud/src/test/java/org/testcontainers/containers/FirestoreEmulatorContainerTest.java) inside_block:testWithEmulatorContainer
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Testing with a Firestore Emulator container]&#40;../../modules/gcloud/src/test/java/org/testcontainers/containers/FirestoreEmulatorContainerTest.java&#41; inside_block:testWithEmulatorContainer)
+[//]: # (<!--/codeinclude-->)
 
 See more examples:
 
@@ -79,27 +79,27 @@ See more examples:
 
 Start Spanner Emulator during a test:
 
-<!--codeinclude-->
-[Starting a Spanner Emulator container](../../modules/gcloud/src/test/java/org/testcontainers/containers/SpannerEmulatorContainerTest.java) inside_block:emulatorContainer
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Starting a Spanner Emulator container]&#40;../../modules/gcloud/src/test/java/org/testcontainers/containers/SpannerEmulatorContainerTest.java&#41; inside_block:emulatorContainer)
+[//]: # (<!--/codeinclude-->)
 
 Create a test Spanner Instance in the Emulator:
 
-<!--codeinclude-->
-[Create a test Spanner instance](../../modules/gcloud/src/test/java/org/testcontainers/containers/SpannerEmulatorContainerTest.java) inside_block:createInstance
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Create a test Spanner instance]&#40;../../modules/gcloud/src/test/java/org/testcontainers/containers/SpannerEmulatorContainerTest.java&#41; inside_block:createInstance)
+[//]: # (<!--/codeinclude-->)
 
 Create a test Database in the Emulator:
 
-<!--codeinclude-->
-[Creating a test Spanner database](../../modules/gcloud/src/test/java/org/testcontainers/containers/SpannerEmulatorContainerTest.java) inside_block:createDatabase
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Creating a test Spanner database]&#40;../../modules/gcloud/src/test/java/org/testcontainers/containers/SpannerEmulatorContainerTest.java&#41; inside_block:createDatabase)
+[//]: # (<!--/codeinclude-->)
 
 And test against the Emulator:
 
-<!--codeinclude-->
-[Testing with a Firestore Emulator container](../../modules/gcloud/src/test/java/org/testcontainers/containers/SpannerEmulatorContainerTest.java) inside_block:testWithEmulatorContainer
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Testing with a Firestore Emulator container]&#40;../../modules/gcloud/src/test/java/org/testcontainers/containers/SpannerEmulatorContainerTest.java&#41; inside_block:testWithEmulatorContainer)
+[//]: # (<!--/codeinclude-->)
 
 See more examples:
 
@@ -110,27 +110,27 @@ See more examples:
 
 Start Pub/Sub Emulator during a test:
 
-<!--codeinclude-->
-[Starting a Pub/Sub Emulator container](../../modules/gcloud/src/test/java/org/testcontainers/containers/PubSubEmulatorContainerTest.java) inside_block:emulatorContainer
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Starting a Pub/Sub Emulator container]&#40;../../modules/gcloud/src/test/java/org/testcontainers/containers/PubSubEmulatorContainerTest.java&#41; inside_block:emulatorContainer)
+[//]: # (<!--/codeinclude-->)
 
 Create a test Pub/Sub topic in the Emulator:
 
-<!--codeinclude-->
-[Create a test topic](../../modules/gcloud/src/test/java/org/testcontainers/containers/PubSubEmulatorContainerTest.java) inside_block:createTopic
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Create a test topic]&#40;../../modules/gcloud/src/test/java/org/testcontainers/containers/PubSubEmulatorContainerTest.java&#41; inside_block:createTopic)
+[//]: # (<!--/codeinclude-->)
 
 Create a test Pub/Sub subscription in the Emulator:
 
-<!--codeinclude-->
-[Create a test subscription](../../modules/gcloud/src/test/java/org/testcontainers/containers/PubSubEmulatorContainerTest.java) inside_block:createSubscription
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Create a test subscription]&#40;../../modules/gcloud/src/test/java/org/testcontainers/containers/PubSubEmulatorContainerTest.java&#41; inside_block:createSubscription)
+[//]: # (<!--/codeinclude-->)
 
 And test against the Emulator:
 
-<!--codeinclude-->
-[Testing with a Pub/Sub Emulator container](../../modules/gcloud/src/test/java/org/testcontainers/containers/PubSubEmulatorContainerTest.java) inside_block:testWithEmulatorContainer
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Testing with a Pub/Sub Emulator container]&#40;../../modules/gcloud/src/test/java/org/testcontainers/containers/PubSubEmulatorContainerTest.java&#41; inside_block:testWithEmulatorContainer)
+[//]: # (<!--/codeinclude-->)
 
 See more examples:
 

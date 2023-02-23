@@ -16,24 +16,24 @@ Testcontainers Toxiproxy support allows resilience features to be easily verifie
 A Toxiproxy container can be placed in between test code and a container, or in between containers.
 In either scenario, it is necessary to create a `ToxiproxyContainer` instance on the same Docker network, as follows:
 
-<!--codeinclude-->
-[Creating a Toxiproxy container](../../modules/toxiproxy/src/test/java/org/testcontainers/containers/ToxiproxyTest.java) inside_block:creatingProxy
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Creating a Toxiproxy container]&#40;../../modules/toxiproxy/src/test/java/org/testcontainers/containers/ToxiproxyTest.java&#41; inside_block:creatingProxy)
+[//]: # (<!--/codeinclude-->)
 
 Next, it is necessary to instruct Toxiproxy to start proxying connections. 
 Each `ToxiproxyContainer` can proxy to many target containers if necessary.
 
 We do this as follows:
 
-<!--codeinclude-->
-[Starting proxying connections to a target container](../../modules/toxiproxy/src/test/java/org/testcontainers/containers/ToxiproxyTest.java) inside_block:obtainProxyObject
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Starting proxying connections to a target container]&#40;../../modules/toxiproxy/src/test/java/org/testcontainers/containers/ToxiproxyTest.java&#41; inside_block:obtainProxyObject)
+[//]: # (<!--/codeinclude-->)
 
 To establish a connection from the test code (on the host machine) to the target container via Toxiproxy, we obtain **Toxiproxy's** proxy host IP and port:
 
-<!--codeinclude-->
-[Obtaining proxied host and port](../../modules/toxiproxy/src/test/java/org/testcontainers/containers/ToxiproxyTest.java) inside_block:obtainProxiedHostAndPortForHostMachine
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Obtaining proxied host and port]&#40;../../modules/toxiproxy/src/test/java/org/testcontainers/containers/ToxiproxyTest.java&#41; inside_block:obtainProxiedHostAndPortForHostMachine)
+[//]: # (<!--/codeinclude-->)
 
 Code under test should connect to this proxied host IP and port.
 
@@ -55,15 +55,15 @@ Please see the [Toxiproxy documentation](https://github.com/Shopify/toxiproxy#to
 
 As one example, we can introduce latency and random jitter to proxied connections as follows:
 
-<!--codeinclude-->
-[Adding latency to a connection](../../modules/toxiproxy/src/test/java/org/testcontainers/containers/ToxiproxyTest.java) inside_block:addingLatency
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Adding latency to a connection]&#40;../../modules/toxiproxy/src/test/java/org/testcontainers/containers/ToxiproxyTest.java&#41; inside_block:addingLatency)
+[//]: # (<!--/codeinclude-->)
 
 Additionally we can disable the proxy to simulate a complete interruption to the network connection:
 
-<!--codeinclude-->
-[Cutting a connection](../../modules/toxiproxy/src/test/java/org/testcontainers/containers/ToxiproxyTest.java) inside_block:disableProxy
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Cutting a connection]&#40;../../modules/toxiproxy/src/test/java/org/testcontainers/containers/ToxiproxyTest.java&#41; inside_block:disableProxy)
+[//]: # (<!--/codeinclude-->)
 
 ## Adding this module to your project dependencies
 

@@ -12,17 +12,17 @@ At present, container output will always begin from the time of container creati
 
 `getLogs()` is the simplest mechanism for accessing container logs, and can be used as follows:
 
-<!--codeinclude--> 
-[Accessing all output (stdout and stderr)](../../core/src/test/java/org/testcontainers/containers/output/ContainerLogsTest.java) inside_block:docsGetAllLogs
-<!--/codeinclude-->
+[//]: # (<!--codeinclude--> )
+[//]: # ([Accessing all output &#40;stdout and stderr&#41;]&#40;../../core/src/test/java/org/testcontainers/containers/output/ContainerLogsTest.java&#41; inside_block:docsGetAllLogs)
+[//]: # (<!--/codeinclude-->)
 
-<!--codeinclude--> 
-[Accessing just stdout](../../core/src/test/java/org/testcontainers/containers/output/ContainerLogsTest.java) inside_block:docsGetStdOut
-<!--/codeinclude-->
+[//]: # (<!--codeinclude--> )
+[//]: # ([Accessing just stdout]&#40;../../core/src/test/java/org/testcontainers/containers/output/ContainerLogsTest.java&#41; inside_block:docsGetStdOut)
+[//]: # (<!--/codeinclude-->)
 
-<!--codeinclude--> 
-[Accessing just stderr](../../core/src/test/java/org/testcontainers/containers/output/ContainerLogsTest.java) inside_block:docsGetStdErr
-<!--/codeinclude-->
+[//]: # (<!--codeinclude--> )
+[//]: # ([Accessing just stderr]&#40;../../core/src/test/java/org/testcontainers/containers/output/ContainerLogsTest.java&#41; inside_block:docsGetStdErr)
+[//]: # (<!--/codeinclude-->)
 
 ## Streaming logs
 

@@ -10,9 +10,9 @@ This module is intended to be used for testing components that interact with Kub
 
 Start a K3s server as follows:
 
-<!--codeinclude-->
-[Starting a K3S server](../../modules/k3s/src/test/java/org/testcontainers/k3s/Fabric8K3sContainerTest.java) inside_block:starting_k3s
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Starting a K3S server]&#40;../../modules/k3s/src/test/java/org/testcontainers/k3s/Fabric8K3sContainerTest.java&#41; inside_block:starting_k3s)
+[//]: # (<!--/codeinclude-->)
 
 ### Connecting to the server
 
@@ -21,10 +21,10 @@ Start a K3s server as follows:
 This may be used with Kubernetes clients - e.g. for the [official Java client](connecting_with_k8sio) and 
 [the Fabric8 Kubernetes client](https://github.com/fabric8io/kubernetes-client):
 
-<!--codeinclude-->
-[Official Java client](../../modules/k3s/src/test/java/org/testcontainers/k3s/OfficialClientK3sContainerTest.java) inside_block:connecting_with_k8sio
-[Fabric8 Kubernetes client](../../modules/k3s/src/test/java/org/testcontainers/k3s/Fabric8K3sContainerTest.java) inside_block:connecting_with_fabric8
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Official Java client]&#40;../../modules/k3s/src/test/java/org/testcontainers/k3s/OfficialClientK3sContainerTest.java&#41; inside_block:connecting_with_k8sio)
+[//]: # ([Fabric8 Kubernetes client]&#40;../../modules/k3s/src/test/java/org/testcontainers/k3s/Fabric8K3sContainerTest.java&#41; inside_block:connecting_with_fabric8)
+[//]: # (<!--/codeinclude-->)
 
 ## Known limitations
 

@@ -16,13 +16,13 @@ public LocalStackContainer localstack = new LocalStackContainer(localstackImage)
 
 ## Creating a client using AWS SDK
 
-<!--codeinclude-->
-[AWS SDK V1](../../modules/localstack/src/test/java/org/testcontainers/containers/localstack/LocalstackContainerTest.java) inside_block:with_aws_sdk_v1
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([AWS SDK V1]&#40;../../modules/localstack/src/test/java/org/testcontainers/containers/localstack/LocalstackContainerTest.java&#41; inside_block:with_aws_sdk_v1)
+[//]: # (<!--/codeinclude-->)
 
-<!--codeinclude-->
-[AWS SDK V2](../../modules/localstack/src/test/java/org/testcontainers/containers/localstack/LocalstackContainerTest.java) inside_block:with_aws_sdk_v2
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([AWS SDK V2]&#40;../../modules/localstack/src/test/java/org/testcontainers/containers/localstack/LocalstackContainerTest.java&#41; inside_block:with_aws_sdk_v2)
+[//]: # (<!--/codeinclude-->)
 
 Environment variables listed in [Localstack's README](https://github.com/localstack/localstack#configurations) may be used to customize Localstack's configuration. 
 Use the `.withEnv(key, value)` method on `LocalStackContainer` to apply configuration settings.
@@ -35,15 +35,15 @@ Testcontainers will inform Localstack of the best hostname automatically, using 
 
 * when running the Localstack container directly without a custom network defined, it is expected that all calls to the container will be from the test host. As such, the container address will be used (typically localhost or the address where the Docker daemon is running).
 
-    <!--codeinclude-->
-    [Localstack container running without a custom network](../../modules/localstack/src/test/java/org/testcontainers/containers/localstack/LocalstackContainerTest.java) inside_block:without_network
-    <!--/codeinclude-->
+[//]: # (    <!--codeinclude-->)
+[//]: # (    [Localstack container running without a custom network]&#40;../../modules/localstack/src/test/java/org/testcontainers/containers/localstack/LocalstackContainerTest.java&#41; inside_block:without_network)
+[//]: # (    <!--/codeinclude-->)
 
 * when running the Localstack container [with a custom network defined](/features/networking/#advanced-networking), it is expected that all calls to the container will be **from other containers on that network**. `HOSTNAME_EXTERNAL` will be set to the *last* network alias that has been configured for the Localstack container.
 
-    <!--codeinclude-->
-    [Localstack container running with a custom network](../../modules/localstack/src/test/java/org/testcontainers/containers/localstack/LocalstackContainerTest.java) inside_block:with_network
-    <!--/codeinclude-->
+[//]: # (    <!--codeinclude-->)
+[//]: # (    [Localstack container running with a custom network]&#40;../../modules/localstack/src/test/java/org/testcontainers/containers/localstack/LocalstackContainerTest.java&#41; inside_block:with_network)
+[//]: # (    <!--/codeinclude-->)
 
 * Other usage scenarios, such as where the Localstack container is used from both the test host and containers on a custom network are not automatically supported. If you have this use case, you should set `HOSTNAME_EXTERNAL` manually.
 

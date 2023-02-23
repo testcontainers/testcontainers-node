@@ -13,9 +13,9 @@ Ordinarily Testcontainers will wait for up to 60 seconds for the container's fir
 
 This simple measure provides a basic check whether a container is ready for use.
 
-<!--codeinclude--> 
-[Waiting for the first exposed port to start listening](../examples/junit4/generic/src/test/java/generic/WaitStrategiesTest.java) inside_block:waitForNetworkListening
-<!--/codeinclude-->
+[//]: # (<!--codeinclude--> )
+[//]: # ([Waiting for the first exposed port to start listening]&#40;../examples/junit4/generic/src/test/java/generic/WaitStrategiesTest.java&#41; inside_block:waitForNetworkListening)
+[//]: # (<!--/codeinclude-->)
 
 If the default 60s timeout is not sufficient, it can be altered with the `withStartupTimeout()` method.
 
@@ -27,43 +27,47 @@ If waiting for a listening TCP port is not sufficient to establish whether the c
 You can choose to wait for an HTTP(S) endpoint to return a particular status code.
 
 #### Waiting for 200 OK
-<!--codeinclude--> 
-[](../examples/junit4/generic/src/test/java/generic/WaitStrategiesTest.java) inside_block:waitForSimpleHttp
-<!--/codeinclude-->
+
+[//]: # (<!--codeinclude--> )
+[//]: # ([]&#40;../examples/junit4/generic/src/test/java/generic/WaitStrategiesTest.java&#41; inside_block:waitForSimpleHttp)
+[//]: # (<!--/codeinclude-->)
 
 Variations on the HTTP wait strategy are supported, including:
 
 #### Waiting for multiple possible status codes
-<!--codeinclude--> 
-[](../examples/junit4/generic/src/test/java/generic/WaitStrategiesTest.java) inside_block:waitForHttpWithMultipleStatusCodes
-<!--/codeinclude-->
+
+[//]: # (<!--codeinclude--> )
+[//]: # ([]&#40;../examples/junit4/generic/src/test/java/generic/WaitStrategiesTest.java&#41; inside_block:waitForHttpWithMultipleStatusCodes)
+[//]: # (<!--/codeinclude-->)
 
 #### Waiting for a status code that matches a predicate
-<!--codeinclude--> 
-[Waiting for a status code that matches a predicate](../examples/junit4/generic/src/test/java/generic/WaitStrategiesTest.java) inside_block:waitForHttpWithStatusCodePredicate
-<!--/codeinclude-->
+
+[//]: # (<!--codeinclude--> )
+[//]: # ([Waiting for a status code that matches a predicate]&#40;../examples/junit4/generic/src/test/java/generic/WaitStrategiesTest.java&#41; inside_block:waitForHttpWithStatusCodePredicate)
+[//]: # (<!--/codeinclude-->)
 
 #### Using TLS
-<!--codeinclude--> 
-[](../examples/junit4/generic/src/test/java/generic/WaitStrategiesTest.java) inside_block:waitForHttpWithTls
-<!--/codeinclude-->
+
+[//]: # (<!--codeinclude--> )
+[//]: # ([]&#40;../examples/junit4/generic/src/test/java/generic/WaitStrategiesTest.java&#41; inside_block:waitForHttpWithTls)
+[//]: # (<!--/codeinclude-->)
 
 ### Healthcheck Wait strategy examples
 
 If the used image supports Docker's [Healthcheck](https://docs.docker.com/engine/reference/builder/#healthcheck) feature, you can directly leverage the `healthy` state of the container as your wait condition:
 
-<!--codeinclude-->
-[](../examples/junit4/generic/src/test/java/generic/WaitStrategiesTest.java) inside_block:healthcheckWait
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([]&#40;../examples/junit4/generic/src/test/java/generic/WaitStrategiesTest.java&#41; inside_block:healthcheckWait)
+[//]: # (<!--/codeinclude-->)
 
 ### Log output Wait Strategy
 
 In some situations a container's log output is a simple way to determine if it is ready or not.
 For example, we can wait for a `Ready' message in the container's logs as follows:
 
-<!--codeinclude-->
-[](../examples/junit4/generic/src/test/java/generic/WaitStrategiesTest.java) inside_block:logMessageWait
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([]&#40;../examples/junit4/generic/src/test/java/generic/WaitStrategiesTest.java&#41; inside_block:logMessageWait)
+[//]: # (<!--/codeinclude-->)
 
 ### Other Wait Strategies
 
@@ -93,9 +97,9 @@ Implemented in [`IsRunningStartupCheckStrategy`](http://static.javadoc.io/org.te
 This strategy is intended for use with containers that only run briefly and exit of their own accord. As such, success is deemed to be when
 the container has stopped with exit code 0.
  
-<!--codeinclude--> 
-[Using one shot startup strategy](../examples/junit4/generic/src/test/java/org/testcontainers/containers/startupcheck/StartupCheckStrategyTest.java) inside_block:withOneShotStrategy
-<!--/codeinclude-->
+[//]: # (<!--codeinclude--> )
+[//]: # ([Using one shot startup strategy]&#40;../examples/junit4/generic/src/test/java/org/testcontainers/containers/startupcheck/StartupCheckStrategyTest.java&#41; inside_block:withOneShotStrategy)
+[//]: # (<!--/codeinclude-->)
 
 ### Indefinite one shot startup strategy example
 
@@ -104,17 +108,17 @@ Variant of one shot strategy that does not impose a timeout. Intended for situat
 
 It has to be assumed that the container will stop of its own accord, either with a success or failure exit code.
 
-<!--codeinclude--> 
-[Using indefinite one shot startup strategy](../examples/junit4/generic/src/test/java/org/testcontainers/containers/startupcheck/StartupCheckStrategyTest.java) inside_block:withIndefiniteOneShotStrategy
-<!--/codeinclude-->
+[//]: # (<!--codeinclude--> )
+[//]: # ([Using indefinite one shot startup strategy]&#40;../examples/junit4/generic/src/test/java/org/testcontainers/containers/startupcheck/StartupCheckStrategyTest.java&#41; inside_block:withIndefiniteOneShotStrategy)
+[//]: # (<!--/codeinclude-->)
 
 ### Minimum duration startup strategy example
 
 Checks that the container is running and has been running for a defined minimum period of time.
 
-<!--codeinclude--> 
-[Using minimum duration strategy](../examples/junit4/generic/src/test/java/org/testcontainers/containers/startupcheck/StartupCheckStrategyTest.java) inside_block:withMinimumDurationStrategy
-<!--/codeinclude-->
+[//]: # (<!--codeinclude--> )
+[//]: # ([Using minimum duration strategy]&#40;../examples/junit4/generic/src/test/java/org/testcontainers/containers/startupcheck/StartupCheckStrategyTest.java&#41; inside_block:withMinimumDurationStrategy)
+[//]: # (<!--/codeinclude-->)
 
 ### Other startup  strategies
 
@@ -128,6 +132,6 @@ Or you can leave it as is and just implement the `checkStartupState(DockerClient
 
 Sometimes, a container relies on another container to be ready before it should start itself. An example of this might be a database that needs to be started before your application container can link to it. You can tell a container that it depends on another container by using the `dependsOn` method:
 
-<!--codeinclude--> 
-[Depending on another container](../examples/junit4/generic/src/test/java/generic/DependsOnTest.java) inside_block:dependsOn
-<!--/codeinclude-->
+[//]: # (<!--codeinclude--> )
+[//]: # ([Depending on another container]&#40;../examples/junit4/generic/src/test/java/generic/DependsOnTest.java&#41; inside_block:dependsOn)
+[//]: # (<!--/codeinclude-->)

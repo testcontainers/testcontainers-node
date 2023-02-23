@@ -22,24 +22,27 @@ every test.
 ## Example
 
 The following field in your JUnit UI test class will prepare a container running Chrome:
-<!--codeinclude-->
-[Chrome](../../modules/selenium/src/test/java/org/testcontainers/junit/ChromeWebDriverContainerTest.java) inside_block:junitRule
-<!--/codeinclude-->
+
+[//]: # (<!--codeinclude-->)
+[//]: # ([Chrome]&#40;../../modules/selenium/src/test/java/org/testcontainers/junit/ChromeWebDriverContainerTest.java&#41; inside_block:junitRule)
+[//]: # (<!--/codeinclude-->)
 
         
 Now, instead of instantiating an instance of WebDriver directly, use the following to obtain an instance inside your
 test methods:
-<!--codeinclude-->
-[RemoteWebDriver](../../modules/selenium/src/test/java/org/testcontainers/junit/LocalServerWebDriverContainerTest.java) inside_block:getWebDriver
-<!--/codeinclude-->
+
+[//]: # (<!--codeinclude-->)
+[//]: # ([RemoteWebDriver]&#40;../../modules/selenium/src/test/java/org/testcontainers/junit/LocalServerWebDriverContainerTest.java&#41; inside_block:getWebDriver)
+[//]: # (<!--/codeinclude-->)
 
 You can then use this driver instance like a regular WebDriver.
 
 Note that, if you want to test a **web application running on the host machine** (the machine the JUnit tests are
 running on - which is quite likely), you'll need to use [the host exposing](../features/networking.md#exposing-host-ports-to-the-container) feature of Testcontainers, e.g.:
-<!--codeinclude-->
-[Open Web Page](../../modules/selenium/src/test/java/org/testcontainers/junit/LocalServerWebDriverContainerTest.java) inside_block:getPage
-<!--/codeinclude-->
+
+[//]: # (<!--codeinclude-->)
+[//]: # ([Open Web Page]&#40;../../modules/selenium/src/test/java/org/testcontainers/junit/LocalServerWebDriverContainerTest.java&#41; inside_block:getPage)
+[//]: # (<!--/codeinclude-->)
 
 
 ## Options
@@ -47,35 +50,37 @@ running on - which is quite likely), you'll need to use [the host exposing](../f
 ### Other browsers
 
 At the moment, Chrome, Firefox and Edge are supported. To switch, simply change the first parameter to the rule constructor:
-<!--codeinclude-->
-[Chrome](../../modules/selenium/src/test/java/org/testcontainers/junit/ChromeWebDriverContainerTest.java) inside_block:junitRule
-[Firefox](../../modules/selenium/src/test/java/org/testcontainers/junit/FirefoxWebDriverContainerTest.java) inside_block:junitRule
-[Edge](../../modules/selenium/src/test/java/org/testcontainers/junit/EdgeWebDriverContainerTest.java) inside_block:junitRule
-<!--/codeinclude-->
+
+[//]: # (<!--codeinclude-->)
+[//]: # ([Chrome]&#40;../../modules/selenium/src/test/java/org/testcontainers/junit/ChromeWebDriverContainerTest.java&#41; inside_block:junitRule)
+[//]: # ([Firefox]&#40;../../modules/selenium/src/test/java/org/testcontainers/junit/FirefoxWebDriverContainerTest.java&#41; inside_block:junitRule)
+[//]: # ([Edge]&#40;../../modules/selenium/src/test/java/org/testcontainers/junit/EdgeWebDriverContainerTest.java&#41; inside_block:junitRule)
+[//]: # (<!--/codeinclude-->)
 
 ### Recording videos
 
 By default, no videos will be recorded. However, you can instruct Testcontainers to capture videos for all tests or
 just for failing tests.
 
-<!--codeinclude-->
-[Record all Tests](../../modules/selenium/src/test/java/org/testcontainers/junit/ChromeRecordingWebDriverContainerTest.java) inside_block:recordAll
-[Record failing Tests](../../modules/selenium/src/test/java/org/testcontainers/junit/ChromeRecordingWebDriverContainerTest.java) inside_block:recordFailing
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Record all Tests]&#40;../../modules/selenium/src/test/java/org/testcontainers/junit/ChromeRecordingWebDriverContainerTest.java&#41; inside_block:recordAll)
+[//]: # ([Record failing Tests]&#40;../../modules/selenium/src/test/java/org/testcontainers/junit/ChromeRecordingWebDriverContainerTest.java&#41; inside_block:recordFailing)
+[//]: # (<!--/codeinclude-->)
 
 Note that the second parameter of `withRecordingMode` should be a directory where recordings can be saved.
 
 By default, the video will be recorded in [FLV](https://en.wikipedia.org/wiki/Flash_Video) format, but you can specify it explicitly or change it to [MP4](https://en.wikipedia.org/wiki/MPEG-4_Part_14) using `withRecordingMode` method with `VncRecordingFormat` option:
 
-<!--codeinclude-->
-[Video Format in MP4](../../modules/selenium/src/test/java/org/testcontainers/junit/ChromeRecordingWebDriverContainerTest.java) inside_block:recordMp4
-[Video Format in FLV](../../modules/selenium/src/test/java/org/testcontainers/junit/ChromeRecordingWebDriverContainerTest.java) inside_block:recordFlv
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Video Format in MP4]&#40;../../modules/selenium/src/test/java/org/testcontainers/junit/ChromeRecordingWebDriverContainerTest.java&#41; inside_block:recordMp4)
+[//]: # ([Video Format in FLV]&#40;../../modules/selenium/src/test/java/org/testcontainers/junit/ChromeRecordingWebDriverContainerTest.java&#41; inside_block:recordFlv)
+[//]: # (<!--/codeinclude-->)
 
 If you would like to customise the file name of the recording, or provide a different directory at runtime based on the description of the test and/or its success or failure, you may provide a custom recording file factory as follows:
-<!--codeinclude-->
-[CustomRecordingFileFactory](../../modules/selenium/src/test/java/org/testcontainers/junit/ChromeRecordingWebDriverContainerTest.java) inside_block:withRecordingFileFactory
-<!--/codeinclude-->
+
+[//]: # (<!--codeinclude-->)
+[//]: # ([CustomRecordingFileFactory]&#40;../../modules/selenium/src/test/java/org/testcontainers/junit/ChromeRecordingWebDriverContainerTest.java&#41; inside_block:withRecordingFileFactory)
+[//]: # (<!--/codeinclude-->)
 
 
 Note the factory must implement `org.testcontainers.containers.RecordingFileFactory`.

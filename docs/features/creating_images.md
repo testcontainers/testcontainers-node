@@ -33,9 +33,10 @@ The following methods may be used to provide the `Dockerfile` and any other requ
     In older versions of Testcontainers (before 1.3.0) it was necessary to explicitly declare each file that needed to 
     be present in the Docker build context.
     This can be replaced with the following syntax:
-    <!--codeinclude--> 
-    [Passing an entire directory of files to the Dockerfile build context](../../core/src/test/java/org/testcontainers/images/builder/DockerfileBuildTest.java) inside_block:docsShowRecursiveFileInclusion
-    <!--/codeinclude-->
+
+[//]: # (    <!--codeinclude--> )
+[//]: # (    [Passing an entire directory of files to the Dockerfile build context]&#40;../../core/src/test/java/org/testcontainers/images/builder/DockerfileBuildTest.java&#41; inside_block:docsShowRecursiveFileInclusion)
+[//]: # (    <!--/codeinclude-->)
     
     Where `RESOURCE_PATH` is the path to a directory containing a `Dockerfile` and any files that it needs to refer to.
     Doing this is equivalent to `docker build RESOURCE_PATH` on the command line.

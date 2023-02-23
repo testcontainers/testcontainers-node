@@ -7,9 +7,9 @@ In our imaginary program, there is a `RedisBackedCache` class which stores data 
  
 You can see an example test that could have been written for it (without using Testcontainers):
 
-<!--codeinclude-->
-[Pre-Testcontainers test code](../examples/junit4/redis/src/test/java/quickstart/RedisBackedCacheIntTestStep0.java) block:RedisBackedCacheIntTestStep0
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Pre-Testcontainers test code]&#40;../examples/junit4/redis/src/test/java/quickstart/RedisBackedCacheIntTestStep0.java&#41; block:RedisBackedCacheIntTestStep0)
+[//]: # (<!--/codeinclude-->)
 
 Notice that the existing test has a problem - it's relying on a local installation of Redis, which is a red flag for test reliability.
 This may work if we were sure that every developer and CI machine had Redis installed, but would fail otherwise.
@@ -39,9 +39,9 @@ First, add Testcontainers as a dependency as follows:
 
 Simply add the following to the body of our test class:
 
-<!--codeinclude-->
-[JUnit 4 Rule](../examples/junit4/redis/src/test/java/quickstart/RedisBackedCacheIntTest.java) inside_block:rule
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([JUnit 4 Rule]&#40;../examples/junit4/redis/src/test/java/quickstart/RedisBackedCacheIntTest.java&#41; inside_block:rule)
+[//]: # (<!--/codeinclude-->)
 
 The `@Rule` annotation tells JUnit to notify this field about various events in the test lifecycle.
 In this case, our rule object is a Testcontainers `GenericContainer`, configured to use a specific Redis image from Docker Hub, and configured to expose a port.
@@ -61,9 +61,9 @@ Before Testcontainers, we might have hardcoded an address like `localhost:6379` 
 Testcontainers uses *randomized ports* for each container it starts, but makes it easy to obtain the actual port at runtime.
 We can do this in our test `setUp` method, to set up our component under test:
 
-<!--codeinclude-->
-[Obtaining a mapped port](../examples/junit4/redis/src/test/java/quickstart/RedisBackedCacheIntTest.java) inside_block:setUp
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Obtaining a mapped port]&#40;../examples/junit4/redis/src/test/java/quickstart/RedisBackedCacheIntTest.java&#41; inside_block:setUp)
+[//]: # (<!--/codeinclude-->)
 
 !!! tip
     Notice that we also ask Testcontainers for the container's actual address with `redis.getHost();`, 
@@ -77,7 +77,7 @@ That's it!
 
 Let's look at our complete test class to see how little we had to add to get up and running with Testcontainers:
 
-<!--codeinclude-->
-[RedisBackedCacheIntTest](../examples/junit4/redis/src/test/java/quickstart/RedisBackedCacheIntTest.java) block:RedisBackedCacheIntTest
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([RedisBackedCacheIntTest]&#40;../examples/junit4/redis/src/test/java/quickstart/RedisBackedCacheIntTest.java&#41; block:RedisBackedCacheIntTest)
+[//]: # (<!--/codeinclude-->)
 

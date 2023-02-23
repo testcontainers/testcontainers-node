@@ -31,15 +31,15 @@ This approach simply entails modifying test code manually, e.g. changing:
 
 For example, you may have a test that uses the `mysql` container image from Docker Hub:
 
-<!--codeinclude--> 
-[Direct Docker Hub image name](../examples/junit4/generic/src/test/java/generic/ImageNameSubstitutionTest.java) inside_block:directDockerHubReference
-<!--/codeinclude-->
+[//]: # (<!--codeinclude--> )
+[//]: # ([Direct Docker Hub image name]&#40;../examples/junit4/generic/src/test/java/generic/ImageNameSubstitutionTest.java&#41; inside_block:directDockerHubReference)
+[//]: # (<!--/codeinclude-->)
 
 to:
 
-<!--codeinclude--> 
-[Private registry image name](../examples/junit4/generic/src/test/java/generic/ImageNameSubstitutionTest.java) inside_block:hardcodedMirror
-<!--/codeinclude-->
+[//]: # (<!--codeinclude--> )
+[//]: # ([Private registry image name]&#40;../examples/junit4/generic/src/test/java/generic/ImageNameSubstitutionTest.java&#41; inside_block:hardcodedMirror)
+[//]: # (<!--/codeinclude-->)
 
 
 
@@ -58,9 +58,9 @@ Consider this if:
 In this case, image name references in code are **unchanged**.
 i.e. you would leave as-is:
 
-<!--codeinclude--> 
-[Unchanged direct Docker Hub image name](../examples/junit4/generic/src/test/java/generic/ImageNameSubstitutionTest.java) inside_block:directDockerHubReference
-<!--/codeinclude-->
+[//]: # (<!--codeinclude--> )
+[//]: # ([Unchanged direct Docker Hub image name]&#40;../examples/junit4/generic/src/test/java/generic/ImageNameSubstitutionTest.java&#41; inside_block:directDockerHubReference)
+[//]: # (<!--/codeinclude-->)
 
 You can then configure Testcontainers to apply the prefix `registry.mycompany.com/mirror/` to every image that it tries to pull from Docker Hub.
 This can be done in one of two ways:
@@ -92,9 +92,9 @@ Consider this if:
 In this case, image name references in code are **unchanged**.
 i.e. you would leave as-is:
 
-<!--codeinclude--> 
-[Unchanged direct Docker Hub image name](../examples/junit4/generic/src/test/java/generic/ImageNameSubstitutionTest.java) inside_block:directDockerHubReference
-<!--/codeinclude-->
+[//]: # (<!--codeinclude--> )
+[//]: # ([Unchanged direct Docker Hub image name]&#40;../examples/junit4/generic/src/test/java/generic/ImageNameSubstitutionTest.java&#41; inside_block:directDockerHubReference)
+[//]: # (<!--/codeinclude-->)
 
 You can implement a custom image name substitutor by:
 
@@ -103,9 +103,9 @@ You can implement a custom image name substitutor by:
 
 The following is an example image substitutor implementation:
 
-<!--codeinclude--> 
-[Example Image Substitutor](../examples/junit4/generic/src/test/java/generic/ExampleImageNameSubstitutor.java) block:ExampleImageNameSubstitutor
-<!--/codeinclude-->
+[//]: # (<!--codeinclude--> )
+[//]: # ([Example Image Substitutor]&#40;../examples/junit4/generic/src/test/java/generic/ExampleImageNameSubstitutor.java&#41; block:ExampleImageNameSubstitutor)
+[//]: # (<!--/codeinclude-->)
 
 Testcontainers can be configured to find it at runtime via configuration.
 To do this, create or modify a file on the classpath named `testcontainers.properties`.
@@ -141,8 +141,8 @@ Consider this if:
 In this case, image name references in code are left **unchanged**.
 i.e. you would leave as-is:
 
-<!--codeinclude--> 
-[Unchanged direct Docker Hub image name](../examples/junit4/generic/src/test/java/generic/ImageNameSubstitutionTest.java) inside_block:directDockerHubReference
-<!--/codeinclude-->
+[//]: # (<!--codeinclude--> )
+[//]: # ([Unchanged direct Docker Hub image name]&#40;../examples/junit4/generic/src/test/java/generic/ImageNameSubstitutionTest.java&#41; inside_block:directDockerHubReference)
+[//]: # (<!--/codeinclude-->)
 
 You can force Testcontainers to substitute in a different image [using a configuration file](./configuration.md), which allows some (but not all) container names to be substituted. 

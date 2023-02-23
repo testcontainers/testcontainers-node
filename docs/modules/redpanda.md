@@ -9,21 +9,22 @@ More precisely Testcontainers uses the official Docker images for [Redpanda](htt
 ## Example
 
 Create a `Redpanda` to use it in your tests:
-<!--codeinclude-->
-[Creating a Redpanda](../../modules/redpanda/src/test/java/org/testcontainers/redpanda/RedpandaContainerTest.java) inside_block:constructorWithVersion
-<!--/codeinclude-->
+
+[//]: # (<!--codeinclude-->)
+[//]: # ([Creating a Redpanda]&#40;../../modules/redpanda/src/test/java/org/testcontainers/redpanda/RedpandaContainerTest.java&#41; inside_block:constructorWithVersion)
+[//]: # (<!--/codeinclude-->)
 
 Now your tests or any other process running on your machine can get access to running Redpanda broker by using the following bootstrap server location:
 
-<!--codeinclude-->
-[Bootstrap Servers](../../modules/redpanda/src/test/java/org/testcontainers/redpanda/RedpandaContainerTest.java) inside_block:getBootstrapServers
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Bootstrap Servers]&#40;../../modules/redpanda/src/test/java/org/testcontainers/redpanda/RedpandaContainerTest.java&#41; inside_block:getBootstrapServers)
+[//]: # (<!--/codeinclude-->)
 
 Redpanda also provides a schema registry implementation. Like the Redpanda broker, you can access by using the following schema registry location:
 
-<!--codeinclude-->
-[Schema Registry](../../modules/redpanda/src/test/java/org/testcontainers/redpanda/RedpandaContainerTest.java) inside_block:getSchemaRegistryAddress
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Schema Registry]&#40;../../modules/redpanda/src/test/java/org/testcontainers/redpanda/RedpandaContainerTest.java&#41; inside_block:getSchemaRegistryAddress)
+[//]: # (<!--/codeinclude-->)
 
 ## Adding this module to your project dependencies
 

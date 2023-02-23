@@ -6,15 +6,15 @@ Mock Server can be used to mock HTTP services by matching requests against user-
 
 The following example shows how to start Mockserver.
 
-<!--codeinclude-->
-[Creating a MockServer container](../../modules/mockserver/src/test/java/org/testcontainers/containers/MockServerContainerRuleTest.java) inside_block:creatingProxy
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Creating a MockServer container]&#40;../../modules/mockserver/src/test/java/org/testcontainers/containers/MockServerContainerRuleTest.java&#41; inside_block:creatingProxy)
+[//]: # (<!--/codeinclude-->)
 
 And how to set a simple expectation using the Java MockServerClient.
 
-<!--codeinclude-->
-[Setting a simple expectation](../../modules/mockserver/src/test/java/org/testcontainers/containers/MockServerContainerRuleTest.java) inside_block:testSimpleExpectation
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Setting a simple expectation]&#40;../../modules/mockserver/src/test/java/org/testcontainers/containers/MockServerContainerRuleTest.java&#41; inside_block:testSimpleExpectation)
+[//]: # (<!--/codeinclude-->)
 
 ## Adding this module to your project dependencies
 

@@ -12,9 +12,9 @@ Note that it's based on the [official Docker image](https://hub.docker.com/_/sol
 
 You can start a solr container instance from any Java application by using:
 
-<!--codeinclude-->
-[Using a Solr container](../../modules/solr/src/test/java/org/testcontainers/containers/SolrContainerTest.java) inside_block:solrContainerUsage
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Using a Solr container]&#40;../../modules/solr/src/test/java/org/testcontainers/containers/SolrContainerTest.java&#41; inside_block:solrContainerUsage)
+[//]: # (<!--/codeinclude-->)
 
 ## Adding this module to your project dependencies
 

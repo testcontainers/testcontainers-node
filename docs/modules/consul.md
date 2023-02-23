@@ -4,9 +4,9 @@ Testcontainers module for [Consul](https://github.com/hashicorp/consul). Consul 
 
 ## Usage example
 
-<!--codeinclude-->
-[Running Consul in your Junit tests](../../modules/consul/src/test/java/org/testcontainers/consul/ConsulContainerTest.java)
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Running Consul in your Junit tests]&#40;../../modules/consul/src/test/java/org/testcontainers/consul/ConsulContainerTest.java&#41;)
+[//]: # (<!--/codeinclude-->)
 
 ## Why Consul in Junit tests?
 

@@ -6,27 +6,27 @@ Testcontainers module for [Vault](https://github.com/hashicorp/vault). Vault is 
 
 Start Vault container as a `@ClassRule`:
 
-<!--codeinclude-->
-[Starting a Vault container](../../modules/vault/src/test/java/org/testcontainers/vault/VaultContainerTest.java) inside_block:vaultContainer
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Starting a Vault container]&#40;../../modules/vault/src/test/java/org/testcontainers/vault/VaultContainerTest.java&#41; inside_block:vaultContainer)
+[//]: # (<!--/codeinclude-->)
 
 Use CLI to read data from Vault container:
 
-<!--codeinclude-->
-[Use CLI to read data](../../modules/vault/src/test/java/org/testcontainers/vault/VaultContainerTest.java) inside_block:readFirstSecretPathWithCli
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Use CLI to read data]&#40;../../modules/vault/src/test/java/org/testcontainers/vault/VaultContainerTest.java&#41; inside_block:readFirstSecretPathWithCli)
+[//]: # (<!--/codeinclude-->)
 
 Use Http API to read data from Vault container:
 
-<!--codeinclude-->
-[Use Http API to read data](../../modules/vault/src/test/java/org/testcontainers/vault/VaultContainerTest.java) inside_block:readFirstSecretPathOverHttpApi
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Use Http API to read data]&#40;../../modules/vault/src/test/java/org/testcontainers/vault/VaultContainerTest.java&#41; inside_block:readFirstSecretPathOverHttpApi)
+[//]: # (<!--/codeinclude-->)
 
 Use client library to read data from Vault container:
 
-<!--codeinclude-->
-[Use library to read data](../../modules/vault/src/test/java/org/testcontainers/vault/VaultContainerTest.java) inside_block:readWithLibrary
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Use library to read data]&#40;../../modules/vault/src/test/java/org/testcontainers/vault/VaultContainerTest.java&#41; inside_block:readWithLibrary)
+[//]: # (<!--/codeinclude-->)
 
 [See full example.](https://github.com/testcontainers/testcontainers-java/blob/master/modules/vault/src/test/java/org/testcontainers/vault/VaultContainerTest.java)
 

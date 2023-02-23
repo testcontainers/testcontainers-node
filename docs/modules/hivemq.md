@@ -25,28 +25,31 @@ is published as *hivemq/hivemq-ce*.
 Both editions can be used directly:
 
 Using the Community Edition:
-<!--codeinclude-->
-[Community Edition HiveMQ image](../../modules/hivemq/src/test/java/org/testcontainers/hivemq/docs/DemoHiveMQContainerIT.java) inside_block:ceVersion
-<!--/codeinclude-->
+
+[//]: # (<!--codeinclude-->)
+[//]: # ([Community Edition HiveMQ image]&#40;../../modules/hivemq/src/test/java/org/testcontainers/hivemq/docs/DemoHiveMQContainerIT.java&#41; inside_block:ceVersion)
+[//]: # (<!--/codeinclude-->)
 
 Using the Enterprise Edition:
-<!--codeinclude-->
-[Enterprise Edition HiveMQ image](../../modules/hivemq/src/test/java/org/testcontainers/hivemq/docs/DemoHiveMQContainerIT.java) inside_block:hiveEEVersion
-<!--/codeinclude-->
+
+[//]: # (<!--codeinclude-->)
+[//]: # ([Enterprise Edition HiveMQ image]&#40;../../modules/hivemq/src/test/java/org/testcontainers/hivemq/docs/DemoHiveMQContainerIT.java&#41; inside_block:hiveEEVersion)
+[//]: # (<!--/codeinclude-->)
 
 Using a specifc version is possible by using the tag:
-<!--codeinclude-->
-[Specific HiveMQ Version](../../modules/hivemq/src/test/java/org/testcontainers/hivemq/docs/DemoHiveMQContainerIT.java) inside_block:specificVersion
-<!--/codeinclude-->
+
+[//]: # (<!--codeinclude-->)
+[//]: # ([Specific HiveMQ Version]&#40;../../modules/hivemq/src/test/java/org/testcontainers/hivemq/docs/DemoHiveMQContainerIT.java&#41; inside_block:specificVersion)
+[//]: # (<!--/codeinclude-->)
 
 ## Test your MQTT 3 and MQTT 5 client application
 
 Using an Mqtt-client (e.g. the [HiveMQ-Mqtt-Client](https://github.com/hivemq/hivemq-mqtt-client)) you can start 
 testing directly. 
 
-<!--codeinclude-->
-[MQTT5 Client](../../modules/hivemq/src/test/java/org/testcontainers/hivemq/docs/DemoHiveMQContainerIT.java) inside_block:mqtt5client
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([MQTT5 Client]&#40;../../modules/hivemq/src/test/java/org/testcontainers/hivemq/docs/DemoHiveMQContainerIT.java&#41; inside_block:mqtt5client)
+[//]: # (<!--/codeinclude-->)
 
 ## Settings
 
@@ -54,9 +57,9 @@ There are several things that can be adjusted before container setup.
 The following example shows how to enable the Control Center (this is an enterprise feature), set the log level to DEBUG 
 and load a HiveMQ-config-file from the classpath.
 
-<!--codeinclude-->
-[Config Examples](../../modules/hivemq/src/test/java/org/testcontainers/hivemq/docs/DemoHiveMQContainerIT.java) inside_block:eeVersionWithControlCenter
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Config Examples]&#40;../../modules/hivemq/src/test/java/org/testcontainers/hivemq/docs/DemoHiveMQContainerIT.java&#41; inside_block:eeVersionWithControlCenter)
+[//]: # (<!--/codeinclude-->)
 
 ---
 **Note:**
@@ -86,15 +89,15 @@ We therefore provide custom wait conditions for HiveMQ Extensions:
 The following will specify an extension to be loaded from **src/test/resources/modifier-extension** into the container and 
 wait for an  extension named **'My Extension Name'** to be started: 
 
-<!--codeinclude-->
-[Custom Wait Strategy](../../modules/hivemq/src/test/java/org/testcontainers/hivemq/docs/DemoExtensionTestsIT.java) inside_block:waitStrategy
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Custom Wait Strategy]&#40;../../modules/hivemq/src/test/java/org/testcontainers/hivemq/docs/DemoExtensionTestsIT.java&#41; inside_block:waitStrategy)
+[//]: # (<!--/codeinclude-->)
 
 Next up we have an example for using an extension directly from the classpath and waiting directly on the extension:
 
-<!--codeinclude-->
-[Extension from Classpath](../../modules/hivemq/src/test/java/org/testcontainers/hivemq/docs/DemoExtensionTestsIT.java) inside_block:extensionClasspath
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Extension from Classpath]&#40;../../modules/hivemq/src/test/java/org/testcontainers/hivemq/docs/DemoExtensionTestsIT.java&#41; inside_block:extensionClasspath)
+[//]: # (<!--/codeinclude-->)
 
 ---
 **Note** Debugging extensions
@@ -115,9 +118,9 @@ The plugin adds an `integrationTest` task which executes tests from the `integra
 The `integrationTest` task builds the extension and unzips it to the `build/hivemq-extension-test` directory.
 The tests can then load the built extension into the HiveMQ Testcontainer.
 
-<!--codeinclude-->
-[Extension from filesystem](../../modules/hivemq/src/test/java/org/testcontainers/hivemq/docs/DemoDisableExtensionsIT.java) inside_block:startFromFilesystem
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Extension from filesystem]&#40;../../modules/hivemq/src/test/java/org/testcontainers/hivemq/docs/DemoDisableExtensionsIT.java&#41; inside_block:startFromFilesystem)
+[//]: # (<!--/codeinclude-->)
 
 ### Enable/Disable an extension
 
@@ -131,15 +134,15 @@ It is possible to enable and disable HiveMQ extensions during runtime. Extension
 The following example shows how to start a HiveMQ container with the extension called **my-extension** being disabled.
 
 
-<!--codeinclude-->
-[Disable Extension at startup](../../modules/hivemq/src/test/java/org/testcontainers/hivemq/docs/DemoDisableExtensionsIT.java) inside_block:startDisabled
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Disable Extension at startup]&#40;../../modules/hivemq/src/test/java/org/testcontainers/hivemq/docs/DemoDisableExtensionsIT.java&#41; inside_block:startDisabled)
+[//]: # (<!--/codeinclude-->)
 
 The following test then proceeds to enable and then disable the extension:
 
-<!--codeinclude-->
-[Enable/Disable extension at runtime](../../modules/hivemq/src/test/java/org/testcontainers/hivemq/docs/DemoDisableExtensionsIT.java) inside_block:hiveRuntimeEnable
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Enable/Disable extension at runtime]&#40;../../modules/hivemq/src/test/java/org/testcontainers/hivemq/docs/DemoDisableExtensionsIT.java&#41; inside_block:hiveRuntimeEnable)
+[//]: # (<!--/codeinclude-->)
 
 ## Enable/Disable an extension loaded from a folder
 
@@ -152,15 +155,16 @@ If the extension folder contains a DISABLED file, the extension will be disabled
 ---
 
 We first load the extension from the filesytem:
-<!--codeinclude-->
-[Extension from filesystem](../../modules/hivemq/src/test/java/org/testcontainers/hivemq/docs/DemoDisableExtensionsIT.java) inside_block:startFromFilesystem
-<!--/codeinclude-->
+
+[//]: # (<!--codeinclude-->)
+[//]: # ([Extension from filesystem]&#40;../../modules/hivemq/src/test/java/org/testcontainers/hivemq/docs/DemoDisableExtensionsIT.java&#41; inside_block:startFromFilesystem)
+[//]: # (<!--/codeinclude-->)
 
 Now we can enable/disable the extension using its name:
 
-<!--codeinclude-->
-[Enable/Disable extension at runtime](../../modules/hivemq/src/test/java/org/testcontainers/hivemq/docs/DemoDisableExtensionsIT.java) inside_block:runtimeEnableFilesystem
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Enable/Disable extension at runtime]&#40;../../modules/hivemq/src/test/java/org/testcontainers/hivemq/docs/DemoDisableExtensionsIT.java&#41; inside_block:runtimeEnableFilesystem)
+[//]: # (<!--/codeinclude-->)
 
 ### Remove prepackaged HiveMQ Extensions
 
@@ -170,34 +174,35 @@ These Extensions are disabled by default, but sometimes you my need to remove th
 
 Removing all extension is as simple as:
 
-<!--codeinclude-->
-[Remove all extensions](../../modules/hivemq/src/test/java/org/testcontainers/hivemq/docs/DemoDisableExtensionsIT.java) inside_block:noExtensions
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Remove all extensions]&#40;../../modules/hivemq/src/test/java/org/testcontainers/hivemq/docs/DemoDisableExtensionsIT.java&#41; inside_block:noExtensions)
+[//]: # (<!--/codeinclude-->)
 
 A single extension (e.g. Kafka) can be removed as easily:
-<!--codeinclude-->
-[Remove a specific extension](../../modules/hivemq/src/test/java/org/testcontainers/hivemq/docs/DemoDisableExtensionsIT.java) inside_block:noKafkaExtension
-<!--/codeinclude-->
+
+[//]: # (<!--codeinclude-->)
+[//]: # ([Remove a specific extension]&#40;../../modules/hivemq/src/test/java/org/testcontainers/hivemq/docs/DemoDisableExtensionsIT.java&#41; inside_block:noKafkaExtension)
+[//]: # (<!--/codeinclude-->)
 
 ## Put files into the container
 
 ### Put a file into HiveMQ home
 
-<!--codeinclude-->
-[Put file into HiveMQ home](../../modules/hivemq/src/test/java/org/testcontainers/hivemq/docs/DemoFilesIT.java) inside_block:hivemqHome
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Put file into HiveMQ home]&#40;../../modules/hivemq/src/test/java/org/testcontainers/hivemq/docs/DemoFilesIT.java&#41; inside_block:hivemqHome)
+[//]: # (<!--/codeinclude-->)
 
 ### Put files into extension home
 
-<!--codeinclude-->
-[Put file into HiveMQ-Extension home](../../modules/hivemq/src/test/java/org/testcontainers/hivemq/docs/DemoFilesIT.java) inside_block:extensionHome
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Put file into HiveMQ-Extension home]&#40;../../modules/hivemq/src/test/java/org/testcontainers/hivemq/docs/DemoFilesIT.java&#41; inside_block:extensionHome)
+[//]: # (<!--/codeinclude-->)
 
 ### Put license files into the container
 
-<!--codeinclude-->
-[Put license file into the HiveMQ container](../../modules/hivemq/src/test/java/org/testcontainers/hivemq/docs/DemoFilesIT.java) inside_block:withLicenses
-<!--/codeinclude-->
+[//]: # (<!--codeinclude-->)
+[//]: # ([Put license file into the HiveMQ container]&#40;../../modules/hivemq/src/test/java/org/testcontainers/hivemq/docs/DemoFilesIT.java&#41; inside_block:withLicenses)
+[//]: # (<!--/codeinclude-->)
 
 
 ### Customize the Container further
