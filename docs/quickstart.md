@@ -2,7 +2,9 @@
 
 The generic container support offered by Testcontainers offers the greatest flexibility and makes it easy to use virtually any container image in the context of a temporary test environment.
 
-In this example we will spin up a Redis container. Note that omitting the tag will use `latest`:
+## Example
+
+Let's spin up a Redis container. Note that omitting the tag will use latest:
 
 ```javascript
 const redis = require("async-redis");
@@ -35,14 +37,7 @@ describe("Redis", () => {
 });
 ```
 
-Use a specific version of the image:
-
-```javascript
-const { GenericContainer } = require("testcontainers");
-
-const container = await new GenericContainer("alpine:3.10")
-  .start();
-```
+## TypeScript Example
 
 Testcontainers is built with TypeScript and offers first-class support for TypeScript users:
 

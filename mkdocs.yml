@@ -31,9 +31,16 @@ nav:
   - Home: index.md
   - Quickstart: quickstart.md
   - Features:
-      - features/x.md
+      - Containers: features/containers.md
+      - Images: features/images.md
+      - Networking: features/networking.md
+      - Compose: features/compose.md
+      - Lifecycle: features/lifecycle.md
+      - Wait strategies: features/wait-strategies.md
   - Modules:
       - modules/x.md
   - Configuration:
       - Logging: configuration/logging.md
       - Authentication: configuration/authentication.md
+      - Advanced: configuration/advanced.md
+  - Troubleshooting: troubleshooting.md
