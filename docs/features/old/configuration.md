@@ -40,7 +40,7 @@ It takes a couple of seconds, but if you want to speed up your tests, you can di
 !!! note
     This approach is discouraged and deprecated, but is documented for completeness.
     Overriding individual image names via configuration may be removed in 2021.
-    See [Image Name Substitution](./image_name_substitution.md) for other strategies for substituting image names to pull from other registries.
+    See [Image Name Substitution](docs/features/old/image_name_substitution.md_substitution.md) for other strategies for substituting image names to pull from other registries.
 
 
 Testcontainers uses public Docker images to perform different actions like startup checks, VNC recording and others. 
@@ -53,14 +53,14 @@ Some companies disallow the usage of Docker Hub, but you can override `*.image` 
 > Used to check whether images can be pulled at startup, and always required (unless [startup checks are disabled](#disabling-the-startup-checks))
 
 > **sshd.container.image = testcontainers/sshd:1.1.0**  
-> Required if [exposing host ports to containers](./networking.md#exposing-host-ports-to-the-container)
+> Required if [exposing host ports to containers](docs/features/old/networking.mdld/networking.md#exposing-host-ports-to-the-container)
 
 > **vncrecorder.container.image = testcontainers/vnc-recorder:1.3.0**
 > Used by VNC recorder in Testcontainers' Selenium integration
 
 > **socat.container.image = alpine/socat**  
 > **compose.container.image = docker/compose:1.8.0**  
-> Required if using [Docker Compose](../modules/docker_compose.md)
+> Required if using [Docker Compose](docs/modules/old/docker_compose.md)
 
 > **kafka.container.image = confluentinc/cp-kafka**  
 > Used by KafkaContainer 

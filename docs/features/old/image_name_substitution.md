@@ -123,7 +123,7 @@ Note that it is also possible to provide this same configuration property:
 * in a properties file in the user's home directory (`~/.testcontainers.properties`; note the leading `.`)
 * or as an environment variable (e.g. `TESTCONTAINERS_IMAGE_SUBSTITUTOR=com.mycompany.testcontainers.ExampleImageNameSubstitutor`).
 
-Please see [the documentation on configuration mechanisms](./configuration.md) for more information.
+Please see [the documentation on configuration mechanisms](docs/features/old/configuration.mdconfiguration.md) for more information.
 
 
 ## Overriding image names individually in configuration
@@ -145,4 +145,4 @@ i.e. you would leave as-is:
 [//]: # ([Unchanged direct Docker Hub image name]&#40;../examples/junit4/generic/src/test/java/generic/ImageNameSubstitutionTest.java&#41; inside_block:directDockerHubReference)
 [//]: # (<!--/codeinclude-->)
 
-You can force Testcontainers to substitute in a different image [using a configuration file](./configuration.md), which allows some (but not all) container names to be substituted. 
+You can force Testcontainers to substitute in a different image [using a configuration file](docs/features/old/configuration.mdconfiguration.md), which allows some (but not all) container names to be substituted. 

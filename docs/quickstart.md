@@ -1,83 +1,60 @@
-# JUnit 4 Quickstart
+# Quickstart
 
-It's easy to add Testcontainers to your project - let's walk through a quick example to see how.
+The generic container support offered by Testcontainers offers the greatest flexibility and makes it easy to use virtually any container image in the context of a temporary test environment.
 
-Let's imagine we have a simple program that has a dependency on Redis, and we want to add some tests for it.
-In our imaginary program, there is a `RedisBackedCache` class which stores data in Redis.
- 
-You can see an example test that could have been written for it (without using Testcontainers):
+In this example we will spin up a Redis container. Note that omitting the tag will use `latest`:
 
-[//]: # (<!--codeinclude-->)
-[//]: # ([Pre-Testcontainers test code]&#40;../examples/junit4/redis/src/test/java/quickstart/RedisBackedCacheIntTestStep0.java&#41; block:RedisBackedCacheIntTestStep0)
-[//]: # (<!--/codeinclude-->)
+```javascript
+const redis = require("async-redis");
+const { GenericContainer } = require("testcontainers");
 
-Notice that the existing test has a problem - it's relying on a local installation of Redis, which is a red flag for test reliability.
-This may work if we were sure that every developer and CI machine had Redis installed, but would fail otherwise.
-We might also have problems if we attempted to run tests in parallel, such as state bleeding between tests, or port clashes.
+describe("Redis", () => {
+  let container;
+  let redisClient;
 
-Let's start from here, and see how to improve the test with Testcontainers:  
+  beforeAll(async () => {
+    container = await new GenericContainer("redis")
+      .withExposedPorts(6379)
+      .start();
 
-## 1. Add Testcontainers as a test-scoped dependency
+    redisClient = redis.createClient(
+      container.getMappedPort(6379),
+      container.getHost(),
+    );
+  });
 
-First, add Testcontainers as a dependency as follows:
+  afterAll(async () => {
+    await redisClient.quit();
+    await container.stop();
+  });
 
-=== "Gradle"
-    ```groovy
-    testImplementation "org.testcontainers:testcontainers:{{latest_version}}"
-    ```
-=== "Maven"
-    ```xml
-    <dependency>
-        <groupId>org.testcontainers</groupId>
-        <artifactId>testcontainers</artifactId>
-        <version>{{latest_version}}</version>
-        <scope>test</scope>
-    </dependency>
-    ```
+  it("works", async () => {
+    await redisClient.set("key", "val");
+    expect(await redisClient.get("key")).toBe("val");
+  });
+});
+```
 
-## 2. Get Testcontainers to run a Redis container during our tests
+Use a specific version of the image:
 
-Simply add the following to the body of our test class:
+```javascript
+const { GenericContainer } = require("testcontainers");
 
-[//]: # (<!--codeinclude-->)
-[//]: # ([JUnit 4 Rule]&#40;../examples/junit4/redis/src/test/java/quickstart/RedisBackedCacheIntTest.java&#41; inside_block:rule)
-[//]: # (<!--/codeinclude-->)
+const container = await new GenericContainer("alpine:3.10")
+  .start();
+```
 
-The `@Rule` annotation tells JUnit to notify this field about various events in the test lifecycle.
-In this case, our rule object is a Testcontainers `GenericContainer`, configured to use a specific Redis image from Docker Hub, and configured to expose a port.
+Testcontainers is built with TypeScript and offers first-class support for TypeScript users:
 
-If we run our test as-is, then regardless of the actual test outcome, we'll see logs showing us that Testcontainers:
+```typescript
+import {
+  TestContainer,
+  StartedTestContainer,
+  StoppedTestContainer,
+  GenericContainer
+} from "testcontainers";
 
-* was activated before our test method ran
-* discovered and quickly tested our local Docker setup
-* pulled the image if necessary
-* started a new container and waited for it to be ready
-* shut down and deleted the container after the test
-
-## 3. Make sure our code can talk to the container
-
-Before Testcontainers, we might have hardcoded an address like `localhost:6379` into our tests.
-
-Testcontainers uses *randomized ports* for each container it starts, but makes it easy to obtain the actual port at runtime.
-We can do this in our test `setUp` method, to set up our component under test:
-
-[//]: # (<!--codeinclude-->)
-[//]: # ([Obtaining a mapped port]&#40;../examples/junit4/redis/src/test/java/quickstart/RedisBackedCacheIntTest.java&#41; inside_block:setUp)
-[//]: # (<!--/codeinclude-->)
-
-!!! tip
-    Notice that we also ask Testcontainers for the container's actual address with `redis.getHost();`, 
-    rather than hard-coding `localhost`. `localhost` may work in some environments but not others - for example it may
-    not work on your current or future CI environment. As such, **avoid hard-coding** the address, and use 
-    `getHost()` instead.
-
-## 4. Run the tests!
-
-That's it!
-
-Let's look at our complete test class to see how little we had to add to get up and running with Testcontainers:
-
-[//]: # (<!--codeinclude-->)
-[//]: # ([RedisBackedCacheIntTest]&#40;../examples/junit4/redis/src/test/java/quickstart/RedisBackedCacheIntTest.java&#41; block:RedisBackedCacheIntTest)
-[//]: # (<!--/codeinclude-->)
-
+const container: TestContainer = new GenericContainer("alpine");
+const startedContainer: StartedTestContainer = await container.start();
+const stoppedContainer: StoppedTestContainer = await startedContainer.stop();
+```
