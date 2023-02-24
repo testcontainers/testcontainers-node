@@ -2,15 +2,16 @@
 
 ## Starting a container
 
-Testcontainers will use an existing image if it exists, otherwise it will pull the image:
+Testcontainers will pull the image if it doesn't exist, and re-use it if it does:
 
 ```javascript
 const { GenericContainer } = require("testcontainers");
 
-const container = await new GenericContainer("alpine").start();
+const container = await new GenericContainer("alpine")
+  .start();
 ```
 
-The pull behaviour can be overridden by specifying a pull policy:
+Pull behaviour can be overridden by specifying a pull policy:
 
 ```javascript
 const { GenericContainer, AlwaysPullPolicy } = require("testcontainers");
@@ -20,15 +21,14 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
-A specific image version can be provided:
+Use a specific image version:
 
 ```javascript
-const container = await new GenericContainer("alpine:3.10").start();
+const container = await new GenericContainer("alpine:3.10")
+  .start();
 ```
 
 ### With a command
-
-Creating a container with a command:
 
 ```javascript
 const container = await new GenericContainer("alpine")
@@ -38,8 +38,6 @@ const container = await new GenericContainer("alpine")
 
 ### With an entrypoint
 
-Creating a container with entrypoint:
-
 ```javascript
 const container = await new GenericContainer("alpine")
   .withEntrypoint(["cat"])
@@ -47,8 +45,6 @@ const container = await new GenericContainer("alpine")
 ```
 
 ### With environment variables
-
-Creating a container with environment variables:
 
 ```javascript
 const container = await new GenericContainer("alpine")
@@ -60,8 +56,6 @@ const container = await new GenericContainer("alpine")
 ```
 
 ### With bind mounts
-
-Creating a container with bind mounts:
 
 ```javascript
 const container = await new GenericContainer("alpine")
@@ -78,8 +72,6 @@ const container = await new GenericContainer("alpine")
 
 ### With labels
 
-Creating a container with labels:
-
 ```javascript
 const container = await new GenericContainer("alpine")
   .withLabels({
@@ -91,7 +83,11 @@ const container = await new GenericContainer("alpine")
 
 ### With a name
 
-Creating a container with a specified name:
+**Not recommended.** 
+
+If a container with the same name already exists, Docker will raise a conflict. If you are specifying a name to enable container to container communication, look into creating a network and specifying network aliases instead.
+
+**TODO: Link to network docs**
 
 ```javascript
 const container = await new GenericContainer("alpine")
@@ -101,11 +97,8 @@ const container = await new GenericContainer("alpine")
 
 ### With files/content
 
-Copy a file to a container before it is started:
-
 ```javascript
 const container = await new GenericContainer("postgres")
-  .withExposedPorts(5432)
   .withCopyFilesToContainer([{ 
     source: "/local/file.txt", 
     target: "/remote/file1.txt"
@@ -119,8 +112,6 @@ const container = await new GenericContainer("postgres")
 
 ### With a `tmpfs` mount
 
-Creating a container with a `tmpfs` mount:
-
 ```javascript
 const container = await new GenericContainer("postgres")
   .withExposedPorts(5432)
@@ -130,10 +121,11 @@ const container = await new GenericContainer("postgres")
 
 ### With default log driver
 
-Specifying a default log driver. You can override the logging driver used by Docker to be the default one (json-file).
+You can override the logging driver used by Docker to be the default one (json-file).
 This might be necessary when the driver of your docker host does not support reading logs
-and you want to use the `Wait.forLogMessage` wait strategy. This is the same as
-[--log-driver json-file on docker run](https://docs.docker.com/config/containers/logging/configure/#configure-the-logging-driver-for-a-container).
+and you want to use the `Wait.forLogMessage` (**TODO ADD LINK**) wait strategy. 
+
+See [`--log-driver`](https://docs.docker.com/config/containers/logging/configure/#configure-the-logging-driver-for-a-container).
 
 ```javascript
 const container = await new GenericContainer("redis")
@@ -143,7 +135,7 @@ const container = await new GenericContainer("redis")
 
 ### With user
 
-Creating and running a container with a specific user, note that the value can be a username or UID (format: `<name|uid>[:<group|gid>]`):
+Value can be a username or UID (format: `<name|uid>[:<group|gid>]`).
 
 ```javascript
 const container = await new GenericContainer("alpine")
@@ -153,8 +145,6 @@ const container = await new GenericContainer("alpine")
 
 ### With privileged mode
 
-Creating a container with privileged mode:
-
 ```javascript
 const container = await new GenericContainer("alpine")
   .withPrivilegedMode()
@@ -163,27 +153,25 @@ const container = await new GenericContainer("alpine")
 
 ### With added capabilities
 
-Creating a container with added [capabilities](https://man7.org/linux/man-pages/man7/capabilities.7.html):
+See available [capabilities](https://man7.org/linux/man-pages/man7/capabilities.7.html).
 
 ```javascript
-const container = await new GenericContainer("aline")
+const container = await new GenericContainer("alpine")
   .withAddedCapabilities("NET_ADMIN", "IPC_LOCK")
   .start();
 ```
 
 ### With dropped capabilities
 
-Creating a container with dropped [capabilities](https://man7.org/linux/man-pages/man7/capabilities.7.html):
+See available [capabilities](https://man7.org/linux/man-pages/man7/capabilities.7.html).
 
 ```javascript
-const container = await new GenericContainer("aline")
+const container = await new GenericContainer("alpine")
   .withDroppedCapabilities("NET_ADMIN", "IPC_LOCK")
   .start();
 ```
 
 ### With ulimits
-
-Creating a container with ulimits:
 
 ```javascript
 const container = await new GenericContainer("aline")
@@ -198,7 +186,7 @@ const container = await new GenericContainer("aline")
 
 ### With IPC mode
 
-Creating a container with [IPC mode](https://docs.docker.com/engine/reference/run/#ipc-settings---ipc):
+See [IPC mode](https://docs.docker.com/engine/reference/run/#ipc-settings---ipc).
 
 ```javascript
 const container = await new GenericContainer("alpine")

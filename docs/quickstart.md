@@ -1,6 +1,10 @@
 # Quickstart
 
-The generic container support offered by Testcontainers offers the greatest flexibility and makes it easy to use virtually any container image in the context of a temporary test environment.
+## Installation
+
+```bash
+npm install --save-dev testcontainers
+```
 
 ## Example
 
