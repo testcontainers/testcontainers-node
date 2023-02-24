@@ -1,50 +1,56 @@
 # Images
 
-Building and using your own Docker image:
+## Building an image
 
-```javascript
-const path = require("path");
-const { GenericContainer } = require("testcontainers");
-
-const buildContext = path.resolve(__dirname, "dir-containing-dockerfile");
-
-const container = await GenericContainer.fromDockerfile(buildContext)
-  .withBuildArgs({
-    ARG_1: "ARG_VALUE_1",    
-    ARG_2: "ARG_VALUE_2",    
-  })
-  .build();
-
-const startedContainer = await container
-  .withExposedPorts(8080)
-  .start();
-```
-
-Using a custom Dockerfile name:
+Build and start your own Docker image:
 
 ```javascript
 const { GenericContainer } = require("testcontainers");
 
-const container = await GenericContainer.fromDockerfile(buildContext, "my-dockerfile")
+const container = await GenericContainer
+  .fromDockerfile("/path/to/build-context")
   .build();
+
+const startedContainer = await container.start();
 ```
 
-Build the image without using the cache:
+### With pull policy
 
-```javascript
-const { GenericContainer } = require("testcontainers");
-
-const container = await GenericContainer.fromDockerfile(buildContext, "my-dockerfile")
-  .withCache(false)
-  .build();
-```
-
-TODO explain image pull policy
+Testcontainers will automatically pull an image if it doesn't exist. This is configurable:
 
 ```javascript
 const { GenericContainer, AlwaysPullPolicy } = require("testcontainers");
 
 const container = await GenericContainer.fromDockerfile(buildContext)
   .withPullPolicy(new AlwaysPullPolicy())
+  .build();
+```
+
+### With build arguments
+
+```javascript
+const container = await GenericContainer
+  .fromDockerfile(buildContext)
+  .withBuildArgs({
+    ARG_1: "VALUE_1",    
+    ARG_2: "VALUE_2",    
+  })
+  .build();
+```
+
+### With custom Dockerfile
+
+```javascript
+const container = await GenericContainer
+  .fromDockerfile(buildContext, "my-dockerfile")
+  .build();
+```
+
+### With cache
+
+```javascript
+const container = await GenericContainer
+  .fromDockerfile("/path/to/build-context")
+  .withCache(false)
   .build();
 ```

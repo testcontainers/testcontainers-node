@@ -2,7 +2,7 @@
 
 ## Starting a container
 
-Build and start any container using a Generic Container:
+Create and start any container using a Generic Container:
 
 ```javascript
 const { GenericContainer } = require("testcontainers");
