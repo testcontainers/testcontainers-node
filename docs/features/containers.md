@@ -79,9 +79,7 @@ const container = await new GenericContainer("alpine")
 
 **Not recommended.** 
 
-If a container with the same name already exists, Docker will raise a conflict. If you are specifying a name to enable container to container communication, look into creating a network and using network aliases.
-
-**TODO: Link to network docs**
+If a container with the same name already exists, Docker will raise a conflict. If you are specifying a name to enable container to container communication, look into creating a network and using [network aliases](../networking#network-aliases).
 
 ```javascript
 const container = await new GenericContainer("alpine")
@@ -106,8 +104,7 @@ const container = await new GenericContainer("alpine")
 
 ### With default log driver
 
-May be necessary when the driver of your docker host does not support reading logs
-and you want to use the `Wait.forLogMessage` (**TODO ADD LINK**) wait strategy.
+May be necessary when the driver of your docker host does not support reading logs, and you want to use the `Wait.forLogMessage` (**TODO ADD LINK**) wait strategy.
 
 See [log drivers](https://docs.docker.com/config/containers/logging/configure/#configure-the-logging-driver-for-a-container).
 
