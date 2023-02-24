@@ -21,7 +21,8 @@ Testcontainers will automatically pull an image if it doesn't exist. This is con
 ```javascript
 const { GenericContainer, AlwaysPullPolicy } = require("testcontainers");
 
-const container = await GenericContainer.fromDockerfile(buildContext)
+const container = await GenericContainer
+  .fromDockerfile("/path/to/build-context")
   .withPullPolicy(new AlwaysPullPolicy())
   .build();
 ```
@@ -30,7 +31,7 @@ const container = await GenericContainer.fromDockerfile(buildContext)
 
 ```javascript
 const container = await GenericContainer
-  .fromDockerfile(buildContext)
+  .fromDockerfile("/path/to/build-context")
   .withBuildArgs({
     ARG_1: "VALUE_1",    
     ARG_2: "VALUE_2",    
@@ -42,7 +43,7 @@ const container = await GenericContainer
 
 ```javascript
 const container = await GenericContainer
-  .fromDockerfile(buildContext, "my-dockerfile")
+  .fromDockerfile("/path/to/build-context", "my-dockerfile")
   .build();
 ```
 
