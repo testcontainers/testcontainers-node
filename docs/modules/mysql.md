@@ -1,38 +1,17 @@
 # MySQL Module
 
-Mock Server can be used to mock HTTP services by matching requests against user-defined expectations.
+[MySQL](https://www.mysql.com/) is the world's most popular open source database. With its proven performance, reliability and ease-of-use, MySQL has become the leading database choice for web-based applications, covering the entire range from personal projects and websites, via e-commerce and information services, all the way to high profile web properties including Facebook, Twitter, YouTube, Yahoo! and many more.
 
-## Usage example
+## Examples
 
-The following example shows how to start Mockserver.
+<!--codeinclude-->
+[Connect and execute query:](../../src/modules/mysql/mysql-container.test.ts) inside_block:connect
+<!--/codeinclude-->
 
-[//]: # (<!--codeinclude-->)
-[//]: # ([Creating a MockServer container]&#40;../../modules/mockserver/src/test/java/org/testcontainers/containers/MockServerContainerRuleTest.java&#41; inside_block:creatingProxy)
-[//]: # (<!--/codeinclude-->)
+<!--codeinclude-->
+[Set username:](../../src/modules/mysql/mysql-container.test.ts) inside_block:setUsername
+<!--/codeinclude-->
 
-And how to set a simple expectation using the Java MockServerClient.
-
-[//]: # (<!--codeinclude-->)
-[//]: # ([Setting a simple expectation]&#40;../../modules/mockserver/src/test/java/org/testcontainers/containers/MockServerContainerRuleTest.java&#41; inside_block:testSimpleExpectation)
-[//]: # (<!--/codeinclude-->)
-
-## Adding this module to your project dependencies
-
-Add the following dependency to your `pom.xml`/`build.gradle` file:
-
-=== "Gradle"
-    ```groovy
-    testImplementation "org.testcontainers:mockserver:{{latest_version}}"
-    ```
-=== "Maven"
-    ```xml
-    <dependency>
-        <groupId>org.testcontainers</groupId>
-        <artifactId>mockserver</artifactId>
-        <version>{{latest_version}}</version>
-        <scope>test</scope>
-    </dependency>
-    ```
-
-Additionally, don't forget to add a [client dependency `org.mock-server:mockserver-client-java`](https://search.maven.org/search?q=mockserver-client-java) 
-to be able to set expectations, it's not provided by the testcontainers module. Client version should match to the version in a container tag.
+<!--codeinclude-->
+[Execute a query inside the container:](../../src/modules/mysql/mysql-container.test.ts) inside_block:executeQuery
+<!--/codeinclude-->

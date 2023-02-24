@@ -4,6 +4,7 @@ import { Neo4jContainer } from "./neo4j-container";
 describe("Neo4jContainer", () => {
   jest.setTimeout(180_000);
 
+  // createNode {
   it("should create a person node", async () => {
     const container = await new Neo4jContainer().start();
     const driver = neo4j.driver(
@@ -22,7 +23,9 @@ describe("Neo4jContainer", () => {
     await driver.close();
     await container.stop();
   });
+  // }
 
+  // setPassword {
   it("should connect with custom password", async () => {
     const container = await new Neo4jContainer().withPassword("xyz1234@!").start();
     const driver = neo4j.driver(
@@ -41,7 +44,9 @@ describe("Neo4jContainer", () => {
     await driver.close();
     await container.stop();
   });
+  // }
 
+  // apoc {
   it("should have APOC plugin installed", async () => {
     const container = await new Neo4jContainer().withApoc().withStartupTimeout(120_000).start();
     const driver = neo4j.driver(
@@ -58,4 +63,5 @@ describe("Neo4jContainer", () => {
     await driver.close();
     await container.stop();
   });
+  // }
 });

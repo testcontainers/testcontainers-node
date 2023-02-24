@@ -4,7 +4,8 @@ import { PostgreSqlContainer } from "./postgresql-container";
 describe("PostgreSqlContainer", () => {
   jest.setTimeout(180_000);
 
-  it("should work", async () => {
+  // connect {
+  it("should connect and return a query result", async () => {
     const container = await new PostgreSqlContainer().start();
 
     const client = new Client({
@@ -22,7 +23,9 @@ describe("PostgreSqlContainer", () => {
     await client.end();
     await container.stop();
   });
+  // }
 
+  // setDatabase {
   it("should set database", async () => {
     const container = await new PostgreSqlContainer().withDatabase("customDatabase").start();
 
@@ -41,7 +44,9 @@ describe("PostgreSqlContainer", () => {
     await client.end();
     await container.stop();
   });
+  // }
 
+  // setUsername {
   it("should set username", async () => {
     const container = await new PostgreSqlContainer().withUsername("customUsername").start();
 
@@ -60,4 +65,5 @@ describe("PostgreSqlContainer", () => {
     await client.end();
     await container.stop();
   });
+  // }
 });

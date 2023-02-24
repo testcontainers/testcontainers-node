@@ -1,41 +1,17 @@
 # Nats Module
 
-Nginx is a web server, reverse proxy and mail proxy and http cache.
+[NATS](https://nats.io/) is a simple, secure and high performance open source messaging system for cloud native applications, IoT messaging, and microservices architectures.
 
-## Usage example
+## Examples
 
-The following example shows how to start Nginx.
+<!--codeinclude-->
+[Connect:](../../src/modules/nats/nats-container.test.ts) inside_block:connect
+<!--/codeinclude-->
 
-[//]: # (<!--codeinclude-->)
-[//]: # ([Creating a Nginx container]&#40;../../modules/nginx/src/test/java/org/testcontainers/junit/SimpleNginxTest.java&#41; inside_block:creatingContainer)
-[//]: # (<!--/codeinclude-->)
+<!--codeinclude-->
+[Publish and subscribe:](../../src/modules/nats/nats-container.test.ts) inside_block:pubsub
+<!--/codeinclude-->
 
-How to add custom content to the Nginx server.
-
-[//]: # (<!--codeinclude-->)
-[//]: # ([Creating the static content to serve]&#40;../../modules/nginx/src/test/java/org/testcontainers/junit/SimpleNginxTest.java&#41; inside_block:addCustomContent)
-[//]: # (<!--/codeinclude-->)
-
-And how to query the Nginx server for the custom content added.
-
-[//]: # (<!--codeinclude-->)
-[//]: # ([Creating the static content to serve]&#40;../../modules/nginx/src/test/java/org/testcontainers/junit/SimpleNginxTest.java&#41; inside_block:getFromNginxServer)
-[//]: # (<!--/codeinclude-->)
-
-## Adding this module to your project dependencies
-
-Add the following dependency to your `pom.xml`/`build.gradle` file:
-
-=== "Gradle"
-    ```groovy
-    testImplementation "org.testcontainers:nginx:{{latest_version}}"
-    ```
-=== "Maven"
-    ```xml
-    <dependency>
-        <groupId>org.testcontainers</groupId>
-        <artifactId>nginx</artifactId>
-        <version>{{latest_version}}</version>
-        <scope>test</scope>
-    </dependency>
-    ```
+<!--codeinclude-->
+[Set credentials:](../../src/modules/nats/nats-container.test.ts) inside_block:credentials
+<!--/codeinclude-->
