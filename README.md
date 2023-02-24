@@ -14,7 +14,7 @@
 
 ## License
 
-See [LICENSE](https://github.com/testcontainers/testcontainers-node/blob/main/LICENSE).
+See [LICENSE](https://github.com/testcontainers/testcontainers-node/blob/master/LICENSE).
 
 ## Copyright
 
