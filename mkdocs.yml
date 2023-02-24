@@ -35,7 +35,6 @@ nav:
       - Images: features/images.md
       - Networking: features/networking.md
       - Compose: features/compose.md
-      - Lifecycle: features/lifecycle.md
       - Wait strategies: features/wait-strategies.md
   - Modules:
       - ArangoDB: modules/arangodb.md

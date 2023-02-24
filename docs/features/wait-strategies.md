@@ -47,6 +47,38 @@ const container = await new GenericContainer("redis")
   .start();
 ```
 
+
+Creating a container with a custom health check command. Note that `interval`, `timeout`, `retries` and `startPeriod` are optional; the values will be inherited from the image or parent image if omitted. Also note that the wait strategy should be set to `Wait.forHealthCheck()` for this option to take effect:
+
+```javascript
+const { GenericContainer, Wait } = require("testcontainers");
+
+const container = await new GenericContainer("alpine")
+  .withHealthCheck({
+    test: ["CMD-SHELL", "curl -f http://localhost || exit 1"],
+    interval: 1000,
+    timeout: 3000,
+    retries: 5,
+    startPeriod: 1000
+  })
+  .withWaitStrategy(Wait.forHealthCheck())
+  .start();
+```
+
+To execute the `test` in a shell use the form `["CMD-SHELL", "command"]`, for example:
+
+```javascript
+["CMD-SHELL", "curl -f http://localhost:8000 || exit 1"]
+```
+
+To execute the `test` without a shell, use the form: `["CMD", "command", "arg1", "arg2"]`, for example:
+
+```javascript
+["CMD", "/usr/bin/wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/hello-world"]
+```
+
+
+
 ### HTTP
 
 Default behaviour of waiting for a 200 response:
