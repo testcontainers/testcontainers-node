@@ -143,7 +143,7 @@ const container = await new GenericContainer("redis")
 
 ## Other startup strategies
 
-If these options do not meet your requirements, you can subclass `StartupCheckStrategy`:
+If these options do not meet your requirements, you can subclass `StartupCheckStrategy` and use `Dockerode`, which is the underlying Docker client used by Testcontainers:
 
 ```javascript
 const Dockerode = require("dockerode");

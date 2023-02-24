@@ -36,8 +36,6 @@ nav:
       - Networking: features/networking.md
       - Compose: features/compose.md
       - Wait strategies: features/wait-strategies.md
-      - Authentication: features/authentication.md
-      - Resource cleanup: features/resource-cleanup.md
   - Modules:
       - ArangoDB: modules/arangodb.md
       - Elastic Search: modules/elastic-search.md
@@ -47,7 +45,4 @@ nav:
       - Nats: modules/nats.md
       - Neo4J: modules/neo4j.md
       - PostgreSQL: modules/postgresql.md
-  - Configuration:
-      - Logging: configuration/logging.md
-      - Advanced: configuration/advanced.md
-  - Troubleshooting: troubleshooting.md
+  - Configuration: configuration.md
