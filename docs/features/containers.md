@@ -225,7 +225,7 @@ await container.restart();
 
 ## Reusing a container
 
-Enabling container re-use means that Testcontainers will **not** start a new container if a Testcontainers managed container with the same configuration is already running. 
+Enabling container re-use means that Testcontainers will not start a new container if a Testcontainers managed container with the same configuration is already running. 
 
 This is useful for example if you want to share a container across tests without global set up.
 
