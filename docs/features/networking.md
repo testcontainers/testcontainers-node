@@ -95,8 +95,8 @@ const container = await new GenericContainer("alpine")
   .withCommand(["sleep", "infinity"])
   .start();
 
-const { output } = await container.exec(["curl", `http://host.testcontainers.internal:8000`]);
-assert(output === "hello world");
+expect((await container.exec(["curl", `http://host.testcontainers.internal:8000`])).output)
+  .toBe("hello world");
 ```
 
 To achieve this, Testcontainers will start a SSHd container. Containers join the same network as the SSHd container and have a host mapping of `host.testcontainers.internal` pointing to it. When we expose a host port, we remote port forward our local port to the SSHd container, which other containers can access at `host.testcontainers.internal:<exposed-port>`.

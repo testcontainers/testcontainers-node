@@ -1,59 +1,67 @@
 # Wait Strategies
 
-Ordinarily Testcontainers will wait for up to 60 seconds for the container's mapped network ports to start listening.
-If the default 60s timeout is not sufficient, it can be altered with the `withStartupTimeout()` method:
+Note that the startup timeout of all wait strategies is configurable:
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await new GenericContainer("alpine")
+  .withStartupTimeout(120000) // wait 120s
+  .start();
+```
+
+## Host port
+
+The default wait strategy used by Testcontainers. It will wait up to 60 seconds for the container's mapped network ports to be bound.
 
 ```javascript
 const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("redis")
   .withExposedPorts(6379)
-  .withStartupTimeout(120000) // wait 120s 
   .start();
 ```
 
-### Log output
+## Log output
 
-Plain text:
+Wait until the container has logged a message:
 
 ```javascript
 const { GenericContainer, Wait } = require("testcontainers");
 
 const container = await new GenericContainer("redis")
-  .withExposedPorts(6379)
   .withWaitStrategy(Wait.forLogMessage("Ready to accept connections"))
   .start();
 ```
 
-Regular expression:
+With a regular expression:
 
 ```javascript
 const { GenericContainer, Wait } = require("testcontainers");
 
 const container = await new GenericContainer("redis")
-  .withExposedPorts(6379)
-  .withWaitStrategy(Wait.forLogMessage(/Listening on port [0-9]+/))
+  .withWaitStrategy(Wait.forLogMessage(/Listening on port \d+/))
   .start();
 ```
 
-### Health check
+## Health check
+
+Wait until the container's health check is successful:
 
 ```javascript
 const { GenericContainer, Wait } = require("testcontainers");
 
 const container = await new GenericContainer("redis")
-  .withExposedPorts(6379)
   .withWaitStrategy(Wait.forHealthCheck())
   .start();
 ```
 
-
-Creating a container with a custom health check command. Note that `interval`, `timeout`, `retries` and `startPeriod` are optional; the values will be inherited from the image or parent image if omitted. Also note that the wait strategy should be set to `Wait.forHealthCheck()` for this option to take effect:
+Define your own health check:
 
 ```javascript
 const { GenericContainer, Wait } = require("testcontainers");
 
-const container = await new GenericContainer("alpine")
+const container = await new GenericContainer("redis")
   .withHealthCheck({
     test: ["CMD-SHELL", "curl -f http://localhost || exit 1"],
     interval: 1000,
@@ -65,34 +73,33 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
-To execute the `test` in a shell use the form `["CMD-SHELL", "command"]`, for example:
+Note that `interval`, `timeout`, `retries` and `startPeriod` are optional as they are inherited from the image or parent image if omitted.
+
+To execute the test with a shell use the form `["CMD-SHELL", "command"]`:
 
 ```javascript
 ["CMD-SHELL", "curl -f http://localhost:8000 || exit 1"]
 ```
 
-To execute the `test` without a shell, use the form: `["CMD", "command", "arg1", "arg2"]`, for example:
+To execute the test without a shell, use the form: `["CMD", "command", "arg1", "arg2"]`. This may be needed when working with distroless images:
 
 ```javascript
 ["CMD", "/usr/bin/wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/hello-world"]
 ```
 
+## HTTP
 
-
-### HTTP
-
-Default behaviour of waiting for a 200 response:
+Wait for an HTTP request to satisfy a condition. By default, it will wait for a 200 response:
 
 ```javascript
 const { GenericContainer, Wait } = require("testcontainers");
 
 const container = await new GenericContainer("redis")
-  .withExposedPorts(6379)
   .withWaitStrategy(Wait.forHttp("/health", 8080))
   .start();
 ```
 
-Specify status code:
+### For status code
 
 ```javascript
 .withWaitStrategy(Wait.forHttp("/health", 8080)
@@ -102,14 +109,14 @@ Specify status code:
   .forStatusCodeMatching(statusCode => statusCode === 201))
 ```
 
-Specify response body:
+### For response body
 
 ```javascript
 .withWaitStrategy(Wait.forHttp("/health", 8080)
   .forResponsePredicate(response => response === "OK"))
 ```
 
-Customise the request:
+### Custom request
 
 ```javascript
 .withWaitStrategy(Wait.forHttp("/health", 8080)
@@ -119,14 +126,14 @@ Customise the request:
   .withReadTimeout(10000))
 ```
 
-Use TLS:
+### Use TLS
 
 ```javascript
 .withWaitStrategy(Wait.forHttp("/health", 8443)
   .useTls())
 ```
 
-Allow insecure TLS:
+#### Insecure TLS
 
 ```javascript
 .withWaitStrategy(Wait.forHttp("/health", 8443)
@@ -134,9 +141,9 @@ Allow insecure TLS:
   .insecureTls())
 ```
 
-### Other Startup Strategies
+## Other startup strategies
 
-If none of these options meet your requirements, you can create your own subclass of `StartupCheckStrategy`:
+If these options do not meet your requirements, you can subclass `StartupCheckStrategy`:
 
 ```javascript
 const Dockerode = require("dockerode");
@@ -153,7 +160,6 @@ class ReadyAfterDelayWaitStrategy extends StartupCheckStrategy {
 }
 
 const container = await new GenericContainer("redis")
-  .withExposedPorts(6379)
   .withWaitStrategy(new ReadyAfterDelayWaitStrategy())
   .start();
 ```
