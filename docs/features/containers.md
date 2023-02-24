@@ -255,9 +255,7 @@ const container = await new GenericContainer("alpine")
 const httpPort = container.getMappedPort(80);
 ```
 
-**Not recommended.**
-
-Specify fixed host port bindings:
+Specify fixed host port bindings (**not recommended**):
 
 ```javascript
 const container = await new GenericContainer("alpine")
