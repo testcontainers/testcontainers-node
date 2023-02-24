@@ -10,7 +10,7 @@
 
 ![Testcontainers Banner](https://github.com/testcontainers/testcontainers-node/raw/docs/docs/site/banner.png)
 
-# [Read the documentation here](https://node.testcontainers.org/)
+## [Read the Documentation](https://node.testcontainers.org/)
 
 ## License
 
