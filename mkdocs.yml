@@ -36,6 +36,7 @@ nav:
       - Networking: features/networking.md
       - Compose: features/compose.md
       - Wait strategies: features/wait-strategies.md
+      - Authentication: configuration/authentication.md
   - Modules:
       - ArangoDB: modules/arangodb.md
       - Elastic Search: modules/elastic-search.md
@@ -47,6 +48,5 @@ nav:
       - PostgreSQL: modules/postgresql.md
   - Configuration:
       - Logging: configuration/logging.md
-      - Authentication: configuration/authentication.md
       - Advanced: configuration/advanced.md
   - Troubleshooting: troubleshooting.md

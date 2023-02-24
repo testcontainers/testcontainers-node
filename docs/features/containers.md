@@ -10,7 +10,7 @@ const { GenericContainer } = require("testcontainers");
 const container = await new GenericContainer("alpine").start();
 ```
 
-The default pull behaviour can be overridden by specifying a pull policy:
+The pull behaviour can be overridden by specifying a pull policy:
 
 ```javascript
 const { GenericContainer, AlwaysPullPolicy } = require("testcontainers");
@@ -23,8 +23,6 @@ const container = await new GenericContainer("alpine")
 A specific image version can be provided:
 
 ```javascript
-const { GenericContainer } = require("testcontainers");
-
 const container = await new GenericContainer("alpine:3.10").start();
 ```
 
@@ -33,8 +31,6 @@ const container = await new GenericContainer("alpine:3.10").start();
 Creating a container with a command:
 
 ```javascript
-const { GenericContainer } = require("testcontainers");
-
 const container = await new GenericContainer("alpine")
   .withCommand(["sleep", "infinity"])
   .start();
@@ -45,8 +41,6 @@ const container = await new GenericContainer("alpine")
 Creating a container with entrypoint:
 
 ```javascript
-const { GenericContainer } = require("testcontainers");
-
 const container = await new GenericContainer("alpine")
   .withEntrypoint(["cat"])
   .start();
@@ -57,12 +51,10 @@ const container = await new GenericContainer("alpine")
 Creating a container with environment variables:
 
 ```javascript
-const { GenericContainer } = require("testcontainers");
-
 const container = await new GenericContainer("alpine")
   .withEnvironment({ 
-    ENV_1: "ENV_VALUE_1", 
-    ENV_2: "ENV_VALUE_2", 
+    ENV_1: "VALUE_1", 
+    ENV_2: "VALUE_2", 
   })
   .start();
 ```
@@ -72,8 +64,6 @@ const container = await new GenericContainer("alpine")
 Creating a container with bind mounts:
 
 ```javascript
-const { GenericContainer } = require("testcontainers");
-
 const container = await new GenericContainer("alpine")
   .withBindMounts([{ 
     source: "/local/file.txt", 
@@ -91,8 +81,6 @@ const container = await new GenericContainer("alpine")
 Creating a container with labels:
 
 ```javascript
-const { GenericContainer } = require("testcontainers");
-
 const container = await new GenericContainer("alpine")
   .withLabels({
     label1: "value1",
@@ -106,8 +94,6 @@ const container = await new GenericContainer("alpine")
 Creating a container with a specified name:
 
 ```javascript
-const { GenericContainer } = require("testcontainers");
-
 const container = await new GenericContainer("alpine")
   .withName("custom-container-name")
   .start();
@@ -118,8 +104,6 @@ const container = await new GenericContainer("alpine")
 Copy a file to a container before it is started:
 
 ```javascript
-const { GenericContainer } = require("testcontainers");
-
 const container = await new GenericContainer("postgres")
   .withExposedPorts(5432)
   .withCopyFilesToContainer([{ 
@@ -138,8 +122,6 @@ const container = await new GenericContainer("postgres")
 Creating a container with a `tmpfs` mount:
 
 ```javascript
-const { GenericContainer } = require("testcontainers");
-
 const container = await new GenericContainer("postgres")
   .withExposedPorts(5432)
   .withTmpFs({ "/temp_pgdata": "rw,noexec,nosuid,size=65536k" })
@@ -154,8 +136,6 @@ and you want to use the `Wait.forLogMessage` wait strategy. This is the same as
 [--log-driver json-file on docker run](https://docs.docker.com/config/containers/logging/configure/#configure-the-logging-driver-for-a-container).
 
 ```javascript
-const { GenericContainer } = require("testcontainers");
-
 const container = await new GenericContainer("redis")
   .withDefaultLogDriver()
   .start();
@@ -166,8 +146,6 @@ const container = await new GenericContainer("redis")
 Creating and running a container with a specific user, note that the value can be a username or UID (format: `<name|uid>[:<group|gid>]`):
 
 ```javascript
-const { GenericContainer } = require("testcontainers");
-
 const container = await new GenericContainer("alpine")
   .withUser("bob")
   .start();
@@ -178,8 +156,6 @@ const container = await new GenericContainer("alpine")
 Creating a container with privileged mode:
 
 ```javascript
-const { GenericContainer } = require("testcontainers");
-
 const container = await new GenericContainer("alpine")
   .withPrivilegedMode()
   .start();
@@ -190,8 +166,6 @@ const container = await new GenericContainer("alpine")
 Creating a container with added [capabilities](https://man7.org/linux/man-pages/man7/capabilities.7.html):
 
 ```javascript
-const { GenericContainer } = require("testcontainers");
-
 const container = await new GenericContainer("aline")
   .withAddedCapabilities("NET_ADMIN", "IPC_LOCK")
   .start();
@@ -202,8 +176,6 @@ const container = await new GenericContainer("aline")
 Creating a container with dropped [capabilities](https://man7.org/linux/man-pages/man7/capabilities.7.html):
 
 ```javascript
-const { GenericContainer } = require("testcontainers");
-
 const container = await new GenericContainer("aline")
   .withDroppedCapabilities("NET_ADMIN", "IPC_LOCK")
   .start();
@@ -214,8 +186,6 @@ const container = await new GenericContainer("aline")
 Creating a container with ulimits:
 
 ```javascript
-const { GenericContainer } = require("testcontainers");
-
 const container = await new GenericContainer("aline")
   .withUlimits({ 
     memlock: { 
@@ -231,8 +201,6 @@ const container = await new GenericContainer("aline")
 Creating a container with [IPC mode](https://docs.docker.com/engine/reference/run/#ipc-settings---ipc):
 
 ```javascript
-const { GenericContainer } = require("testcontainers");
-
 const container = await new GenericContainer("alpine")
   .withIpcMode("host")
   .start();
@@ -243,8 +211,6 @@ const container = await new GenericContainer("alpine")
 Testcontainers by default will not wait until the container has stopped. It will simply issue the stop command and return immediately:
 
 ```javascript
-const { GenericContainer } = require("testcontainers");
-
 const container = await new GenericContainer("postgres").start();
 await container.stop();
 ```
@@ -252,8 +218,6 @@ await container.stop();
 If you need to wait for the container to be stopped, you can provide a timeout:
 
 ```javascript
-const { GenericContainer } = require("testcontainers");
-
 const container = await new GenericContainer("postgres").start();
 await container.stop({ timeout: 10000 }); // ms
 ```
@@ -261,8 +225,6 @@ await container.stop({ timeout: 10000 }); // ms
 Testcontainers by default will remove volumes created by the container when stopped. This behaviour can be configured:
 
 ```javascript
-const { GenericContainer } = require("testcontainers");
-
 const container = await new GenericContainer("postgres").start();
 await container.stop({ removeVolumes: false });
 ```
@@ -272,49 +234,8 @@ await container.stop({ removeVolumes: false });
 Restarting a container:
 
 ```javascript
-const { GenericContainer } = require("testcontainers");
-
 const container = await new GenericContainer("alpine").start();
 await container.restart();
-```
-
-## Exposing ports
-
-You can provide the ports you want to expose from the container:
-
-```javascript
-const { GenericContainer } = require("testcontainers");
-
-const container = await new GenericContainer("alpine")
-  .withExposedPorts(22, 80, 443)
-  .start();
-```
-
-Testcontainers will automatically bind an available, random port on the host to each exposed port. This is to avoid port conflicts when running tests quickly or in parallel. 
-
-You can retrieve the mapped port as follows:
-
-```javascript
-const { GenericContainer } = require("testcontainers");
-
-const container = await new GenericContainer("alpine")
-  .withExposedPorts(80)
-  .start();
-
-const httpPort = container.getMappedPort(80);
-```
-
-Though not recommended, you can provide fixed ports:
-
-```javascript
-const { GenericContainer } = require("testcontainers");
-
-const container = await new GenericContainer("alpine")
-  .withExposedPorts({
-    container: 80,
-    host: 80
-  })
-  .start();
 ```
 
 ## Reusing a container
@@ -322,8 +243,6 @@ const container = await new GenericContainer("alpine")
 Enabling container reuse, note that two containers are considered equal if their options (exposed ports, commands, mounts, etc) match. This also works across multiple processes:
 
 ```javascript
-const { GenericContainer } = require("testcontainers");
-
 const container1 = await new GenericContainer("alpine")
   .withCommand(["sleep", "infinity"])
   .withReuse()
@@ -337,13 +256,44 @@ const container2 = await new GenericContainer("alpine")
 expect(container1.getId()).toBe(container2.getId());
 ```
 
+## Exposing container ports
+
+You can provide the ports you want to expose from the container:
+
+```javascript
+const container = await new GenericContainer("alpine")
+  .withExposedPorts(22, 80, 443)
+  .start();
+```
+
+Testcontainers will automatically bind an available, random port on the host to each exposed port. This is to avoid port conflicts when running tests quickly or in parallel.
+
+You can retrieve the mapped port as follows:
+
+```javascript
+const container = await new GenericContainer("alpine")
+  .withExposedPorts(80)
+  .start();
+
+const httpPort = container.getMappedPort(80);
+```
+
+Though not recommended, you can provide fixed ports:
+
+```javascript
+const container = await new GenericContainer("alpine")
+  .withExposedPorts({
+    container: 80,
+    host: 80
+  })
+  .start();
+```
+
 ## Running commands
 
 Execute commands inside a running container:
 
 ```javascript
-const { GenericContainer } = require("testcontainers");
-
 const container = await new GenericContainer("alpine")
   .withCommand(["sleep", "infinity"])
   .start();
@@ -355,14 +305,10 @@ const { output, exitCode } = await container.exec(["echo", "hello", "world"]);
 
 Stream logs from a running container:
 ```javascript
-const { GenericContainer } = require("testcontainers");
+const container = await new GenericContainer("alpine").start();
 
-const container = await new GenericContainer("alpine")
-  .start();
-
-const stream = await container.logs();
-stream
-    .on("data", line => console.log(line))
-    .on("err", line => console.error(line))
-    .on("end", () => console.log("Stream closed"));
+(await container.logs())
+  .on("data", line => console.log(line))
+  .on("err", line => console.error(line))
+  .on("end", () => console.log("Stream closed"));
 ```
