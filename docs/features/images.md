@@ -47,7 +47,7 @@ const container = await GenericContainer
   .build();
 ```
 
-### With cache
+### With/without cache
 
 ```javascript
 const container = await GenericContainer
