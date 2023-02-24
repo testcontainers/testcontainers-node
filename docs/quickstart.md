@@ -8,7 +8,7 @@ npm install --save-dev testcontainers
 
 ## Example
 
-Let's spin up a Redis container. Note that omitting the tag will use latest:
+Let's spin up a Redis container:
 
 ```javascript
 const redis = require("async-redis");
