@@ -127,7 +127,6 @@ const container = await new GenericContainer("alpine")
 
 ```javascript
 const container = await new GenericContainer("alpine")
-  .withExposedPorts(5432)
   .withTmpFs({ "/temp_pgdata": "rw,noexec,nosuid,size=65536k" })
   .start();
 ```
