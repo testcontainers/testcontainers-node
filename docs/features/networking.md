@@ -1,12 +1,13 @@
 # Networking
 
-Creating a container within a network:
+## Creating and using a network
+
+Create and start a new network. Start a container within the network:
 
 ```javascript
 const { GenericContainer, Network } = require("testcontainers");
 
-const network = await new Network()
-  .start();
+const network = await new Network().start();
 
 const container = await new GenericContainer("alpine")
   .withNetwork(network)
@@ -16,43 +17,29 @@ await container.stop();
 await network.stop();
 ```
 
-Creating a container with a network mode:
+Find a container's IP address in a given network:
 
 ```javascript
-const { GenericContainer } = require("testcontainers");
+const network = await new Network().start();
 
+const container = await new GenericContainer("alpine")
+  .withNetwork(network)
+  .start();
+
+const networkIpAddress = container.getIpAddress(network.getName());
+```
+
+### With network mode
+
+```javascript
 const container = await new GenericContainer("alpine")
   .withNetworkMode("bridge")
   .start();
 ```
 
-Communicate to containers on the same network via aliases:
+### With extra hosts
 
 ```javascript
-const { GenericContainer, Network } = require("testcontainers");
-
-const network = await new Network()
-    .start();
-
-const container = await new GenericContainer("alpine")
-  .withCommand(["sleep", "infinity"])
-  .withNetwork(network)
-  .start();
-
-const fooContainer = await new GenericContainer("alpine")
-  .withCommand(["sleep", "infinity"])
-  .withNetwork(network)
-  .withNetworkAliases("foo", "bar")
-  .start();
-
-expect((await container.exec(["getent", "hosts", "foo"])).exitCode).toBe(0);
-```
-
-Add hostname mappings:
-
-```javascript
-const { GenericContainer } = require("testcontainers");
-
 const container = await new GenericContainer("alpine")
   .withExtraHosts([{
     host: "foo",
@@ -67,22 +54,30 @@ expect((await container.exec(["getent", "hosts", "foo"])).exitCode).toBe(0);
 expect((await container.exec(["getent", "hosts", "bar"])).exitCode).toBe(0);
 ```
 
-Finding a container's IP address in a given network:
+## Network aliases
+
+Network aliases are the preferred option for container communication on the same network:
 
 ```javascript
-const { GenericContainer, Network } = require("testcontainers");
-
-const network = await new Network()
-  .start();
+const network = await new Network().start();
 
 const container = await new GenericContainer("alpine")
+  .withCommand(["sleep", "infinity"])
   .withNetwork(network)
   .start();
 
-const networkIpAddress = container.getIpAddress(network.getName());
+const fooContainer = await new GenericContainer("alpine")
+  .withCommand(["sleep", "infinity"])
+  .withNetwork(network)
+  .withNetworkAliases("foo")
+  .start();
+
+expect((await container.exec(["getent", "hosts", "foo"])).exitCode).toBe(0);
 ```
 
-[Exposing host ports to the container:](https://www.testcontainers.org/features/networking/#exposing-host-ports-to-the-container)
+## Expose host ports to container
+
+You can expose a host port to a container:
 
 ```javascript
 const { GenericContainer, TestContainers } = require("testcontainers");
@@ -104,12 +99,4 @@ const { output } = await container.exec(["curl", `http://host.testcontainers.int
 assert(output === "hello world");
 ```
 
-### SSHd
-
-Testcontainers will start SSHd when using the expose host port functionality.
-
-Once started, any container that is created will have a host mapping of `host.testcontainers.internal` that points to
-the SSHd container, as well as being connected to its network.
-
-When we then expose a host port, we remote port forward our local port to the SSHd container, which the other
-containers will then be able to access at `host.testcontainers.internal:<exposed-port>`.
+To achieve this, Testcontainers will start a SSHd container. Containers join the same network as the SSHd container and have a host mapping of `host.testcontainers.internal` pointing to it. When we expose a host port, we remote port forward our local port to the SSHd container, which other containers can access at `host.testcontainers.internal:<exposed-port>`.
