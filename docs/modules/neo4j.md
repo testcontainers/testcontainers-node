@@ -1,4 +1,4 @@
-# Apache Pulsar Module
+# Neo4J Module
 
 Testcontainers can be used to automatically create [Apache Pulsar](https://pulsar.apache.org) containers without external services.
 

@@ -1,4 +1,4 @@
-# Elasticsearch container
+# Elastic Search Module
 
 This module helps running [elasticsearch](https://www.elastic.co/products/elasticsearch) using
 Testcontainers.

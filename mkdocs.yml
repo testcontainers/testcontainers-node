@@ -38,7 +38,14 @@ nav:
       - Lifecycle: features/lifecycle.md
       - Wait strategies: features/wait-strategies.md
   - Modules:
-      - modules/x.md
+      - ArangoDB: modules/arangodb.md
+      - Elastic Search: modules/elastic-search.md
+      - Kafka: modules/kafka.md
+      - MongoDB: modules/mongodb.md
+      - MySQL: modules/mysql.md
+      - Nats: modules/nats.md
+      - Neo4J: modules/neo4j.md
+      - PostgreSQL: modules/postgresql.md
   - Configuration:
       - Logging: configuration/logging.md
       - Authentication: configuration/authentication.md

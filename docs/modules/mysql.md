@@ -1,4 +1,4 @@
-# Mockserver Module
+# MySQL Module
 
 Mock Server can be used to mock HTTP services by matching requests against user-defined expectations.
 

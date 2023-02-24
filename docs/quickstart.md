@@ -37,7 +37,7 @@ describe("Redis", () => {
 });
 ```
 
-## TypeScript Example
+## TypeScript
 
 Testcontainers is built with TypeScript and offers first-class support for TypeScript users:
 

@@ -1,4 +1,4 @@
-# Nginx Module
+# Nats Module
 
 Nginx is a web server, reverse proxy and mail proxy and http cache.
 

@@ -1,4 +1,4 @@
-# LocalStack Module
+# MongoDB Module
 
 Testcontainers module for [LocalStack](http://localstack.cloud/), 'a fully functional local AWS cloud stack', to develop and test your cloud and serverless apps without actually using the cloud.
 
