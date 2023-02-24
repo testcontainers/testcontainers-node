@@ -55,8 +55,8 @@ See [environment file](https://docs.docker.com/compose/environment-variables/#us
 
 ```javascript
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
-    .withEnvironmentFile(".env.custom")
-    .up();
+  .withEnvironmentFile(".env.custom")
+  .up();
 ```
 
 ### With profiles
@@ -65,8 +65,8 @@ See [profiles](https://docs.docker.com/compose/profiles/).
 
 ```javascript
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
-    .withProfiles("profile1", "profile2")
-    .up();
+  .withProfiles("profile1", "profile2")
+  .up();
 ```
 
 ### With no recreate
