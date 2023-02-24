@@ -2,29 +2,29 @@
 
 ## Starting a container
 
-Testcontainers will pull the image if it doesn't exist, and re-use it if it does:
+Build and start any container using a Generic Container:
 
 ```javascript
 const { GenericContainer } = require("testcontainers");
 
-const container = await new GenericContainer("alpine")
-  .start();
+const container = await new GenericContainer("alpine").start();
 ```
 
-Pull behaviour can be overridden by specifying a pull policy:
+To use a specific image version:
+
+```javascript
+const container = await new GenericContainer("alpine:3.10").start();
+```
+
+### With a pull policy
+
+Testcontainers will automatically pull an image if it doesn't exist. This is configurable:
 
 ```javascript
 const { GenericContainer, AlwaysPullPolicy } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
   .withPullPolicy(new AlwaysPullPolicy())
-  .start();
-```
-
-Use a specific image version:
-
-```javascript
-const container = await new GenericContainer("alpine:3.10")
   .start();
 ```
 
@@ -85,7 +85,7 @@ const container = await new GenericContainer("alpine")
 
 **Not recommended.** 
 
-If a container with the same name already exists, Docker will raise a conflict. If you are specifying a name to enable container to container communication, look into creating a network and specifying network aliases instead.
+If a container with the same name already exists, Docker will raise a conflict. If you are specifying a name to enable container to container communication, look into creating a network and using network aliases.
 
 **TODO: Link to network docs**
 
@@ -98,7 +98,7 @@ const container = await new GenericContainer("alpine")
 ### With files/content
 
 ```javascript
-const container = await new GenericContainer("postgres")
+const container = await new GenericContainer("alpine")
   .withCopyFilesToContainer([{ 
     source: "/local/file.txt", 
     target: "/remote/file1.txt"
@@ -110,26 +110,25 @@ const container = await new GenericContainer("postgres")
   .start();
 ```
 
-### With a `tmpfs` mount
+### With default log driver
+
+May be necessary when the driver of your docker host does not support reading logs
+and you want to use the `Wait.forLogMessage` (**TODO ADD LINK**) wait strategy.
+
+See [log drivers](https://docs.docker.com/config/containers/logging/configure/#configure-the-logging-driver-for-a-container).
 
 ```javascript
-const container = await new GenericContainer("postgres")
-  .withExposedPorts(5432)
-  .withTmpFs({ "/temp_pgdata": "rw,noexec,nosuid,size=65536k" })
+const container = await new GenericContainer("alpine")
+  .withDefaultLogDriver()
   .start();
 ```
 
-### With default log driver
-
-You can override the logging driver used by Docker to be the default one (json-file).
-This might be necessary when the driver of your docker host does not support reading logs
-and you want to use the `Wait.forLogMessage` (**TODO ADD LINK**) wait strategy. 
-
-See [`--log-driver`](https://docs.docker.com/config/containers/logging/configure/#configure-the-logging-driver-for-a-container).
+### With a tmpfs mount
 
 ```javascript
-const container = await new GenericContainer("redis")
-  .withDefaultLogDriver()
+const container = await new GenericContainer("alpine")
+  .withExposedPorts(5432)
+  .withTmpFs({ "/temp_pgdata": "rw,noexec,nosuid,size=65536k" })
   .start();
 ```
 
@@ -153,7 +152,7 @@ const container = await new GenericContainer("alpine")
 
 ### With added capabilities
 
-See available [capabilities](https://man7.org/linux/man-pages/man7/capabilities.7.html).
+See [capabilities](https://man7.org/linux/man-pages/man7/capabilities.7.html).
 
 ```javascript
 const container = await new GenericContainer("alpine")
@@ -163,7 +162,7 @@ const container = await new GenericContainer("alpine")
 
 ### With dropped capabilities
 
-See available [capabilities](https://man7.org/linux/man-pages/man7/capabilities.7.html).
+See [capabilities](https://man7.org/linux/man-pages/man7/capabilities.7.html).
 
 ```javascript
 const container = await new GenericContainer("alpine")
@@ -196,7 +195,7 @@ const container = await new GenericContainer("alpine")
 
 ## Stopping a container
 
-Testcontainers by default will not wait until the container has stopped. It will simply issue the stop command and return immediately:
+Testcontainers by default will not wait until the container has stopped. It will simply issue the stop command and return immediately. This is to save time when running tests.
 
 ```javascript
 const container = await new GenericContainer("postgres").start();
@@ -210,7 +209,7 @@ const container = await new GenericContainer("postgres").start();
 await container.stop({ timeout: 10000 }); // ms
 ```
 
-Testcontainers by default will remove volumes created by the container when stopped. This behaviour can be configured:
+Volumes created by the container are removed when stopped. This is configurable:
 
 ```javascript
 const container = await new GenericContainer("postgres").start();
@@ -219,8 +218,6 @@ await container.stop({ removeVolumes: false });
 
 ## Restarting a container
 
-Restarting a container:
-
 ```javascript
 const container = await new GenericContainer("alpine").start();
 await container.restart();
@@ -228,7 +225,9 @@ await container.restart();
 
 ## Reusing a container
 
-Enabling container reuse, note that two containers are considered equal if their options (exposed ports, commands, mounts, etc) match. This also works across multiple processes:
+Enabling container re-use means that Testcontainers will **not** start a new container if a Testcontainers managed container with the same configuration is already running. 
+
+This is useful for example if you want to share a container across tests without global set up.
 
 ```javascript
 const container1 = await new GenericContainer("alpine")
@@ -246,7 +245,7 @@ expect(container1.getId()).toBe(container2.getId());
 
 ## Exposing container ports
 
-You can provide the ports you want to expose from the container:
+Specify which container ports you want accessible by the host:
 
 ```javascript
 const container = await new GenericContainer("alpine")
@@ -254,9 +253,9 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
-Testcontainers will automatically bind an available, random port on the host to each exposed port. This is to avoid port conflicts when running tests quickly or in parallel.
+Testcontainers will automatically bind an available, random port on the host to each exposed container port. This is to avoid port conflicts when running tests quickly or in parallel.
 
-You can retrieve the mapped port as follows:
+Retrieve the mapped port as follows:
 
 ```javascript
 const container = await new GenericContainer("alpine")
@@ -266,7 +265,9 @@ const container = await new GenericContainer("alpine")
 const httpPort = container.getMappedPort(80);
 ```
 
-Though not recommended, you can provide fixed ports:
+**Not recommended.**
+
+Specify fixed host port bindings:
 
 ```javascript
 const container = await new GenericContainer("alpine")
@@ -279,8 +280,6 @@ const container = await new GenericContainer("alpine")
 
 ## Running commands
 
-Execute commands inside a running container:
-
 ```javascript
 const container = await new GenericContainer("alpine")
   .withCommand(["sleep", "infinity"])
@@ -291,7 +290,6 @@ const { output, exitCode } = await container.exec(["echo", "hello", "world"]);
 
 ## Streaming logs
 
-Stream logs from a running container:
 ```javascript
 const container = await new GenericContainer("alpine").start();
 
