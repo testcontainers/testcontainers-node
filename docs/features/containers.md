@@ -104,7 +104,7 @@ const container = await new GenericContainer("alpine")
 
 ### With default log driver
 
-May be necessary when the driver of your docker host does not support reading logs, and you want to use the `Wait.forLogMessage` (**TODO ADD LINK**) wait strategy.
+May be necessary when the driver of your docker host does not support reading logs, and you want to use the [Log output wait strategy](../wait-strategies#log-output).
 
 See [log drivers](https://docs.docker.com/config/containers/logging/configure/#configure-the-logging-driver-for-a-container).
 
