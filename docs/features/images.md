@@ -32,10 +32,7 @@ const container = await GenericContainer
 ```javascript
 const container = await GenericContainer
   .fromDockerfile("/path/to/build-context")
-  .withBuildArgs({
-    ARG_1: "VALUE_1",    
-    ARG_2: "VALUE_2",    
-  })
+  .withBuildArgs({ ARG: "VALUE" })
   .build();
 ```
 

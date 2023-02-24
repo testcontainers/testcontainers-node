@@ -8,7 +8,7 @@ npm install --save-dev testcontainers
 
 ## Example
 
-Let's spin up a Redis container:
+Let's spin up and use a Redis container:
 
 ```javascript
 const redis = require("async-redis");

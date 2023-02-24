@@ -48,10 +48,7 @@ const container = await new GenericContainer("alpine")
 
 ```javascript
 const container = await new GenericContainer("alpine")
-  .withEnvironment({ 
-    ENV_1: "VALUE_1", 
-    ENV_2: "VALUE_2", 
-  })
+  .withEnvironment({ ENV: "VALUE" })
   .start();
 ```
 
@@ -74,10 +71,7 @@ const container = await new GenericContainer("alpine")
 
 ```javascript
 const container = await new GenericContainer("alpine")
-  .withLabels({
-    label1: "value1",
-    label2: "value2",
-  })
+  .withLabels({ label: "value" })
   .start();
 ```
 
