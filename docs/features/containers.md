@@ -1,47 +1,55 @@
 # Containers
 
-Starting a container with a specific image version:
+## Starting a container
+
+Testcontainers will automatically pull the image if it doesn't already exist:
 
 ```javascript
 const { GenericContainer } = require("testcontainers");
 
-const container = await new GenericContainer("alpine:3.10")
-  .start();
+const container = await new GenericContainer("alpine").start();
 ```
 
-Stopping a container
-Testcontainers will not wait for a container to stop, to override:
+Start a container with a specific image version:
 
 ```javascript
 const { GenericContainer } = require("testcontainers");
 
-const container = await new GenericContainer("postgres")
-  .withExposedPorts(5432)
-  .start();
-
-await container.stop({
-  timeout: 10000
-});
+const container = await new GenericContainer("alpine:3.10").start();
 ```
 
-Testcontainers will remove associated volumes created
-by the container when stopped, to override:
+## Stopping a container
+
+Testcontainers by default will not wait until the container has stopped. It will simply issue the stop command and return immediately:
 
 ```javascript
 const { GenericContainer } = require("testcontainers");
 
-const container = await new GenericContainer("postgres")
-  .withExposedPorts(5432)
-  .start();
-
-await container.stop({
-  removeVolumes: false
-});
+const container = await new GenericContainer("postgres").start();
+await container.stop();
 ```
 
+If you need to wait for the container to be stopped, you can provide a timeout:
 
+```javascript
+const { GenericContainer } = require("testcontainers");
 
-Creating a container with multiple exposed ports:
+const container = await new GenericContainer("postgres").start();
+await container.stop({ timeout: 10000 }); // ms
+```
+
+Testcontainers by default will remove volumes created by the container when stopped. This behaviour can be configured:
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await new GenericContainer("postgres").start();
+await container.stop({ removeVolumes: false });
+```
+
+## Exposing container ports
+
+You can provide the ports you want to expose from the container:
 
 ```javascript
 const { GenericContainer } = require("testcontainers");
@@ -51,20 +59,34 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+Testcontainers will automatically bind an available, random port on the host to each exposed port. This is to avoid port conflicts when running tests quickly or in parallel. 
 
-Specifying an exact host port to bind to (not recommended, Testcontainers will automatically find an available port):
+You can retrieve the mapped port as follows:
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await new GenericContainer("alpine")
+  .withExposedPorts(80)
+  .start();
+
+const httpPort = container.getMappedPort(80);
+```
+
+Though not recommended, you can provide fixed ports:
 
 ```javascript
 const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
   .withExposedPorts({
-    container: 8000,
-    host: 8080
+    container: 80,
+    host: 80
   })
   .start();
 ```
 
+## Container reuse
 
 Enabling container reuse, note that two containers are considered equal if their options (exposed ports, commands, mounts, etc) match. This also works across multiple processes:
 
