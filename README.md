@@ -10,9 +10,7 @@
 
 ![Testcontainers Banner](https://github.com/testcontainers/testcontainers-node/raw/docs/docs/site/logo.png)
 
-> Testcontainers is a NodeJS library that supports tests, providing lightweight, throwaway instances of common databases, Selenium web browsers, or anything else that can run in a Docker container.
-
-## [Documentation](https://node.testcontainers.org/)
+## [📖 Documentation](https://node.testcontainers.org/)
 
 ## License
 
