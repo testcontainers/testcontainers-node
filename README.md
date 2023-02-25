@@ -1,5 +1,7 @@
 # Testcontainers
 
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=master&repo=116414510&machine=standardLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json&location=EastUs)
+
 > Testcontainers is a NodeJS library that supports tests, providing lightweight, throwaway instances of common databases, Selenium web browsers, or anything else that can run in a Docker container.
 
 [![Test](https://github.com/testcontainers/testcontainers-node/actions/workflows/test-master.yml/badge.svg)](https://github.com/testcontainers/testcontainers-node/actions/workflows/test-master.yml)
