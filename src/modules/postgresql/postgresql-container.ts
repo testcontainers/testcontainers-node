@@ -71,6 +71,9 @@ export class StartedPostgreSqlContainer extends AbstractStartedContainer {
     return this.password;
   }
 
+  /**
+   * @returns A connection URI in the form of `postgres[ql]://[username[:password]@][host[:port],]/database`
+   */
   public getConnectionUri(): string {
     const url = new URL("", "postgres://");
     url.hostname = this.getHost();
