@@ -23,6 +23,21 @@ describe("PostgreSqlContainer", () => {
     await container.stop();
   });
 
+  it("should work with database URI", async () => {
+    const container = await new PostgreSqlContainer().start();
+
+    const client = new Client({
+      connectionString: container.getConnectionUri(),
+    });
+    await client.connect();
+
+    const result = await client.query("SELECT 1");
+    expect(result.rows[0]).toEqual({ "?column?": 1 });
+
+    await client.end();
+    await container.stop();
+  });
+
   it("should set database", async () => {
     const container = await new PostgreSqlContainer().withDatabase("customDatabase").start();
 

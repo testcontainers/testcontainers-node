@@ -70,4 +70,14 @@ export class StartedPostgreSqlContainer extends AbstractStartedContainer {
   public getPassword(): string {
     return this.password;
   }
+
+  public getConnectionUri(): string {
+    const url = new URL("", "postgres://");
+    url.hostname = this.getHost();
+    url.port = this.getPort().toString();
+    url.pathname = this.getDatabase();
+    url.username = this.getUsername();
+    url.password = this.getPassword();
+    return url.toString();
+  }
 }
