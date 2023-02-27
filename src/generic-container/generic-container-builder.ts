@@ -45,7 +45,7 @@ export class GenericContainerBuilder {
 
     const dockerfile = path.resolve(this.context, this.dockerfileName);
     log.debug(`Preparing to build Dockerfile: ${dockerfile}`);
-    const imageNames = await getDockerfileImages(dockerfile);
+    const imageNames = await getDockerfileImages(dockerfile, this.buildArgs);
     const registryConfig = await this.getRegistryConfig(imageNames);
 
     await buildImage({
