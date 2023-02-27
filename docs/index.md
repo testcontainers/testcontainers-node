@@ -11,6 +11,7 @@
     <a href="https://testcontainers-python.readthedocs.io/en/latest/" class="card-grid-item"><img src="site/language-logos/python.svg"/>Python</a>
     <a class="card-grid-item"><img src="site/language-logos/nodejs.svg"/>Node.js</a>
     <a href="https://docs.rs/testcontainers/latest/testcontainers/" class="card-grid-item"><img src="site/language-logos/rust.svg"/>Rust</a>
+    <a class="card-grid-item" href="https://github.com/testcontainers/testcontainers-hs/"><img src="site/language-logos/haskell.svg"/>Haskell</a>
 </div>
 
 ## About
