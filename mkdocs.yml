@@ -1,7 +1,7 @@
 site_name: Testcontainers for NodeJS
 repo_name: 'testcontainers-node'
 repo_url: 'https://github.com/testcontainers/testcontainers-node'
-edit_uri: edit/master/docs/
+edit_uri: edit/main/docs/
 
 theme:
   name: 'material'
