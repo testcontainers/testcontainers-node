@@ -19,7 +19,7 @@ Testcontainers is a library that supports tests, providing lightweight, throwawa
 
 ## License
 
-See [LICENSE](https://raw.githubusercontent.com/testcontainers/testcontainers-node/master/LICENSE).
+See [LICENSE](https://raw.githubusercontent.com/testcontainers/testcontainers-node/main/LICENSE).
 
 ## Copyright
 
