@@ -22,7 +22,7 @@ async function parseImages(dockerfile: string): Promise<string[]> {
     (await fs.readFile(dockerfile, "utf8"))
       .split(EOL)
       .filter((line) => line.toUpperCase().startsWith("FROM"))
-      .map((line: string) => line.split(" ").filter((part) => part !== "")[1])
+      .map((line) => line.split(" ").filter((part) => part !== "")[1])
       .reduce((prev, next) => prev.add(next), new Set<string>())
       .values()
   );
