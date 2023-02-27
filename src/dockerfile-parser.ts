@@ -8,8 +8,8 @@ const buildArgRegex = /\${([^{]+)}/g;
 
 export const getDockerfileImages = async (dockerfile: string, buildArgs: BuildArgs): Promise<DockerImageName[]> => {
   try {
-    return Array.from(await parseImages(dockerfile))
-      .map((line: string) => line.replace(buildArgRegex, (_, arg) => buildArgs[arg] ?? ""))
+    return (await parseImages(dockerfile))
+      .map((line) => line.replace(buildArgRegex, (_, arg) => buildArgs[arg] ?? ""))
       .map((line) => DockerImageName.fromString(line));
   } catch (err) {
     log.error(`Failed to read Dockerfile "${dockerfile}": ${err}`);
@@ -17,11 +17,13 @@ export const getDockerfileImages = async (dockerfile: string, buildArgs: BuildAr
   }
 };
 
-async function parseImages(dockerfile: string) {
-  return (await fs.readFile(dockerfile, "utf8"))
-    .split(EOL)
-    .filter((line) => line.toUpperCase().startsWith("FROM"))
-    .map((line: string) => line.split(" ").filter((part) => part !== "")[1])
-    .reduce((prev, next) => prev.add(next), new Set<string>())
-    .values();
+async function parseImages(dockerfile: string): Promise<string[]> {
+  return Array.from(
+    (await fs.readFile(dockerfile, "utf8"))
+      .split(EOL)
+      .filter((line) => line.toUpperCase().startsWith("FROM"))
+      .map((line: string) => line.split(" ").filter((part) => part !== "")[1])
+      .reduce((prev, next) => prev.add(next), new Set<string>())
+      .values()
+  );
 }
