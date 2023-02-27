@@ -31,6 +31,8 @@ const networkIpAddress = container.getIpAddress(network.getName());
 
 ### With network mode
 
+Note that some network modes, for example `host`, only work on Linux machines.
+
 ```javascript
 const container = await new GenericContainer("alpine")
   .withNetworkMode("bridge")
