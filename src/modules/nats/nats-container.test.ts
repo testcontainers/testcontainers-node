@@ -4,6 +4,7 @@ import { NatsContainer } from "./nats-container";
 describe("NatsContainer", () => {
   jest.setTimeout(180_000);
 
+  // connect {
   it("should start, connect and close", async () => {
     const container = await new NatsContainer().start();
 
@@ -17,7 +18,9 @@ describe("NatsContainer", () => {
 
     await container.stop();
   });
+  // }
 
+  // pubsub {
   it("should subscribe and receive one published message", async () => {
     const SUBJECT = "HELLO";
     const PAYLOAD = "WORLD";
@@ -46,7 +49,9 @@ describe("NatsContainer", () => {
 
     await container.stop();
   });
+  // }
 
+  // credentials {
   it("should start with alternative username and password ", async () => {
     // set username and password like this
     const container = await new NatsContainer().withPass("1234").withUsername("George").start();
@@ -60,6 +65,7 @@ describe("NatsContainer", () => {
 
     await container.stop();
   });
+  // }
 
   it("should immediately end when started with version argument ", async () => {
     // for the complete list of available arguments see:
