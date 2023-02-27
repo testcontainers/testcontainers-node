@@ -8,7 +8,7 @@
 [![npm version](https://badge.fury.io/js/testcontainers.svg)](https://www.npmjs.com/package/testcontainers)
 [![npm version](https://img.shields.io/npm/dm/testcontainers.svg)](https://www.npmjs.com/package/testcontainers)
 
-![Testcontainers Banner](https://github.com/testcontainers/testcontainers-node/raw/docs/docs/site/logo.png)
+![Testcontainers Banner](https://github.com/testcontainers/testcontainers-node/raw/master/docs/site/logo.png)
 
 ## [📖 Documentation](https://node.testcontainers.org/)
 
