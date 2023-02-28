@@ -6,12 +6,13 @@ All possible configurations for Testcontainers are found here.
 
 Configuration of the Docker daemon:
 
-| Variable          | Example           | Description                                                    |
-|-------------------|-------------------|----------------------------------------------------------------|
-| DOCKER_HOST       | tcp://docker:2375 | Set the URL of the docker daemon                               |
-| DOCKER_TLS_VERIFY | 1                 | Enable/disable TLS communication with the docker daemon        |
-| DOCKER_CERT_PATH  | /some/path        | Configures the path to the files used for TLS verification     |
-| DOCKER_CONFIG     | /some/path        | Configures the path to the config.json file for authentication |
+| Variable           | Example                                                            | Description                                                                             |
+|--------------------|--------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
+| DOCKER_HOST        | tcp://docker:2375                                                  | Set the URL of the docker daemon                                                        |
+| DOCKER_TLS_VERIFY  | 1                                                                  | Enable/disable TLS communication with the docker daemon                                 |
+| DOCKER_CERT_PATH   | /some/path                                                         | Configures the path to the files used for TLS verification                              |
+| DOCKER_CONFIG      | /some/path                                                         | Configures the path to the config.json file for authentication                          |
+| DOCKER_AUTH_CONFIG | `{"auths":{"https://registry.example.com":{"user":"","pass":""}}}` | JSON string representation of the config.json file, takes precedence for authentication |
 
 ## Testcontainers
 

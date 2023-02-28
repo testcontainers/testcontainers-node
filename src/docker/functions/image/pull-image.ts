@@ -3,7 +3,7 @@ import { log } from "../../../logger";
 import { PullStreamParser } from "../../pull-stream-parser";
 import { imageExists } from "./image-exists";
 import Dockerode from "dockerode";
-import { getAuthConfig } from "../../../registry-auth-locator";
+import { getAuthConfig } from "../../../registry-auth-locator/get-auth-config";
 import AsyncLock from "async-lock";
 
 export type PullImageOptions = {

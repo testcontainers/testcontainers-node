@@ -8,7 +8,7 @@ import { log } from "../logger";
 import { getDockerfileImages } from "../dockerfile-parser";
 import { buildImage } from "../docker/functions/image/build-image";
 import { imageExists } from "../docker/functions/image/image-exists";
-import { getAuthConfig } from "../registry-auth-locator";
+import { getAuthConfig } from "../registry-auth-locator/get-auth-config";
 import { GenericContainer } from "./generic-container";
 import { dockerClient } from "../docker/docker-client";
 
