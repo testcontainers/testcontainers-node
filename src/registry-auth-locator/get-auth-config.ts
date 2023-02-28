@@ -1,7 +1,8 @@
 import path from "path";
 import os from "os";
 import { DockerConfig } from "./types";
-import { existsSync, promises as fs } from "fs";
+import { existsSync } from "fs";
+import { readFile } from "fs/promises";
 import { CredHelpers } from "./cred-helpers";
 import { CredsStore } from "./creds-store";
 import { Auths } from "./auths";
@@ -16,19 +17,24 @@ const dockerConfigLocation = process.env.DOCKER_CONFIG || `${os.homedir()}/.dock
 const dockerConfigFile = path.resolve(dockerConfigLocation, "config.json");
 
 const readDockerConfig = async (): Promise<DockerConfig> => {
-  if (!existsSync(dockerConfigFile)) {
+  if (process.env.DOCKER_AUTH_CONFIG) {
+    return parseDockerConfig(process.env.DOCKER_AUTH_CONFIG);
+  } else if (existsSync(dockerConfigFile)) {
+    return parseDockerConfig((await readFile(dockerConfigFile)).toString());
+  } else {
     return Promise.resolve({});
   }
+};
 
-  const buffer = await fs.readFile(dockerConfigFile);
-  const object = JSON.parse(buffer.toString());
+function parseDockerConfig(dockerConfig: string) {
+  const object = JSON.parse(dockerConfig);
 
   return {
     credsStore: object.credsStore,
     credHelpers: object.credHelpers,
     auths: object.auths,
   };
-};
+}
 
 const dockerConfig = readDockerConfig();
 
