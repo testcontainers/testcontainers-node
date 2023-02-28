@@ -4,6 +4,11 @@ import { getDockerInfo } from "./docker/functions/get-info";
 import Dockerode from "dockerode";
 
 export const logSystemDiagnostics = async (dockerode: Dockerode): Promise<void> => {
+  if (!log.enabled()) {
+    // Logs are not enabled, no point in doing the work of fetching the information
+    return;
+  }
+
   log.debug("Fetching system diagnostics");
 
   const info = {
