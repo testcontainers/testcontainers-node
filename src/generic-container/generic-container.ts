@@ -61,6 +61,7 @@ export class GenericContainer implements TestContainer {
   protected startupTimeout = 60_000;
   protected useDefaultLogDriver = false;
   protected privilegedMode = false;
+  protected workingDir?: string;
   protected ipcMode?: string;
   protected ulimits?: Ulimits;
   protected addedCapabilities?: string[];
@@ -119,6 +120,7 @@ export class GenericContainer implements TestContainer {
       addedCapabilities: this.addedCapabilities,
       droppedCapabilities: this.droppedCapabilities,
       user: this.user,
+      workingDir: this.workingDir,
     };
 
     if (this.reuse) {
@@ -375,5 +377,10 @@ export class GenericContainer implements TestContainer {
       this.tarToCopy = archiver("tar");
     }
     return this.tarToCopy;
+  }
+
+  public withWorkingDir(workingDir: string): this {
+    this.workingDir = workingDir;
+    return this;
   }
 }

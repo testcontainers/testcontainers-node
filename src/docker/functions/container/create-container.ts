@@ -28,6 +28,7 @@ export type CreateContainerOptions = {
   addedCapabilities?: string[];
   droppedCapabilities?: string[];
   user?: string;
+  workingDir?: string;
 };
 
 export const createContainer = async (options: CreateContainerOptions): Promise<Dockerode.Container> => {
@@ -45,6 +46,7 @@ export const createContainer = async (options: CreateContainerOptions): Promise<
       Entrypoint: options.entrypoint,
       Labels: createLabels(options.reusable, options.imageName, options.labels),
       Healthcheck: getHealthCheck(options.healthCheck),
+      WorkingDir: options.workingDir,
       HostConfig: {
         IpcMode: options.ipcMode,
         ExtraHosts: getExtraHosts(options.extraHosts),
