@@ -188,6 +188,17 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
+  it("should set working directory", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withWorkingDir("/tmp")
+      .withCommand(["node", "../index.js"])
+      .withExposedPorts(8080)
+      .start();
+
+    const { output } = await container.exec(["pwd"]);
+    expect(output.trim()).toBe("/tmp");
+  });
+
   it("should set entrypoint", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withEntrypoint(["node"])
@@ -456,7 +467,7 @@ describe("GenericContainer", () => {
   });
 
   it("should wait for custom health check using CMD to run the command directly without a shell", async () => {
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
       .withHealthCheck({
         test: ["CMD", "/usr/bin/wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/hello-world"],

@@ -106,6 +106,14 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+### With working directory
+
+```javascript
+const container = await new GenericContainer("alpine")
+  .withWorkingDir("/opt")
+  .start();
+```
+
 ### With default log driver
 
 May be necessary when the driver of your docker host does not support reading logs, and you want to use the [Log output wait strategy](../wait-strategies#log-output).
