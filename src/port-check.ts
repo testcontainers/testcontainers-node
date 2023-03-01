@@ -52,7 +52,7 @@ export class InternalPortCheck implements PortCheck {
     );
     const isBound = commandResults.some((result) => result.exitCode === 0);
 
-    if (!isBound) {
+    if (!isBound && log.enabled()) {
       const shellExists = commandResults.some((result) => result.exitCode !== 126);
       if (!shellExists) {
         if (!this.isDistroless) {

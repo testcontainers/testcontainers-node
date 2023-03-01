@@ -25,6 +25,7 @@
     "prepare": "npm run build && husky install",
     "pre-commit": "lint-staged",
     "build": "npm run clean && tsc -p tsconfig.prod.json",
+    "docs:serve": "docker-compose up",
     "clean": "rimraf dist",
     "test": "cross-env DEBUG=testcontainers,testcontainers:exec jest --runInBand --coverage",
     "format": "prettier --write package.json \"src/**/*.ts\"",

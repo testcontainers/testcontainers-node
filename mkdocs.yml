@@ -1,0 +1,49 @@
+site_name: Testcontainers for NodeJS
+repo_name: 'testcontainers-node'
+repo_url: 'https://github.com/testcontainers/testcontainers-node'
+edit_uri: edit/main/docs/
+
+theme:
+  name: 'material'
+  custom_dir: 'docs/site/theme'
+  palette:
+    scheme: testcontainers
+  font:
+    text: Roboto
+    code: Roboto Mono
+  logo: 'site/logo.svg'
+  favicon: 'site/favicon.ico'
+
+extra_css:
+  - 'site/css/extra.css'
+
+plugins:
+  - search
+  - codeinclude
+  - markdownextradata
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed
+
+nav:
+  - Home: index.md
+  - Quickstart: quickstart.md
+  - Features:
+      - Containers: features/containers.md
+      - Images: features/images.md
+      - Networking: features/networking.md
+      - Compose: features/compose.md
+      - Wait strategies: features/wait-strategies.md
+  - Modules:
+      - ArangoDB: modules/arangodb.md
+      - Elastic Search: modules/elastic-search.md
+      - Kafka: modules/kafka.md
+      - MongoDB: modules/mongodb.md
+      - MySQL: modules/mysql.md
+      - Nats: modules/nats.md
+      - Neo4J: modules/neo4j.md
+      - PostgreSQL: modules/postgresql.md
+  - Configuration: configuration.md
