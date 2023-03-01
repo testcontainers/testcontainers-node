@@ -9,7 +9,7 @@
 <!--/codeinclude-->
 
 <!--codeinclude-->
-[Connect and execute query using URI:](../../src/modules/postgresql/postgresql-container.test.ts) inside_block:connectUri
+[Connect and execute query using URI:](../../src/modules/postgresql/postgresql-container.test.ts) inside_block:uriConnect
 <!--/codeinclude-->
 
 <!--codeinclude-->
