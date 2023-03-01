@@ -9,6 +9,10 @@
 <!--/codeinclude-->
 
 <!--codeinclude-->
+[Connect and execute query using URI:](../../src/modules/postgresql/postgresql-container.test.ts) inside_block:connectUri
+<!--/codeinclude-->
+
+<!--codeinclude-->
 [Set database:](../../src/modules/postgresql/postgresql-container.test.ts) inside_block:setDatabase
 <!--/codeinclude-->
 
