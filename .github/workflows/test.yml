@@ -29,7 +29,6 @@ jobs:
     - name: Setup Remote Docker Daemon
       run: |
         sh -c "$(curl -fsSL https://get.testcontainers.cloud/bash)"
-        ./tcc-agent &
         ./tcc-agent wait
         cat ~/.testcontainers.properties | grep docker.host
       env:
