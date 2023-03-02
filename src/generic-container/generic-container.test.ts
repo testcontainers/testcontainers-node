@@ -10,7 +10,7 @@ import { Network } from "../network";
 import { getContainerById } from "../docker/functions/container/get-container";
 
 describe("GenericContainer", () => {
-  jest.setTimeout(180_000);
+  jest.setTimeout(20_000);
 
   const fixtures = path.resolve(__dirname, "..", "..", "fixtures", "docker");
 
