@@ -26,6 +26,12 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - name: Install dependencies
       run: npm ci --omit=optional
+    - name: Setup Remote Docker Daemon
+      run: |
+        sh -c "$(curl -fsSL https://get.testcontainers.cloud/bash)"
+        cat ~/.testcontainers.properties | grep docker.host
+      env:
+        TC_CLOUD_LOGS_VERBOSE: true
     - name: Run tests
       run: npm test
 
