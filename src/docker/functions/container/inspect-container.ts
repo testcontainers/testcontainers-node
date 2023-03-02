@@ -1,7 +1,6 @@
 import { HealthCheckStatus, Labels, NetworkSettings, Ports } from "../../types";
 import Dockerode, { ContainerInspectInfo } from "dockerode";
 import { log } from "../../../logger";
-import * as dns from "dns";
 
 export type InspectResult = {
   name: string;
@@ -39,10 +38,6 @@ export const inspectContainer = async (container: Dockerode.Container): Promise<
 };
 
 const getPorts = (inspectInfo: ContainerInspectInfo): Ports => {
-  dns.setDefaultResultOrder("verbatim");
-  dns.lookup("localhost", (err, address, family) => {
-    console.log("address: %j family: IPv%s", address, family);
-  });
   console.log(inspectInfo.NetworkSettings.Ports);
   return Object.entries(inspectInfo.NetworkSettings.Ports)
     .filter(([, hostPorts]) => hostPorts !== null)

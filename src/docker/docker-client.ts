@@ -6,6 +6,7 @@ import { existsSync, promises as fs } from "fs";
 import { runInContainer } from "./functions/run-in-container";
 import { logSystemDiagnostics } from "../log-system-diagnostics";
 import * as propertiesFile from "../testcontainers-properties-file";
+import dns from "dns";
 
 type DockerClient = {
   host: string;
@@ -14,6 +15,11 @@ type DockerClient = {
 };
 
 const getDockerClient = async (): Promise<DockerClient> => {
+  dns.setDefaultResultOrder("verbatim");
+  dns.lookup("localhost", (err, address, family) => {
+    console.log("address: %j family: IPv%s", address, family);
+  });
+
   const strategies: DockerClientStrategy[] = [
     new ConfigurationStrategy(),
     new UnixSocketStrategy(),
