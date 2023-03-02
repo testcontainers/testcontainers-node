@@ -47,7 +47,7 @@ const getPorts = (inspectInfo: ContainerInspectInfo): Ports => {
   return Object.entries(inspectInfo.NetworkSettings.Ports)
     .filter(([, hostPorts]) => hostPorts !== null)
     .map(([internalPort, hostPorts]) => {
-      const hostPort = hostPorts[1].HostPort;
+      const hostPort = hostPorts[hostPorts.length - 1].HostPort; // todo parse HostIPs to get correct family instead of relying on index
       return { [parseInt(internalPort.split("/")[0])]: parseInt(hostPort) };
     })
     .reduce((acc, curr) => ({ ...acc, ...curr }), {});
