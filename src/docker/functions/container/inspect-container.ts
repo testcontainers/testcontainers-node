@@ -39,6 +39,7 @@ export const inspectContainer = async (container: Dockerode.Container): Promise<
 };
 
 const getPorts = (inspectInfo: ContainerInspectInfo): Ports => {
+  dns.setDefaultResultOrder("verbatim");
   dns.lookup("localhost", (err, address, family) => {
     console.log("address: %j family: IPv%s", address, family);
   });
