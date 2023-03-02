@@ -29,8 +29,11 @@ jobs:
     - name: Setup Remote Docker Daemon
       run: |
         sh -c "$(curl -fsSL https://get.testcontainers.cloud/bash)"
+        ./tcc-agent &
+        ./tcc-agent wait
         cat ~/.testcontainers.properties | grep docker.host
       env:
+        TC_CLOUD_TOKEN: ${{ secrets.TC_CLOUD_TOKEN }}
         TC_CLOUD_LOGS_VERBOSE: true
     - name: Run tests
       run: npm test
