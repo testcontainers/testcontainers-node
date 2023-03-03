@@ -31,8 +31,8 @@ jobs:
         sh -c "$(curl -fsSL https://get.testcontainers.cloud/bash)"
         ./tcc-agent wait
         cat ~/.testcontainers.properties | grep docker.host
-#        sed -i "s/127.0.0.1/localhost/" ~/.testcontainers.properties
-#        cat ~/.testcontainers.properties | grep docker.host
+        sed -i "s/127.0.0.1/localhost/" ~/.testcontainers.properties
+        cat ~/.testcontainers.properties | grep docker.host
       env:
         TC_CLOUD_TOKEN: ${{ secrets.TC_CLOUD_TOKEN }}
         TC_CLOUD_LOGS_VERBOSE: true
