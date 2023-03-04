@@ -4,12 +4,13 @@ import { log } from "../logger";
 import { URL } from "url";
 import { existsSync, promises as fs } from "fs";
 import { runInContainer } from "./functions/run-in-container";
-import { logSystemDiagnostics } from "../log-system-diagnostics";
 import * as propertiesFile from "../testcontainers-properties-file";
+import { getSystemInfo } from "../system-info";
 
 type DockerClient = {
   host: string;
   dockerode: Dockerode;
+  indexServerAddress: string;
   composeEnvironment: NodeJS.ProcessEnv;
 };
 
@@ -26,10 +27,12 @@ const getDockerClient = async (): Promise<DockerClient> => {
       const { uri, dockerode, composeEnvironment } = await strategy.initialise();
       log.debug(`Testing Docker client strategy URI: ${uri}`);
       if (await isDockerDaemonReachable(dockerode)) {
-        const host = await resolveHost(dockerode, uri);
+        const {
+          dockerInfo: { indexServerAddress },
+        } = await getSystemInfo(dockerode);
+        const host = await resolveHost(dockerode, indexServerAddress, uri);
         log.info(`Using Docker client strategy: ${strategy.getName()}, Docker host: ${host}`);
-        logSystemDiagnostics(dockerode);
-        return { host, dockerode, composeEnvironment };
+        return { host, dockerode, indexServerAddress, composeEnvironment };
       } else {
         log.warn(`Docker client strategy ${strategy.getName()} is not reachable`);
       }
@@ -142,7 +145,7 @@ class NpipeSocketStrategy implements DockerClientStrategy {
   }
 }
 
-const resolveHost = async (dockerode: Dockerode, uri: string): Promise<string> => {
+const resolveHost = async (dockerode: Dockerode, indexServerAddress: string, uri: string): Promise<string> => {
   if (process.env.TESTCONTAINERS_HOST_OVERRIDE !== undefined) {
     return process.env.TESTCONTAINERS_HOST_OVERRIDE;
   }
@@ -161,7 +164,7 @@ const resolveHost = async (dockerode: Dockerode, uri: string): Promise<string> =
         if (gateway !== undefined) {
           return gateway;
         }
-        const defaultGateway = await findDefaultGateway(dockerode);
+        const defaultGateway = await findDefaultGateway(dockerode, indexServerAddress);
         if (defaultGateway !== undefined) {
           return defaultGateway;
         }
@@ -179,9 +182,13 @@ const findGateway = async (dockerode: Dockerode): Promise<string | undefined> =>
   return inspectResult?.IPAM?.Config?.find((config) => config.Gateway !== undefined)?.Gateway;
 };
 
-const findDefaultGateway = async (dockerode: Dockerode): Promise<string | undefined> => {
+const findDefaultGateway = async (dockerode: Dockerode, indexServerAddress: string): Promise<string | undefined> => {
   log.debug(`Checking default gateway for Docker host`);
-  return runInContainer(dockerode, "alpine:3.14", ["sh", "-c", "ip route|awk '/default/ { print $3 }'"]);
+  return runInContainer(dockerode, indexServerAddress, "alpine:3.14", [
+    "sh",
+    "-c",
+    "ip route|awk '/default/ { print $3 }'",
+  ]);
 };
 
 const isInContainer = () => existsSync("/.dockerenv");

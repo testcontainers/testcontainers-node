@@ -46,7 +46,8 @@ export class GenericContainerBuilder {
     const dockerfile = path.resolve(this.context, this.dockerfileName);
     log.debug(`Preparing to build Dockerfile: ${dockerfile}`);
     const imageNames = await getDockerfileImages(dockerfile, this.buildArgs);
-    const registryConfig = await this.getRegistryConfig(imageNames);
+    const { dockerode, indexServerAddress } = await dockerClient();
+    const registryConfig = await this.getRegistryConfig(indexServerAddress, imageNames);
 
     await buildImage({
       imageName: imageName,
@@ -59,19 +60,19 @@ export class GenericContainerBuilder {
     });
     const container = new GenericContainer(imageName.toString());
 
-    if (!(await imageExists((await dockerClient()).dockerode, imageName))) {
+    if (!(await imageExists(dockerode, imageName))) {
       throw new Error("Failed to build image");
     }
 
     return Promise.resolve(container);
   }
 
-  private async getRegistryConfig(imageNames: DockerImageName[]): Promise<RegistryConfig> {
+  private async getRegistryConfig(indexServerAddress: string, imageNames: DockerImageName[]): Promise<RegistryConfig> {
     const authConfigs: AuthConfig[] = [];
 
     await Promise.all(
       imageNames.map(async (imageName) => {
-        const authConfig = await getAuthConfig(imageName.registry);
+        const authConfig = await getAuthConfig(imageName.registry ?? indexServerAddress);
 
         if (authConfig !== undefined) {
           authConfigs.push(authConfig);
