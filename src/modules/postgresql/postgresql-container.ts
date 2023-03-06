@@ -1,14 +1,13 @@
 import { GenericContainer } from "../../generic-container/generic-container";
 import { StartedTestContainer } from "../../test-container";
-import { RandomUuid } from "../../uuid";
 import { AbstractStartedContainer } from "../abstract-started-container";
 
 const POSTGRES_PORT = 5432;
 
 export class PostgreSqlContainer extends GenericContainer {
   private database = "test";
-  private username = new RandomUuid().nextUuid();
-  private password = new RandomUuid().nextUuid();
+  private username = "test";
+  private password = "test";
 
   constructor(image = "postgres:13.3-alpine") {
     super(image);

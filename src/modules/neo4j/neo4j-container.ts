@@ -1,6 +1,5 @@
 import { GenericContainer, Wait } from "../..";
 import { StartedTestContainer } from "../../test-container";
-import { RandomUuid } from "../../uuid";
 import { AbstractStartedContainer } from "../abstract-started-container";
 
 const BOLT_PORT = 7687;
@@ -8,7 +7,7 @@ const HTTP_PORT = 7474;
 const USERNAME = "neo4j";
 
 export class Neo4jContainer extends GenericContainer {
-  private password = new RandomUuid().nextUuid();
+  private password = "test";
   private apoc = false;
   private ttl?: number;
 

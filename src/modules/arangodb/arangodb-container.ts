@@ -1,13 +1,12 @@
 import { GenericContainer, Wait } from "../..";
 import { StartedTestContainer } from "../../test-container";
-import { RandomUuid } from "../../uuid";
 import { AbstractStartedContainer } from "../abstract-started-container";
 
 const ARANGODB_PORT = 8529;
 const USERNAME = "root";
 
 export class ArangoDBContainer extends GenericContainer {
-  constructor(image = "arangodb:3.10.0", private password = new RandomUuid().nextUuid()) {
+  constructor(image = "arangodb:3.10.0", private password = "test") {
     super(image);
   }
 

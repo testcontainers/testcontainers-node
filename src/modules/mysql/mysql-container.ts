@@ -1,15 +1,14 @@
 import { GenericContainer } from "../../generic-container/generic-container";
 import { StartedTestContainer } from "../../test-container";
-import { RandomUuid } from "../../uuid";
 import { AbstractStartedContainer } from "../abstract-started-container";
 
 const MYSQL_PORT = 3306;
 
 export class MySqlContainer extends GenericContainer {
   private database = "test";
-  private username = new RandomUuid().nextUuid();
-  private userPassword = new RandomUuid().nextUuid();
-  private rootPassword = new RandomUuid().nextUuid();
+  private username = "test";
+  private userPassword = "test";
+  private rootPassword = "test";
 
   constructor(image = "mysql:8.0.31") {
     super(image);
