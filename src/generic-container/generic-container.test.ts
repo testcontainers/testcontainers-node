@@ -387,7 +387,7 @@ describe("GenericContainer", () => {
     await container.restart();
 
     const logs = containerLogTraceSpy.mock.calls.flat();
-    expect(logs.find((line) => line.includes("Listening on port 8080"))).not.toBeUndefined();
+    expect(logs.some((line) => line.includes("Listening on port 8080"))).toBe(true);
 
     await container.stop();
   });
