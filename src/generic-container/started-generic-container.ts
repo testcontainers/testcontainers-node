@@ -8,7 +8,6 @@ import {
 import Dockerode from "dockerode";
 import { ExecResult, Labels } from "../docker/types";
 import {
-  containerRestartedLogOptions,
   hasContainerRestarted,
   inspectContainer,
   InspectResult,
@@ -18,7 +17,7 @@ import { containerLog, log } from "../logger";
 import { removeContainer } from "../docker/functions/container/remove-container";
 import { execContainer } from "../docker/functions/container/exec-container";
 import { Readable } from "stream";
-import { containerLogs } from "../docker/functions/container/container-logs";
+import { containerLogs, containerRestartedLogOptions } from "../docker/functions/container/container-logs";
 import { StoppedGenericContainer } from "./stopped-generic-container";
 import { stopContainer } from "../docker/functions/container/stop-container";
 import { restartContainer } from "../docker/functions/container/restart-container";

@@ -5,12 +5,8 @@ import { HostPortCheck, InternalPortCheck, PortCheck } from "./port-check";
 import { IntervalRetryStrategy } from "./retry-strategy";
 import { HealthCheckStatus } from "./docker/types";
 import Dockerode from "dockerode";
-import { containerLogs } from "./docker/functions/container/container-logs";
-import {
-  containerRestartedLogOptions,
-  hasContainerRestarted,
-  inspectContainer,
-} from "./docker/functions/container/inspect-container";
+import { containerLogs, containerRestartedLogOptions } from "./docker/functions/container/container-logs";
+import { hasContainerRestarted, inspectContainer } from "./docker/functions/container/inspect-container";
 
 export interface WaitStrategy {
   waitUntilReady(container: Dockerode.Container, host: string, boundPorts: BoundPorts): Promise<void>;
