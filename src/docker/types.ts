@@ -41,7 +41,8 @@ export type ExtraHost = {
 
 export type Labels = { [key: string]: string };
 
-export type Ports = { [internalPort: number]: number };
+export type HostPortBindings = Array<{ hostIp: string; hostPort: number }>;
+export type Ports = { [containerPort: number]: HostPortBindings };
 
 export type AuthConfig = {
   username: string;

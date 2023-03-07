@@ -123,9 +123,9 @@ export class DockerComposeEnvironment {
             .on("data", (data) => containerLog.trace(`${containerName}: ${data}`))
             .on("err", (data) => containerLog.error(`${containerName}: ${data}`));
 
+          const { host, hostIps } = await dockerClient();
           const inspectResult = await inspectContainer(container);
-          const boundPorts = BoundPorts.fromInspectResult(inspectResult);
-          const host = (await dockerClient()).host;
+          const boundPorts = BoundPorts.fromInspectResult(hostIps, inspectResult);
           const waitStrategy = (
             this.waitStrategy[containerName] ? this.waitStrategy[containerName] : defaultWaitStrategy(host, container)
           ).withStartupTimeout(this.startupTimeout);
