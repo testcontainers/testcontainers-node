@@ -65,7 +65,7 @@ describe("GenericContainer", () => {
   it("should wait for log with regex", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
-      .withWaitStrategy(Wait.forLogMessage(/Listening on port [0-9]+/))
+      .withWaitStrategy(Wait.forLogMessage(/Listening on port \d+/))
       .start();
 
     await checkContainerIsHealthy(container);
@@ -189,6 +189,17 @@ describe("GenericContainer", () => {
     expect(responseBody).toEqual(["/usr/local/bin/node", "/index.js", "one", "two", "three"]);
 
     await container.stop();
+  });
+
+  it("should set working directory", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withWorkingDir("/tmp")
+      .withCommand(["node", "../index.js"])
+      .withExposedPorts(8080)
+      .start();
+
+    const { output } = await container.exec(["pwd"]);
+    expect(output.trim()).toBe("/tmp");
   });
 
   it("should set entrypoint", async () => {
@@ -474,7 +485,7 @@ describe("GenericContainer", () => {
   });
 
   it("should wait for custom health check using CMD to run the command directly without a shell", async () => {
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.12")
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
       .withHealthCheck({
         test: ["CMD", "/usr/bin/wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/hello-world"],
@@ -675,7 +686,7 @@ describe("GenericContainer", () => {
     });
 
     it("should use pull policy", async () => {
-      const containerSpec = await GenericContainer.fromDockerfile(path.resolve(fixtures, "docker")).withPullPolicy(
+      const containerSpec = GenericContainer.fromDockerfile(path.resolve(fixtures, "docker")).withPullPolicy(
         new AlwaysPullPolicy()
       );
       await containerSpec.build();

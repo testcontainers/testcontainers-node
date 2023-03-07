@@ -9,7 +9,6 @@ import { DockerImageName } from "../docker-image-name";
 import { StartedTestContainer, TestContainer } from "../test-container";
 import { defaultWaitStrategy, WaitStrategy } from "../wait-strategy";
 import { PortForwarderInstance } from "../port-forwarder";
-import { getAuthConfig } from "../registry-auth-locator";
 import {
   BindMount,
   ContentToCopy,
@@ -62,6 +61,7 @@ export class GenericContainer implements TestContainer {
   protected startupTimeout = 60_000;
   protected useDefaultLogDriver = false;
   protected privilegedMode = false;
+  protected workingDir?: string;
   protected ipcMode?: string;
   protected ulimits?: Ulimits;
   protected addedCapabilities?: string[];
@@ -83,7 +83,6 @@ export class GenericContainer implements TestContainer {
     await pullImage((await dockerClient()).dockerode, {
       imageName: this.imageName,
       force: this.pullPolicy.shouldPull(),
-      authConfig: await getAuthConfig(this.imageName.registry),
     });
 
     if (!this.reuse && !this.imageName.isReaper()) {
@@ -121,6 +120,7 @@ export class GenericContainer implements TestContainer {
       addedCapabilities: this.addedCapabilities,
       droppedCapabilities: this.droppedCapabilities,
       user: this.user,
+      workingDir: this.workingDir,
     };
 
     if (this.reuse) {
@@ -151,9 +151,9 @@ export class GenericContainer implements TestContainer {
   }
 
   private async reuseContainer(startedContainer: Dockerode.Container) {
+    const { host, hostIps } = await dockerClient();
     const inspectResult = await inspectContainer(startedContainer);
-    const boundPorts = BoundPorts.fromInspectResult(inspectResult).filter(this.ports);
-    const host = (await dockerClient()).host;
+    const boundPorts = BoundPorts.fromInspectResult(hostIps, inspectResult).filter(this.ports);
     const waitStrategy = (this.waitStrategy ?? defaultWaitStrategy(host, startedContainer)).withStartupTimeout(
       this.startupTimeout
     );
@@ -206,9 +206,9 @@ export class GenericContainer implements TestContainer {
       .on("data", (data) => containerLog.trace(`${container.id}: ${data.trim()}`))
       .on("err", (data) => containerLog.error(`${container.id}: ${data.trim()}`));
 
+    const { host, hostIps } = await dockerClient();
     const inspectResult = await inspectContainer(container);
-    const boundPorts = BoundPorts.fromInspectResult(inspectResult).filter(this.ports);
-    const host = (await dockerClient()).host;
+    const boundPorts = BoundPorts.fromInspectResult(hostIps, inspectResult).filter(this.ports);
     const waitStrategy = (this.waitStrategy ?? defaultWaitStrategy(host, container)).withStartupTimeout(
       this.startupTimeout
     );
@@ -377,5 +377,10 @@ export class GenericContainer implements TestContainer {
       this.tarToCopy = archiver("tar");
     }
     return this.tarToCopy;
+  }
+
+  public withWorkingDir(workingDir: string): this {
+    this.workingDir = workingDir;
+    return this;
   }
 }

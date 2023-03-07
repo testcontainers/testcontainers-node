@@ -9,15 +9,17 @@ import * as path from "path";
 describe("KafkaContainer", () => {
   jest.setTimeout(240_000);
 
-  it("should connect to kafka using in-built zoo-keeper", async () => {
+  // connectBuiltInZK {
+  it("should connect using in-built zoo-keeper", async () => {
     const kafkaContainer = await new KafkaContainer().withExposedPorts(9093).start();
 
     await testPubSub(kafkaContainer);
 
     await kafkaContainer.stop();
   });
+  // }
 
-  it("should connect to kafka using in-built zoo-keeper and custom images", async () => {
+  it("should connect using in-built zoo-keeper and custom images", async () => {
     const kafkaContainer = await new KafkaContainer(KAFKA_IMAGE).withExposedPorts(9093).start();
 
     await testPubSub(kafkaContainer);
@@ -25,7 +27,7 @@ describe("KafkaContainer", () => {
     await kafkaContainer.stop();
   });
 
-  it("should connect to kafka using in-built zoo-keeper and custom network", async () => {
+  it("should connect using in-built zoo-keeper and custom network", async () => {
     const network = await new Network().start();
 
     const kafkaContainer = await new KafkaContainer().withNetwork(network).withExposedPorts(9093).start();
@@ -36,7 +38,8 @@ describe("KafkaContainer", () => {
     await network.stop();
   });
 
-  it("should connect to kafka using provided zoo-keeper and network", async () => {
+  // connectProvidedZK {
+  it("should connect using provided zoo-keeper and network", async () => {
     const network = await new Network().start();
 
     const zooKeeperHost = "zookeeper";
@@ -60,6 +63,7 @@ describe("KafkaContainer", () => {
     await kafkaContainer.stop();
     await network.stop();
   });
+  // }
 
   it("should be reusable", async () => {
     const originalKafkaContainer = await new KafkaContainer().withReuse().start();
@@ -73,6 +77,7 @@ describe("KafkaContainer", () => {
   describe("when a set of certificates is provided", () => {
     const certificatesDir = path.resolve(__dirname, ".", "test-certs");
 
+    // ssl {
     it(`should expose SASL_SSL listener if configured`, async () => {
       const kafkaContainer = await new KafkaContainer()
         .withSaslSslListener({
@@ -108,6 +113,7 @@ describe("KafkaContainer", () => {
       });
       await kafkaContainer.stop();
     });
+    // }
   });
 
   const testPubSub = async (kafkaContainer: StartedTestContainer, additionalConfig: Partial<KafkaConfig> = {}) => {

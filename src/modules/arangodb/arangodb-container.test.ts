@@ -4,7 +4,8 @@ import { ArangoDBContainer } from "./arangodb-container";
 describe("ArangoDB", () => {
   jest.setTimeout(180_000);
 
-  it("should connect", async () => {
+  // connect {
+  it("should connect and return a query result", async () => {
     const container = await new ArangoDBContainer().start();
     const db = new Database({ url: container.getHttpUrl() });
 
@@ -21,4 +22,5 @@ describe("ArangoDB", () => {
 
     await container.stop();
   });
+  // }
 });

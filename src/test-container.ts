@@ -59,6 +59,8 @@ export interface TestContainer {
   withCopyFilesToContainer(filesToCopy: FileToCopy[]): this;
 
   withCopyContentToContainer(contentsToCopy: ContentToCopy[]): this;
+
+  withWorkingDir(workingDir: string): this;
 }
 
 export interface RestartOptions {

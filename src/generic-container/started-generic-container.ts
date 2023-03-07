@@ -24,6 +24,7 @@ import { stopContainer } from "../docker/functions/container/stop-container";
 import { restartContainer } from "../docker/functions/container/restart-container";
 import { WaitStrategy } from "../wait-strategy";
 import { waitForContainer } from "../wait-for-container";
+import { dockerClient } from "../docker/docker-client";
 
 export class StartedGenericContainer implements StartedTestContainer {
   constructor(
@@ -43,6 +44,7 @@ export class StartedGenericContainer implements StartedTestContainer {
     const resolvedOptions: RestartOptions = { timeout: 0, ...options };
     await restartContainer(this.container, resolvedOptions);
 
+    const { hostIps } = await dockerClient();
     this.inspectResult = await inspectContainer(this.container);
 
     const logsOptions = hasContainerRestarted(this.inspectResult)
@@ -52,7 +54,7 @@ export class StartedGenericContainer implements StartedTestContainer {
       .on("data", (data) => containerLog.trace(`${this.container.id}: ${data.trim()}`))
       .on("err", (data) => containerLog.error(`${this.container.id}: ${data.trim()}`));
 
-    this.boundPorts = BoundPorts.fromInspectResult(this.inspectResult).filter(
+    this.boundPorts = BoundPorts.fromInspectResult(hostIps, this.inspectResult).filter(
       Array.from(this.boundPorts.iterator()).map((port) => port[0])
     );
 

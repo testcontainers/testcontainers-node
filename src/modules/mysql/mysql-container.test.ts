@@ -4,7 +4,8 @@ import { MySqlContainer } from "./mysql-container";
 describe("MySqlContainer", () => {
   jest.setTimeout(240_000);
 
-  it("should work", async () => {
+  // connect {
+  it("should connect and execute query", async () => {
     const container = await new MySqlContainer().start();
 
     const client = await createConnection({
@@ -21,7 +22,9 @@ describe("MySqlContainer", () => {
     await client.end();
     await container.stop();
   });
+  // }
 
+  // setDatabase {
   it("should set database", async () => {
     const container = await new MySqlContainer().withDatabase("customDatabase").start();
 
@@ -39,7 +42,9 @@ describe("MySqlContainer", () => {
     await client.end();
     await container.stop();
   });
+  // }
 
+  // setUsername {
   it("should set username", async () => {
     const container = await new MySqlContainer().withUsername("customUsername").start();
 
@@ -57,7 +62,9 @@ describe("MySqlContainer", () => {
     await client.end();
     await container.stop();
   });
+  // }
 
+  // executeQuery {
   it("should execute a query and return the result", async () => {
     const container = await new MySqlContainer().start();
 
@@ -66,4 +73,5 @@ describe("MySqlContainer", () => {
 
     await container.stop();
   });
+  // }
 });

@@ -1,13 +1,8 @@
-# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
-
 name: Test
 
 on:
-  push:
-    branches: [ master ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   test:
@@ -32,7 +27,7 @@ jobs:
     - name: Install dependencies
       run: npm ci --omit=optional
     - name: Run tests
-      run: npm run test:ci
+      run: npm test
 
   smoke-test:
     runs-on: ${{ matrix.os-version }}
