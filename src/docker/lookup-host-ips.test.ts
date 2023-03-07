@@ -11,8 +11,6 @@ jest.mock("dns", () => {
 const dnsMock = jest.mocked(dns);
 
 describe("lookupHostIps", () => {
-  afterEach(() => jest.resetAllMocks());
-
   it("should return a list of resolved host IPs when host is not an IP", async () => {
     const hostIps: HostIps = [{ address: "127.0.0.1", family: 4 }];
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
