@@ -152,9 +152,9 @@ export class GenericContainer implements TestContainer {
   }
 
   private async reuseContainer(startedContainer: Dockerode.Container) {
+    const { host, hostIps } = await dockerClient();
     const inspectResult = await inspectContainer(startedContainer);
-    const boundPorts = BoundPorts.fromInspectResult(inspectResult).filter(this.ports);
-    const host = (await dockerClient()).host;
+    const boundPorts = BoundPorts.fromInspectResult(hostIps, inspectResult).filter(this.ports);
     const waitStrategy = (this.waitStrategy ?? defaultWaitStrategy(host, startedContainer)).withStartupTimeout(
       this.startupTimeout
     );
@@ -207,9 +207,9 @@ export class GenericContainer implements TestContainer {
       .on("data", (data) => containerLog.trace(`${container.id}: ${data.trim()}`))
       .on("err", (data) => containerLog.error(`${container.id}: ${data.trim()}`));
 
+    const { host, hostIps } = await dockerClient();
     const inspectResult = await inspectContainer(container);
-    const boundPorts = BoundPorts.fromInspectResult(inspectResult).filter(this.ports);
-    const host = (await dockerClient()).host;
+    const boundPorts = BoundPorts.fromInspectResult(hostIps, inspectResult).filter(this.ports);
     const waitStrategy = (this.waitStrategy ?? defaultWaitStrategy(host, container)).withStartupTimeout(
       this.startupTimeout
     );

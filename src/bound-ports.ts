@@ -1,5 +1,6 @@
-import { getContainerPort, PortWithOptionalBinding } from "./port";
+import { getContainerPort, PortWithOptionalBinding, resolveHostPortBinding } from "./port";
 import { InspectResult } from "./docker/functions/container/inspect-container";
+import { HostIps } from "./docker/lookup-host-ips";
 
 export class BoundPorts {
   private readonly ports = new Map<number, number>();
@@ -36,12 +37,13 @@ export class BoundPorts {
     return boundPorts;
   }
 
-  public static fromInspectResult(inspectResult: InspectResult): BoundPorts {
+  public static fromInspectResult(hostIps: HostIps, inspectResult: InspectResult): BoundPorts {
     const boundPorts = new BoundPorts();
 
-    Object.entries(inspectResult.ports).forEach(([internalPort, hostPort]) =>
-      boundPorts.setBinding(parseInt(internalPort), hostPort)
-    );
+    Object.entries(inspectResult.ports).forEach(([containerPort, hostBindings]) => {
+      const hostPort = resolveHostPortBinding(hostIps, hostBindings);
+      boundPorts.setBinding(parseInt(containerPort), hostPort);
+    });
 
     return boundPorts;
   }

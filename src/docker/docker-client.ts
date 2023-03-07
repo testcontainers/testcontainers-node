@@ -5,10 +5,12 @@ import { URL } from "url";
 import { existsSync, promises as fs } from "fs";
 import { runInContainer } from "./functions/run-in-container";
 import * as propertiesFile from "../testcontainers-properties-file";
+import { HostIps, lookupHostIps } from "./lookup-host-ips";
 import { getSystemInfo } from "../system-info";
 
 type DockerClient = {
   host: string;
+  hostIps: HostIps;
   dockerode: Dockerode;
   indexServerAddress: string;
   composeEnvironment: NodeJS.ProcessEnv;
@@ -31,8 +33,13 @@ const getDockerClient = async (): Promise<DockerClient> => {
           dockerInfo: { indexServerAddress },
         } = await getSystemInfo(dockerode);
         const host = await resolveHost(dockerode, indexServerAddress, uri);
-        log.info(`Using Docker client strategy: ${strategy.getName()}, Docker host: ${host}`);
-        return { host, dockerode, indexServerAddress, composeEnvironment };
+        const hostIps = await lookupHostIps(host);
+        log.info(
+          `Using Docker client strategy: ${strategy.getName()}, Docker host: ${host} (${hostIps
+            .map((hostIp) => hostIp.address)
+            .join(", ")})`
+        );
+        return { host, hostIps, dockerode, indexServerAddress, composeEnvironment };
       } else {
         log.warn(`Docker client strategy ${strategy.getName()} is not reachable`);
       }
