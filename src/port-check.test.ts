@@ -15,7 +15,6 @@ describe("PortCheck", () => {
     let portCheck: InternalPortCheck;
 
     beforeEach(() => {
-      jest.resetAllMocks();
       mockContainer = { id: "containerId" } as Dockerode.Container;
       portCheck = new InternalPortCheck(mockContainer);
 
