@@ -3,6 +3,7 @@ import { log } from "../logger";
 import { exec, spawn } from "child_process";
 import { RegistryAuthLocator } from "./registry-auth-locator";
 import { AuthConfig } from "../docker/types";
+import { registryMatches } from "./registry-matches";
 
 export abstract class CredentialProvider implements RegistryAuthLocator {
   abstract getName(): string;
@@ -19,7 +20,7 @@ export abstract class CredentialProvider implements RegistryAuthLocator {
     log.debug(`Executing Docker credential provider: ${programName}`);
 
     const credentials = await this.listCredentials(programName);
-    if (!Object.keys(credentials).some((credential) => credential.includes(registry))) {
+    if (!Object.keys(credentials).some((aRegistry) => registryMatches(aRegistry, registry))) {
       log.debug(`No credential found for registry: "${registry}"`);
       return undefined;
     }

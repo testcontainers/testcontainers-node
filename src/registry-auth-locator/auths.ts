@@ -1,6 +1,7 @@
 import { Auth, DockerConfig } from "./types";
 import { RegistryAuthLocator } from "./registry-auth-locator";
 import { AuthConfig } from "../docker/types";
+import { registryMatches } from "./registry-matches";
 
 export class Auths implements RegistryAuthLocator {
   public getName(): string {
@@ -40,7 +41,7 @@ export class Auths implements RegistryAuthLocator {
     const authEntries = dockerConfig.auths ?? {};
 
     for (const key in authEntries) {
-      if (key === registry || key.includes(`://${registry}`)) {
+      if (registryMatches(key, registry)) {
         return authEntries[key];
       }
     }

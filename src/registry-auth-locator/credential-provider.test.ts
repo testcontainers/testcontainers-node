@@ -37,22 +37,18 @@ describe("CredentialProvider", () => {
     });
   });
 
-  it("should return auth config when registry is a substring of registry in credentials", async () => {
-    mockExecReturns(JSON.stringify({ "registry.example.com": "username" }));
+  it("should not return auth config for registry which is a partial match", async () => {
+    mockExecReturns(JSON.stringify({ "https://registry.example.com": "username" }));
     mockSpawnReturns(
       0,
       JSON.stringify({
-        ServerURL: "registry.example.com",
+        ServerURL: "https://registry.example.com",
         Username: "username",
         Secret: "secret",
       })
     );
 
-    expect(await credentialProvider.getAuthConfig("registry", dockerConfig)).toEqual({
-      registryAddress: "registry.example.com",
-      username: "username",
-      password: "secret",
-    });
+    expect(await credentialProvider.getAuthConfig("https://registry.example.co", dockerConfig)).toBeUndefined();
   });
 
   it("should return undefined when no auth config found for registry", async () => {
