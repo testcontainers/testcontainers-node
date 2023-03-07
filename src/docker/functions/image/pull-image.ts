@@ -13,7 +13,11 @@ export type PullImageOptions = {
 
 const imagePullLock = new AsyncLock();
 
-export const pullImage = async (dockerode: Dockerode, options: PullImageOptions): Promise<void> => {
+export const pullImage = async (
+  dockerode: Dockerode,
+  indexServerAddress: string,
+  options: PullImageOptions
+): Promise<void> => {
   try {
     return imagePullLock.acquire(options.imageName.toString(), async () => {
       if (!options.force && (await imageExists(dockerode, options.imageName))) {
@@ -22,7 +26,7 @@ export const pullImage = async (dockerode: Dockerode, options: PullImageOptions)
       }
 
       log.info(`Pulling image: ${options.imageName}`);
-      const authconfig = await getAuthConfig(options.imageName.registry);
+      const authconfig = await getAuthConfig(options.imageName.registry ?? indexServerAddress);
       const stream = await dockerode.pull(options.imageName.toString(), { authconfig });
 
       await new PullStreamParser(options.imageName, log).consume(stream);

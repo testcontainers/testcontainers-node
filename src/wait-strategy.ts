@@ -73,7 +73,7 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
   }
 
   public async waitUntilReady(container: Dockerode.Container): Promise<void> {
-    log.debug(`Waiting for log message "${this.message}"`);
+    log.debug(`Waiting for log message "${this.message}" for ${container.id}`);
     const inspect = await inspectContainer(container);
 
     const stream = await containerLogs(container, inspect);
@@ -116,7 +116,7 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
 
 export class HealthCheckWaitStrategy extends AbstractWaitStrategy {
   public async waitUntilReady(container: Dockerode.Container): Promise<void> {
-    log.debug(`Waiting for health check`);
+    log.debug(`Waiting for health check for ${container.id}`);
 
     const retryStrategy = new IntervalRetryStrategy<HealthCheckStatus, Error>(100);
 

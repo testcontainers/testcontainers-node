@@ -8,13 +8,14 @@ import Dockerode from "dockerode";
 
 export const runInContainer = async (
   dockerode: Dockerode,
+  indexServerAddress: string,
   image: string,
   command: string[]
 ): Promise<string | undefined> => {
   try {
     const imageName = DockerImageName.fromString(image);
 
-    await pullImage(dockerode, { imageName, force: false });
+    await pullImage(dockerode, indexServerAddress, { imageName, force: false });
 
     log.debug(`Creating container: ${image} with command: ${command.join(" ")}`);
     const container = await dockerode.createContainer({ Image: image, Cmd: command, HostConfig: { AutoRemove: true } });

@@ -15,14 +15,14 @@ export const waitForContainer = async (
 
   try {
     await waitStrategy.waitUntilReady(container, host, boundPorts);
-    log.info("Container is ready");
+    log.info(`Container is ready: ${container.id}`);
   } catch (err) {
-    log.error(`Container failed to be ready: ${err}`);
+    log.error(`Container failed to be ready: ${container.id}: ${err}`);
     try {
       await stopContainer(container, { timeout: 0 });
       await removeContainer(container, { removeVolumes: true });
     } catch (stopErr) {
-      log.error(`Failed to stop container after it failed to be ready: ${stopErr}`);
+      log.error(`Failed to stop container after it failed to be ready: ${container.id}: ${stopErr}`);
     }
     throw err;
   }
