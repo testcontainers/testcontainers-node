@@ -37,8 +37,8 @@ export const inspectContainer = async (container: Dockerode.Container): Promise<
   }
 };
 
-const getPorts = (inspectInfo: ContainerInspectInfo): Ports => {
-  const x = Object.entries(inspectInfo.NetworkSettings.Ports)
+const getPorts = (inspectInfo: ContainerInspectInfo): Ports =>
+  Object.entries(inspectInfo.NetworkSettings.Ports)
     .filter(([, hostPorts]) => hostPorts !== null)
     .map(([containerPortAndProtocol, hostPorts]) => {
       const containerPort = parseInt(containerPortAndProtocol.split("/")[0]);
@@ -50,9 +50,6 @@ const getPorts = (inspectInfo: ContainerInspectInfo): Ports => {
       };
     })
     .reduce((acc, curr) => ({ ...acc, ...curr }), {});
-  console.log(x);
-  return x;
-};
 
 const getHealthCheckStatus = (inspectResult: ContainerInspectInfo): HealthCheckStatus => {
   const health = inspectResult.State.Health;
