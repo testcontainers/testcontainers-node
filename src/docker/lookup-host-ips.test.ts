@@ -5,6 +5,7 @@ jest.mock("dns", () => {
   return {
     promises: {
       lookup: jest.fn(),
+      setDefaultResultOrder: jest.fn(),
     },
   };
 });
