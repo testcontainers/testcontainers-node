@@ -21,10 +21,8 @@ export const containerLogs = async (
   }
 };
 
-const hasContainerRestarted = (inspectResult: InspectResult) => {
-  const { finishedAt, status } = inspectResult.state;
-  return finishedAt !== undefined && status === "running";
-};
+const hasContainerRestarted = ({ state: { finishedAt, status } }: InspectResult) =>
+  finishedAt !== undefined && status === "running";
 
 const logOptionsForRestartedContainer = (
   inspectResult: InspectResult

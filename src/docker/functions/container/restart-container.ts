@@ -11,7 +11,7 @@ export const restartContainer = async (
 ): Promise<void> => {
   try {
     await container.restart({ t: options.timeout / 1000 });
-  } catch (err: unknown) {
+  } catch (err) {
     log.error(`Failed to restart container ${container.id}: ${err}`);
     throw err;
   }
