@@ -7,6 +7,7 @@ import { runInContainer } from "./functions/run-in-container";
 import * as propertiesFile from "../testcontainers-properties-file";
 import { HostIps, lookupHostIps } from "./lookup-host-ips";
 import { getSystemInfo } from "../system-info";
+import dns from "dns";
 
 type DockerClient = {
   host: string;
@@ -17,6 +18,8 @@ type DockerClient = {
 };
 
 const getDockerClient = async (): Promise<DockerClient> => {
+  dns.promises.setDefaultResultOrder("verbatim"); // https://github.com/nodejs/node/issues/40702
+
   const strategies: DockerClientStrategy[] = [
     new ConfigurationStrategy(),
     new UnixSocketStrategy(),
