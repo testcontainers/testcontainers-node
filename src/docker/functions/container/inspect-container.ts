@@ -70,8 +70,3 @@ const getNetworkSettings = (inspectResult: ContainerInspectInfo): { [networkName
       },
     }))
     .reduce((prev, next) => ({ ...prev, ...next }), {});
-
-export const hasContainerRestarted = (inspectResult: InspectResult) => {
-  const { finishedAt, status } = inspectResult.state;
-  return finishedAt !== undefined && status === "running";
-};

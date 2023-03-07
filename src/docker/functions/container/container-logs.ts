@@ -8,10 +8,11 @@ import { InspectResult } from "./inspect-container";
 
 export const containerLogs = async (
   container: Dockerode.Container,
-  options?: Omit<Dockerode.ContainerLogsOptions, "follow" | "stdout" | "stderr">
+  inspectResult: InspectResult
 ): Promise<Readable> => {
   try {
-    const stream = (await container.logs({ follow: true, stdout: true, stderr: true, ...options })) as IncomingMessage;
+    const opts = hasContainerRestarted(inspectResult) ? logOptionsForRestartedContainer(inspectResult) : undefined;
+    const stream = (await container.logs({ follow: true, stdout: true, stderr: true, ...opts })) as IncomingMessage;
     stream.socket.unref();
     return demuxStream((await dockerClient()).dockerode, stream);
   } catch (err) {
@@ -20,7 +21,12 @@ export const containerLogs = async (
   }
 };
 
-export const containerRestartedLogOptions = (
+const hasContainerRestarted = (inspectResult: InspectResult) => {
+  const { finishedAt, status } = inspectResult.state;
+  return finishedAt !== undefined && status === "running";
+};
+
+const logOptionsForRestartedContainer = (
   inspectResult: InspectResult
 ): Omit<Dockerode.ContainerLogsOptions, "follow" | "stdout" | "stderr"> | undefined => {
   const { finishedAt } = inspectResult.state;

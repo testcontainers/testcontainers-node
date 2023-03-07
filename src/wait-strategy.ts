@@ -5,8 +5,8 @@ import { HostPortCheck, InternalPortCheck, PortCheck } from "./port-check";
 import { IntervalRetryStrategy } from "./retry-strategy";
 import { HealthCheckStatus } from "./docker/types";
 import Dockerode from "dockerode";
-import { containerLogs, containerRestartedLogOptions } from "./docker/functions/container/container-logs";
-import { hasContainerRestarted, inspectContainer } from "./docker/functions/container/inspect-container";
+import { containerLogs } from "./docker/functions/container/container-logs";
+import { inspectContainer } from "./docker/functions/container/inspect-container";
 
 export interface WaitStrategy {
   waitUntilReady(container: Dockerode.Container, host: string, boundPorts: BoundPorts): Promise<void>;
@@ -76,8 +76,7 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
     log.debug(`Waiting for log message "${this.message}"`);
     const inspect = await inspectContainer(container);
 
-    const logsOptions = hasContainerRestarted(inspect) ? containerRestartedLogOptions(inspect) : undefined;
-    const stream = await containerLogs(container, logsOptions);
+    const stream = await containerLogs(container, inspect);
 
     return new Promise((resolve, reject) => {
       const startupTimeout = this.startupTimeout;

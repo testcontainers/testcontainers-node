@@ -7,17 +7,13 @@ import {
 } from "../test-container";
 import Dockerode from "dockerode";
 import { ExecResult, Labels } from "../docker/types";
-import {
-  hasContainerRestarted,
-  inspectContainer,
-  InspectResult,
-} from "../docker/functions/container/inspect-container";
+import { inspectContainer, InspectResult } from "../docker/functions/container/inspect-container";
 import { BoundPorts } from "../bound-ports";
 import { containerLog, log } from "../logger";
 import { removeContainer } from "../docker/functions/container/remove-container";
 import { execContainer } from "../docker/functions/container/exec-container";
 import { Readable } from "stream";
-import { containerLogs, containerRestartedLogOptions } from "../docker/functions/container/container-logs";
+import { containerLogs } from "../docker/functions/container/container-logs";
 import { StoppedGenericContainer } from "./stopped-generic-container";
 import { stopContainer } from "../docker/functions/container/stop-container";
 import { restartContainer } from "../docker/functions/container/restart-container";
@@ -45,11 +41,7 @@ export class StartedGenericContainer implements StartedTestContainer {
 
     const { hostIps } = await dockerClient();
     this.inspectResult = await inspectContainer(this.container);
-
-    const logsOptions = hasContainerRestarted(this.inspectResult)
-      ? containerRestartedLogOptions(this.inspectResult)
-      : undefined;
-    (await containerLogs(this.container, logsOptions))
+    (await containerLogs(this.container, this.inspectResult))
       .on("data", (data) => containerLog.trace(`${this.container.id}: ${data.trim()}`))
       .on("err", (data) => containerLog.error(`${this.container.id}: ${data.trim()}`));
 
@@ -108,6 +100,6 @@ export class StartedGenericContainer implements StartedTestContainer {
   }
 
   public logs(): Promise<Readable> {
-    return containerLogs(this.container);
+    return containerLogs(this.container, this.inspectResult);
   }
 }
