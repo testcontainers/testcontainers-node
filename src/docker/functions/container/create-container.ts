@@ -5,6 +5,7 @@ import Dockerode, { PortMap as DockerodePortBindings } from "dockerode";
 import { getContainerPort, hasHostBinding, PortWithOptionalBinding } from "../../../port";
 import { createLabels } from "../create-labels";
 import { BindMount, Environment, ExtraHost, HealthCheck, Labels, TmpFs, Ulimits } from "../../types";
+import { RandomUniquePortGenerator } from "../../../port-generator";
 
 export type CreateContainerOptions = {
   imageName: DockerImageName;
@@ -52,7 +53,7 @@ export const createContainer = async (options: CreateContainerOptions): Promise<
         ExtraHosts: getExtraHosts(options.extraHosts),
         AutoRemove: options.autoRemove,
         NetworkMode: options.networkMode,
-        PortBindings: getPortBindings(options.exposedPorts),
+        PortBindings: await getPortBindings(options.exposedPorts),
         Binds: getBindMounts(options.bindMounts),
         Tmpfs: options.tmpFs,
         LogConfig: getLogConfig(options.useDefaultLogDriver),
@@ -90,13 +91,17 @@ const getExtraHosts = (extraHosts: ExtraHost[]): string[] => {
   return extraHosts.map((extraHost) => `${extraHost.host}:${extraHost.ipAddress}`);
 };
 
-const getPortBindings = (exposedPorts: PortWithOptionalBinding[]): DockerodePortBindings => {
+const getPortBindings = async (exposedPorts: PortWithOptionalBinding[]): Promise<DockerodePortBindings> => {
   const dockerodePortBindings: DockerodePortBindings = {};
+  const r = new RandomUniquePortGenerator();
   for (const exposedPort of exposedPorts) {
     if (hasHostBinding(exposedPort)) {
       dockerodePortBindings[exposedPort.container] = [{ HostPort: exposedPort.host.toString() }];
     } else {
-      dockerodePortBindings[exposedPort] = [{ HostPort: "0" }];
+      dockerodePortBindings[exposedPort] = [
+        { HostIp: "0.0.0.0", HostPort: `${await r.generatePort()}` },
+        { HostIp: "::", HostPort: `${await r.generatePort()}` },
+      ];
     }
   }
   return dockerodePortBindings;
