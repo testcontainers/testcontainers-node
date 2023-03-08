@@ -27,14 +27,7 @@ describe("RootlessUnixSocketStrategy", () => {
   });
 
   it("should return Docker client for socket from XDG_RUNTIME_DIR", async () => {
-    mockExistsSync.mockImplementationOnce((file) => {
-      switch (file) {
-        case path.join("/tmp", "docker.sock"):
-          return true;
-        default:
-          return false;
-      }
-    });
+    mockExistsSync.mockImplementationOnce((file) => file === path.join("/tmp", "docker.sock"));
 
     const strategy = new RootlessUnixSocketStrategy("linux", { XDG_RUNTIME_DIR: "/tmp" });
     await strategy.init();
@@ -44,14 +37,7 @@ describe("RootlessUnixSocketStrategy", () => {
   });
 
   it("should return Docker client for socket from home dir", async () => {
-    mockExistsSync.mockImplementationOnce((file) => {
-      switch (file) {
-        case path.join(os.homedir(), ".docker", "run", "docker.sock"):
-          return true;
-        default:
-          return false;
-      }
-    });
+    mockExistsSync.mockImplementationOnce((file) => file === path.join(os.homedir(), ".docker", "run", "docker.sock"));
 
     const strategy = new RootlessUnixSocketStrategy("linux", {});
     await strategy.init();
