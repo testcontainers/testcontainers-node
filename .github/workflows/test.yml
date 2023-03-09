@@ -39,7 +39,6 @@ jobs:
           - { XDG_RUNTIME_DIR: "/tmp/docker-testcontainers/" }
     env:
       XDG_RUNTIME_DIR: ${{ matrix.XDG_RUNTIME_DIR }}
-      TESTCONTAINERS_RYUK_DISABLED: true
     steps:
     - name: Code checkout
       uses: actions/checkout@v3
