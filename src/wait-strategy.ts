@@ -73,7 +73,7 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
 export type Log = string;
 
 export class LogWaitStrategy extends AbstractWaitStrategy {
-  constructor(private readonly message: Log | RegExp) {
+  constructor(private readonly message: Log | RegExp, private readonly times: number) {
     super();
   }
 
@@ -103,11 +103,14 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
         }
       };
 
+      let count = 0;
       const lineProcessor = (line: string) => {
         if (comparisonFn(line)) {
-          stream.destroy();
-          clearTimeout(timeout);
-          resolve();
+          if (++count === this.times) {
+            stream.destroy();
+            clearTimeout(timeout);
+            resolve();
+          }
         }
       };
 
