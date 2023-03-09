@@ -37,14 +37,15 @@ jobs:
         include:
           - { XDG_RUNTIME_DIR: "" }
           - { XDG_RUNTIME_DIR: "/tmp/docker-testcontainers/" }
+    env:
+      XDG_RUNTIME_DIR: ${{ matrix.XDG_RUNTIME_DIR }}
+      TESTCONTAINERS_RYUK_DISABLED: true
     steps:
     - name: Code checkout
       uses: actions/checkout@v3
     - name: Uninstall root Docker
       run: sudo apt-get -q -y --purge remove moby-engine moby-buildx && sudo rm -rf /var/run/docker.sock
     - name: Install rootless Docker
-      env:
-        XDG_RUNTIME_DIR: ${{ matrix.XDG_RUNTIME_DIR }}
       run: |
         mkdir -p $XDG_RUNTIME_DIR || true
         curl -fsSL https://get.docker.com/rootless | sh > init.sh
