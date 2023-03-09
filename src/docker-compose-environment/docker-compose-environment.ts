@@ -126,7 +126,7 @@ export class DockerComposeEnvironment {
             this.waitStrategy[containerName] ? this.waitStrategy[containerName] : defaultWaitStrategy(host, container)
           ).withStartupTimeout(this.startupTimeout);
 
-          (await containerLogs(container, inspectResult))
+          (await containerLogs(container))
             .on("data", (data) => containerLog.trace(`${containerName}: ${data}`))
             .on("err", (data) => containerLog.error(`${containerName}: ${data}`));
 

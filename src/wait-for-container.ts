@@ -9,12 +9,13 @@ export const waitForContainer = async (
   container: Dockerode.Container,
   waitStrategy: WaitStrategy,
   host: string,
-  boundPorts: BoundPorts
+  boundPorts: BoundPorts,
+  startTime?: Date
 ): Promise<void> => {
   log.debug(`Waiting for container to be ready: ${container.id}`);
 
   try {
-    await waitStrategy.waitUntilReady(container, host, boundPorts);
+    await waitStrategy.waitUntilReady(container, host, boundPorts, startTime);
     log.info(`Container is ready: ${container.id}`);
   } catch (err) {
     log.error(`Container failed to be ready: ${container.id}: ${err}`);

@@ -37,11 +37,13 @@ export class StartedGenericContainer implements StartedTestContainer {
 
   public async restart(options: Partial<RestartOptions> = {}): Promise<void> {
     const resolvedOptions: RestartOptions = { timeout: 0, ...options };
+    log.info(`Restarting container with ID: ${this.container.id}`);
     await restartContainer(this.container, resolvedOptions);
 
     const { hostIps } = await dockerClient();
     this.inspectResult = await inspectContainer(this.container);
-    (await containerLogs(this.container, this.inspectResult))
+    const startTime = this.inspectResult.state.startedAt;
+    (await containerLogs(this.container, { since: startTime }))
       .on("data", (data) => containerLog.trace(`${this.container.id}: ${data.trim()}`))
       .on("err", (data) => containerLog.error(`${this.container.id}: ${data.trim()}`));
 
@@ -49,7 +51,7 @@ export class StartedGenericContainer implements StartedTestContainer {
       Array.from(this.boundPorts.iterator()).map((port) => port[0])
     );
 
-    await waitForContainer(this.container, this.waitStrategy, this.host, this.boundPorts);
+    await waitForContainer(this.container, this.waitStrategy, this.host, this.boundPorts, startTime);
   }
 
   private async stopContainer(options: Partial<StopOptions> = {}): Promise<StoppedGenericContainer> {
@@ -100,6 +102,6 @@ export class StartedGenericContainer implements StartedTestContainer {
   }
 
   public logs(): Promise<Readable> {
-    return containerLogs(this.container, this.inspectResult);
+    return containerLogs(this.container);
   }
 }
