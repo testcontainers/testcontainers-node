@@ -9,7 +9,7 @@ import { containerLogs } from "./docker/functions/container/container-logs";
 import { inspectContainer } from "./docker/functions/container/inspect-container";
 
 export interface WaitStrategy {
-  waitUntilReady(container: Dockerode.Container, host: string, boundPorts: BoundPorts): Promise<void>;
+  waitUntilReady(container: Dockerode.Container, host: string, boundPorts: BoundPorts, startTime?: Date): Promise<void>;
 
   withStartupTimeout(startupTimeout: number): WaitStrategy;
 }
@@ -17,7 +17,12 @@ export interface WaitStrategy {
 export abstract class AbstractWaitStrategy implements WaitStrategy {
   protected startupTimeout = 60_000;
 
-  public abstract waitUntilReady(container: Dockerode.Container, host: string, boundPorts: BoundPorts): Promise<void>;
+  public abstract waitUntilReady(
+    container: Dockerode.Container,
+    host: string,
+    boundPorts: BoundPorts,
+    startTime?: Date
+  ): Promise<void>;
 
   public withStartupTimeout(startupTimeout: number): WaitStrategy {
     this.startupTimeout = startupTimeout;
@@ -72,11 +77,15 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
     super();
   }
 
-  public async waitUntilReady(container: Dockerode.Container): Promise<void> {
+  public async waitUntilReady(
+    container: Dockerode.Container,
+    host: string,
+    boundPorts: BoundPorts,
+    startTime?: Date
+  ): Promise<void> {
     log.debug(`Waiting for log message "${this.message}" for ${container.id}`);
-    const inspect = await inspectContainer(container);
 
-    const stream = await containerLogs(container, inspect);
+    const stream = await containerLogs(container, { since: startTime });
 
     return new Promise((resolve, reject) => {
       const startupTimeout = this.startupTimeout;
