@@ -10,6 +10,7 @@ import { getSystemInfo } from "../system-info";
 import { RootlessUnixSocketStrategy } from "./rootless-unix-socket-strategy";
 
 type DockerClient = {
+  uri: string;
   host: string;
   hostIps: HostIps;
   dockerode: Dockerode;
@@ -42,7 +43,7 @@ const getDockerClient = async (): Promise<DockerClient> => {
             .map((hostIp) => hostIp.address)
             .join(", ")})`
         );
-        return { host, hostIps, dockerode, indexServerAddress, composeEnvironment };
+        return { uri, host, hostIps, dockerode, indexServerAddress, composeEnvironment };
       } else {
         log.warn(`Docker client strategy ${strategy.getName()} is not reachable`);
       }
