@@ -210,7 +210,7 @@ export class GenericContainer implements TestContainer {
       this.startupTimeout
     );
 
-    (await containerLogs(container, inspectResult))
+    (await containerLogs(container))
       .on("data", (data) => containerLog.trace(`${container.id}: ${data.trim()}`))
       .on("err", (data) => containerLog.error(`${container.id}: ${data.trim()}`));
 
