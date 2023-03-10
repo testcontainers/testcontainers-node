@@ -42,8 +42,6 @@ jobs:
     steps:
     - name: Code checkout
       uses: actions/checkout@v3
-    - name: Uninstall root Docker
-      run: sudo apt-get -q -y --purge remove moby-engine moby-buildx && sudo rm -rf /var/run/docker.sock
     - name: Setup rootless Docker
       uses: ScribeMD/rootless-docker@0.2.2
     - name: Remove rootful Docket socket
