@@ -27,24 +27,35 @@ describe("RootlessUnixSocketStrategy", () => {
   });
 
   it("should return Docker client for socket from XDG_RUNTIME_DIR", async () => {
-    mockExistsSync.mockImplementationOnce((file) => file === path.join("/tmp", "docker.sock"));
+    const socketPath = path.join("/tmp", "docker.sock");
+    mockExistsSync.mockImplementation((file) => file === socketPath);
 
     const strategy = new RootlessUnixSocketStrategy("linux", { XDG_RUNTIME_DIR: "/tmp" });
     await strategy.init();
 
     expect(strategy.isApplicable()).toBe(true);
-    expect((await strategy.getDockerClient()).uri).toEqual(`unix://${path.join("/tmp", "docker.sock")}`);
+    expect((await strategy.getDockerClient()).uri).toEqual(`unix://${socketPath}`);
   });
 
   it("should return Docker client for socket from home dir", async () => {
-    mockExistsSync.mockImplementationOnce((file) => file === path.join(os.homedir(), ".docker", "run", "docker.sock"));
+    const socketPath = path.join(os.homedir(), ".docker", "run", "docker.sock");
+    mockExistsSync.mockImplementation((file) => file === socketPath);
 
     const strategy = new RootlessUnixSocketStrategy("linux", {});
     await strategy.init();
 
     expect(strategy.isApplicable()).toBe(true);
-    expect((await strategy.getDockerClient()).uri).toEqual(
-      `unix://${path.join(os.homedir(), ".docker", "run", "docker.sock")}`
-    );
+    expect((await strategy.getDockerClient()).uri).toEqual(`unix://${socketPath}`);
+  });
+
+  it("should return Docker client for socket from run dir", async () => {
+    const socketPath = path.join("/run", "user", `${os.userInfo().uid}`, "docker.sock");
+    mockExistsSync.mockImplementation((file) => file === socketPath);
+
+    const strategy = new RootlessUnixSocketStrategy("linux", {});
+    await strategy.init();
+
+    expect(strategy.isApplicable()).toBe(true);
+    expect((await strategy.getDockerClient()).uri).toEqual(`unix://${socketPath}`);
   });
 });
