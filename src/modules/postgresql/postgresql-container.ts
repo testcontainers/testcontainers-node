@@ -2,6 +2,7 @@ import { GenericContainer } from "../../generic-container/generic-container";
 import { StartedTestContainer } from "../../test-container";
 import { RandomUuid } from "../../uuid";
 import { AbstractStartedContainer } from "../abstract-started-container";
+import { Wait } from "../../wait";
 
 const POSTGRES_PORT = 5432;
 
@@ -36,6 +37,7 @@ export class PostgreSqlContainer extends GenericContainer {
         POSTGRES_USER: this.username,
         POSTGRES_PASSWORD: this.password,
       })
+      .withWaitStrategy(Wait.forLogMessage(/.*database system is ready to accept connections.*/, 2))
       .withStartupTimeout(120_000);
 
     return new StartedPostgreSqlContainer(await super.start(), this.database, this.username, this.password);
