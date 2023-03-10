@@ -93,7 +93,7 @@ export class StartedMySqlContainer extends AbstractStartedContainer {
     const result = await this.startedTestContainer.exec([
       "mysql",
       "-h",
-      this.getHost(),
+      "127.0.0.1",
       "-u",
       this.username,
       `-p${this.userPassword}`,
