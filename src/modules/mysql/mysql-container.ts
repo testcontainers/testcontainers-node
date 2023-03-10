@@ -92,6 +92,8 @@ export class StartedMySqlContainer extends AbstractStartedContainer {
   public async executeQuery(query: string, additionalFlags: string[] = []): Promise<string> {
     const result = await this.startedTestContainer.exec([
       "mysql",
+      "-h",
+      this.getHost(),
       "-u",
       this.username,
       `-p${this.userPassword}`,
