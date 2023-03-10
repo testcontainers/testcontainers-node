@@ -11,7 +11,7 @@ export class MySqlContainer extends GenericContainer {
   private userPassword = new RandomUuid().nextUuid();
   private rootPassword = new RandomUuid().nextUuid();
 
-  constructor(image = "mysql:8.0.32-debian") {
+  constructor(image = "mysql:8.0.31") {
     super(image);
   }
 

@@ -35,6 +35,7 @@ jobs:
       fail-fast: false
       matrix:
         os-version: [ubuntu-latest]
+        node-version: [14.x, 16.x, 18.x]
     steps:
     - name: Code checkout
       uses: actions/checkout@v3
@@ -50,7 +51,7 @@ jobs:
     - name: Install NodeJS
       uses: actions/setup-node@v3
       with:
-        node-version: 18.x
+        node-version: ${{ matrix.node-version }}
     - name: Install dependencies
       run: npm ci --omit=optional
     - name: Run tests
