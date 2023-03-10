@@ -2,8 +2,8 @@ import { HealthCheckWaitStrategy, Log, LogWaitStrategy, WaitStrategy } from "./w
 import { HttpWaitStrategy } from "./http-wait-strategy";
 
 export class Wait {
-  public static forLogMessage(message: Log | RegExp): WaitStrategy {
-    return new LogWaitStrategy(message);
+  public static forLogMessage(message: Log | RegExp, times = 1): WaitStrategy {
+    return new LogWaitStrategy(message, times);
   }
 
   public static forHealthCheck(): WaitStrategy {
