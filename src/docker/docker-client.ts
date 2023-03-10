@@ -7,8 +7,10 @@ import { runInContainer } from "./functions/run-in-container";
 import * as propertiesFile from "../testcontainers-properties-file";
 import { HostIps, lookupHostIps } from "./lookup-host-ips";
 import { getSystemInfo } from "../system-info";
+import { RootlessUnixSocketStrategy } from "./rootless-unix-socket-strategy";
 
 type DockerClient = {
+  uri: string;
   host: string;
   hostIps: HostIps;
   dockerode: Dockerode;
@@ -20,18 +22,20 @@ const getDockerClient = async (): Promise<DockerClient> => {
   const strategies: DockerClientStrategy[] = [
     new ConfigurationStrategy(),
     new UnixSocketStrategy(),
+    new RootlessUnixSocketStrategy(),
     new NpipeSocketStrategy(),
   ];
 
   for (const strategy of strategies) {
+    if (strategy.init) {
+      await strategy.init();
+    }
     if (strategy.isApplicable()) {
       log.debug(`Found applicable Docker client strategy: ${strategy.getName()}`);
-      const { uri, dockerode, composeEnvironment } = await strategy.initialise();
+      const { uri, dockerode, composeEnvironment } = await strategy.getDockerClient();
       log.debug(`Testing Docker client strategy URI: ${uri}`);
       if (await isDockerDaemonReachable(dockerode)) {
-        const {
-          dockerInfo: { indexServerAddress },
-        } = await getSystemInfo(dockerode);
+        const indexServerAddress = (await getSystemInfo(dockerode)).dockerInfo.indexServerAddress;
         const host = await resolveHost(dockerode, indexServerAddress, uri);
         const hostIps = await lookupHostIps(host);
         log.info(
@@ -39,7 +43,7 @@ const getDockerClient = async (): Promise<DockerClient> => {
             .map((hostIp) => hostIp.address)
             .join(", ")})`
         );
-        return { host, hostIps, dockerode, indexServerAddress, composeEnvironment };
+        return { uri, host, hostIps, dockerode, indexServerAddress, composeEnvironment };
       } else {
         log.warn(`Docker client strategy ${strategy.getName()} is not reachable`);
       }
@@ -59,22 +63,24 @@ const isDockerDaemonReachable = async (dockerode: Dockerode): Promise<boolean> =
   }
 };
 
-type DockerClientInit = {
+export type DockerClientInit = {
   uri: string;
   dockerode: Dockerode;
   composeEnvironment: NodeJS.ProcessEnv;
 };
 
-interface DockerClientStrategy {
+export interface DockerClientStrategy {
+  init?(): Promise<void>;
+
   isApplicable(): boolean;
 
-  initialise(): Promise<DockerClientInit>;
+  getDockerClient(): Promise<DockerClientInit>;
 
   getName(): string;
 }
 
 class ConfigurationStrategy implements DockerClientStrategy {
-  async initialise(): Promise<DockerClientInit> {
+  async getDockerClient(): Promise<DockerClientInit> {
     const { dockerHost, dockerTlsVerify, dockerCertPath } = propertiesFile;
 
     const dockerOptions: DockerOptions = {};
@@ -117,7 +123,7 @@ class ConfigurationStrategy implements DockerClientStrategy {
 }
 
 class UnixSocketStrategy implements DockerClientStrategy {
-  async initialise(): Promise<DockerClientInit> {
+  async getDockerClient(): Promise<DockerClientInit> {
     return {
       uri: "unix:///var/run/docker.sock",
       dockerode: new Dockerode({ socketPath: "/var/run/docker.sock" }),
@@ -126,7 +132,7 @@ class UnixSocketStrategy implements DockerClientStrategy {
   }
 
   isApplicable(): boolean {
-    return process.platform === "linux" || process.platform === "darwin";
+    return (process.platform === "linux" || process.platform === "darwin") && existsSync("/var/run/docker.sock");
   }
 
   getName(): string {
@@ -135,7 +141,7 @@ class UnixSocketStrategy implements DockerClientStrategy {
 }
 
 class NpipeSocketStrategy implements DockerClientStrategy {
-  async initialise(): Promise<DockerClientInit> {
+  async getDockerClient(): Promise<DockerClientInit> {
     return {
       uri: "npipe:////./pipe/docker_engine",
       dockerode: new Dockerode({ socketPath: "//./pipe/docker_engine" }),
@@ -144,7 +150,7 @@ class NpipeSocketStrategy implements DockerClientStrategy {
   }
 
   isApplicable(): boolean {
-    return process.platform === "win32";
+    return process.platform === "win32" && existsSync("//./pipe/docker_engine");
   }
 
   getName(): string {

@@ -8,6 +8,8 @@ import { getContainerPort, PortWithOptionalBinding } from "./port";
 import { LABEL_TESTCONTAINERS_SESSION_ID } from "./labels";
 import { Wait } from "./wait";
 import { IntervalRetryStrategy } from "./retry-strategy";
+import { getRemoteDockerUnixSocketPath } from "./docker/get-remote-docker-unix-socket-path";
+import { dockerClient } from "./docker/docker-client";
 
 export interface Reaper {
   addProject(projectName: string): void;
@@ -84,8 +86,6 @@ export class ReaperInstance {
   }
 
   private static async createRealInstance(): Promise<Reaper> {
-    const dockerSocket = process.env["TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE"] ?? "/var/run/docker.sock";
-
     const containerPort: PortWithOptionalBinding = process.env["TESTCONTAINERS_RYUK_PORT"]
       ? { container: 8080, host: Number(process.env["TESTCONTAINERS_RYUK_PORT"]) }
       : 8080;
@@ -94,7 +94,12 @@ export class ReaperInstance {
     const container = new GenericContainer(REAPER_IMAGE)
       .withName(`testcontainers-ryuk-${sessionId}`)
       .withExposedPorts(containerPort)
-      .withBindMounts([{ source: dockerSocket, target: "/var/run/docker.sock" }])
+      .withBindMounts([
+        {
+          source: getRemoteDockerUnixSocketPath((await dockerClient()).uri),
+          target: "/var/run/docker.sock",
+        },
+      ])
       .withWaitStrategy(Wait.forLogMessage(/.+ Started!/));
 
     if (this.isPrivileged()) {

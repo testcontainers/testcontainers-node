@@ -269,17 +269,19 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
-  it("should set ulimits", async () => {
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
-      .withUlimits({ memlock: { hard: -1, soft: -1 } })
-      .withExposedPorts(8080)
-      .start();
+  if (!process.env["CI_ROOTLESS"]) {
+    it("should set ulimits", async () => {
+      const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+        .withUlimits({ memlock: { hard: -1, soft: -1 } })
+        .withExposedPorts(8080)
+        .start();
 
-    const { output } = await container.exec(["sh", "-c", "ulimit -l"]);
-    expect(output.trim()).toBe("unlimited");
+      const { output } = await container.exec(["sh", "-c", "ulimit -l"]);
+      expect(output.trim()).toBe("unlimited");
 
-    await container.stop();
-  });
+      await container.stop();
+    });
+  }
 
   it("should add capabilities", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")

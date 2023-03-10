@@ -39,6 +39,35 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
+  rootless:
+    runs-on: ${{ matrix.os-version }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os-version: [ubuntu-latest]
+    steps:
+    - name: Code checkout
+      uses: actions/checkout@v3
+    - name: Setup rootless Docker
+      uses: ScribeMD/rootless-docker@0.2.2
+    - name: Remove Docket root socket
+      run: sudo rm -rf /var/run/docker.sock
+    - name: Login to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: cristianrgreco
+        password: b62e3c19-4990-46f6-b221-55cf0bfb6513 # read-only
+    - name: Install NodeJS
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18.x
+    - name: Install dependencies
+      run: npm ci --omit=optional
+    - name: Run tests
+      run: npm run test:ci
+      env:
+        CI_ROOTLESS: true
+
   smoke-test:
     runs-on: ${{ matrix.os-version }}
     strategy:
@@ -46,17 +75,17 @@ jobs:
         os-version: [ubuntu-latest]
         node-version: [14.x, 16.x, 18.x]
     steps:
-      - name: Code checkout
-        uses: actions/checkout@v3
-      - name: Install NodeJS ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-      - name: Install dependencies
-        run: npm ci --omit=optional
-      - name: Remove dev dependencies
-        run: npm prune --omit=dev
-      - name: Run CommonJS module smoke test
-        run: node smoke-test.js
-      - name: Run ES module smoke test
-        run: node smoke-test.mjs
+    - name: Code checkout
+      uses: actions/checkout@v3
+    - name: Install NodeJS ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: Install dependencies
+      run: npm ci --omit=optional
+    - name: Remove dev dependencies
+      run: npm prune --omit=dev
+    - name: Run CommonJS module smoke test
+      run: node smoke-test.js
+    - name: Run ES module smoke test
+      run: node smoke-test.mjs
