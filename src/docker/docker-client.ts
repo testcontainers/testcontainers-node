@@ -132,7 +132,7 @@ class UnixSocketStrategy implements DockerClientStrategy {
   }
 
   isApplicable(): boolean {
-    return process.platform === "linux" || process.platform === "darwin";
+    return (process.platform === "linux" || process.platform === "darwin") && existsSync("/var/run/docker.sock");
   }
 
   getName(): string {
@@ -150,7 +150,7 @@ class NpipeSocketStrategy implements DockerClientStrategy {
   }
 
   isApplicable(): boolean {
-    return process.platform === "win32";
+    return process.platform === "win32" && existsSync("//./pipe/docker_engine");
   }
 
   getName(): string {
