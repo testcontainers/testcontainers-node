@@ -5,6 +5,7 @@ import { StartedDockerComposeEnvironment } from "./docker-compose-environment/st
 import fetch from "node-fetch";
 import { StartedTestContainer } from "./test-container";
 import https from "https";
+import { getSystemInfo } from "./system-info";
 
 export const checkContainerIsHealthy = async (container: StartedTestContainer): Promise<void> => {
   const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
@@ -67,4 +68,10 @@ export const getReaperContainerId = async (): Promise<string> => {
 
 export const stopReaper = async (): Promise<void> => {
   return ReaperInstance.stopInstance();
+};
+
+export const composeContainerName = async (serviceName: string, index = 1): Promise<string> => {
+  const { dockerode } = await dockerClient();
+  const { dockerComposeInfo } = await getSystemInfo(dockerode);
+  return dockerComposeInfo?.version.startsWith("1.") ? `${serviceName}_${index}` : `${serviceName}-${index}`;
 };

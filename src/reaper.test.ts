@@ -1,10 +1,11 @@
 import { GenericContainer } from "./generic-container/generic-container";
 import {
-  getReaperContainerId,
+  composeContainerName,
   getContainerIds,
+  getReaperContainerId,
+  getRunningContainerNames,
   getRunningNetworkIds,
   stopReaper,
-  getRunningContainerNames,
 } from "./test-helper";
 import { Network } from "./network";
 import path from "path";
@@ -50,8 +51,8 @@ describe("Reaper", () => {
       path.resolve(fixtures, "docker-compose"),
       "docker-compose.yml"
     ).up();
-    const container = startedEnvironment.getContainer("container_1");
-    const anotherContainer = startedEnvironment.getContainer("another_container_1");
+    const container = startedEnvironment.getContainer(await composeContainerName("container"));
+    const anotherContainer = startedEnvironment.getContainer(await composeContainerName("another_container"));
 
     const reaperContainerId = await getReaperContainerId();
     await stopReaper();
