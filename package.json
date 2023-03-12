@@ -28,7 +28,7 @@
     "docs:serve": "docker-compose up",
     "clean": "rimraf dist",
     "test": "cross-env DEBUG=testcontainers,testcontainers:exec,testcontainers:containers jest",
-    "test:ci": "cross-env DEBUG=testcontainers,testcontainers:exec,testcontainers:containers jest --runInBand --coverage",
+    "test:ci": "cross-env DEBUG=testcontainers,testcontainers:exec,testcontainers:containers jest --runInBand --coverage generic-container",
     "format": "prettier --write package.json \"src/**/*.ts\"",
     "lint": "eslint --fix package.json \"src/**/*.ts\"",
     "lint:ci": "eslint package.json \"src/**/*.ts\" --max-warnings=0",

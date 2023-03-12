@@ -74,17 +74,40 @@ jobs:
         with:
           username: cristianrgreco
           password: b62e3c19-4990-46f6-b221-55cf0bfb6513 # read-only
-      - name: Uninstall Docker
-        run: |
-          sudo apt-get -q -y --purge remove moby-engine moby-buildx 
-          sudo rm -rf /var/run/docker.sock
       - name: Install Podman
-        run: |
-          sudo apt-get update && sudo apt-get install -y podman
-          shopt -s expand_aliases
-          alias docker=podman
+        run: sudo apt-get update && sudo apt-get install -y podman
       - name: Set environment
         run: echo "DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock" >> $GITHUB_ENV
+      - name: Install NodeJS ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install dependencies
+        run: npm ci --omit=optional
+      - name: Run tests
+        run: npm run test:ci
+        env:
+          TESTCONTAINERS_RYUK_DISABLED: true
+
+  colima:
+    runs-on: ${{ matrix.os-version }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os-version: [ ubuntu-latest ]
+        node-version: [ 14.x, 16.x, 18.x ]
+    steps:
+      - name: Code checkout
+        uses: actions/checkout@v3
+      - name: Login to Docker Hub # https://github.com/containers/podman/issues/17571
+        uses: docker/login-action@v2
+        with:
+          username: cristianrgreco
+          password: b62e3c19-4990-46f6-b221-55cf0bfb6513 # read-only
+      - name: Install Colima
+        run: sudo nix-env -iA nixpkgs.colima
+      - name: Set environment
+        run: echo "DOCKER_HOST=unix://$HOME/.colima/docker.sock" >> $GITHUB_ENV
       - name: Install NodeJS ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
