@@ -74,10 +74,16 @@ jobs:
         with:
           username: cristianrgreco
           password: b62e3c19-4990-46f6-b221-55cf0bfb6513 # read-only
+      - name: Install Podman
+        uses: supplypike/setup-bin@v3
+        with:
+          uri: 'https://github.com/containers/podman/releases/download/v4.4.2/podman-remote-static-linux_amd64.tar.gz'
+          name: 'podman'
+          version: '4.4.2'
       - name: Setup Podman
         run: |
-          sudo apt-get update
-          sudo apt-get install -y podman
+#          sudo apt-get update
+#          sudo apt-get install -y podman
           systemctl enable --now --user podman podman.socket
       - name: Set environment
         run: echo "DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock" >> $GITHUB_ENV
