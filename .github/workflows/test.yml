@@ -87,6 +87,7 @@ jobs:
       - name: Run tests
         run: npm run test:ci
         env:
+          CI_ROOTLESS: true
           TESTCONTAINERS_RYUK_DISABLED: true
 
   colima:
@@ -94,7 +95,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os-version: [ ubuntu-latest ]
+        os-version: [ macos-latest ]
         node-version: [ 14.x, 16.x, 18.x ]
     steps:
       - name: Code checkout
@@ -104,16 +105,8 @@ jobs:
         with:
           username: cristianrgreco
           password: b62e3c19-4990-46f6-b221-55cf0bfb6513 # read-only
-      - name: Install Colima
-        run: |
-          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          test -d ~/.linuxbrew && eval "$(~/.linuxbrew/bin/brew shellenv)"
-          test -d /home/linuxbrew/.linuxbrew && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-          test -r ~/.bash_profile && echo "eval \"\$($(brew --prefix)/bin/brew shellenv)\"" >> ~/.bash_profile
-          echo "eval \"\$($(brew --prefix)/bin/brew shellenv)\"" >> ~/.profile
-          brew install colima
-          colima delete
-          colima start --arch x86_64
+      - name: Setup Docker on macOS
+        uses: douglascamata/setup-docker-macos-action@v1-alpha
       - name: Set environment
         run: echo "DOCKER_HOST=unix://$HOME/.colima/docker.sock" >> $GITHUB_ENV
       - name: Install NodeJS ${{ matrix.node-version }}
@@ -125,6 +118,7 @@ jobs:
       - name: Run tests
         run: npm run test:ci
         env:
+          CI_ROOTLESS: true
           TESTCONTAINERS_RYUK_DISABLED: true
 
   smoke-test:
