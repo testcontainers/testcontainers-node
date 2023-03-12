@@ -104,15 +104,13 @@ jobs:
         with:
           username: cristianrgreco
           password: b62e3c19-4990-46f6-b221-55cf0bfb6513 # read-only
-      - name: Install Brew
+      - name: Install Colima
         run: |
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
           test -d ~/.linuxbrew && eval "$(~/.linuxbrew/bin/brew shellenv)"
           test -d /home/linuxbrew/.linuxbrew && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           test -r ~/.bash_profile && echo "eval \"\$($(brew --prefix)/bin/brew shellenv)\"" >> ~/.bash_profile
           echo "eval \"\$($(brew --prefix)/bin/brew shellenv)\"" >> ~/.profile
-      - name: Install Colima
-        run: |
           brew install colima
           colima start
       - name: Set environment
