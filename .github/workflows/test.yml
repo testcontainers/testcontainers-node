@@ -109,7 +109,7 @@ jobs:
           echo 'deb [signed-by=/usr/share/keyrings/isv-rancher-stable-archive-keyring.gpg] https://download.opensuse.org/repositories/isv:/Rancher:/stable/deb/ ./' | sudo dd status=none of=/etc/apt/sources.list.d/isv-rancher-stable.list
           sudo apt update
           sudo apt install rancher-desktop
-          rdctl start --container-runtime dockerd
+          ~/.rd/bin/rdctl start --container-runtime dockerd
       - name: Set environment
         run: echo "DOCKER_HOST=unix://$HOME/.rd/docker.sock" >> $GITHUB_ENV
       - name: Login to Docker Hub
