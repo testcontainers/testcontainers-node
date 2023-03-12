@@ -69,6 +69,8 @@ jobs:
     steps:
       - name: Code checkout
         uses: actions/checkout@v3
+      - name: Uninstall Docker
+        run: sudo apt-get -q -y --purge remove moby-engine moby-buildx && sudo rm -rf /var/run/docker.sock
       - name: Install Podman
         run: |
           sudo apt-get update && sudo apt-get install -y podman
