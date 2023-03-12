@@ -16,7 +16,6 @@ export const imageExists = async (dockerode: Dockerode, imageName: DockerImageNa
     }
 
     const images = await listImages(dockerode);
-    console.log("IMAGE EXISTS: ", imageName.toString(), images);
     images.forEach((name) => {
       existingImages.add(name.toString());
     });
