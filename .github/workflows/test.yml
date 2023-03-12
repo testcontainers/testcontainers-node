@@ -70,7 +70,9 @@ jobs:
       - name: Code checkout
         uses: actions/checkout@v3
       - name: Uninstall Docker
-        run: sudo apt-get -q -y --purge remove moby-engine moby-buildx && sudo rm -rf /var/run/docker.sock
+        run: |
+          sudo apt-get -q -y --purge remove moby-engine moby-buildx 
+          sudo rm -rf /var/run/docker.sock
       - name: Install Podman
         run: |
           sudo apt-get update && sudo apt-get install -y podman
@@ -89,6 +91,9 @@ jobs:
         run: npm ci --omit=optional
       - name: Run tests
         run: npm run test:ci
+        env:
+          DOCKER_HOST: unix:///run/user/$(id -u)/podman/podman.sock
+          TESTCONTAINERS_RYUK_DISABLED: true
 
   smoke-test:
     runs-on: ${{ matrix.os-version }}
