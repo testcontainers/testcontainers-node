@@ -78,6 +78,8 @@ jobs:
           sudo apt-get update && sudo apt-get install -y podman
           shopt -s expand_aliases
           alias docker=podman
+      - name: Set environment
+        run: echo "DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock" >> $GITHUB_ENV
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
@@ -92,7 +94,6 @@ jobs:
       - name: Run tests
         run: npm run test:ci
         env:
-          DOCKER_HOST: unix:///run/user/$(id -u)/podman/podman.sock
           TESTCONTAINERS_RYUK_DISABLED: true
 
   smoke-test:
