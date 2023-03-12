@@ -267,6 +267,16 @@ const container = await new GenericContainer("alpine")
 const httpPort = container.getMappedPort(80);
 ```
 
+If a container exposes a single port, you can use the following convenience method:
+
+```javascript
+const container = await new GenericContainer("alpine")
+  .withExposedPorts(80)
+  .start();
+
+const httpPort = container.getFirstMappedPort();
+```
+
 Specify fixed host port bindings (**not recommended**):
 
 ```javascript

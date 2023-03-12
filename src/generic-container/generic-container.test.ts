@@ -23,6 +23,14 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
+  it("should return first mapped port", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
+
+    expect(container.getFirstMappedPort()).toBe(container.getMappedPort(8080));
+
+    await container.stop();
+  });
+
   it("should bind to specified host port", async () => {
     const hostPort = await getPort();
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
