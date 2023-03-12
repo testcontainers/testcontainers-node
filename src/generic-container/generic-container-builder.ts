@@ -60,9 +60,9 @@ export class GenericContainerBuilder {
     });
     const container = new GenericContainer(imageName.toString());
 
-    if (!(await imageExists(dockerode, imageName))) {
-      throw new Error("Failed to build image");
-    }
+    // if (!(await imageExists(dockerode, imageName))) {
+    //   throw new Error("Failed to build image");
+    // }
 
     return Promise.resolve(container);
   }
