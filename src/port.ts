@@ -18,6 +18,11 @@ export const hasHostBinding = (port: PortWithOptionalBinding): port is PortWithB
 
 export const resolveHostPortBinding = (hostIps: HostIps, hostPortBindings: HostPortBindings): number => {
   console.log(hostIps, hostPortBindings);
+
+  if (hostPortBindings.length === 1 && hostPortBindings[0].hostIp === "") {
+    return hostPortBindings[0].hostPort;
+  }
+
   for (const { family } of hostIps) {
     const hostPortBinding = hostPortBindings.find(({ hostIp }) => net.isIP(hostIp) === family);
     if (hostPortBinding !== undefined) {
