@@ -112,7 +112,8 @@ jobs:
           test -r ~/.bash_profile && echo "eval \"\$($(brew --prefix)/bin/brew shellenv)\"" >> ~/.bash_profile
           echo "eval \"\$($(brew --prefix)/bin/brew shellenv)\"" >> ~/.profile
           brew install colima
-          colima start
+          colima delete
+          colima start --arch x86_64
       - name: Set environment
         run: echo "DOCKER_HOST=unix://$HOME/.colima/docker.sock" >> $GITHUB_ENV
       - name: Install NodeJS ${{ matrix.node-version }}
