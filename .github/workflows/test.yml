@@ -100,15 +100,15 @@ jobs:
     steps:
       - name: Code checkout
         uses: actions/checkout@v3
+      - name: Install Colima
+        uses: douglascamata/setup-docker-macos-action@v1-alpha
+      - name: Set environment
+        run: echo "DOCKER_HOST=unix://$HOME/.colima/docker.sock" >> $GITHUB_ENV
       - name: Login to Docker Hub # https://github.com/containers/podman/issues/17571
         uses: docker/login-action@v2
         with:
           username: cristianrgreco
           password: b62e3c19-4990-46f6-b221-55cf0bfb6513 # read-only
-      - name: Setup Docker on macOS
-        uses: douglascamata/setup-docker-macos-action@v1-alpha
-      - name: Set environment
-        run: echo "DOCKER_HOST=unix://$HOME/.colima/docker.sock" >> $GITHUB_ENV
       - name: Install NodeJS ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
