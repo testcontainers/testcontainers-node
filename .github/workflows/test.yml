@@ -29,7 +29,7 @@ jobs:
     - name: Run tests
       run: npm run test:ci
 
-  docker rootless:
+  docker-rootless:
     runs-on: ${{ matrix.os-version }}
     strategy:
       fail-fast: false
@@ -87,7 +87,6 @@ jobs:
         run: npm ci --omit=optional
       - name: Run tests
         run: npm run test:ci
-
 
   smoke-test:
     runs-on: ${{ matrix.os-version }}
