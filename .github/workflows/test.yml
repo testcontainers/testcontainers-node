@@ -75,10 +75,12 @@ jobs:
           username: cristianrgreco
           password: b62e3c19-4990-46f6-b221-55cf0bfb6513 # read-only
       - name: Install Podman
-        run: sudo apt-get update && sudo apt-get install -y podman
-      - run: podman info
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y podman
+          systemctl enable --now podman.socket
       - name: Set environment
-        run: echo "DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock" >> $GITHUB_ENV
+        run: echo "DOCKER_HOST=unix:///run/podman/podman.sock" >> $GITHUB_ENV
       - name: Install NodeJS ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
