@@ -105,7 +105,7 @@ jobs:
           username: cristianrgreco
           password: b62e3c19-4990-46f6-b221-55cf0bfb6513 # read-only
       - name: Install Colima
-        run: sudo nix-env -iA nixpkgs.colima
+        run: nix-env -iA nixpkgs.colima
       - name: Set environment
         run: echo "DOCKER_HOST=unix://$HOME/.colima/docker.sock" >> $GITHUB_ENV
       - name: Install NodeJS ${{ matrix.node-version }}
