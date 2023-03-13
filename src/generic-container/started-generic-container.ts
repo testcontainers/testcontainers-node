@@ -9,7 +9,7 @@ import Dockerode from "dockerode";
 import { ExecResult, Labels } from "../docker/types";
 import { inspectContainer, InspectResult } from "../docker/functions/container/inspect-container";
 import { BoundPorts } from "../bound-ports";
-import { log } from "../logger";
+import { containerLog, log } from "../logger";
 import { removeContainer } from "../docker/functions/container/remove-container";
 import { execContainer } from "../docker/functions/container/exec-container";
 import { Readable } from "stream";
@@ -19,6 +19,7 @@ import { stopContainer } from "../docker/functions/container/stop-container";
 import { restartContainer } from "../docker/functions/container/restart-container";
 import { WaitStrategy } from "../wait-strategy";
 import { waitForContainer } from "../wait-for-container";
+import { dockerClient } from "../docker/docker-client";
 
 export class StartedGenericContainer implements StartedTestContainer {
   constructor(
@@ -36,13 +37,21 @@ export class StartedGenericContainer implements StartedTestContainer {
 
   public async restart(options: Partial<RestartOptions> = {}): Promise<void> {
     const resolvedOptions: RestartOptions = { timeout: 0, ...options };
+    log.info(`Restarting container with ID: ${this.container.id}`);
     await restartContainer(this.container, resolvedOptions);
 
+    const { hostIps } = await dockerClient();
     this.inspectResult = await inspectContainer(this.container);
-    this.boundPorts = BoundPorts.fromInspectResult(this.inspectResult).filter(
+    const startTime = this.inspectResult.state.startedAt;
+    (await containerLogs(this.container, { since: startTime }))
+      .on("data", (data) => containerLog.trace(`${this.container.id}: ${data.trim()}`))
+      .on("err", (data) => containerLog.error(`${this.container.id}: ${data.trim()}`));
+
+    this.boundPorts = BoundPorts.fromInspectResult(hostIps, this.inspectResult).filter(
       Array.from(this.boundPorts.iterator()).map((port) => port[0])
     );
-    await waitForContainer(this.container, this.waitStrategy, this.host, this.boundPorts);
+
+    await waitForContainer(this.container, this.waitStrategy, this.host, this.boundPorts, startTime);
   }
 
   private async stopContainer(options: Partial<StopOptions> = {}): Promise<StoppedGenericContainer> {
@@ -57,6 +66,10 @@ export class StartedGenericContainer implements StartedTestContainer {
 
   public getHost(): string {
     return this.host;
+  }
+
+  public getFirstMappedPort(): number {
+    return this.boundPorts.getFirstBinding();
   }
 
   public getMappedPort(port: number): number {

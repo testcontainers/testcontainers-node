@@ -8,6 +8,7 @@ import { RandomUuid } from "../uuid";
 import { checkContainerIsHealthy, getEvents, getRunningContainerNames } from "../test-helper";
 import { Network } from "../network";
 import { getContainerById } from "../docker/functions/container/get-container";
+import { containerLog } from "../logger";
 
 describe("GenericContainer", () => {
   jest.setTimeout(180_000);
@@ -18,6 +19,14 @@ describe("GenericContainer", () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
 
     await checkContainerIsHealthy(container);
+
+    await container.stop();
+  });
+
+  it("should return first mapped port", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
+
+    expect(container.getFirstMappedPort()).toBe(container.getMappedPort(8080));
 
     await container.stop();
   });
@@ -268,17 +277,19 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
-  it("should set ulimits", async () => {
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
-      .withUlimits({ memlock: { hard: -1, soft: -1 } })
-      .withExposedPorts(8080)
-      .start();
+  if (!process.env["CI_ROOTLESS"]) {
+    it("should set ulimits", async () => {
+      const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+        .withUlimits({ memlock: { hard: -1, soft: -1 } })
+        .withExposedPorts(8080)
+        .start();
 
-    const { output } = await container.exec(["sh", "-c", "ulimit -l"]);
-    expect(output.trim()).toBe("unlimited");
+      const { output } = await container.exec(["sh", "-c", "ulimit -l"]);
+      expect(output.trim()).toBe("unlimited");
 
-    await container.stop();
-  });
+      await container.stop();
+    });
+  }
 
   it("should add capabilities", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
@@ -375,6 +386,18 @@ describe("GenericContainer", () => {
     const stream = await container.logs();
     const log = await new Promise((resolve) => stream.on("data", (line) => resolve(line)));
     expect(log).toContain("Listening on port 8080");
+
+    await container.stop();
+  });
+
+  it("should stream logs from a running container after restart", async () => {
+    const containerLogTraceSpy = jest.spyOn(containerLog, "trace");
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
+
+    await container.restart();
+
+    const logs = containerLogTraceSpy.mock.calls.flat();
+    expect(logs.some((line) => line.includes("Listening on port 8080"))).toBe(true);
 
     await container.stop();
   });

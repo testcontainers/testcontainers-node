@@ -44,6 +44,16 @@ const container = await new GenericContainer("redis")
   .start();
 ```
 
+Wait until the container has logged a message a number of times:
+
+```javascript
+const { GenericContainer, Wait } = require("testcontainers");
+
+const container = await new GenericContainer("redis")
+  .withWaitStrategy(Wait.forLogMessage("Listening on port 8080", 2))
+  .start();
+```
+
 ## Health check
 
 Wait until the container's health check is successful:

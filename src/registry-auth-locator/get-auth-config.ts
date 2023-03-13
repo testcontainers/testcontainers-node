@@ -10,8 +10,6 @@ import { RegistryAuthLocator } from "./registry-auth-locator";
 import { log } from "../logger";
 import { AuthConfig } from "../docker/types";
 
-const DEFAULT_REGISTRY = "https://index.docker.io/v1/";
-
 const dockerConfigLocation = process.env.DOCKER_CONFIG || `${os.homedir()}/.docker`;
 
 const dockerConfigFile = path.resolve(dockerConfigLocation, "config.json");
@@ -42,7 +40,7 @@ const registryAuthLocators: RegistryAuthLocator[] = [new CredHelpers(), new Cred
 
 const authsCache = new Map<string, AuthConfig | undefined>();
 
-export const getAuthConfig = async (registry = DEFAULT_REGISTRY): Promise<AuthConfig | undefined> => {
+export const getAuthConfig = async (registry: string): Promise<AuthConfig | undefined> => {
   if (authsCache.has(registry)) {
     log.debug(`Re-using cached auth for registry ${registry}`);
     return authsCache.get(registry);

@@ -40,9 +40,14 @@ export const inspectContainer = async (container: Dockerode.Container): Promise<
 const getPorts = (inspectInfo: ContainerInspectInfo): Ports =>
   Object.entries(inspectInfo.NetworkSettings.Ports)
     .filter(([, hostPorts]) => hostPorts !== null)
-    .map(([internalPort, hostPorts]) => {
-      const hostPort = hostPorts[0].HostPort;
-      return { [parseInt(internalPort.split("/")[0])]: parseInt(hostPort) };
+    .map(([containerPortAndProtocol, hostPorts]) => {
+      const containerPort = parseInt(containerPortAndProtocol.split("/")[0]);
+      return {
+        [containerPort]: hostPorts.map((hostPort) => ({
+          hostIp: hostPort.HostIp,
+          hostPort: parseInt(hostPort.HostPort),
+        })),
+      };
     })
     .reduce((acc, curr) => ({ ...acc, ...curr }), {});
 

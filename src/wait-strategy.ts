@@ -6,10 +6,10 @@ import { IntervalRetryStrategy } from "./retry-strategy";
 import { HealthCheckStatus } from "./docker/types";
 import Dockerode from "dockerode";
 import { containerLogs } from "./docker/functions/container/container-logs";
-import { inspectContainer, InspectResult } from "./docker/functions/container/inspect-container";
+import { inspectContainer } from "./docker/functions/container/inspect-container";
 
 export interface WaitStrategy {
-  waitUntilReady(container: Dockerode.Container, host: string, boundPorts: BoundPorts): Promise<void>;
+  waitUntilReady(container: Dockerode.Container, host: string, boundPorts: BoundPorts, startTime?: Date): Promise<void>;
 
   withStartupTimeout(startupTimeout: number): WaitStrategy;
 }
@@ -17,7 +17,12 @@ export interface WaitStrategy {
 export abstract class AbstractWaitStrategy implements WaitStrategy {
   protected startupTimeout = 60_000;
 
-  public abstract waitUntilReady(container: Dockerode.Container, host: string, boundPorts: BoundPorts): Promise<void>;
+  public abstract waitUntilReady(
+    container: Dockerode.Container,
+    host: string,
+    boundPorts: BoundPorts,
+    startTime?: Date
+  ): Promise<void>;
 
   public withStartupTimeout(startupTimeout: number): WaitStrategy {
     this.startupTimeout = startupTimeout;
@@ -68,35 +73,19 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
 export type Log = string;
 
 export class LogWaitStrategy extends AbstractWaitStrategy {
-  constructor(private readonly message: Log | RegExp) {
+  constructor(private readonly message: Log | RegExp, private readonly times: number) {
     super();
   }
 
-  private containerRestartedLogOptions(
-    inspectResult: InspectResult
-  ): Omit<Dockerode.ContainerLogsOptions, "follow" | "stdout" | "stderr"> | undefined {
-    const { finishedAt } = inspectResult.state;
-    if (finishedAt === undefined) {
-      return undefined;
-    }
+  public async waitUntilReady(
+    container: Dockerode.Container,
+    host: string,
+    boundPorts: BoundPorts,
+    startTime?: Date
+  ): Promise<void> {
+    log.debug(`Waiting for log message "${this.message}" for ${container.id}`);
 
-    return {
-      since: finishedAt.getTime() / 1000,
-      timestamps: true,
-    };
-  }
-
-  private hasContainerRestarted(inspectResult: InspectResult) {
-    const { finishedAt, status } = inspectResult.state;
-    return finishedAt !== undefined && status === "running";
-  }
-
-  public async waitUntilReady(container: Dockerode.Container): Promise<void> {
-    log.debug(`Waiting for log message "${this.message}"`);
-    const inspect = await inspectContainer(container);
-
-    const logsOptions = this.hasContainerRestarted(inspect) ? this.containerRestartedLogOptions(inspect) : undefined;
-    const stream = await containerLogs(container, logsOptions);
+    const stream = await containerLogs(container, { since: startTime });
 
     return new Promise((resolve, reject) => {
       const startupTimeout = this.startupTimeout;
@@ -114,11 +103,14 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
         }
       };
 
+      let count = 0;
       const lineProcessor = (line: string) => {
         if (comparisonFn(line)) {
-          stream.destroy();
-          clearTimeout(timeout);
-          resolve();
+          if (++count === this.times) {
+            stream.destroy();
+            clearTimeout(timeout);
+            resolve();
+          }
         }
       };
 
@@ -136,7 +128,7 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
 
 export class HealthCheckWaitStrategy extends AbstractWaitStrategy {
   public async waitUntilReady(container: Dockerode.Container): Promise<void> {
-    log.debug(`Waiting for health check`);
+    log.debug(`Waiting for health check for ${container.id}`);
 
     const retryStrategy = new IntervalRetryStrategy<HealthCheckStatus, Error>(100);
 

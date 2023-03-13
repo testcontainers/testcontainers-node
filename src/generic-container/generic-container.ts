@@ -80,7 +80,8 @@ export class GenericContainer implements TestContainer {
   protected preStart?(): Promise<void>;
 
   public async start(): Promise<StartedTestContainer> {
-    await pullImage((await dockerClient()).dockerode, {
+    const { dockerode, indexServerAddress } = await dockerClient();
+    await pullImage(dockerode, indexServerAddress, {
       imageName: this.imageName,
       force: this.pullPolicy.shouldPull(),
     });
@@ -151,9 +152,9 @@ export class GenericContainer implements TestContainer {
   }
 
   private async reuseContainer(startedContainer: Dockerode.Container) {
+    const { host, hostIps } = await dockerClient();
     const inspectResult = await inspectContainer(startedContainer);
-    const boundPorts = BoundPorts.fromInspectResult(inspectResult).filter(this.ports);
-    const host = (await dockerClient()).host;
+    const boundPorts = BoundPorts.fromInspectResult(hostIps, inspectResult).filter(this.ports);
     const waitStrategy = (this.waitStrategy ?? defaultWaitStrategy(host, startedContainer)).withStartupTimeout(
       this.startupTimeout
     );
@@ -202,16 +203,17 @@ export class GenericContainer implements TestContainer {
     log.info(`Starting container ${this.imageName} with ID: ${container.id}`);
     await startContainer(container);
 
+    const { host, hostIps } = await dockerClient();
+    const inspectResult = await inspectContainer(container);
+    const boundPorts = BoundPorts.fromInspectResult(hostIps, inspectResult).filter(this.ports);
+    const waitStrategy = (this.waitStrategy ?? defaultWaitStrategy(host, container)).withStartupTimeout(
+      this.startupTimeout
+    );
+
     (await containerLogs(container))
       .on("data", (data) => containerLog.trace(`${container.id}: ${data.trim()}`))
       .on("err", (data) => containerLog.error(`${container.id}: ${data.trim()}`));
 
-    const inspectResult = await inspectContainer(container);
-    const boundPorts = BoundPorts.fromInspectResult(inspectResult).filter(this.ports);
-    const host = (await dockerClient()).host;
-    const waitStrategy = (this.waitStrategy ?? defaultWaitStrategy(host, container)).withStartupTimeout(
-      this.startupTimeout
-    );
     await waitForContainer(container, waitStrategy, host, boundPorts);
 
     const startedContainer = new StartedGenericContainer(

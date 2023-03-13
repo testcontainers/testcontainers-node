@@ -62,6 +62,6 @@ describe("get auth config", () => {
   it("should return empty auth when docker config file does not exist", async () => {
     mockExistsSync.mockReturnValue(false);
     const { getAuthConfig } = await import("./get-auth-config");
-    expect(await getAuthConfig()).toBeUndefined();
+    expect(await getAuthConfig("https://registry.example.com")).toBeUndefined();
   });
 });

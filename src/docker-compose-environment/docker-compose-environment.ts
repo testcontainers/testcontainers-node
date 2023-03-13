@@ -119,16 +119,16 @@ export class DockerComposeEnvironment {
           const container = await getContainerById(startedContainer.Id);
           const containerName = resolveContainerName(this.projectName, startedContainer.Names[0]);
 
-          (await containerLogs(container))
-            .on("data", (data) => containerLog.trace(`${containerName}: ${data}`))
-            .on("err", (data) => containerLog.error(`${containerName}: ${data}`));
-
+          const { host, hostIps } = await dockerClient();
           const inspectResult = await inspectContainer(container);
-          const boundPorts = BoundPorts.fromInspectResult(inspectResult);
-          const host = (await dockerClient()).host;
+          const boundPorts = BoundPorts.fromInspectResult(hostIps, inspectResult);
           const waitStrategy = (
             this.waitStrategy[containerName] ? this.waitStrategy[containerName] : defaultWaitStrategy(host, container)
           ).withStartupTimeout(this.startupTimeout);
+
+          (await containerLogs(container))
+            .on("data", (data) => containerLog.trace(`${containerName}: ${data}`))
+            .on("err", (data) => containerLog.error(`${containerName}: ${data}`));
 
           try {
             log.info(`Waiting for container ${containerName} to be ready`);
