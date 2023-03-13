@@ -7,7 +7,6 @@ import path from "path";
 import { log } from "../logger";
 import { getDockerfileImages } from "../dockerfile-parser";
 import { buildImage } from "../docker/functions/image/build-image";
-import { imageExists } from "../docker/functions/image/image-exists";
 import { getAuthConfig } from "../registry-auth-locator/get-auth-config";
 import { GenericContainer } from "./generic-container";
 import { dockerClient } from "../docker/docker-client";
@@ -46,7 +45,7 @@ export class GenericContainerBuilder {
     const dockerfile = path.resolve(this.context, this.dockerfileName);
     log.debug(`Preparing to build Dockerfile: ${dockerfile}`);
     const imageNames = await getDockerfileImages(dockerfile, this.buildArgs);
-    const { dockerode, indexServerAddress } = await dockerClient();
+    const { indexServerAddress } = await dockerClient();
     const registryConfig = await this.getRegistryConfig(indexServerAddress, imageNames);
 
     await buildImage({
@@ -59,10 +58,6 @@ export class GenericContainerBuilder {
       registryConfig,
     });
     const container = new GenericContainer(imageName.toString());
-
-    // if (!(await imageExists(dockerode, imageName))) {
-    //   throw new Error("Failed to build image");
-    // }
 
     return Promise.resolve(container);
   }
