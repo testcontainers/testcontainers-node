@@ -68,6 +68,10 @@ export class StartedGenericContainer implements StartedTestContainer {
     return this.host;
   }
 
+  public getFirstMappedPort(): number {
+    return this.boundPorts.getFirstBinding();
+  }
+
   public getMappedPort(port: number): number {
     return this.boundPorts.getBinding(port);
   }

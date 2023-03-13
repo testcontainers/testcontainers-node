@@ -10,6 +10,21 @@ describe("BoundPorts", () => {
     expect(boundPorts.getBinding(1)).toBe(1000);
   });
 
+  describe("get first binding", () => {
+    it("should return", () => {
+      const boundPorts = new BoundPorts();
+      boundPorts.setBinding(1, 1000);
+
+      expect(boundPorts.getFirstBinding()).toBe(1000);
+    });
+
+    it("should throw when not set", () => {
+      const boundPorts = new BoundPorts();
+
+      expect(() => boundPorts.getFirstBinding()).toThrowError("No port bindings found");
+    });
+  });
+
   it("should return an iterator for all bindings", () => {
     const boundPorts = new BoundPorts();
     boundPorts.setBinding(1, 1000);
