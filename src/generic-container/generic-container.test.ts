@@ -474,7 +474,7 @@ describe("GenericContainer", () => {
       customGenericContainer
         .withName(containerName)
         .withExposedPorts(8080)
-        .withHealthCheck({ test: ["CMD-SHELL", "exit 1"] })
+        .withHealthCheck({ test: ["CMD-SHELL", "exit 1"], interval: 1000, timeout: 1000, retries: 5 })
         .withWaitStrategy(Wait.forHealthCheck())
         .start()
     ).rejects.toThrowError("Health check failed");
