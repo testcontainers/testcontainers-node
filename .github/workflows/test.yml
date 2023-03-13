@@ -82,7 +82,9 @@ jobs:
           version: 4.4.2
           command: systemctl enable --now --user podman podman.socket
       - name: Debug
-        run: podman info
+        run: |
+          podman -v
+          podman info
       - name: Set environment
         run: echo "DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock" >> $GITHUB_ENV
       - name: Install NodeJS ${{ matrix.node-version }}
