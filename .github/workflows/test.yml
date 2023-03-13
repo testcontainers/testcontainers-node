@@ -81,6 +81,7 @@ jobs:
           tar -xzf podman-remote-static-linux_amd64.tar.gz
           mv podman-remote-static-linux_amd64 /usr/local/bin/podman
           systemctl --user start podman.socket
+          podman info
       - name: Set environment
         run: echo "DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock" >> $GITHUB_ENV
       - name: Install NodeJS ${{ matrix.node-version }}
