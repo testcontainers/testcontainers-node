@@ -111,12 +111,6 @@ jobs:
     steps:
       - name: Code checkout
         uses: actions/checkout@v3
-      - name: Disable IPv6
-        run: |
-          sudo echo "net.ipv6.conf.all.disable_ipv6=1" >> /etc/sysctl.conf
-          sudo echo "net.ipv6.conf.default.disable_ipv6=1" >> /etc/sysctl.conf
-          sudo echo "net.ipv6.conf.lo.disable_ipv6=1" >> /etc/sysctl.conf
-          sudo sysctl -p
       - name: Setup Colima
         uses: douglascamata/setup-docker-macos-action@v1-alpha
       - name: Set environment
@@ -133,7 +127,7 @@ jobs:
       - name: Install dependencies
         run: npm ci --omit=optional
       - name: Run tests
-        run: npm run test:ci
+        run: npm run test:ci -- --dns-result-order=ipv4first
         env:
           CI_ROOTLESS: true
           TESTCONTAINERS_RYUK_DISABLED: true
