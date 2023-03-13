@@ -80,6 +80,7 @@ jobs:
           curl -L "https://github.com/containers/podman/releases/download/v4.4.2/podman-remote-static-linux_amd64.tar.gz" -o podman-remote-static-linux_amd64.tar.gz 
           tar -xzf podman-remote-static-linux_amd64.tar.gz
           mv podman-remote-static-linux_amd64 /usr/local/bin/podman
+          systemctl unmask /etc/xdg/systemd/user/podman.service
           systemctl enable --now --user podman podman.socket
           podman info
       - name: Set environment
