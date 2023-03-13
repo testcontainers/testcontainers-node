@@ -74,6 +74,8 @@ jobs:
         with:
           username: cristianrgreco
           password: b62e3c19-4990-46f6-b221-55cf0bfb6513 # read-only
+      - name: Uninstall existing Podman
+        run: sudo apt-get remove -y podman
       - name: Setup Podman
         uses: supplypike/setup-bin@v3
         with:
