@@ -74,16 +74,12 @@ jobs:
         with:
           username: cristianrgreco
           password: b62e3c19-4990-46f6-b221-55cf0bfb6513 # read-only
-      - name: Uninstall existing Podman
-        run: sudo apt-get remove -y podman
       - name: Setup Podman
-        uses: supplypike/setup-bin@v3
-        with:
-          uri: https://github.com/containers/podman/releases/download/v4.4.2/podman-remote-static-linux_amd64.tar.gz
-          name: podman
-          version: 4.4.2
-      - name: Debug
         run: |
+          sudo apt-get remove -y podman
+          curl -L "https://github.com/containers/podman/releases/download/v4.4.2/podman-remote-static-linux_amd64.tar.gz" -o podman-remote-static-linux_amd64.tar.gz 
+          tar -xzf podman-remote-static-linux_amd64.tar.gz
+          ln -s podman-remote-static-linux_amd64 /usr/local/bin/podman
           podman -v
           podman info
       - name: Set environment
