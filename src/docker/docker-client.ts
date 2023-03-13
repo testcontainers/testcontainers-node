@@ -68,8 +68,7 @@ class ConfigurationStrategy implements DockerClientStrategy {
   async initialise(): Promise<DockerClientInit> {
     const { dockerHost, dockerTlsVerify, dockerCertPath } = propertiesFile;
 
-    const dockerOptions: DockerOptions & { headers?: { "x-tc-sid": string } } = {};
-    dockerOptions.headers = { "x-tc-sid": sessionId };
+    const dockerOptions: DockerOptions = { headers: { "x-tc-sid": sessionId } };
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const { pathname, hostname, port } = new URL(dockerHost!);
