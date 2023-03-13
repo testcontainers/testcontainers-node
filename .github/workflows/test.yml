@@ -82,7 +82,6 @@ jobs:
           uri: https://github.com/containers/podman/releases/download/v4.4.2/podman-remote-static-linux_amd64.tar.gz
           name: podman
           version: 4.4.2
-          command: systemctl enable --now --user podman podman.socket
       - name: Debug
         run: |
           podman -v
