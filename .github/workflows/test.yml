@@ -101,37 +101,6 @@ jobs:
           CI_ROOTLESS: true
           TESTCONTAINERS_RYUK_DISABLED: true
 
-  colima:
-    runs-on: ${{ matrix.os-version }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os-version: [ macos-latest ]
-        node-version: [ 14.x, 16.x, 18.x ]
-    steps:
-      - name: Code checkout
-        uses: actions/checkout@v3
-      - name: Setup Colima
-        uses: douglascamata/setup-docker-macos-action@v1-alpha
-      - name: Set environment
-        run: echo "DOCKER_HOST=unix://$HOME/.colima/docker.sock" >> $GITHUB_ENV
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: cristianrgreco
-          password: b62e3c19-4990-46f6-b221-55cf0bfb6513 # read-only
-      - name: Install NodeJS ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-      - name: Install dependencies
-        run: npm ci --omit=optional
-      - name: Run tests
-        run: npm run test:ci -- --dns-result-order=ipv4first
-        env:
-          CI_ROOTLESS: true
-          TESTCONTAINERS_RYUK_DISABLED: true
-
   smoke-test:
     runs-on: ${{ matrix.os-version }}
     strategy:
