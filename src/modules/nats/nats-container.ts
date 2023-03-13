@@ -1,6 +1,5 @@
 import { GenericContainer } from "../../generic-container/generic-container";
 import { StartedTestContainer } from "../../test-container";
-import { RandomUuid } from "../../uuid";
 import { AbstractStartedContainer } from "../abstract-started-container";
 import { Wait } from "../../wait";
 
@@ -16,8 +15,8 @@ export class NatsContainer extends GenericContainer {
 
   constructor(image = "nats:2.8-alpine") {
     super(image);
-    this.args[USER_ARGUMENT_KEY] = new RandomUuid().nextUuid();
-    this.args[PASS_ARGUMENT_KEY] = new RandomUuid().nextUuid();
+    this.args[USER_ARGUMENT_KEY] = "test";
+    this.args[PASS_ARGUMENT_KEY] = "test";
   }
 
   public withUsername(user: string): this {

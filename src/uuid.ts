@@ -6,6 +6,6 @@ export interface Uuid {
 
 export class RandomUuid implements Uuid {
   public nextUuid(): string {
-    return crypto.randomBytes(16).toString("hex");
+    return crypto.randomUUID();
   }
 }

@@ -4,6 +4,7 @@ import { log } from "../logger";
 import { URL } from "url";
 import { existsSync, promises as fs } from "fs";
 import { runInContainer } from "./functions/run-in-container";
+import { sessionId } from "./session-id";
 import * as propertiesFile from "../testcontainers-properties-file";
 import { HostIps, lookupHostIps } from "./lookup-host-ips";
 import { getSystemInfo } from "../system-info";
@@ -85,7 +86,7 @@ class ConfigurationStrategy implements DockerClientStrategy {
   async getDockerClient(): Promise<DockerClientInit> {
     const { dockerHost, dockerTlsVerify, dockerCertPath } = propertiesFile;
 
-    const dockerOptions: DockerOptions = {};
+    const dockerOptions: DockerOptions = { headers: { "x-tc-sid": sessionId } };
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const { pathname, hostname, port } = new URL(dockerHost!);
