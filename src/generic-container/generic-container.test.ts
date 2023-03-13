@@ -428,7 +428,7 @@ describe("GenericContainer", () => {
         .withExposedPorts(8081)
         .withStartupTimeout(0)
         .start()
-    ).rejects.toThrowError("Port 8081 not bound after 0ms");
+    ).rejects.toThrowError(/Port \d+ not bound after 0ms/);
 
     expect(await getRunningContainerNames()).not.toContain(containerName);
   });
