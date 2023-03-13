@@ -2,7 +2,12 @@ import fetch from "node-fetch";
 import path from "path";
 import { DockerComposeEnvironment } from "./docker-compose-environment";
 import { Wait } from "../wait";
-import { checkEnvironmentContainerIsHealthy, getRunningContainerNames, getVolumeNames } from "../test-helper";
+import {
+  checkEnvironmentContainerIsHealthy,
+  composeContainerName,
+  getRunningContainerNames,
+  getVolumeNames,
+} from "../test-helper";
 
 describe("DockerComposeEnvironment", () => {
   jest.setTimeout(180_000);
@@ -17,7 +22,7 @@ describe("DockerComposeEnvironment", () => {
     const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml").up();
 
     await Promise.all(
-      ["container_1", "another_container_1"].map(
+      [await composeContainerName("container"), await composeContainerName("another_container")].map(
         async (containerName) => await checkEnvironmentContainerIsHealthy(startedEnvironment, containerName)
       )
     );
@@ -40,7 +45,7 @@ describe("DockerComposeEnvironment", () => {
       "docker-compose.yml",
       "docker-compose-update.yml",
     ]).up();
-    const container = startedEnvironment.getContainer("container_1");
+    const container = startedEnvironment.getContainer(await composeContainerName("container"));
 
     const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
     const response = await fetch(`${url}/env`);
@@ -53,12 +58,12 @@ describe("DockerComposeEnvironment", () => {
 
   it("should support log message wait strategy", async () => {
     const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml")
-      .withWaitStrategy("container_1", Wait.forLogMessage("Listening on port 8080"))
-      .withWaitStrategy("another_container_1", Wait.forLogMessage("Listening on port 8080"))
+      .withWaitStrategy(await composeContainerName("container"), Wait.forLogMessage("Listening on port 8080"))
+      .withWaitStrategy(await composeContainerName("another_container"), Wait.forLogMessage("Listening on port 8080"))
       .up();
 
     await Promise.all(
-      ["container_1", "another_container_1"].map(
+      [await composeContainerName("container"), await composeContainerName("another_container")].map(
         async (containerName) => await checkEnvironmentContainerIsHealthy(startedEnvironment, containerName)
       )
     );
@@ -80,7 +85,7 @@ describe("DockerComposeEnvironment", () => {
   it("should stop the container when the health check wait strategy times out", async () => {
     await expect(
       new DockerComposeEnvironment(fixtures, "docker-compose-with-healthcheck.yml")
-        .withWaitStrategy("container_1", Wait.forHealthCheck())
+        .withWaitStrategy(await composeContainerName("container"), Wait.forHealthCheck())
         .withStartupTimeout(0)
         .up()
     ).rejects.toThrowError(`Health check not healthy after 0ms`);
@@ -90,10 +95,10 @@ describe("DockerComposeEnvironment", () => {
 
   it("should support health check wait strategy", async () => {
     const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-healthcheck.yml")
-      .withWaitStrategy("container_1", Wait.forHealthCheck())
+      .withWaitStrategy(await composeContainerName("container"), Wait.forHealthCheck())
       .up();
 
-    await checkEnvironmentContainerIsHealthy(startedEnvironment, "container_1");
+    await checkEnvironmentContainerIsHealthy(startedEnvironment, await composeContainerName("container"));
 
     await startedEnvironment.down();
   });
@@ -130,7 +135,7 @@ describe("DockerComposeEnvironment", () => {
     const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml").withBuild().up();
 
     await Promise.all(
-      ["container_1", "another_container_1"].map(
+      [await composeContainerName("container"), await composeContainerName("another_container")].map(
         async (containerName) => await checkEnvironmentContainerIsHealthy(startedEnvironment, containerName)
       )
     );
@@ -143,7 +148,7 @@ describe("DockerComposeEnvironment", () => {
       .withEnvironment({ ENV_VAR: "ENV_VAR_VALUE" })
       .up();
 
-    const container = startedEnvironment.getContainer("container_1");
+    const container = startedEnvironment.getContainer(await composeContainerName("container"));
     const response = await fetch(`http://${container.getHost()}:${container.getMappedPort(8080)}/env`);
     const responseBody = await response.json();
     expect(responseBody["ENV_VAR"]).toBe("ENV_VAR_VALUE");
@@ -166,7 +171,7 @@ describe("DockerComposeEnvironment", () => {
       ["service_2"]
     );
 
-    await checkEnvironmentContainerIsHealthy(startedEnvironment, `service_2_1`);
+    await checkEnvironmentContainerIsHealthy(startedEnvironment, await composeContainerName("service_2"));
     expect(() => startedEnvironment.getContainer("service_1")).toThrowError(
       `Cannot get container "service_1" as it is not running`
     );
@@ -191,7 +196,7 @@ describe("DockerComposeEnvironment", () => {
 
     const startedEnvironment = await new DockerComposeEnvironment(overrideFixtures, "docker-compose.yml").up();
 
-    const container = startedEnvironment.getContainer("container_1");
+    const container = startedEnvironment.getContainer(await composeContainerName("container"));
     const response = await fetch(`http://${container.getHost()}:${container.getMappedPort(8080)}/env`);
     const responseBody = await response.json();
     expect(responseBody["ENV_VAR"]).toBe("default");
@@ -206,7 +211,7 @@ describe("DockerComposeEnvironment", () => {
       .withEnvironmentFile(".env.override")
       .up();
 
-    const container = startedEnvironment.getContainer("container_1");
+    const container = startedEnvironment.getContainer(await composeContainerName("container"));
     const response = await fetch(`http://${container.getHost()}:${container.getMappedPort(8080)}/env`);
     const responseBody = await response.json();
     expect(responseBody["ENV_VAR"]).toBe("override");
@@ -220,7 +225,7 @@ describe("DockerComposeEnvironment", () => {
       .up();
 
     await Promise.all(
-      ["container_1", "another_container_1"].map(
+      [await composeContainerName("container"), await composeContainerName("another_container")].map(
         async (containerName) => await checkEnvironmentContainerIsHealthy(startedEnvironment, containerName)
       )
     );

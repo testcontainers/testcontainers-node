@@ -48,7 +48,7 @@ const getNodeInfo = () => {
   };
 };
 
-type DockerComposeInfo = {
+export type DockerComposeInfo = {
   version: string;
 };
 

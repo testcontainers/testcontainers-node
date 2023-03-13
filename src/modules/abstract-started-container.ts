@@ -17,6 +17,10 @@ export class AbstractStartedContainer {
     return this.startedTestContainer.getHost();
   }
 
+  public getFirstMappedPort(): number {
+    return this.startedTestContainer.getFirstMappedPort();
+  }
+
   public getMappedPort(port: number): number {
     return this.startedTestContainer.getMappedPort(port);
   }

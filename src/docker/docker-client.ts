@@ -7,6 +7,8 @@ import { runInContainer } from "./functions/run-in-container";
 import { HostIps, lookupHostIps } from "./lookup-host-ips";
 import { getSystemInfo } from "../system-info";
 import { RootlessUnixSocketStrategy } from "./rootless-unix-socket-strategy";
+import { streamToString } from "../stream-utils";
+import { Readable } from "stream";
 import { DockerClientConfig, getDockerClientConfig } from "./docker-client-config";
 
 type DockerClient = {
@@ -56,7 +58,7 @@ const getDockerClient = async (): Promise<DockerClient> => {
 const isDockerDaemonReachable = async (dockerode: Dockerode): Promise<boolean> => {
   try {
     const response = await dockerode.ping();
-    return response.toString() === "OK";
+    return (await streamToString(Readable.from(response))) === "OK";
   } catch (err) {
     log.warn(`Docker daemon is not reachable: ${err}`);
     return false;

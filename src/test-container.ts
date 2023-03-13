@@ -90,6 +90,8 @@ export interface StartedTestContainer {
 
   getHost(): string;
 
+  getFirstMappedPort(): number;
+
   getMappedPort(port: number): number;
 
   getName(): string;

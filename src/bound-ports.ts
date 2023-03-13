@@ -15,6 +15,16 @@ export class BoundPorts {
     return binding;
   }
 
+  public getFirstBinding(): number {
+    const firstBinding = this.ports.values().next().value;
+
+    if (!firstBinding) {
+      throw new Error("No port bindings found");
+    } else {
+      return firstBinding;
+    }
+  }
+
   public setBinding(key: number, value: number): void {
     this.ports.set(key, value);
   }
