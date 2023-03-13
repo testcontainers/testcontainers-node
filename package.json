@@ -41,7 +41,7 @@
     "byline": "^5.0.0",
     "debug": "^4.3.4",
     "docker-compose": "^0.23.19",
-    "dockerode": "^3.3.4",
+    "dockerode": "^3.3.5",
     "get-port": "^5.1.1",
     "node-fetch": "^2.6.9",
     "properties-reader": "^2.2.0",

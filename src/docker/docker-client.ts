@@ -6,6 +6,8 @@ import { existsSync, promises as fs } from "fs";
 import { runInContainer } from "./functions/run-in-container";
 import { logSystemDiagnostics } from "../log-system-diagnostics";
 import "../testcontainers-properties-file";
+import { streamToString } from "../stream-utils";
+import { Readable } from "stream";
 
 type DockerClient = {
   host: string;
@@ -41,7 +43,7 @@ const getDockerClient = async (): Promise<DockerClient> => {
 const isDockerDaemonReachable = async (dockerode: Dockerode): Promise<boolean> => {
   try {
     const response = await dockerode.ping();
-    return response.toString() === "OK";
+    return (await streamToString(Readable.from(response))) === "OK";
   } catch (err) {
     log.warn(`Docker daemon is not reachable: ${err}`);
     return false;
