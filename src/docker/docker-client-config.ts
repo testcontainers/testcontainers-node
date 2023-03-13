@@ -11,13 +11,7 @@ export type DockerClientConfig = {
   dockerCertPath?: string;
 };
 
-let dockerClientConfig: DockerClientConfig;
-
 export const getDockerClientConfig = async (env: NodeJS.ProcessEnv = process.env): Promise<DockerClientConfig> => {
-  if (dockerClientConfig) {
-    return dockerClientConfig;
-  }
-
   let dockerHost: string | undefined;
   let dockerTlsVerify: string | undefined;
   let dockerCertPath: string | undefined;
