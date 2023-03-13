@@ -672,7 +672,7 @@ describe("GenericContainer", () => {
     });
   });
 
-  describe.skip("from Dockerfile", () => {
+  describe("from Dockerfile", () => {
     it("should build and start", async () => {
       const context = path.resolve(fixtures, "docker");
       const container = await GenericContainer.fromDockerfile(context).build();
