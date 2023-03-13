@@ -4,10 +4,10 @@ import { log } from "../logger";
 import { URL } from "url";
 import { existsSync, promises as fs } from "fs";
 import { runInContainer } from "./functions/run-in-container";
-import * as propertiesFile from "../testcontainers-properties-file";
 import { HostIps, lookupHostIps } from "./lookup-host-ips";
 import { getSystemInfo } from "../system-info";
 import { RootlessUnixSocketStrategy } from "./rootless-unix-socket-strategy";
+import { DockerClientConfig, getDockerClientConfig } from "./docker-client-config";
 
 type DockerClient = {
   uri: string;
@@ -80,8 +80,14 @@ export interface DockerClientStrategy {
 }
 
 class ConfigurationStrategy implements DockerClientStrategy {
+  private dockerConfig!: DockerClientConfig;
+
+  async init(): Promise<void> {
+    this.dockerConfig = await getDockerClientConfig();
+  }
+
   async getDockerClient(): Promise<DockerClientInit> {
-    const { dockerHost, dockerTlsVerify, dockerCertPath } = propertiesFile;
+    const { dockerHost, dockerTlsVerify, dockerCertPath } = this.dockerConfig;
 
     const dockerOptions: DockerOptions = {};
 
@@ -114,7 +120,7 @@ class ConfigurationStrategy implements DockerClientStrategy {
   }
 
   isApplicable(): boolean {
-    return propertiesFile.dockerHost !== undefined;
+    return this.dockerConfig.dockerHost !== undefined;
   }
 
   getName(): string {
