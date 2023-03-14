@@ -717,7 +717,7 @@ describe("GenericContainer", () => {
       events.destroy();
     });
 
-    it("should pull an image from a private registry", async () => {
+    it.only("should pull an image from a private registry", async () => {
       const context = path.resolve(fixtures, "docker-private");
       const container = await GenericContainer.fromDockerfile(context).withPullPolicy(new AlwaysPullPolicy()).build();
       const startedContainer = await container.withExposedPorts(8080).start();

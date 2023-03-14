@@ -96,7 +96,7 @@ jobs:
       - name: Install dependencies
         run: npm ci --omit=optional
       - name: Run tests
-        run: npm run test:ci -- generic-container -t 'should pull an image from a private registry'
+        run: npm run test:ci -- generic-container
         env:
           CI_ROOTLESS: true
           TESTCONTAINERS_RYUK_DISABLED: true
