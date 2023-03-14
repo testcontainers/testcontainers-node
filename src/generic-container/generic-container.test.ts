@@ -691,51 +691,53 @@ describe("GenericContainer", () => {
       await startedContainer.stop();
     });
 
-    it("should use pull policy", async () => {
-      const containerSpec = GenericContainer.fromDockerfile(path.resolve(fixtures, "docker")).withPullPolicy(
-        new AlwaysPullPolicy()
-      );
-      await containerSpec.build();
+    if (!process.env["CI_SKIP_PULL"]) {
+      it("should use pull policy", async () => {
+        const containerSpec = GenericContainer.fromDockerfile(path.resolve(fixtures, "docker")).withPullPolicy(
+          new AlwaysPullPolicy()
+        );
+        await containerSpec.build();
 
-      const events = await getEvents();
-      const pullPromise = new Promise<void>((resolve) => {
-        events.on("data", (data) => {
-          try {
-            const { status } = JSON.parse(data);
-            if (status === "pull") {
-              resolve();
+        const events = await getEvents();
+        const pullPromise = new Promise<void>((resolve) => {
+          events.on("data", (data) => {
+            try {
+              const { status } = JSON.parse(data);
+              if (status === "pull") {
+                resolve();
+              }
+            } catch {
+              // ignored
             }
-          } catch {
-            // ignored
-          }
+          });
         });
+        await containerSpec.build();
+
+        await pullPromise;
+
+        events.destroy();
       });
-      await containerSpec.build();
 
-      await pullPromise;
+      it("should pull an image from a private registry", async () => {
+        const context = path.resolve(fixtures, "docker-private");
+        const container = await GenericContainer.fromDockerfile(context).withPullPolicy(new AlwaysPullPolicy()).build();
+        const startedContainer = await container.withExposedPorts(8080).start();
 
-      events.destroy();
-    });
+        await checkContainerIsHealthy(startedContainer);
 
-    it("should pull an image from a private registry", async () => {
-      const context = path.resolve(fixtures, "docker-private");
-      const container = await GenericContainer.fromDockerfile(context).withPullPolicy(new AlwaysPullPolicy()).build();
-      const startedContainer = await container.withExposedPorts(8080).start();
+        await startedContainer.stop();
+      });
 
-      await checkContainerIsHealthy(startedContainer);
+      it("should pull an image from a private registry in a multistage Dockerfile", async () => {
+        const context = path.resolve(fixtures, "docker-private-multistage");
+        const container = await GenericContainer.fromDockerfile(context).withPullPolicy(new AlwaysPullPolicy()).build();
+        const startedContainer = await container.withExposedPorts(8080).start();
 
-      await startedContainer.stop();
-    });
+        await checkContainerIsHealthy(startedContainer);
 
-    it("should pull an image from a private registry in a multistage Dockerfile", async () => {
-      const context = path.resolve(fixtures, "docker-private-multistage");
-      const container = await GenericContainer.fromDockerfile(context).withPullPolicy(new AlwaysPullPolicy()).build();
-      const startedContainer = await container.withExposedPorts(8080).start();
-
-      await checkContainerIsHealthy(startedContainer);
-
-      await startedContainer.stop();
-    });
+        await startedContainer.stop();
+      });
+    }
 
     it("should build and start with custom file name", async () => {
       const context = path.resolve(fixtures, "docker-with-custom-filename");

@@ -99,6 +99,7 @@ jobs:
         run: npm run test:ci -- generic-container
         env:
           CI_ROOTLESS: true
+          CI_SKIP_PULL: true # remove when https://github.com/containers/podman/issues/17571 released
           TESTCONTAINERS_RYUK_DISABLED: true
 
   smoke-test:
