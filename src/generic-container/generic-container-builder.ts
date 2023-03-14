@@ -38,7 +38,8 @@ export class GenericContainerBuilder {
     return this;
   }
 
-  public async build(image = `${this.uuid.nextUuid()}:${this.uuid.nextUuid()}`): Promise<GenericContainer> {
+  // https://github.com/containers/buildah/issues/1034
+  public async build(image = `localhost/${this.uuid.nextUuid()}:${this.uuid.nextUuid()}`): Promise<GenericContainer> {
     const imageName = DockerImageName.fromString(image);
 
     await ReaperInstance.getInstance();
