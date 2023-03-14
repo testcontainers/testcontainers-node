@@ -691,7 +691,7 @@ describe("GenericContainer", () => {
       await startedContainer.stop();
     });
 
-    it.only("should use pull policy", async () => {
+    it("should use pull policy", async () => {
       const containerSpec = GenericContainer.fromDockerfile(path.resolve(fixtures, "docker")).withPullPolicy(
         new AlwaysPullPolicy()
       );
@@ -718,9 +718,9 @@ describe("GenericContainer", () => {
       events.destroy();
     });
 
-    it("should pull an image from a private registry", async () => {
+    it.only("should pull an image from a private registry", async () => {
       const context = path.resolve(fixtures, "docker-private");
-      const container = await GenericContainer.fromDockerfile(context).withPullPolicy(new AlwaysPullPolicy()).build();
+      const container = await GenericContainer.fromDockerfile(context).build();
       const startedContainer = await container.withExposedPorts(8080).start();
 
       await checkContainerIsHealthy(startedContainer);
