@@ -55,10 +55,7 @@ export const buildImage = async (options: BuildImageOptions): Promise<void> => {
       console.log("build image stream starts");
       dockerode
         .buildImage(tarStream, buildImageOptions)
-        .then((stream) => {
-          console.log("build image stream", stream);
-          return byline(stream);
-        })
+        .then((stream) => byline(stream))
         .then((stream) => {
           stream.setEncoding("utf-8");
           stream.on("data", (line) => log.trace(`${options.imageName.toString()}: ${line}`));

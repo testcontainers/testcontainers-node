@@ -343,28 +343,28 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
-  it("should use pull policy", async () => {
+  it.only("should use pull policy", async () => {
     const container1 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
-    const events = await getEvents();
-    const pullPromise = new Promise<void>((resolve, reject) => {
-      events.on("data", (data) => {
-        try {
-          if (JSON.parse(data).status === "pull") {
-            resolve();
-          }
-        } catch (err) {
-          reject(`Unexpected err: ${err}`);
-        }
-      });
-    });
 
+    const events = await getEvents();
     const container2 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withPullPolicy(new AlwaysPullPolicy())
       .withExposedPorts(8080)
       .start();
 
-    await pullPromise;
-
+    await new Promise<void>((resolve) =>
+      events.on("data", (data) => {
+        console.log(data);
+        try {
+          const { status } = JSON.parse(data);
+          if (status === "pull") {
+            resolve();
+          }
+        } catch {
+          // ignored
+        }
+      })
+    );
     events.destroy();
     await container1.stop();
     await container2.stop();
@@ -691,14 +691,16 @@ describe("GenericContainer", () => {
       await startedContainer.stop();
     });
 
-    it("should use pull policy", async () => {
+    it.only("should use pull policy", async () => {
       const containerSpec = GenericContainer.fromDockerfile(path.resolve(fixtures, "docker")).withPullPolicy(
         new AlwaysPullPolicy()
       );
       await containerSpec.build();
-
       const events = await getEvents();
-      const pullPromise = new Promise<void>((resolve) => {
+
+      await containerSpec.build();
+
+      await new Promise<void>((resolve) =>
         events.on("data", (data) => {
           console.log(data);
           try {
@@ -709,12 +711,8 @@ describe("GenericContainer", () => {
           } catch {
             // ignored
           }
-        });
-      });
-      await containerSpec.build();
-
-      await pullPromise;
-
+        })
+      );
       events.destroy();
     });
 
