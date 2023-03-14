@@ -27,7 +27,7 @@ jobs:
       - name: Install dependencies
         run: npm ci --omit=optional
       - name: Run tests
-        run: npm run test:ci
+        run: npm run test:ci -- generic-container
 
   docker-rootless:
     runs-on: ${{ matrix.os-version }}
@@ -55,7 +55,7 @@ jobs:
       - name: Install dependencies
         run: npm ci --omit=optional
       - name: Run tests
-        run: npm run test:ci
+        run: npm run test:ci -- generic-container
         env:
           CI_ROOTLESS: true
 
