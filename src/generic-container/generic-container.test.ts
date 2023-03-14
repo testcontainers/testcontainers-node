@@ -11,7 +11,7 @@ import { getContainerById } from "../docker/functions/container/get-container";
 import { containerLog } from "../logger";
 
 describe("GenericContainer", () => {
-  jest.setTimeout(180_000);
+  jest.setTimeout(30_000);
 
   const fixtures = path.resolve(__dirname, "..", "..", "fixtures", "docker");
 
@@ -343,7 +343,7 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
-  it.only("should use pull policy", async () => {
+  it("should use pull policy", async () => {
     const container1 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
 
     const events = await getEvents();
