@@ -6,6 +6,7 @@ import fetch from "node-fetch";
 import { StartedTestContainer } from "./test-container";
 import https from "https";
 import { getSystemInfo } from "./system-info";
+import { GetEventsOptions } from "dockerode";
 
 export const checkContainerIsHealthy = async (container: StartedTestContainer): Promise<void> => {
   const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
@@ -28,9 +29,9 @@ export const checkEnvironmentContainerIsHealthy = async (
   await checkContainerIsHealthy(container);
 };
 
-export const getEvents = async (): Promise<Readable> => {
+export const getEvents = async (opts: GetEventsOptions = {}): Promise<Readable> => {
   const { dockerode } = await dockerClient();
-  const events = (await dockerode.getEvents()) as Readable;
+  const events = (await dockerode.getEvents(opts)) as Readable;
   events.setEncoding("utf-8");
   return events;
 };

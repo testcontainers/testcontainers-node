@@ -99,6 +99,7 @@ jobs:
         run: npm run test:ci -- generic-container
         env:
           CI_ROOTLESS: true
+          CI_PODMAN: true
           TESTCONTAINERS_RYUK_DISABLED: true
 
   smoke-test:

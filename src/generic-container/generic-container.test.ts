@@ -345,13 +345,15 @@ describe("GenericContainer", () => {
 
   it("should use pull policy", async () => {
     const container1 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
+    await container1.stop();
 
-    const events = await getEvents();
+    const startTime = Date.now();
     const container2 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withPullPolicy(new AlwaysPullPolicy())
       .withExposedPorts(8080)
       .start();
 
+    const events = await getEvents({ since: startTime / 1000, filters: { type: ["image"] } });
     await new Promise<void>((resolve) =>
       events.on("data", (data) => {
         console.log(data);
@@ -366,7 +368,6 @@ describe("GenericContainer", () => {
       })
     );
     events.destroy();
-    await container1.stop();
     await container2.stop();
   });
 
@@ -691,30 +692,34 @@ describe("GenericContainer", () => {
       await startedContainer.stop();
     });
 
-    it.only("should use pull policy", async () => {
-      const containerSpec = GenericContainer.fromDockerfile(path.resolve(fixtures, "docker")).withPullPolicy(
-        new AlwaysPullPolicy()
-      );
-      await containerSpec.build();
-      const events = await getEvents();
+    if (!process.env["CI_PODMAN"]) {
+      // Podman not emitting image pull event when building from image
 
-      await containerSpec.build();
+      it("should use pull policy", async () => {
+        const context = path.resolve(fixtures, "docker");
+        const containerSpec = GenericContainer.fromDockerfile(context).withPullPolicy(new AlwaysPullPolicy());
+        await containerSpec.build();
 
-      await new Promise<void>((resolve) =>
-        events.on("data", (data) => {
-          console.log(data);
-          try {
-            const { status } = JSON.parse(data);
-            if (status === "pull") {
-              resolve();
+        const startTime = Date.now();
+        await containerSpec.build();
+
+        const events = await getEvents({ since: startTime / 1000, filters: { type: ["image"] } });
+        await new Promise<void>((resolve) =>
+          events.on("data", (data) => {
+            console.log(data);
+            try {
+              const { status } = JSON.parse(data);
+              if (status === "pull") {
+                resolve();
+              }
+            } catch {
+              // ignored
             }
-          } catch {
-            // ignored
-          }
-        })
-      );
-      events.destroy();
-    });
+          })
+        );
+        events.destroy();
+      });
+    }
 
     it("should pull an image from a private registry", async () => {
       const context = path.resolve(fixtures, "docker-private");
