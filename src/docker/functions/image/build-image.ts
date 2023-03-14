@@ -47,10 +47,7 @@ export const buildImage = async (options: BuildImageOptions): Promise<void> => {
       t: options.imageName.toString(),
       labels: createLabels(false, options.imageName),
       registryconfig: options.registryConfig,
-      // https://github.com/containers/podman/issues/17778
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      pull: options.pullPolicy.shouldPull() ? true : undefined,
+      pull: options.pullPolicy.shouldPull() ? "true" : undefined,
     };
     return new Promise((resolve) => {
       dockerode
