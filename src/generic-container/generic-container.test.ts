@@ -345,29 +345,28 @@ describe("GenericContainer", () => {
 
   it("should use pull policy", async () => {
     const container1 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
-    await container1.stop();
+    const events = await getEvents();
+    const pullPromise = new Promise<void>((resolve, reject) => {
+      events.on("data", (data) => {
+        try {
+          if (JSON.parse(data).status === "pull") {
+            resolve();
+          }
+        } catch (err) {
+          reject(`Unexpected err: ${err}`);
+        }
+      });
+    });
 
-    const startTime = Date.now();
     const container2 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withPullPolicy(new AlwaysPullPolicy())
       .withExposedPorts(8080)
       .start();
 
-    const events = await getEvents({ since: startTime / 1000, filters: { type: ["image"] } });
-    await new Promise<void>((resolve) =>
-      events.on("data", (data) => {
-        console.log(data);
-        try {
-          const { status } = JSON.parse(data);
-          if (status === "pull") {
-            resolve();
-          }
-        } catch {
-          // ignored
-        }
-      })
-    );
+    await pullPromise;
+
     events.destroy();
+    await container1.stop();
     await container2.stop();
   });
 
@@ -483,7 +482,7 @@ describe("GenericContainer", () => {
       customGenericContainer
         .withName(containerName)
         .withExposedPorts(8080)
-        .withHealthCheck({ test: ["CMD-SHELL", "exit 1"], interval: 0, timeout: 0, retries: 0 })
+        .withHealthCheck({ test: ["CMD-SHELL", "exit 1"], interval: 1, timeout: 3, retries: 3 })
         .withWaitStrategy(Wait.forHealthCheck())
         .start()
     ).rejects.toThrowError("Health check failed");
@@ -695,16 +694,14 @@ describe("GenericContainer", () => {
     if (!process.env["CI_PODMAN"]) {
       // Podman not emitting image pull event when building from image
 
-      it.only("should use pull policy", async () => {
-        const context = path.resolve(fixtures, "docker");
-        const containerSpec = GenericContainer.fromDockerfile(context).withPullPolicy(new AlwaysPullPolicy());
+      it("should use pull policy", async () => {
+        const containerSpec = GenericContainer.fromDockerfile(path.resolve(fixtures, "docker")).withPullPolicy(
+          new AlwaysPullPolicy()
+        );
         await containerSpec.build();
 
-        const startTime = Date.now();
-        await containerSpec.build();
-
-        const events = await getEvents({ since: startTime / 1000, filters: { type: ["image"] } });
-        await new Promise<void>((resolve) =>
+        const events = await getEvents();
+        const pullPromise = new Promise<void>((resolve) => {
           events.on("data", (data) => {
             console.log(data);
             try {
@@ -715,8 +712,12 @@ describe("GenericContainer", () => {
             } catch {
               // ignored
             }
-          })
-        );
+          });
+        });
+        await containerSpec.build();
+
+        await pullPromise;
+
         events.destroy();
       });
     }
