@@ -50,6 +50,7 @@ export const buildImage = async (options: BuildImageOptions): Promise<void> => {
       pull: options.pullPolicy.shouldPull() ? "any" : undefined,
     };
     return new Promise((resolve) => {
+      console.log("build image stream starts");
       dockerode
         .buildImage(tarStream, buildImageOptions)
         .then((stream) => byline(stream))
