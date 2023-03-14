@@ -47,7 +47,9 @@ export const buildImage = async (options: BuildImageOptions): Promise<void> => {
       t: options.imageName.toString(),
       labels: createLabels(false, options.imageName),
       registryconfig: options.registryConfig,
-      pull: options.pullPolicy.shouldPull() ? "always" : undefined,
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      pull: options.pullPolicy.shouldPull() ? true : undefined,
     };
     return new Promise((resolve) => {
       console.log("build image stream starts");
