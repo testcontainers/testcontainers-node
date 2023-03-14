@@ -691,9 +691,8 @@ describe("GenericContainer", () => {
       await startedContainer.stop();
     });
 
+    // https://github.com/containers/podman/issues/17779
     if (!process.env["CI_PODMAN"]) {
-      // Podman not emitting image pull event when building from image
-
       it("should use pull policy", async () => {
         const containerSpec = GenericContainer.fromDockerfile(path.resolve(fixtures, "docker")).withPullPolicy(
           new AlwaysPullPolicy()

@@ -14,14 +14,6 @@ export type DockerInfo = {
 export const getDockerInfo = async (dockerode: Dockerode): Promise<DockerInfo> => {
   const info = await dockerode.info();
 
-  let indexServerAddress: string;
-  if (info.IndexServerAddress === undefined || info.IndexServerAddress.length === 0) {
-    log.debug("Index server address is not set, using default");
-    indexServerAddress = "https://index.docker.io/v1/";
-  } else {
-    indexServerAddress = info.IndexServerAddress;
-  }
-
   return {
     serverVersion: info.ServerVersion,
     operatingSystem: info.OperatingSystem,
@@ -29,6 +21,19 @@ export const getDockerInfo = async (dockerode: Dockerode): Promise<DockerInfo> =
     architecture: info.Architecture,
     cpus: info.NCPU,
     memory: info.MemTotal,
-    indexServerAddress,
+    indexServerAddress: getIndexServerAddress(info),
   };
 };
+
+// https://github.com/containers/podman/issues/17776
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const getIndexServerAddress = (info: any): string => {
+  if (isUndefinedOrEmpty(info.IndexServerAddress)) {
+    log.debug("Index server address is not set, using default");
+    return "https://index.docker.io/v1/";
+  } else {
+    return info.IndexServerAddress;
+  }
+};
+
+const isUndefinedOrEmpty = (value: string | undefined): boolean => value === undefined || value.length === 0;

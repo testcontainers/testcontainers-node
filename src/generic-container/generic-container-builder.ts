@@ -46,11 +46,8 @@ export class GenericContainerBuilder {
     const dockerfile = path.resolve(this.context, this.dockerfileName);
     log.debug(`Preparing to build Dockerfile: ${dockerfile}`);
     const imageNames = await getDockerfileImages(dockerfile, this.buildArgs);
-    console.log("dockerfile image names", imageNames);
     const { dockerode, indexServerAddress } = await dockerClient();
     const registryConfig = await this.getRegistryConfig(indexServerAddress, imageNames);
-
-    console.log("indexServerAddress", indexServerAddress);
 
     await buildImage({
       imageName: imageName,
@@ -61,7 +58,6 @@ export class GenericContainerBuilder {
       cache: this.cache,
       registryConfig,
     });
-    console.log("build image complete");
     const container = new GenericContainer(imageName.toString());
     if (!(await imageExists(dockerode, imageName))) {
       throw new Error("Failed to build image");
