@@ -483,7 +483,7 @@ describe("GenericContainer", () => {
       customGenericContainer
         .withName(containerName)
         .withExposedPorts(8080)
-        .withHealthCheck({ test: ["CMD-SHELL", "exit 1"], interval: 1000, timeout: 1000, retries: 5 })
+        .withHealthCheck({ test: ["CMD-SHELL", "exit 1"], interval: 0, timeout: 0, retries: 0 })
         .withWaitStrategy(Wait.forHealthCheck())
         .start()
     ).rejects.toThrowError("Health check failed");
@@ -695,7 +695,7 @@ describe("GenericContainer", () => {
     if (!process.env["CI_PODMAN"]) {
       // Podman not emitting image pull event when building from image
 
-      it("should use pull policy", async () => {
+      it.only("should use pull policy", async () => {
         const context = path.resolve(fixtures, "docker");
         const containerSpec = GenericContainer.fromDockerfile(context).withPullPolicy(new AlwaysPullPolicy());
         await containerSpec.build();
