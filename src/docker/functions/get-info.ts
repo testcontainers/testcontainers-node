@@ -19,6 +19,6 @@ export const getDockerInfo = async (dockerode: Dockerode): Promise<DockerInfo> =
     architecture: info.Architecture,
     cpus: info.NCPU,
     memory: info.MemTotal,
-    indexServerAddress: info.IndexServerAddress,
+    indexServerAddress: info.IndexServerAddress ?? "https://index.docker.io/v1/",
   };
 };
