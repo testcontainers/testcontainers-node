@@ -47,15 +47,15 @@ export const buildImage = async (options: BuildImageOptions): Promise<void> => {
       t: options.imageName.toString(),
       labels: createLabels(false, options.imageName),
       registryconfig: options.registryConfig,
-      pull: options.pullPolicy.shouldPull() ? "any" : undefined,
+      pull: options.pullPolicy.shouldPull() ? "always" : undefined,
     };
     return new Promise((resolve) => {
       console.log("build image stream starts");
       dockerode
         .buildImage(tarStream, buildImageOptions)
-        .then((stream) => byline(stream))
+        // .then((stream) => byline(stream))
         .then((stream) => {
-          stream.setEncoding("utf-8");
+          // stream.setEncoding("utf-8");
           stream.on("data", (line) => log.trace(`${options.imageName.toString()}: ${line}`));
           stream.on("end", () => resolve());
         });
