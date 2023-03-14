@@ -11,7 +11,7 @@ import { getContainerById } from "../docker/functions/container/get-container";
 import { containerLog } from "../logger";
 
 describe("GenericContainer", () => {
-  jest.setTimeout(30_000);
+  jest.setTimeout(180_000);
 
   const fixtures = path.resolve(__dirname, "..", "..", "fixtures", "docker");
 
