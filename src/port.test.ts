@@ -26,6 +26,7 @@ describe("resolveHostPortBinding", () => {
     expect(resolveHostPortBinding(hostIps, ports)).toBe(50000);
   });
 
+  // https://github.com/containers/podman/issues/17780
   it("should return mapped host port when single entry with empty host IP (podman)", () => {
     const hostIps: HostIps = [
       { address: "127.0.0.1", family: 4 },
