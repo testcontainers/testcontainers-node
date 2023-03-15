@@ -205,7 +205,7 @@ describe("GenericContainer", () => {
       .start();
 
     const { output } = await container.exec(["pwd"]);
-    expect(output.trim()).toBe("/tmp");
+    expect(output).toEqual(expect.stringContaining("/tmp"));
   });
 
   it("should set entrypoint", async () => {
@@ -320,10 +320,11 @@ describe("GenericContainer", () => {
 
     const dockerContainer = await getContainerById(container.getId());
     const containerInfo = await dockerContainer.inspect();
-    expect(containerInfo.HostConfig.LogConfig).toEqual({
-      Type: "json-file",
-      Config: {},
-    });
+    expect(containerInfo.HostConfig.LogConfig).toEqual(
+      expect.objectContaining({
+        Type: "json-file",
+      })
+    );
 
     await container.stop();
   });
@@ -375,7 +376,7 @@ describe("GenericContainer", () => {
     const { output, exitCode } = await container.exec(["echo", "hello", "world"]);
 
     expect(exitCode).toBe(0);
-    expect(output.trim()).toBe("hello world");
+    expect(output).toEqual(expect.stringContaining("hello world"));
 
     await container.stop();
   });
@@ -421,7 +422,7 @@ describe("GenericContainer", () => {
 
     const { output } = await container.exec(["whoami"]);
 
-    expect(output.trim()).toBe("node");
+    expect(output).toEqual(expect.stringContaining("node"));
 
     await container.stop();
   });
@@ -481,7 +482,7 @@ describe("GenericContainer", () => {
       customGenericContainer
         .withName(containerName)
         .withExposedPorts(8080)
-        .withHealthCheck({ test: ["CMD-SHELL", "exit 1"] })
+        .withHealthCheck({ test: ["CMD-SHELL", "exit 1"], interval: 1, timeout: 3, retries: 3 })
         .withWaitStrategy(Wait.forHealthCheck())
         .start()
     ).rejects.toThrowError("Health check failed");
@@ -538,7 +539,7 @@ describe("GenericContainer", () => {
       .start();
     const { output } = await container.exec(["cat", target]);
 
-    expect(output).toBe("hello world");
+    expect(output).toEqual(expect.stringContaining("hello world"));
 
     await container.stop();
   });
@@ -552,7 +553,7 @@ describe("GenericContainer", () => {
       .start();
     const { output } = await container.exec(["cat", target]);
 
-    expect(output).toBe(content);
+    expect(output).toEqual(expect.stringContaining(content));
 
     await container.stop();
   });
@@ -690,31 +691,34 @@ describe("GenericContainer", () => {
       await startedContainer.stop();
     });
 
-    it("should use pull policy", async () => {
-      const containerSpec = GenericContainer.fromDockerfile(path.resolve(fixtures, "docker")).withPullPolicy(
-        new AlwaysPullPolicy()
-      );
-      await containerSpec.build();
+    // https://github.com/containers/podman/issues/17779
+    if (!process.env["CI_PODMAN"]) {
+      it("should use pull policy", async () => {
+        const containerSpec = GenericContainer.fromDockerfile(path.resolve(fixtures, "docker")).withPullPolicy(
+          new AlwaysPullPolicy()
+        );
+        await containerSpec.build();
 
-      const events = await getEvents();
-      const pullPromise = new Promise<void>((resolve) => {
-        events.on("data", (data) => {
-          try {
-            const { status } = JSON.parse(data);
-            if (status === "pull") {
-              resolve();
+        const events = await getEvents();
+        const pullPromise = new Promise<void>((resolve) => {
+          events.on("data", (data) => {
+            try {
+              const { status } = JSON.parse(data);
+              if (status === "pull") {
+                resolve();
+              }
+            } catch {
+              // ignored
             }
-          } catch {
-            // ignored
-          }
+          });
         });
+        await containerSpec.build();
+
+        await pullPromise;
+
+        events.destroy();
       });
-      await containerSpec.build();
-
-      await pullPromise;
-
-      events.destroy();
-    });
+    }
 
     it("should pull an image from a private registry", async () => {
       const context = path.resolve(fixtures, "docker-private");
@@ -797,7 +801,7 @@ describe("GenericContainer", () => {
       await checkContainerIsHealthy(container);
       const result = await container.exec(["cat", "config.txt"]);
 
-      expect(result.output.trim()).toStrictEqual("testconfig");
+      expect(result.output).toEqual(expect.stringContaining("testconfig"));
 
       await container.stop();
     });

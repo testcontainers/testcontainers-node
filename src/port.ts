@@ -17,6 +17,10 @@ export const hasHostBinding = (port: PortWithOptionalBinding): port is PortWithB
 };
 
 export const resolveHostPortBinding = (hostIps: HostIps, hostPortBindings: HostPortBindings): number => {
+  if (isDualStackIp(hostPortBindings)) {
+    return hostPortBindings[0].hostPort;
+  }
+
   for (const { family } of hostIps) {
     const hostPortBinding = hostPortBindings.find(({ hostIp }) => net.isIP(hostIp) === family);
     if (hostPortBinding !== undefined) {
@@ -25,3 +29,6 @@ export const resolveHostPortBinding = (hostIps: HostIps, hostPortBindings: HostP
   }
   throw new Error("No host port found for host IP");
 };
+
+const isDualStackIp = (hostPortBindings: HostPortBindings): boolean =>
+  hostPortBindings.length === 1 && hostPortBindings[0].hostIp === "";

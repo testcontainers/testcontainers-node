@@ -7,10 +7,10 @@ import path from "path";
 import { log } from "../logger";
 import { getDockerfileImages } from "../dockerfile-parser";
 import { buildImage } from "../docker/functions/image/build-image";
-import { imageExists } from "../docker/functions/image/image-exists";
 import { getAuthConfig } from "../registry-auth-locator/get-auth-config";
 import { GenericContainer } from "./generic-container";
 import { dockerClient } from "../docker/docker-client";
+import { imageExists } from "../docker/functions/image/image-exists";
 
 export class GenericContainerBuilder {
   private buildArgs: BuildArgs = {};
@@ -38,7 +38,8 @@ export class GenericContainerBuilder {
     return this;
   }
 
-  public async build(image = `${this.uuid.nextUuid()}:${this.uuid.nextUuid()}`): Promise<GenericContainer> {
+  // https://github.com/containers/buildah/issues/1034
+  public async build(image = `localhost/${this.uuid.nextUuid()}:${this.uuid.nextUuid()}`): Promise<GenericContainer> {
     const imageName = DockerImageName.fromString(image);
 
     await ReaperInstance.getInstance();
@@ -59,11 +60,9 @@ export class GenericContainerBuilder {
       registryConfig,
     });
     const container = new GenericContainer(imageName.toString());
-
     if (!(await imageExists(dockerode, imageName))) {
       throw new Error("Failed to build image");
     }
-
     return Promise.resolve(container);
   }
 

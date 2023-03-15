@@ -47,7 +47,7 @@ export const buildImage = async (options: BuildImageOptions): Promise<void> => {
       t: options.imageName.toString(),
       labels: createLabels(false, options.imageName),
       registryconfig: options.registryConfig,
-      pull: options.pullPolicy.shouldPull() ? "any" : undefined,
+      pull: options.pullPolicy.shouldPull() ? "true" : undefined,
     };
     return new Promise((resolve) => {
       dockerode
