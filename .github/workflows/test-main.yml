@@ -98,7 +98,7 @@ jobs:
           systemctl enable --now --user podman podman.socket
           podman info
       - name: Set environment
-        run: echo "DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock" >> $GITHUB_ENV
+        run: echo "DOCKER_HOST=unix://${XDG_RUNTIME_DIR}/podman/podman.sock" >> $GITHUB_ENV
       - name: Install NodeJS ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
@@ -110,7 +110,6 @@ jobs:
         env:
           CI_ROOTLESS: true
           CI_PODMAN: true
-          TESTCONTAINERS_RYUK_DISABLED: true
 
   smoke-test:
     runs-on: ${{ matrix.os-version }}
