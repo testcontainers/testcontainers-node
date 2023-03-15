@@ -16,16 +16,6 @@ export const getDockerClientConfig = async (env: NodeJS.ProcessEnv = process.env
   let dockerTlsVerify: string | undefined;
   let dockerCertPath: string | undefined;
 
-  if (env["DOCKER_HOST"] !== undefined) {
-    dockerHost = env["DOCKER_HOST"];
-  }
-  if (env["DOCKER_TLS_VERIFY"] !== undefined) {
-    dockerTlsVerify = env["DOCKER_TLS_VERIFY"];
-  }
-  if (env["DOCKER_CERT_PATH"] !== undefined) {
-    dockerCertPath = env["DOCKER_CERT_PATH"];
-  }
-
   const file = path.resolve(homedir(), ".testcontainers.properties");
   if (existsSync(file)) {
     log.debug("Found .testcontainers.properties file");
@@ -46,6 +36,16 @@ export const getDockerClientConfig = async (env: NodeJS.ProcessEnv = process.env
     if (certPath !== null) {
       dockerCertPath = certPath;
     }
+  }
+
+  if (env["DOCKER_HOST"] !== undefined) {
+    dockerHost = env["DOCKER_HOST"];
+  }
+  if (env["DOCKER_TLS_VERIFY"] !== undefined) {
+    dockerTlsVerify = env["DOCKER_TLS_VERIFY"];
+  }
+  if (env["DOCKER_CERT_PATH"] !== undefined) {
+    dockerCertPath = env["DOCKER_CERT_PATH"];
   }
 
   let logStr = "Loaded properties: ";
