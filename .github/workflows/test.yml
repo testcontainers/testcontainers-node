@@ -100,7 +100,6 @@ jobs:
         env:
           CI_ROOTLESS: true
           CI_PODMAN: true
-          TESTCONTAINERS_RYUK_DISABLED: true
 
   smoke-test:
     runs-on: ${{ matrix.os-version }}
