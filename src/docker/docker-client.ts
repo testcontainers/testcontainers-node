@@ -153,7 +153,7 @@ class NpipeSocketStrategy implements DockerClientStrategy {
   }
 
   isApplicable(): boolean {
-    return process.platform === "win32" && existsSync("//./pipe/docker_engine");
+    return process.platform === "win32";
   }
 
   getName(): string {

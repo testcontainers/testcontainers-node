@@ -25,7 +25,7 @@ export const getSystemInfo = async (dockerode: Dockerode): Promise<SystemInfo> =
   log.debug(
     `System info:
   System: Node version: ${nodeInfo.version}, Platform: ${nodeInfo.platform}, Arch: ${nodeInfo.architecture}
-  Docker: Version: ${dockerInfo.serverVersion}, OS: ${dockerInfo.operatingSystem}, Arch: ${
+  Container runtime: OS: ${dockerInfo.operatingSystem}, Version: ${dockerInfo.serverVersion}, Arch: ${
       dockerInfo.architecture
     }, CPUs: ${dockerInfo.cpus}, Memory: ${dockerInfo.memory} 
   Compose: Installed: ${dockerComposeInfo !== undefined}, Version: ${dockerComposeInfo?.version ?? "N/A"}`
