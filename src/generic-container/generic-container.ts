@@ -19,6 +19,7 @@ import {
   Labels,
   TmpFs,
   Ulimits,
+  ResourcesQuota,
 } from "../docker/types";
 import { pullImage } from "../docker/functions/image/pull-image";
 import { createContainer, CreateContainerOptions } from "../docker/functions/container/create-container";
@@ -70,6 +71,7 @@ export class GenericContainer implements TestContainer {
   protected pullPolicy: PullPolicy = new DefaultPullPolicy();
   protected reuse = false;
   protected tarToCopy?: archiver.Archiver;
+  protected resourcesQuota?: ResourcesQuota;
 
   private extraHosts: ExtraHost[] = [];
 
@@ -122,6 +124,7 @@ export class GenericContainer implements TestContainer {
       droppedCapabilities: this.droppedCapabilities,
       user: this.user,
       workingDir: this.workingDir,
+      resourcesQuota: this.resourcesQuota,
     };
 
     if (this.reuse) {
@@ -383,6 +386,15 @@ export class GenericContainer implements TestContainer {
 
   public withWorkingDir(workingDir: string): this {
     this.workingDir = workingDir;
+    return this;
+  }
+
+  public withResourcesQuota({ memory, cpu }: ResourcesQuota): this {
+    const ram = memory !== undefined ? memory * 10 ** 9 : undefined;
+    const cpuQuota = cpu !== undefined ? cpu * 10 ** 9 : undefined;
+
+    this.resourcesQuota = { memory: ram, cpu: cpuQuota };
+
     return this;
   }
 }

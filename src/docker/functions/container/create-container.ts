@@ -4,8 +4,9 @@ import { dockerClient } from "../../docker-client";
 import Dockerode, { PortMap as DockerodePortBindings } from "dockerode";
 import { getContainerPort, hasHostBinding, PortWithOptionalBinding } from "../../../port";
 import { createLabels } from "../create-labels";
-import { BindMount, Environment, ExtraHost, HealthCheck, Labels, TmpFs, Ulimits } from "../../types";
+import { BindMount, Environment, ExtraHost, HealthCheck, Labels, ResourcesQuota, TmpFs, Ulimits } from "../../types";
 
+// Docker docs: https://docs.docker.com/engine/api/v1.42/#tag/Container/operation/ContainerCreate
 export type CreateContainerOptions = {
   imageName: DockerImageName;
   environment: Environment;
@@ -29,6 +30,7 @@ export type CreateContainerOptions = {
   droppedCapabilities?: string[];
   user?: string;
   workingDir?: string;
+  resourcesQuota?: ResourcesQuota;
 };
 
 export const createContainer = async (options: CreateContainerOptions): Promise<Dockerode.Container> => {
@@ -60,6 +62,8 @@ export const createContainer = async (options: CreateContainerOptions): Promise<
         Ulimits: getUlimits(options.ulimits),
         CapAdd: options.addedCapabilities,
         CapDrop: options.droppedCapabilities,
+        Memory: options.resourcesQuota?.memory,
+        NanoCpus: options.resourcesQuota?.cpu,
       },
     });
   } catch (err) {
