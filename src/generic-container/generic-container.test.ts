@@ -336,7 +336,7 @@ describe("GenericContainer", () => {
     const dockerContainer = await getContainerById(container.getId());
     const containerInfo = await dockerContainer.inspect();
 
-    expect(containerInfo.HostConfig.Memory).toEqual(500000000);
+    expect(containerInfo.HostConfig.Memory).toEqual(536870912);
     expect(containerInfo.HostConfig.NanoCpus).toEqual(1000000000);
 
     await container.stop();

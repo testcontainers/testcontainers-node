@@ -390,7 +390,7 @@ export class GenericContainer implements TestContainer {
   }
 
   public withResourcesQuota({ memory, cpu }: ResourcesQuota): this {
-    const ram = memory !== undefined ? memory * 10 ** 9 : undefined;
+    const ram = memory !== undefined ? memory * 1024 ** 3 : undefined;
     const cpuQuota = cpu !== undefined ? cpu * 10 ** 9 : undefined;
 
     this.resourcesQuota = { memory: ram, cpu: cpuQuota };
