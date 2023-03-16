@@ -195,6 +195,19 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+### With Resources Quota
+
+See [NanoCpu, Memory in ContainerCreate method](https://docs.docker.com/engine/api/v1.42/#tag/Container/operation/ContainerCreate).
+
+- memory – Memory limit in Gigabytes
+- cpu – CPU quota in units of CPUs
+
+```javascript
+const container = await new GenericContainer("alpine")
+  .withResourcesQuota({ memory: 0.5, cpu: 1 })
+  .start();
+```
+
 ## Stopping a container
 
 Testcontainers by default will not wait until the container has stopped. It will simply issue the stop command and return immediately. This is to save time when running tests.
