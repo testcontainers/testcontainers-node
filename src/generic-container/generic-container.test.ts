@@ -328,6 +328,20 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
+  it("should set resources quota", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withResourcesQuota({ memory: 0.5, cpu: 1 })
+      .start();
+
+    const dockerContainer = await getContainerById(container.getId());
+    const containerInfo = await dockerContainer.inspect();
+
+    expect(containerInfo.HostConfig.Memory).toEqual(500000000);
+    expect(containerInfo.HostConfig.NanoCpus).toEqual(1000000000);
+
+    await container.stop();
+  });
+
   it("should set privileged mode", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withPrivilegedMode()
