@@ -572,6 +572,18 @@ describe("GenericContainer", () => {
       await container.stop();
     });
 
+    it("resources quota should be 0 for cpu and memory if not set by user", async () => {
+      const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").start();
+
+      const dockerContainer = await getContainerById(container.getId());
+      const containerInfo = await dockerContainer.inspect();
+
+      expect(containerInfo.HostConfig.Memory).toEqual(0);
+      expect(containerInfo.HostConfig.NanoCpus).toEqual(0);
+
+      await container.stop();
+    });
+
     it("should set resources quota memory only, cpu should be 0", async () => {
       const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
         .withResourcesQuota({ memory: 0.5 })
