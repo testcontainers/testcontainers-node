@@ -390,6 +390,8 @@ export class GenericContainer implements TestContainer {
   }
 
   public withResourcesQuota({ memory, cpu }: ResourcesQuota): this {
+    // Memory and CPU units from here: https://docs.docker.com/engine/api/v1.42/#tag/Container/operation/ContainerCreate
+    // see Memory, NanoCpus parameters
     const ram = memory !== undefined ? memory * 1024 ** 3 : undefined;
     const cpuQuota = cpu !== undefined ? cpu * 10 ** 9 : undefined;
 
