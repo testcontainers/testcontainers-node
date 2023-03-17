@@ -195,6 +195,34 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+### With Resources Quota
+
+See [NanoCpu, Memory in ContainerCreate method](https://docs.docker.com/engine/api/v1.42/#tag/Container/operation/ContainerCreate).
+
+- memory – Memory limit in Gigabytes
+- cpu – CPU quota in units of CPUs
+
+```javascript
+const container = await new GenericContainer("alpine")
+  .withResourcesQuota({ memory: 0.5, cpu: 1 })
+  .start();
+```
+
+#### Some docker features isn't supported when running rootless.
+
+Errors example:
+
+- `NanoCPUs can not be set, as your kernel does not support CPU CFS scheduler or the cgroup is not mounted`
+- `(HTTP code 500) server error - crun: the requested cgroup controller `cpu` is not available: OCI runtime error`
+
+So in tests it may be required to wrap your case by condition like this:
+
+```ts
+if (!process.env["CI_ROOTLESS"]) {
+  it('my case', () => {})
+}
+```
+
 ## Stopping a container
 
 Testcontainers by default will not wait until the container has stopped. It will simply issue the stop command and return immediately. This is to save time when running tests.

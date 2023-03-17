@@ -26,6 +26,11 @@ export type TmpFs = { [dir in string]: string };
 
 export type Ulimits = { [name: string]: { hard: number | undefined; soft: number | undefined } };
 
+export type ResourcesQuota = {
+  memory?: number; // Memory limit in Gigabytes
+  cpu?: number; // CPU quota in units of CPUs
+};
+
 export type HealthCheck = {
   test: ["CMD-SHELL", string] | ["CMD", ...string[]];
   interval?: number;
