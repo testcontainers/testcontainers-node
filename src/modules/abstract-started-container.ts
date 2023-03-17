@@ -2,7 +2,7 @@ import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer
 import { ExecResult, Labels } from "../docker/types";
 import { Readable } from "stream";
 
-export class AbstractStartedContainer {
+export class AbstractStartedContainer implements StartedTestContainer {
   constructor(protected readonly startedTestContainer: StartedTestContainer) {}
 
   public stop(options?: Partial<StopOptions>): Promise<StoppedTestContainer> {
