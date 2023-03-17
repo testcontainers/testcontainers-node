@@ -12,6 +12,7 @@ import {
   FileToCopy,
   ContentToCopy,
   Environment,
+  ResourcesQuota,
 } from "./docker/types";
 import { StartedNetwork } from "./network";
 
@@ -61,6 +62,8 @@ export interface TestContainer {
   withCopyContentToContainer(contentsToCopy: ContentToCopy[]): this;
 
   withWorkingDir(workingDir: string): this;
+
+  withResourcesQuota(resourcesQuota: ResourcesQuota): this;
 }
 
 export interface RestartOptions {
