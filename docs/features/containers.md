@@ -174,6 +174,8 @@ const container = await new GenericContainer("alpine")
 
 ### With ulimits
 
+**Not supported in rootless container runtimes.**
+
 ```javascript
 const container = await new GenericContainer("aline")
   .withUlimits({ 
@@ -195,32 +197,19 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
-### With Resources Quota
+### With resources quota
 
-See [NanoCpu, Memory in ContainerCreate method](https://docs.docker.com/engine/api/v1.42/#tag/Container/operation/ContainerCreate).
+**Not supported in rootless container runtimes.**
 
-- memory – Memory limit in Gigabytes
-- cpu – CPU quota in units of CPUs
+See [NanoCpu and Memory in ContainerCreate](https://docs.docker.com/engine/api/v1.42/#tag/Container/operation/ContainerCreate) method.
+
+- Memory – Limit in Gigabytes
+- CPU – Quota in units of CPUs
 
 ```javascript
 const container = await new GenericContainer("alpine")
   .withResourcesQuota({ memory: 0.5, cpu: 1 })
   .start();
-```
-
-#### Some docker features isn't supported when running rootless.
-
-Errors example:
-
-- `NanoCPUs can not be set, as your kernel does not support CPU CFS scheduler or the cgroup is not mounted`
-- `(HTTP code 500) server error - crun: the requested cgroup controller `cpu` is not available: OCI runtime error`
-
-So in tests it may be required to wrap your case by condition like this:
-
-```ts
-if (!process.env["CI_ROOTLESS"]) {
-  it('my case', () => {})
-}
 ```
 
 ## Stopping a container
@@ -271,6 +260,47 @@ const container2 = await new GenericContainer("alpine")
   .start();
 
 expect(container1.getId()).toBe(container2.getId());
+```
+
+## Creating a custom container
+
+You can create your own Generic Container as follows:
+
+```typescript
+import {
+  GenericContainer,
+  TestContainer,
+  StartedTestContainer,
+  AbstractStartedContainer
+} from "testcontainers";
+
+class CustomContainer extends GenericContainer {
+  constructor() {
+    super("alpine");
+  }
+
+  public withCustomMethod(): this {
+    // ...
+    return this;
+  }
+
+  public override async start(): Promise<StartedCustomContainer> {
+    return new StartedCustomContainer(await super.start());
+  }
+}
+
+class StartedCustomContainer extends AbstractStartedContainer {
+  constructor(startedTestContainer: StartedTestContainer) {
+    super(startedTestContainer);
+  }
+
+  public withCustomMethod(): void {
+    // ...
+  }
+}
+
+const customContainer: TestContainer = new CustomContainer();
+const startedCustomContainer: StartedTestContainer = await customContainer.start();
 ```
 
 ## Exposing container ports
