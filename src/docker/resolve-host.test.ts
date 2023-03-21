@@ -69,3 +69,26 @@ test("should return host from default gateway when running in a container", asyn
     expect(host).toEqual("172.0.0.2");
   }
 });
+
+test("should return localhost if unable to find gateway", async () => {
+  mockExistsSync.mockReturnValue(true);
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  mockDockerode.mockImplementation(() => ({
+    getNetwork: () => ({
+      inspect: () => Promise.resolve({}),
+    }),
+  }));
+  mockRunInContainer.mockReturnValue(Promise.resolve(undefined));
+
+  for (const uri of ["unix://docker:2375", "npipe://docker:2375"]) {
+    const host = await resolveHost(new Dockerode(), "", uri, {});
+    expect(host).toEqual("localhost");
+  }
+});
+
+test("should throw for unsupported protocol", async () => {
+  await expect(() => resolveHost(new Dockerode(), "", "invalid://unknown", {})).rejects.toThrowError(
+    "Unsupported protocol: invalid"
+  );
+});

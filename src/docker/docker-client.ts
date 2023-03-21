@@ -1,4 +1,4 @@
-import Dockerode, { DockerOptions, NetworkInspectInfo } from "dockerode";
+import Dockerode, { DockerOptions } from "dockerode";
 import path from "path";
 import { log } from "../logger";
 import { URL } from "url";
