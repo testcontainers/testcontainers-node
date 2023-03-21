@@ -1,9 +1,8 @@
-import Dockerode, { DockerOptions, NetworkInspectInfo } from "dockerode";
+import Dockerode, { DockerOptions } from "dockerode";
 import path from "path";
 import { log } from "../logger";
 import { URL } from "url";
 import { existsSync, promises as fs } from "fs";
-import { runInContainer } from "./functions/run-in-container";
 import { sessionId } from "./session-id";
 import { HostIps, lookupHostIps } from "./lookup-host-ips";
 import { getSystemInfo } from "../system-info";
@@ -11,6 +10,7 @@ import { RootlessUnixSocketStrategy } from "./rootless-unix-socket-strategy";
 import { streamToString } from "../stream-utils";
 import { Readable } from "stream";
 import { DockerClientConfig, getDockerClientConfig } from "./docker-client-config";
+import { resolveHost } from "./resolve-host";
 
 type DockerClient = {
   uri: string;
@@ -166,54 +166,6 @@ class NpipeSocketStrategy implements DockerClientStrategy {
     return "NpipeSocketStrategy";
   }
 }
-
-const resolveHost = async (dockerode: Dockerode, indexServerAddress: string, uri: string): Promise<string> => {
-  if (process.env.TESTCONTAINERS_HOST_OVERRIDE !== undefined) {
-    return process.env.TESTCONTAINERS_HOST_OVERRIDE;
-  }
-
-  const { protocol, hostname } = new URL(uri);
-
-  switch (protocol) {
-    case "http:":
-    case "https:":
-    case "tcp:":
-      return hostname;
-    case "unix:":
-    case "npipe:": {
-      if (isInContainer()) {
-        const gateway = await findGateway(dockerode);
-        if (gateway !== undefined) {
-          return gateway;
-        }
-        const defaultGateway = await findDefaultGateway(dockerode, indexServerAddress);
-        if (defaultGateway !== undefined) {
-          return defaultGateway;
-        }
-      }
-      return "localhost";
-    }
-    default:
-      throw new Error(`Unsupported protocol: ${protocol}`);
-  }
-};
-
-const findGateway = async (dockerode: Dockerode): Promise<string | undefined> => {
-  log.debug(`Checking gateway for Docker host`);
-  const inspectResult: NetworkInspectInfo = await dockerode.getNetwork("bridge").inspect();
-  return inspectResult?.IPAM?.Config?.find((config) => config.Gateway !== undefined)?.Gateway;
-};
-
-const findDefaultGateway = async (dockerode: Dockerode, indexServerAddress: string): Promise<string | undefined> => {
-  log.debug(`Checking default gateway for Docker host`);
-  return runInContainer(dockerode, indexServerAddress, "alpine:3.14", [
-    "sh",
-    "-c",
-    "ip route|awk '/default/ { print $3 }'",
-  ]);
-};
-
-const isInContainer = () => existsSync("/.dockerenv");
 
 let _dockerClient: Promise<DockerClient>;
 
