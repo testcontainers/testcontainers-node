@@ -168,7 +168,7 @@ export class KafkaContainer extends GenericContainer {
       "--entity-type",
       "brokers",
       "--entity-name",
-      this.environment["KAFKA_BROKER_ID"],
+      this.opts.environment["KAFKA_BROKER_ID"],
       "--add-config",
       `advertised.listeners=[${bootstrapServers},${brokerAdvertisedListener}]`,
     ]);
@@ -185,7 +185,7 @@ export class KafkaContainer extends GenericContainer {
       // At the time of writing kafka-configs displays a warning stating that the 'zookeeper' flag is deprecated in favor of 'bootstrap-server'.
       // Unfortunately, 'bootstrap-server' can only be used to set quotas and not to create a user.
       "--zookeeper",
-      this.environment["KAFKA_ZOOKEEPER_CONNECT"],
+      this.opts.environment["KAFKA_ZOOKEEPER_CONNECT"],
       "--entity-type",
       "users",
       "--entity-name",
