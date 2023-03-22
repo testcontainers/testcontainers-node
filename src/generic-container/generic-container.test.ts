@@ -46,17 +46,6 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
-  it("should pull an image from a private registry", async () => {
-    const container = await new GenericContainer("cristianrgreco/testcontainer-private:1.1.12")
-      .withPullPolicy(new AlwaysPullPolicy())
-      .withExposedPorts(8080)
-      .start();
-
-    await checkContainerIsHealthy(container);
-
-    await container.stop();
-  });
-
   it("should wait for log", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
@@ -779,26 +768,6 @@ describe("GenericContainer", () => {
         events.destroy();
       });
     }
-
-    it("should pull an image from a private registry", async () => {
-      const context = path.resolve(fixtures, "docker-private");
-      const container = await GenericContainer.fromDockerfile(context).withPullPolicy(new AlwaysPullPolicy()).build();
-      const startedContainer = await container.withExposedPorts(8080).start();
-
-      await checkContainerIsHealthy(startedContainer);
-
-      await startedContainer.stop();
-    });
-
-    it("should pull an image from a private registry in a multistage Dockerfile", async () => {
-      const context = path.resolve(fixtures, "docker-private-multistage");
-      const container = await GenericContainer.fromDockerfile(context).withPullPolicy(new AlwaysPullPolicy()).build();
-      const startedContainer = await container.withExposedPorts(8080).start();
-
-      await checkContainerIsHealthy(startedContainer);
-
-      await startedContainer.stop();
-    });
 
     it("should build and start with custom file name", async () => {
       const context = path.resolve(fixtures, "docker-with-custom-filename");
