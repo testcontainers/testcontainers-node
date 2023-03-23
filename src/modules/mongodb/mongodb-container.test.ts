@@ -30,23 +30,8 @@ describe("MongodbContainer", () => {
 
   it("should connect inside a network", async () => {
     const network = await new Network().start();
-    const mongoContainer = await new MongoDBContainer()
-      .withNetwork(network)
-      .withNetworkAliases("mongo-t1")
-      .withCommand([
-        "/usr/bin/mongod",
-        "--bind_ip_all",
-        "--journal",
-        "--dbpath",
-        "/data/db",
-        "--enableMajorityReadConcern",
-        "true",
-      ])
-      .start();
-    const mongoClientContainer = await new GenericContainer("mongo:4.0.1")
-      .withNetwork(network)
-      .withCommand(["sleep", "infinity"])
-      .start();
+    const mongoContainer = await new MongoDBContainer().withNetwork(network).withNetworkAliases("mongo-t1").start();
+    const mongoClientContainer = await new GenericContainer("mongo:4.0.1").withNetwork(network).start();
 
     const { exitCode } = await mongoClientContainer.exec([
       "mongo",
