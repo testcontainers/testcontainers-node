@@ -3,7 +3,7 @@ import { DockerComposeOptions } from "./docker-compose-options";
 import { dockerClient } from "../docker/docker-client";
 import { log } from "../logger";
 import { EOL } from "os";
-import { isEmptyString, isNotEmptyString } from "../type-guards";
+import { isNotEmptyString } from "../type-guards";
 
 export const defaultDockerComposeOptions = async ({
   environment = {},
