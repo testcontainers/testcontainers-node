@@ -9,6 +9,7 @@ const MONGODB_PORT = 27017;
 
 export class MongoDBContainer extends GenericContainer {
   private readonly dockerImageName: DockerImageName;
+
   constructor(image = "mongo:4.0.1") {
     super(image);
     this.dockerImageName = DockerImageName.fromString(this.image);
@@ -19,7 +20,8 @@ export class MongoDBContainer extends GenericContainer {
       .withCommand(["--replSet", "rs0"])
       .withWaitStrategy(Wait.forLogMessage(/.*waiting for connections.*/i))
       .withStartupTimeout(120_000);
-    return new StartedMongoDBContainer(await super.start());
+
+    return new StartedMongoDBContainer(await super.start(), this.networkMode, this.networkAliases);
   }
 
   protected override async postStart(startedTestContainer: StartedTestContainer): Promise<void> {
@@ -65,11 +67,18 @@ export class MongoDBContainer extends GenericContainer {
 }
 
 export class StartedMongoDBContainer extends AbstractStartedContainer {
-  constructor(startedTestContainer: StartedTestContainer) {
+  private readonly connectionString: string;
+
+  constructor(startedTestContainer: StartedTestContainer, networkMode: string | undefined, networkAliases: string[]) {
     super(startedTestContainer);
+
+    this.connectionString =
+      networkMode && networkAliases.length > 0
+        ? `mongodb://${networkAliases[0]}:${MONGODB_PORT}`
+        : `mongodb://${this.getHost()}:${this.getMappedPort(MONGODB_PORT)}`;
   }
 
   public getConnectionString(): string {
-    return `mongodb://${this.getHost()}:${this.getMappedPort(MONGODB_PORT)}`;
+    return this.connectionString;
   }
 }

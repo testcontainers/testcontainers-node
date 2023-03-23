@@ -1,5 +1,7 @@
 import { MongoDBContainer, StartedMongoDBContainer } from "./mongodb-container";
 import mongoose from "mongoose";
+import { Network } from "../../network";
+import { GenericContainer } from "../../generic-container/generic-container";
 
 describe("MongodbContainer", () => {
   jest.setTimeout(240_000);
@@ -25,6 +27,40 @@ describe("MongodbContainer", () => {
     await mongodbContainer.stop();
   });
   // }
+
+  it("should connect inside a network", async () => {
+    const network = await new Network().start();
+    const mongoContainer = await new MongoDBContainer()
+      .withNetwork(network)
+      .withNetworkAliases("mongo-t1")
+      .withCommand([
+        "/usr/bin/mongod",
+        "--bind_ip_all",
+        "--journal",
+        "--dbpath",
+        "/data/db",
+        "--enableMajorityReadConcern",
+        "true",
+      ])
+      .start();
+    const mongoClientContainer = await new GenericContainer("mongo:4.0.1")
+      .withNetwork(network)
+      .withCommand(["sleep", "infinity"])
+      .start();
+
+    const { exitCode } = await mongoClientContainer.exec([
+      "mongo",
+      mongoContainer.getConnectionString(),
+      "--eval",
+      "printjson(db.serverStatus())",
+    ]);
+
+    expect(exitCode).toEqual(0);
+
+    await mongoClientContainer.stop();
+    await mongoContainer.stop();
+    await network.stop();
+  });
 
   async function checkMongo(mongodbContainer: StartedMongoDBContainer) {
     const db = mongoose.createConnection(mongodbContainer.getConnectionString(), { directConnection: true });
