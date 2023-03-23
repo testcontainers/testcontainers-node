@@ -1,6 +1,9 @@
 import { IDockerComposeOptions } from "docker-compose";
 import { DockerComposeOptions } from "./docker-compose-options";
 import { dockerClient } from "../docker/docker-client";
+import { log } from "../logger";
+import { EOL } from "os";
+import { isEmptyString, isNotEmptyString } from "../type-guards";
 
 export const defaultDockerComposeOptions = async ({
   environment = {},
@@ -10,6 +13,15 @@ export const defaultDockerComposeOptions = async ({
 
   return {
     log: false,
+    callback: log.enabled()
+      ? (chunk) => {
+          chunk
+            .toString()
+            .split(EOL)
+            .filter(isNotEmptyString)
+            .forEach((line) => log.trace(line.trim()));
+        }
+      : undefined,
     cwd: options.filePath,
     config: options.files,
     composeOptions: options.composeOptions,

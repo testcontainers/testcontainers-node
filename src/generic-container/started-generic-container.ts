@@ -43,9 +43,12 @@ export class StartedGenericContainer implements StartedTestContainer {
     const { hostIps } = await dockerClient();
     this.inspectResult = await inspectContainer(this.container);
     const startTime = this.inspectResult.state.startedAt;
-    (await containerLogs(this.container, { since: startTime }))
-      .on("data", (data) => containerLog.trace(`${this.container.id}: ${data.trim()}`))
-      .on("err", (data) => containerLog.error(`${this.container.id}: ${data.trim()}`));
+
+    if (containerLog.enabled()) {
+      (await containerLogs(this.container, { since: startTime }))
+        .on("data", (data) => containerLog.trace(`${this.container.id}: ${data.trim()}`))
+        .on("err", (data) => containerLog.error(`${this.container.id}: ${data.trim()}`));
+    }
 
     this.boundPorts = BoundPorts.fromInspectResult(hostIps, this.inspectResult).filter(
       Array.from(this.boundPorts.iterator()).map((port) => port[0])
