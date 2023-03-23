@@ -213,9 +213,11 @@ export class GenericContainer implements TestContainer {
       this.startupTimeout
     );
 
-    (await containerLogs(container))
-      .on("data", (data) => containerLog.trace(`${container.id}: ${data.trim()}`))
-      .on("err", (data) => containerLog.error(`${container.id}: ${data.trim()}`));
+    if (containerLog.enabled()) {
+      (await containerLogs(container))
+        .on("data", (data) => containerLog.trace(`${container.id}: ${data.trim()}`))
+        .on("err", (data) => containerLog.error(`${container.id}: ${data.trim()}`));
+    }
 
     await waitForContainer(container, waitStrategy, host, boundPorts);
 

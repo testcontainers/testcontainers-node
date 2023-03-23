@@ -3,6 +3,7 @@ import { promises as fs } from "fs";
 import { log } from "./logger";
 import { DockerImageName } from "./docker-image-name";
 import { BuildArgs } from "./docker/types";
+import { isNotEmptyString } from "./type-guards";
 
 const buildArgRegex = /\${([^{]+)}/g;
 
@@ -22,7 +23,7 @@ async function parseImages(dockerfile: string): Promise<string[]> {
     (await fs.readFile(dockerfile, "utf8"))
       .split(EOL)
       .filter((line) => line.toUpperCase().startsWith("FROM"))
-      .map((line) => line.split(" ").filter((part) => part !== "")[1])
+      .map((line) => line.split(" ").filter(isNotEmptyString)[1])
       .reduce((prev, next) => prev.add(next), new Set<string>())
       .values()
   );
