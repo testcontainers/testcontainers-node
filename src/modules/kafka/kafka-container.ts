@@ -1,5 +1,4 @@
 import { GenericContainer } from "../../generic-container/generic-container";
-import { BoundPorts } from "../../bound-ports";
 import { RandomUuid, Uuid } from "../../uuid";
 import { StartedTestContainer } from "../..";
 import { AbstractStartedContainer } from "../abstract-started-container";
