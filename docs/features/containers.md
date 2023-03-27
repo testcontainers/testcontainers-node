@@ -303,6 +303,61 @@ const customContainer: TestContainer = new CustomContainer();
 const startedCustomContainer: StartedTestContainer = await customContainer.start();
 ```
 
+### Lifecycle callbacks
+
+Define your own lifecycle callbacks for better control over your custom containers:
+
+```typescript
+import { 
+  GenericContainer, 
+  AbstractStartedContainer, 
+  StartedTestContainer, 
+  InspectResult, 
+  BoundPorts 
+} from "testcontainers";
+
+class CustomContainer extends GenericContainer {
+  protected override async beforeStart(): Promise<void> {
+    // ...
+  }
+  
+  protected override async containerIsCreated(containerId: string): Promise<void> {
+    // ...
+  }
+  
+  protected override async containerIsStarting(
+    inspectResult: InspectResult,
+    boundPorts: BoundPorts,
+    reused: boolean
+  ): Promise<void> {
+    // ...
+  }
+  
+  protected override async containerIsStarted(
+    container: StartedTestContainer,
+    inspectResult: InspectResult,
+    boundPorts: BoundPorts,
+    reused: boolean
+  ): Promise<void> {
+    // ...
+  }
+
+  public override async start(): Promise<CustomStartedContainer> {
+    return new CustomStartedContainer(await super.start());
+  }
+}
+
+class CustomStartedContainer extends AbstractStartedContainer {
+  protected override async containerIsStopping(): Promise<void> {
+    // ...
+  }
+  
+  protected override async containerIsStopped(): Promise<void> {
+    // ...
+  }
+}
+```
+
 ## Exposing container ports
 
 Specify which container ports you want accessible by the host:
