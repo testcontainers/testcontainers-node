@@ -88,7 +88,7 @@ export class GenericContainer implements TestContainer {
 
   protected containerIsCreated?(containerId: string): Promise<void>;
 
-  protected containerIsStarting?(inspectResult: InspectResult, boundPorts: BoundPorts, reused: boolean): Promise<void>;
+  protected containerIsStarting?(inspectResult: InspectResult, reused: boolean): Promise<void>;
 
   public async start(): Promise<StartedTestContainer> {
     const { dockerode, indexServerAddress } = await dockerClient();
@@ -174,7 +174,7 @@ export class GenericContainer implements TestContainer {
     );
 
     if (this.containerIsStarting) {
-      await this.containerIsStarting(inspectResult, boundPorts, true);
+      await this.containerIsStarting(inspectResult, true);
     }
 
     await waitForContainer(container, waitStrategy, host, boundPorts);
@@ -189,7 +189,7 @@ export class GenericContainer implements TestContainer {
     );
 
     if (this.containerIsStarted) {
-      await this.containerIsStarted(startedContainer, inspectResult, boundPorts, true);
+      await this.containerIsStarted(startedContainer, inspectResult, true);
     } else if (this.postStart) {
       await this.postStart(startedContainer, inspectResult, boundPorts);
     }
@@ -248,7 +248,7 @@ export class GenericContainer implements TestContainer {
     }
 
     if (this.containerIsStarting) {
-      await this.containerIsStarting(inspectResult, boundPorts, false);
+      await this.containerIsStarting(inspectResult, false);
     }
 
     await waitForContainer(container, waitStrategy, host, boundPorts);
@@ -263,7 +263,7 @@ export class GenericContainer implements TestContainer {
     );
 
     if (this.containerIsStarted) {
-      await this.containerIsStarted(startedContainer, inspectResult, boundPorts, false);
+      await this.containerIsStarted(startedContainer, inspectResult, false);
     } else if (this.postStart) {
       await this.postStart(startedContainer, inspectResult, boundPorts);
     }
@@ -283,7 +283,6 @@ export class GenericContainer implements TestContainer {
   protected containerIsStarted?(
     container: StartedTestContainer,
     inspectResult: InspectResult,
-    boundPorts: BoundPorts,
     reused: boolean
   ): Promise<void>;
 

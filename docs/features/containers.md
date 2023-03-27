@@ -312,8 +312,7 @@ import {
   GenericContainer, 
   AbstractStartedContainer, 
   StartedTestContainer, 
-  InspectResult, 
-  BoundPorts 
+  InspectResult 
 } from "testcontainers";
 
 class CustomContainer extends GenericContainer {
@@ -327,7 +326,6 @@ class CustomContainer extends GenericContainer {
   
   protected override async containerIsStarting(
     inspectResult: InspectResult,
-    boundPorts: BoundPorts,
     reused: boolean
   ): Promise<void> {
     // ...
@@ -336,7 +334,6 @@ class CustomContainer extends GenericContainer {
   protected override async containerIsStarted(
     container: StartedTestContainer,
     inspectResult: InspectResult,
-    boundPorts: BoundPorts,
     reused: boolean
   ): Promise<void> {
     // ...

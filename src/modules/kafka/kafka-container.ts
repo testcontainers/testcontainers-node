@@ -106,10 +106,9 @@ export class KafkaContainer extends GenericContainer {
 
   protected override async containerIsStarted(
     container: StartedTestContainer,
-    inspectResult: InspectResult,
-    boundPorts: BoundPorts
+    inspectResult: InspectResult
   ): Promise<void> {
-    await this.updateAdvertisedListeners(container, inspectResult, boundPorts);
+    await this.updateAdvertisedListeners(container, inspectResult);
     if (this.saslSslConfig) {
       await this.createUser(container, this.saslSslConfig.sasl);
     }
@@ -147,15 +146,11 @@ export class KafkaContainer extends GenericContainer {
     }).withExposedPorts(KAFKA_PORT);
   }
 
-  private async updateAdvertisedListeners(
-    container: StartedTestContainer,
-    inspectResult: InspectResult,
-    boundPorts: BoundPorts
-  ) {
+  private async updateAdvertisedListeners(container: StartedTestContainer, inspectResult: InspectResult) {
     const brokerAdvertisedListener = `BROKER://${inspectResult.hostname}:${KAFKA_BROKER_PORT}`;
-    let bootstrapServers = `PLAINTEXT://${container.getHost()}:${boundPorts.getBinding(KAFKA_PORT)}`;
+    let bootstrapServers = `PLAINTEXT://${container.getHost()}:${container.getMappedPort(KAFKA_PORT)}`;
     if (this.saslSslConfig) {
-      bootstrapServers = `${bootstrapServers},SECURE://${container.getHost()}:${boundPorts.getBinding(
+      bootstrapServers = `${bootstrapServers},SECURE://${container.getHost()}:${container.getMappedPort(
         this.saslSslConfig.port
       )}`;
     }
