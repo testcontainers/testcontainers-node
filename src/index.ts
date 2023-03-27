@@ -13,6 +13,8 @@ export { Network, StartedNetwork, StoppedNetwork } from "./network";
 export { Wait } from "./wait";
 export { StartupCheckStrategy, StartupStatus } from "./startup-check-strategy";
 export { PullPolicy, DefaultPullPolicy, AlwaysPullPolicy } from "./pull-policy";
+export { InspectResult } from "./docker/functions/container/inspect-container";
+export { BoundPorts } from "./bound-ports";
 
 export { AbstractStartedContainer } from "./modules/abstract-started-container";
 export { PostgreSqlContainer, StartedPostgreSqlContainer } from "./modules/postgresql/postgresql-container";
@@ -27,5 +29,4 @@ export {
   NatsConnectionOptions,
   NatsTlsOptions,
 } from "./modules/nats/nats-container";
-
 export { MongoDBContainer, StartedMongoDBContainer } from "./modules/mongodb/mongodb-container";

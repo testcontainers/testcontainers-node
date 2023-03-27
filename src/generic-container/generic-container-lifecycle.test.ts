@@ -1,8 +1,4 @@
-import { GenericContainer } from "./generic-container";
-import { AbstractStartedContainer } from "../modules/abstract-started-container";
-import { InspectResult } from "../docker/functions/container/inspect-container";
-import { BoundPorts } from "../bound-ports";
-import { StartedTestContainer } from "../test-container";
+import { GenericContainer, AbstractStartedContainer, StartedTestContainer, InspectResult, BoundPorts } from "../index";
 
 describe("GenericContainer lifecycle", () => {
   jest.setTimeout(180_000);
