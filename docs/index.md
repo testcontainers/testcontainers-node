@@ -8,8 +8,8 @@
     <a href="https://testcontainers.org/" class="card-grid-item"><img src="site/language-logos/java.svg"/>Java</a>
     <a href="https://golang.testcontainers.org/" class="card-grid-item"><img src="site/language-logos/go.svg"/>Go</a>
     <a href="https://dotnet.testcontainers.org/" class="card-grid-item"><img src="site/language-logos/dotnet.svg"/>.NET</a>
-    <a href="https://testcontainers-python.readthedocs.io/en/latest/" class="card-grid-item"><img src="site/language-logos/python.svg"/>Python</a>
     <a class="card-grid-item"><img src="site/language-logos/nodejs.svg"/>Node.js</a>
+    <a href="https://testcontainers-python.readthedocs.io/en/latest/" class="card-grid-item"><img src="site/language-logos/python.svg"/>Python</a>
     <a href="https://docs.rs/testcontainers/latest/testcontainers/" class="card-grid-item"><img src="site/language-logos/rust.svg"/>Rust</a>
     <a class="card-grid-item" href="https://github.com/testcontainers/testcontainers-hs/"><img src="site/language-logos/haskell.svg"/>Haskell</a>
 </div>
