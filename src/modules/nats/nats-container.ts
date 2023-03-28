@@ -61,7 +61,9 @@ export class NatsContainer extends GenericContainer {
 
     this.withCommand(buildCmdsFromArgs(this.args))
       .withExposedPorts(
-        ...(this.hasExposedPorts ? this.ports : [CLIENT_PORT, ROUTING_PORT_FOR_CLUSTERING, HTTP_MANAGEMENT_PORT])
+        ...(this.hasExposedPorts
+          ? this.opts.exposedPorts
+          : [CLIENT_PORT, ROUTING_PORT_FOR_CLUSTERING, HTTP_MANAGEMENT_PORT])
       )
       .withWaitStrategy(Wait.forLogMessage(/.*Server is ready.*/))
       .withStartupTimeout(120_000);
