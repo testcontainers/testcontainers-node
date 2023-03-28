@@ -59,7 +59,16 @@ export class GenericContainer implements TestContainer {
     this.opts = initCreateContainerOptions(imageName, imageName.isReaper());
   }
 
+  /**
+   * @deprecated Since version 9.4.0. Will be removed in version 10.0.0. Use `beforeStart` instead.
+   */
   protected preStart?(): Promise<void>;
+
+  protected beforeStart?(): Promise<void>;
+
+  protected containerIsCreated?(containerId: string): Promise<void>;
+
+  protected containerIsStarting?(inspectResult: InspectResult, reused: boolean): Promise<void>;
 
   public async start(): Promise<StartedTestContainer> {
     const { dockerode, indexServerAddress } = await dockerClient();
@@ -73,7 +82,9 @@ export class GenericContainer implements TestContainer {
       await ReaperInstance.getInstance();
     }
 
-    if (this.preStart) {
+    if (this.beforeStart) {
+      await this.beforeStart();
+    } else if (this.preStart) {
       await this.preStart();
     }
 
@@ -115,23 +126,36 @@ export class GenericContainer implements TestContainer {
     }
   }
 
-  private async reuseContainer(startedContainer: Dockerode.Container) {
+  private async reuseContainer(container: Dockerode.Container) {
     const { host, hostIps } = await dockerClient();
-    const inspectResult = await inspectContainer(startedContainer);
+    const inspectResult = await inspectContainer(container);
     const boundPorts = BoundPorts.fromInspectResult(hostIps, inspectResult).filter(this.opts.exposedPorts);
-    const waitStrategy = (this.waitStrategy ?? defaultWaitStrategy(host, startedContainer)).withStartupTimeout(
+    const waitStrategy = (this.waitStrategy ?? defaultWaitStrategy(host, container)).withStartupTimeout(
       this.startupTimeout
     );
-    await waitForContainer(startedContainer, waitStrategy, host, boundPorts);
 
-    return new StartedGenericContainer(
-      startedContainer,
+    if (this.containerIsStarting) {
+      await this.containerIsStarting(inspectResult, true);
+    }
+
+    await waitForContainer(container, waitStrategy, host, boundPorts);
+
+    const startedContainer = new StartedGenericContainer(
+      container,
       host,
       inspectResult,
       boundPorts,
       inspectResult.name,
       waitStrategy
     );
+
+    if (this.containerIsStarted) {
+      await this.containerIsStarted(startedContainer, inspectResult, true);
+    } else if (this.postStart) {
+      await this.postStart(startedContainer, inspectResult, boundPorts);
+    }
+
+    return startedContainer;
   }
 
   private async startContainer(createContainerOptions: CreateContainerOptions): Promise<StartedTestContainer> {
@@ -165,6 +189,10 @@ export class GenericContainer implements TestContainer {
     }
 
     log.info(`Starting container ${this.opts.imageName} with ID: ${container.id}`);
+    if (this.containerIsCreated) {
+      await this.containerIsCreated(container.id);
+    }
+
     await startContainer(container);
 
     const { host, hostIps } = await dockerClient();
@@ -174,9 +202,15 @@ export class GenericContainer implements TestContainer {
       this.startupTimeout
     );
 
-    (await containerLogs(container))
-      .on("data", (data) => containerLog.trace(`${container.id}: ${data.trim()}`))
-      .on("err", (data) => containerLog.error(`${container.id}: ${data.trim()}`));
+    if (containerLog.enabled()) {
+      (await containerLogs(container))
+        .on("data", (data) => containerLog.trace(`${container.id}: ${data.trim()}`))
+        .on("err", (data) => containerLog.error(`${container.id}: ${data.trim()}`));
+    }
+
+    if (this.containerIsStarting) {
+      await this.containerIsStarting(inspectResult, false);
+    }
 
     await waitForContainer(container, waitStrategy, host, boundPorts);
 
@@ -189,17 +223,28 @@ export class GenericContainer implements TestContainer {
       waitStrategy
     );
 
-    if (this.postStart) {
+    if (this.containerIsStarted) {
+      await this.containerIsStarted(startedContainer, inspectResult, false);
+    } else if (this.postStart) {
       await this.postStart(startedContainer, inspectResult, boundPorts);
     }
 
     return startedContainer;
   }
 
+  /**
+   * @deprecated Since version 9.4.0. Will be removed in version 10.0.0. Use `containerIsStarted` instead.
+   */
   protected postStart?(
     container: StartedTestContainer,
     inspectResult: InspectResult,
     boundPorts: BoundPorts
+  ): Promise<void>;
+
+  protected containerIsStarted?(
+    container: StartedTestContainer,
+    inspectResult: InspectResult,
+    reused: boolean
   ): Promise<void>;
 
   protected get hasExposedPorts(): boolean {

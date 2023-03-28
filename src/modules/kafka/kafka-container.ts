@@ -1,5 +1,4 @@
 import { GenericContainer } from "../../generic-container/generic-container";
-import { BoundPorts } from "../../bound-ports";
 import { RandomUuid, Uuid } from "../../uuid";
 import { StartedTestContainer } from "../..";
 import { AbstractStartedContainer } from "../abstract-started-container";
@@ -71,7 +70,7 @@ export class KafkaContainer extends GenericContainer {
     return this;
   }
 
-  protected override async preStart(): Promise<void> {
+  protected override async beforeStart(): Promise<void> {
     const network = this.networkMode && this.networkAliases.length > 0 ? this.networkAliases[0] : "localhost";
     this.withEnvironment({ KAFKA_ADVERTISED_LISTENERS: `BROKER://${network}:${KAFKA_BROKER_PORT}` });
 
@@ -104,12 +103,11 @@ export class KafkaContainer extends GenericContainer {
     return new StartedKafkaContainer(await super.start());
   }
 
-  protected override async postStart(
+  protected override async containerIsStarted(
     container: StartedTestContainer,
-    inspectResult: InspectResult,
-    boundPorts: BoundPorts
+    inspectResult: InspectResult
   ): Promise<void> {
-    await this.updateAdvertisedListeners(container, inspectResult, boundPorts);
+    await this.updateAdvertisedListeners(container, inspectResult);
     if (this.saslSslConfig) {
       await this.createUser(container, this.saslSslConfig.sasl);
     }
@@ -147,15 +145,11 @@ export class KafkaContainer extends GenericContainer {
     }).withExposedPorts(KAFKA_PORT);
   }
 
-  private async updateAdvertisedListeners(
-    container: StartedTestContainer,
-    inspectResult: InspectResult,
-    boundPorts: BoundPorts
-  ) {
+  private async updateAdvertisedListeners(container: StartedTestContainer, inspectResult: InspectResult) {
     const brokerAdvertisedListener = `BROKER://${inspectResult.hostname}:${KAFKA_BROKER_PORT}`;
-    let bootstrapServers = `PLAINTEXT://${container.getHost()}:${boundPorts.getBinding(KAFKA_PORT)}`;
+    let bootstrapServers = `PLAINTEXT://${container.getHost()}:${container.getMappedPort(KAFKA_PORT)}`;
     if (this.saslSslConfig) {
-      bootstrapServers = `${bootstrapServers},SECURE://${container.getHost()}:${boundPorts.getBinding(
+      bootstrapServers = `${bootstrapServers},SECURE://${container.getHost()}:${container.getMappedPort(
         this.saslSslConfig.port
       )}`;
     }

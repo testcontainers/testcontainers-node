@@ -116,7 +116,7 @@ const container = await new GenericContainer("alpine")
 
 ### With default log driver
 
-May be necessary when the driver of your docker host does not support reading logs, and you want to use the [Log output wait strategy](../wait-strategies#log-output).
+May be necessary when the driver of your docker host does not support reading logs, and you want to use the [log output wait strategy](../wait-strategies#log-output).
 
 See [log drivers](https://docs.docker.com/config/containers/logging/configure/#configure-the-logging-driver-for-a-container).
 
@@ -301,6 +301,58 @@ class StartedCustomContainer extends AbstractStartedContainer {
 
 const customContainer: TestContainer = new CustomContainer();
 const startedCustomContainer: StartedTestContainer = await customContainer.start();
+```
+
+### Lifecycle callbacks
+
+Define your own lifecycle callbacks for better control over your custom containers:
+
+```typescript
+import { 
+  GenericContainer, 
+  AbstractStartedContainer, 
+  StartedTestContainer, 
+  InspectResult 
+} from "testcontainers";
+
+class CustomContainer extends GenericContainer {
+  protected override async beforeStart(): Promise<void> {
+    // ...
+  }
+  
+  protected override async containerIsCreated(containerId: string): Promise<void> {
+    // ...
+  }
+  
+  protected override async containerIsStarting(
+    inspectResult: InspectResult,
+    reused: boolean
+  ): Promise<void> {
+    // ...
+  }
+  
+  protected override async containerIsStarted(
+    container: StartedTestContainer,
+    inspectResult: InspectResult,
+    reused: boolean
+  ): Promise<void> {
+    // ...
+  }
+
+  public override async start(): Promise<CustomStartedContainer> {
+    return new CustomStartedContainer(await super.start());
+  }
+}
+
+class CustomStartedContainer extends AbstractStartedContainer {
+  protected override async containerIsStopping(): Promise<void> {
+    // ...
+  }
+  
+  protected override async containerIsStopped(): Promise<void> {
+    // ...
+  }
+}
 ```
 
 ## Exposing container ports

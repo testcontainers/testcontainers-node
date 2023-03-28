@@ -126,9 +126,11 @@ export class DockerComposeEnvironment {
             this.waitStrategy[containerName] ? this.waitStrategy[containerName] : defaultWaitStrategy(host, container)
           ).withStartupTimeout(this.startupTimeout);
 
-          (await containerLogs(container))
-            .on("data", (data) => containerLog.trace(`${containerName}: ${data}`))
-            .on("err", (data) => containerLog.error(`${containerName}: ${data}`));
+          if (containerLog.enabled()) {
+            (await containerLogs(container))
+              .on("data", (data) => containerLog.trace(`${containerName}: ${data.trim()}`))
+              .on("err", (data) => containerLog.error(`${containerName}: ${data.trim()}`));
+          }
 
           try {
             log.info(`Waiting for container ${containerName} to be ready`);

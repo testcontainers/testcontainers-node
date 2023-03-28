@@ -22,7 +22,7 @@ export class MongoDBContainer extends GenericContainer {
     return new StartedMongoDBContainer(await super.start());
   }
 
-  protected override async postStart(startedTestContainer: StartedTestContainer): Promise<void> {
+  protected override async containerIsStarted(startedTestContainer: StartedTestContainer): Promise<void> {
     await this.initReplicaSet(startedTestContainer);
   }
 

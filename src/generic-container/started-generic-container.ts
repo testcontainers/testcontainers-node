@@ -31,9 +31,13 @@ export class StartedGenericContainer implements StartedTestContainer {
     private readonly waitStrategy: WaitStrategy
   ) {}
 
+  protected containerIsStopping?(): Promise<void>;
+
   public async stop(options: Partial<StopOptions> = {}): Promise<StoppedTestContainer> {
     return this.stopContainer(options);
   }
+
+  protected containerIsStopped?(): Promise<void>;
 
   public async restart(options: Partial<RestartOptions> = {}): Promise<void> {
     const resolvedOptions: RestartOptions = { timeout: 0, ...options };
@@ -43,9 +47,12 @@ export class StartedGenericContainer implements StartedTestContainer {
     const { hostIps } = await dockerClient();
     this.inspectResult = await inspectContainer(this.container);
     const startTime = this.inspectResult.state.startedAt;
-    (await containerLogs(this.container, { since: startTime }))
-      .on("data", (data) => containerLog.trace(`${this.container.id}: ${data.trim()}`))
-      .on("err", (data) => containerLog.error(`${this.container.id}: ${data.trim()}`));
+
+    if (containerLog.enabled()) {
+      (await containerLogs(this.container, { since: startTime }))
+        .on("data", (data) => containerLog.trace(`${this.container.id}: ${data.trim()}`))
+        .on("err", (data) => containerLog.error(`${this.container.id}: ${data.trim()}`));
+    }
 
     this.boundPorts = BoundPorts.fromInspectResult(hostIps, this.inspectResult).filter(
       Array.from(this.boundPorts.iterator()).map((port) => port[0])
@@ -57,9 +64,17 @@ export class StartedGenericContainer implements StartedTestContainer {
   private async stopContainer(options: Partial<StopOptions> = {}): Promise<StoppedGenericContainer> {
     log.info(`Stopping container with ID: ${this.container.id}`);
 
+    if (this.containerIsStopping) {
+      await this.containerIsStopping();
+    }
+
     const resolvedOptions: StopOptions = { timeout: 0, removeVolumes: true, ...options };
     await stopContainer(this.container, { timeout: resolvedOptions.timeout });
     await removeContainer(this.container, { removeVolumes: resolvedOptions.removeVolumes });
+
+    if (this.containerIsStopped) {
+      await this.containerIsStopped();
+    }
 
     return new StoppedGenericContainer();
   }
