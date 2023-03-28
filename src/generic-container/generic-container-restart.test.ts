@@ -1,7 +1,7 @@
 import { GenericContainer } from "./generic-container";
 import { checkContainerIsHealthy } from "../test-helper";
 
-describe("GenericContainer", () => {
+describe("GenericContainer restart", () => {
   jest.setTimeout(180_000);
 
   it("should restart", async () => {
