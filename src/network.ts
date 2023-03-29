@@ -3,30 +3,39 @@ import { log } from "./logger";
 import { ReaperInstance } from "./reaper";
 import { createNetwork, CreateNetworkOptions } from "./docker/functions/network/create-network";
 import { removeNetwork } from "./docker/functions/network/remove-network";
+import { dockerClient } from "./docker/docker-client";
 
 export class Network {
-  private readonly createNetworkOptions: CreateNetworkOptions;
+  constructor(
+    private readonly createNetworkOptions: Partial<CreateNetworkOptions> = {},
+    private readonly uuid: Uuid = new RandomUuid()
+  ) {
+    this.createNetworkOptions = createNetworkOptions;
+  }
 
-  constructor(createNetworkOptions: Partial<CreateNetworkOptions> = {}, uuid: Uuid = new RandomUuid()) {
-    this.createNetworkOptions = {
-      name: uuid.nextUuid(),
-      driver: "bridge",
+  public async start(): Promise<StartedNetwork> {
+    const { uri } = await dockerClient();
+    const driver = uri.includes("podman.sock") ? "podman" : "bridge";
+
+    console.log("STARTING NETWORK WITH DRIVER ", driver);
+
+    const options = {
+      name: this.uuid.nextUuid(),
+      driver,
       checkDuplicate: true,
       internal: false,
       attachable: false,
       ingress: false,
       enableIPv6: false,
-      ...createNetworkOptions,
+      ...this.createNetworkOptions,
     };
-  }
 
-  public async start(): Promise<StartedNetwork> {
     await ReaperInstance.getInstance();
 
-    const id = await createNetwork(this.createNetworkOptions);
+    const id = await createNetwork(options);
     log.info(`Started network with ID: ${id}`);
 
-    return new StartedNetwork(id, this.createNetworkOptions);
+    return new StartedNetwork(id, options);
   }
 }
 

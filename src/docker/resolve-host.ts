@@ -24,7 +24,8 @@ export const resolveHost = async (
     case "unix:":
     case "npipe:": {
       if (isInContainer()) {
-        const gateway = await findGateway(dockerode);
+        const networkName = uri.includes("podman.sock") ? "podman" : "bridge";
+        const gateway = await findGateway(dockerode, networkName);
         if (gateway !== undefined) {
           return gateway;
         }
@@ -40,9 +41,9 @@ export const resolveHost = async (
   }
 };
 
-const findGateway = async (dockerode: Dockerode): Promise<string | undefined> => {
+const findGateway = async (dockerode: Dockerode, networkName: string): Promise<string | undefined> => {
   log.debug(`Checking gateway for Docker host`);
-  const inspectResult: NetworkInspectInfo = await dockerode.getNetwork("bridge").inspect();
+  const inspectResult: NetworkInspectInfo = await dockerode.getNetwork(networkName).inspect();
   return inspectResult?.IPAM?.Config?.find((config) => config.Gateway !== undefined)?.Gateway;
 };
 
