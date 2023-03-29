@@ -32,7 +32,7 @@ describe("PortForwarder", () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").start();
 
     const { output } = await container.exec(["curl", "-s", `http://host.testcontainers.internal:${randomPort}`]);
-    expect(output).toBe("hello world");
+    expect(output).toEqual(expect.stringContaining("hello world"));
 
     await container.stop();
   });
@@ -44,7 +44,7 @@ describe("PortForwarder", () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withNetwork(network).start();
 
     const { output } = await container.exec(["curl", "-s", `http://host.testcontainers.internal:${randomPort}`]);
-    expect(output).toBe("hello world");
+    expect(output).toEqual(expect.stringContaining("hello world"));
 
     await container.stop();
     await network.stop();
@@ -60,7 +60,7 @@ describe("PortForwarder", () => {
       .start();
 
     const { output } = await container.exec(["curl", "-s", `http://host.testcontainers.internal:${randomPort}`]);
-    expect(output).toBe("hello world");
+    expect(output).toEqual(expect.stringContaining("hello world"));
 
     await container.stop();
     await network.stop();

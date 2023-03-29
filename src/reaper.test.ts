@@ -80,7 +80,7 @@ describe("Reaper", () => {
   });
 
   it("should remove images", async () => {
-    const imageId = `${new RandomUuid().nextUuid()}:${new RandomUuid().nextUuid()}`;
+    const imageId = `localhost/${new RandomUuid().nextUuid()}:${new RandomUuid().nextUuid()}`;
     const context = path.resolve(path.resolve(fixtures, "docker", "docker"));
     await GenericContainer.fromDockerfile(context).build(imageId);
 

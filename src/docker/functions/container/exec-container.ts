@@ -26,7 +26,6 @@ export const execContainer = async (
     });
 
     const stream = await startExec(exec, options);
-    stream.setEncoding("utf-8");
 
     stream.on("data", (chunk) => chunks.push(chunk));
 
