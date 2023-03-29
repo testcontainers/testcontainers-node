@@ -21,7 +21,7 @@ export class Network {
 
     const options = {
       name: this.uuid.nextUuid(),
-      driver,
+      driver: "bridge",
       checkDuplicate: true,
       internal: false,
       attachable: false,
