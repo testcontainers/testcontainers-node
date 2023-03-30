@@ -12,13 +12,15 @@ const mockExistsSync = jest.mocked(existsSync);
 const mockRunInContainer = jest.mocked(runInContainer);
 
 test("should return TESTCONTAINERS_HOST_OVERRIDE from environment", async () => {
-  const host = await resolveHost(new Dockerode(), "", "", { TESTCONTAINERS_HOST_OVERRIDE: "tcp://docker:2375" });
+  const host = await resolveHost(new Dockerode(), "docker", "", "", {
+    TESTCONTAINERS_HOST_OVERRIDE: "tcp://docker:2375",
+  });
   expect(host).toEqual("tcp://docker:2375");
 });
 
 test("should return hostname for TCP protocols", async () => {
   for (const uri of ["tcp://docker:2375", "http://docker:2375", "https://docker:2375"]) {
-    const host = await resolveHost(new Dockerode(), "", uri, {});
+    const host = await resolveHost(new Dockerode(), "docker", "", uri, {});
     expect(host).toEqual("docker");
   }
 });
@@ -27,7 +29,7 @@ test("should return localhost for unix and npipe protocols when not running in a
   mockExistsSync.mockReturnValue(false);
 
   for (const uri of ["unix://docker:2375", "npipe://docker:2375"]) {
-    const host = await resolveHost(new Dockerode(), "", uri, {});
+    const host = await resolveHost(new Dockerode(), "docker", "", uri, {});
     expect(host).toEqual("localhost");
   }
 });
@@ -48,8 +50,48 @@ test("should return host from gateway when running in a container", async () => 
   }));
 
   for (const uri of ["unix://docker:2375", "npipe://docker:2375"]) {
-    const host = await resolveHost(new Dockerode(), "", uri, {});
+    const host = await resolveHost(new Dockerode(), "docker", "", uri, {});
     expect(host).toEqual("172.0.0.1");
+  }
+});
+
+test("should use bridge network as gateway for Docker provider", async () => {
+  mockExistsSync.mockReturnValue(true);
+  const mockGetNetwork = jest.fn(() => ({
+    inspect: () =>
+      Promise.resolve({
+        IPAM: {
+          Config: [{ Gateway: "172.0.0.1" }],
+        },
+      }),
+  }));
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  mockDockerode.mockImplementation(() => ({ getNetwork: mockGetNetwork }));
+
+  for (const uri of ["unix://docker:2375", "npipe://docker:2375"]) {
+    await resolveHost(new Dockerode(), "docker", "", uri, {});
+    expect(mockGetNetwork).toHaveBeenCalledWith("bridge");
+  }
+});
+
+test("should use podman network as gateway for Podman provider", async () => {
+  mockExistsSync.mockReturnValue(true);
+  const mockGetNetwork = jest.fn(() => ({
+    inspect: () =>
+      Promise.resolve({
+        IPAM: {
+          Config: [{ Gateway: "172.0.0.1" }],
+        },
+      }),
+  }));
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  mockDockerode.mockImplementation(() => ({ getNetwork: mockGetNetwork }));
+
+  for (const uri of ["unix://docker:2375", "npipe://docker:2375"]) {
+    await resolveHost(new Dockerode(), "podman", "", uri, {});
+    expect(mockGetNetwork).toHaveBeenCalledWith("podman");
   }
 });
 
@@ -65,7 +107,7 @@ test("should return host from default gateway when running in a container", asyn
   mockRunInContainer.mockReturnValue(Promise.resolve("172.0.0.2"));
 
   for (const uri of ["unix://docker:2375", "npipe://docker:2375"]) {
-    const host = await resolveHost(new Dockerode(), "", uri, {});
+    const host = await resolveHost(new Dockerode(), "docker", "", uri, {});
     expect(host).toEqual("172.0.0.2");
   }
 });
@@ -82,13 +124,13 @@ test("should return localhost if unable to find gateway", async () => {
   mockRunInContainer.mockReturnValue(Promise.resolve(undefined));
 
   for (const uri of ["unix://docker:2375", "npipe://docker:2375"]) {
-    const host = await resolveHost(new Dockerode(), "", uri, {});
+    const host = await resolveHost(new Dockerode(), "docker", "", uri, {});
     expect(host).toEqual("localhost");
   }
 });
 
 test("should throw for unsupported protocol", async () => {
-  await expect(() => resolveHost(new Dockerode(), "", "invalid://unknown", {})).rejects.toThrowError(
+  await expect(() => resolveHost(new Dockerode(), "docker", "", "invalid://unknown", {})).rejects.toThrowError(
     "Unsupported protocol: invalid"
   );
 });

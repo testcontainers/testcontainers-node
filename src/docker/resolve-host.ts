@@ -3,9 +3,11 @@ import { URL } from "url";
 import { log } from "../logger";
 import { runInContainer } from "./functions/run-in-container";
 import { existsSync } from "fs";
+import { Provider } from "./docker-client";
 
 export const resolveHost = async (
   dockerode: Dockerode,
+  provider: Provider,
   indexServerAddress: string,
   uri: string,
   env: NodeJS.ProcessEnv = process.env
@@ -24,7 +26,7 @@ export const resolveHost = async (
     case "unix:":
     case "npipe:": {
       if (isInContainer()) {
-        const networkName = uri.includes("podman.sock") ? "podman" : "bridge";
+        const networkName = provider === "podman" ? "podman" : "bridge";
         const gateway = await findGateway(dockerode, networkName);
         if (gateway !== undefined) {
           return gateway;
