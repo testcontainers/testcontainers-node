@@ -35,7 +35,7 @@ export class MySqlContainer extends GenericContainer {
   }
 
   public override async start(): Promise<StartedMySqlContainer> {
-    this.withExposedPorts(...(this.hasExposedPorts ? this.ports : [MYSQL_PORT]))
+    this.withExposedPorts(...(this.hasExposedPorts ? this.opts.exposedPorts : [MYSQL_PORT]))
       .withEnvironment({
         MYSQL_DATABASE: this.database,
         MYSQL_ROOT_PASSWORD: this.rootPassword,

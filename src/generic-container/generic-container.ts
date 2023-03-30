@@ -17,9 +17,9 @@ import {
   FileToCopy,
   HealthCheck,
   Labels,
+  ResourcesQuota,
   TmpFs,
   Ulimits,
-  ResourcesQuota,
 } from "../docker/types";
 import { pullImage } from "../docker/functions/image/pull-image";
 import { createContainer, CreateContainerOptions } from "../docker/functions/container/create-container";
@@ -37,6 +37,7 @@ import { getContainerByHash } from "../docker/functions/container/get-container"
 import { LABEL_TESTCONTAINERS_CONTAINER_HASH } from "../labels";
 import { StartedNetwork } from "../network";
 import { waitForContainer } from "../wait-for-container";
+import { initCreateContainerOptions } from "./create-container-options";
 
 const reusableContainerCreationLock = new AsyncLock();
 
@@ -45,38 +46,17 @@ export class GenericContainer implements TestContainer {
     return new GenericContainerBuilder(context, dockerfileName);
   }
 
-  private readonly imageName: DockerImageName;
-
-  protected environment: Environment = {};
+  protected opts: CreateContainerOptions;
+  protected startupTimeout = 60_000;
+  protected waitStrategy?: WaitStrategy;
+  protected tarToCopy?: archiver.Archiver;
   protected networkMode?: string;
   protected networkAliases: string[] = [];
-  protected ports: PortWithOptionalBinding[] = [];
-  protected command: string[] = [];
-  protected entrypoint?: string[];
-  protected bindMounts: BindMount[] = [];
-  protected name?: string;
-  protected labels: Labels = {};
-  protected tmpFs: TmpFs = {};
-  protected healthCheck?: HealthCheck;
-  protected waitStrategy?: WaitStrategy;
-  protected startupTimeout = 60_000;
-  protected useDefaultLogDriver = false;
-  protected privilegedMode = false;
-  protected workingDir?: string;
-  protected ipcMode?: string;
-  protected ulimits?: Ulimits;
-  protected addedCapabilities?: string[];
-  protected droppedCapabilities?: string[];
-  protected user?: string;
   protected pullPolicy: PullPolicy = new DefaultPullPolicy();
-  protected reuse = false;
-  protected tarToCopy?: archiver.Archiver;
-  protected resourcesQuota?: ResourcesQuota;
-
-  private extraHosts: ExtraHost[] = [];
 
   constructor(readonly image: string) {
-    this.imageName = DockerImageName.fromString(image);
+    const imageName = DockerImageName.fromString(image);
+    this.opts = initCreateContainerOptions(imageName, imageName.isReaper());
   }
 
   /**
@@ -92,12 +72,13 @@ export class GenericContainer implements TestContainer {
 
   public async start(): Promise<StartedTestContainer> {
     const { dockerode, indexServerAddress } = await dockerClient();
+
     await pullImage(dockerode, indexServerAddress, {
-      imageName: this.imageName,
+      imageName: this.opts.imageName,
       force: this.pullPolicy.shouldPull(),
     });
 
-    if (!this.reuse && !this.imageName.isReaper()) {
+    if (!this.opts.reusable && !this.opts.imageName.isReaper()) {
       await ReaperInstance.getInstance();
     }
 
@@ -107,41 +88,21 @@ export class GenericContainer implements TestContainer {
       await this.preStart();
     }
 
-    if (!this.imageName.isHelperContainer() && PortForwarderInstance.isRunning()) {
+    if (!this.opts.imageName.isHelperContainer() && PortForwarderInstance.isRunning()) {
       const portForwarder = await PortForwarderInstance.getInstance();
-      this.extraHosts.push({ host: "host.testcontainers.internal", ipAddress: portForwarder.getIpAddress() });
+      this.opts.extraHosts.push({ host: "host.testcontainers.internal", ipAddress: portForwarder.getIpAddress() });
     }
 
-    const createContainerOptions: CreateContainerOptions = {
-      imageName: this.imageName,
-      environment: this.environment,
-      command: this.command,
-      entrypoint: this.entrypoint,
-      bindMounts: this.bindMounts,
-      tmpFs: this.tmpFs,
-      exposedPorts: this.ports,
-      name: this.name,
-      labels: this.labels,
-      reusable: this.reuse,
-      networkMode: this.networkAliases.length > 0 ? undefined : this.networkMode,
-      healthCheck: this.healthCheck,
-      useDefaultLogDriver: this.useDefaultLogDriver,
-      privilegedMode: this.privilegedMode,
-      autoRemove: this.imageName.isReaper(),
-      extraHosts: this.extraHosts,
-      ipcMode: this.ipcMode,
-      ulimits: this.ulimits,
-      addedCapabilities: this.addedCapabilities,
-      droppedCapabilities: this.droppedCapabilities,
-      user: this.user,
-      workingDir: this.workingDir,
-      resourcesQuota: this.resourcesQuota,
-    };
+    if (this.networkAliases.length > 0) {
+      this.opts.networkMode = undefined;
+    } else {
+      this.opts.networkMode = this.networkMode;
+    }
 
-    if (this.reuse) {
-      const containerHash = hash(JSON.stringify(createContainerOptions));
-      createContainerOptions.labels = {
-        ...createContainerOptions.labels,
+    if (this.opts.reusable) {
+      const containerHash = hash(JSON.stringify(this.opts));
+      this.opts.labels = {
+        ...this.opts.labels,
         [LABEL_TESTCONTAINERS_CONTAINER_HASH]: containerHash,
       };
       log.debug(`Container reuse has been enabled, hash: ${containerHash}`);
@@ -157,18 +118,18 @@ export class GenericContainer implements TestContainer {
           return this.reuseContainer(container);
         } else {
           log.debug("No container found to reuse");
-          return this.startContainer(createContainerOptions);
+          return this.startContainer(this.opts);
         }
       });
     } else {
-      return this.startContainer(createContainerOptions);
+      return this.startContainer(this.opts);
     }
   }
 
   private async reuseContainer(container: Dockerode.Container) {
     const { host, hostIps } = await dockerClient();
     const inspectResult = await inspectContainer(container);
-    const boundPorts = BoundPorts.fromInspectResult(hostIps, inspectResult).filter(this.ports);
+    const boundPorts = BoundPorts.fromInspectResult(hostIps, inspectResult).filter(this.opts.exposedPorts);
     const waitStrategy = (this.waitStrategy ?? defaultWaitStrategy(host, container)).withStartupTimeout(
       this.startupTimeout
     );
@@ -200,7 +161,7 @@ export class GenericContainer implements TestContainer {
   private async startContainer(createContainerOptions: CreateContainerOptions): Promise<StartedTestContainer> {
     const container = await createContainer(createContainerOptions);
 
-    if (!this.imageName.isHelperContainer() && PortForwarderInstance.isRunning()) {
+    if (!this.opts.imageName.isHelperContainer() && PortForwarderInstance.isRunning()) {
       const portForwarder = await PortForwarderInstance.getInstance();
       const portForwarderNetworkId = portForwarder.getNetworkId();
       const excludedNetworks = [portForwarderNetworkId, "none", "host"];
@@ -227,7 +188,7 @@ export class GenericContainer implements TestContainer {
       await putContainerArchive({ container, stream: this.tarToCopy, containerPath: "/" });
     }
 
-    log.info(`Starting container ${this.imageName} with ID: ${container.id}`);
+    log.info(`Starting container ${this.opts.imageName} with ID: ${container.id}`);
     if (this.containerIsCreated) {
       await this.containerIsCreated(container.id);
     }
@@ -236,7 +197,7 @@ export class GenericContainer implements TestContainer {
 
     const { host, hostIps } = await dockerClient();
     const inspectResult = await inspectContainer(container);
-    const boundPorts = BoundPorts.fromInspectResult(hostIps, inspectResult).filter(this.ports);
+    const boundPorts = BoundPorts.fromInspectResult(hostIps, inspectResult).filter(this.opts.exposedPorts);
     const waitStrategy = (this.waitStrategy ?? defaultWaitStrategy(host, container)).withStartupTimeout(
       this.startupTimeout
     );
@@ -287,51 +248,51 @@ export class GenericContainer implements TestContainer {
   ): Promise<void>;
 
   protected get hasExposedPorts(): boolean {
-    return this.ports.length !== 0;
+    return this.opts.exposedPorts.length !== 0;
   }
 
   public withCommand(command: string[]): this {
-    this.command = command;
+    this.opts.command = command;
     return this;
   }
 
   public withEntrypoint(entrypoint: string[]): this {
-    this.entrypoint = entrypoint;
+    this.opts.entrypoint = entrypoint;
     return this;
   }
 
   public withName(name: string): this {
-    this.name = name;
+    this.opts.name = name;
     return this;
   }
 
   public withLabels(labels: Labels): this {
-    this.labels = { ...this.labels, ...labels };
+    this.opts.labels = { ...this.opts.labels, ...labels };
     return this;
   }
 
   public withEnvironment(environment: Environment): this {
-    this.environment = { ...this.environment, ...environment };
+    this.opts.environment = { ...this.opts.environment, ...environment };
     return this;
   }
 
   public withTmpFs(tmpFs: TmpFs): this {
-    this.tmpFs = { ...this.tmpFs, ...tmpFs };
+    this.opts.tmpFs = { ...this.opts.tmpFs, ...tmpFs };
     return this;
   }
 
   public withUlimits(ulimits: Ulimits): this {
-    this.ulimits = { ...this.ulimits, ...ulimits };
+    this.opts.ulimits = { ...this.opts.ulimits, ...ulimits };
     return this;
   }
 
   public withAddedCapabilities(...capabilities: string[]): this {
-    this.addedCapabilities = [...(this.addedCapabilities ?? []), ...capabilities];
+    this.opts.addedCapabilities = [...(this.opts.addedCapabilities ?? []), ...capabilities];
     return this;
   }
 
   public withDroppedCapabilities(...capabilities: string[]): this {
-    this.droppedCapabilities = [...(this.droppedCapabilities ?? []), ...capabilities];
+    this.opts.droppedCapabilities = [...(this.opts.droppedCapabilities ?? []), ...capabilities];
     return this;
   }
 
@@ -351,22 +312,22 @@ export class GenericContainer implements TestContainer {
   }
 
   public withExtraHosts(extraHosts: ExtraHost[]): this {
-    this.extraHosts = [...this.extraHosts, ...extraHosts];
+    this.opts.extraHosts = [...this.opts.extraHosts, ...extraHosts];
     return this;
   }
 
   public withExposedPorts(...ports: PortWithOptionalBinding[]): this {
-    this.ports = [...this.ports, ...ports];
+    this.opts.exposedPorts = [...this.opts.exposedPorts, ...ports];
     return this;
   }
 
   public withBindMounts(bindMounts: BindMount[]): this {
-    this.bindMounts = bindMounts.map((bindMount) => ({ mode: "rw", ...bindMount }));
+    this.opts.bindMounts = bindMounts.map((bindMount) => ({ mode: "rw", ...bindMount }));
     return this;
   }
 
   public withHealthCheck(healthCheck: HealthCheck): this {
-    this.healthCheck = healthCheck;
+    this.opts.healthCheck = healthCheck;
     return this;
   }
 
@@ -381,22 +342,22 @@ export class GenericContainer implements TestContainer {
   }
 
   public withDefaultLogDriver(): this {
-    this.useDefaultLogDriver = true;
+    this.opts.useDefaultLogDriver = true;
     return this;
   }
 
   public withPrivilegedMode(): this {
-    this.privilegedMode = true;
+    this.opts.privilegedMode = true;
     return this;
   }
 
   public withUser(user: string): this {
-    this.user = user;
+    this.opts.user = user;
     return this;
   }
 
   public withReuse(): this {
-    this.reuse = true;
+    this.opts.reusable = true;
     return this;
   }
 
@@ -406,7 +367,7 @@ export class GenericContainer implements TestContainer {
   }
 
   public withIpcMode(ipcMode: string): this {
-    this.ipcMode = ipcMode;
+    this.opts.ipcMode = ipcMode;
     return this;
   }
 
@@ -430,7 +391,7 @@ export class GenericContainer implements TestContainer {
   }
 
   public withWorkingDir(workingDir: string): this {
-    this.workingDir = workingDir;
+    this.opts.workingDir = workingDir;
     return this;
   }
 
@@ -440,7 +401,7 @@ export class GenericContainer implements TestContainer {
     const ram = memory !== undefined ? memory * 1024 ** 3 : undefined;
     const cpuQuota = cpu !== undefined ? cpu * 10 ** 9 : undefined;
 
-    this.resourcesQuota = { memory: ram, cpu: cpuQuota };
+    this.opts.resourcesQuota = { memory: ram, cpu: cpuQuota };
 
     return this;
   }
