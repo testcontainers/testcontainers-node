@@ -12,11 +12,8 @@ import { Network } from "./network";
 import path from "path";
 import { RandomUuid } from "./uuid";
 import waitForExpect from "wait-for-expect";
-import { DockerImageName } from "./docker-image-name";
 import { DockerComposeEnvironment } from "./docker-compose-environment/docker-compose-environment";
-import { dockerClient } from "./docker/docker-client";
 import { sessionId } from "./docker/session-id";
-import { imageExists } from "./docker/functions/image/image-exists";
 
 const fixtures = path.resolve(__dirname, "..", "fixtures");
 
