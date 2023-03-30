@@ -7,6 +7,7 @@ import { HealthCheckStatus } from "./docker/types";
 import Dockerode from "dockerode";
 import { containerLogs } from "./docker/functions/container/container-logs";
 import { inspectContainer } from "./docker/functions/container/inspect-container";
+import { Provider } from "./docker/docker-client";
 
 export interface WaitStrategy {
   waitUntilReady(container: Dockerode.Container, host: string, boundPorts: BoundPorts, startTime?: Date): Promise<void>;
@@ -148,5 +149,9 @@ export class HealthCheckWaitStrategy extends AbstractWaitStrategy {
   }
 }
 
-export const defaultWaitStrategy = (host: string, container: Dockerode.Container) =>
-  new HostPortWaitStrategy(new HostPortCheck(host), new InternalPortCheck(container));
+export const defaultWaitStrategy = (
+  host: string,
+  dockerode: Dockerode,
+  provider: Provider,
+  container: Dockerode.Container
+) => new HostPortWaitStrategy(new HostPortCheck(host), new InternalPortCheck(dockerode, provider, container));

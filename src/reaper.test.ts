@@ -11,11 +11,11 @@ import { Network } from "./network";
 import path from "path";
 import { RandomUuid } from "./uuid";
 import waitForExpect from "wait-for-expect";
-import { listImages } from "./docker/functions/image/list-images";
 import { DockerImageName } from "./docker-image-name";
 import { DockerComposeEnvironment } from "./docker-compose-environment/docker-compose-environment";
 import { dockerClient } from "./docker/docker-client";
 import { sessionId } from "./docker/session-id";
+import { imageExists } from "./docker/functions/image/image-exists";
 
 const fixtures = path.resolve(__dirname, "..", "fixtures");
 
@@ -80,17 +80,18 @@ describe("Reaper", () => {
   });
 
   it("should remove images", async () => {
-    const imageId = `localhost/${new RandomUuid().nextUuid()}:${new RandomUuid().nextUuid()}`;
+    const imageName = `${new RandomUuid().nextUuid()}:${new RandomUuid().nextUuid()}`;
     const context = path.resolve(path.resolve(fixtures, "docker", "docker"));
-    await GenericContainer.fromDockerfile(context).build(imageId);
+    await GenericContainer.fromDockerfile(context).build(imageName);
 
     const reaperContainerId = await getReaperContainerId();
     await stopReaper();
 
     const { dockerode } = await dockerClient();
-    expect(await listImages(dockerode)).toContainEqual(DockerImageName.fromString(imageId));
+
+    expect(await imageExists(dockerode, DockerImageName.fromString(imageName))).toBe(true);
     await waitForExpect(async () => {
-      expect(await listImages(dockerode)).not.toContainEqual(DockerImageName.fromString(imageId));
+      expect(await imageExists(dockerode, DockerImageName.fromString(imageName))).toBe(false);
       expect(await getContainerIds()).not.toContain(reaperContainerId);
     }, 30_000);
   });

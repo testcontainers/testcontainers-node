@@ -30,7 +30,7 @@ export const getDockerInfo = async (dockerode: Dockerode): Promise<DockerInfo> =
 const getIndexServerAddress = (info: any): string => {
   if (isUndefinedOrEmpty(info.IndexServerAddress)) {
     log.debug("Index server address is not set, using default");
-    return "https://index.docker.io/v1/";
+    return "https://index.v1/";
   } else {
     return info.IndexServerAddress;
   }

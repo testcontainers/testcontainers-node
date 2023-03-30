@@ -69,7 +69,7 @@ describe("MySqlContainer", () => {
     const container = await new MySqlContainer().start();
 
     const queryResult = await container.executeQuery("SELECT 1 as res");
-    expect(queryResult).toEqual("res\n1\n");
+    expect(queryResult).toEqual(expect.stringContaining("res\n1\n"));
 
     await container.stop();
   });

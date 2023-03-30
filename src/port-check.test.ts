@@ -3,11 +3,12 @@ import { execContainer } from "./docker/functions/container/exec-container";
 import Dockerode from "dockerode";
 import { InternalPortCheck } from "./port-check";
 
+jest.mock("dockerode");
 jest.mock("./logger");
 jest.mock("./docker/functions/container/exec-container");
 
-const mockLogger = jest.mocked(log, { shallow: true });
-const mockExecContainer = jest.mocked(execContainer, { shallow: true });
+const mockLogger = jest.mocked(log);
+const mockExecContainer = jest.mocked(execContainer);
 
 describe("PortCheck", () => {
   describe("InternalPortCheck", () => {
@@ -16,7 +17,7 @@ describe("PortCheck", () => {
 
     beforeEach(() => {
       mockContainer = { id: "containerId" } as Dockerode.Container;
-      portCheck = new InternalPortCheck(mockContainer);
+      portCheck = new InternalPortCheck(new Dockerode(), "docker", mockContainer);
 
       // Make sure logging is enabled to capture all logs
       mockLogger.enabled.mockImplementation(() => true);

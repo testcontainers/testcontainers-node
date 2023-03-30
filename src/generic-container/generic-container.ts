@@ -127,12 +127,12 @@ export class GenericContainer implements TestContainer {
   }
 
   private async reuseContainer(container: Dockerode.Container) {
-    const { host, hostIps } = await dockerClient();
+    const { dockerode, provider, host, hostIps } = await dockerClient();
     const inspectResult = await inspectContainer(container);
     const boundPorts = BoundPorts.fromInspectResult(hostIps, inspectResult).filter(this.opts.exposedPorts);
-    const waitStrategy = (this.waitStrategy ?? defaultWaitStrategy(host, container)).withStartupTimeout(
-      this.startupTimeout
-    );
+    const waitStrategy = (
+      this.waitStrategy ?? defaultWaitStrategy(host, dockerode, provider, container)
+    ).withStartupTimeout(this.startupTimeout);
 
     if (this.containerIsStarting) {
       await this.containerIsStarting(inspectResult, true);
@@ -195,12 +195,12 @@ export class GenericContainer implements TestContainer {
 
     await startContainer(container);
 
-    const { host, hostIps } = await dockerClient();
+    const { dockerode, provider, host, hostIps } = await dockerClient();
     const inspectResult = await inspectContainer(container);
     const boundPorts = BoundPorts.fromInspectResult(hostIps, inspectResult).filter(this.opts.exposedPorts);
-    const waitStrategy = (this.waitStrategy ?? defaultWaitStrategy(host, container)).withStartupTimeout(
-      this.startupTimeout
-    );
+    const waitStrategy = (
+      this.waitStrategy ?? defaultWaitStrategy(host, dockerode, provider, container)
+    ).withStartupTimeout(this.startupTimeout);
 
     if (containerLog.enabled()) {
       (await containerLogs(container))

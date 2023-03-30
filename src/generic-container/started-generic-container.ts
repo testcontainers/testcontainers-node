@@ -115,9 +115,10 @@ export class StartedGenericContainer implements StartedTestContainer {
     return this.inspectResult.networkSettings[networkName].ipAddress;
   }
 
-  public exec(command: string[], options: Partial<ExecOptions> = {}): Promise<ExecResult> {
+  public async exec(command: string[], options: Partial<ExecOptions> = {}): Promise<ExecResult> {
+    const { dockerode, provider } = await dockerClient();
     const resolvedOptions: ExecOptions = { stdin: true, detach: false, tty: true, ...options };
-    return execContainer(this.container, command, resolvedOptions);
+    return execContainer(dockerode, provider, this.container, command, resolvedOptions);
   }
 
   public logs(): Promise<Readable> {

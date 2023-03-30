@@ -1,8 +1,10 @@
 import { Readable } from "stream";
 import { ExecResult } from "../../types";
 import Dockerode from "dockerode";
-import { log, execLog } from "../../../logger";
+import { execLog, log } from "../../../logger";
 import byline from "byline";
+import { demuxStream } from "../demux-stream";
+import { Provider } from "../../docker-client";
 
 type ExecContainerOptions = {
   tty: boolean;
@@ -11,6 +13,8 @@ type ExecContainerOptions = {
 };
 
 export const execContainer = async (
+  dockerode: Dockerode,
+  provider: Provider,
   container: Dockerode.Container,
   command: string[],
   options: ExecContainerOptions,
@@ -25,7 +29,7 @@ export const execContainer = async (
       AttachStderr: true,
     });
 
-    const stream = await startExec(exec, options);
+    const stream = await startExec(dockerode, provider, exec, options);
 
     stream.on("data", (chunk) => chunks.push(chunk));
 
@@ -47,11 +51,19 @@ export const execContainer = async (
   }
 };
 
-const startExec = async (exec: Dockerode.Exec, options: ExecContainerOptions): Promise<Readable> => {
+const startExec = async (
+  dockerode: Dockerode,
+  provider: Provider,
+  exec: Dockerode.Exec,
+  options: ExecContainerOptions
+): Promise<Readable> => {
   try {
     const stream = await exec.start(options);
-    stream.setEncoding("utf-8");
-    return stream;
+    if (provider === "podman") {
+      return demuxStream(dockerode, stream);
+    } else {
+      return stream;
+    }
   } catch (err) {
     log.error(`Failed to start exec: ${err}`);
     throw err;

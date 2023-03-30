@@ -14,7 +14,7 @@ describe("Network", () => {
 
     const dockerContainer = await getContainerById(container.getId());
     const containerInfo = await dockerContainer.inspect();
-    expect(containerInfo.HostConfig.NetworkMode).toBe(network.getName());
+    expect(Object.keys(containerInfo.NetworkSettings.Networks)).toContain(network.getName());
 
     await container.stop();
     await network.stop();
@@ -27,7 +27,7 @@ describe("Network", () => {
 
     const dockerContainer = await getContainerById(container.getId());
     const containerInfo = await dockerContainer.inspect();
-    expect(containerInfo.HostConfig.NetworkMode).toBe(network.getName());
+    expect(Object.keys(containerInfo.NetworkSettings.Networks)).toContain(network.getName());
 
     await container.stop();
     await network.stop();
