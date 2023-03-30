@@ -3,7 +3,6 @@ import { log } from "./logger";
 import { ReaperInstance } from "./reaper";
 import { createNetwork, CreateNetworkOptions } from "./docker/functions/network/create-network";
 import { removeNetwork } from "./docker/functions/network/remove-network";
-import { dockerClient } from "./docker/docker-client";
 
 export class Network {
   constructor(
@@ -14,11 +13,6 @@ export class Network {
   }
 
   public async start(): Promise<StartedNetwork> {
-    const { uri } = await dockerClient();
-    const driver = uri.includes("podman.sock") ? "podman" : "bridge";
-
-    console.log("STARTING NETWORK WITH DRIVER ", driver);
-
     const options = {
       name: this.uuid.nextUuid(),
       driver: "bridge",
