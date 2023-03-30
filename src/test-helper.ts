@@ -51,6 +51,16 @@ export const getContainerIds = async (): Promise<string[]> => {
   return containers.map((container) => container.Id);
 };
 
+export const checkImageExists = async (imageName: string): Promise<boolean> => {
+  const { dockerode } = await dockerClient();
+  try {
+    await dockerode.getImage(imageName.toString()).inspect();
+    return true;
+  } catch (err) {
+    return false;
+  }
+};
+
 export const getRunningNetworkIds = async (): Promise<string[]> => {
   const { dockerode } = await dockerClient();
   const networks = await dockerode.listNetworks();

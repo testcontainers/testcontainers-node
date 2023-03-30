@@ -1,5 +1,6 @@
 import { GenericContainer } from "./generic-container/generic-container";
 import {
+  checkImageExists,
   composeContainerName,
   getContainerIds,
   getReaperContainerId,
@@ -87,11 +88,9 @@ describe("Reaper", () => {
     const reaperContainerId = await getReaperContainerId();
     await stopReaper();
 
-    const { dockerode } = await dockerClient();
-
-    expect(await imageExists(dockerode, DockerImageName.fromString(imageName))).toBe(true);
+    expect(await checkImageExists(imageName)).toBe(true);
     await waitForExpect(async () => {
-      expect(await imageExists(dockerode, DockerImageName.fromString(imageName))).toBe(false);
+      expect(await checkImageExists(imageName)).toBe(false);
       expect(await getContainerIds()).not.toContain(reaperContainerId);
     }, 30_000);
   });
