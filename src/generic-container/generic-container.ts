@@ -60,15 +60,15 @@ export class GenericContainer implements TestContainer {
   }
 
   /**
-   * @deprecated Since version 9.4.0. Will be removed in version 10.0.0. Use `beforeStart` instead.
+   * @deprecated Since version 9.4.0. Will be removed in version 10.0.0. Use `beforeContainerStarted` instead.
    */
   protected preStart?(): Promise<void>;
 
-  protected beforeStart?(): Promise<void>;
+  protected beforeContainerStarted?(): Promise<void>;
 
-  protected containerIsCreated?(containerId: string): Promise<void>;
+  protected containerCreated?(containerId: string): Promise<void>;
 
-  protected containerIsStarting?(inspectResult: InspectResult, reused: boolean): Promise<void>;
+  protected containerStarting?(inspectResult: InspectResult, reused: boolean): Promise<void>;
 
   public async start(): Promise<StartedTestContainer> {
     const { dockerode, indexServerAddress } = await dockerClient();
@@ -82,8 +82,8 @@ export class GenericContainer implements TestContainer {
       await ReaperInstance.getInstance();
     }
 
-    if (this.beforeStart) {
-      await this.beforeStart();
+    if (this.beforeContainerStarted) {
+      await this.beforeContainerStarted();
     } else if (this.preStart) {
       await this.preStart();
     }
@@ -134,8 +134,8 @@ export class GenericContainer implements TestContainer {
       this.startupTimeout
     );
 
-    if (this.containerIsStarting) {
-      await this.containerIsStarting(inspectResult, true);
+    if (this.containerStarting) {
+      await this.containerStarting(inspectResult, true);
     }
 
     await waitForContainer(container, waitStrategy, host, boundPorts);
@@ -149,8 +149,8 @@ export class GenericContainer implements TestContainer {
       waitStrategy
     );
 
-    if (this.containerIsStarted) {
-      await this.containerIsStarted(startedContainer, inspectResult, true);
+    if (this.containerStarted) {
+      await this.containerStarted(startedContainer, inspectResult, true);
     } else if (this.postStart) {
       await this.postStart(startedContainer, inspectResult, boundPorts);
     }
@@ -189,8 +189,8 @@ export class GenericContainer implements TestContainer {
     }
 
     log.info(`Starting container ${this.opts.imageName} with ID: ${container.id}`);
-    if (this.containerIsCreated) {
-      await this.containerIsCreated(container.id);
+    if (this.containerCreated) {
+      await this.containerCreated(container.id);
     }
 
     await startContainer(container);
@@ -208,8 +208,8 @@ export class GenericContainer implements TestContainer {
         .on("err", (data) => containerLog.error(`${container.id}: ${data.trim()}`));
     }
 
-    if (this.containerIsStarting) {
-      await this.containerIsStarting(inspectResult, false);
+    if (this.containerStarting) {
+      await this.containerStarting(inspectResult, false);
     }
 
     await waitForContainer(container, waitStrategy, host, boundPorts);
@@ -223,8 +223,8 @@ export class GenericContainer implements TestContainer {
       waitStrategy
     );
 
-    if (this.containerIsStarted) {
-      await this.containerIsStarted(startedContainer, inspectResult, false);
+    if (this.containerStarted) {
+      await this.containerStarted(startedContainer, inspectResult, false);
     } else if (this.postStart) {
       await this.postStart(startedContainer, inspectResult, boundPorts);
     }
@@ -233,7 +233,7 @@ export class GenericContainer implements TestContainer {
   }
 
   /**
-   * @deprecated Since version 9.4.0. Will be removed in version 10.0.0. Use `containerIsStarted` instead.
+   * @deprecated Since version 9.4.0. Will be removed in version 10.0.0. Use `containerStarted` instead.
    */
   protected postStart?(
     container: StartedTestContainer,
@@ -241,7 +241,7 @@ export class GenericContainer implements TestContainer {
     boundPorts: BoundPorts
   ): Promise<void>;
 
-  protected containerIsStarted?(
+  protected containerStarted?(
     container: StartedTestContainer,
     inspectResult: InspectResult,
     reused: boolean

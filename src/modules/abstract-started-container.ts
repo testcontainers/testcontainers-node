@@ -5,23 +5,23 @@ import { Readable } from "stream";
 export class AbstractStartedContainer implements StartedTestContainer {
   constructor(protected readonly startedTestContainer: StartedTestContainer) {}
 
-  protected containerIsStopping?(): Promise<void>;
+  protected containerStopping?(): Promise<void>;
 
   public async stop(options?: Partial<StopOptions>): Promise<StoppedTestContainer> {
-    if (this.containerIsStopping) {
-      await this.containerIsStopping();
+    if (this.containerStopping) {
+      await this.containerStopping();
     }
 
     const stoppedContainer = this.startedTestContainer.stop(options);
 
-    if (this.containerIsStopped) {
-      await this.containerIsStopped();
+    if (this.containerStopped) {
+      await this.containerStopped();
     }
 
     return stoppedContainer;
   }
 
-  protected containerIsStopped?(): Promise<void>;
+  protected containerStopped?(): Promise<void>;
 
   public async restart(options?: Partial<RestartOptions>): Promise<void> {
     return this.startedTestContainer.restart(options);
