@@ -1,6 +1,17 @@
 # Configuration
 
-All possible configurations for Testcontainers are found here.
+All possible environment variable configurations for Testcontainers are found here.
+
+## Logs
+
+| Variable | Example                   | Description                |
+|----------|---------------------------|----------------------------|
+| DEBUG    | testcontainers*           | Enable all logs            |
+| DEBUG    | testcontainers            | Enable testcontainers logs |
+| DEBUG    | testcontainers:containers | Enable container logs      |
+| DEBUG    | testcontainers:exec       | Enable container exec logs |
+
+Note that you can enable multiple loggers, e.g: `DEBUG=testcontainers,testcontainers:exec`.
 
 ## Docker
 
