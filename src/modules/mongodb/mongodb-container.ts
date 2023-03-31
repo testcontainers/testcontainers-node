@@ -70,6 +70,6 @@ export class StartedMongoDBContainer extends AbstractStartedContainer {
   }
 
   public getConnectionString(): string {
-    return `mongodb://${this.getHost()}:${this.getMappedPort(MONGODB_PORT)}`;
+    return `mongodb://${this.getHost()}:${this.getMappedPort(MONGODB_PORT)}?directConnection=true`;
   }
 }
