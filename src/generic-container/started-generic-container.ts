@@ -1,10 +1,4 @@
-import {
-  ExecOptions,
-  RestartOptions,
-  StartedTestContainer,
-  StopOptions,
-  StoppedTestContainer,
-} from "../test-container";
+import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
 import Dockerode from "dockerode";
 import { ExecResult, Labels } from "../docker/types";
 import { inspectContainer, InspectResult } from "../docker/functions/container/inspect-container";
