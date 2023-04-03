@@ -11,6 +11,12 @@ export class ElasticsearchContainer extends GenericContainer {
   public override async start(): Promise<StartedElasticsearchContainer> {
     this.withExposedPorts(...(this.hasExposedPorts ? this.opts.exposedPorts : [ELASTIC_SEARCH_HTTP_PORT]))
       .withEnvironment({ "discovery.type": "single-node" })
+      .withCopyContentToContainer([
+        {
+          content: "-Xms2G\n-Xmx2G\n",
+          target: "/usr/share/elasticsearch/config/jvm.options.d/elasticsearch-default-memory-vm.options",
+        },
+      ])
       .withStartupTimeout(120_000);
 
     return new StartedElasticsearchContainer(await super.start());
