@@ -31,9 +31,7 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
   }
 
   private async waitForPort(container: Dockerode.Container, port: number, portCheck: PortCheck): Promise<void> {
-    const retryStrategy = new IntervalRetryStrategy<boolean, Error>(100);
-
-    await retryStrategy.retryUntil(
+    await new IntervalRetryStrategy<boolean, Error>(100).retryUntil(
       () => portCheck.isBound(port),
       (isBound) => isBound,
       () => {

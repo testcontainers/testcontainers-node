@@ -9,9 +9,7 @@ export class HealthCheckWaitStrategy extends AbstractWaitStrategy {
   public async waitUntilReady(container: Dockerode.Container): Promise<void> {
     log.debug(`Waiting for health check for ${container.id}`);
 
-    const retryStrategy = new IntervalRetryStrategy<HealthCheckStatus, Error>(100);
-
-    const status = await retryStrategy.retryUntil(
+    const status = await new IntervalRetryStrategy<HealthCheckStatus, Error>(100).retryUntil(
       async () => (await inspectContainer(container)).healthCheckStatus,
       (healthCheckStatus) => healthCheckStatus === "healthy" || healthCheckStatus === "unhealthy",
       () => {
