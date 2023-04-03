@@ -4,16 +4,9 @@ import Dockerode from "dockerode";
 import { log, execLog } from "../../../logger";
 import byline from "byline";
 
-type ExecContainerOptions = {
-  tty: boolean;
-  stdin: boolean;
-  detach: boolean;
-};
-
 export const execContainer = async (
   container: Dockerode.Container,
   command: string[],
-  options: ExecContainerOptions,
   shouldLog = true
 ): Promise<ExecResult> => {
   const chunks: string[] = [];
@@ -25,7 +18,7 @@ export const execContainer = async (
       AttachStderr: true,
     });
 
-    const stream = await startExec(exec, options);
+    const stream = await startExec(exec);
 
     stream.on("data", (chunk) => chunks.push(chunk));
 
@@ -47,9 +40,9 @@ export const execContainer = async (
   }
 };
 
-const startExec = async (exec: Dockerode.Exec, options: ExecContainerOptions): Promise<Readable> => {
+const startExec = async (exec: Dockerode.Exec): Promise<Readable> => {
   try {
-    const stream = await exec.start(options);
+    const stream = await exec.start({ stdin: true, Detach: false, Tty: true });
     stream.setEncoding("utf-8");
     return stream;
   } catch (err) {

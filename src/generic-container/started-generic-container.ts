@@ -115,9 +115,8 @@ export class StartedGenericContainer implements StartedTestContainer {
     return this.inspectResult.networkSettings[networkName].ipAddress;
   }
 
-  public exec(command: string[], options: Partial<ExecOptions> = {}): Promise<ExecResult> {
-    const resolvedOptions: ExecOptions = { stdin: true, detach: false, tty: true, ...options };
-    return execContainer(this.container, command, resolvedOptions);
+  public exec(command: string[]): Promise<ExecResult> {
+    return execContainer(this.container, command);
   }
 
   public logs(): Promise<Readable> {

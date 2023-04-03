@@ -14,12 +14,7 @@ export class ShellWaitStrategy extends AbstractWaitStrategy {
 
     await new IntervalRetryStrategy<number, Error>(100).retryUntil(
       async () => {
-        const { exitCode } = await execContainer(
-          container,
-          ["/bin/sh", "-c", this.command],
-          { stdin: true, detach: false, tty: true },
-          false
-        );
+        const { exitCode } = await execContainer(container, ["/bin/sh", "-c", this.command], false);
         return exitCode;
       },
       (exitCode) => exitCode === 0,
