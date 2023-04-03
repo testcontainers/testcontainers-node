@@ -1,6 +1,6 @@
 import { PortWithOptionalBinding } from "./port";
 import { PullPolicy } from "./pull-policy";
-import { WaitStrategy } from "./wait-strategy";
+import { WaitStrategy } from "./wait-strategy/wait-strategy";
 import { Readable } from "stream";
 import {
   ExecResult,

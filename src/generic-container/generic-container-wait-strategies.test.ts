@@ -1,6 +1,6 @@
 import path from "path";
 import { GenericContainer } from "./generic-container";
-import { Wait } from "../wait";
+import { Wait } from "../wait-strategy/wait";
 import { checkContainerIsHealthy, getRunningContainerNames } from "../test-helper";
 import { RandomUuid } from "../uuid";
 

@@ -1,7 +1,7 @@
 import { GenericContainer } from "../../generic-container/generic-container";
 import { StartedTestContainer } from "../../test-container";
 import { AbstractStartedContainer } from "../abstract-started-container";
-import { Wait } from "../../wait";
+import { Wait } from "../../wait-strategy/wait";
 
 const CLIENT_PORT = 4222;
 const ROUTING_PORT_FOR_CLUSTERING = 6222;

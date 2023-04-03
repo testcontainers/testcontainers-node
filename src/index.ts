@@ -10,8 +10,8 @@ export { DownedDockerComposeEnvironment } from "./docker-compose-environment/dow
 
 export { Network, StartedNetwork, StoppedNetwork } from "./network";
 
-export { Wait } from "./wait";
-export { StartupCheckStrategy, StartupStatus } from "./startup-check-strategy";
+export { Wait } from "./wait-strategy/wait";
+export { StartupCheckStrategy, StartupStatus } from "./wait-strategy/startup-check-strategy";
 export { PullPolicy, DefaultPullPolicy, AlwaysPullPolicy } from "./pull-policy";
 export { InspectResult } from "./docker/functions/container/inspect-container";
 

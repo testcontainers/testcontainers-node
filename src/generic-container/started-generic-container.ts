@@ -17,7 +17,7 @@ import { containerLogs } from "../docker/functions/container/container-logs";
 import { StoppedGenericContainer } from "./stopped-generic-container";
 import { stopContainer } from "../docker/functions/container/stop-container";
 import { restartContainer } from "../docker/functions/container/restart-container";
-import { WaitStrategy } from "../wait-strategy";
+import { WaitStrategy } from "../wait-strategy/wait-strategy";
 import { waitForContainer } from "../wait-for-container";
 import { dockerClient } from "../docker/docker-client";
 

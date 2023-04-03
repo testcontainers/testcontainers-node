@@ -1,7 +1,7 @@
 import { GenericContainer } from "../../generic-container/generic-container";
 import { AbstractStartedContainer } from "../abstract-started-container";
 import { StartedTestContainer } from "../../test-container";
-import { Wait } from "../../wait";
+import { Wait } from "../../wait-strategy/wait";
 import { ExecResult } from "../../docker/types";
 import { DockerImageName } from "../../docker-image-name";
 

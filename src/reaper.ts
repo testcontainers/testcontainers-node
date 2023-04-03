@@ -6,7 +6,7 @@ import { sessionId } from "./docker/session-id";
 import { REAPER_IMAGE } from "./images";
 import { getContainerPort, PortWithOptionalBinding } from "./port";
 import { LABEL_TESTCONTAINERS_SESSION_ID } from "./labels";
-import { Wait } from "./wait";
+import { Wait } from "./wait-strategy/wait";
 import { IntervalRetryStrategy } from "./retry-strategy";
 import { getRemoteDockerUnixSocketPath } from "./docker/get-remote-docker-unix-socket-path";
 import { dockerClient } from "./docker/docker-client";

@@ -7,7 +7,7 @@ import { DefaultPullPolicy, PullPolicy } from "../pull-policy";
 import { ReaperInstance } from "../reaper";
 import { DockerImageName } from "../docker-image-name";
 import { StartedTestContainer, TestContainer } from "../test-container";
-import { defaultWaitStrategy, WaitStrategy } from "../wait-strategy";
+import { WaitStrategy } from "../wait-strategy/wait-strategy";
 import { PortForwarderInstance } from "../port-forwarder";
 import {
   BindMount,
@@ -38,6 +38,7 @@ import { LABEL_TESTCONTAINERS_CONTAINER_HASH } from "../labels";
 import { StartedNetwork } from "../network";
 import { waitForContainer } from "../wait-for-container";
 import { initCreateContainerOptions } from "./create-container-options";
+import { defaultWaitStrategy } from "../wait-strategy/default-wait-strategy";
 
 const reusableContainerCreationLock = new AsyncLock();
 

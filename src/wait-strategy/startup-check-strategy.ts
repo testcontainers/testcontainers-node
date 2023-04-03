@@ -1,7 +1,7 @@
 import { AbstractWaitStrategy } from "./wait-strategy";
 import Dockerode from "dockerode";
-import { IntervalRetryStrategy } from "./retry-strategy";
-import { dockerClient } from "./docker/docker-client";
+import { IntervalRetryStrategy } from "../retry-strategy";
+import { dockerClient } from "../docker/docker-client";
 
 export type StartupStatus = "PENDING" | "SUCCESS" | "FAIL";
 
