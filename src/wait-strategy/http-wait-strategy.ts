@@ -1,7 +1,7 @@
 import Dockerode from "dockerode";
-import { BoundPorts } from "./bound-ports";
+import { BoundPorts } from "../bound-ports";
 import { AbstractWaitStrategy } from "./wait-strategy";
-import { IntervalRetryStrategy } from "./retry-strategy";
+import { IntervalRetryStrategy } from "../retry-strategy";
 import fetch, { Response } from "node-fetch";
 import https, { Agent } from "https";
 

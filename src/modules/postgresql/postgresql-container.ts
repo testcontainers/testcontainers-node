@@ -1,7 +1,7 @@
 import { GenericContainer } from "../../generic-container/generic-container";
 import { StartedTestContainer } from "../../test-container";
 import { AbstractStartedContainer } from "../abstract-started-container";
-import { Wait } from "../../wait";
+import { Wait } from "../../wait-strategy/wait";
 
 const POSTGRES_PORT = 5432;
 

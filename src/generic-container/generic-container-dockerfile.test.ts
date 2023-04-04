@@ -1,7 +1,7 @@
 import path from "path";
 import { GenericContainer } from "./generic-container";
 import { AlwaysPullPolicy } from "../pull-policy";
-import { Wait } from "../wait";
+import { Wait } from "../wait-strategy/wait";
 import { checkContainerIsHealthy, getEvents } from "../test-helper";
 
 describe("GenericContainer Dockerfile", () => {

@@ -3,7 +3,7 @@ import { BoundPorts } from "./bound-ports";
 import { log } from "./logger";
 import { stopContainer } from "./docker/functions/container/stop-container";
 import { removeContainer } from "./docker/functions/container/remove-container";
-import { WaitStrategy } from "./wait-strategy";
+import { WaitStrategy } from "./wait-strategy/wait-strategy";
 
 export const waitForContainer = async (
   container: Dockerode.Container,

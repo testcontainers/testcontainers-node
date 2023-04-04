@@ -17,7 +17,7 @@ The default wait strategy used by Testcontainers. It will wait up to 60 seconds 
 ```javascript
 const { GenericContainer } = require("testcontainers");
 
-const container = await new GenericContainer("redis")
+const container = await new GenericContainer("alpine")
   .withExposedPorts(6379)
   .start();
 ```
@@ -29,7 +29,7 @@ Wait until the container has logged a message:
 ```javascript
 const { GenericContainer, Wait } = require("testcontainers");
 
-const container = await new GenericContainer("redis")
+const container = await new GenericContainer("alpine")
   .withWaitStrategy(Wait.forLogMessage("Ready to accept connections"))
   .start();
 ```
@@ -39,7 +39,7 @@ With a regular expression:
 ```javascript
 const { GenericContainer, Wait } = require("testcontainers");
 
-const container = await new GenericContainer("redis")
+const container = await new GenericContainer("alpine")
   .withWaitStrategy(Wait.forLogMessage(/Listening on port \d+/))
   .start();
 ```
@@ -49,7 +49,7 @@ Wait until the container has logged a message a number of times:
 ```javascript
 const { GenericContainer, Wait } = require("testcontainers");
 
-const container = await new GenericContainer("redis")
+const container = await new GenericContainer("alpine")
   .withWaitStrategy(Wait.forLogMessage("Listening on port 8080", 2))
   .start();
 ```
@@ -61,7 +61,7 @@ Wait until the container's health check is successful:
 ```javascript
 const { GenericContainer, Wait } = require("testcontainers");
 
-const container = await new GenericContainer("redis")
+const container = await new GenericContainer("alpine")
   .withWaitStrategy(Wait.forHealthCheck())
   .start();
 ```
@@ -71,7 +71,7 @@ Define your own health check:
 ```javascript
 const { GenericContainer, Wait } = require("testcontainers");
 
-const container = await new GenericContainer("redis")
+const container = await new GenericContainer("alpine")
   .withHealthCheck({
     test: ["CMD-SHELL", "curl -f http://localhost || exit 1"],
     interval: 1000,
@@ -151,6 +151,18 @@ const container = await new GenericContainer("redis")
   .insecureTls())
 ```
 
+## Shell command
+
+Wait until a shell command returns a successful exit code:
+
+```javascript
+const { GenericContainer, Wait } = require("testcontainers");
+
+const container = await new GenericContainer("alpine")
+  .withWaitStrategy(Wait.forSuccessfulCommand("stat /tmp/app.lock"))
+  .start();
+```
+
 ## Other startup strategies
 
 If these options do not meet your requirements, you can subclass `StartupCheckStrategy` and use `Dockerode`, which is the underlying Docker client used by Testcontainers:
@@ -169,7 +181,7 @@ class ReadyAfterDelayWaitStrategy extends StartupCheckStrategy {
   }
 }
 
-const container = await new GenericContainer("redis")
+const container = await new GenericContainer("alpine")
   .withWaitStrategy(new ReadyAfterDelayWaitStrategy())
   .start();
 ```

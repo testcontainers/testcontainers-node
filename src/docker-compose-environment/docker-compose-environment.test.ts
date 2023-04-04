@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
 import path from "path";
 import { DockerComposeEnvironment } from "./docker-compose-environment";
-import { Wait } from "../wait";
+import { Wait } from "../wait-strategy/wait";
 import {
   checkEnvironmentContainerIsHealthy,
   composeContainerName,

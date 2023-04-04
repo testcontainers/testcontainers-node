@@ -1,10 +1,4 @@
-import {
-  ExecOptions,
-  RestartOptions,
-  StartedTestContainer,
-  StopOptions,
-  StoppedTestContainer,
-} from "../test-container";
+import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
 import Dockerode from "dockerode";
 import { ExecResult, Labels } from "../docker/types";
 import { inspectContainer, InspectResult } from "../docker/functions/container/inspect-container";
@@ -17,7 +11,7 @@ import { containerLogs } from "../docker/functions/container/container-logs";
 import { StoppedGenericContainer } from "./stopped-generic-container";
 import { stopContainer } from "../docker/functions/container/stop-container";
 import { restartContainer } from "../docker/functions/container/restart-container";
-import { WaitStrategy } from "../wait-strategy";
+import { WaitStrategy } from "../wait-strategy/wait-strategy";
 import { waitForContainer } from "../wait-for-container";
 import { dockerClient } from "../docker/docker-client";
 
@@ -115,9 +109,8 @@ export class StartedGenericContainer implements StartedTestContainer {
     return this.inspectResult.networkSettings[networkName].ipAddress;
   }
 
-  public exec(command: string[], options: Partial<ExecOptions> = {}): Promise<ExecResult> {
-    const resolvedOptions: ExecOptions = { stdin: true, detach: false, tty: true, ...options };
-    return execContainer(this.container, command, resolvedOptions);
+  public exec(command: string[]): Promise<ExecResult> {
+    return execContainer(this.container, command);
   }
 
   public logs(): Promise<Readable> {
