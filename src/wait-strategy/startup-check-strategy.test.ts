@@ -1,4 +1,4 @@
-import { GenericContainer } from "./generic-container/generic-container";
+import { GenericContainer } from "../generic-container/generic-container";
 import { StartupCheckStrategy, StartupStatus } from "./startup-check-strategy";
 
 jest.setTimeout(180_000);

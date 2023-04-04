@@ -3,7 +3,7 @@ import { BoundPorts } from "../bound-ports";
 import { resolveContainerName } from "../docker-compose/functions/container-name-resolver";
 import { StartedGenericContainer } from "../generic-container/started-generic-container";
 import { containerLog, log } from "../logger";
-import { defaultWaitStrategy, WaitStrategy } from "../wait-strategy";
+import { WaitStrategy } from "../wait-strategy/wait-strategy";
 import { ReaperInstance } from "../reaper";
 import { RandomUuid, Uuid } from "../uuid";
 import { Environment } from "../docker/types";
@@ -16,6 +16,7 @@ import { StartedDockerComposeEnvironment } from "./started-docker-compose-enviro
 import { dockerComposeDown } from "../docker-compose/functions/docker-compose-down";
 import { dockerComposeUp } from "../docker-compose/functions/docker-compose-up";
 import { waitForContainer } from "../wait-for-container";
+import { defaultWaitStrategy } from "../wait-strategy/default-wait-strategy";
 
 export class DockerComposeEnvironment {
   private readonly composeFilePath: string;

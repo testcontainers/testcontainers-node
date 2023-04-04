@@ -6,18 +6,11 @@ import byline from "byline";
 import { demuxStream } from "../demux-stream";
 import { Provider } from "../../docker-client";
 
-type ExecContainerOptions = {
-  tty: boolean;
-  stdin: boolean;
-  detach: boolean;
-};
-
 export const execContainer = async (
   dockerode: Dockerode,
   provider: Provider,
   container: Dockerode.Container,
   command: string[],
-  options: ExecContainerOptions,
   shouldLog = true
 ): Promise<ExecResult> => {
   const chunks: string[] = [];
@@ -29,7 +22,7 @@ export const execContainer = async (
       AttachStderr: true,
     });
 
-    const stream = await startExec(dockerode, provider, exec, options);
+    const stream = await startExec(dockerode, provider, exec);
 
     stream.on("data", (chunk) => chunks.push(chunk));
 
@@ -51,14 +44,9 @@ export const execContainer = async (
   }
 };
 
-const startExec = async (
-  dockerode: Dockerode,
-  provider: Provider,
-  exec: Dockerode.Exec,
-  options: ExecContainerOptions
-): Promise<Readable> => {
+const startExec = async (dockerode: Dockerode, provider: Provider, exec: Dockerode.Exec): Promise<Readable> => {
   try {
-    const stream = await exec.start(options);
+    const stream = await exec.start({ stdin: true, Detach: false, Tty: true });
     if (provider === "podman") {
       return demuxStream(dockerode, stream);
     } else {

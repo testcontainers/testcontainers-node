@@ -316,22 +316,22 @@ import {
 } from "testcontainers";
 
 class CustomContainer extends GenericContainer {
-  protected override async beforeStart(): Promise<void> {
+  protected override async beforeContainerStarted(): Promise<void> {
     // ...
   }
   
-  protected override async containerIsCreated(containerId: string): Promise<void> {
+  protected override async containerCreated(containerId: string): Promise<void> {
     // ...
   }
   
-  protected override async containerIsStarting(
+  protected override async containerStarting(
     inspectResult: InspectResult,
     reused: boolean
   ): Promise<void> {
     // ...
   }
   
-  protected override async containerIsStarted(
+  protected override async containerStarted(
     container: StartedTestContainer,
     inspectResult: InspectResult,
     reused: boolean
@@ -345,11 +345,11 @@ class CustomContainer extends GenericContainer {
 }
 
 class CustomStartedContainer extends AbstractStartedContainer {
-  protected override async containerIsStopping(): Promise<void> {
+  protected override async containerStopping(): Promise<void> {
     // ...
   }
   
-  protected override async containerIsStopped(): Promise<void> {
+  protected override async containerStopped(): Promise<void> {
     // ...
   }
 }

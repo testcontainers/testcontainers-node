@@ -1,7 +1,7 @@
 import { GenericContainer } from "../../generic-container/generic-container";
 import { AbstractStartedContainer } from "../abstract-started-container";
 import { StartedTestContainer } from "../../test-container";
-import { Wait } from "../../wait";
+import { Wait } from "../../wait-strategy/wait";
 import { ExecResult } from "../../docker/types";
 import { DockerImageName } from "../../docker-image-name";
 
@@ -22,7 +22,7 @@ export class MongoDBContainer extends GenericContainer {
     return new StartedMongoDBContainer(await super.start());
   }
 
-  protected override async containerIsStarted(startedTestContainer: StartedTestContainer): Promise<void> {
+  protected override async containerStarted(startedTestContainer: StartedTestContainer): Promise<void> {
     await this.initReplicaSet(startedTestContainer);
   }
 

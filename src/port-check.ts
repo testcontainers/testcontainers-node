@@ -51,16 +51,7 @@ export class InternalPortCheck implements PortCheck {
     ];
 
     const commandResults = await Promise.all(
-      commands.map((command) =>
-        execContainer(
-          this.dockerode,
-          this.provider,
-          this.container,
-          command,
-          { stdin: true, detach: false, tty: true },
-          false
-        )
-      )
+      commands.map((command) => execContainer(this.dockerode, this.provider, this.container, command, false))
     );
     const isBound = commandResults.some((result) => result.exitCode === 0);
 
