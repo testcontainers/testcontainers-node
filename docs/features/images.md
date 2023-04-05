@@ -27,6 +27,23 @@ const container = await GenericContainer
   .build();
 ```
 
+#### Custom pull policy
+
+```typescript
+const { GenericContainer, ImagePullPolicy } = require("testcontainers");
+
+class CustomPullPolicy implements ImagePullPolicy {
+  public shouldPull(): boolean {
+    return true;
+  }
+}
+
+const container = await GenericContainer
+  .fromDockerfile("/path/to/build-context")
+  .withPullPolicy(new CustomPullPolicy())
+  .build();
+```
+
 ### With build arguments
 
 ```javascript

@@ -28,6 +28,22 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+#### Custom pull policy
+
+```typescript
+const { GenericContainer, ImagePullPolicy } = require("testcontainers");
+
+class CustomPullPolicy implements ImagePullPolicy {
+  public shouldPull(): boolean {
+    return true;
+  }
+}
+
+const container = await new GenericContainer("alpine")
+  .withPullPolicy(new CustomPullPolicy())
+  .start();
+```
+
 ### With a command
 
 ```javascript
