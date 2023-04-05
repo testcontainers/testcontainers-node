@@ -60,11 +60,6 @@ export class GenericContainer implements TestContainer {
     this.opts = initCreateContainerOptions(imageName, imageName.isReaper());
   }
 
-  /**
-   * @deprecated Since version 9.4.0. Will be removed in version 10.0.0. Use `beforeContainerStarted` instead.
-   */
-  protected preStart?(): Promise<void>;
-
   protected beforeContainerStarted?(): Promise<void>;
 
   protected containerCreated?(containerId: string): Promise<void>;
@@ -85,8 +80,6 @@ export class GenericContainer implements TestContainer {
 
     if (this.beforeContainerStarted) {
       await this.beforeContainerStarted();
-    } else if (this.preStart) {
-      await this.preStart();
     }
 
     if (!this.opts.imageName.isHelperContainer() && PortForwarderInstance.isRunning()) {
@@ -152,8 +145,6 @@ export class GenericContainer implements TestContainer {
 
     if (this.containerStarted) {
       await this.containerStarted(startedContainer, inspectResult, true);
-    } else if (this.postStart) {
-      await this.postStart(startedContainer, inspectResult, boundPorts);
     }
 
     return startedContainer;
@@ -226,21 +217,10 @@ export class GenericContainer implements TestContainer {
 
     if (this.containerStarted) {
       await this.containerStarted(startedContainer, inspectResult, false);
-    } else if (this.postStart) {
-      await this.postStart(startedContainer, inspectResult, boundPorts);
     }
 
     return startedContainer;
   }
-
-  /**
-   * @deprecated Since version 9.4.0. Will be removed in version 10.0.0. Use `containerStarted` instead.
-   */
-  protected postStart?(
-    container: StartedTestContainer,
-    inspectResult: InspectResult,
-    boundPorts: BoundPorts
-  ): Promise<void>;
 
   protected containerStarted?(
     container: StartedTestContainer,
