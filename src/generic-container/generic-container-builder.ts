@@ -1,5 +1,5 @@
 import { AuthConfig, BuildArgs, RegistryConfig } from "../docker/types";
-import { DefaultPullPolicy, PullPolicy } from "../pull-policy";
+import { ImagePullPolicy, PullPolicy } from "../pull-policy";
 import { RandomUuid, Uuid } from "../uuid";
 import { ReaperInstance } from "../reaper";
 import { DockerImageName } from "../docker-image-name";
@@ -14,7 +14,7 @@ import { imageExists } from "../docker/functions/image/image-exists";
 
 export class GenericContainerBuilder {
   private buildArgs: BuildArgs = {};
-  private pullPolicy: PullPolicy = new DefaultPullPolicy();
+  private pullPolicy: ImagePullPolicy = PullPolicy.defaultPolicy();
   private cache = true;
 
   constructor(
@@ -28,7 +28,7 @@ export class GenericContainerBuilder {
     return this;
   }
 
-  public withPullPolicy(pullPolicy: PullPolicy): this {
+  public withPullPolicy(pullPolicy: ImagePullPolicy): this {
     this.pullPolicy = pullPolicy;
     return this;
   }

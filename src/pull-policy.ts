@@ -1,15 +1,25 @@
-export interface PullPolicy {
+export interface ImagePullPolicy {
   shouldPull(): boolean;
 }
 
-export class DefaultPullPolicy implements PullPolicy {
+class DefaultPullPolicy implements ImagePullPolicy {
   public shouldPull(): boolean {
     return false;
   }
 }
 
-export class AlwaysPullPolicy implements PullPolicy {
+class AlwaysPullPolicy implements ImagePullPolicy {
   public shouldPull(): boolean {
     return true;
+  }
+}
+
+export class PullPolicy {
+  public static defaultPolicy(): ImagePullPolicy {
+    return new DefaultPullPolicy();
+  }
+
+  public static alwaysPull(): ImagePullPolicy {
+    return new AlwaysPullPolicy();
   }
 }

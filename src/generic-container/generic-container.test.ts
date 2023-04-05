@@ -2,7 +2,7 @@ import fetch from "node-fetch";
 import path from "path";
 import getPort from "get-port";
 import { GenericContainer } from "./generic-container";
-import { AlwaysPullPolicy } from "../pull-policy";
+import { PullPolicy } from "../pull-policy";
 import { checkContainerIsHealthy, getEvents } from "../test-helper";
 import { getContainerById } from "../docker/functions/container/get-container";
 
@@ -235,7 +235,7 @@ describe("GenericContainer", () => {
     });
 
     const container2 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
-      .withPullPolicy(new AlwaysPullPolicy())
+      .withPullPolicy(PullPolicy.alwaysPull())
       .withExposedPorts(8080)
       .start();
 

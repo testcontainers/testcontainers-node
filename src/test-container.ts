@@ -1,5 +1,5 @@
 import { PortWithOptionalBinding } from "./port";
-import { PullPolicy } from "./pull-policy";
+import { ImagePullPolicy } from "./pull-policy";
 import { WaitStrategy } from "./wait-strategy/wait-strategy";
 import { Readable } from "stream";
 import {
@@ -53,7 +53,7 @@ export interface TestContainer {
 
   withUser(user: string): this;
 
-  withPullPolicy(pullPolicy: PullPolicy): this;
+  withPullPolicy(pullPolicy: ImagePullPolicy): this;
 
   withReuse(): this;
 

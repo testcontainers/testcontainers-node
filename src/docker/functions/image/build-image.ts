@@ -1,5 +1,5 @@
 import { DockerImageName } from "../../../docker-image-name";
-import { PullPolicy } from "../../../pull-policy";
+import { ImagePullPolicy } from "../../../pull-policy";
 import { log } from "../../../logger";
 import tar from "tar-fs";
 import byline from "byline";
@@ -16,7 +16,7 @@ export type BuildImageOptions = {
   context: string;
   dockerfileName: string;
   buildArgs: BuildArgs;
-  pullPolicy: PullPolicy;
+  pullPolicy: ImagePullPolicy;
   registryConfig: RegistryConfig;
   cache: boolean;
 };

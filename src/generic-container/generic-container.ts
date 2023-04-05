@@ -3,7 +3,7 @@ import AsyncLock from "async-lock";
 import { BoundPorts } from "../bound-ports";
 import { containerLog, log } from "../logger";
 import { PortWithOptionalBinding } from "../port";
-import { DefaultPullPolicy, PullPolicy } from "../pull-policy";
+import { ImagePullPolicy, PullPolicy } from "../pull-policy";
 import { ReaperInstance } from "../reaper";
 import { DockerImageName } from "../docker-image-name";
 import { StartedTestContainer, TestContainer } from "../test-container";
@@ -53,7 +53,7 @@ export class GenericContainer implements TestContainer {
   protected tarToCopy?: archiver.Archiver;
   protected networkMode?: string;
   protected networkAliases: string[] = [];
-  protected pullPolicy: PullPolicy = new DefaultPullPolicy();
+  protected pullPolicy: ImagePullPolicy = PullPolicy.defaultPolicy();
 
   constructor(readonly image: string) {
     const imageName = DockerImageName.fromString(image);
@@ -362,7 +362,7 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
-  public withPullPolicy(pullPolicy: PullPolicy): this {
+  public withPullPolicy(pullPolicy: ImagePullPolicy): this {
     this.pullPolicy = pullPolicy;
     return this;
   }

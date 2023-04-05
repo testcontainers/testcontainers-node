@@ -1,6 +1,6 @@
 import path from "path";
 import { GenericContainer } from "./generic-container";
-import { AlwaysPullPolicy } from "../pull-policy";
+import { PullPolicy } from "../pull-policy";
 import { Wait } from "../wait-strategy/wait";
 import { checkContainerIsHealthy, getEvents } from "../test-helper";
 
@@ -23,7 +23,7 @@ describe("GenericContainer Dockerfile", () => {
   if (!process.env["CI_PODMAN"]) {
     it("should use pull policy", async () => {
       const containerSpec = GenericContainer.fromDockerfile(path.resolve(fixtures, "docker")).withPullPolicy(
-        new AlwaysPullPolicy()
+        PullPolicy.alwaysPull()
       );
       await containerSpec.build();
 
