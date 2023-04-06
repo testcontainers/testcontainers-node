@@ -38,7 +38,7 @@ import { LABEL_TESTCONTAINERS_CONTAINER_HASH } from "../labels";
 import { StartedNetwork } from "../network";
 import { waitForContainer } from "../wait-for-container";
 import { initCreateContainerOptions } from "./create-container-options";
-import { defaultWaitStrategy } from "../wait-strategy/default-wait-strategy";
+import { Wait } from "../wait-strategy/wait";
 
 const reusableContainerCreationLock = new AsyncLock();
 
@@ -128,18 +128,16 @@ export class GenericContainer implements TestContainer {
   }
 
   private async reuseContainer(container: Dockerode.Container) {
-    const { dockerode, provider, host, hostIps } = await dockerClient();
+    const { host, hostIps } = await dockerClient();
     const inspectResult = await inspectContainer(container);
     const boundPorts = BoundPorts.fromInspectResult(hostIps, inspectResult).filter(this.opts.exposedPorts);
-    const waitStrategy = (
-      this.waitStrategy ?? defaultWaitStrategy(host, dockerode, provider, container)
-    ).withStartupTimeout(this.startupTimeout);
+    const waitStrategy = (this.waitStrategy ?? Wait.forListeningPorts()).withStartupTimeout(this.startupTimeout);
 
     if (this.containerStarting) {
       await this.containerStarting(inspectResult, true);
     }
 
-    await waitForContainer(container, waitStrategy, host, boundPorts);
+    await waitForContainer(container, waitStrategy, boundPorts);
 
     const startedContainer = new StartedGenericContainer(
       container,
@@ -196,12 +194,10 @@ export class GenericContainer implements TestContainer {
 
     await startContainer(container);
 
-    const { dockerode, provider, host, hostIps } = await dockerClient();
+    const { host, hostIps } = await dockerClient();
     const inspectResult = await inspectContainer(container);
     const boundPorts = BoundPorts.fromInspectResult(hostIps, inspectResult).filter(this.opts.exposedPorts);
-    const waitStrategy = (
-      this.waitStrategy ?? defaultWaitStrategy(host, dockerode, provider, container)
-    ).withStartupTimeout(this.startupTimeout);
+    const waitStrategy = (this.waitStrategy ?? Wait.forListeningPorts()).withStartupTimeout(this.startupTimeout);
 
     if (containerLog.enabled()) {
       (await containerLogs(container))
@@ -213,7 +209,7 @@ export class GenericContainer implements TestContainer {
       await this.containerStarting(inspectResult, false);
     }
 
-    await waitForContainer(container, waitStrategy, host, boundPorts);
+    await waitForContainer(container, waitStrategy, boundPorts);
 
     const startedContainer = new StartedGenericContainer(
       container,

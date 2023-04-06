@@ -16,7 +16,7 @@ import { StartedDockerComposeEnvironment } from "./started-docker-compose-enviro
 import { dockerComposeDown } from "../docker-compose/functions/docker-compose-down";
 import { dockerComposeUp } from "../docker-compose/functions/docker-compose-up";
 import { waitForContainer } from "../wait-for-container";
-import { defaultWaitStrategy } from "../wait-strategy/default-wait-strategy";
+import { Wait } from "../wait-strategy/wait";
 
 export class DockerComposeEnvironment {
   private readonly composeFilePath: string;
@@ -120,13 +120,11 @@ export class DockerComposeEnvironment {
           const container = await getContainerById(startedContainer.Id);
           const containerName = resolveContainerName(this.projectName, startedContainer.Names[0]);
 
-          const { dockerode, provider, host, hostIps } = await dockerClient();
+          const { host, hostIps } = await dockerClient();
           const inspectResult = await inspectContainer(container);
           const boundPorts = BoundPorts.fromInspectResult(hostIps, inspectResult);
           const waitStrategy = (
-            this.waitStrategy[containerName]
-              ? this.waitStrategy[containerName]
-              : defaultWaitStrategy(host, dockerode, provider, container)
+            this.waitStrategy[containerName] ? this.waitStrategy[containerName] : Wait.forListeningPorts()
           ).withStartupTimeout(this.startupTimeout);
 
           if (containerLog.enabled()) {
@@ -137,7 +135,7 @@ export class DockerComposeEnvironment {
 
           try {
             log.info(`Waiting for container ${containerName} to be ready`);
-            await waitForContainer(container, waitStrategy, host, boundPorts);
+            await waitForContainer(container, waitStrategy, boundPorts);
             log.info(`Container ${containerName} is ready`);
           } catch (err) {
             log.error(`Container ${containerName} failed to be ready: ${err}`);
