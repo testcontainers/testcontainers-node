@@ -84,8 +84,14 @@ describe("DockerComposeEnvironment", () => {
 
   it("should support log message wait strategy", async () => {
     const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml")
-      .withWaitStrategy(await composeContainerName("container"), Wait.forLogMessage("Listening on port 8080"))
-      .withWaitStrategy(await composeContainerName("another_container"), Wait.forLogMessage("Listening on port 8080"))
+      .withWaitStrategy(
+        await composeContainerName("container"),
+        Wait.forAll([Wait.forListeningPorts(), Wait.forLogMessage("Listening on port 8080")])
+      )
+      .withWaitStrategy(
+        await composeContainerName("another_container"),
+        Wait.forAll([Wait.forListeningPorts(), Wait.forLogMessage("Listening on port 8080")])
+      )
       .up();
 
     await Promise.all(
@@ -108,6 +114,19 @@ describe("DockerComposeEnvironment", () => {
     expect(await getRunningContainerNames()).not.toContain("custom_container_name");
   });
 
+  it("should support health check wait strategy", async () => {
+    const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-healthcheck.yml")
+      .withWaitStrategy(
+        await composeContainerName("container"),
+        Wait.forAll([Wait.forListeningPorts(), Wait.forHealthCheck()])
+      )
+      .up();
+
+    await checkEnvironmentContainerIsHealthy(startedEnvironment, await composeContainerName("container"));
+
+    await startedEnvironment.down();
+  });
+
   it("should stop the container when the health check wait strategy times out", async () => {
     await expect(
       new DockerComposeEnvironment(fixtures, "docker-compose-with-healthcheck.yml")
@@ -117,16 +136,6 @@ describe("DockerComposeEnvironment", () => {
     ).rejects.toThrowError(`Health check not healthy after 0ms`);
 
     expect(await getRunningContainerNames()).not.toContain("container_1");
-  });
-
-  it("should support health check wait strategy", async () => {
-    const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-healthcheck.yml")
-      .withWaitStrategy(await composeContainerName("container"), Wait.forHealthCheck())
-      .up();
-
-    await checkEnvironmentContainerIsHealthy(startedEnvironment, await composeContainerName("container"));
-
-    await startedEnvironment.down();
   });
 
   it("should remove volumes when downing an environment", async () => {

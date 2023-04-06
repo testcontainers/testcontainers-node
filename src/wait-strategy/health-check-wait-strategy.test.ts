@@ -14,7 +14,7 @@ describe("HealthCheckWaitStrategy", () => {
     const customGenericContainer = await GenericContainer.fromDockerfile(context).build();
     const container = await customGenericContainer
       .withExposedPorts(8080)
-      .withWaitStrategy(Wait.forHealthCheck())
+      .withWaitStrategy(Wait.forAll([Wait.forListeningPorts(), Wait.forHealthCheck()]))
       .start();
 
     await checkContainerIsHealthy(container);
@@ -32,7 +32,7 @@ describe("HealthCheckWaitStrategy", () => {
         retries: 5,
         startPeriod: 1000,
       })
-      .withWaitStrategy(Wait.forHealthCheck())
+      .withWaitStrategy(Wait.forAll([Wait.forListeningPorts(), Wait.forHealthCheck()]))
       .start();
 
     await checkContainerIsHealthy(container);
@@ -84,7 +84,7 @@ describe("HealthCheckWaitStrategy", () => {
         retries: 5,
         startPeriod: 1000,
       })
-      .withWaitStrategy(Wait.forHealthCheck())
+      .withWaitStrategy(Wait.forAll([Wait.forListeningPorts(), Wait.forHealthCheck()]))
       .start();
 
     await checkContainerIsHealthy(container);

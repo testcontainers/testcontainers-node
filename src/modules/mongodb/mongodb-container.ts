@@ -17,7 +17,7 @@ export class MongoDBContainer extends GenericContainer {
   public override async start(): Promise<StartedMongoDBContainer> {
     this.withExposedPorts(MONGODB_PORT)
       .withCommand(["--replSet", "rs0"])
-      .withWaitStrategy(Wait.forLogMessage(/.*waiting for connections.*/i))
+      .withWaitStrategy(Wait.forAll([Wait.forListeningPorts(), Wait.forLogMessage(/.*waiting for connections.*/i)]))
       .withStartupTimeout(120_000);
     return new StartedMongoDBContainer(await super.start());
   }

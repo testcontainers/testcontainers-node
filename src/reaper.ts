@@ -100,7 +100,7 @@ export class ReaperInstance {
           target: "/var/run/docker.sock",
         },
       ])
-      .withWaitStrategy(Wait.forLogMessage(/.+ Started!/));
+      .withWaitStrategy(Wait.forAll([Wait.forListeningPorts(), Wait.forLogMessage(/.+ Started!/)]));
 
     if (this.isPrivileged()) {
       container.withPrivilegedMode();
