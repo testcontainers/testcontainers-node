@@ -9,7 +9,7 @@ describe("LogWaitStrategy", () => {
   it("should wait for log", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
-      .withWaitStrategy(Wait.forLogMessage("Listening on port 8080"))
+      .withWaitStrategy(Wait.forAll([Wait.forListeningPorts(), Wait.forLogMessage("Listening on port 8080")]))
       .start();
 
     await checkContainerIsHealthy(container);
@@ -20,7 +20,7 @@ describe("LogWaitStrategy", () => {
   it("should wait for log with regex", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
-      .withWaitStrategy(Wait.forLogMessage(/Listening on port \d+/))
+      .withWaitStrategy(Wait.forAll([Wait.forListeningPorts(), Wait.forLogMessage(/Listening on port \d+/)]))
       .start();
 
     await checkContainerIsHealthy(container);
