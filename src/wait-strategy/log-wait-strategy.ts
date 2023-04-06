@@ -12,12 +12,7 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
     super();
   }
 
-  public async waitUntilReady(
-    container: Dockerode.Container,
-    host: string,
-    boundPorts: BoundPorts,
-    startTime?: Date
-  ): Promise<void> {
+  public async waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts, startTime?: Date): Promise<void> {
     log.debug(`Waiting for log message "${this.message}" for ${container.id}`);
 
     const stream = await containerLogs(container, { since: startTime });
