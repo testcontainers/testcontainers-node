@@ -3,6 +3,7 @@ import { StartedTestContainer } from "../../test-container";
 import { AbstractStartedContainer } from "../abstract-started-container";
 
 const MYSQL_PORT = 3306;
+const MYSQL_IMAGE = process.env.arch === "m1" ? "arm64v8/mysql:8-oracle" : "mysql:8.0.31";
 
 export class MySqlContainer extends GenericContainer {
   private database = "test";
@@ -10,7 +11,7 @@ export class MySqlContainer extends GenericContainer {
   private userPassword = "test";
   private rootPassword = "test";
 
-  constructor(image = "mysql:8.0.31") {
+  constructor(image = MYSQL_IMAGE) {
     super(image);
   }
 
