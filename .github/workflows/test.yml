@@ -106,7 +106,7 @@ jobs:
         uses: actions/checkout@v3
       - name: Start Colima
         run: |
-          brew install docker
+          brew install docker docker-compose
           colima start --runtime docker
           colima status
       - name: Set environment
