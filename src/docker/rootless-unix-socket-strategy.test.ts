@@ -37,8 +37,19 @@ describe("RootlessUnixSocketStrategy", () => {
     expect((await strategy.getDockerClient()).uri).toEqual(`unix://${socketPath}`);
   });
 
-  it("should return Docker client for socket from home dir", async () => {
+  it("should return Docker client for socket from home run dir", async () => {
     const socketPath = path.join(os.homedir(), ".docker", "run", "docker.sock");
+    mockExistsSync.mockImplementation((file) => file === socketPath);
+
+    const strategy = new RootlessUnixSocketStrategy("linux", {});
+    await strategy.init();
+
+    expect(strategy.isApplicable()).toBe(true);
+    expect((await strategy.getDockerClient()).uri).toEqual(`unix://${socketPath}`);
+  });
+
+  it("should return Docker client for socket from home desktop dir", async () => {
+    const socketPath = path.join(os.homedir(), ".docker", "desktop", "docker.sock");
     mockExistsSync.mockImplementation((file) => file === socketPath);
 
     const strategy = new RootlessUnixSocketStrategy("linux", {});
