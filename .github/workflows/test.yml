@@ -104,11 +104,10 @@ jobs:
     steps:
       - name: Code checkout
         uses: actions/checkout@v3
-      - name: Install nix
-        run: curl -L https://nixos.org/nix/install | sh -s -- --daemon
       - name: Setup Colima
         run: |
-          nix-env -iA nixpkgs.colima
+          curl -L https://nixos.org/nix/install | sh -s -- --daemon
+          bash -lc "nix-env -iA nixpkgs.colima"
           colima start --runtime docker
           colima status
       - name: Set environment
