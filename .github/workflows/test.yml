@@ -107,9 +107,11 @@ jobs:
       - name: Setup Colima
         run: |
           curl -L https://nixos.org/nix/install | sh -s -- --daemon
-          bash -lc "nix-env -iA nixpkgs.colima"
-          colima start --runtime docker
-          colima status
+          bash -lc 'cat <<EOF
+            nix-env -iA nixpkgs.colima
+            colima start --runtime docker
+            colima status
+          EOF'
       - name: Set environment
         run: |
           echo "DOCKER_HOST=unix://${HOME}/.colima/default/docker.sock" >> $GITHUB_ENV
