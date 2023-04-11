@@ -4,8 +4,6 @@ import { AbstractStartedContainer } from "../abstract-started-container";
 import { Wait } from "../../wait-strategy/wait";
 
 const CLIENT_PORT = 4222;
-const ROUTING_PORT_FOR_CLUSTERING = 6222;
-const HTTP_MANAGEMENT_PORT = 8222;
 
 const USER_ARGUMENT_KEY = "--user";
 const PASS_ARGUMENT_KEY = "--pass";
