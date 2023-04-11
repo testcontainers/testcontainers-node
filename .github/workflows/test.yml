@@ -107,6 +107,7 @@ jobs:
       - name: Setup Colima
         run: |
           curl -L https://nixos.org/nix/install | sh -s -- --daemon
+          source /etc/bash.bashrc
           nix-env -iA nixpkgs.colima
           colima start --runtime docker
           colima status
