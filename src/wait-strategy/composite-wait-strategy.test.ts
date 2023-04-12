@@ -57,11 +57,12 @@ test("should enforce startup timeout", async () => {
 });
 
 class FakeWaitStrategy extends AbstractWaitStrategy {
-  constructor(private opts: { resolves: boolean; error?: Error }) {
+  constructor(private opts: { resolves: boolean; error?: Error; delay?: number }) {
     super();
   }
 
-  waitUntilReady(): Promise<void> {
+  async waitUntilReady(): Promise<void> {
+    await new Promise((resolve) => setTimeout(resolve, this.opts.delay ?? 0));
     if (this.opts.resolves) {
       return Promise.resolve();
     } else {
