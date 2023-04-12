@@ -47,8 +47,8 @@ test("should override startup timeouts when one is provided", async () => {
 
 test("should enforce startup timeout", async () => {
   const waitStrategy = new CompositeWaitStrategy([
-    new FakeWaitStrategy({ resolves: true }).withStartupTimeout(1000),
-    new FakeWaitStrategy({ resolves: true }).withStartupTimeout(1000),
+    new FakeWaitStrategy({ resolves: true, delay: 1000 }),
+    new FakeWaitStrategy({ resolves: true, delay: 1000 }),
   ]).withStartupTimeout(0);
 
   await expect(waitStrategy.waitUntilReady(fakeContainer, fakeBoundPorts, fakeStartTime)).rejects.toThrowError(
@@ -62,7 +62,9 @@ class FakeWaitStrategy extends AbstractWaitStrategy {
   }
 
   async waitUntilReady(): Promise<void> {
-    await new Promise((resolve) => setTimeout(resolve, this.opts.delay ?? 0));
+    if (this.opts.delay) {
+      await new Promise((resolve) => setTimeout(resolve, this.opts.delay));
+    }
     if (this.opts.resolves) {
       return Promise.resolve();
     } else {
