@@ -10,7 +10,7 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
-## Host port
+## Listening ports
 
 The default wait strategy used by Testcontainers. It will wait up to 60 seconds for the container's mapped network ports to be bound.
 
@@ -19,6 +19,17 @@ const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
   .withExposedPorts(6379)
+  .start();
+```
+
+It can be set explicitly but is not required:
+
+```javascript
+const { GenericContainer, Wait } = require("testcontainers");
+
+const container = await new GenericContainer("alpine")
+  .withExposedPorts(6379)
+  .withWaitStrategy(Wait.forListeningPorts())
   .start();
 ```
 
@@ -161,6 +172,45 @@ const { GenericContainer, Wait } = require("testcontainers");
 const container = await new GenericContainer("alpine")
   .withWaitStrategy(Wait.forSuccessfulCommand("stat /tmp/app.lock"))
   .start();
+```
+
+## Composite
+
+Multiple wait strategies can be chained together:
+
+```javascript
+const { GenericContainer, Wait } = require("testcontainers");
+
+const container = await new GenericContainer("alpine")
+  .withWaitStrategy(Wait.forAll([
+    Wait.forListeningPorts(),
+    Wait.forLogMessage("Ready to accept connections")
+  ]))
+  .start();
+```
+
+By default, the startup timeout of the composite wait strategy will be the maximum of the startup timeouts of the provided wait strategies. For example:
+
+```javascript
+const w1 = Wait.forListeningPorts().withStartupTimeout(1000);
+const w1 = Wait.forLogMessage("").withStartupTimeout(2000);
+
+const composite = Wait.forAll([w1, w2]);
+
+expect(composite.getStartupTimeout()).toBe(2000);
+```
+
+You can override the startup timeouts of the provided wait strategies by setting a startup timeout on the composite. For example:
+
+```javascript
+const w1 = Wait.forListeningPorts().withStartupTimeout(1000);
+const w1 = Wait.forLogMessage("").withStartupTimeout(2000);
+
+const composite = Wait.forAll([w1, w2]).withStartupTimeout(3000)
+
+expect(w1.getStartupTimeout()).toBe(3000);
+expect(w2.getStartupTimeout()).toBe(3000);
+expect(composite.getStartupTimeout()).toBe(3000);
 ```
 
 ## Other startup strategies
