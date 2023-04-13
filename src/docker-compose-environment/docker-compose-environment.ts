@@ -17,7 +17,7 @@ import { dockerComposeDown } from "../docker-compose/functions/docker-compose-do
 import { dockerComposeUp } from "../docker-compose/functions/docker-compose-up";
 import { waitForContainer } from "../wait-for-container";
 import { defaultWaitStrategy } from "../wait-strategy/default-wait-strategy";
-import { DefaultPullPolicy, PullPolicy } from "../pull-policy";
+import { ImagePullPolicy, PullPolicy } from "../pull-policy";
 import { dockerComposePull } from "../docker-compose/functions/docker-compose-pull";
 
 export class DockerComposeEnvironment {
@@ -30,7 +30,7 @@ export class DockerComposeEnvironment {
   private environmentFile = "";
   private profiles: string[] = [];
   private environment: Environment = {};
-  private pullPolicy: PullPolicy = new DefaultPullPolicy();
+  private pullPolicy: ImagePullPolicy = PullPolicy.defaultPolicy();
   private waitStrategy: { [containerName: string]: WaitStrategy } = {};
   private startupTimeout = 60_000;
 
@@ -66,7 +66,7 @@ export class DockerComposeEnvironment {
     return this;
   }
 
-  public withPullPolicy(pullPolicy: PullPolicy): this {
+  public withPullPolicy(pullPolicy: ImagePullPolicy): this {
     this.pullPolicy = pullPolicy;
     return this;
   }
