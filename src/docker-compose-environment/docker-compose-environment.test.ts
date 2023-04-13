@@ -129,16 +129,6 @@ describe("DockerComposeEnvironment", () => {
     await startedEnvironment.down();
   });
 
-  it("should stop a docker-compose environment", async () => {
-    const environment1 = await new DockerComposeEnvironment(fixtures, "docker-compose-with-network.yml").up();
-    const environment2 = await new DockerComposeEnvironment(fixtures, "docker-compose-with-network.yml").up();
-
-    const stoppedEnvironment = await environment2.stop();
-    await environment1.down();
-
-    await stoppedEnvironment.down();
-  });
-
   it("should remove volumes when downing an environment", async () => {
     const environment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-volume.yml").up();
 

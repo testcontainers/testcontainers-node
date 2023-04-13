@@ -2,6 +2,7 @@ import { Socket } from "net";
 import { execContainer } from "./docker/functions/container/exec-container";
 import { log } from "./logger";
 import Dockerode from "dockerode";
+import { Provider } from "./docker/docker-client";
 
 export interface PortCheck {
   isBound(port: number): Promise<boolean>;
@@ -35,7 +36,11 @@ export class InternalPortCheck implements PortCheck {
   private isDistroless = false;
   private commandOutputs = new Set<string>();
 
-  constructor(private readonly container: Dockerode.Container) {}
+  constructor(
+    private readonly dockerode: Dockerode,
+    private readonly provider: Provider,
+    private readonly container: Dockerode.Container
+  ) {}
 
   public async isBound(port: number): Promise<boolean> {
     const portHex = port.toString(16).padStart(4, "0");
@@ -45,7 +50,9 @@ export class InternalPortCheck implements PortCheck {
       ["/bin/bash", "-c", `</dev/tcp/localhost/${port}`],
     ];
 
-    const commandResults = await Promise.all(commands.map((command) => execContainer(this.container, command, false)));
+    const commandResults = await Promise.all(
+      commands.map((command) => execContainer(this.dockerode, this.provider, this.container, command, false))
+    );
     const isBound = commandResults.some((result) => result.exitCode === 0);
 
     if (!isBound && log.enabled()) {

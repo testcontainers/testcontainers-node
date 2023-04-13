@@ -1,5 +1,6 @@
 import { GenericContainer } from "./generic-container/generic-container";
 import {
+  checkImageExists,
   composeContainerName,
   getContainerIds,
   getReaperContainerId,
@@ -11,10 +12,7 @@ import { Network } from "./network";
 import path from "path";
 import { RandomUuid } from "./uuid";
 import waitForExpect from "wait-for-expect";
-import { listImages } from "./docker/functions/image/list-images";
-import { DockerImageName } from "./docker-image-name";
 import { DockerComposeEnvironment } from "./docker-compose-environment/docker-compose-environment";
-import { dockerClient } from "./docker/docker-client";
 import { sessionId } from "./docker/session-id";
 
 const fixtures = path.resolve(__dirname, "..", "fixtures");
@@ -79,19 +77,21 @@ describe("Reaper", () => {
     }, 30_000);
   });
 
-  it("should remove images", async () => {
-    const imageId = `${new RandomUuid().nextUuid()}:${new RandomUuid().nextUuid()}`;
-    const context = path.resolve(path.resolve(fixtures, "docker", "docker"));
-    await GenericContainer.fromDockerfile(context).build(imageId);
+  // https://github.com/containers/podman/issues/17614
+  if (!process.env.CI_PODMAN) {
+    it("should remove images", async () => {
+      const imageName = `${new RandomUuid().nextUuid()}:${new RandomUuid().nextUuid()}`;
+      const context = path.resolve(path.resolve(fixtures, "docker", "docker"));
+      await GenericContainer.fromDockerfile(context).build(imageName);
 
-    const reaperContainerId = await getReaperContainerId();
-    await stopReaper();
+      const reaperContainerId = await getReaperContainerId();
+      await stopReaper();
 
-    const { dockerode } = await dockerClient();
-    expect(await listImages(dockerode)).toContainEqual(DockerImageName.fromString(imageId));
-    await waitForExpect(async () => {
-      expect(await listImages(dockerode)).not.toContainEqual(DockerImageName.fromString(imageId));
-      expect(await getContainerIds()).not.toContain(reaperContainerId);
-    }, 30_000);
-  });
+      expect(await checkImageExists(imageName)).toBe(true);
+      await waitForExpect(async () => {
+        expect(await checkImageExists(imageName)).toBe(false);
+        expect(await getContainerIds()).not.toContain(reaperContainerId);
+      }, 30_000);
+    });
+  }
 });

@@ -20,7 +20,7 @@ describe("GenericContainer Dockerfile", () => {
   });
 
   // https://github.com/containers/podman/issues/17779
-  if (!process.env["CI_PODMAN"]) {
+  if (!process.env.CI_PODMAN) {
     it("should use pull policy", async () => {
       const dockerfile = path.resolve(fixtures, "docker");
       const containerSpec = GenericContainer.fromDockerfile(dockerfile).withPullPolicy(new AlwaysPullPolicy());
