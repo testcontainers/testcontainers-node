@@ -41,6 +41,16 @@ const environment = await new DockerComposeEnvironment(composeFilePath, composeF
   .up();
 ```
 
+### With a pull policy
+
+```javascript
+const { DockerComposeEnvironment, AlwaysPullPolicy } = require("testcontainers");
+
+const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
+  .withPullPolicy(new AlwaysPullPolicy())
+  .up();
+```
+
 ### With rebuild
 
 ```javascript

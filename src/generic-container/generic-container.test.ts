@@ -3,7 +3,7 @@ import path from "path";
 import getPort from "get-port";
 import { GenericContainer } from "./generic-container";
 import { AlwaysPullPolicy } from "../pull-policy";
-import { checkContainerIsHealthy, getEvents } from "../test-helper";
+import { checkContainerIsHealthy, waitForDockerEvent } from "../test-helper";
 import { getContainerById } from "../docker/functions/container/get-container";
 
 describe("GenericContainer", () => {
@@ -220,30 +220,15 @@ describe("GenericContainer", () => {
   });
 
   it("should use pull policy", async () => {
-    const container1 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
-    const events = await getEvents();
-    const pullPromise = new Promise<void>((resolve, reject) => {
-      events.on("data", (data) => {
-        try {
-          if (JSON.parse(data).status === "pull") {
-            resolve();
-          }
-        } catch (err) {
-          reject(`Unexpected err: ${err}`);
-        }
-      });
-    });
+    const container = new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080);
 
-    const container2 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
-      .withPullPolicy(new AlwaysPullPolicy())
-      .withExposedPorts(8080)
-      .start();
+    const startedContainer1 = await container.start();
+    const dockerPullEventPromise = waitForDockerEvent("pull");
+    const startedContainer2 = await container.withPullPolicy(new AlwaysPullPolicy()).start();
+    await dockerPullEventPromise;
 
-    await pullPromise;
-
-    events.destroy();
-    await container1.stop();
-    await container2.stop();
+    await startedContainer1.stop();
+    await startedContainer2.stop();
   });
 
   it("should set the IPC mode", async () => {
