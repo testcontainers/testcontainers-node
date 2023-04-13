@@ -76,3 +76,20 @@ export const composeContainerName = async (serviceName: string, index = 1): Prom
   const { dockerComposeInfo } = await getSystemInfo(dockerode);
   return dockerComposeInfo?.version.startsWith("1.") ? `${serviceName}_${index}` : `${serviceName}-${index}`;
 };
+
+export const waitForDockerEvent = async (event: string) => {
+  const events = await getEvents();
+  return new Promise<void>((resolve, reject) => {
+    events.on("data", (data) => {
+      try {
+        if (JSON.parse(data).status === event) {
+          resolve();
+          events.destroy();
+        }
+      } catch (err) {
+        reject(`Unexpected err: ${err}`);
+        events.destroy();
+      }
+    });
+  });
+};

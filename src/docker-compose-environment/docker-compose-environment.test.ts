@@ -5,9 +5,9 @@ import { Wait } from "../wait-strategy/wait";
 import {
   checkEnvironmentContainerIsHealthy,
   composeContainerName,
-  getEvents,
   getRunningContainerNames,
   getVolumeNames,
+  waitForDockerEvent,
 } from "../test-helper";
 import { AlwaysPullPolicy } from "../pull-policy";
 
@@ -42,24 +42,12 @@ describe("DockerComposeEnvironment", () => {
 
   it("should use pull policy", async () => {
     const env = new DockerComposeEnvironment(fixtures, "docker-compose-with-many-services.yml");
+
     const startedEnv1 = await env.up(["service_2"]);
-    const events = await getEvents();
-    const pullPromise = new Promise<void>((resolve, reject) => {
-      events.on("data", (data) => {
-        try {
-          if (JSON.parse(data).status === "pull") {
-            resolve();
-          }
-        } catch (err) {
-          reject(`Unexpected err: ${err}`);
-        }
-      });
-    });
-
+    const dockerPullEventPromise = waitForDockerEvent("pull");
     const startedEnv2 = await env.withPullPolicy(new AlwaysPullPolicy()).up(["service_2"]);
-    await pullPromise;
+    await dockerPullEventPromise;
 
-    events.destroy();
     await startedEnv1.stop();
     await startedEnv2.stop();
   });
