@@ -140,7 +140,7 @@ export class ReaperInstance {
       },
       (result) => result !== undefined,
       () => new Error(`Failed to connect to Reaper ${containerId}`),
-      4000
+      9000
     );
 
     if (retryResult instanceof RealReaper) {
