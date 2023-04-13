@@ -134,7 +134,7 @@ describe("DockerComposeEnvironment", () => {
 
   it("should stop the container when the health check wait strategy times out", async () => {
     await expect(
-      new DockerComposeEnvironment(fixtures, "docker-compose-with-healthcheck.yml")
+      new DockerComposeEnvironment(fixtures, "docker-compose-with-healthcheck-with-start-period.yml")
         .withWaitStrategy(await composeContainerName("container"), Wait.forHealthCheck())
         .withStartupTimeout(0)
         .up()
