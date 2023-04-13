@@ -17,6 +17,8 @@ import { dockerComposeDown } from "../docker-compose/functions/docker-compose-do
 import { dockerComposeUp } from "../docker-compose/functions/docker-compose-up";
 import { waitForContainer } from "../wait-for-container";
 import { defaultWaitStrategy } from "../wait-strategy/default-wait-strategy";
+import { DefaultPullPolicy, PullPolicy } from "../pull-policy";
+import { dockerComposePull } from "../docker-compose/functions/docker-compose-pull";
 
 export class DockerComposeEnvironment {
   private readonly composeFilePath: string;
@@ -28,6 +30,7 @@ export class DockerComposeEnvironment {
   private environmentFile = "";
   private profiles: string[] = [];
   private environment: Environment = {};
+  private pullPolicy: PullPolicy = new DefaultPullPolicy();
   private waitStrategy: { [containerName: string]: WaitStrategy } = {};
   private startupTimeout = 60_000;
 
@@ -60,6 +63,11 @@ export class DockerComposeEnvironment {
   public withNoRecreate(): this {
     this.recreate = false;
     this.projectName = "testcontainers-node";
+    return this;
+  }
+
+  public withPullPolicy(pullPolicy: PullPolicy): this {
+    this.pullPolicy = pullPolicy;
     return this;
   }
 
@@ -98,6 +106,9 @@ export class DockerComposeEnvironment {
     }
     this.profiles.forEach((profile) => composeOptions.push("--profile", profile));
 
+    if (this.pullPolicy.shouldPull()) {
+      await dockerComposePull(options, services);
+    }
     await dockerComposeUp({ ...options, commandOptions, composeOptions, environment: this.environment }, services);
 
     const startedContainers = (await listContainers()).filter(

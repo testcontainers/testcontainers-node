@@ -2,11 +2,13 @@ import fetch from "node-fetch";
 import path from "path";
 import { DockerComposeEnvironment } from "./docker-compose-environment";
 import { Wait } from "../wait-strategy/wait";
+import { PullPolicy } from "../pull-policy";
 import {
   checkEnvironmentContainerIsHealthy,
   composeContainerName,
   getRunningContainerNames,
   getVolumeNames,
+  waitForDockerEvent,
 } from "../test-helper";
 
 describe("DockerComposeEnvironment", () => {
@@ -36,6 +38,30 @@ describe("DockerComposeEnvironment", () => {
     await checkEnvironmentContainerIsHealthy(startedEnvironment, "custom_container_name");
 
     await startedEnvironment.down();
+  });
+
+  it("should use pull policy", async () => {
+    const env = new DockerComposeEnvironment(fixtures, "docker-compose-with-many-services.yml");
+
+    const startedEnv1 = await env.up();
+    const dockerPullEventPromise = waitForDockerEvent("pull", 2);
+    const startedEnv2 = await env.withPullPolicy(PullPolicy.alwaysPull()).up();
+    await dockerPullEventPromise;
+
+    await startedEnv1.stop();
+    await startedEnv2.stop();
+  });
+
+  it("should use pull policy for specific service", async () => {
+    const env = new DockerComposeEnvironment(fixtures, "docker-compose-with-many-services.yml");
+
+    const startedEnv1 = await env.up(["service_2"]);
+    const dockerPullEventPromise = waitForDockerEvent("pull");
+    const startedEnv2 = await env.withPullPolicy(PullPolicy.alwaysPull()).up(["service_2"]);
+    await dockerPullEventPromise;
+
+    await startedEnv1.stop();
+    await startedEnv2.stop();
   });
 
   it("should start environment with multiple compose files", async () => {
