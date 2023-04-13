@@ -5,6 +5,7 @@ import { Wait } from "../wait-strategy/wait";
 import {
   checkEnvironmentContainerIsHealthy,
   composeContainerName,
+  getDockerEventStream,
   getRunningContainerNames,
   getVolumeNames,
   waitForDockerEvent,
@@ -44,10 +45,12 @@ describe("DockerComposeEnvironment", () => {
     const env = new DockerComposeEnvironment(fixtures, "docker-compose-with-many-services.yml");
 
     const startedEnv1 = await env.up();
-    const dockerPullEventPromise = waitForDockerEvent("pull", 2);
+    const dockerEventStream = await getDockerEventStream();
+    const dockerPullEventPromise = waitForDockerEvent(dockerEventStream, "pull", 2);
     const startedEnv2 = await env.withPullPolicy(new AlwaysPullPolicy()).up();
     await dockerPullEventPromise;
 
+    dockerEventStream.destroy();
     await startedEnv1.stop();
     await startedEnv2.stop();
   });
@@ -56,10 +59,12 @@ describe("DockerComposeEnvironment", () => {
     const env = new DockerComposeEnvironment(fixtures, "docker-compose-with-many-services.yml");
 
     const startedEnv1 = await env.up(["service_2"]);
-    const dockerPullEventPromise = waitForDockerEvent("pull");
+    const dockerEventStream = await getDockerEventStream();
+    const dockerPullEventPromise = waitForDockerEvent(dockerEventStream, "pull");
     const startedEnv2 = await env.withPullPolicy(new AlwaysPullPolicy()).up(["service_2"]);
     await dockerPullEventPromise;
 
+    dockerEventStream.destroy();
     await startedEnv1.stop();
     await startedEnv2.stop();
   });
