@@ -3,7 +3,7 @@ import Dockerode from "dockerode";
 import { BoundPorts } from "../bound-ports";
 import { log } from "../logger";
 import { IntervalRetryStrategy } from "../retry-strategy";
-import { AbstractWaitStrategy } from "./wait-strategy";
+import { AbstractWaitStrategy, DEFAULT_STARTUP_TIMEOUT } from "./wait-strategy";
 import { dockerClient } from "../docker/docker-client";
 
 export class HostPortWaitStrategy extends AbstractWaitStrategy {
@@ -50,7 +50,7 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
         const timeout = this.startupTimeout;
         throw new Error(`Port ${port} not bound after ${timeout}ms for ${container.id}`);
       },
-      this.startupTimeout
+      this.startupTimeout ?? DEFAULT_STARTUP_TIMEOUT
     );
   }
 }

@@ -7,7 +7,7 @@ import { HostPortWaitStrategy } from "./host-port-wait-strategy";
 import { CompositeWaitStrategy } from "./composite-wait-strategy";
 
 export class Wait {
-  public static forAll(waitStrategies: WaitStrategy[]): WaitStrategy {
+  public static forAll(waitStrategies: WaitStrategy[]): CompositeWaitStrategy {
     return new CompositeWaitStrategy(waitStrategies);
   }
 

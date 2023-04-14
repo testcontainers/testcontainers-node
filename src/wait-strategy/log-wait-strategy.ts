@@ -3,7 +3,7 @@ import { BoundPorts } from "../bound-ports";
 import { log } from "../logger";
 import { containerLogs } from "../docker/functions/container/container-logs";
 import byline from "byline";
-import { AbstractWaitStrategy } from "./wait-strategy";
+import { AbstractWaitStrategy, DEFAULT_STARTUP_TIMEOUT } from "./wait-strategy";
 
 export type Log = string;
 
@@ -18,7 +18,7 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
     const stream = await containerLogs(container, { since: startTime });
 
     return new Promise((resolve, reject) => {
-      const startupTimeout = this.startupTimeout;
+      const startupTimeout = this.startupTimeout ?? DEFAULT_STARTUP_TIMEOUT;
       const timeout = setTimeout(() => {
         const message = `Log message "${this.message}" not received after ${startupTimeout}ms for ${container.id}`;
         log.error(message);

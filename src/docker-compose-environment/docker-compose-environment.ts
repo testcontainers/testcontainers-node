@@ -32,7 +32,7 @@ export class DockerComposeEnvironment {
   private environment: Environment = {};
   private pullPolicy: PullPolicy = new DefaultPullPolicy();
   private waitStrategy: { [containerName: string]: WaitStrategy } = {};
-  private startupTimeout = 60_000;
+  private startupTimeout?: number;
 
   constructor(composeFilePath: string, composeFiles: string | string[], uuid: Uuid = new RandomUuid()) {
     this.composeFilePath = composeFilePath;
@@ -134,9 +134,12 @@ export class DockerComposeEnvironment {
           const { host, hostIps } = await dockerClient();
           const inspectResult = await inspectContainer(container);
           const boundPorts = BoundPorts.fromInspectResult(hostIps, inspectResult);
-          const waitStrategy = (
-            this.waitStrategy[containerName] ? this.waitStrategy[containerName] : Wait.forListeningPorts()
-          ).withStartupTimeout(this.startupTimeout);
+          const waitStrategy = this.waitStrategy[containerName]
+            ? this.waitStrategy[containerName]
+            : Wait.forListeningPorts();
+          if (this.startupTimeout !== undefined) {
+            waitStrategy.withStartupTimeout(this.startupTimeout);
+          }
 
           if (containerLog.enabled()) {
             (await containerLogs(container))

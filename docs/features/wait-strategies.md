@@ -189,28 +189,37 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
-By default, the startup timeout of the composite wait strategy will be the maximum of the startup timeouts of the provided wait strategies. For example:
+The composite wait strategy by default will respect each individual wait strategy's timeouts. For example:
 
 ```javascript
 const w1 = Wait.forListeningPorts().withStartupTimeout(1000);
-const w1 = Wait.forLogMessage("").withStartupTimeout(2000);
+const w2 = Wait.forLogMessage("READY").withStartupTimeout(2000);
 
-const composite = Wait.forAll([w1, w2]);
+const composite = Wait.forAll([w1, w2])
 
-expect(composite.getStartupTimeout()).toBe(2000);
+expect(w1.getStartupTimeout()).toBe(1000);
+expect(w2.getStartupTimeout()).toBe(2000);
 ```
 
-You can override the startup timeouts of the provided wait strategies by setting a startup timeout on the composite. For example:
+The startup timeout of inner wait strategies that have not defined their own startup timeout can be set by setting the startup timeout on the composite:
 
 ```javascript
 const w1 = Wait.forListeningPorts().withStartupTimeout(1000);
-const w1 = Wait.forLogMessage("").withStartupTimeout(2000);
+const w2 = Wait.forLogMessage("READY");
 
-const composite = Wait.forAll([w1, w2]).withStartupTimeout(3000)
+const composite = Wait.forAll([w1, w2]).withStartupTimeout(2000)
 
-expect(w1.getStartupTimeout()).toBe(3000);
-expect(w2.getStartupTimeout()).toBe(3000);
-expect(composite.getStartupTimeout()).toBe(3000);
+expect(w1.getStartupTimeout()).toBe(1000);
+expect(w2.getStartupTimeout()).toBe(2000);
+```
+
+The startup timeout of all wait strategies can be controlled by setting a deadline on the composite. In this case, the composite will throw unless all inner wait strategies have resolved before the deadline.
+
+```javascript
+const w1 = Wait.forListeningPorts();
+const w2 = Wait.forLogMessage("READY");
+
+const composite = Wait.forAll([w1, w2]).withDeadline(2000)
 ```
 
 ## Other startup strategies

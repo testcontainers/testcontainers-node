@@ -1,6 +1,6 @@
 import Dockerode from "dockerode";
 import { BoundPorts } from "../bound-ports";
-import { AbstractWaitStrategy } from "./wait-strategy";
+import { AbstractWaitStrategy, DEFAULT_STARTUP_TIMEOUT } from "./wait-strategy";
 import { IntervalRetryStrategy } from "../retry-strategy";
 import fetch, { Response } from "node-fetch";
 import https, { Agent } from "https";
@@ -103,7 +103,7 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
       () => {
         throw new Error(`URL ${this.path} not accessible after ${this.startupTimeout}ms for ${container.id}`);
       },
-      this.startupTimeout
+      this.startupTimeout ?? DEFAULT_STARTUP_TIMEOUT
     );
   }
 

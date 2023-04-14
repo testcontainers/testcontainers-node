@@ -48,8 +48,8 @@ export class GenericContainer implements TestContainer {
   }
 
   protected opts: CreateContainerOptions;
-  protected startupTimeout = 60_000;
-  protected waitStrategy?: WaitStrategy;
+  protected startupTimeout?: number;
+  protected waitStrategy: WaitStrategy = Wait.forListeningPorts();
   protected tarToCopy?: archiver.Archiver;
   protected networkMode?: string;
   protected networkAliases: string[] = [];
@@ -131,13 +131,15 @@ export class GenericContainer implements TestContainer {
     const { host, hostIps } = await dockerClient();
     const inspectResult = await inspectContainer(container);
     const boundPorts = BoundPorts.fromInspectResult(hostIps, inspectResult).filter(this.opts.exposedPorts);
-    const waitStrategy = (this.waitStrategy ?? Wait.forListeningPorts()).withStartupTimeout(this.startupTimeout);
+    if (this.startupTimeout !== undefined) {
+      this.waitStrategy.withStartupTimeout(this.startupTimeout);
+    }
 
     if (this.containerStarting) {
       await this.containerStarting(inspectResult, true);
     }
 
-    await waitForContainer(container, waitStrategy, boundPorts);
+    await waitForContainer(container, this.waitStrategy, boundPorts);
 
     const startedContainer = new StartedGenericContainer(
       container,
@@ -145,7 +147,7 @@ export class GenericContainer implements TestContainer {
       inspectResult,
       boundPorts,
       inspectResult.name,
-      waitStrategy
+      this.waitStrategy
     );
 
     if (this.containerStarted) {
@@ -197,7 +199,10 @@ export class GenericContainer implements TestContainer {
     const { host, hostIps } = await dockerClient();
     const inspectResult = await inspectContainer(container);
     const boundPorts = BoundPorts.fromInspectResult(hostIps, inspectResult).filter(this.opts.exposedPorts);
-    const waitStrategy = (this.waitStrategy ?? Wait.forListeningPorts()).withStartupTimeout(this.startupTimeout);
+    const waitStrategy = this.waitStrategy ?? Wait.forListeningPorts();
+    if (this.startupTimeout !== undefined) {
+      waitStrategy.withStartupTimeout(this.startupTimeout);
+    }
 
     if (containerLog.enabled()) {
       (await containerLogs(container))

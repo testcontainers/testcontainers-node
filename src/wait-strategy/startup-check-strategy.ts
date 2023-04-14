@@ -1,4 +1,4 @@
-import { AbstractWaitStrategy } from "./wait-strategy";
+import { AbstractWaitStrategy, DEFAULT_STARTUP_TIMEOUT } from "./wait-strategy";
 import Dockerode from "dockerode";
 import { IntervalRetryStrategy } from "../retry-strategy";
 import { dockerClient } from "../docker/docker-client";
@@ -15,7 +15,7 @@ export abstract class StartupCheckStrategy extends AbstractWaitStrategy {
       async () => await this.checkStartupState(dockerode, container.id),
       (startupStatus) => startupStatus === "SUCCESS" || startupStatus === "FAIL",
       () => new Error(`Container not accessible after ${this.startupTimeout}ms for ${container.id}`),
-      this.startupTimeout
+      this.startupTimeout ?? DEFAULT_STARTUP_TIMEOUT
     );
 
     if (startupStatus instanceof Error) {
