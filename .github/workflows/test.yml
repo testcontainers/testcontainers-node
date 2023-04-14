@@ -114,6 +114,7 @@ jobs:
         run: |
           echo "DOCKER_HOST=unix://${HOME}/.colima/default/docker.sock" >> $GITHUB_ENV
           echo "TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock" >> $GITHUB_ENV
+          echo "NODE_OPTIONS=--dns-result-order=ipv4first" >> $GITHUB_ENV
       - name: Install NodeJS ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:

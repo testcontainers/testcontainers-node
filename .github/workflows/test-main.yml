@@ -110,16 +110,17 @@ jobs:
     steps:
       - name: Code checkout
         uses: actions/checkout@v3
-      - name: Start Colima
+      - name: Setup Colima
         run: |
           brew install docker docker-compose
-          # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
-          colima start --cpu 3 --memory 10 --disk 10 --runtime docker
+          colima start --cpu 3 --memory 10 --disk 10 --runtime docker 
           colima status
+          colima --version
       - name: Set environment
         run: |
           echo "DOCKER_HOST=unix://${HOME}/.colima/default/docker.sock" >> $GITHUB_ENV
           echo "TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock" >> $GITHUB_ENV
+          echo "NODE_OPTIONS=--dns-result-order=ipv4first" >> $GITHUB_ENV
       - name: Install NodeJS ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
