@@ -47,7 +47,7 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
       () => portCheck.isBound(port),
       (isBound) => isBound,
       () => {
-        const timeout = this.startupTimeout;
+        const timeout = this.startupTimeout ?? DEFAULT_STARTUP_TIMEOUT;
         throw new Error(`Port ${port} not bound after ${timeout}ms for ${container.id}`);
       },
       this.startupTimeout ?? DEFAULT_STARTUP_TIMEOUT
