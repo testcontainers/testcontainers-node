@@ -34,7 +34,7 @@ export class Neo4jContainer extends GenericContainer {
     this.withExposedPorts(...(this.hasExposedPorts ? this.opts.exposedPorts : [BOLT_PORT, HTTP_PORT]))
       .withWaitStrategy(Wait.forAll([Wait.forListeningPorts(), Wait.forLogMessage("Started.")]))
       .withEnvironment({ NEO4J_AUTH: `${USERNAME}/${this.password}` })
-      .withStartupTimeout(120_000);
+      .withStartupTimeout(180_000);
 
     if (this.apoc) {
       this.withEnvironment({

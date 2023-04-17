@@ -17,7 +17,7 @@ export class ElasticsearchContainer extends GenericContainer {
           target: "/usr/share/elasticsearch/config/jvm.options.d/elasticsearch-default-memory-vm.options",
         },
       ])
-      .withStartupTimeout(120_000);
+      .withStartupTimeout(180_000);
 
     return new StartedElasticsearchContainer(await super.start());
   }

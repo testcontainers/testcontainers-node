@@ -2,7 +2,7 @@ import { MongoDBContainer, StartedMongoDBContainer } from "./mongodb-container";
 import mongoose from "mongoose";
 
 describe("MongodbContainer", () => {
-  jest.setTimeout(240_000);
+  jest.setTimeout(180_000);
 
   // connect4 {
   it("should work using default version 4.0.1", async () => {
