@@ -2,7 +2,7 @@ import path from "path";
 import { GenericContainer } from "./generic-container";
 import { AlwaysPullPolicy } from "../pull-policy";
 import { Wait } from "../wait-strategy/wait";
-import { checkContainerIsHealthy, waitForDockerEvent } from "../test-helper";
+import { checkContainerIsHealthy, getDockerEventStream, waitForDockerEvent } from "../test-helper";
 
 describe("GenericContainer Dockerfile", () => {
   jest.setTimeout(180_000);
@@ -26,9 +26,12 @@ describe("GenericContainer Dockerfile", () => {
       const containerSpec = GenericContainer.fromDockerfile(dockerfile).withPullPolicy(new AlwaysPullPolicy());
 
       await containerSpec.build();
-      const dockerPullEventPromise = waitForDockerEvent("pull");
+      const dockerEventStream = await getDockerEventStream();
+      const dockerPullEventPromise = waitForDockerEvent(dockerEventStream, "pull");
       await containerSpec.build();
       await dockerPullEventPromise;
+
+      dockerEventStream.destroy();
     });
   }
 

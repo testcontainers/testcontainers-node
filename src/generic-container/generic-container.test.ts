@@ -3,7 +3,7 @@ import path from "path";
 import getPort from "get-port";
 import { GenericContainer } from "./generic-container";
 import { AlwaysPullPolicy } from "../pull-policy";
-import { checkContainerIsHealthy, waitForDockerEvent } from "../test-helper";
+import { checkContainerIsHealthy, getDockerEventStream, waitForDockerEvent } from "../test-helper";
 import { getContainerById } from "../docker/functions/container/get-container";
 
 describe("GenericContainer", () => {
@@ -223,10 +223,12 @@ describe("GenericContainer", () => {
     const container = new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080);
 
     const startedContainer1 = await container.start();
-    const dockerPullEventPromise = waitForDockerEvent("pull");
+    const dockerEventStream = await getDockerEventStream();
+    const dockerPullEventPromise = waitForDockerEvent(dockerEventStream, "pull");
     const startedContainer2 = await container.withPullPolicy(new AlwaysPullPolicy()).start();
     await dockerPullEventPromise;
 
+    dockerEventStream.destroy();
     await startedContainer1.stop();
     await startedContainer2.stop();
   });

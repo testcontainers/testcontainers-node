@@ -1,9 +1,10 @@
 import Dockerode from "dockerode";
 import { BoundPorts } from "../bound-ports";
-import { AbstractWaitStrategy } from "./wait-strategy";
+import { AbstractWaitStrategy, DEFAULT_STARTUP_TIMEOUT } from "./wait-strategy";
 import { IntervalRetryStrategy } from "../retry-strategy";
 import fetch, { Response } from "node-fetch";
 import https, { Agent } from "https";
+import { dockerClient } from "../docker/docker-client";
 
 export class HttpWaitStrategy extends AbstractWaitStrategy {
   private readonly path: string;
@@ -68,7 +69,10 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
     return this;
   }
 
-  public async waitUntilReady(container: Dockerode.Container, host: string, boundPorts: BoundPorts): Promise<void> {
+  public async waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void> {
+    const { host } = await dockerClient();
+    const startupTimeout = this.startupTimeout ?? DEFAULT_STARTUP_TIMEOUT;
+
     await new IntervalRetryStrategy<Response | undefined, Error>(this.readTimeout).retryUntil(
       async () => {
         try {
@@ -99,9 +103,9 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
         }
       },
       () => {
-        throw new Error(`URL ${this.path} not accessible after ${this.startupTimeout}ms for ${container.id}`);
+        throw new Error(`URL ${this.path} not accessible after ${startupTimeout}ms for ${container.id}`);
       },
-      this.startupTimeout
+      startupTimeout
     );
   }
 

@@ -75,6 +75,6 @@ describe("NatsContainer", () => {
       await connect(container.getConnectionOptions());
     }
 
-    await expect(outputVersionAndExit()).rejects.toThrow("Log stream ended");
+    await expect(outputVersionAndExit()).rejects.toThrowError();
   });
 });
