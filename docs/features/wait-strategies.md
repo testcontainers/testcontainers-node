@@ -180,6 +180,7 @@ Multiple wait strategies can be chained together:
 
 ```javascript
 const { GenericContainer, Wait } = require("testcontainers");
+
 const container = await new GenericContainer("alpine")
   .withWaitStrategy(Wait.forAll([
     Wait.forListeningPorts(),
@@ -188,12 +189,14 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
-The composite wait strategy by default will respect each individual wait strategy's timeouts. For example:
+The composite wait strategy by default will respect each individual wait strategy's startup timeout. For example:
 
 ```javascript
 const w1 = Wait.forListeningPorts().withStartupTimeout(1000);
 const w2 = Wait.forLogMessage("READY").withStartupTimeout(2000);
+
 const composite = Wait.forAll([w1, w2])
+
 expect(w1.getStartupTimeout()).toBe(1000);
 expect(w2.getStartupTimeout()).toBe(2000);
 ```
@@ -203,7 +206,9 @@ The startup timeout of inner wait strategies that have not defined their own sta
 ```javascript
 const w1 = Wait.forListeningPorts().withStartupTimeout(1000);
 const w2 = Wait.forLogMessage("READY");
+
 const composite = Wait.forAll([w1, w2]).withStartupTimeout(2000)
+
 expect(w1.getStartupTimeout()).toBe(1000);
 expect(w2.getStartupTimeout()).toBe(2000);
 ```
