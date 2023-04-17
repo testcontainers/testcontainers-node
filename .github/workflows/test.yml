@@ -99,17 +99,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os-version: [ macos-latest ]
+        os-version: [ ubuntu-latest ]
         node-version: [ 14.x, 16.x, 18.x ]
     steps:
       - name: Code checkout
         uses: actions/checkout@v3
       - name: Setup Colima
         run: |
-          brew install docker docker-compose
-          colima start --cpu 3 --memory 14 --disk 14 --runtime docker 
+          sudo apt-get update
+          sudo apt-get install -y qemu-kvm qemu-utils ssh
+          curl -Lo colima https://github.com/abiosoft/colima/releases/download/v0.5.4/colima-Linux-x86_64
+          chmod +x colima
+          sudo mv colima /usr/local/bin/
+          colima start --vm-driver qemu --cpu 2 --memory 7 --disk 14 --runtime docker 
           colima status
-          colima --version
       - name: Set environment
         run: |
           echo "DOCKER_HOST=unix://${HOME}/.colima/default/docker.sock" >> $GITHUB_ENV
