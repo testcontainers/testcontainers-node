@@ -112,7 +112,8 @@ jobs:
           
           # Install Lima
           curl -LO https://github.com/lima-vm/lima/releases/download/v0.15.1/lima-0.15.1-Linux-x86_64.tar.gz
-          tar -xvf lima-0.15.1-Linux-x86_64.tar.gz
+          mkdir lima-0.15.1-Linux-x86_64
+          tar -xvf lima-0.15.1-Linux-x86_64.tar.gz -C lima-0.15.1-Linux-x86_64
           sudo mv lima-0.15.1-Linux-x86_64/bin/limactl /usr/local/bin/limactl
           sudo mv lima-0.15.1-Linux-x86_64/bin/lima /usr/local/bin/lima
           
