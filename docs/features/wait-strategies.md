@@ -10,7 +10,7 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
-## Host port
+## Listening ports
 
 The default wait strategy used by Testcontainers. It will wait up to 60 seconds for the container's mapped network ports to be bound.
 
@@ -19,6 +19,17 @@ const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
   .withExposedPorts(6379)
+  .start();
+```
+
+It can be set explicitly but is not required:
+
+```javascript
+const { GenericContainer, Wait } = require("testcontainers");
+
+const container = await new GenericContainer("alpine")
+  .withExposedPorts(6379)
+  .withWaitStrategy(Wait.forListeningPorts())
   .start();
 ```
 
@@ -161,6 +172,48 @@ const { GenericContainer, Wait } = require("testcontainers");
 const container = await new GenericContainer("alpine")
   .withWaitStrategy(Wait.forSuccessfulCommand("stat /tmp/app.lock"))
   .start();
+```
+
+## Composite
+
+Multiple wait strategies can be chained together:
+
+```javascript
+const { GenericContainer, Wait } = require("testcontainers");
+const container = await new GenericContainer("alpine")
+  .withWaitStrategy(Wait.forAll([
+    Wait.forListeningPorts(),
+    Wait.forLogMessage("Ready to accept connections")
+  ]))
+  .start();
+```
+
+The composite wait strategy by default will respect each individual wait strategy's timeouts. For example:
+
+```javascript
+const w1 = Wait.forListeningPorts().withStartupTimeout(1000);
+const w2 = Wait.forLogMessage("READY").withStartupTimeout(2000);
+const composite = Wait.forAll([w1, w2])
+expect(w1.getStartupTimeout()).toBe(1000);
+expect(w2.getStartupTimeout()).toBe(2000);
+```
+
+The startup timeout of inner wait strategies that have not defined their own startup timeout can be set by setting the startup timeout on the composite:
+
+```javascript
+const w1 = Wait.forListeningPorts().withStartupTimeout(1000);
+const w2 = Wait.forLogMessage("READY");
+const composite = Wait.forAll([w1, w2]).withStartupTimeout(2000)
+expect(w1.getStartupTimeout()).toBe(1000);
+expect(w2.getStartupTimeout()).toBe(2000);
+```
+
+The startup timeout of all wait strategies can be controlled by setting a deadline on the composite. In this case, the composite will throw unless all inner wait strategies have resolved before the deadline.
+
+```javascript
+const w1 = Wait.forListeningPorts();
+const w2 = Wait.forLogMessage("READY");
+const composite = Wait.forAll([w1, w2]).withDeadline(2000)
 ```
 
 ## Other startup strategies

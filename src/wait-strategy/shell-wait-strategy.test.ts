@@ -19,6 +19,6 @@ describe("ShellWaitStrategy", () => {
         .withWaitStrategy(Wait.forSuccessfulCommand("stat /tmp/test.lock"))
         .withStartupTimeout(1000)
         .start()
-    ).rejects.toThrowError("Shell command not successful");
+    ).rejects.toThrowError(`Shell command "stat /tmp/test.lock" not successful`);
   });
 });

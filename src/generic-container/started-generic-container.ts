@@ -52,7 +52,7 @@ export class StartedGenericContainer implements StartedTestContainer {
       Array.from(this.boundPorts.iterator()).map((port) => port[0])
     );
 
-    await waitForContainer(this.container, this.waitStrategy, this.host, this.boundPorts, startTime);
+    await waitForContainer(this.container, this.waitStrategy, this.boundPorts, startTime);
   }
 
   private async stopContainer(options: Partial<StopOptions> = {}): Promise<StoppedGenericContainer> {

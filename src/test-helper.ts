@@ -29,7 +29,7 @@ export const checkEnvironmentContainerIsHealthy = async (
   await checkContainerIsHealthy(container);
 };
 
-export const getEvents = async (opts: GetEventsOptions = {}): Promise<Readable> => {
+export const getDockerEventStream = async (opts: GetEventsOptions = {}): Promise<Readable> => {
   const { dockerode } = await dockerClient();
   const events = (await dockerode.getEvents(opts)) as Readable;
   events.setEncoding("utf-8");
@@ -87,22 +87,18 @@ export const composeContainerName = async (serviceName: string, index = 1): Prom
   return dockerComposeInfo?.version.startsWith("1.") ? `${serviceName}_${index}` : `${serviceName}-${index}`;
 };
 
-export const waitForDockerEvent = async (event: string, times = 1) => {
-  const events = await getEvents();
-
+export const waitForDockerEvent = async (eventStream: Readable, eventName: string, times = 1) => {
   let currentTimes = 0;
-  return new Promise<void>((resolve, reject) => {
-    events.on("data", (data) => {
+  return new Promise<void>((resolve) => {
+    eventStream.on("data", (data) => {
       try {
-        if (JSON.parse(data).status === event) {
+        if (JSON.parse(data).status === eventName) {
           if (++currentTimes === times) {
             resolve();
-            events.destroy();
           }
         }
       } catch (err) {
-        reject(`Unexpected err: ${err}`);
-        events.destroy();
+        // ignored
       }
     });
   });
