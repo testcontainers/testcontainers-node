@@ -111,8 +111,9 @@ jobs:
           sudo apt-get install -y qemu-kvm qemu-utils ssh
           
           # Install Lima
-          VERSION="v0.15.1"
-          curl -fsSL "https://github.com/lima-vm/lima/releases/download/${VERSION}/lima-${VERSION:1}-$(uname -s)-$(uname -m).tar.gz" | tar Cxzvm /usr/local
+          VERSION=v0.15.1
+          curl -fsSL "https://github.com/lima-vm/lima/releases/download/${VERSION}/lima-${VERSION:1}-$(uname -s)-$(uname -m).tar.gz" \
+            | sudo tar Cxzvm /usr/local
 
           # Install Colima
           curl -Lo colima https://github.com/abiosoft/colima/releases/download/v0.5.4/colima-Linux-x86_64
