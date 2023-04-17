@@ -111,7 +111,7 @@ jobs:
           curl -Lo colima https://github.com/abiosoft/colima/releases/download/v0.5.4/colima-Linux-x86_64
           chmod +x colima
           sudo mv colima /usr/local/bin/
-          colima start --vm-driver qemu --cpu 2 --memory 7 --disk 14 --runtime docker 
+          colima start --cpu 2 --memory 7 --disk 14 --runtime docker 
           colima status
       - name: Set environment
         run: |
