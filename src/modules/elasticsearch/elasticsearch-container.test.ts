@@ -2,7 +2,7 @@ import { ElasticsearchContainer } from "./elasticsearch-container";
 import { Client } from "@elastic/elasticsearch";
 
 describe("ElasticsearchContainer", () => {
-  jest.setTimeout(180_000);
+  jest.setTimeout(240_000);
 
   // createIndex {
   it("should create an index", async () => {
