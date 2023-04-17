@@ -106,7 +106,7 @@ jobs:
         uses: actions/checkout@v3
       - name: Setup Colima
         run: |
-          $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+          eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
           brew install colima
           colima start --cpu 2 --memory 7 --disk 14 --runtime docker
           colima status
