@@ -15,10 +15,10 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
   public async waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts, startTime?: Date): Promise<void> {
     log.debug(`Waiting for log message "${this.message}" for ${container.id}`);
 
+    const startupTimeout = this.startupTimeout ?? DEFAULT_STARTUP_TIMEOUT;
     const stream = await containerLogs(container, { since: startTime });
 
     return new Promise((resolve, reject) => {
-      const startupTimeout = this.startupTimeout ?? DEFAULT_STARTUP_TIMEOUT;
       const timeout = setTimeout(() => {
         const message = `Log message "${this.message}" not received after ${startupTimeout}ms for ${container.id}`;
         log.error(message);

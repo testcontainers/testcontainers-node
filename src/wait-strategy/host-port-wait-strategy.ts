@@ -43,14 +43,14 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
   }
 
   private async waitForPort(container: Dockerode.Container, port: number, portCheck: PortCheck): Promise<void> {
+    const startupTimeout = this.startupTimeout ?? DEFAULT_STARTUP_TIMEOUT;
     await new IntervalRetryStrategy<boolean, Error>(100).retryUntil(
       () => portCheck.isBound(port),
       (isBound) => isBound,
       () => {
-        const timeout = this.startupTimeout ?? DEFAULT_STARTUP_TIMEOUT;
-        throw new Error(`Port ${port} not bound after ${timeout}ms for ${container.id}`);
+        throw new Error(`Port ${port} not bound after ${startupTimeout}ms for ${container.id}`);
       },
-      this.startupTimeout ?? DEFAULT_STARTUP_TIMEOUT
+      startupTimeout
     );
   }
 }

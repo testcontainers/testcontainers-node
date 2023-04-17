@@ -189,7 +189,7 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
-The composite wait strategy by default will respect each individual wait strategy's timeouts. For example:
+The composite wait strategy by default will respect each individual wait strategy's startup timeout. For example:
 
 ```javascript
 const w1 = Wait.forListeningPorts().withStartupTimeout(1000);
@@ -218,7 +218,6 @@ The startup timeout of all wait strategies can be controlled by setting a deadli
 ```javascript
 const w1 = Wait.forListeningPorts();
 const w2 = Wait.forLogMessage("READY");
-
 const composite = Wait.forAll([w1, w2]).withDeadline(2000)
 ```
 

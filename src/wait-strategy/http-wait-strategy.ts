@@ -71,6 +71,8 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
 
   public async waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void> {
     const { host } = await dockerClient();
+    const startupTimeout = this.startupTimeout ?? DEFAULT_STARTUP_TIMEOUT;
+
     await new IntervalRetryStrategy<Response | undefined, Error>(this.readTimeout).retryUntil(
       async () => {
         try {
@@ -101,9 +103,9 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
         }
       },
       () => {
-        throw new Error(`URL ${this.path} not accessible after ${this.startupTimeout}ms for ${container.id}`);
+        throw new Error(`URL ${this.path} not accessible after ${startupTimeout}ms for ${container.id}`);
       },
-      this.startupTimeout ?? DEFAULT_STARTUP_TIMEOUT
+      startupTimeout
     );
   }
 

@@ -199,9 +199,8 @@ export class GenericContainer implements TestContainer {
     const { host, hostIps } = await dockerClient();
     const inspectResult = await inspectContainer(container);
     const boundPorts = BoundPorts.fromInspectResult(hostIps, inspectResult).filter(this.opts.exposedPorts);
-    const waitStrategy = this.waitStrategy ?? Wait.forListeningPorts();
     if (this.startupTimeout !== undefined) {
-      waitStrategy.withStartupTimeout(this.startupTimeout);
+      this.waitStrategy.withStartupTimeout(this.startupTimeout);
     }
 
     if (containerLog.enabled()) {
@@ -214,7 +213,7 @@ export class GenericContainer implements TestContainer {
       await this.containerStarting(inspectResult, false);
     }
 
-    await waitForContainer(container, waitStrategy, boundPorts);
+    await waitForContainer(container, this.waitStrategy, boundPorts);
 
     const startedContainer = new StartedGenericContainer(
       container,
@@ -222,7 +221,7 @@ export class GenericContainer implements TestContainer {
       inspectResult,
       boundPorts,
       inspectResult.name,
-      waitStrategy
+      this.waitStrategy
     );
 
     if (this.containerStarted) {

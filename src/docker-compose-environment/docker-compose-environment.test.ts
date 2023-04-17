@@ -46,7 +46,7 @@ describe("DockerComposeEnvironment", () => {
 
     const startedEnv1 = await env.up();
     const dockerEventStream = await getDockerEventStream();
-    const dockerPullEventPromise = waitForDockerEvent(dockerEventStream, "pull");
+    const dockerPullEventPromise = waitForDockerEvent(dockerEventStream, "pull", 2);
     const startedEnv2 = await env.withPullPolicy(new AlwaysPullPolicy()).up();
     await dockerPullEventPromise;
 
