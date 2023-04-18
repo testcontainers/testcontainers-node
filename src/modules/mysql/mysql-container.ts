@@ -42,7 +42,7 @@ export class MySqlContainer extends GenericContainer {
         MYSQL_USER: this.username,
         MYSQL_PASSWORD: this.userPassword,
       })
-      .withStartupTimeout(120_000);
+      .withStartupTimeout(180_000);
 
     return new StartedMySqlContainer(
       await super.start(),

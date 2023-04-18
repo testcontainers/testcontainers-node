@@ -7,7 +7,7 @@ import * as fs from "fs";
 import * as path from "path";
 
 describe("KafkaContainer", () => {
-  jest.setTimeout(300_000);
+  jest.setTimeout(360_000);
 
   // connectBuiltInZK {
   it("should connect using in-built zoo-keeper", async () => {
