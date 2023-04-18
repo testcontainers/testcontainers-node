@@ -11,6 +11,7 @@ export type PullImageOptions = {
   force: boolean;
 };
 
+const MAX_ATTEMPTS = 2;
 const imagePullLock = new AsyncLock();
 
 export const pullImage = async (
@@ -18,18 +19,25 @@ export const pullImage = async (
   indexServerAddress: string,
   options: PullImageOptions
 ): Promise<void> => {
+  const doPullImage = async (attempt: number) => {
+    log.info(`Pulling image (attempt ${attempt}): ${options.imageName}`);
+    const authconfig = await getAuthConfig(options.imageName.registry ?? indexServerAddress);
+    const stream = await dockerode.pull(options.imageName.toString(), { authconfig });
+    await new PullStreamParser(options.imageName, log).consume(stream);
+  };
+
   try {
-    return imagePullLock.acquire(options.imageName.toString(), async () => {
+    return await imagePullLock.acquire(options.imageName.toString(), async () => {
       if (!options.force && (await imageExists(dockerode, options.imageName))) {
         log.debug(`Not pulling image as it already exists: ${options.imageName}`);
         return;
       }
 
-      log.info(`Pulling image: ${options.imageName}`);
-      const authconfig = await getAuthConfig(options.imageName.registry ?? indexServerAddress);
-      const stream = await dockerode.pull(options.imageName.toString(), { authconfig });
-
-      await new PullStreamParser(options.imageName, log).consume(stream);
+      let currentAttempts = 0;
+      do {
+        if (currentAttempts === MAX_ATTEMPTS) throw new Error(`Failed to pull image after ${MAX_ATTEMPTS} attempts`);
+        await doPullImage(++currentAttempts);
+      } while (!(await imageExists(dockerode, options.imageName)));
     });
   } catch (err) {
     log.error(`Failed to pull image "${options.imageName}": ${err}`);
