@@ -108,7 +108,7 @@ jobs:
         run: |
           curl -L https://nixos.org/nix/install | sh -s -- --daemon
           bash -lc "nix-env -iA nixpkgs.colima"
-          bash -lc "colima start --cpu 2 --memory 7 --disk 14 --runtime docker --layer=true"
+          bash -lc "colima start --very-verbose --cpu 2 --memory 7 --disk 14 --runtime docker"
           bash -lc "colima status"
       - name: Set environment
         run: |
