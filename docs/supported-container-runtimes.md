@@ -19,7 +19,9 @@ export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock
 
 ### Known issues
 
-- Lack of IPv6 support: [https://github.com/abiosoft/colima/issues/583](https://github.com/abiosoft/colima/issues/583)
+**Issue**
+
+Lack of IPv6 support: [https://github.com/abiosoft/colima/issues/583](https://github.com/abiosoft/colima/issues/583)
 
 **Explanation**
 
@@ -36,7 +38,9 @@ export NODE_OPTIONS=--dns-result-order=ipv4first
 
 ---
 
-- Colima port forwarding delays: [https://github.com/abiosoft/colima/issues/71](https://github.com/abiosoft/colima/issues/71)
+**Issue**
+
+Colima port forwarding delays: [https://github.com/abiosoft/colima/issues/71](https://github.com/abiosoft/colima/issues/71)
 
 **Explanation**
 
