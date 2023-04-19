@@ -2,15 +2,11 @@
 
 ## Docker
 
-Status: 🟢
-
 ### Setup
 
 Works out of the box.
 
 ## Podman
-
-Status: 🟢
 
 ### Setup
 
@@ -28,8 +24,6 @@ export DOCKER_HOST=unix://${XDG_RUNTIME_DIR}/podman/podman.sock
 ```
 
 ## Colima
-
-Status: 🟠
 
 ### Setup
 
