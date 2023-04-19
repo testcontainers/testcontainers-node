@@ -19,8 +19,6 @@ export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock
 
 ### Known issues
 
----
-
 - Lack of IPv6 support: [https://github.com/abiosoft/colima/issues/583](https://github.com/abiosoft/colima/issues/583)
 
 **Explanation**
@@ -58,5 +56,3 @@ const container = await new GenericContainer("redis")
   ]))
   .start();
 ```
-
----
