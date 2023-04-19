@@ -6,34 +6,11 @@ Works out of the box.
 
 ## Podman
 
-Install Podman and enable the socket:
-
-```bash
-sudo apt-get -y install podman
-systemctl enable --now --user podman podman.socket
-```
-
-Tell Testcontainers to use the Podman socket:
-
 ```bash
 export DOCKER_HOST=unix://${XDG_RUNTIME_DIR}/podman/podman.sock
 ```
 
 ## Colima
-
-Install Docker and Colima:
-
-```bash
-brew install docker docker-compose colima
-```
-
-Start Colima with the Docker runtime:
-
-```bash
-colima start --runtime docker
-```
-
-Tell Testcontainers to use the Colima socket:
 
 ```bash
 export DOCKER_HOST=unix://${HOME}/.colima/default/docker.sock
