@@ -31,6 +31,7 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Quickstart: quickstart.md
+  - Supported container runtimes: supported-container-runtimes.md
   - Features:
       - Containers: features/containers.md
       - Images: features/images.md

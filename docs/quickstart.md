@@ -8,6 +8,8 @@ npm install --save-dev testcontainers
 
 ## Example
 
+### JavaScript
+
 Let's spin up and use a Redis container:
 
 ```javascript
@@ -41,7 +43,7 @@ describe("Redis", () => {
 });
 ```
 
-## TypeScript
+### TypeScript
 
 Testcontainers is built with TypeScript and offers first-class support for TypeScript users:
 
