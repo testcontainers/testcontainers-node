@@ -2,13 +2,9 @@
 
 ## Docker
 
-### Setup
-
 Works out of the box.
 
 ## Podman
-
-### Setup
 
 Install Podman and enable the socket.
 
@@ -24,8 +20,6 @@ export DOCKER_HOST=unix://${XDG_RUNTIME_DIR}/podman/podman.sock
 ```
 
 ## Colima
-
-### Setup
 
 Install Docker and Colima.
 
