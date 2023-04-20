@@ -139,12 +139,6 @@ jobs:
           brew install docker docker-compose
           brew install --cask rancher
           
-          RANCHER_LOGS_DIR="$HOME/rancher-desktop-logs"
-          mkdir "${RANCHER_LOGS_DIR}"
-          tail -F "${RANCHER_LOGS_DIR}/*" &
-          export RD_LOGS_DIR="${RANCHER_LOGS_DIR}"
-          echo "-> Start tailing Rancher Desktop logs in ${RANCHER_LOGS_DIR}"
-          
           TIMEOUT_SECS_USER_DIR=60
           TIMEOUT_SECS_USER_SOCKET=300
           
@@ -171,6 +165,7 @@ jobs:
             --application.admin-access=false \
             --kubernetes.enabled=false \
             --application.start-in-background=true \
+            --application.path-management-strategy=manual \
             --virtual-machine.number-cpus=3 \
             --virtual-machine.memory-in-gb=14 \
             || true
