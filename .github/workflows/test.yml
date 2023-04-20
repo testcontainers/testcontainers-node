@@ -135,6 +135,7 @@ jobs:
       - name: Code checkout
         uses: actions/checkout@v3
       - name: Setup Rancher Desktop
+        continue-on-error: true
         run: |
           brew install docker docker-compose
           brew install --cask rancher
@@ -149,6 +150,11 @@ jobs:
               fi
               sleep 1
           done
+          
+          if [ ! -d "$HOME/.rd" ]; then
+            echo "Rancher Desktop user directory not found"
+            exit 1
+          fi
           
           echo "Rancher Desktop should have started successfully. Configure the container runtime"
           $HOME/.rd/bin/rdctl set \
@@ -170,6 +176,11 @@ jobs:
               fi
               sleep 1
           done
+          
+          if [ ! -d "$HOME/.rd/docker.sock" ]; then
+            echo "Rancher Desktop socket not found"
+            exit 1
+          fi
       - name: Set environment
         run: |
           echo "DOCKER_HOST=unix://${HOME}/.rd/docker.sock" >> $GITHUB_ENV
