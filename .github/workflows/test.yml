@@ -139,11 +139,14 @@ jobs:
           brew install docker docker-compose
           brew install --cask rancher
           
+          TIMEOUT_SECS_USER_DIR=60
+          TIMEOUT_SECS_USER_SOCKET=300
+          
           echo "Open Rancher Desktop app"
           open "/Applications/Rancher Desktop.app"
           
-          echo "Wait max of 1m for Rancher Desktop to create user directory"
-          for i in {1..60}; do
+          echo "Wait max of ${TIMEOUT_SECS_USER_DIR}s for Rancher Desktop to create user directory"
+          for i in {1..${TIMEOUT_SECS_USER_DIR}}; do
               if [ -d "$HOME/.rd" ]; then
                 break
               fi
@@ -169,11 +172,11 @@ jobs:
           $HOME/.rd/bin/rdctl shutdown
           $HOME/.rd/bin/rdctl start
           
-          echo "Wait max of 5m for Rancher socket"
+          echo "Wait max of ${TIMEOUT_SECS_USER_SOCKET}s for Rancher socket"
           
-          tail -f "$HOME/Library/Logs/rancher-desktop/*.log" &
+#          tail -f "$HOME/Library/Logs/rancher-desktop/*.log" &
           
-          for i in {1..120}; do
+          for i in {1..${TIMEOUT_SECS_USER_SOCKET}}; do
               if [ -d "$HOME/.rd/docker.sock" ]; then
                 break
               fi
