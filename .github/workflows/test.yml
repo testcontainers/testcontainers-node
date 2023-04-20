@@ -140,7 +140,7 @@ jobs:
           brew install --cask rancher
           
           echo "Open Rancher Desktop app"
-          open -a "Rancher Desktop"
+          open "/Applications/Rancher Desktop.app"
           
           echo "Wait max of 1m for Rancher Desktop to create user directory"
           for i in {1..60}; do
