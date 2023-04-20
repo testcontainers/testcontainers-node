@@ -140,10 +140,10 @@ jobs:
           brew install --cask rancher
           
           RANCHER_LOGS_DIR="$HOME/rancher-desktop-logs"
-          tail -F "${RANCHER_LOGS_DIR}/*" &
-          
           mkdir "${RANCHER_LOGS_DIR}"
+          tail -F "${RANCHER_LOGS_DIR}/*" &
           export RD_LOGS_DIR="${RANCHER_LOGS_DIR}"
+          echo "-> Start tailing Rancher Desktop logs in ${RANCHER_LOGS_DIR}"
           
           TIMEOUT_SECS_USER_DIR=60
           TIMEOUT_SECS_USER_SOCKET=300
