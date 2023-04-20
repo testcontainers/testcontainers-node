@@ -174,8 +174,6 @@ jobs:
           
           echo "Wait max of ${TIMEOUT_SECS_USER_SOCKET}s for Rancher socket"
           
-#          tail -f "$HOME/Library/Logs/rancher-desktop/*.log" &
-          
           for i in {1..${TIMEOUT_SECS_USER_SOCKET}}; do
               if [ -d "$HOME/.rd/docker.sock" ]; then
                 break
