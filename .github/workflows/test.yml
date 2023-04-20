@@ -146,7 +146,7 @@ jobs:
           open "/Applications/Rancher Desktop.app"
           
           echo "Wait max of ${TIMEOUT_SECS_USER_DIR}s for Rancher Desktop to create user directory"
-          for i in {1..${TIMEOUT_SECS_USER_DIR}}; do
+          for i in $(seq 1 ${TIMEOUT_SECS_USER_DIR}); do
               if [ -d "$HOME/.rd" ]; then
                 break
               fi
@@ -174,7 +174,7 @@ jobs:
           
           echo "Wait max of ${TIMEOUT_SECS_USER_SOCKET}s for Rancher socket"
           
-          for i in {1..${TIMEOUT_SECS_USER_SOCKET}}; do
+          for i in $(seq 1 ${TIMEOUT_SECS_USER_SOCKET}); do
               if [ -d "$HOME/.rd/docker.sock" ]; then
                 break
               fi
