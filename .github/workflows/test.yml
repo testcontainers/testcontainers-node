@@ -184,7 +184,7 @@ jobs:
               sleep 1
           done
           
-          if [ ! -d "$HOME/.rd/docker.sock" ]; then
+          if [ ! -e "$HOME/.rd/docker.sock" ]; then
             echo "-> Rancher Desktop socket not found"
             exit 1
           fi
