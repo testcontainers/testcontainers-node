@@ -155,7 +155,7 @@ jobs:
             exit 1
           fi
           
-          echo "Rancher Desktop initialised successfully, now configure the container runtime"
+          echo "Rancher Desktop initialised successfully, now configure the container runtime. Expect an error message"
           $HOME/.rd/bin/rdctl set \
             --container-engine.name=moby \
             --application.admin-access=false \
@@ -169,7 +169,10 @@ jobs:
           $HOME/.rd/bin/rdctl shutdown
           $HOME/.rd/bin/rdctl start
           
-          echo "Wait max of 2m for Rancher socket"
+          echo "Wait max of 5m for Rancher socket"
+          
+          tail -f "$HOME/Library/Logs/rancher-desktop/*.log" &
+          
           for i in {1..120}; do
               if [ -d "$HOME/.rd/docker.sock" ]; then
                 break
