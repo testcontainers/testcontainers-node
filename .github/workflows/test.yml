@@ -139,23 +139,23 @@ jobs:
           brew install docker docker-compose
           brew install --cask rancher
           
-          TIMEOUT_SECS_USER_DIR=60
+          TIMEOUT_SECS_CLI_TOOLS=60
           TIMEOUT_SECS_USER_SOCKET=300
           
           echo "Open Rancher Desktop app"
           open "/Applications/Rancher Desktop.app"
           
-          echo "Wait max of ${TIMEOUT_SECS_USER_DIR}s for Rancher Desktop to create user directory"
-          for i in $(seq 1 ${TIMEOUT_SECS_USER_DIR}); do
-              if [ -d "$HOME/.rd" ]; then
-                echo "Rancher Desktop user directory created after ${i}s"
+          echo "Wait max of ${TIMEOUT_SECS_CLI_TOOLS}s for Rancher Desktop to create CLI tools"
+          for i in $(seq 1 ${TIMEOUT_SECS_CLI_TOOLS}); do
+              if [ -e "$HOME/.rd/bin/rdctl" ]; then
+                echo "Rancher Desktop CLI tools created after ${i}s"
                 break
               fi
               sleep 1
           done
           
-          if [ ! -d "$HOME/.rd" ]; then
-            echo "Rancher Desktop user directory not found"
+          if [ ! -e "$HOME/.rd" ]; then
+            echo "Rancher Desktop CLI tools not found"
             exit 1
           fi
           
