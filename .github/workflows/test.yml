@@ -136,30 +136,34 @@ jobs:
         uses: actions/checkout@v3
       - name: Setup Rancher Desktop
         run: |
+          echo "DOCKER CONFIG VALUE:"
+          cat ~/.docker/config.json
+          
+          
           brew install docker docker-compose
           brew install --cask rancher
           
           TIMEOUT_SECS_USER_DIR=60
           TIMEOUT_SECS_USER_SOCKET=300
           
-          echo "-> Open Rancher Desktop app"
+          echo "Open Rancher Desktop app"
           open "/Applications/Rancher Desktop.app"
           
-          echo "-> Wait max of ${TIMEOUT_SECS_USER_DIR}s for Rancher Desktop to create user directory"
+          echo "Wait max of ${TIMEOUT_SECS_USER_DIR}s for Rancher Desktop to create user directory"
           for i in $(seq 1 ${TIMEOUT_SECS_USER_DIR}); do
               if [ -d "$HOME/.rd" ]; then
-                echo "-> Rancher Desktop user directory created after ${i}s"
+                echo "Rancher Desktop user directory created after ${i}s"
                 break
               fi
               sleep 1
           done
           
           if [ ! -d "$HOME/.rd" ]; then
-            echo "-> Rancher Desktop user directory not found"
+            echo "Rancher Desktop user directory not found"
             exit 1
           fi
           
-          echo "-> Rancher Desktop initialised successfully, now configure the container runtime"
+          echo "Rancher Desktop initialised successfully, now configure the container runtime"
           $HOME/.rd/bin/rdctl set \
             --container-engine.name=moby \
             --application.admin-access=false \
@@ -170,22 +174,22 @@ jobs:
             --virtual-machine.memory-in-gb=14 \
             || true
           
-          echo "-> Restart Rancher Desktop"
+          echo "Restart Rancher Desktop"
           $HOME/.rd/bin/rdctl shutdown
           $HOME/.rd/bin/rdctl start
           
-          echo "-> Wait max of ${TIMEOUT_SECS_USER_SOCKET}s for Rancher socket"
+          echo "Wait max of ${TIMEOUT_SECS_USER_SOCKET}s for Rancher socket"
           
           for i in $(seq 1 ${TIMEOUT_SECS_USER_SOCKET}); do
               if [ -e "$HOME/.rd/docker.sock" ]; then
-                echo "-> Rancher Desktop socket created after ${i}s"
+                echo "Rancher Desktop socket created after ${i}s"
                 break
               fi
               sleep 1
           done
           
           if [ ! -e "$HOME/.rd/docker.sock" ]; then
-            echo "-> Rancher Desktop socket not found"
+            echo "Rancher Desktop socket not found"
             exit 1
           fi
       - name: Set environment
