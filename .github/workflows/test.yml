@@ -136,12 +136,11 @@ jobs:
         uses: actions/checkout@v3
       - name: Setup Rancher Desktop
         run: |
-          echo "DOCKER CONFIG VALUE:"
-          cat ~/.docker/config.json
-          
-          
           brew install docker docker-compose
           brew install --cask rancher
+
+          echo "DOCKER CONFIG VALUE:"
+          cat ~/.docker/config.json
           
           TIMEOUT_SECS_USER_DIR=60
           TIMEOUT_SECS_USER_SOCKET=300
