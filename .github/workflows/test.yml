@@ -19,7 +19,7 @@ jobs:
       fail-fast: false
       matrix:
         os-version: [ ubuntu-latest ]
-        node-version: [ 14.x, 16.x, 18.x ]
+        node-version: [ 16.x, 18.x, 20.x ]
     steps:
       - name: Code checkout
         uses: actions/checkout@v3
@@ -38,7 +38,7 @@ jobs:
       fail-fast: false
       matrix:
         os-version: [ ubuntu-latest ]
-        node-version: [ 14.x, 16.x, 18.x ]
+        node-version: [ 16.x, 18.x, 20.x ]
     steps:
       - name: Code checkout
         uses: actions/checkout@v3
@@ -63,7 +63,7 @@ jobs:
       fail-fast: false
       matrix:
         os-version: [ ubuntu-latest ]
-        node-version: [ 14.x, 16.x, 18.x ]
+        node-version: [ 16.x, 18.x, 20.x ]
     steps:
       - name: Code checkout
         uses: actions/checkout@v3
@@ -100,7 +100,7 @@ jobs:
       fail-fast: false
       matrix:
         os-version: [ macos-latest ]
-        node-version: [ 14.x, 16.x, 18.x ]
+        node-version: [ 16.x, 18.x, 20.x ]
     steps:
       - name: Code checkout
         uses: actions/checkout@v3
@@ -130,7 +130,7 @@ jobs:
       fail-fast: false
       matrix:
         os-version: [ macos-latest ]
-        node-version: [ 14.x, 16.x, 18.x ]
+        node-version: [ 16.x, 18.x, 20.x ]
     steps:
       - name: Code checkout
         uses: actions/checkout@v3
@@ -209,7 +209,7 @@ jobs:
     strategy:
       matrix:
         os-version: [ ubuntu-latest ]
-        node-version: [ 14.x, 16.x, 18.x ]
+        node-version: [ 16.x, 18.x, 20.x ]
     steps:
       - name: Code checkout
         uses: actions/checkout@v3
