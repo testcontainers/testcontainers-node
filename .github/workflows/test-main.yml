@@ -160,7 +160,7 @@ jobs:
               sleep 1
           done
           
-          if [ ! -e "$HOME/.rd" ]; then
+          if [ ! -e "$HOME/.rd/bin/rdctl" ]; then
             echo "Rancher Desktop CLI tools not found"
             exit 1
           fi
