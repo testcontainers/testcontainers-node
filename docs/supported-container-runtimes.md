@@ -60,3 +60,14 @@ const container = await new GenericContainer("redis")
   ]))
   .start();
 ```
+
+## Rancher Desktop
+
+```bash
+export DOCKER_HOST=unix://${HOME}/.rd/docker.sock
+export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock
+```
+
+### Known issues
+
+Rancher Desktop has the same issues as [Colima](#colima).
