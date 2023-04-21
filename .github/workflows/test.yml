@@ -189,8 +189,7 @@ jobs:
             exit 1
           fi
           
-          echo "DOCKER CONFIG VALUE:"
-          cat ~/.docker/config.json
+          echo "{}" > $HOME/.docker/config.json
       - name: Set environment
         run: |
           echo "DOCKER_HOST=unix://${HOME}/.rd/docker.sock" >> $GITHUB_ENV
