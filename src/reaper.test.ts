@@ -77,21 +77,18 @@ describe("Reaper", () => {
     }, 30_000);
   });
 
-  // https://github.com/containers/podman/issues/17614
-  if (!process.env.CI_PODMAN) {
-    it("should remove images", async () => {
-      const imageName = `${new RandomUuid().nextUuid()}:${new RandomUuid().nextUuid()}`;
-      const context = path.resolve(path.resolve(fixtures, "docker", "docker"));
-      await GenericContainer.fromDockerfile(context).build(imageName);
+  it("should remove images", async () => {
+    const imageName = `${new RandomUuid().nextUuid()}:${new RandomUuid().nextUuid()}`;
+    const context = path.resolve(path.resolve(fixtures, "docker", "docker"));
+    await GenericContainer.fromDockerfile(context).build(imageName);
 
-      const reaperContainerId = await getReaperContainerId();
-      await stopReaper();
+    const reaperContainerId = await getReaperContainerId();
+    await stopReaper();
 
-      expect(await checkImageExists(imageName)).toBe(true);
-      await waitForExpect(async () => {
-        expect(await checkImageExists(imageName)).toBe(false);
-        expect(await getContainerIds()).not.toContain(reaperContainerId);
-      }, 30_000);
-    });
-  }
+    expect(await checkImageExists(imageName)).toBe(true);
+    await waitForExpect(async () => {
+      expect(await checkImageExists(imageName)).toBe(false);
+      expect(await getContainerIds()).not.toContain(reaperContainerId);
+    }, 30_000);
+  });
 });
