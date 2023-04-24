@@ -1,0 +1,6 @@
+ca-cert
+ca-cert.srl
+ca-key
+cert-file
+cert-signed
+kafka.client.truststore.pfx
