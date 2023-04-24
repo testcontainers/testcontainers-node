@@ -15,7 +15,7 @@ jobs:
       fail-fast: false
       matrix:
         os-version: [ ubuntu-latest ]
-        node-version: [ 14.x, 16.x, 18.x ]
+        node-version: [ 16.x, 18.x, 20.x ]
     steps:
       - name: Code checkout
         uses: actions/checkout@v3
@@ -32,7 +32,7 @@ jobs:
       - name: Run tests
         run: npm run test:ci
       - name: SonarCloud scan
-        if: ${{ matrix.node-version == '18.x' }}
+        if: ${{ matrix.node-version == '20.x' }}
         uses: SonarSource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -44,7 +44,7 @@ jobs:
       fail-fast: false
       matrix:
         os-version: [ ubuntu-latest ]
-        node-version: [ 14.x, 16.x, 18.x ]
+        node-version: [ 16.x, 18.x, 20.x ]
     steps:
       - name: Code checkout
         uses: actions/checkout@v3
@@ -69,7 +69,7 @@ jobs:
       fail-fast: false
       matrix:
         os-version: [ ubuntu-latest ]
-        node-version: [ 14.x, 16.x, 18.x ]
+        node-version: [ 16.x, 18.x, 20.x ]
     steps:
       - name: Code checkout
         uses: actions/checkout@v3
@@ -106,7 +106,7 @@ jobs:
       fail-fast: false
       matrix:
         os-version: [ macos-latest ]
-        node-version: [ 14.x, 16.x, 18.x ]
+        node-version: [ 16.x, 18.x, 20.x ]
     steps:
       - name: Code checkout
         uses: actions/checkout@v3
@@ -136,7 +136,7 @@ jobs:
       fail-fast: false
       matrix:
         os-version: [ macos-latest ]
-        node-version: [ 14.x, 16.x, 18.x ]
+        node-version: [ 16.x, 18.x, 20.x ]
     steps:
       - name: Code checkout
         uses: actions/checkout@v3
@@ -145,23 +145,23 @@ jobs:
           brew install docker docker-compose
           brew install --cask rancher
           
-          TIMEOUT_SECS_USER_DIR=60
+          TIMEOUT_SECS_CLI_TOOLS=60
           TIMEOUT_SECS_USER_SOCKET=300
           
           echo "Open Rancher Desktop app"
           open "/Applications/Rancher Desktop.app"
           
-          echo "Wait max of ${TIMEOUT_SECS_USER_DIR}s for Rancher Desktop to create user directory"
-          for i in $(seq 1 ${TIMEOUT_SECS_USER_DIR}); do
-              if [ -d "$HOME/.rd" ]; then
-                echo "Rancher Desktop user directory created after ${i}s"
+          echo "Wait max of ${TIMEOUT_SECS_CLI_TOOLS}s for Rancher Desktop to create CLI tools"
+          for i in $(seq 1 ${TIMEOUT_SECS_CLI_TOOLS}); do
+              if [ -e "$HOME/.rd/bin/rdctl" ]; then
+                echo "Rancher Desktop CLI tools created after ${i}s"
                 break
               fi
               sleep 1
           done
           
-          if [ ! -d "$HOME/.rd" ]; then
-            echo "Rancher Desktop user directory not found"
+          if [ ! -e "$HOME/.rd/bin/rdctl" ]; then
+            echo "Rancher Desktop CLI tools not found"
             exit 1
           fi
           
@@ -215,7 +215,7 @@ jobs:
     strategy:
       matrix:
         os-version: [ ubuntu-latest ]
-        node-version: [ 14.x, 16.x, 18.x ]
+        node-version: [ 16.x, 18.x, 20.x ]
     steps:
       - name: Code checkout
         uses: actions/checkout@v3
