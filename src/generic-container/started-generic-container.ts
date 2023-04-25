@@ -14,8 +14,12 @@ import { restartContainer } from "../docker/functions/container/restart-containe
 import { WaitStrategy } from "../wait-strategy/wait-strategy";
 import { waitForContainer } from "../wait-for-container";
 import { dockerClient } from "../docker/docker-client";
+import AsyncLock from "async-lock";
 
 export class StartedGenericContainer implements StartedTestContainer {
+  private stoppedContainer?: StoppedTestContainer;
+  private stopContainerLock = new AsyncLock();
+
   constructor(
     private readonly container: Dockerode.Container,
     private readonly host: string,
@@ -28,7 +32,13 @@ export class StartedGenericContainer implements StartedTestContainer {
   protected containerIsStopping?(): Promise<void>;
 
   public async stop(options: Partial<StopOptions> = {}): Promise<StoppedTestContainer> {
-    return this.stopContainer(options);
+    return this.stopContainerLock.acquire("stop", async () => {
+      if (this.stoppedContainer) {
+        return this.stoppedContainer;
+      }
+      this.stoppedContainer = await this.stopContainer(options);
+      return this.stoppedContainer;
+    });
   }
 
   protected containerIsStopped?(): Promise<void>;
