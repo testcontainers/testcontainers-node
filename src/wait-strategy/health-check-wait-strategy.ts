@@ -3,7 +3,7 @@ import { log } from "../logger";
 import { IntervalRetryStrategy } from "../retry-strategy";
 import { HealthCheckStatus } from "../docker/types";
 import { inspectContainer } from "../docker/functions/container/inspect-container";
-import { AbstractWaitStrategy, DEFAULT_STARTUP_TIMEOUT } from "./wait-strategy";
+import { AbstractWaitStrategy } from "./wait-strategy";
 
 export class HealthCheckWaitStrategy extends AbstractWaitStrategy {
   public async waitUntilReady(container: Dockerode.Container): Promise<void> {
@@ -16,7 +16,7 @@ export class HealthCheckWaitStrategy extends AbstractWaitStrategy {
         const timeout = this.startupTimeout;
         throw new Error(`Health check not healthy after ${timeout}ms for ${container.id}`);
       },
-      this.startupTimeout ?? DEFAULT_STARTUP_TIMEOUT
+      this.startupTimeout
     );
 
     if (status !== "healthy") {
