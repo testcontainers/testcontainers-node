@@ -1,18 +1,19 @@
 import { BoundPorts } from "../bound-ports";
 import Dockerode from "dockerode";
 
-export const DEFAULT_STARTUP_TIMEOUT = 60_000;
-
 export interface WaitStrategy {
   waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts, startTime?: Date): Promise<void>;
 
   withStartupTimeout(startupTimeout: number): WaitStrategy;
 
-  getStartupTimeout(): number | undefined;
+  isStartupTimeoutSet(): boolean;
+
+  getStartupTimeout(): number;
 }
 
 export abstract class AbstractWaitStrategy implements WaitStrategy {
-  protected startupTimeout?: number;
+  protected startupTimeout = 60_000;
+  private startupTimeoutSet = false;
 
   public abstract waitUntilReady(
     container: Dockerode.Container,
@@ -22,10 +23,15 @@ export abstract class AbstractWaitStrategy implements WaitStrategy {
 
   public withStartupTimeout(startupTimeout: number): this {
     this.startupTimeout = startupTimeout;
+    this.startupTimeoutSet = true;
     return this;
   }
 
-  public getStartupTimeout(): number | undefined {
+  public isStartupTimeoutSet(): boolean {
+    return this.startupTimeoutSet;
+  }
+
+  public getStartupTimeout(): number {
     return this.startupTimeout;
   }
 }

@@ -3,7 +3,7 @@ import Dockerode from "dockerode";
 import { BoundPorts } from "../bound-ports";
 import { log } from "../logger";
 import { IntervalRetryStrategy } from "../retry-strategy";
-import { AbstractWaitStrategy, DEFAULT_STARTUP_TIMEOUT } from "./wait-strategy";
+import { AbstractWaitStrategy } from "./wait-strategy";
 import { dockerClient } from "../docker/docker-client";
 
 export class HostPortWaitStrategy extends AbstractWaitStrategy {
@@ -43,14 +43,13 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
   }
 
   private async waitForPort(container: Dockerode.Container, port: number, portCheck: PortCheck): Promise<void> {
-    const startupTimeout = this.startupTimeout ?? DEFAULT_STARTUP_TIMEOUT;
     await new IntervalRetryStrategy<boolean, Error>(100).retryUntil(
       () => portCheck.isBound(port),
       (isBound) => isBound,
       () => {
-        throw new Error(`Port ${port} not bound after ${startupTimeout}ms for ${container.id}`);
+        throw new Error(`Port ${port} not bound after ${this.startupTimeout}ms for ${container.id}`);
       },
-      startupTimeout
+      this.startupTimeout
     );
   }
 }
