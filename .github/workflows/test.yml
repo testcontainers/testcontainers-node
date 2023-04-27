@@ -99,7 +99,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os-version: [ macos-12 ]
+        os-version: [ macos-13 ]
         node-version: [ 16.x, 18.x, 20.x ]
     steps:
       - name: Code checkout
@@ -129,7 +129,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os-version: [ macos-12 ]
+        os-version: [ macos-13 ]
         node-version: [ 16.x, 18.x, 20.x ]
     steps:
       - name: Code checkout
