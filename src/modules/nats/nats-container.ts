@@ -13,7 +13,7 @@ const PASS_ARGUMENT_KEY = "--pass";
 export class NatsContainer extends GenericContainer {
   private args: { [name: string]: string } = {};
 
-  constructor(image = "nats:2.8-alpine") {
+  constructor(image = "nats:2.8.4-alpine") {
     super(image);
     this.args[USER_ARGUMENT_KEY] = "test";
     this.args[PASS_ARGUMENT_KEY] = "test";

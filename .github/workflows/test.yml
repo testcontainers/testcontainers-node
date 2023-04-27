@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os-version: [ ubuntu-latest ]
+        os-version: [ ubuntu-22.04 ]
         node-version: [ 16.x, 18.x, 20.x ]
     steps:
       - name: Code checkout
@@ -37,7 +37,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os-version: [ ubuntu-latest ]
+        os-version: [ ubuntu-22.04 ]
         node-version: [ 16.x, 18.x, 20.x ]
     steps:
       - name: Code checkout
@@ -62,7 +62,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os-version: [ ubuntu-latest ]
+        os-version: [ ubuntu-22.04 ]
         node-version: [ 16.x, 18.x, 20.x ]
     steps:
       - name: Code checkout
@@ -99,7 +99,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os-version: [ macos-latest ]
+        os-version: [ macos-12 ]
         node-version: [ 16.x, 18.x, 20.x ]
     steps:
       - name: Code checkout
@@ -129,7 +129,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os-version: [ macos-latest ]
+        os-version: [ macos-12 ]
         node-version: [ 16.x, 18.x, 20.x ]
     steps:
       - name: Code checkout
@@ -208,7 +208,7 @@ jobs:
     runs-on: ${{ matrix.os-version }}
     strategy:
       matrix:
-        os-version: [ ubuntu-latest ]
+        os-version: [ ubuntu-22.04 ]
         node-version: [ 16.x, 18.x, 20.x ]
     steps:
       - name: Code checkout
