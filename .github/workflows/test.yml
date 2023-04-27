@@ -77,7 +77,7 @@ jobs:
               https://download.opensuse.org/repositories/devel:kubic:libcontainers:unstable/Debian_Testing/ /" \
             | sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:unstable.list > /dev/null
           sudo apt-get update
-          sudo apt-get -y install podman=4.4.4
+          sudo apt-get -y install podman=4:4.4.4-0debian12+obs73.9
           systemctl enable --now --user podman podman.socket
           podman info
       - name: Set environment
