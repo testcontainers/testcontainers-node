@@ -106,7 +106,7 @@ jobs:
         uses: actions/checkout@v3
       - name: Setup Colima
         run: |
-          brew install docker docker-compose
+          brew install docker docker-compose colima
           colima start --cpu 3 --memory 14 --disk 14 --runtime docker
           colima status
           colima --version
