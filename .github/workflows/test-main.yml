@@ -112,7 +112,9 @@ jobs:
         uses: actions/checkout@v3
       - name: Setup Colima
         run: |
-          brew install docker@23.05 docker-compose@2.17.3 colima@0.5.4
+          brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/d6f7c6772528a824d85706780d686ec4b2a14354/Formula/docker.rb
+          brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/d6f7c6772528a824d85706780d686ec4b2a14354/Formula/docker-compose.rb 
+          brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/master/Formula/colima.rb
           colima start --cpu 3 --memory 14 --disk 14 --runtime docker 
           colima status
           colima --version
@@ -142,8 +144,9 @@ jobs:
         uses: actions/checkout@v3
       - name: Setup Rancher Desktop
         run: |
-          brew install docker@23.05 docker-compose@2.17.3
-          brew install --cask rancher@1.8.1
+          brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/d6f7c6772528a824d85706780d686ec4b2a14354/Formula/docker.rb
+          brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/d6f7c6772528a824d85706780d686ec4b2a14354/Formula/docker-compose.rb
+          brew install --cask https://raw.githubusercontent.com/Homebrew/homebrew-cask/master/Casks/rancher.rb
           
           TIMEOUT_SECS_CLI_TOOLS=60
           TIMEOUT_SECS_USER_SOCKET=300
