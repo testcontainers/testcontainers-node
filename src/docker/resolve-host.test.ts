@@ -1,15 +1,32 @@
 import { resolveHost } from "./resolve-host";
-import { existsSync } from "fs";
-import { runInContainer } from "./functions/run-in-container";
 import Dockerode from "dockerode";
 
-jest.mock("fs");
-jest.mock("dockerode");
-jest.mock("./functions/run-in-container");
+const mockExistsSync = jest.fn();
+jest.mock("fs", () => ({
+  existsSync: () => mockExistsSync(),
+}));
 
-const mockDockerode = jest.mocked(Dockerode);
-const mockExistsSync = jest.mocked(existsSync);
-const mockRunInContainer = jest.mocked(runInContainer);
+const mockInspectNetwork = jest.fn();
+const mockGetNetwork = jest.fn();
+jest.mock(
+  "dockerode",
+  () =>
+    function () {
+      return {
+        getNetwork: (...args: unknown[]) => {
+          mockGetNetwork.mockImplementation(() => ({
+            inspect: mockInspectNetwork,
+          }));
+          return mockGetNetwork(...args);
+        },
+      };
+    }
+);
+
+const runInContainerMock = jest.fn();
+jest.mock("./functions/run-in-container", () => ({
+  runInContainer: () => runInContainerMock(),
+}));
 
 test("should return TESTCONTAINERS_HOST_OVERRIDE from environment", async () => {
   const host = await resolveHost(new Dockerode(), "docker", "", "", {
@@ -36,18 +53,11 @@ test("should return localhost for unix and npipe protocols when not running in a
 
 test("should return host from gateway when running in a container", async () => {
   mockExistsSync.mockReturnValue(true);
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  mockDockerode.mockImplementation(() => ({
-    getNetwork: () => ({
-      inspect: () =>
-        Promise.resolve({
-          IPAM: {
-            Config: [{ Gateway: "172.0.0.1" }],
-          },
-        }),
-    }),
-  }));
+  mockInspectNetwork.mockResolvedValue({
+    IPAM: {
+      Config: [{ Gateway: "172.0.0.1" }],
+    },
+  });
 
   for (const uri of ["unix://docker:2375", "npipe://docker:2375"]) {
     const host = await resolveHost(new Dockerode(), "docker", "", uri, {});
@@ -57,17 +67,11 @@ test("should return host from gateway when running in a container", async () => 
 
 test("should use bridge network as gateway for Docker provider", async () => {
   mockExistsSync.mockReturnValue(true);
-  const mockGetNetwork = jest.fn(() => ({
-    inspect: () =>
-      Promise.resolve({
-        IPAM: {
-          Config: [{ Gateway: "172.0.0.1" }],
-        },
-      }),
-  }));
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  mockDockerode.mockImplementation(() => ({ getNetwork: mockGetNetwork }));
+  mockInspectNetwork.mockResolvedValue({
+    IPAM: {
+      Config: [{ Gateway: "172.0.0.1" }],
+    },
+  });
 
   for (const uri of ["unix://docker:2375", "npipe://docker:2375"]) {
     await resolveHost(new Dockerode(), "docker", "", uri, {});
@@ -77,17 +81,11 @@ test("should use bridge network as gateway for Docker provider", async () => {
 
 test("should use podman network as gateway for Podman provider", async () => {
   mockExistsSync.mockReturnValue(true);
-  const mockGetNetwork = jest.fn(() => ({
-    inspect: () =>
-      Promise.resolve({
-        IPAM: {
-          Config: [{ Gateway: "172.0.0.1" }],
-        },
-      }),
-  }));
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  mockDockerode.mockImplementation(() => ({ getNetwork: mockGetNetwork }));
+  mockInspectNetwork.mockResolvedValue({
+    IPAM: {
+      Config: [{ Gateway: "172.0.0.1" }],
+    },
+  });
 
   for (const uri of ["unix://docker:2375", "npipe://docker:2375"]) {
     await resolveHost(new Dockerode(), "podman", "", uri, {});
@@ -97,14 +95,8 @@ test("should use podman network as gateway for Podman provider", async () => {
 
 test("should return host from default gateway when running in a container", async () => {
   mockExistsSync.mockReturnValue(true);
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  mockDockerode.mockImplementation(() => ({
-    getNetwork: () => ({
-      inspect: () => Promise.resolve({}),
-    }),
-  }));
-  mockRunInContainer.mockReturnValue(Promise.resolve("172.0.0.2"));
+  mockInspectNetwork.mockResolvedValue({});
+  runInContainerMock.mockResolvedValue("172.0.0.2");
 
   for (const uri of ["unix://docker:2375", "npipe://docker:2375"]) {
     const host = await resolveHost(new Dockerode(), "docker", "", uri, {});
@@ -114,14 +106,8 @@ test("should return host from default gateway when running in a container", asyn
 
 test("should return localhost if unable to find gateway", async () => {
   mockExistsSync.mockReturnValue(true);
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  mockDockerode.mockImplementation(() => ({
-    getNetwork: () => ({
-      inspect: () => Promise.resolve({}),
-    }),
-  }));
-  mockRunInContainer.mockReturnValue(Promise.resolve(undefined));
+  mockInspectNetwork.mockResolvedValue({});
+  runInContainerMock.mockResolvedValue(undefined);
 
   for (const uri of ["unix://docker:2375", "npipe://docker:2375"]) {
     const host = await resolveHost(new Dockerode(), "docker", "", uri, {});
