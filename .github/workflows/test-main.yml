@@ -78,7 +78,7 @@ jobs:
           curl -fsSL https://download.opensuse.org/repositories/devel:kubic:libcontainers:unstable/xUbuntu_$(lsb_release -rs)/Release.key | gpg --dearmor | sudo tee /etc/apt/keyrings/devel_kubic_libcontainers_unstable.gpg > /dev/null
           echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/devel_kubic_libcontainers_unstable.gpg] https://download.opensuse.org/repositories/devel:kubic:libcontainers:unstable/xUbuntu_$(lsb_release -rs)/ /" | sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:unstable.list > /dev/null
           sudo apt-get update
-          sudo apt-get -y install podman=4:4.4.4-0debian12+obs73.9
+          sudo apt-get -y install podman=4:4.5.0-0ubuntu22.04+obs74.8
           systemctl enable --now --user podman podman.socket
           podman info
       - name: Set environment
