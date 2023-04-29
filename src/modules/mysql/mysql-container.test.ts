@@ -24,6 +24,32 @@ describe("MySqlContainer", () => {
   });
   // }
 
+  // uriConnect {
+  it("should work with database URI", async () => {
+    const username = "testUser";
+    const password = "testPassword";
+    const database = "testDB";
+
+    // Test non-root user
+    const container = await new MySqlContainer()
+      .withUsername(username)
+      .withUserPassword(password)
+      .withDatabase(database)
+      .start();
+    expect(container.getConnectionUri()).toEqual(
+      `mysql://${username}:${password}@${container.getHost()}:${container.getPort()}/${database}`
+    );
+    await container.stop();
+
+    // Test root user
+    const rootContainer = await new MySqlContainer().withRootPassword(password).withDatabase(database).start();
+    expect(rootContainer.getConnectionUri(true)).toEqual(
+      `mysql://root:${password}@${rootContainer.getHost()}:${rootContainer.getPort()}/${database}`
+    );
+    await rootContainer.stop();
+  });
+  // }
+
   // setDatabase {
   it("should set database", async () => {
     const container = await new MySqlContainer().withDatabase("customDatabase").start();
