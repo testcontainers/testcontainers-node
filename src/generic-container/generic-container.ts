@@ -248,10 +248,6 @@ export class GenericContainer implements TestContainer {
     reused: boolean
   ): Promise<void>;
 
-  protected get hasExposedPorts(): boolean {
-    return this.opts.exposedPorts.length !== 0;
-  }
-
   public withCommand(command: string[]): this {
     this.opts.command = command;
     return this;
@@ -268,32 +264,37 @@ export class GenericContainer implements TestContainer {
   }
 
   public withLabels(labels: Labels): this {
-    this.opts.labels = { ...this.opts.labels, ...labels };
+    this.opts.labels = labels;
     return this;
   }
 
   public withEnvironment(environment: Environment): this {
+    this.opts.environment = environment;
+    return this;
+  }
+
+  public addEnvironment(environment: Environment): this {
     this.opts.environment = { ...this.opts.environment, ...environment };
     return this;
   }
 
   public withTmpFs(tmpFs: TmpFs): this {
-    this.opts.tmpFs = { ...this.opts.tmpFs, ...tmpFs };
+    this.opts.tmpFs = tmpFs;
     return this;
   }
 
   public withUlimits(ulimits: Ulimits): this {
-    this.opts.ulimits = { ...this.opts.ulimits, ...ulimits };
+    this.opts.ulimits = ulimits;
     return this;
   }
 
   public withAddedCapabilities(...capabilities: string[]): this {
-    this.opts.addedCapabilities = [...(this.opts.addedCapabilities ?? []), ...capabilities];
+    this.opts.addedCapabilities = capabilities;
     return this;
   }
 
   public withDroppedCapabilities(...capabilities: string[]): this {
-    this.opts.droppedCapabilities = [...(this.opts.droppedCapabilities ?? []), ...capabilities];
+    this.opts.droppedCapabilities = capabilities;
     return this;
   }
 
@@ -308,16 +309,21 @@ export class GenericContainer implements TestContainer {
   }
 
   public withNetworkAliases(...networkAliases: string[]): this {
-    this.networkAliases = [...this.networkAliases, ...networkAliases];
+    this.networkAliases = networkAliases;
     return this;
   }
 
   public withExtraHosts(extraHosts: ExtraHost[]): this {
-    this.opts.extraHosts = [...this.opts.extraHosts, ...extraHosts];
+    this.opts.extraHosts = extraHosts;
     return this;
   }
 
   public withExposedPorts(...ports: PortWithOptionalBinding[]): this {
+    this.opts.exposedPorts = ports;
+    return this;
+  }
+
+  public addExposedPorts(...ports: PortWithOptionalBinding[]): this {
     this.opts.exposedPorts = [...this.opts.exposedPorts, ...ports];
     return this;
   }
@@ -384,26 +390,27 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
-  protected getTarToCopy(): archiver.Archiver {
-    if (!this.tarToCopy) {
-      this.tarToCopy = archiver("tar");
-    }
-    return this.tarToCopy;
-  }
-
   public withWorkingDir(workingDir: string): this {
     this.opts.workingDir = workingDir;
     return this;
   }
 
+  /**
+   * Memory and CPU units from here: https://docs.docker.com/engine/api/v1.42/#tag/Container/operation/ContainerCreate
+   */
   public withResourcesQuota({ memory, cpu }: ResourcesQuota): this {
-    // Memory and CPU units from here: https://docs.docker.com/engine/api/v1.42/#tag/Container/operation/ContainerCreate
-    // see Memory, NanoCpus parameters
     const ram = memory !== undefined ? memory * 1024 ** 3 : undefined;
     const cpuQuota = cpu !== undefined ? cpu * 10 ** 9 : undefined;
 
     this.opts.resourcesQuota = { memory: ram, cpu: cpuQuota };
 
     return this;
+  }
+
+  private getTarToCopy(): archiver.Archiver {
+    if (!this.tarToCopy) {
+      this.tarToCopy = archiver("tar");
+    }
+    return this.tarToCopy;
   }
 }

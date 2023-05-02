@@ -15,6 +15,27 @@ export class Neo4jContainer extends GenericContainer {
     super(image);
   }
 
+  protected override async beforeContainerStarted(): Promise<void> {
+    this.withExposedPorts(BOLT_PORT, HTTP_PORT)
+      .withWaitStrategy(Wait.forLogMessage("Started."))
+      .withEnvironment({ NEO4J_AUTH: `${USERNAME}/${this.password}` })
+      .withStartupTimeout(120_000);
+
+    if (this.apoc) {
+      this.addEnvironment({
+        NEO4JLABS_PLUGINS: '["apoc"]',
+        NEO4J_dbms_security_procedures_unrestricted: "apoc.*",
+      });
+    }
+
+    if (this.ttl) {
+      this.addEnvironment({
+        NEO4J_apoc_ttl_enabled: "true",
+        NEO4J_apoc_ttl_schedule: this.ttl.toString(),
+      });
+    }
+  }
+
   public withPassword(password: string): this {
     this.password = password;
     return this;
@@ -31,25 +52,6 @@ export class Neo4jContainer extends GenericContainer {
   }
 
   public override async start(): Promise<StartedNeo4jContainer> {
-    this.withExposedPorts(...(this.hasExposedPorts ? this.opts.exposedPorts : [BOLT_PORT, HTTP_PORT]))
-      .withWaitStrategy(Wait.forLogMessage("Started."))
-      .withEnvironment({ NEO4J_AUTH: `${USERNAME}/${this.password}` })
-      .withStartupTimeout(120_000);
-
-    if (this.apoc) {
-      this.withEnvironment({
-        NEO4JLABS_PLUGINS: '["apoc"]',
-        NEO4J_dbms_security_procedures_unrestricted: "apoc.*",
-      });
-    }
-
-    if (this.ttl) {
-      this.withEnvironment({
-        NEO4J_apoc_ttl_enabled: "true",
-        NEO4J_apoc_ttl_schedule: this.ttl.toString(),
-      });
-    }
-
     return new StartedNeo4jContainer(await super.start(), this.password);
   }
 }

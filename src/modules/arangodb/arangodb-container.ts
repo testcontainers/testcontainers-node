@@ -10,17 +10,19 @@ export class ArangoDBContainer extends GenericContainer {
     super(image);
   }
 
+  protected override async beforeContainerStarted(): Promise<void> {
+    this.withExposedPorts(ARANGODB_PORT)
+      .withWaitStrategy(Wait.forLogMessage("Have fun!"))
+      .withEnvironment({ ARANGO_ROOT_PASSWORD: this.password })
+      .withStartupTimeout(120_000);
+  }
+
   public withPassword(password: string): this {
     this.password = password;
     return this;
   }
 
   public override async start(): Promise<StartedArangoContainer> {
-    this.withExposedPorts(...(this.hasExposedPorts ? this.opts.exposedPorts : [ARANGODB_PORT]))
-      .withWaitStrategy(Wait.forLogMessage("Have fun!"))
-      .withEnvironment({ ARANGO_ROOT_PASSWORD: this.password })
-      .withStartupTimeout(120_000);
-
     return new StartedArangoContainer(await super.start(), this.password);
   }
 }

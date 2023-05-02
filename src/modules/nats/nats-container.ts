@@ -19,6 +19,24 @@ export class NatsContainer extends GenericContainer {
     this.args[PASS_ARGUMENT_KEY] = "test";
   }
 
+  protected override async beforeContainerStarted(): Promise<void> {
+    function buildCmdsFromArgs(args: { [p: string]: string }): string[] {
+      const result: string[] = [];
+      result.push("nats-server");
+
+      for (const argsKey in args) {
+        result.push(argsKey);
+        result.push(args[argsKey]);
+      }
+      return result;
+    }
+
+    this.withCommand(buildCmdsFromArgs(this.args))
+      .withExposedPorts(CLIENT_PORT, ROUTING_PORT_FOR_CLUSTERING, HTTP_MANAGEMENT_PORT)
+      .withWaitStrategy(Wait.forLogMessage(/.*Server is ready.*/))
+      .withStartupTimeout(120_000);
+  }
+
   public withUsername(user: string): this {
     this.args[USER_ARGUMENT_KEY] = user;
     return this;
@@ -48,26 +66,6 @@ export class NatsContainer extends GenericContainer {
   }
 
   public override async start(): Promise<StartedNatsContainer> {
-    function buildCmdsFromArgs(args: { [p: string]: string }): string[] {
-      const result: string[] = [];
-      result.push("nats-server");
-
-      for (const argsKey in args) {
-        result.push(argsKey);
-        result.push(args[argsKey]);
-      }
-      return result;
-    }
-
-    this.withCommand(buildCmdsFromArgs(this.args))
-      .withExposedPorts(
-        ...(this.hasExposedPorts
-          ? this.opts.exposedPorts
-          : [CLIENT_PORT, ROUTING_PORT_FOR_CLUSTERING, HTTP_MANAGEMENT_PORT])
-      )
-      .withWaitStrategy(Wait.forLogMessage(/.*Server is ready.*/))
-      .withStartupTimeout(120_000);
-
     return new StartedNatsContainer(await super.start(), this.getUser(), this.getPass());
   }
 

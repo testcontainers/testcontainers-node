@@ -21,6 +21,8 @@ export interface TestContainer {
 
   withEnvironment(environment: Environment): this;
 
+  addEnvironment(environment: Environment): this;
+
   withCommand(command: string[]): this;
 
   withEntrypoint(entrypoint: string[]): this;
@@ -34,6 +36,8 @@ export interface TestContainer {
   withDroppedCapabilities(...capabilities: string[]): this;
 
   withExposedPorts(...ports: PortWithOptionalBinding[]): this;
+
+  addExposedPorts(...ports: PortWithOptionalBinding[]): this;
 
   withBindMounts(bindMounts: BindMount[]): this;
 

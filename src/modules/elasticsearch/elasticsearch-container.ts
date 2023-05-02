@@ -8,8 +8,8 @@ export class ElasticsearchContainer extends GenericContainer {
     super(image);
   }
 
-  public override async start(): Promise<StartedElasticsearchContainer> {
-    this.withExposedPorts(...(this.hasExposedPorts ? this.opts.exposedPorts : [ELASTIC_SEARCH_HTTP_PORT]))
+  protected override async beforeContainerStarted(): Promise<void> {
+    this.withExposedPorts(ELASTIC_SEARCH_HTTP_PORT)
       .withEnvironment({ "discovery.type": "single-node" })
       .withCopyContentToContainer([
         {
@@ -18,7 +18,9 @@ export class ElasticsearchContainer extends GenericContainer {
         },
       ])
       .withStartupTimeout(120_000);
+  }
 
+  public override async start(): Promise<StartedElasticsearchContainer> {
     return new StartedElasticsearchContainer(await super.start());
   }
 }

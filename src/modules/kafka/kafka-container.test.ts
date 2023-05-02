@@ -11,7 +11,7 @@ describe("KafkaContainer", () => {
 
   // connectBuiltInZK {
   it("should connect using in-built zoo-keeper", async () => {
-    const kafkaContainer = await new KafkaContainer().withExposedPorts(9093).start();
+    const kafkaContainer = await new KafkaContainer().start();
 
     await testPubSub(kafkaContainer);
 
@@ -20,7 +20,7 @@ describe("KafkaContainer", () => {
   // }
 
   it("should connect using in-built zoo-keeper and custom images", async () => {
-    const kafkaContainer = await new KafkaContainer(KAFKA_IMAGE).withExposedPorts(9093).start();
+    const kafkaContainer = await new KafkaContainer(KAFKA_IMAGE).start();
 
     await testPubSub(kafkaContainer);
 
@@ -30,7 +30,7 @@ describe("KafkaContainer", () => {
   it("should connect using in-built zoo-keeper and custom network", async () => {
     const network = await new Network().start();
 
-    const kafkaContainer = await new KafkaContainer().withNetwork(network).withExposedPorts(9093).start();
+    const kafkaContainer = await new KafkaContainer().withNetwork(network).start();
 
     await testPubSub(kafkaContainer);
 
@@ -54,7 +54,7 @@ describe("KafkaContainer", () => {
     const kafkaContainer = await new KafkaContainer()
       .withNetwork(network)
       .withZooKeeper(zooKeeperHost, zooKeeperPort)
-      .withExposedPorts(9093)
+
       .start();
 
     await testPubSub(kafkaContainer);
