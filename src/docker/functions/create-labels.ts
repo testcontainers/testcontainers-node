@@ -21,10 +21,6 @@ export const createLabels = (
     [LABEL_TESTCONTAINERS_VERSION]: version,
   };
 
-  if (dockerImageName && dockerImageName.isReaper()) {
-    return labels;
-  }
-
   if (!reusable) {
     labels[LABEL_TESTCONTAINERS_SESSION_ID] = sessionId;
   }

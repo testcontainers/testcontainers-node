@@ -12,23 +12,16 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
     super();
   }
 
-  public async waitUntilReady(
-    container: Dockerode.Container,
-    host: string,
-    boundPorts: BoundPorts,
-    startTime?: Date
-  ): Promise<void> {
+  public async waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts, startTime?: Date): Promise<void> {
     log.debug(`Waiting for log message "${this.message}" for ${container.id}`);
 
     const stream = await containerLogs(container, { since: startTime });
-
     return new Promise((resolve, reject) => {
-      const startupTimeout = this.startupTimeout;
       const timeout = setTimeout(() => {
-        const message = `Log message "${this.message}" not received after ${startupTimeout}ms for ${container.id}`;
+        const message = `Log message "${this.message}" not received after ${this.startupTimeout}ms for ${container.id}`;
         log.error(message);
         reject(new Error(message));
-      }, startupTimeout);
+      }, this.startupTimeout);
 
       const comparisonFn: (line: string) => boolean = (line: string) => {
         if (this.message instanceof RegExp) {

@@ -13,7 +13,7 @@ export class ElasticsearchContainer extends GenericContainer {
       .withEnvironment({ "discovery.type": "single-node" })
       .withCopyContentToContainer([
         {
-          content: "-Xms2G\n-Xmx2G\n",
+          content: "-Xmx2G\n",
           target: "/usr/share/elasticsearch/config/jvm.options.d/elasticsearch-default-memory-vm.options",
         },
       ])

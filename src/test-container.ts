@@ -80,12 +80,6 @@ export interface DockerComposeDownOptions {
   removeVolumes: boolean;
 }
 
-export interface ExecOptions {
-  tty: boolean;
-  detach: boolean;
-  stdin: boolean;
-}
-
 export interface StartedTestContainer {
   stop(options?: Partial<StopOptions>): Promise<StoppedTestContainer>;
 
@@ -109,7 +103,7 @@ export interface StartedTestContainer {
 
   getIpAddress(networkName: string): string;
 
-  exec(command: string[], options?: Partial<ExecOptions>): Promise<ExecResult>;
+  exec(command: string[]): Promise<ExecResult>;
 
   logs(): Promise<Readable>;
 }

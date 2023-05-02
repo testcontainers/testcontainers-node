@@ -1,10 +1,14 @@
 import { Readable } from "stream";
 import { ExecResult } from "../../types";
 import Dockerode from "dockerode";
-import { log, execLog } from "../../../logger";
+import { execLog, log } from "../../../logger";
 import byline from "byline";
+import { demuxStream } from "../demux-stream";
+import { Provider } from "../../docker-client";
 
 export const execContainer = async (
+  dockerode: Dockerode,
+  provider: Provider,
   container: Dockerode.Container,
   command: string[],
   shouldLog = true
@@ -18,7 +22,7 @@ export const execContainer = async (
       AttachStderr: true,
     });
 
-    const stream = await startExec(exec);
+    const stream = await startExec(dockerode, provider, exec);
 
     stream.on("data", (chunk) => chunks.push(chunk));
 
@@ -40,11 +44,14 @@ export const execContainer = async (
   }
 };
 
-const startExec = async (exec: Dockerode.Exec): Promise<Readable> => {
+const startExec = async (dockerode: Dockerode, provider: Provider, exec: Dockerode.Exec): Promise<Readable> => {
   try {
     const stream = await exec.start({ stdin: true, Detach: false, Tty: true });
-    stream.setEncoding("utf-8");
-    return stream;
+    if (provider === "podman") {
+      return demuxStream(dockerode, stream);
+    } else {
+      return stream;
+    }
   } catch (err) {
     log.error(`Failed to start exec: ${err}`);
     throw err;

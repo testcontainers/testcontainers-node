@@ -4,6 +4,7 @@ import { AbstractWaitStrategy } from "./wait-strategy";
 import { IntervalRetryStrategy } from "../retry-strategy";
 import fetch, { Response } from "node-fetch";
 import https, { Agent } from "https";
+import { dockerClient } from "../docker/docker-client";
 
 export class HttpWaitStrategy extends AbstractWaitStrategy {
   private readonly path: string;
@@ -68,7 +69,9 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
     return this;
   }
 
-  public async waitUntilReady(container: Dockerode.Container, host: string, boundPorts: BoundPorts): Promise<void> {
+  public async waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void> {
+    const { host } = await dockerClient();
+
     await new IntervalRetryStrategy<Response | undefined, Error>(this.readTimeout).retryUntil(
       async () => {
         try {

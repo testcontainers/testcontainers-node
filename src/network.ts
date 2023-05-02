@@ -5,28 +5,31 @@ import { createNetwork, CreateNetworkOptions } from "./docker/functions/network/
 import { removeNetwork } from "./docker/functions/network/remove-network";
 
 export class Network {
-  private readonly createNetworkOptions: CreateNetworkOptions;
+  constructor(
+    private readonly createNetworkOptions: Partial<CreateNetworkOptions> = {},
+    private readonly uuid: Uuid = new RandomUuid()
+  ) {
+    this.createNetworkOptions = createNetworkOptions;
+  }
 
-  constructor(createNetworkOptions: Partial<CreateNetworkOptions> = {}, uuid: Uuid = new RandomUuid()) {
-    this.createNetworkOptions = {
-      name: uuid.nextUuid(),
+  public async start(): Promise<StartedNetwork> {
+    const options = {
+      name: this.uuid.nextUuid(),
       driver: "bridge",
       checkDuplicate: true,
       internal: false,
       attachable: false,
       ingress: false,
       enableIPv6: false,
-      ...createNetworkOptions,
+      ...this.createNetworkOptions,
     };
-  }
 
-  public async start(): Promise<StartedNetwork> {
     await ReaperInstance.getInstance();
 
-    const id = await createNetwork(this.createNetworkOptions);
+    const id = await createNetwork(options);
     log.info(`Started network with ID: ${id}`);
 
-    return new StartedNetwork(id, this.createNetworkOptions);
+    return new StartedNetwork(id, options);
   }
 }
 

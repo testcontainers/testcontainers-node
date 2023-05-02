@@ -20,7 +20,12 @@ export class RootlessUnixSocketStrategy implements DockerClientStrategy {
       return;
     }
 
-    this.socketPath = [this.getSocketPathFromEnv(), this.getSocketPathFromHomeDir(), this.getSocketPathFromRunDir()]
+    this.socketPath = [
+      this.getSocketPathFromEnv(),
+      this.getSocketPathFromHomeRunDir(),
+      this.getSocketPathFromHomeDesktopDir(),
+      this.getSocketPathFromRunDir(),
+    ]
       .filter(isDefined)
       .find((candidateSocketPath) => existsSync(candidateSocketPath));
 
@@ -37,8 +42,12 @@ export class RootlessUnixSocketStrategy implements DockerClientStrategy {
     }
   }
 
-  private getSocketPathFromHomeDir(): string {
+  private getSocketPathFromHomeRunDir(): string {
     return path.join(os.homedir(), ".docker", "run", "docker.sock");
+  }
+
+  private getSocketPathFromHomeDesktopDir(): string {
+    return path.join(os.homedir(), ".docker", "desktop", "docker.sock");
   }
 
   private getSocketPathFromRunDir(): string {

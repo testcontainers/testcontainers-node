@@ -3,8 +3,14 @@ import path from "path";
 import getPort from "get-port";
 import { GenericContainer } from "./generic-container";
 import { AlwaysPullPolicy } from "../pull-policy";
-import { checkContainerIsHealthy, getEvents } from "../test-helper";
+import {
+  checkContainerIsHealthy,
+  getDockerEventStream,
+  getRunningContainerNames,
+  waitForDockerEvent,
+} from "../test-helper";
 import { getContainerById } from "../docker/functions/container/get-container";
+import { RandomUuid } from "../uuid";
 
 describe("GenericContainer", () => {
   jest.setTimeout(180_000);
@@ -220,30 +226,17 @@ describe("GenericContainer", () => {
   });
 
   it("should use pull policy", async () => {
-    const container1 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
-    const events = await getEvents();
-    const pullPromise = new Promise<void>((resolve, reject) => {
-      events.on("data", (data) => {
-        try {
-          if (JSON.parse(data).status === "pull") {
-            resolve();
-          }
-        } catch (err) {
-          reject(`Unexpected err: ${err}`);
-        }
-      });
-    });
+    const container = new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080);
 
-    const container2 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
-      .withPullPolicy(new AlwaysPullPolicy())
-      .withExposedPorts(8080)
-      .start();
+    const startedContainer1 = await container.start();
+    const dockerEventStream = await getDockerEventStream();
+    const dockerPullEventPromise = waitForDockerEvent(dockerEventStream, "pull");
+    const startedContainer2 = await container.withPullPolicy(new AlwaysPullPolicy()).start();
+    await dockerPullEventPromise;
 
-    await pullPromise;
-
-    events.destroy();
-    await container1.stop();
-    await container2.stop();
+    dockerEventStream.destroy();
+    await startedContainer1.stop();
+    await startedContainer2.stop();
   });
 
   it("should set the IPC mode", async () => {
@@ -318,5 +311,30 @@ describe("GenericContainer", () => {
     expect(output).not.toContain("Dockerfile");
 
     await startedContainer.stop();
+  });
+
+  it("should stop the container", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withName(`container-${new RandomUuid().nextUuid()}`)
+      .start();
+
+    await container.stop();
+
+    expect(await getRunningContainerNames()).not.toContain(container.getName());
+  });
+
+  it("should stop the container idempotently", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withName(`container-${new RandomUuid().nextUuid()}`)
+      .start();
+
+    const stopContainerPromises = Promise.all(
+      Array(5)
+        .fill(0)
+        .map(() => container.stop())
+    );
+
+    await expect(stopContainerPromises).resolves.not.toThrow();
+    expect(await getRunningContainerNames()).not.toContain(container.getName());
   });
 });

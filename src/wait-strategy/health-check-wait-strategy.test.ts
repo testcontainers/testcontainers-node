@@ -60,7 +60,7 @@ describe("HealthCheckWaitStrategy", () => {
   it("should stop the container when the health check wait strategy times out", async () => {
     const containerName = `container-${new RandomUuid().nextUuid()}`;
 
-    const context = path.resolve(fixtures, "docker-with-health-check");
+    const context = path.resolve(fixtures, "docker-with-health-check-with-start-period");
     const customGenericContainer = await GenericContainer.fromDockerfile(context).build();
     await expect(
       customGenericContainer

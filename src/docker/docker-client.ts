@@ -12,8 +12,11 @@ import { Readable } from "stream";
 import { DockerClientConfig, getDockerClientConfig } from "./docker-client-config";
 import { resolveHost } from "./resolve-host";
 
+export type Provider = "docker" | "podman";
+
 type DockerClient = {
   uri: string;
+  provider: Provider;
   host: string;
   hostIps: HostIps;
   dockerode: Dockerode;
@@ -39,14 +42,15 @@ const getDockerClient = async (): Promise<DockerClient> => {
       log.debug(`Testing Docker client strategy URI: ${uri}`);
       if (await isDockerDaemonReachable(dockerode)) {
         const indexServerAddress = (await getSystemInfo(dockerode)).dockerInfo.indexServerAddress;
-        const host = await resolveHost(dockerode, indexServerAddress, uri);
+        const provider: Provider = uri.includes("podman.sock") ? "podman" : "docker";
+        const host = await resolveHost(dockerode, provider, indexServerAddress, uri);
         const hostIps = await lookupHostIps(host);
         log.info(
           `Using Docker client strategy: ${strategy.getName()}, Docker host: ${host} (${hostIps
             .map((hostIp) => hostIp.address)
             .join(", ")})`
         );
-        return { uri, host, hostIps, dockerode, indexServerAddress, composeEnvironment };
+        return { uri, provider, host, hostIps, dockerode, indexServerAddress, composeEnvironment };
       } else {
         log.warn(`Docker client strategy ${strategy.getName()} is not reachable`);
       }

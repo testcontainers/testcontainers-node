@@ -10,7 +10,6 @@ export abstract class StartupCheckStrategy extends AbstractWaitStrategy {
 
   public override async waitUntilReady(container: Dockerode.Container): Promise<void> {
     const { dockerode } = await dockerClient();
-
     const startupStatus = await new IntervalRetryStrategy<StartupStatus, Error>(1000).retryUntil(
       async () => await this.checkStartupState(dockerode, container.id),
       (startupStatus) => startupStatus === "SUCCESS" || startupStatus === "FAIL",

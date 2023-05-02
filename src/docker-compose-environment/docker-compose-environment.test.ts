@@ -5,9 +5,12 @@ import { Wait } from "../wait-strategy/wait";
 import {
   checkEnvironmentContainerIsHealthy,
   composeContainerName,
+  getDockerEventStream,
   getRunningContainerNames,
   getVolumeNames,
+  waitForDockerEvent,
 } from "../test-helper";
+import { AlwaysPullPolicy } from "../pull-policy";
 
 describe("DockerComposeEnvironment", () => {
   jest.setTimeout(180_000);
@@ -36,6 +39,34 @@ describe("DockerComposeEnvironment", () => {
     await checkEnvironmentContainerIsHealthy(startedEnvironment, "custom_container_name");
 
     await startedEnvironment.down();
+  });
+
+  it("should use pull policy", async () => {
+    const env = new DockerComposeEnvironment(fixtures, "docker-compose-with-many-services.yml");
+
+    const startedEnv1 = await env.up();
+    const dockerEventStream = await getDockerEventStream();
+    const dockerPullEventPromise = waitForDockerEvent(dockerEventStream, "pull", 2);
+    const startedEnv2 = await env.withPullPolicy(new AlwaysPullPolicy()).up();
+    await dockerPullEventPromise;
+
+    dockerEventStream.destroy();
+    await startedEnv1.stop();
+    await startedEnv2.stop();
+  });
+
+  it("should use pull policy for specific service", async () => {
+    const env = new DockerComposeEnvironment(fixtures, "docker-compose-with-many-services.yml");
+
+    const startedEnv1 = await env.up(["service_2"]);
+    const dockerEventStream = await getDockerEventStream();
+    const dockerPullEventPromise = waitForDockerEvent(dockerEventStream, "pull");
+    const startedEnv2 = await env.withPullPolicy(new AlwaysPullPolicy()).up(["service_2"]);
+    await dockerPullEventPromise;
+
+    dockerEventStream.destroy();
+    await startedEnv1.stop();
+    await startedEnv2.stop();
   });
 
   it("should start environment with multiple compose files", async () => {
@@ -82,17 +113,6 @@ describe("DockerComposeEnvironment", () => {
     expect(await getRunningContainerNames()).not.toContain("custom_container_name");
   });
 
-  it("should stop the container when the health check wait strategy times out", async () => {
-    await expect(
-      new DockerComposeEnvironment(fixtures, "docker-compose-with-healthcheck.yml")
-        .withWaitStrategy(await composeContainerName("container"), Wait.forHealthCheck())
-        .withStartupTimeout(0)
-        .up()
-    ).rejects.toThrowError(`Health check not healthy after 0ms`);
-
-    expect(await getRunningContainerNames()).not.toContain("container_1");
-  });
-
   it("should support health check wait strategy", async () => {
     const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-healthcheck.yml")
       .withWaitStrategy(await composeContainerName("container"), Wait.forHealthCheck())
@@ -103,14 +123,15 @@ describe("DockerComposeEnvironment", () => {
     await startedEnvironment.down();
   });
 
-  it("should stop a docker-compose environment", async () => {
-    const environment1 = await new DockerComposeEnvironment(fixtures, "docker-compose-with-network.yml").up();
-    const environment2 = await new DockerComposeEnvironment(fixtures, "docker-compose-with-network.yml").up();
+  it("should stop the container when the health check wait strategy times out", async () => {
+    await expect(
+      new DockerComposeEnvironment(fixtures, "docker-compose-with-healthcheck-with-start-period.yml")
+        .withWaitStrategy(await composeContainerName("container"), Wait.forHealthCheck())
+        .withStartupTimeout(0)
+        .up()
+    ).rejects.toThrowError(`Health check not healthy after 0ms`);
 
-    const stoppedEnvironment = await environment2.stop();
-    await environment1.down();
-
-    await stoppedEnvironment.down();
+    expect(await getRunningContainerNames()).not.toContain("container_1");
   });
 
   it("should remove volumes when downing an environment", async () => {

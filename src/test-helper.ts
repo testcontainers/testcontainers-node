@@ -29,7 +29,7 @@ export const checkEnvironmentContainerIsHealthy = async (
   await checkContainerIsHealthy(container);
 };
 
-export const getEvents = async (opts: GetEventsOptions = {}): Promise<Readable> => {
+export const getDockerEventStream = async (opts: GetEventsOptions = {}): Promise<Readable> => {
   const { dockerode } = await dockerClient();
   const events = (await dockerode.getEvents(opts)) as Readable;
   events.setEncoding("utf-8");
@@ -49,6 +49,16 @@ export const getContainerIds = async (): Promise<string[]> => {
   const { dockerode } = await dockerClient();
   const containers = await dockerode.listContainers({ all: true });
   return containers.map((container) => container.Id);
+};
+
+export const checkImageExists = async (imageName: string): Promise<boolean> => {
+  const { dockerode } = await dockerClient();
+  try {
+    await dockerode.getImage(imageName.toString()).inspect();
+    return true;
+  } catch (err) {
+    return false;
+  }
 };
 
 export const getRunningNetworkIds = async (): Promise<string[]> => {
@@ -75,4 +85,21 @@ export const composeContainerName = async (serviceName: string, index = 1): Prom
   const { dockerode } = await dockerClient();
   const { dockerComposeInfo } = await getSystemInfo(dockerode);
   return dockerComposeInfo?.version.startsWith("1.") ? `${serviceName}_${index}` : `${serviceName}-${index}`;
+};
+
+export const waitForDockerEvent = async (eventStream: Readable, eventName: string, times = 1) => {
+  let currentTimes = 0;
+  return new Promise<void>((resolve) => {
+    eventStream.on("data", (data) => {
+      try {
+        if (JSON.parse(data).status === eventName) {
+          if (++currentTimes === times) {
+            resolve();
+          }
+        }
+      } catch (err) {
+        // ignored
+      }
+    });
+  });
 };

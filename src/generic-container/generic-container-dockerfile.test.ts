@@ -2,7 +2,7 @@ import path from "path";
 import { GenericContainer } from "./generic-container";
 import { AlwaysPullPolicy } from "../pull-policy";
 import { Wait } from "../wait-strategy/wait";
-import { checkContainerIsHealthy, getEvents } from "../test-helper";
+import { checkContainerIsHealthy, getDockerEventStream, waitForDockerEvent } from "../test-helper";
 
 describe("GenericContainer Dockerfile", () => {
   jest.setTimeout(180_000);
@@ -20,31 +20,18 @@ describe("GenericContainer Dockerfile", () => {
   });
 
   // https://github.com/containers/podman/issues/17779
-  if (!process.env["CI_PODMAN"]) {
+  if (!process.env.CI_PODMAN) {
     it("should use pull policy", async () => {
-      const containerSpec = GenericContainer.fromDockerfile(path.resolve(fixtures, "docker")).withPullPolicy(
-        new AlwaysPullPolicy()
-      );
+      const dockerfile = path.resolve(fixtures, "docker");
+      const containerSpec = GenericContainer.fromDockerfile(dockerfile).withPullPolicy(new AlwaysPullPolicy());
+
       await containerSpec.build();
-
-      const events = await getEvents();
-      const pullPromise = new Promise<void>((resolve) => {
-        events.on("data", (data) => {
-          try {
-            const { status } = JSON.parse(data);
-            if (status === "pull") {
-              resolve();
-            }
-          } catch {
-            // ignored
-          }
-        });
-      });
+      const dockerEventStream = await getDockerEventStream();
+      const dockerPullEventPromise = waitForDockerEvent(dockerEventStream, "pull");
       await containerSpec.build();
+      await dockerPullEventPromise;
 
-      await pullPromise;
-
-      events.destroy();
+      dockerEventStream.destroy();
     });
   }
 
