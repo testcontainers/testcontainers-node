@@ -316,7 +316,7 @@ import {
 } from "testcontainers";
 
 class CustomContainer extends GenericContainer {
-  protected override async beforeContainerStarted(): Promise<void> {
+  protected override async beforeContainerCreated(): Promise<void> {
     // ...
   }
   

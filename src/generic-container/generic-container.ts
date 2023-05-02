@@ -60,7 +60,7 @@ export class GenericContainer implements TestContainer {
     this.opts = initCreateContainerOptions(imageName, imageName.isReaper());
   }
 
-  protected beforeContainerStarted?(): Promise<void>;
+  protected beforeContainerCreated?(): Promise<void>;
 
   protected containerCreated?(containerId: string): Promise<void>;
 
@@ -78,8 +78,8 @@ export class GenericContainer implements TestContainer {
       await ReaperInstance.getInstance();
     }
 
-    if (this.beforeContainerStarted) {
-      await this.beforeContainerStarted();
+    if (this.beforeContainerCreated) {
+      await this.beforeContainerCreated();
     }
 
     if (!this.opts.imageName.isHelperContainer() && PortForwarderInstance.isRunning()) {

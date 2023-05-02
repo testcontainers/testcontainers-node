@@ -70,7 +70,7 @@ export class KafkaContainer extends GenericContainer {
     return this;
   }
 
-  protected override async beforeContainerStarted(): Promise<void> {
+  protected override async beforeContainerCreated(): Promise<void> {
     const network = this.networkMode && this.networkAliases.length > 0 ? this.networkAliases[0] : "localhost";
     this.withEnvironment({ KAFKA_ADVERTISED_LISTENERS: `BROKER://${network}:${KAFKA_BROKER_PORT}` });
 

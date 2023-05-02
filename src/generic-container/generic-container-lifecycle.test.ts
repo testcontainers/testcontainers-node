@@ -3,7 +3,7 @@ import { GenericContainer, AbstractStartedContainer, StartedTestContainer, Inspe
 describe("GenericContainer lifecycle", () => {
   jest.setTimeout(180_000);
 
-  let beforeContainerStarted: jest.Func;
+  let beforeContainerCreated: jest.Func;
   let containerCreated: jest.Func;
   let containerStarting: jest.Func;
   let containerStarted: jest.Func;
@@ -11,7 +11,7 @@ describe("GenericContainer lifecycle", () => {
   let containerStopped: jest.Func;
 
   beforeEach(() => {
-    beforeContainerStarted = jest.fn();
+    beforeContainerCreated = jest.fn();
     containerCreated = jest.fn();
     containerStarting = jest.fn();
     containerStarted = jest.fn();
@@ -24,7 +24,7 @@ describe("GenericContainer lifecycle", () => {
       .withExposedPorts(8080)
       .start();
 
-    expect(beforeContainerStarted).toHaveBeenCalled();
+    expect(beforeContainerCreated).toHaveBeenCalled();
     expect(containerCreated).toHaveBeenCalledWith(container.getId());
     expect(containerStarting).toHaveBeenCalledWith(false);
     expect(containerStarted).toHaveBeenCalledWith(false);
@@ -45,7 +45,7 @@ describe("GenericContainer lifecycle", () => {
       .start();
 
     expect(container1.getId()).toEqual(container2.getId());
-    expect(beforeContainerStarted).toHaveBeenCalled();
+    expect(beforeContainerCreated).toHaveBeenCalled();
     expect(containerCreated).not.toHaveBeenCalled();
     expect(containerStarting).toHaveBeenCalledWith(true);
     expect(containerStarted).toHaveBeenCalledWith(true);
@@ -54,8 +54,8 @@ describe("GenericContainer lifecycle", () => {
   });
 
   class CustomContainer extends GenericContainer {
-    protected override async beforeContainerStarted(): Promise<void> {
-      beforeContainerStarted();
+    protected override async beforeContainerCreated(): Promise<void> {
+      beforeContainerCreated();
     }
 
     protected override async containerCreated(containerId: string): Promise<void> {
