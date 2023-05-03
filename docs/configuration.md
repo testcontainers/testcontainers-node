@@ -10,6 +10,7 @@ All possible environment variable configurations for Testcontainers are found he
 | DEBUG    | testcontainers            | Enable testcontainers logs |
 | DEBUG    | testcontainers:containers | Enable container logs      |
 | DEBUG    | testcontainers:exec       | Enable container exec logs |
+| DEBUG    | testcontainers:container:${container-name} | Enable logs for single container by name |
 
 Note that you can enable multiple loggers, e.g: `DEBUG=testcontainers,testcontainers:exec`.
 
