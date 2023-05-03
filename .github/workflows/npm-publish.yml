@@ -9,7 +9,7 @@ on:
 
 jobs:
   commit-version:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
         with:
@@ -28,7 +28,7 @@ jobs:
 
   publish-npm:
     needs: commit-version
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
         with:

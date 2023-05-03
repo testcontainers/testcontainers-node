@@ -1,6 +1,7 @@
 import { Readable } from "stream";
 import Dockerode from "dockerode";
 import { log } from "../../../logger";
+import { streamToString } from "../../../stream-utils";
 
 export type PutContainerArchiveOptions = {
   container: Dockerode.Container;
@@ -10,7 +11,8 @@ export type PutContainerArchiveOptions = {
 
 export const putContainerArchive = async (options: PutContainerArchiveOptions): Promise<void> => {
   try {
-    await options.container.putArchive(options.stream, { path: options.containerPath });
+    const stream = await options.container.putArchive(options.stream, { path: options.containerPath });
+    await streamToString(Readable.from(stream));
   } catch (err) {
     log.error(`Failed to put archive to container ${options.container.id}: ${err}`);
     throw err;

@@ -1,12 +1,15 @@
 import { CredentialProvider } from "./credential-provider";
-import { ChildProcess, exec, spawn } from "child_process";
+import { ChildProcess } from "child_process";
 import { DockerConfig } from "./types";
 import { Readable, Writable } from "stream";
 import EventEmitter from "events";
 
-jest.mock("child_process");
-const mockExec = jest.mocked(exec, { shallow: true });
-const mockSpawn = jest.mocked(spawn, { shallow: true });
+const mockExec = jest.fn();
+const mockSpawn = jest.fn();
+jest.mock("child_process", () => ({
+  exec: (...args: unknown[]) => mockExec(...args),
+  spawn: (...args: unknown[]) => mockSpawn(...args),
+}));
 
 describe("CredentialProvider", () => {
   let credentialProvider: CredentialProvider;
@@ -110,16 +113,12 @@ describe("CredentialProvider", () => {
 
 function mockExecReturns(stdout: string) {
   mockExec.mockImplementationOnce((command, callback) => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     return callback(null, stdout);
   });
 }
 
 function mockExecThrows() {
   mockExec.mockImplementationOnce((command, callback) => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     return callback("An error occurred");
   });
 }

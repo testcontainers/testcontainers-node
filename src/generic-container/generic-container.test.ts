@@ -3,8 +3,14 @@ import path from "path";
 import getPort from "get-port";
 import { GenericContainer } from "./generic-container";
 import { AlwaysPullPolicy } from "../pull-policy";
-import { checkContainerIsHealthy, getDockerEventStream, waitForDockerEvent } from "../test-helper";
+import {
+  checkContainerIsHealthy,
+  getDockerEventStream,
+  getRunningContainerNames,
+  waitForDockerEvent,
+} from "../test-helper";
 import { getContainerById } from "../docker/functions/container/get-container";
+import { RandomUuid } from "../uuid";
 
 describe("GenericContainer", () => {
   jest.setTimeout(180_000);
@@ -305,5 +311,30 @@ describe("GenericContainer", () => {
     expect(output).not.toContain("Dockerfile");
 
     await startedContainer.stop();
+  });
+
+  it("should stop the container", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withName(`container-${new RandomUuid().nextUuid()}`)
+      .start();
+
+    await container.stop();
+
+    expect(await getRunningContainerNames()).not.toContain(container.getName());
+  });
+
+  it("should stop the container idempotently", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withName(`container-${new RandomUuid().nextUuid()}`)
+      .start();
+
+    const stopContainerPromises = Promise.all(
+      Array(5)
+        .fill(0)
+        .map(() => container.stop())
+    );
+
+    await expect(stopContainerPromises).resolves.not.toThrow();
+    expect(await getRunningContainerNames()).not.toContain(container.getName());
   });
 });
