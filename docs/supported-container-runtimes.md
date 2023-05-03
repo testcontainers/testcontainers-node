@@ -6,6 +6,12 @@ Works out of the box.
 
 ## Podman
 
+MacOS:
+```bash
+export DOCKER_HOST=$(podman machine inspect --format '{{.ConnectionInfo.PodmanSocket.Path}}')
+```
+
+Linux:
 ```bash
 export DOCKER_HOST=unix://${XDG_RUNTIME_DIR}/podman/podman.sock
 ```
