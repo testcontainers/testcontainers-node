@@ -206,9 +206,9 @@ export class GenericContainer implements TestContainer {
     }
 
     if (containerLog.enabled()) {
-      await this.logContainer(container, containerLog, containerName);
+      await this.logContainer(container, containerLog);
     } else if (currentContainerLog?.enabled()) {
-      await this.logContainer(container, currentContainerLog, containerName);
+      await this.logContainer(container, currentContainerLog);
     }
 
     if (this.containerStarting) {
@@ -235,12 +235,10 @@ export class GenericContainer implements TestContainer {
     return startedContainer;
   }
 
-  private async logContainer(container: Dockerode.Container, logger: Logger, name?: string) {
-    const containerName = name ? `${name}, ` : "";
-
+  private async logContainer(container: Dockerode.Container, logger: Logger) {
     (await containerLogs(container))
-      .on("data", (data) => logger.trace(`${containerName}${container.id}: ${data.trim()}`))
-      .on("err", (data) => logger.error(`${containerName}${container.id}: ${data.trim()}`));
+      .on("data", (data) => logger.trace(`${container.id}: ${data.trim()}`))
+      .on("err", (data) => logger.error(`${container.id}: ${data.trim()}`));
   }
 
   /**
