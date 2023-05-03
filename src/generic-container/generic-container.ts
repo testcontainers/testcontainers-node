@@ -1,7 +1,7 @@
 import archiver from "archiver";
 import AsyncLock from "async-lock";
 import { BoundPorts } from "../bound-ports";
-import { containerLog, log } from "../logger";
+import { containerLog, createContainerLogger, log, Logger } from "../logger";
 import { PortWithOptionalBinding } from "../port";
 import { DefaultPullPolicy, PullPolicy } from "../pull-policy";
 import { ReaperInstance } from "../reaper";
@@ -161,6 +161,8 @@ export class GenericContainer implements TestContainer {
 
   private async startContainer(createContainerOptions: CreateContainerOptions): Promise<StartedTestContainer> {
     const container = await createContainer(createContainerOptions);
+    const containerName = createContainerOptions.name;
+    const currentContainerLog = containerName ? createContainerLogger(containerName) : null;
 
     if (!this.opts.imageName.isHelperContainer() && PortForwarderInstance.isRunning()) {
       const portForwarder = await PortForwarderInstance.getInstance();
@@ -204,9 +206,9 @@ export class GenericContainer implements TestContainer {
     }
 
     if (containerLog.enabled()) {
-      (await containerLogs(container))
-        .on("data", (data) => containerLog.trace(`${container.id}: ${data.trim()}`))
-        .on("err", (data) => containerLog.error(`${container.id}: ${data.trim()}`));
+      await this.logContainer(container, containerLog, containerName);
+    } else if (currentContainerLog?.enabled()) {
+      await this.logContainer(container, currentContainerLog, containerName);
     }
 
     if (this.containerStarting) {
@@ -231,6 +233,14 @@ export class GenericContainer implements TestContainer {
     }
 
     return startedContainer;
+  }
+
+  private async logContainer(container: Dockerode.Container, logger: Logger, name?: string) {
+    const containerName = name ? `${name}, ` : "";
+
+    (await containerLogs(container))
+      .on("data", (data) => logger.trace(`${containerName}${container.id}: ${data.trim()}`))
+      .on("err", (data) => logger.error(`${containerName}${container.id}: ${data.trim()}`));
   }
 
   /**

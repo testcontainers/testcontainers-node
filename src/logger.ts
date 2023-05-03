@@ -75,6 +75,10 @@ export class FakeLogger implements Logger {
   }
 }
 
+export function createContainerLogger(containerName: string) {
+  return new DebugLogger(`testcontainers:container:${containerName}`);
+}
+
 export const log = new DebugLogger("testcontainers");
 export const containerLog = new DebugLogger("testcontainers:containers");
 export const execLog = new DebugLogger("testcontainers:exec");
