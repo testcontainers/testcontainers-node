@@ -37,7 +37,7 @@ const getDockerClient = async (): Promise<DockerClient> => {
       await strategy.init();
     }
     if (strategy.isApplicable()) {
-      log.debug(`Found potential Docker client strategy "${strategy.getName()}"`);
+      log.debug(`Found Docker client strategy "${strategy.getName()}"`);
       const { uri, dockerode, composeEnvironment } = await strategy.getDockerClient();
       log.debug(`Testing Docker client strategy "${uri}"...`);
       if (await isDockerDaemonReachable(dockerode)) {

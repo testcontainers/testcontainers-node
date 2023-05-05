@@ -8,7 +8,9 @@ export class PullStreamParser {
 
   public consume(stream: Readable): Promise<void> {
     return new Promise((resolve) => {
-      byline(stream).on("data", (line) => this.logger.trace(line, { imageName: this.dockerImageName.toString() }));
+      if (this.logger.enabled()) {
+        byline(stream).on("data", (line) => this.logger.trace(line, { imageName: this.dockerImageName.toString() }));
+      }
       stream.on("end", resolve);
     });
   }

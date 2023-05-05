@@ -10,16 +10,17 @@ export const defaultDockerComposeOptions = async ({
   ...options
 }: DockerComposeOptions): Promise<Partial<IDockerComposeOptions>> => {
   const { composeEnvironment } = await dockerClient();
+  const log = options.logger ?? composeLog;
 
   return {
     log: false,
-    callback: composeLog.enabled()
+    callback: log.enabled()
       ? (chunk) => {
           chunk
             .toString()
             .split(EOL)
             .filter(isNotEmptyString)
-            .forEach((line) => composeLog.trace(line.trim()));
+            .forEach((line) => log.trace(line.trim()));
         }
       : undefined,
     cwd: options.filePath,

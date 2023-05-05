@@ -410,6 +410,8 @@ const { output, exitCode } = await container.exec(["echo", "hello", "world"]);
 
 ## Streaming logs
 
+Logs can be consumed either from a started container:
+
 ```javascript
 const container = await new GenericContainer("alpine").start();
 
@@ -417,4 +419,16 @@ const container = await new GenericContainer("alpine").start();
   .on("data", line => console.log(line))
   .on("err", line => console.error(line))
   .on("end", () => console.log("Stream closed"));
+```
+
+Or a consumer can be provided before start. This is useful for example if your container is failing to start:
+
+```javascript
+const container = await new GenericContainer("alpine")
+  .withLogConsumer(stream => {
+    stream.on("data", line => console.log(line));
+    stream.on("err", line => console.error(line));
+    stream.on("end", () => console.log("Stream closed"));
+  })
+  .start();
 ```

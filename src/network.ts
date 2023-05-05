@@ -26,8 +26,9 @@ export class Network {
 
     await ReaperInstance.getInstance();
 
+    log.info(`Starting network...`);
     const id = await createNetwork(options);
-    log.info(`Started network with ID: ${id}`);
+    log.info(`Started network with ID "${id.substring(0, 12)}"`);
 
     return new StartedNetwork(id, options);
   }
@@ -45,8 +46,9 @@ export class StartedNetwork {
   }
 
   public async stop(): Promise<StoppedNetwork> {
-    log.info(`Stopping network with ID: ${this.id}`);
+    log.info(`Stopping network with ID "${this.id}"...`);
     await removeNetwork(this.id);
+    log.info(`Stopped network with ID "${this.id}"`);
     return new StoppedNetwork();
   }
 }

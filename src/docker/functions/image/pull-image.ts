@@ -1,5 +1,5 @@
 import { DockerImageName } from "../../../docker-image-name";
-import { imageLog, log } from "../../../logger";
+import { pullLog, log } from "../../../logger";
 import { PullStreamParser } from "../../pull-stream-parser";
 import { imageExists } from "./image-exists";
 import Dockerode from "dockerode";
@@ -29,7 +29,7 @@ export const pullImage = async (
       const authconfig = await getAuthConfig(options.imageName.registry ?? indexServerAddress);
       const stream = await dockerode.pull(options.imageName.toString(), { authconfig });
 
-      await new PullStreamParser(options.imageName, imageLog).consume(stream);
+      await new PullStreamParser(options.imageName, pullLog).consume(stream);
     });
   } catch (err) {
     log.error(`Failed to pull image "${options.imageName}": ${err}`);

@@ -4,14 +4,15 @@ All possible environment variable configurations for Testcontainers are found he
 
 ## Logs
 
-| Variable | Example                   | Description                      |
-|----------|---------------------------|----------------------------------|
-| DEBUG    | testcontainers*           | Enable all logs                  |
-| DEBUG    | testcontainers            | Enable testcontainers logs       |
-| DEBUG    | testcontainers:containers | Enable container logs            |
-| DEBUG    | testcontainers:compose    | Enable compose logs              |
-| DEBUG    | testcontainers:image      | Enable image build and pull logs |
-| DEBUG    | testcontainers:exec       | Enable container exec logs       |
+| Variable | Example                   | Description                |
+|----------|---------------------------|----------------------------|
+| DEBUG    | testcontainers*           | Enable all logs            |
+| DEBUG    | testcontainers            | Enable testcontainers logs |
+| DEBUG    | testcontainers:containers | Enable container logs      |
+| DEBUG    | testcontainers:compose    | Enable compose logs        |
+| DEBUG    | testcontainers:build      | Enable build logs          |
+| DEBUG    | testcontainers:pull       | Enable pull logs           |
+| DEBUG    | testcontainers:exec       | Enable container exec logs |
 
 Note that you can enable multiple loggers, e.g: `DEBUG=testcontainers,testcontainers:exec`.
 

@@ -1,6 +1,6 @@
 import { DockerImageName } from "../../../docker-image-name";
 import { PullPolicy } from "../../../pull-policy";
-import { imageLog, log } from "../../../logger";
+import { buildLog, log } from "../../../logger";
 import tar from "tar-fs";
 import byline from "byline";
 import { dockerClient } from "../../docker-client";
@@ -54,8 +54,10 @@ export const buildImage = async (options: BuildImageOptions): Promise<void> => {
         .buildImage(tarStream, buildImageOptions)
         .then((stream) => byline(stream))
         .then((stream) => {
-          stream.setEncoding("utf-8");
-          stream.on("data", (line) => imageLog.trace(line, { imageName: options.imageName.toString() }));
+          if (buildLog.enabled()) {
+            stream.setEncoding("utf-8");
+            stream.on("data", (line) => buildLog.trace(line, { imageName: options.imageName.toString() }));
+          }
           stream.on("end", () => resolve());
         });
     });

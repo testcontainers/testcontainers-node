@@ -39,6 +39,7 @@ import { StartedNetwork } from "../network";
 import { waitForContainer } from "../wait-for-container";
 import { initCreateContainerOptions } from "./create-container-options";
 import { Wait } from "../wait-strategy/wait";
+import { Readable } from "stream";
 
 const reusableContainerCreationLock = new AsyncLock();
 
@@ -54,6 +55,7 @@ export class GenericContainer implements TestContainer {
   protected networkMode?: string;
   protected networkAliases: string[] = [];
   protected pullPolicy: PullPolicy = new DefaultPullPolicy();
+  protected logConsumer?: (stream: Readable) => unknown;
 
   constructor(readonly image: string) {
     const imageName = DockerImageName.fromString(image);
@@ -204,10 +206,18 @@ export class GenericContainer implements TestContainer {
       this.waitStrategy.withStartupTimeout(this.startupTimeout);
     }
 
-    if (containerLog.enabled()) {
-      (await containerLogs(container))
-        .on("data", (data) => containerLog.trace(data.trim(), { containerId: container.id }))
-        .on("err", (data) => containerLog.error(data.trim(), { containerId: container.id }));
+    if (containerLog.enabled() || this.logConsumer !== undefined) {
+      const logStream = await containerLogs(container);
+
+      if (this.logConsumer !== undefined) {
+        this.logConsumer(logStream);
+      }
+
+      if (containerLog.enabled()) {
+        logStream
+          .on("data", (data) => containerLog.trace(data.trim(), { containerId: container.id }))
+          .on("err", (data) => containerLog.error(data.trim(), { containerId: container.id }));
+      }
     }
 
     if (this.containerStarting) {
@@ -405,6 +415,11 @@ export class GenericContainer implements TestContainer {
 
     this.opts.resourcesQuota = { memory: ram, cpu: cpuQuota };
 
+    return this;
+  }
+
+  public withLogConsumer(logConsumer: (stream: Readable) => unknown): this {
+    this.logConsumer = logConsumer;
     return this;
   }
 }

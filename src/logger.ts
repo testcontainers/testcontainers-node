@@ -53,5 +53,6 @@ export class Logger {
 export const log = new Logger("testcontainers");
 export const containerLog = new Logger("testcontainers:containers", false);
 export const composeLog = new Logger("testcontainers:compose", false);
-export const imageLog = new Logger("testcontainers:image", false);
+export const buildLog = new Logger("testcontainers:build", false);
+export const pullLog = new Logger("testcontainers:pull", false);
 export const execLog = new Logger("testcontainers:exec", false);
