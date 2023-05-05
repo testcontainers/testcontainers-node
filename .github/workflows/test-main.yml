@@ -223,6 +223,6 @@ jobs:
       - name: Remove dev dependencies
         run: npm prune --omit=dev
       - name: Run CommonJS module smoke test
-        run: node smoke-test.js
+        run: DEBUG=testcontainers* node smoke-test.js
       - name: Run ES module smoke test
-        run: node smoke-test.mjs
+        run: DEBUG=testcontainers* node smoke-test.mjs
