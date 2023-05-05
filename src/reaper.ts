@@ -81,7 +81,7 @@ export class ReaperInstance {
   }
 
   private static createDisabledInstance(): Promise<Reaper> {
-    log.debug(`Not creating new Reaper for session: ${sessionId}`);
+    log.debug(`Not creating new Reaper for session "${sessionId}"`);
     return Promise.resolve(new DisabledReaper());
   }
 

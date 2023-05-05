@@ -42,7 +42,7 @@ const authsCache = new Map<string, AuthConfig | undefined>();
 
 export const getAuthConfig = async (registry: string): Promise<AuthConfig | undefined> => {
   if (authsCache.has(registry)) {
-    log.debug(`Re-using cached auth for registry "${registry}"`);
+    log.debug(`Auth config cache hit for registry "${registry}"`);
     return authsCache.get(registry);
   }
 
@@ -50,7 +50,7 @@ export const getAuthConfig = async (registry: string): Promise<AuthConfig | unde
     const authConfig = await registryAuthLocator.getAuthConfig(registry, await dockerConfig);
 
     if (authConfig) {
-      log.debug(`Found registry auth locator for registry "${registry}": ${registryAuthLocator.getName()}`);
+      log.debug(`Auth config found for registry "${registry}": ${registryAuthLocator.getName()}`);
       authsCache.set(registry, authConfig);
       return authConfig;
     }

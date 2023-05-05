@@ -19,11 +19,11 @@ export class Logger {
   }
 
   public trace(message: Message, options?: Options): void {
-    this.logger(`${this.showLevel ? "[TRAC] " : ""}${this.renderOptions(options)}${message}`);
+    this.logger(`${this.showLevel ? "[TRACE] " : ""}${this.renderOptions(options)}${message}`);
   }
 
   public debug(message: Message, options?: Options): void {
-    this.logger(`${this.showLevel ? "[DEBU] " : ""}${this.renderOptions(options)}${message}`);
+    this.logger(`${this.showLevel ? "[DEBUG] " : ""}${this.renderOptions(options)}${message}`);
   }
 
   public info(message: Message, options?: Options): void {
@@ -35,7 +35,7 @@ export class Logger {
   }
 
   public error(message: Message, options?: Options): void {
-    this.logger(`${this.showLevel && "[ERRO] "}${this.renderOptions(options)}${message}`);
+    this.logger(`${this.showLevel && "[ERROR] "}${this.renderOptions(options)}${message}`);
   }
 
   private renderOptions(options?: Options): string {

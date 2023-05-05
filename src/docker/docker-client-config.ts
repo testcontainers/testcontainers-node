@@ -12,55 +12,65 @@ export type DockerClientConfig = {
 };
 
 export const getDockerClientConfig = async (env: NodeJS.ProcessEnv = process.env): Promise<DockerClientConfig> => {
-  let dockerHost: string | undefined;
-  let dockerTlsVerify: string | undefined;
-  let dockerCertPath: string | undefined;
+  const dockerClientConfig: DockerClientConfig = {
+    ...(await loadFromFile()),
+    ...loadFromEnv(env),
+  };
+  logDockerClientConfig(dockerClientConfig);
+  return dockerClientConfig;
+};
 
+async function loadFromFile() {
   const file = path.resolve(homedir(), ".testcontainers.properties");
+
+  const dockerClientConfig: DockerClientConfig = {};
+
   if (existsSync(file)) {
-    log.debug("Found .testcontainers.properties file");
+    log.debug(`Found ".testcontainers.properties" file`);
     const string = await readFile(file, { encoding: "utf-8" });
     const properties = propertiesReader("").read(string);
 
     const host = properties.get("docker.host") as string;
     if (host !== null) {
-      dockerHost = host;
+      dockerClientConfig.dockerHost = host;
     }
 
     const tlsVerify = properties.get("docker.tls.verify") as number;
     if (tlsVerify !== null) {
-      dockerTlsVerify = `${tlsVerify}`;
+      dockerClientConfig.dockerTlsVerify = `${tlsVerify}`;
     }
 
     const certPath = properties.get("docker.cert.path") as string;
     if (certPath !== null) {
-      dockerCertPath = certPath;
+      dockerClientConfig.dockerCertPath = certPath;
     }
   }
 
+  return dockerClientConfig;
+}
+
+function loadFromEnv(env: NodeJS.ProcessEnv) {
+  const dockerClientConfig: DockerClientConfig = {};
+
   if (env["DOCKER_HOST"] !== undefined) {
-    dockerHost = env["DOCKER_HOST"];
+    dockerClientConfig.dockerHost = env["DOCKER_HOST"];
   }
   if (env["DOCKER_TLS_VERIFY"] !== undefined) {
-    dockerTlsVerify = env["DOCKER_TLS_VERIFY"];
+    dockerClientConfig.dockerTlsVerify = env["DOCKER_TLS_VERIFY"];
   }
   if (env["DOCKER_CERT_PATH"] !== undefined) {
-    dockerCertPath = env["DOCKER_CERT_PATH"];
+    dockerClientConfig.dockerCertPath = env["DOCKER_CERT_PATH"];
   }
 
-  let logStr = "Loaded properties: ";
-  if (dockerHost !== undefined) {
-    logStr += `dockerHost=${dockerHost}, `;
-  }
-  if (dockerTlsVerify !== undefined) {
-    logStr += `dockerTlsVerify=${dockerTlsVerify}, `;
-  }
-  if (dockerCertPath !== undefined) {
-    logStr += `dockerCertPath=${dockerCertPath}`;
-  }
-  if (logStr !== "Loaded properties: ") {
-    log.debug(logStr);
-  }
+  return dockerClientConfig;
+}
 
-  return { dockerHost, dockerTlsVerify, dockerCertPath };
-};
+function logDockerClientConfig(config: DockerClientConfig) {
+  const configurations = Object.entries(config)
+    .filter(([, value]) => value !== undefined)
+    .map(([key, value]) => `${key}: "${value}"`);
+
+  if (configurations.length > 0) {
+    log.debug(`Loaded Docker client configuration, ${configurations.join(", ")}`);
+  }
+}

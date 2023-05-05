@@ -22,7 +22,7 @@ export const execContainer = async (
       AttachStderr: true,
     });
 
-    const stream = await startExec(dockerode, provider, exec);
+    const stream = await startExec(dockerode, provider, exec, container);
 
     stream.on("data", (chunk) => chunks.push(chunk));
 
@@ -42,7 +42,12 @@ export const execContainer = async (
   }
 };
 
-const startExec = async (dockerode: Dockerode, provider: Provider, exec: Dockerode.Exec): Promise<Readable> => {
+const startExec = async (
+  dockerode: Dockerode,
+  provider: Provider,
+  exec: Dockerode.Exec,
+  container: Dockerode.Container
+): Promise<Readable> => {
   try {
     const stream = await exec.start({ stdin: true, Detach: false, Tty: true });
     if (provider === "podman") {
@@ -51,7 +56,7 @@ const startExec = async (dockerode: Dockerode, provider: Provider, exec: Dockero
       return stream;
     }
   } catch (err) {
-    log.error(`Failed to start exec: ${err}`);
+    log.error(`Failed to start exec: ${err}`, { containerId: container.id });
     throw err;
   }
 };

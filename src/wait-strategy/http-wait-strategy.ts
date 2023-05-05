@@ -71,6 +71,7 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
   }
 
   public async waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void> {
+    log.debug(`Waiting for HTTP...`, { containerId: container.id });
     const { host } = await dockerClient();
 
     await new IntervalRetryStrategy<Response | undefined, Error>(this.readTimeout).retryUntil(

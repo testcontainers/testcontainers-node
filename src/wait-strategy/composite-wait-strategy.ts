@@ -11,7 +11,7 @@ export class CompositeWaitStrategy extends AbstractWaitStrategy {
   }
 
   public async waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts, startTime?: Date): Promise<void> {
-    log.debug(`Starting composite wait strategy`, { containerId: container.id });
+    log.debug(`Waiting for composite...`, { containerId: container.id });
 
     return new Promise((resolve, reject) => {
       let deadlineTimeout: NodeJS.Timeout;

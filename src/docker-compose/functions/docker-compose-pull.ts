@@ -6,7 +6,7 @@ import { DockerComposeOptions } from "../docker-compose-options";
 export const dockerComposePull = async (options: DockerComposeOptions, services?: Array<string>): Promise<void> => {
   try {
     if (services) {
-      log.info(`Pulling DockerCompose environment images "${services.join(", ")}"...`);
+      log.info(`Pulling DockerCompose environment images "${services.join('", "')}"...`);
       await pullMany(services, await defaultDockerComposeOptions({ ...options, logger: pullLog }));
     } else {
       log.info(`Pulling DockerCompose environment images...`);

@@ -29,7 +29,7 @@ export const getContainerByHash = async (hash: string): Promise<Dockerode.Contai
       return await getContainerById(containers[0].Id);
     }
   } catch (err) {
-    log.error(`Failed to get container by hash (${hash}): ${err}`);
+    log.error(`Failed to get container by hash "${hash}": ${err}`);
     throw err;
   }
 };

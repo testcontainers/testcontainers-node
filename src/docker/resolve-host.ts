@@ -44,13 +44,13 @@ export const resolveHost = async (
 };
 
 const findGateway = async (dockerode: Dockerode, networkName: string): Promise<string | undefined> => {
-  log.debug(`Checking gateway for Docker host`);
+  log.debug(`Checking gateway for Docker host...`);
   const inspectResult: NetworkInspectInfo = await dockerode.getNetwork(networkName).inspect();
   return inspectResult?.IPAM?.Config?.find((config) => config.Gateway !== undefined)?.Gateway;
 };
 
 const findDefaultGateway = async (dockerode: Dockerode, indexServerAddress: string): Promise<string | undefined> => {
-  log.debug(`Checking default gateway for Docker host`);
+  log.debug(`Checking default gateway for Docker host...`);
   return runInContainer(dockerode, indexServerAddress, "alpine:3.14", [
     "sh",
     "-c",

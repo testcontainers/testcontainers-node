@@ -13,8 +13,9 @@ export class Network {
   }
 
   public async start(): Promise<StartedNetwork> {
+    const name = this.uuid.nextUuid();
     const options = {
-      name: this.uuid.nextUuid(),
+      name,
       driver: "bridge",
       checkDuplicate: true,
       internal: false,
@@ -26,9 +27,9 @@ export class Network {
 
     await ReaperInstance.getInstance();
 
-    log.info(`Starting network...`);
+    log.info(`Starting network "${name}"...`);
     const id = await createNetwork(options);
-    log.info(`Started network with ID "${id.substring(0, 12)}"`);
+    log.info(`Started network "${name}" with ID "${id}"`);
 
     return new StartedNetwork(id, options);
   }
