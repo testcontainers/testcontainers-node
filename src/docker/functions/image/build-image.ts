@@ -54,10 +54,12 @@ export const buildImage = async (options: BuildImageOptions): Promise<void> => {
         .buildImage(tarStream, buildImageOptions)
         .then((stream) => byline(stream))
         .then((stream) => {
-          if (buildLog.enabled()) {
-            stream.setEncoding("utf-8");
-            stream.on("data", (line) => buildLog.trace(line, { imageName: options.imageName.toString() }));
-          }
+          stream.setEncoding("utf-8");
+          stream.on("data", (line) => {
+            if (buildLog.enabled()) {
+              buildLog.trace(line, { imageName: options.imageName.toString() });
+            }
+          });
           stream.on("end", () => resolve());
         });
     });
