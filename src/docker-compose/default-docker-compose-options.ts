@@ -1,7 +1,7 @@
 import { IDockerComposeOptions } from "docker-compose";
 import { DockerComposeOptions } from "./docker-compose-options";
 import { dockerClient } from "../docker/docker-client";
-import { log } from "../logger";
+import { composeLog } from "../logger";
 import { EOL } from "os";
 import { isNotEmptyString } from "../type-guards";
 
@@ -13,13 +13,13 @@ export const defaultDockerComposeOptions = async ({
 
   return {
     log: false,
-    callback: log.enabled()
+    callback: composeLog.enabled()
       ? (chunk) => {
           chunk
             .toString()
             .split(EOL)
             .filter(isNotEmptyString)
-            .forEach((line) => log.trace(line.trim()));
+            .forEach((line) => composeLog.trace(line.trim()));
         }
       : undefined,
     cwd: options.filePath,

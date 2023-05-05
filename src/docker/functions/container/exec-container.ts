@@ -27,7 +27,7 @@ export const execContainer = async (
     stream.on("data", (chunk) => chunks.push(chunk));
 
     if (shouldLog && execLog.enabled()) {
-      byline(stream).on("data", (line) => execLog.trace(`${container.id}: ${line}`));
+      byline(stream).on("data", (line) => execLog.trace(line, { containerId: container.id }));
     }
 
     const exitCode = await waitForExec(exec, stream);
@@ -35,11 +35,9 @@ export const execContainer = async (
 
     return { output: chunks.join(""), exitCode };
   } catch (err) {
-    log.error(
-      `Failed to exec container ${container.id} with command "${command.join(
-        " "
-      )}": ${err}. Container output: ${chunks.join("")}`
-    );
+    log.error(`Failed to exec container with command "${command.join(" ")}": ${err}: ${chunks.join("")}`, {
+      containerId: container.id,
+    });
     throw err;
   }
 };

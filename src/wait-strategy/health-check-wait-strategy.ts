@@ -7,20 +7,24 @@ import { AbstractWaitStrategy } from "./wait-strategy";
 
 export class HealthCheckWaitStrategy extends AbstractWaitStrategy {
   public async waitUntilReady(container: Dockerode.Container): Promise<void> {
-    log.debug(`Waiting for health check for ${container.id}`);
+    log.debug(`Waiting for health check...`, { containerId: container.id });
 
     const status = await new IntervalRetryStrategy<HealthCheckStatus, Error>(100).retryUntil(
       async () => (await inspectContainer(container)).healthCheckStatus,
       (healthCheckStatus) => healthCheckStatus === "healthy" || healthCheckStatus === "unhealthy",
       () => {
         const timeout = this.startupTimeout;
-        throw new Error(`Health check not healthy after ${timeout}ms for ${container.id}`);
+        const message = `Health check not healthy after ${timeout}ms`;
+        log.error(message, { containerId: container.id });
+        throw new Error(message);
       },
       this.startupTimeout
     );
 
     if (status !== "healthy") {
-      throw new Error(`Health check failed: ${status} for ${container.id}`);
+      const message = `Health check failed: ${status}`;
+      log.error(message, { containerId: container.id });
+      throw new Error(message);
     }
   }
 }

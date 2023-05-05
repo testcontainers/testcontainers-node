@@ -5,6 +5,7 @@ import { IntervalRetryStrategy } from "../retry-strategy";
 import fetch, { Response } from "node-fetch";
 import https, { Agent } from "https";
 import { dockerClient } from "../docker/docker-client";
+import { log } from "../logger";
 
 export class HttpWaitStrategy extends AbstractWaitStrategy {
   private readonly path: string;
@@ -102,7 +103,9 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
         }
       },
       () => {
-        throw new Error(`URL ${this.path} not accessible after ${this.startupTimeout}ms for ${container.id}`);
+        const message = `URL ${this.path} not accessible after ${this.startupTimeout}ms`;
+        log.error(message, { containerId: container.id });
+        throw new Error(message);
       },
       this.startupTimeout
     );

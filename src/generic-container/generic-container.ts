@@ -106,7 +106,7 @@ export class GenericContainer implements TestContainer {
         ...this.opts.labels,
         [LABEL_TESTCONTAINERS_CONTAINER_HASH]: containerHash,
       };
-      log.debug(`Container reuse has been enabled, hash: ${containerHash}`);
+      log.debug(`Container reuse has been enabled with hash "${containerHash}"`);
 
       // We might have several async processes try to create a reusable container
       // at once, to avoid possibly creating too many of these, use a lock
@@ -115,7 +115,7 @@ export class GenericContainer implements TestContainer {
         const container = await getContainerByHash(containerHash);
 
         if (container !== undefined) {
-          log.debug(`Found container to reuse with hash: ${containerHash}`);
+          log.debug(`Found container to reuse with hash "${containerHash}"`, { containerId: container.id });
           return this.reuseContainer(container);
         } else {
           log.debug("No container found to reuse");
@@ -189,12 +189,13 @@ export class GenericContainer implements TestContainer {
       await putContainerArchive({ container, stream: this.tarToCopy, containerPath: "/" });
     }
 
-    log.info(`Starting container ${this.opts.imageName} with ID: ${container.id}`);
+    log.info(`Starting container for image "${this.opts.imageName}"...`, { containerId: container.id });
     if (this.containerCreated) {
       await this.containerCreated(container.id);
     }
 
     await startContainer(container);
+    log.info(`Started container for image "${this.opts.imageName}"`, { containerId: container.id });
 
     const { host, hostIps } = await dockerClient();
     const inspectResult = await inspectContainer(container);
@@ -205,8 +206,8 @@ export class GenericContainer implements TestContainer {
 
     if (containerLog.enabled()) {
       (await containerLogs(container))
-        .on("data", (data) => containerLog.trace(`${container.id}: ${data.trim()}`))
-        .on("err", (data) => containerLog.error(`${container.id}: ${data.trim()}`));
+        .on("data", (data) => containerLog.trace(data.trim(), { containerId: container.id }))
+        .on("err", (data) => containerLog.error(data.trim(), { containerId: container.id }));
     }
 
     if (this.containerStarting) {

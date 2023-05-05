@@ -58,7 +58,9 @@ export const getDockerClientConfig = async (env: NodeJS.ProcessEnv = process.env
   if (dockerCertPath !== undefined) {
     logStr += `dockerCertPath=${dockerCertPath}`;
   }
-  log.debug(logStr);
+  if (logStr !== "Loaded properties: ") {
+    log.debug(logStr);
+  }
 
   return { dockerHost, dockerTlsVerify, dockerCertPath };
 };

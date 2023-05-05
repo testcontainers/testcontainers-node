@@ -20,7 +20,7 @@ describe("GenericContainer logs", () => {
 
     await container.restart();
 
-    const logs = containerLogTraceSpy.mock.calls.flat();
+    const logs = containerLogTraceSpy.mock.calls;
     expect(logs.some((line) => line.includes("Listening on port 8080"))).toBe(true);
 
     await container.stop();

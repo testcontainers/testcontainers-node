@@ -14,7 +14,7 @@ export const putContainerArchive = async (options: PutContainerArchiveOptions): 
     const stream = await options.container.putArchive(options.stream, { path: options.containerPath });
     await streamToString(Readable.from(stream));
   } catch (err) {
-    log.error(`Failed to put archive to container ${options.container.id}: ${err}`);
+    log.error(`Failed to put archive to container: ${err}`, { containerId: options.container.id });
     throw err;
   }
 };

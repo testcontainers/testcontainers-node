@@ -12,7 +12,7 @@ export const restartContainer = async (
   try {
     await container.restart({ t: options.timeout / 1000 });
   } catch (err) {
-    log.error(`Failed to restart container ${container.id}: ${err}`);
+    log.error(`Failed to restart container: ${err}`, { containerId: container.id });
     throw err;
   }
 };

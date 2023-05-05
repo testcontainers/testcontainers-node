@@ -35,10 +35,10 @@ export type CreateContainerOptions = {
 
 export const createContainer = async (options: CreateContainerOptions): Promise<Dockerode.Container> => {
   try {
-    log.info(`Creating container for image: ${options.imageName}`);
+    log.info(`Creating container for image "${options.imageName}"...`);
     const { dockerode } = await dockerClient();
 
-    return await dockerode.createContainer({
+    const container = await dockerode.createContainer({
       name: options.name,
       User: options.user,
       Image: options.imageName.toString(),
@@ -66,8 +66,10 @@ export const createContainer = async (options: CreateContainerOptions): Promise<
         NanoCpus: options.resourcesQuota?.cpu,
       },
     });
+    log.info(`Created container for image "${options.imageName}"`, { containerId: container.id });
+    return container;
   } catch (err) {
-    log.error(`Failed to create container for image ${options.imageName}: ${err}`);
+    log.error(`Failed to create container for image "${options.imageName}": ${err}`);
     throw err;
   }
 };

@@ -82,7 +82,7 @@ export class DockerComposeEnvironment {
   }
 
   public async up(services?: Array<string>): Promise<StartedDockerComposeEnvironment> {
-    log.info(`Starting DockerCompose environment: ${this.projectName}`);
+    log.info(`Starting DockerCompose environment "${this.projectName}"...`);
 
     (await ReaperInstance.getInstance()).addProject(this.projectName);
 
@@ -123,7 +123,7 @@ export class DockerComposeEnvironment {
       []
     );
 
-    log.info(`Started the following containers: ${startedContainerNames.join(", ")}`);
+    log.info(`Started containers "${startedContainerNames.join('", "')}"`);
 
     const startedGenericContainers = (
       await Promise.all(
@@ -148,11 +148,8 @@ export class DockerComposeEnvironment {
           }
 
           try {
-            log.info(`Waiting for container ${containerName} to be ready`);
             await waitForContainer(container, waitStrategy, boundPorts);
-            log.info(`Container ${containerName} is ready`);
           } catch (err) {
-            log.error(`Container ${containerName} failed to be ready: ${err}`);
             try {
               await dockerComposeDown(options, { removeVolumes: true, timeout: 0 });
             } catch {
@@ -169,7 +166,7 @@ export class DockerComposeEnvironment {
       return { ...map, [containerName]: startedGenericContainer };
     }, {});
 
-    log.info(`DockerCompose environment started: ${Object.keys(startedGenericContainers).join(", ")}`);
+    log.info(`DockerCompose environment started`);
 
     return new StartedDockerComposeEnvironment(startedGenericContainers, {
       ...options,

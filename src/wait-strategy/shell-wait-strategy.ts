@@ -11,7 +11,7 @@ export class ShellWaitStrategy extends AbstractWaitStrategy {
   }
 
   public async waitUntilReady(container: Dockerode.Container): Promise<void> {
-    log.debug(`Waiting for successful shell command ${this.command} for ${container.id}`);
+    log.debug(`Waiting for successful shell command "${this.command}"...`, { containerId: container.id });
 
     const { dockerode, provider } = await dockerClient();
     await new IntervalRetryStrategy<number, Error>(100).retryUntil(
@@ -27,9 +27,9 @@ export class ShellWaitStrategy extends AbstractWaitStrategy {
       },
       (exitCode) => exitCode === 0,
       () => {
-        throw new Error(
-          `Shell command "${this.command}" not successful after ${this.startupTimeout}ms for ${container.id}`
-        );
+        const message = `Shell command "${this.command}" not successful after ${this.startupTimeout}ms`;
+        log.error(message, { containerId: container.id });
+        throw new Error(message);
       },
       this.startupTimeout
     );

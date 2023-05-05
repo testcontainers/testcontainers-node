@@ -11,9 +11,9 @@ export const stopContainer = async (container: Dockerode.Container, options: Sto
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     if (err.statusCode === 304) {
-      log.info(`Container has already been stopped: ${container.id}`);
+      log.info(`Container has already been stopped`, { containerId: container.id });
     } else {
-      log.error(`Failed to stop container ${container.id}: ${err}`);
+      log.error(`Failed to stop container: ${err}`, { containerId: container.id });
       throw err;
     }
   }

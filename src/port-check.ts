@@ -60,9 +60,9 @@ export class InternalPortCheck implements PortCheck {
       if (!shellExists) {
         if (!this.isDistroless) {
           this.isDistroless = true;
-          log.error(
-            `The HostPortWaitStrategy will not work on a distroless image, use an alternate wait strategy for container ${this.container.id}`
-          );
+          log.error(`The HostPortWaitStrategy will not work on a distroless image, use an alternate wait strategy`, {
+            containerId: this.container.id,
+          });
         }
       } else {
         commandResults
@@ -70,9 +70,9 @@ export class InternalPortCheck implements PortCheck {
           .filter((result) => result.exitCode !== 126 && result.output.length > 0)
           .forEach((result) => {
             if (!this.commandOutputs.has(this.commandOutputsKey(result.output))) {
-              log.trace(
-                `Port check result for container ${this.container.id} exit code ${result.exitCode}: ${result.output}`
-              );
+              log.trace(`Port check result exit code ${result.exitCode}: ${result.output}`, {
+                containerId: this.container.id,
+              });
               this.commandOutputs.add(this.commandOutputsKey(result.output));
             }
           });

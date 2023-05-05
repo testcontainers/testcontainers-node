@@ -24,9 +24,9 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
     boundPorts: BoundPorts
   ): Promise<void> {
     for (const [, hostPort] of boundPorts.iterator()) {
-      log.debug(`Waiting for host port ${hostPort} for ${container.id}`);
+      log.debug(`Waiting for host port ${hostPort}...`, { containerId: container.id });
       await this.waitForPort(container, hostPort, portCheck);
-      log.debug(`Host port ${hostPort} ready for ${container.id}`);
+      log.debug(`Host port ${hostPort} ready`, { containerId: container.id });
     }
   }
 
@@ -36,9 +36,9 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
     boundPorts: BoundPorts
   ): Promise<void> {
     for (const [internalPort] of boundPorts.iterator()) {
-      log.debug(`Waiting for internal port ${internalPort} for ${container.id}`);
+      log.debug(`Waiting for internal port ${internalPort}...`, { containerId: container.id });
       await this.waitForPort(container, internalPort, portCheck);
-      log.debug(`Internal port ${internalPort} ready for ${container.id}`);
+      log.debug(`Internal port ${internalPort} ready`, { containerId: container.id });
     }
   }
 
@@ -47,7 +47,9 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
       () => portCheck.isBound(port),
       (isBound) => isBound,
       () => {
-        throw new Error(`Port ${port} not bound after ${this.startupTimeout}ms for ${container.id}`);
+        const message = `Port ${port} not bound after ${this.startupTimeout}ms`;
+        log.error(message, { containerId: container.id });
+        throw new Error(message);
       },
       this.startupTimeout
     );

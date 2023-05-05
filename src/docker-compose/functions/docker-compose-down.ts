@@ -8,7 +8,7 @@ export const dockerComposeDown = async (
   options: DockerComposeOptions,
   downOptions: DockerComposeDownOptions
 ): Promise<void> => {
-  log.info(`Downing DockerCompose environment`);
+  log.info(`Downing DockerCompose environment...`);
 
   try {
     await down({ ...(await defaultDockerComposeOptions(options)), commandOptions: commandOptions(downOptions) });

@@ -43,8 +43,8 @@ describe("PortCheck", () => {
       await portCheck.isBound(8080);
 
       expect(mockLogger.trace.mock.calls).toEqual([
-        ["Port check result for container containerId exit code 1: ERROR 1"],
-        ["Port check result for container containerId exit code 1: ERROR 2"],
+        ["Port check result exit code 1: ERROR 1", { containerId: "containerId" }],
+        ["Port check result exit code 1: ERROR 2", { containerId: "containerId" }],
       ]);
     });
 
@@ -61,8 +61,8 @@ describe("PortCheck", () => {
       await portCheck.isBound(8080);
 
       expect(mockLogger.trace.mock.calls).toEqual([
-        ["Port check result for container containerId exit code 1: ERROR 1"],
-        ["Port check result for container containerId exit code 1: ERROR 2"],
+        ["Port check result exit code 1: ERROR 1", { containerId: "containerId" }],
+        ["Port check result exit code 1: ERROR 2", { containerId: "containerId" }],
       ]);
     });
 
@@ -75,7 +75,7 @@ describe("PortCheck", () => {
       await portCheck.isBound(8080);
 
       expect(mockLogger.trace.mock.calls).toEqual([
-        ["Port check result for container containerId exit code 1: ERROR 1"],
+        ["Port check result exit code 1: ERROR 1", { containerId: "containerId" }],
       ]);
     });
 
@@ -88,7 +88,7 @@ describe("PortCheck", () => {
       await portCheck.isBound(8080);
 
       expect(mockLogger.trace.mock.calls).toEqual([
-        ["Port check result for container containerId exit code 1: ERROR 1"],
+        ["Port check result exit code 1: ERROR 1", { containerId: "containerId" }],
       ]);
     });
 
@@ -102,7 +102,8 @@ describe("PortCheck", () => {
 
       expect(mockLogger.error.mock.calls).toEqual([
         [
-          "The HostPortWaitStrategy will not work on a distroless image, use an alternate wait strategy for container containerId",
+          "The HostPortWaitStrategy will not work on a distroless image, use an alternate wait strategy",
+          { containerId: "containerId" },
         ],
       ]);
     });
@@ -121,7 +122,8 @@ describe("PortCheck", () => {
 
       expect(mockLogger.error.mock.calls).toEqual([
         [
-          "The HostPortWaitStrategy will not work on a distroless image, use an alternate wait strategy for container containerId",
+          "The HostPortWaitStrategy will not work on a distroless image, use an alternate wait strategy",
+          { containerId: "containerId" },
         ],
       ]);
     });

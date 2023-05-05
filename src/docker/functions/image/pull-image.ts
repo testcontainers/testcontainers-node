@@ -1,5 +1,5 @@
 import { DockerImageName } from "../../../docker-image-name";
-import { log } from "../../../logger";
+import { imageLog, log } from "../../../logger";
 import { PullStreamParser } from "../../pull-stream-parser";
 import { imageExists } from "./image-exists";
 import Dockerode from "dockerode";
@@ -21,15 +21,15 @@ export const pullImage = async (
   try {
     return imagePullLock.acquire(options.imageName.toString(), async () => {
       if (!options.force && (await imageExists(dockerode, options.imageName))) {
-        log.debug(`Not pulling image as it already exists: ${options.imageName}`);
+        log.debug(`Not pulling image "${options.imageName}" as it already exists`);
         return;
       }
 
-      log.info(`Pulling image: ${options.imageName}`);
+      log.info(`Pulling image "${options.imageName}"...`);
       const authconfig = await getAuthConfig(options.imageName.registry ?? indexServerAddress);
       const stream = await dockerode.pull(options.imageName.toString(), { authconfig });
 
-      await new PullStreamParser(options.imageName, log).consume(stream);
+      await new PullStreamParser(options.imageName, imageLog).consume(stream);
     });
   } catch (err) {
     log.error(`Failed to pull image "${options.imageName}": ${err}`);

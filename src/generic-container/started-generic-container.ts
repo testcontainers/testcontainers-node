@@ -45,7 +45,7 @@ export class StartedGenericContainer implements StartedTestContainer {
 
   public async restart(options: Partial<RestartOptions> = {}): Promise<void> {
     const resolvedOptions: RestartOptions = { timeout: 0, ...options };
-    log.info(`Restarting container with ID: ${this.container.id}`);
+    log.info(`Restarting container...`, { containerId: this.container.id });
     await restartContainer(this.container, resolvedOptions);
 
     const { hostIps } = await dockerClient();
@@ -54,8 +54,8 @@ export class StartedGenericContainer implements StartedTestContainer {
 
     if (containerLog.enabled()) {
       (await containerLogs(this.container, { since: startTime }))
-        .on("data", (data) => containerLog.trace(`${this.container.id}: ${data.trim()}`))
-        .on("err", (data) => containerLog.error(`${this.container.id}: ${data.trim()}`));
+        .on("data", (data) => containerLog.trace(data.trim(), { containerId: this.container.id }))
+        .on("err", (data) => containerLog.error(data.trim(), { containerId: this.container.id }));
     }
 
     this.boundPorts = BoundPorts.fromInspectResult(hostIps, this.inspectResult).filter(
@@ -63,10 +63,11 @@ export class StartedGenericContainer implements StartedTestContainer {
     );
 
     await waitForContainer(this.container, this.waitStrategy, this.boundPorts, startTime);
+    log.info(`Restarted container`, { containerId: this.container.id });
   }
 
   private async stopContainer(options: Partial<StopOptions> = {}): Promise<StoppedGenericContainer> {
-    log.info(`Stopping container with ID: ${this.container.id}`);
+    log.info(`Stopping container...`, { containerId: this.container.id });
 
     if (this.containerIsStopping) {
       await this.containerIsStopping();
@@ -75,6 +76,7 @@ export class StartedGenericContainer implements StartedTestContainer {
     const resolvedOptions: StopOptions = { timeout: 0, removeVolumes: true, ...options };
     await stopContainer(this.container, { timeout: resolvedOptions.timeout });
     await removeContainer(this.container, { removeVolumes: resolvedOptions.removeVolumes });
+    log.info(`Stopped container`, { containerId: this.container.id });
 
     if (this.containerIsStopped) {
       await this.containerIsStopped();
@@ -121,7 +123,10 @@ export class StartedGenericContainer implements StartedTestContainer {
 
   public async exec(command: string[]): Promise<ExecResult> {
     const { dockerode, provider } = await dockerClient();
-    return execContainer(dockerode, provider, this.container, command);
+    log.debug(`Executing command "${command.join(" ")}"...`, { containerId: this.container.id });
+    const output = await execContainer(dockerode, provider, this.container, command);
+    log.debug(`Executed command "${command.join(" ")}"...`, { containerId: this.container.id });
+    return output;
   }
 
   public logs(): Promise<Readable> {
