@@ -13,7 +13,7 @@ import { stopContainer } from "../docker/functions/container/stop-container";
 import { restartContainer } from "../docker/functions/container/restart-container";
 import { WaitStrategy } from "../wait-strategy/wait-strategy";
 import { waitForContainer } from "../wait-for-container";
-import { dockerClient } from "../docker/docker-client";
+import { dockerClient } from "../docker/client/docker-client";
 import AsyncLock from "async-lock";
 
 export class StartedGenericContainer implements StartedTestContainer {

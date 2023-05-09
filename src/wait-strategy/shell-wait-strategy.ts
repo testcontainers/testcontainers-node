@@ -3,7 +3,7 @@ import { log } from "../logger";
 import { AbstractWaitStrategy } from "./wait-strategy";
 import { IntervalRetryStrategy } from "../retry-strategy";
 import { execContainer } from "../docker/functions/container/exec-container";
-import { dockerClient } from "../docker/docker-client";
+import { dockerClient } from "../docker/client/docker-client";
 
 export class ShellWaitStrategy extends AbstractWaitStrategy {
   constructor(private readonly command: string) {

@@ -3,7 +3,7 @@ import { URL } from "url";
 import { log } from "../logger";
 import { runInContainer } from "./functions/run-in-container";
 import { existsSync } from "fs";
-import { Provider } from "./docker-client";
+import { Provider } from "./client/docker-client";
 
 export const resolveHost = async (
   dockerode: Dockerode,

@@ -1,6 +1,6 @@
 import { IDockerComposeOptions } from "docker-compose";
 import { DockerComposeOptions } from "./docker-compose-options";
-import { dockerClient } from "../docker/docker-client";
+import { dockerClient } from "../docker/client/docker-client";
 import { composeLog } from "../logger";
 import { EOL } from "os";
 import { isNotEmptyString } from "../type-guards";

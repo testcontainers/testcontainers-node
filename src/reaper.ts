@@ -8,8 +8,8 @@ import { getContainerPort, PortWithOptionalBinding } from "./port";
 import { LABEL_TESTCONTAINERS_SESSION_ID } from "./labels";
 import { Wait } from "./wait-strategy/wait";
 import { IntervalRetryStrategy } from "./retry-strategy";
-import { getRemoteDockerUnixSocketPath } from "./docker/get-remote-docker-unix-socket-path";
-import { dockerClient } from "./docker/docker-client";
+import { getRemoteDockerUnixSocketPath } from "./docker/remote-docker-unix-socket-path";
+import { dockerClient } from "./docker/client/docker-client";
 
 export interface Reaper {
   addProject(projectName: string): void;

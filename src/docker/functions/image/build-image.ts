@@ -3,7 +3,7 @@ import { PullPolicy } from "../../../pull-policy";
 import { buildLog, log } from "../../../logger";
 import tar from "tar-fs";
 import byline from "byline";
-import { dockerClient } from "../../docker-client";
+import { dockerClient } from "../../client/docker-client";
 import { createLabels } from "../create-labels";
 import { BuildArgs, RegistryConfig } from "../../types";
 import path from "path";

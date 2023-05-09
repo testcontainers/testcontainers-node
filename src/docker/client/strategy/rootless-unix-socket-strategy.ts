@@ -1,9 +1,10 @@
-import { isDefined } from "../type-guards";
+import { isDefined } from "../../../type-guards";
 import { existsSync } from "fs";
 import path from "path";
 import os from "os";
 import Dockerode from "dockerode";
-import { DockerClientInit, DockerClientStrategy } from "./docker-client";
+import { DockerClientInit } from "../docker-client";
+import { DockerClientStrategy } from "./docker-client-strategy";
 
 export class RootlessUnixSocketStrategy implements DockerClientStrategy {
   private applicable!: boolean;
