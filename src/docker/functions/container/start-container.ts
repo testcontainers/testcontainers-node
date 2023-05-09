@@ -5,7 +5,7 @@ export const startContainer = async (container: Dockerode.Container): Promise<vo
   try {
     await container.start();
   } catch (err) {
-    log.error(`Failed to start container ${container.id}: ${err}`);
+    log.error(`Failed to start container: ${err}`, { containerId: container.id });
     throw err;
   }
 };

@@ -34,7 +34,7 @@ describe("HttpWaitStrategy", () => {
         .withStartupTimeout(3000)
         .withWaitStrategy(Wait.forHttp("/unknown-path", 8080).forStatusCode(200))
         .start()
-    ).rejects.toThrowError("URL /unknown-path not accessible after 3000ms for");
+    ).rejects.toThrowError("URL /unknown-path not accessible after 3000ms");
   });
 
   it("should wait for status code matching", async () => {
@@ -59,7 +59,7 @@ describe("HttpWaitStrategy", () => {
         .withStartupTimeout(3000)
         .withWaitStrategy(Wait.forHttp("/hello-world", 8080).forStatusCodeMatching(() => false))
         .start()
-    ).rejects.toThrowError("URL /hello-world not accessible after 3000ms for");
+    ).rejects.toThrowError("URL /hello-world not accessible after 3000ms");
   });
 
   it("should wait for response body predicate", async () => {
@@ -82,7 +82,7 @@ describe("HttpWaitStrategy", () => {
         .withStartupTimeout(3000)
         .withWaitStrategy(Wait.forHttp("/hello-world", 8080).forResponsePredicate(() => false))
         .start()
-    ).rejects.toThrowError("URL /hello-world not accessible after 3000ms for");
+    ).rejects.toThrowError("URL /hello-world not accessible after 3000ms");
   });
 
   it("should set method", async () => {

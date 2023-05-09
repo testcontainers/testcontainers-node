@@ -32,7 +32,7 @@ export const inspectContainer = async (container: Dockerode.Container): Promise<
       labels: inspectResult.Config.Labels,
     };
   } catch (err) {
-    log.error(`Failed to inspect container ${container.id}: ${err}`);
+    log.error(`Failed to inspect container: ${err}`, { containerId: container.id });
     throw err;
   }
 };

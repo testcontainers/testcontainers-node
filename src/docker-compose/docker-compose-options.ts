@@ -1,4 +1,5 @@
 import { Environment } from "../docker/types";
+import { Logger } from "../logger";
 
 export type DockerComposeOptions = {
   filePath: string;
@@ -7,4 +8,5 @@ export type DockerComposeOptions = {
   commandOptions?: string[];
   composeOptions?: string[];
   environment?: Environment;
+  logger?: Logger;
 };

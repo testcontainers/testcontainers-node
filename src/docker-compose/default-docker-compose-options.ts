@@ -1,7 +1,7 @@
 import { IDockerComposeOptions } from "docker-compose";
 import { DockerComposeOptions } from "./docker-compose-options";
 import { dockerClient } from "../docker/docker-client";
-import { log } from "../logger";
+import { composeLog } from "../logger";
 import { EOL } from "os";
 import { isNotEmptyString } from "../type-guards";
 
@@ -10,6 +10,7 @@ export const defaultDockerComposeOptions = async ({
   ...options
 }: DockerComposeOptions): Promise<Partial<IDockerComposeOptions>> => {
   const { composeEnvironment } = await dockerClient();
+  const log = options.logger ?? composeLog;
 
   return {
     log: false,

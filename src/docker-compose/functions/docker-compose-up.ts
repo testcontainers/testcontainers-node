@@ -5,7 +5,7 @@ import { DockerComposeOptions } from "../docker-compose-options";
 import { dockerComposeDown } from "./docker-compose-down";
 
 export const dockerComposeUp = async (options: DockerComposeOptions, services?: Array<string>): Promise<void> => {
-  log.info(`Upping DockerCompose environment`);
+  log.info(`Upping DockerCompose environment...`);
 
   try {
     if (services) {

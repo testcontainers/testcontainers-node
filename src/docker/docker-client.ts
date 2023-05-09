@@ -37,16 +37,16 @@ const getDockerClient = async (): Promise<DockerClient> => {
       await strategy.init();
     }
     if (strategy.isApplicable()) {
-      log.debug(`Found applicable Docker client strategy: ${strategy.getName()}`);
+      log.debug(`Found Docker client strategy "${strategy.getName()}"`);
       const { uri, dockerode, composeEnvironment } = await strategy.getDockerClient();
-      log.debug(`Testing Docker client strategy URI: ${uri}`);
+      log.debug(`Testing Docker client strategy "${uri}"...`);
       if (await isDockerDaemonReachable(dockerode)) {
         const indexServerAddress = (await getSystemInfo(dockerode)).dockerInfo.indexServerAddress;
         const provider: Provider = uri.includes("podman.sock") ? "podman" : "docker";
         const host = await resolveHost(dockerode, provider, indexServerAddress, uri);
         const hostIps = await lookupHostIps(host);
         log.info(
-          `Using Docker client strategy: ${strategy.getName()}, Docker host: ${host} (${hostIps
+          `Using Docker client strategy "${strategy.getName()}", Docker host "${host}" (${hostIps
             .map((hostIp) => hostIp.address)
             .join(", ")})`
         );

@@ -12,7 +12,7 @@ export const removeContainer = async (
   try {
     await container.remove({ v: options.removeVolumes });
   } catch (err) {
-    log.error(`Failed to remove container ${container.id}: ${err}`);
+    log.error(`Failed to remove container: ${err}`, { containerId: container.id });
     throw err;
   }
 };

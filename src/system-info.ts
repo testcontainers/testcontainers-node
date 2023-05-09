@@ -16,19 +16,18 @@ export const getSystemInfo = async (dockerode: Dockerode): Promise<SystemInfo> =
     return systemInfo;
   }
 
-  log.debug("Fetching system info");
+  log.debug("Fetching system info...");
   const nodeInfo = getNodeInfo();
   const dockerInfo = await getDockerInfo(dockerode);
   const dockerComposeInfo = await getDockerComposeInfo();
   systemInfo = { nodeInfo, dockerInfo, dockerComposeInfo };
 
   log.debug(
-    `System info:
-  System: Node version: ${nodeInfo.version}, Platform: ${nodeInfo.platform}, Arch: ${nodeInfo.architecture}
-  Container runtime: OS: ${dockerInfo.operatingSystem}, Version: ${dockerInfo.serverVersion}, Arch: ${
-      dockerInfo.architecture
-    }, CPUs: ${dockerInfo.cpus}, Memory: ${dockerInfo.memory} 
-  Compose: Installed: ${dockerComposeInfo !== undefined}, Version: ${dockerComposeInfo?.version ?? "N/A"}`
+    `Node version: ${nodeInfo.version}, Platform: ${nodeInfo.platform}, Arch: ${nodeInfo.architecture}, OS: ${
+      dockerInfo.operatingSystem
+    }, Version: ${dockerInfo.serverVersion}, Arch: ${dockerInfo.architecture}, CPUs: ${dockerInfo.cpus}, Memory: ${
+      dockerInfo.memory
+    }, Compose installed: ${dockerComposeInfo !== undefined}, Compose version: ${dockerComposeInfo?.version ?? "N/A"}`
   );
 
   return systemInfo;

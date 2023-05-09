@@ -17,24 +17,21 @@ export abstract class CredentialProvider implements RegistryAuthLocator {
     }
 
     const programName = `docker-credential-${credentialProviderName}`;
-    log.debug(`Executing Docker credential provider: ${programName}`);
+    log.debug(`Executing Docker credential provider "${programName}"`);
 
     const credentials = await this.listCredentials(programName);
     if (!Object.keys(credentials).some((aRegistry) => registryMatches(aRegistry, registry))) {
-      log.debug(`No credential found for registry: "${registry}"`);
+      log.debug(`No credential found for registry "${registry}"`);
       return undefined;
     }
 
     const response = await this.runCredentialProvider(registry, programName);
-    const authConfig: AuthConfig = {
+
+    return {
       username: response.Username,
       password: response.Secret,
       registryAddress: response.ServerURL,
     };
-
-    log.debug(`Docker credential provider found auth config for ${registry}`);
-
-    return authConfig;
   }
 
   private listCredentials(providerName: string): Promise<CredentialProviderListResponse> {

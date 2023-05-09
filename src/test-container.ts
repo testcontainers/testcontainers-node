@@ -64,6 +64,8 @@ export interface TestContainer {
   withWorkingDir(workingDir: string): this;
 
   withResourcesQuota(resourcesQuota: ResourcesQuota): this;
+
+  withLogConsumer(logConsumer: (stream: Readable) => unknown): this;
 }
 
 export interface RestartOptions {

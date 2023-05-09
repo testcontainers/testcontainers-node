@@ -2,19 +2,15 @@ import debug, { IDebugger } from "debug";
 
 type Message = string;
 
-export interface Logger {
-  enabled(): boolean;
-  trace(message: Message): void;
-  debug(message: Message): void;
-  info(message: Message): void;
-  warn(message: Message): void;
-  error(message: Message): void;
-}
+type Options = {
+  containerId?: string;
+  imageName?: string;
+};
 
-class DebugLogger implements Logger {
+export class Logger {
   private readonly logger: IDebugger;
 
-  constructor(namespace: string) {
+  constructor(namespace: string, private readonly showLevel = true) {
     this.logger = debug(namespace);
   }
 
@@ -22,59 +18,45 @@ class DebugLogger implements Logger {
     return this.logger.enabled;
   }
 
-  public trace(message: Message): void {
-    this.logger(`TRACE ${message}`);
+  public trace(message: Message, options?: Options): void {
+    this.logger(this.formatMessage(message, "TRACE", options));
   }
 
-  public debug(message: Message): void {
-    this.logger(`DEBUG ${message}`);
+  public debug(message: Message, options?: Options): void {
+    this.logger(this.formatMessage(message, "DEBUG", options));
   }
 
-  public info(message: Message): void {
-    this.logger(`INFO  ${message}`);
+  public info(message: Message, options?: Options): void {
+    this.logger(this.formatMessage(message, "INFO", options));
   }
 
-  public warn(message: Message): void {
-    this.logger(`WARN  ${message}`);
+  public warn(message: Message, options?: Options): void {
+    this.logger(this.formatMessage(message, "WARN", options));
   }
 
-  public error(message: Message): void {
-    this.logger(`ERROR ${message}`);
-  }
-}
-
-export class FakeLogger implements Logger {
-  public readonly traceLogs: Message[] = [];
-  public readonly debugLogs: Message[] = [];
-  public readonly infoLogs: Message[] = [];
-  public readonly warnLogs: Message[] = [];
-  public readonly errorLogs: Message[] = [];
-
-  public enabled(): boolean {
-    return true;
+  public error(message: Message, options?: Options): void {
+    this.logger(this.formatMessage(message, "ERROR", options));
   }
 
-  public trace(message: Message): void {
-    this.traceLogs.push(message);
+  private formatMessage(message: Message, level: string, options?: Options): string {
+    return `${this.showLevel ? `[${level}] ` : ""}${this.renderOptions(options)}${message}`;
   }
 
-  public debug(message: Message): void {
-    this.debugLogs.push(message);
-  }
-
-  public info(message: Message): void {
-    this.infoLogs.push(message);
-  }
-
-  public warn(message: Message): void {
-    this.warnLogs.push(message);
-  }
-
-  public error(message: Message): void {
-    this.errorLogs.push(message);
+  private renderOptions(options?: Options): string {
+    let str = "";
+    if (options?.containerId) {
+      str += `[${options.containerId.substring(0, 12)}] `;
+    }
+    if (options?.imageName) {
+      str += `[${options.imageName}] `;
+    }
+    return str;
   }
 }
 
-export const log = new DebugLogger("testcontainers");
-export const containerLog = new DebugLogger("testcontainers:containers");
-export const execLog = new DebugLogger("testcontainers:exec");
+export const log = new Logger("testcontainers");
+export const containerLog = new Logger("testcontainers:containers", false);
+export const composeLog = new Logger("testcontainers:compose", false);
+export const buildLog = new Logger("testcontainers:build", false);
+export const pullLog = new Logger("testcontainers:pull", false);
+export const execLog = new Logger("testcontainers:exec", false);

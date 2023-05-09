@@ -15,24 +15,24 @@ export const runInContainer = async (
   try {
     await pullImage(dockerode, indexServerAddress, { imageName: DockerImageName.fromString(image), force: false });
 
-    log.debug(`Creating container: ${image} with command: ${command.join(" ")}`);
+    log.debug(`Creating container: ${image} with command "${command.join(" ")}"...`);
     const container = await dockerode.createContainer({ Image: image, Cmd: command });
 
-    log.debug(`Attaching to container: ${container.id}`);
+    log.debug(`Attaching to container...`, { containerId: container.id });
     const stream = await attachContainer(dockerode, container);
 
-    log.debug(`Starting container: ${container.id}`);
+    log.debug(`Starting container...`, { containerId: container.id });
     await startContainer(container);
 
-    log.debug(`Waiting for container output: ${container.id}`);
+    log.debug(`Waiting for container output...`, { containerId: container.id });
     const output = await streamToString(stream, { trim: true });
 
-    log.debug(`Removing container: ${container.id}`);
+    log.debug(`Removing container...`, { containerId: container.id });
     await container.remove({ force: true, v: true });
 
     return output.length === 0 ? undefined : output;
   } catch (err) {
-    log.error(`Failed to run command in container: "${command.join(" ")}", error: "${err}"`);
+    log.error(`Failed to run command "${command.join(" ")}" in container: "${err}"`);
     return undefined;
   }
 };

@@ -37,7 +37,7 @@ describe("StartupCheckStrategy", () => {
         .withWaitStrategy(waitStrategy)
         .withStartupTimeout(3000)
         .start()
-    ).rejects.toThrowError("Container not accessible after 3000ms for");
+    ).rejects.toThrowError("Container not accessible after 3000ms");
   });
 
   it("should fail immediately when status FAILED", async () => {

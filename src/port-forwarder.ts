@@ -12,8 +12,9 @@ export class PortForwarder {
   constructor(private readonly sshConnection: SshConnection, private readonly container: StartedTestContainer) {}
 
   public async exposeHostPort(port: number): Promise<void> {
-    log.info(`Exposing host port ${port}`);
+    log.info(`Exposing host port ${port}...`);
     await this.sshConnection.remoteForward("localhost", port);
+    log.info(`Exposed host port ${port}`);
   }
 
   public getNetworkId(): string {
@@ -44,7 +45,7 @@ export class PortForwarderInstance {
   }
 
   private static async createInstance(): Promise<PortForwarder> {
-    log.debug(`Creating new Port Forwarder`);
+    log.debug(`Creating new Port Forwarder...`);
 
     const username = "root";
     const password = new RandomUuid().nextUuid();
@@ -67,8 +68,9 @@ export class PortForwarderInstance {
     const host = (await dockerClient()).host;
     const port = container.getMappedPort(22);
 
-    log.debug(`Connecting to Port Forwarder on ${host}:${port}`);
+    log.debug(`Connecting to Port Forwarder on "${host}:${port}"...`);
     const connection = await createSshConnection({ host, port, username, password });
+    log.debug(`Connected to Port Forwarder on "${host}:${port}"`);
     connection.unref();
 
     return new PortForwarder(connection, container);

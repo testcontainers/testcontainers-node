@@ -9,6 +9,9 @@ All possible environment variable configurations for Testcontainers are found he
 | DEBUG    | testcontainers*           | Enable all logs            |
 | DEBUG    | testcontainers            | Enable testcontainers logs |
 | DEBUG    | testcontainers:containers | Enable container logs      |
+| DEBUG    | testcontainers:compose    | Enable compose logs        |
+| DEBUG    | testcontainers:build      | Enable build logs          |
+| DEBUG    | testcontainers:pull       | Enable pull logs           |
 | DEBUG    | testcontainers:exec       | Enable container exec logs |
 
 Note that you can enable multiple loggers, e.g: `DEBUG=testcontainers,testcontainers:exec`.

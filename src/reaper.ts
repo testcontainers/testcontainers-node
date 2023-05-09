@@ -81,7 +81,7 @@ export class ReaperInstance {
   }
 
   private static createDisabledInstance(): Promise<Reaper> {
-    log.debug(`Not creating new Reaper for session: ${sessionId}`);
+    log.debug(`Not creating new Reaper for session "${sessionId}"`);
     return Promise.resolve(new DisabledReaper());
   }
 
@@ -90,7 +90,7 @@ export class ReaperInstance {
       ? { container: 8080, host: Number(process.env["TESTCONTAINERS_RYUK_PORT"]) }
       : 8080;
 
-    log.debug(`Creating new Reaper for session: ${sessionId}`);
+    log.debug(`Creating new Reaper for session "${sessionId}"...`);
     const container = new GenericContainer(REAPER_IMAGE)
       .withName(`testcontainers-ryuk-${sessionId}`)
       .withExposedPorts(containerPort)
@@ -116,7 +116,7 @@ export class ReaperInstance {
     const retryResult = await retryStrategy.retryUntil(
       (attempt) => {
         return new Promise((resolve) => {
-          log.debug(`Connecting to Reaper (attempt ${attempt + 1}) ${containerId} on ${host}:${port}`);
+          log.debug(`Connecting to Reaper (attempt ${attempt + 1}) on "${host}:${port}"...`, { containerId });
           const socket = new Socket();
           socket
             .unref()
@@ -124,14 +124,14 @@ export class ReaperInstance {
             .on("error", (err) => log.error(`Reaper ${containerId} socket error: ${err}`))
             .on("close", (hadError) => {
               if (hadError) {
-                log.error(`Connection to Reaper ${containerId} closed with error`);
+                log.error(`Connection to Reaper closed with error`, { containerId });
               } else {
-                log.warn(`Connection to Reaper ${containerId} closed`);
+                log.warn(`Connection to Reaper closed`, { containerId });
               }
               resolve(undefined);
             })
             .connect(getContainerPort(port), host, () => {
-              log.debug(`Connected to Reaper ${containerId}`);
+              log.debug(`Connected to Reaper`, { containerId });
               socket.write(`label=${LABEL_TESTCONTAINERS_SESSION_ID}=${sessionId}\r\n`);
               const reaper = new RealReaper(startedContainer, socket);
               resolve(reaper);
@@ -139,7 +139,11 @@ export class ReaperInstance {
         });
       },
       (result) => result !== undefined,
-      () => new Error(`Failed to connect to Reaper ${containerId}`),
+      () => {
+        const message = `Failed to connect to Reaper`;
+        log.error(message, { containerId });
+        return new Error(message);
+      },
       4000
     );
 

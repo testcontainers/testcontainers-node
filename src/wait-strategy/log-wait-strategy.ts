@@ -13,13 +13,13 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
   }
 
   public async waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts, startTime?: Date): Promise<void> {
-    log.debug(`Waiting for log message "${this.message}" for ${container.id}`);
+    log.debug(`Waiting for log message "${this.message}"...`, { containerId: container.id });
 
     const stream = await containerLogs(container, { since: startTime });
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
-        const message = `Log message "${this.message}" not received after ${this.startupTimeout}ms for ${container.id}`;
-        log.error(message);
+        const message = `Log message "${this.message}" not received after ${this.startupTimeout}ms`;
+        log.error(message, { containerId: container.id });
         reject(new Error(message));
       }, this.startupTimeout);
 
@@ -48,7 +48,9 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
         .on("end", () => {
           stream.destroy();
           clearTimeout(timeout);
-          reject(new Error(`Log stream ended and message "${this.message}" was not received for ${container.id}`));
+          const message = `Log stream ended and message "${this.message}" was not received`;
+          log.error(message, { containerId: container.id });
+          reject(new Error(message));
         });
     });
   }

@@ -1,6 +1,6 @@
 import { DockerImageName } from "../../../docker-image-name";
 import { PullPolicy } from "../../../pull-policy";
-import { log } from "../../../logger";
+import { buildLog, log } from "../../../logger";
 import tar from "tar-fs";
 import byline from "byline";
 import { dockerClient } from "../../docker-client";
@@ -23,7 +23,7 @@ export type BuildImageOptions = {
 
 export const buildImage = async (options: BuildImageOptions): Promise<void> => {
   try {
-    log.info(`Building image '${options.imageName.toString()}' with context '${options.context}'`);
+    log.info(`Building image "${options.imageName.toString()}" with context "${options.context}"...`);
 
     const isDockerIgnored = await createIsDockerIgnoredFunction(options.context);
 
@@ -49,16 +49,21 @@ export const buildImage = async (options: BuildImageOptions): Promise<void> => {
       registryconfig: options.registryConfig,
       pull: options.pullPolicy.shouldPull() ? "true" : undefined,
     };
-    return new Promise((resolve) => {
+    await new Promise<void>((resolve) => {
       dockerode
         .buildImage(tarStream, buildImageOptions)
         .then((stream) => byline(stream))
         .then((stream) => {
           stream.setEncoding("utf-8");
-          stream.on("data", (line) => log.trace(`${options.imageName.toString()}: ${line}`));
+          stream.on("data", (line) => {
+            if (buildLog.enabled()) {
+              buildLog.trace(line, { imageName: options.imageName.toString() });
+            }
+          });
           stream.on("end", () => resolve());
         });
     });
+    log.info(`Built image "${options.imageName.toString()}" with context "${options.context}"`);
   } catch (err) {
     log.error(`Failed to build image: ${err}`);
     throw err;
