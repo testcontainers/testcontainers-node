@@ -6,6 +6,8 @@ Works out of the box.
 
 ## Podman
 
+### Usage
+
 MacOS:
 ```bash
 {% raw %}
@@ -24,15 +26,15 @@ export DOCKER_HOST=unix://${XDG_RUNTIME_DIR}/podman/podman.sock
 
 The resource reaper is a process which runs in the background and cleans up containers and images after they are no longer needed. It is not possible to run the resource reaper on MacOS with Podman due to permission limitations, it fails with "Operation not supported" errors.
 
-Workarounds:
-
-Disable the resource reaper:
+One workaround is to disable the resource reaper:
 
 ```bash
 export TESTCONTAINERS_RYUK_DISABLED=true
 ```
 
 ## Colima
+
+### Usage
 
 ```bash
 export DOCKER_HOST=unix://${HOME}/.colima/default/docker.sock
@@ -45,7 +47,7 @@ export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock
 
 When exposing a container port, Docker may provide an IPv4 _and_ an IPv6 binding, where the port may be different. Node versions < 18 default to resolve a hostname to an IPv4 address, while Node 18+ would default to an IPv6 address. Because Colima does not support IPv6, resolving a hostname to an IPv6 address results in connection refused.
 
-Workarounds:
+There are 2 workarounds:
 
 1. Disable IPv6 in your environment.
 2. Run Node with flags such that it prefers IPv4:
@@ -74,6 +76,8 @@ const container = await new GenericContainer("redis")
 ```
 
 ## Rancher Desktop
+
+### Usage
 
 ```bash
 export DOCKER_HOST=unix://${HOME}/.rd/docker.sock
