@@ -1,6 +1,6 @@
 import { log } from "../../../logger";
 import { DockerImageName } from "../../../docker-image-name";
-import { dockerClient } from "../../docker-client";
+import { dockerClient } from "../../client/docker-client";
 import Dockerode, { PortMap as DockerodePortBindings } from "dockerode";
 import { getContainerPort, hasHostBinding, PortWithOptionalBinding } from "../../../port";
 import { createLabels } from "../create-labels";

@@ -1,4 +1,4 @@
-import { getRemoteDockerUnixSocketPath } from "./get-remote-docker-unix-socket-path";
+import { getRemoteDockerUnixSocketPath } from "./remote-docker-unix-socket-path";
 
 test("should return TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE when provided", () => {
   const actual = getRemoteDockerUnixSocketPath("unix:///var/run/docker.sock", "linux", {

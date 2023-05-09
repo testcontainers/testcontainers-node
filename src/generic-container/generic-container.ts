@@ -24,7 +24,7 @@ import {
 import { pullImage } from "../docker/functions/image/pull-image";
 import { createContainer, CreateContainerOptions } from "../docker/functions/container/create-container";
 import { connectNetwork } from "../docker/functions/network/connect-network";
-import { dockerClient } from "../docker/docker-client";
+import { dockerClient } from "../docker/client/docker-client";
 import { inspectContainer, InspectResult } from "../docker/functions/container/inspect-container";
 import Dockerode from "dockerode";
 import { startContainer } from "../docker/functions/container/start-container";

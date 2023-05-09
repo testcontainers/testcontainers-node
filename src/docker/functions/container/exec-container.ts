@@ -4,7 +4,7 @@ import Dockerode from "dockerode";
 import { execLog, log } from "../../../logger";
 import byline from "byline";
 import { demuxStream } from "../demux-stream";
-import { Provider } from "../../docker-client";
+import { Provider } from "../../client/docker-client";
 
 export const execContainer = async (
   dockerode: Dockerode,

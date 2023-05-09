@@ -3,7 +3,7 @@ import { log } from "../../../logger";
 import Dockerode from "dockerode";
 import { demuxStream } from "../demux-stream";
 import { Readable } from "stream";
-import { dockerClient } from "../../docker-client";
+import { dockerClient } from "../../client/docker-client";
 
 export type ContainerLogsOptions = {
   since?: Date;

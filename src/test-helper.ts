@@ -1,6 +1,6 @@
 import { Readable } from "stream";
 import { ReaperInstance } from "./reaper";
-import { dockerClient } from "./docker/docker-client";
+import { dockerClient } from "./docker/client/docker-client";
 import { StartedDockerComposeEnvironment } from "./docker-compose-environment/started-docker-compose-environment";
 import fetch from "node-fetch";
 import { StartedTestContainer } from "./test-container";

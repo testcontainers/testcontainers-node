@@ -4,7 +4,7 @@ import { BoundPorts } from "../bound-ports";
 import { log } from "../logger";
 import { IntervalRetryStrategy } from "../retry-strategy";
 import { AbstractWaitStrategy } from "./wait-strategy";
-import { dockerClient } from "../docker/docker-client";
+import { dockerClient } from "../docker/client/docker-client";
 
 export class HostPortWaitStrategy extends AbstractWaitStrategy {
   public async waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void> {

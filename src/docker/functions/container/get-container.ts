@@ -1,4 +1,4 @@
-import { dockerClient } from "../../docker-client";
+import { dockerClient } from "../../client/docker-client";
 import Dockerode from "dockerode";
 import { log } from "../../../logger";
 import { LABEL_TESTCONTAINERS_CONTAINER_HASH } from "../../../labels";

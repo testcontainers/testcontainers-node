@@ -9,7 +9,7 @@ import { RandomUuid, Uuid } from "../uuid";
 import { Environment } from "../docker/types";
 import { listContainers } from "../docker/functions/container/list-containers";
 import { getContainerById } from "../docker/functions/container/get-container";
-import { dockerClient } from "../docker/docker-client";
+import { dockerClient } from "../docker/client/docker-client";
 import { inspectContainer } from "../docker/functions/container/inspect-container";
 import { containerLogs } from "../docker/functions/container/container-logs";
 import { StartedDockerComposeEnvironment } from "./started-docker-compose-environment";

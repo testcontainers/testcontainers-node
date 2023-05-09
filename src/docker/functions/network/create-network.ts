@@ -1,6 +1,6 @@
 import { log } from "../../../logger";
 import { Network } from "dockerode";
-import { dockerClient } from "../../docker-client";
+import { dockerClient } from "../../client/docker-client";
 import { createLabels } from "../create-labels";
 
 export type CreateNetworkOptions = {

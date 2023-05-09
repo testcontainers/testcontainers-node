@@ -5,7 +5,7 @@ import { PortWithOptionalBinding } from "./port";
 import { StartedTestContainer } from "./test-container";
 import { RandomUuid } from "./uuid";
 import { sessionId } from "./docker/session-id";
-import { dockerClient } from "./docker/docker-client";
+import { dockerClient } from "./docker/client/docker-client";
 import { SSHD_IMAGE } from "./images";
 
 export class PortForwarder {

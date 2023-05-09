@@ -1,5 +1,5 @@
 import { runInContainer } from "./run-in-container";
-import { dockerClient } from "../docker-client";
+import { dockerClient } from "../client/docker-client";
 import Dockerode from "dockerode";
 
 describe("runInContainer", () => {

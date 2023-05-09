@@ -1,10 +1,10 @@
 import { DockerImageName } from "../../../docker-image-name";
-import { pullLog, log } from "../../../logger";
-import { PullStreamParser } from "../../pull-stream-parser";
+import { log, pullLog } from "../../../logger";
 import { imageExists } from "./image-exists";
 import Dockerode from "dockerode";
 import { getAuthConfig } from "../../../registry-auth-locator/get-auth-config";
 import AsyncLock from "async-lock";
+import byline from "byline";
 
 export type PullImageOptions = {
   imageName: DockerImageName;
@@ -28,8 +28,14 @@ export const pullImage = async (
       log.info(`Pulling image "${options.imageName}"...`);
       const authconfig = await getAuthConfig(options.imageName.registry ?? indexServerAddress);
       const stream = await dockerode.pull(options.imageName.toString(), { authconfig });
-
-      await new PullStreamParser(options.imageName, pullLog).consume(stream);
+      return new Promise<void>((resolve) => {
+        byline(stream).on("data", (line) => {
+          if (pullLog.enabled()) {
+            pullLog.trace(line, { imageName: options.imageName.toString() });
+          }
+        });
+        stream.on("end", resolve);
+      });
     });
   } catch (err) {
     log.error(`Failed to pull image "${options.imageName}": ${err}`);
