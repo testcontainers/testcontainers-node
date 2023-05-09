@@ -13,7 +13,7 @@ import { stopContainer } from "../docker/functions/container/stop-container";
 import { restartContainer } from "../docker/functions/container/restart-container";
 import { WaitStrategy } from "../wait-strategy/wait-strategy";
 import { waitForContainer } from "../wait-for-container";
-import { dockerClient } from "../docker/client/docker-client";
+import { getDockerClient } from "../docker/client/docker-client";
 import AsyncLock from "async-lock";
 
 export class StartedGenericContainer implements StartedTestContainer {
@@ -48,7 +48,7 @@ export class StartedGenericContainer implements StartedTestContainer {
     log.info(`Restarting container...`, { containerId: this.container.id });
     await restartContainer(this.container, resolvedOptions);
 
-    const { hostIps } = await dockerClient();
+    const { hostIps } = await getDockerClient();
     this.inspectResult = await inspectContainer(this.container);
     const startTime = this.inspectResult.state.startedAt;
 
@@ -122,9 +122,9 @@ export class StartedGenericContainer implements StartedTestContainer {
   }
 
   public async exec(command: string[]): Promise<ExecResult> {
-    const { dockerode, provider } = await dockerClient();
+    const { dockerode, containerRuntime } = await getDockerClient();
     log.debug(`Executing command "${command.join(" ")}"...`, { containerId: this.container.id });
-    const output = await execContainer(dockerode, provider, this.container, command);
+    const output = await execContainer(dockerode, containerRuntime, this.container, command);
     log.debug(`Executed command "${command.join(" ")}"...`, { containerId: this.container.id });
     return output;
   }

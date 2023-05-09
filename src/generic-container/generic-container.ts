@@ -24,7 +24,7 @@ import {
 import { pullImage } from "../docker/functions/image/pull-image";
 import { createContainer, CreateContainerOptions } from "../docker/functions/container/create-container";
 import { connectNetwork } from "../docker/functions/network/connect-network";
-import { dockerClient } from "../docker/client/docker-client";
+import { getDockerClient } from "../docker/client/docker-client";
 import { inspectContainer, InspectResult } from "../docker/functions/container/inspect-container";
 import Dockerode from "dockerode";
 import { startContainer } from "../docker/functions/container/start-container";
@@ -74,7 +74,7 @@ export class GenericContainer implements TestContainer {
   protected containerStarting?(inspectResult: InspectResult, reused: boolean): Promise<void>;
 
   public async start(): Promise<StartedTestContainer> {
-    const { dockerode, indexServerAddress } = await dockerClient();
+    const { dockerode, indexServerAddress } = await getDockerClient();
 
     await pullImage(dockerode, indexServerAddress, {
       imageName: this.opts.imageName,
@@ -130,7 +130,7 @@ export class GenericContainer implements TestContainer {
   }
 
   private async reuseContainer(container: Dockerode.Container) {
-    const { host, hostIps } = await dockerClient();
+    const { host, hostIps } = await getDockerClient();
     const inspectResult = await inspectContainer(container);
     const boundPorts = BoundPorts.fromInspectResult(hostIps, inspectResult).filter(this.opts.exposedPorts);
     if (this.startupTimeout !== undefined) {
@@ -199,7 +199,7 @@ export class GenericContainer implements TestContainer {
     await startContainer(container);
     log.info(`Started container for image "${this.opts.imageName}"`, { containerId: container.id });
 
-    const { host, hostIps } = await dockerClient();
+    const { host, hostIps } = await getDockerClient();
     const inspectResult = await inspectContainer(container);
     const boundPorts = BoundPorts.fromInspectResult(hostIps, inspectResult).filter(this.opts.exposedPorts);
     if (this.startupTimeout !== undefined) {

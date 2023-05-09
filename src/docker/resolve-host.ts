@@ -3,17 +3,20 @@ import { URL } from "url";
 import { log } from "../logger";
 import { runInContainer } from "./functions/run-in-container";
 import { existsSync } from "fs";
-import { Provider } from "./client/docker-client";
+import { ContainerRuntime } from "./client/docker-client";
 
 export const resolveHost = async (
   dockerode: Dockerode,
-  provider: Provider,
+  containerRuntime: ContainerRuntime,
   indexServerAddress: string,
   uri: string,
+  allowUserOverrides: boolean,
   env: NodeJS.ProcessEnv = process.env
 ): Promise<string> => {
-  if (env.TESTCONTAINERS_HOST_OVERRIDE !== undefined) {
-    return env.TESTCONTAINERS_HOST_OVERRIDE;
+  if (allowUserOverrides) {
+    if (env.TESTCONTAINERS_HOST_OVERRIDE !== undefined) {
+      return env.TESTCONTAINERS_HOST_OVERRIDE;
+    }
   }
 
   const { protocol, hostname } = new URL(uri);
@@ -26,7 +29,7 @@ export const resolveHost = async (
     case "unix:":
     case "npipe:": {
       if (isInContainer()) {
-        const networkName = provider === "podman" ? "podman" : "bridge";
+        const networkName = containerRuntime === "podman" ? "podman" : "bridge";
         const gateway = await findGateway(dockerode, networkName);
         if (gateway !== undefined) {
           return gateway;

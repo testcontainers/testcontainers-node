@@ -3,7 +3,7 @@ import { existsSync } from "fs";
 import path from "path";
 import os from "os";
 import Dockerode from "dockerode";
-import { DockerClientInit } from "../docker-client";
+import { DockerClientStrategyResult } from "../docker-client";
 import { DockerClientStrategy } from "./docker-client-strategy";
 
 export class RootlessUnixSocketStrategy implements DockerClientStrategy {
@@ -55,11 +55,12 @@ export class RootlessUnixSocketStrategy implements DockerClientStrategy {
     return path.join("/run", "user", `${os.userInfo().uid}`, "docker.sock");
   }
 
-  async getDockerClient(): Promise<DockerClientInit> {
+  async getDockerClient(): Promise<DockerClientStrategyResult> {
     return {
       uri: `unix://${this.socketPath}`,
       dockerode: new Dockerode({ socketPath: this.socketPath }),
       composeEnvironment: {},
+      allowUserOverrides: true,
     };
   }
 

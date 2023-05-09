@@ -9,7 +9,7 @@ import { LABEL_TESTCONTAINERS_SESSION_ID } from "./labels";
 import { Wait } from "./wait-strategy/wait";
 import { IntervalRetryStrategy } from "./retry-strategy";
 import { getRemoteDockerUnixSocketPath } from "./docker/remote-docker-unix-socket-path";
-import { dockerClient } from "./docker/client/docker-client";
+import { getDockerClient } from "./docker/client/docker-client";
 
 export interface Reaper {
   addProject(projectName: string): void;
@@ -91,12 +91,13 @@ export class ReaperInstance {
       : 8080;
 
     log.debug(`Creating new Reaper for session "${sessionId}"...`);
+    const { uri, allowUserOverrides } = await getDockerClient();
     const container = new GenericContainer(REAPER_IMAGE)
       .withName(`testcontainers-ryuk-${sessionId}`)
       .withExposedPorts(containerPort)
       .withBindMounts([
         {
-          source: getRemoteDockerUnixSocketPath((await dockerClient()).uri),
+          source: getRemoteDockerUnixSocketPath(uri, allowUserOverrides),
           target: "/var/run/docker.sock",
         },
       ])

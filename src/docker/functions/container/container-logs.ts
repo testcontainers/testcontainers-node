@@ -3,7 +3,7 @@ import { log } from "../../../logger";
 import Dockerode from "dockerode";
 import { demuxStream } from "../demux-stream";
 import { Readable } from "stream";
-import { dockerClient } from "../../client/docker-client";
+import { getDockerClient } from "../../client/docker-client";
 
 export type ContainerLogsOptions = {
   since?: Date;
@@ -21,7 +21,7 @@ export const containerLogs = async (
       since: options.since ? options.since.getTime() / 1000 : 0,
     })) as IncomingMessage;
     stream.socket.unref();
-    return demuxStream((await dockerClient()).dockerode, stream);
+    return demuxStream((await getDockerClient()).dockerode, stream);
   } catch (err) {
     log.error(`Failed to get container logs: ${err}`);
     throw err;

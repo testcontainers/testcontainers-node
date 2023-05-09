@@ -3,7 +3,7 @@ import { PullPolicy } from "../../../pull-policy";
 import { buildLog, log } from "../../../logger";
 import tar from "tar-fs";
 import byline from "byline";
-import { dockerClient } from "../../client/docker-client";
+import { getDockerClient } from "../../client/docker-client";
 import { createLabels } from "../create-labels";
 import { BuildArgs, RegistryConfig } from "../../types";
 import path from "path";
@@ -38,7 +38,7 @@ export const buildImage = async (options: BuildImageOptions): Promise<void> => {
       },
     });
 
-    const { dockerode } = await dockerClient();
+    const { dockerode } = await getDockerClient();
 
     const buildImageOptions: ImageBuildOptions = {
       dockerfile: options.dockerfileName,

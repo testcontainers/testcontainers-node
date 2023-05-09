@@ -4,11 +4,11 @@ import Dockerode from "dockerode";
 import { execLog, log } from "../../../logger";
 import byline from "byline";
 import { demuxStream } from "../demux-stream";
-import { Provider } from "../../client/docker-client";
+import { ContainerRuntime } from "../../client/docker-client";
 
 export const execContainer = async (
   dockerode: Dockerode,
-  provider: Provider,
+  containerRuntime: ContainerRuntime,
   container: Dockerode.Container,
   command: string[],
   shouldLog = true
@@ -22,7 +22,7 @@ export const execContainer = async (
       AttachStderr: true,
     });
 
-    const stream = await startExec(dockerode, provider, exec, container);
+    const stream = await startExec(dockerode, containerRuntime, exec, container);
 
     stream.on("data", (chunk) => chunks.push(chunk));
 
@@ -44,13 +44,13 @@ export const execContainer = async (
 
 const startExec = async (
   dockerode: Dockerode,
-  provider: Provider,
+  containerRuntime: ContainerRuntime,
   exec: Dockerode.Exec,
   container: Dockerode.Container
 ): Promise<Readable> => {
   try {
     const stream = await exec.start({ stdin: true, Detach: false, Tty: true });
-    if (provider === "podman") {
+    if (containerRuntime === "podman") {
       return demuxStream(dockerode, stream);
     } else {
       return stream;
