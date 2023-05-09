@@ -93,7 +93,7 @@ export class StartedMySqlContainer extends AbstractStartedContainer {
     url.hostname = this.getHost();
     url.port = this.getPort().toString();
     url.pathname = this.getDatabase();
-    url.username = this.getUsername();
+    url.username = isRoot ? "root" : this.getUsername();
     url.password = isRoot ? this.getRootPassword() : this.getUserPassword();
     return url.toString();
   }
