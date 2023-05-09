@@ -19,23 +19,27 @@ export class Logger {
   }
 
   public trace(message: Message, options?: Options): void {
-    this.logger(`${this.showLevel ? "[TRACE] " : ""}${this.renderOptions(options)}${message}`);
+    this.logger(this.formatMessage(message, "TRACE", options));
   }
 
   public debug(message: Message, options?: Options): void {
-    this.logger(`${this.showLevel ? "[DEBUG] " : ""}${this.renderOptions(options)}${message}`);
+    this.logger(this.formatMessage(message, "DEBUG", options));
   }
 
   public info(message: Message, options?: Options): void {
-    this.logger(`${this.showLevel ? "[INFO] " : ""}${this.renderOptions(options)}${message}`);
+    this.logger(this.formatMessage(message, "INFO", options));
   }
 
   public warn(message: Message, options?: Options): void {
-    this.logger(`${this.showLevel ? "[WARN] " : ""}${this.renderOptions(options)}${message}`);
+    this.logger(this.formatMessage(message, "WARN", options));
   }
 
   public error(message: Message, options?: Options): void {
-    this.logger(`${this.showLevel && "[ERROR] "}${this.renderOptions(options)}${message}`);
+    this.logger(this.formatMessage(message, "ERROR", options));
+  }
+
+  private formatMessage(message: Message, level: string, options?: Options): string {
+    return `${this.showLevel ? `[${level}] ` : ""}${this.renderOptions(options)}${message}`;
   }
 
   private renderOptions(options?: Options): string {
