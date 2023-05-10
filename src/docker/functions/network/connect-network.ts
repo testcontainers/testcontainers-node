@@ -1,5 +1,5 @@
 import { log } from "../../../logger";
-import { dockerClient } from "../../client/docker-client";
+import { getDockerClient } from "../../client/docker-client";
 
 export type ConnectNetworkOptions = {
   containerId: string;
@@ -10,7 +10,7 @@ export type ConnectNetworkOptions = {
 export const connectNetwork = async (options: ConnectNetworkOptions): Promise<void> => {
   try {
     log.info(`Connecting to network "${options.networkId}"...`, { containerId: options.containerId });
-    const { dockerode } = await dockerClient();
+    const { dockerode } = await getDockerClient();
     const network = dockerode.getNetwork(options.networkId);
     await network.connect({ Container: options.containerId, EndpointConfig: { Aliases: options.networkAliases } });
     log.info(`Connected to network "${options.networkId}"...`, { containerId: options.containerId });

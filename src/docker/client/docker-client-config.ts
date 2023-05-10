@@ -26,23 +26,23 @@ async function loadFromFile() {
   const dockerClientConfig: DockerClientConfig = {};
 
   if (existsSync(file)) {
-    log.debug(`Found ".testcontainers.properties" file`);
+    log.debug(`Loading ".testcontainers.properties" file...`);
     const string = await readFile(file, { encoding: "utf-8" });
     const properties = propertiesReader("").read(string);
 
-    const host = properties.get("docker.host") as string;
-    if (host !== null) {
-      dockerClientConfig.dockerHost = host;
+    const dockerHost = properties.get("docker.host") as string;
+    if (dockerHost !== null) {
+      dockerClientConfig.dockerHost = dockerHost;
     }
 
-    const tlsVerify = properties.get("docker.tls.verify") as number;
-    if (tlsVerify !== null) {
-      dockerClientConfig.dockerTlsVerify = `${tlsVerify}`;
+    const dockerTlsVerify = properties.get("docker.tls.verify") as number;
+    if (dockerTlsVerify !== null) {
+      dockerClientConfig.dockerTlsVerify = `${dockerTlsVerify}`;
     }
 
-    const certPath = properties.get("docker.cert.path") as string;
-    if (certPath !== null) {
-      dockerClientConfig.dockerCertPath = certPath;
+    const dockerCertPath = properties.get("docker.cert.path") as string;
+    if (dockerCertPath !== null) {
+      dockerClientConfig.dockerCertPath = dockerCertPath;
     }
   }
 
@@ -66,6 +66,10 @@ function loadFromEnv(env: NodeJS.ProcessEnv) {
 }
 
 function logDockerClientConfig(config: DockerClientConfig) {
+  if (!log.enabled()) {
+    return;
+  }
+
   const configurations = Object.entries(config)
     .filter(([, value]) => value !== undefined)
     .map(([key, value]) => `${key}: "${value}"`);

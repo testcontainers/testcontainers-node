@@ -9,7 +9,7 @@ import { RandomUuid, Uuid } from "../uuid";
 import { Environment } from "../docker/types";
 import { listContainers } from "../docker/functions/container/list-containers";
 import { getContainerById } from "../docker/functions/container/get-container";
-import { dockerClient } from "../docker/client/docker-client";
+import { getDockerClient } from "../docker/client/docker-client";
 import { inspectContainer } from "../docker/functions/container/inspect-container";
 import { containerLogs } from "../docker/functions/container/container-logs";
 import { StartedDockerComposeEnvironment } from "./started-docker-compose-environment";
@@ -131,7 +131,7 @@ export class DockerComposeEnvironment {
           const container = await getContainerById(startedContainer.Id);
           const containerName = resolveContainerName(this.projectName, startedContainer.Names[0]);
 
-          const { host, hostIps } = await dockerClient();
+          const { host, hostIps } = await getDockerClient();
           const inspectResult = await inspectContainer(container);
           const boundPorts = BoundPorts.fromInspectResult(hostIps, inspectResult);
           const waitStrategy = this.waitStrategy[containerName]

@@ -30,9 +30,9 @@ jest.mock("./functions/run-in-container", () => ({
 
 test("should return TESTCONTAINERS_HOST_OVERRIDE from environment", async () => {
   const host = await resolveHost(new Dockerode(), "docker", "", "", {
-    TESTCONTAINERS_HOST_OVERRIDE: "tcp://docker:2375",
+    TESTCONTAINERS_HOST_OVERRIDE: "tcp://another:2375",
   });
-  expect(host).toEqual("tcp://docker:2375");
+  expect(host).toEqual("tcp://another:2375");
 });
 
 test("should return hostname for TCP protocols", async () => {

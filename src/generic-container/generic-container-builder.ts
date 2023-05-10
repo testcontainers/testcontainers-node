@@ -9,7 +9,7 @@ import { getDockerfileImages } from "../dockerfile-parser";
 import { buildImage } from "../docker/functions/image/build-image";
 import { getAuthConfig } from "../registry-auth-locator/get-auth-config";
 import { GenericContainer } from "./generic-container";
-import { dockerClient } from "../docker/client/docker-client";
+import { getDockerClient } from "../docker/client/docker-client";
 import { imageExists } from "../docker/functions/image/image-exists";
 
 export class GenericContainerBuilder {
@@ -47,7 +47,7 @@ export class GenericContainerBuilder {
     const dockerfile = path.resolve(this.context, this.dockerfileName);
     log.debug(`Preparing to build Dockerfile "${dockerfile}" as image "${imageName}"...`);
     const imageNames = await getDockerfileImages(dockerfile, this.buildArgs);
-    const { dockerode, indexServerAddress } = await dockerClient();
+    const { dockerode, indexServerAddress } = await getDockerClient();
     const registryConfig = await this.getRegistryConfig(indexServerAddress, imageNames);
 
     await buildImage({

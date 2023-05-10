@@ -9,7 +9,7 @@ import { LABEL_TESTCONTAINERS_SESSION_ID } from "./labels";
 import { Wait } from "./wait-strategy/wait";
 import { IntervalRetryStrategy } from "./retry-strategy";
 import { getRemoteDockerUnixSocketPath } from "./docker/remote-docker-unix-socket-path";
-import { dockerClient } from "./docker/client/docker-client";
+import { getDockerClient } from "./docker/client/docker-client";
 
 export interface Reaper {
   addProject(projectName: string): void;
@@ -96,7 +96,7 @@ export class ReaperInstance {
       .withExposedPorts(containerPort)
       .withBindMounts([
         {
-          source: getRemoteDockerUnixSocketPath((await dockerClient()).uri),
+          source: getRemoteDockerUnixSocketPath((await getDockerClient()).uri),
           target: "/var/run/docker.sock",
         },
       ])
