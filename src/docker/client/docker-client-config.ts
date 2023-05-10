@@ -6,7 +6,7 @@ import { readFile } from "fs/promises";
 import propertiesReader from "properties-reader";
 
 export type DockerClientConfig = {
-  testcontainersCloudHost?: string;
+  tccHost?: string;
   dockerHost?: string;
   dockerTlsVerify?: string;
   dockerCertPath?: string;
@@ -31,9 +31,9 @@ async function loadFromFile() {
     const string = await readFile(file, { encoding: "utf-8" });
     const properties = propertiesReader("").read(string);
 
-    const testcontainersCloudHost = properties.get("tcc.host") as string;
-    if (testcontainersCloudHost !== null) {
-      dockerClientConfig.testcontainersCloudHost = testcontainersCloudHost;
+    const tccHost = properties.get("tcc.host") as string;
+    if (tccHost !== null) {
+      dockerClientConfig.tccHost = tccHost;
     }
 
     const dockerHost = properties.get("docker.host") as string;

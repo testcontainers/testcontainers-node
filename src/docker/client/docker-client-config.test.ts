@@ -70,7 +70,7 @@ describe("getDockerClientConfig", () => {
 
       const dockerClientConfig = await getDockerClientConfig({});
 
-      expect(dockerClientConfig.testcontainersCloudHost).toBe("tcp://my.docker.host:1234");
+      expect(dockerClientConfig.tccHost).toBe("tcp://my.docker.host:1234");
     });
 
     it("should set the host", async () => {

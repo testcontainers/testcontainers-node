@@ -6,34 +6,34 @@ import { DockerClientStrategyResult } from "../docker-client";
 import { DockerClientStrategy } from "./docker-client-strategy";
 
 export class TestcontainersCloudStrategy implements DockerClientStrategy {
-  private testcontainersCloudHost!: string;
+  private host!: string;
 
   async init(): Promise<void> {
-    const { testcontainersCloudHost } = await getDockerClientConfig();
-    if (testcontainersCloudHost) {
-      this.testcontainersCloudHost = testcontainersCloudHost;
+    const { tccHost } = await getDockerClientConfig();
+    if (tccHost) {
+      this.host = tccHost;
     }
   }
 
   async getDockerClient(): Promise<DockerClientStrategyResult> {
     const dockerOptions: DockerOptions = { headers: { "x-tc-sid": sessionId } };
 
-    const { hostname, port } = new URL(this.testcontainersCloudHost);
+    const { hostname, port } = new URL(this.host);
     dockerOptions.host = hostname;
     dockerOptions.port = port;
 
     return {
-      uri: this.testcontainersCloudHost,
+      uri: this.host,
       dockerode: new Dockerode(dockerOptions),
       composeEnvironment: {
-        DOCKER_HOST: this.testcontainersCloudHost,
+        DOCKER_HOST: this.host,
       },
       allowUserOverrides: false,
     };
   }
 
   isApplicable(): boolean {
-    return this.testcontainersCloudHost !== undefined;
+    return this.host !== undefined;
   }
 
   getName(): string {

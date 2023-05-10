@@ -16,7 +16,7 @@ describe("TestcontainersCloudStrategy", () => {
   });
 
   it("should be applicable when tcc.host property is set", async () => {
-    mockGetDockerClientConfig.mockResolvedValue({ testcontainersCloudHost: "tcp://tcc:2375" });
+    mockGetDockerClientConfig.mockResolvedValue({ tccHost: "tcp://tcc:2375" });
 
     const strategy = new TestcontainersCloudStrategy();
     await strategy.init();
@@ -25,7 +25,7 @@ describe("TestcontainersCloudStrategy", () => {
   });
 
   it("should return relevant fields", async () => {
-    mockGetDockerClientConfig.mockResolvedValue({ testcontainersCloudHost: "tcp://tcc:2375" });
+    mockGetDockerClientConfig.mockResolvedValue({ tccHost: "tcp://tcc:2375" });
 
     const strategy = new TestcontainersCloudStrategy();
     await strategy.init();
