@@ -10,9 +10,15 @@ import { DockerClientStrategy } from "./strategy/docker-client-strategy";
 import { ConfigurationStrategy } from "./strategy/configuration-strategy";
 import { UnixSocketStrategy } from "./strategy/unix-socket-strategy";
 import { NpipeSocketStrategy } from "./strategy/npipe-socket-strategy";
+import { ContainerRuntime } from "../types";
 import { TestcontainersCloudStrategy } from "./strategy/testcontainers-cloud-strategy";
 
-export type ContainerRuntime = "docker" | "podman";
+export type DockerClient = DockerClientStrategyResult & {
+  host: string;
+  containerRuntime: ContainerRuntime;
+  hostIps: HostIps;
+  indexServerAddress: string;
+};
 
 export type DockerClientStrategyResult = {
   uri: string;
@@ -21,16 +27,9 @@ export type DockerClientStrategyResult = {
   allowUserOverrides: boolean;
 };
 
-export type DockerClient = DockerClientStrategyResult & {
-  containerRuntime: ContainerRuntime;
-  host: string;
-  hostIps: HostIps;
-  indexServerAddress: string;
-};
-
 let dockerClient: DockerClient;
 
-export const getDockerClient = async (): Promise<DockerClient> => {
+export async function getDockerClient(): Promise<DockerClient> {
   if (dockerClient) {
     return dockerClient;
   }
@@ -59,7 +58,6 @@ export const getDockerClient = async (): Promise<DockerClient> => {
         const host = await resolveHost(dockerode, containerRuntime, indexServerAddress, uri, allowUserOverrides);
         const hostIps = await lookupHostIps(host);
         logDockerClient(strategy.getName(), host, hostIps);
-
         dockerClient = {
           uri,
           containerRuntime,
@@ -78,9 +76,9 @@ export const getDockerClient = async (): Promise<DockerClient> => {
   }
 
   throw new Error("No Docker client strategy found");
-};
+}
 
-const isDockerDaemonReachable = async (dockerode: Dockerode): Promise<boolean> => {
+async function isDockerDaemonReachable(dockerode: Dockerode): Promise<boolean> {
   try {
     const response = await dockerode.ping();
     return (await streamToString(Readable.from(response))) === "OK";
@@ -88,11 +86,12 @@ const isDockerDaemonReachable = async (dockerode: Dockerode): Promise<boolean> =
     log.warn(`Docker daemon is not reachable: ${err}`);
     return false;
   }
-};
+}
 
-const logDockerClient = (strategyName: string, host: string, hostIps: HostIps) => {
-  if (log.enabled()) {
-    const formattedHostIps = hostIps.map((hostIp) => hostIp.address).join(", ");
-    log.info(`Using Docker client strategy "${strategyName}", Docker host "${host}" (${formattedHostIps})`);
+function logDockerClient(strategyName: string, host: string, hostIps: HostIps) {
+  if (!log.enabled()) {
+    return;
   }
-};
+  const formattedHostIps = hostIps.map((hostIp) => hostIp.address).join(", ");
+  log.info(`Using Docker client strategy "${strategyName}", Docker host "${host}" (${formattedHostIps})`);
+}

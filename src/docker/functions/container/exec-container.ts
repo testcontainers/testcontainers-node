@@ -1,10 +1,9 @@
 import { Readable } from "stream";
-import { ExecResult } from "../../types";
+import { ContainerRuntime, ExecResult } from "../../types";
 import Dockerode from "dockerode";
 import { execLog, log } from "../../../logger";
 import byline from "byline";
 import { demuxStream } from "../demux-stream";
-import { ContainerRuntime } from "../../client/docker-client";
 
 export const execContainer = async (
   dockerode: Dockerode,

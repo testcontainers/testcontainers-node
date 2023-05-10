@@ -2,7 +2,7 @@ import { Socket } from "net";
 import { execContainer } from "./docker/functions/container/exec-container";
 import { log } from "./logger";
 import Dockerode from "dockerode";
-import { ContainerRuntime } from "./docker/client/docker-client";
+import { ContainerRuntime } from "./docker/types";
 
 export interface PortCheck {
   isBound(port: number): Promise<boolean>;
