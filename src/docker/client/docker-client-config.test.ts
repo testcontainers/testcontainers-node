@@ -65,6 +65,14 @@ describe("getDockerClientConfig", () => {
       mockedExistsSync.mockReturnValue(true);
     });
 
+    it("should set the tcc host", async () => {
+      mockedReadFile.mockReturnValueOnce(Promise.resolve("tcc.host=tcp://my.docker.host:1234"));
+
+      const dockerClientConfig = await getDockerClientConfig({});
+
+      expect(dockerClientConfig.testcontainersCloudHost).toBe("tcp://my.docker.host:1234");
+    });
+
     it("should set the host", async () => {
       mockedReadFile.mockReturnValueOnce(Promise.resolve("docker.host=tcp://my.docker.host:1234"));
 

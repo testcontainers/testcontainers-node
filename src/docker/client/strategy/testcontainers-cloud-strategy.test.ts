@@ -6,7 +6,7 @@ jest.mock("../docker-client-config", () => ({
 }));
 
 describe("TestcontainersCloudStrategy", () => {
-  it("should not be applicable when testcontainersCloudHost property is not set", async () => {
+  it("should not be applicable when tcc.host property is not set", async () => {
     mockGetDockerClientConfig.mockResolvedValue({});
 
     const strategy = new TestcontainersCloudStrategy();
@@ -15,7 +15,7 @@ describe("TestcontainersCloudStrategy", () => {
     expect(strategy.isApplicable()).toBe(false);
   });
 
-  it("should be applicable when testcontainersCloudHost property is set", async () => {
+  it("should be applicable when tcc.host property is set", async () => {
     mockGetDockerClientConfig.mockResolvedValue({ testcontainersCloudHost: "tcp://tcc:2375" });
 
     const strategy = new TestcontainersCloudStrategy();

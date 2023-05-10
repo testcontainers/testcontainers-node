@@ -27,7 +27,7 @@ async function loadFromFile() {
   const dockerClientConfig: DockerClientConfig = {};
 
   if (existsSync(file)) {
-    log.debug(`Found ".testcontainers.properties" file`);
+    log.debug(`Loading ".testcontainers.properties" file...`);
     const string = await readFile(file, { encoding: "utf-8" });
     const properties = propertiesReader("").read(string);
 
