@@ -57,7 +57,6 @@ export async function getDockerClient(): Promise<DockerClient> {
         const containerRuntime: ContainerRuntime = uri.includes("podman.sock") ? "podman" : "docker";
         const host = await resolveHost(dockerode, containerRuntime, indexServerAddress, uri, allowUserOverrides);
         const hostIps = await lookupHostIps(host);
-        logDockerClient(strategy.getName(), host, hostIps);
         dockerClient = {
           uri,
           containerRuntime,
@@ -68,6 +67,7 @@ export async function getDockerClient(): Promise<DockerClient> {
           composeEnvironment,
           allowUserOverrides,
         };
+        logDockerClient(strategy.getName(), dockerClient);
         return dockerClient;
       } else {
         log.warn(`Docker client strategy ${strategy.getName()} is not reachable`);
@@ -88,7 +88,7 @@ async function isDockerDaemonReachable(dockerode: Dockerode): Promise<boolean> {
   }
 }
 
-function logDockerClient(strategyName: string, host: string, hostIps: HostIps) {
+function logDockerClient(strategyName: string, { host, hostIps }: DockerClient) {
   if (!log.enabled()) {
     return;
   }
