@@ -10,8 +10,8 @@ describe("TestcontainersCloudStrategy", () => {
     mockGetDockerClientConfig.mockResolvedValue({});
 
     const strategy = new TestcontainersCloudStrategy();
-
     await strategy.init();
+
     expect(strategy.isApplicable()).toBe(false);
   });
 
