@@ -4,13 +4,13 @@ import { BoundPorts } from "../bound-ports";
 import { log } from "../logger";
 import { IntervalRetryStrategy } from "../retry-strategy";
 import { AbstractWaitStrategy } from "./wait-strategy";
-import { dockerClient } from "../docker/client/docker-client";
+import { getDockerClient } from "../docker/client/docker-client";
 
 export class HostPortWaitStrategy extends AbstractWaitStrategy {
   public async waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void> {
-    const { dockerode, provider, host } = await dockerClient();
+    const { dockerode, containerRuntime, host } = await getDockerClient();
     const hostPortCheck = new HostPortCheck(host);
-    const internalPortCheck = new InternalPortCheck(dockerode, provider, container);
+    const internalPortCheck = new InternalPortCheck(dockerode, containerRuntime, container);
 
     await Promise.all([
       this.waitForHostPorts(hostPortCheck, container, boundPorts),

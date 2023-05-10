@@ -3,7 +3,7 @@ import { log } from "../logger";
 import { AbstractWaitStrategy } from "./wait-strategy";
 import { IntervalRetryStrategy } from "../retry-strategy";
 import { execContainer } from "../docker/functions/container/exec-container";
-import { dockerClient } from "../docker/client/docker-client";
+import { getDockerClient } from "../docker/client/docker-client";
 
 export class ShellWaitStrategy extends AbstractWaitStrategy {
   constructor(private readonly command: string) {
@@ -13,12 +13,12 @@ export class ShellWaitStrategy extends AbstractWaitStrategy {
   public async waitUntilReady(container: Dockerode.Container): Promise<void> {
     log.debug(`Waiting for successful shell command "${this.command}"...`, { containerId: container.id });
 
-    const { dockerode, provider } = await dockerClient();
+    const { dockerode, containerRuntime } = await getDockerClient();
     await new IntervalRetryStrategy<number, Error>(100).retryUntil(
       async () => {
         const { exitCode } = await execContainer(
           dockerode,
-          provider,
+          containerRuntime,
           container,
           ["/bin/sh", "-c", this.command],
           false

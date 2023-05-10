@@ -1,5 +1,5 @@
 import { runInContainer } from "./run-in-container";
-import { dockerClient } from "../client/docker-client";
+import { getDockerClient } from "../client/docker-client";
 import Dockerode from "dockerode";
 
 describe("runInContainer", () => {
@@ -8,7 +8,7 @@ describe("runInContainer", () => {
   let dockerode: Dockerode;
 
   beforeAll(async () => {
-    dockerode = (await dockerClient()).dockerode;
+    dockerode = (await getDockerClient()).dockerode;
   });
 
   it("should return the command output", async () => {

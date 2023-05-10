@@ -4,7 +4,7 @@ import { AbstractWaitStrategy } from "./wait-strategy";
 import { IntervalRetryStrategy } from "../retry-strategy";
 import fetch, { Response } from "node-fetch";
 import https, { Agent } from "https";
-import { dockerClient } from "../docker/client/docker-client";
+import { getDockerClient } from "../docker/client/docker-client";
 import { log } from "../logger";
 
 export class HttpWaitStrategy extends AbstractWaitStrategy {
@@ -72,7 +72,7 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
 
   public async waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void> {
     log.debug(`Waiting for HTTP...`, { containerId: container.id });
-    const { host } = await dockerClient();
+    const { host } = await getDockerClient();
 
     await new IntervalRetryStrategy<Response | undefined, Error>(this.readTimeout).retryUntil(
       async () => {

@@ -1,6 +1,6 @@
 import { log } from "../../../logger";
 import { Network } from "dockerode";
-import { dockerClient } from "../../client/docker-client";
+import { getDockerClient } from "../../client/docker-client";
 import { createLabels } from "../create-labels";
 
 export type CreateNetworkOptions = {
@@ -18,7 +18,7 @@ export type CreateNetworkOptions = {
 export const createNetwork = async (options: CreateNetworkOptions): Promise<string> => {
   try {
     log.info(`Creating network "${options.name}"...`);
-    const { dockerode } = await dockerClient();
+    const { dockerode } = await getDockerClient();
 
     const network: Network = await dockerode.createNetwork({
       Name: options.name,
