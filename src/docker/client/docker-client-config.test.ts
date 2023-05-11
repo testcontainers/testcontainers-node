@@ -85,9 +85,9 @@ describe("getDockerClientConfig", () => {
 
     it("should set TLS verify", async () => {
       mockedReadFile.mockResolvedValueOnce(`
-            docker.host=tcp://my.docker.host:1234
-            docker.tls.verify=1
-          `);
+        docker.host=tcp://my.docker.host:1234
+        docker.tls.verify=1
+      `);
 
       const dockerClientConfig = await getDockerClientConfig({});
 
@@ -98,10 +98,10 @@ describe("getDockerClientConfig", () => {
 
     it("should set the cert path", async () => {
       mockedReadFile.mockResolvedValueOnce(`
-            docker.host=tcp://my.docker.host:1234
-            docker.tls.verify=1
-            docker.cert.path=/some/path
-          `);
+        docker.host=tcp://my.docker.host:1234
+        docker.tls.verify=1
+        docker.cert.path=/some/path
+      `);
 
       const dockerClientConfig = await getDockerClientConfig({});
 
