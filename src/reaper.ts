@@ -91,12 +91,13 @@ export class ReaperInstance {
       : 8080;
 
     log.debug(`Creating new Reaper for session "${sessionId}"...`);
+    const { uri, allowUserOverrides } = await getDockerClient();
     const container = new GenericContainer(REAPER_IMAGE)
       .withName(`testcontainers-ryuk-${sessionId}`)
       .withExposedPorts(containerPort)
       .withBindMounts([
         {
-          source: getRemoteDockerUnixSocketPath((await getDockerClient()).uri),
+          source: getRemoteDockerUnixSocketPath(uri, allowUserOverrides),
           target: "/var/run/docker.sock",
         },
       ])

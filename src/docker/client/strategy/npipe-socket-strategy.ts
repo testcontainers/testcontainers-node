@@ -8,6 +8,7 @@ export class NpipeSocketStrategy implements DockerClientStrategy {
       uri: "npipe:////./pipe/docker_engine",
       dockerode: new Dockerode({ socketPath: "//./pipe/docker_engine" }),
       composeEnvironment: {},
+      allowUserOverrides: true,
     };
   }
 

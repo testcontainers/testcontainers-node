@@ -9,6 +9,7 @@ export class UnixSocketStrategy implements DockerClientStrategy {
       uri: "unix:///var/run/docker.sock",
       dockerode: new Dockerode({ socketPath: "/var/run/docker.sock" }),
       composeEnvironment: {},
+      allowUserOverrides: true,
     };
   }
 

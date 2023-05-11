@@ -3,7 +3,6 @@ import { URL } from "url";
 import { log } from "../logger";
 import { runInContainer } from "./functions/run-in-container";
 import { existsSync } from "fs";
-
 import { ContainerRuntime } from "./types";
 
 export const resolveHost = async (
@@ -11,10 +10,13 @@ export const resolveHost = async (
   containerRuntime: ContainerRuntime,
   indexServerAddress: string,
   uri: string,
+  allowUserOverrides: boolean,
   env: NodeJS.ProcessEnv = process.env
 ): Promise<string> => {
-  if (env.TESTCONTAINERS_HOST_OVERRIDE !== undefined) {
-    return env.TESTCONTAINERS_HOST_OVERRIDE;
+  if (allowUserOverrides) {
+    if (env.TESTCONTAINERS_HOST_OVERRIDE !== undefined) {
+      return env.TESTCONTAINERS_HOST_OVERRIDE;
+    }
   }
 
   const { protocol, hostname } = new URL(uri);

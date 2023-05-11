@@ -65,8 +65,16 @@ describe("getDockerClientConfig", () => {
       mockedExistsSync.mockReturnValue(true);
     });
 
+    it("should set the tc host", async () => {
+      mockedReadFile.mockResolvedValueOnce("tc.host=tcp://my.docker.host:1234");
+
+      const dockerClientConfig = await getDockerClientConfig({});
+
+      expect(dockerClientConfig.tcHost).toBe("tcp://my.docker.host:1234");
+    });
+
     it("should set the host", async () => {
-      mockedReadFile.mockReturnValueOnce(Promise.resolve("docker.host=tcp://my.docker.host:1234"));
+      mockedReadFile.mockResolvedValueOnce("docker.host=tcp://my.docker.host:1234");
 
       const dockerClientConfig = await getDockerClientConfig({});
 
@@ -76,12 +84,10 @@ describe("getDockerClientConfig", () => {
     });
 
     it("should set TLS verify", async () => {
-      mockedReadFile.mockReturnValueOnce(
-        Promise.resolve(`
-            docker.host=tcp://my.docker.host:1234
-            docker.tls.verify=1
-          `)
-      );
+      mockedReadFile.mockResolvedValueOnce(`
+        docker.host=tcp://my.docker.host:1234
+        docker.tls.verify=1
+      `);
 
       const dockerClientConfig = await getDockerClientConfig({});
 
@@ -91,13 +97,11 @@ describe("getDockerClientConfig", () => {
     });
 
     it("should set the cert path", async () => {
-      mockedReadFile.mockReturnValueOnce(
-        Promise.resolve(`
-            docker.host=tcp://my.docker.host:1234
-            docker.tls.verify=1
-            docker.cert.path=/some/path
-          `)
-      );
+      mockedReadFile.mockResolvedValueOnce(`
+        docker.host=tcp://my.docker.host:1234
+        docker.tls.verify=1
+        docker.cert.path=/some/path
+      `);
 
       const dockerClientConfig = await getDockerClientConfig({});
 
