@@ -74,9 +74,9 @@ export class GenericContainer implements TestContainer {
   protected containerStarting?(inspectResult: InspectResult, reused: boolean): Promise<void>;
 
   public async start(): Promise<StartedTestContainer> {
-    const { dockerode, indexServerAddress } = await getDockerClient();
+    const { dockerode, info } = await getDockerClient();
 
-    await pullImage(dockerode, indexServerAddress, {
+    await pullImage(dockerode, info.dockerInfo.indexServerAddress, {
       imageName: this.opts.imageName,
       force: this.pullPolicy.shouldPull(),
     });

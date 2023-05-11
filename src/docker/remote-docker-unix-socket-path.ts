@@ -1,5 +1,7 @@
+import { DockerClient } from "./client/docker-client";
+
 export const getRemoteDockerUnixSocketPath = (
-  uri: string,
+  dockerClient: DockerClient,
   platform: NodeJS.Platform = process.platform,
   env: NodeJS.ProcessEnv = process.env
 ): string => {
@@ -8,8 +10,10 @@ export const getRemoteDockerUnixSocketPath = (
   }
 
   let socketPath: string;
-  if (uri.startsWith("unix://")) {
-    socketPath = uri.replace("unix://", "");
+  if (dockerClient.info.dockerInfo.operatingSystem === "Docker Desktop") {
+    socketPath = "/run/guest-services/docker.sock";
+  } else if (dockerClient.uri.startsWith("unix://")) {
+    socketPath = dockerClient.uri.replace("unix://", "");
   } else {
     socketPath = "/var/run/docker.sock";
   }

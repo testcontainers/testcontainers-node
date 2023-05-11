@@ -90,13 +90,14 @@ export class ReaperInstance {
       ? { container: 8080, host: Number(process.env["TESTCONTAINERS_RYUK_PORT"]) }
       : 8080;
 
-    log.debug(`Creating new Reaper for session "${sessionId}"...`);
+    const remoteDockerUnixSocketPath = getRemoteDockerUnixSocketPath(await getDockerClient());
+    log.debug(`Creating new Reaper for session "${sessionId}" with socket path "${remoteDockerUnixSocketPath}"...`);
     const container = new GenericContainer(REAPER_IMAGE)
       .withName(`testcontainers-ryuk-${sessionId}`)
       .withExposedPorts(containerPort)
       .withBindMounts([
         {
-          source: getRemoteDockerUnixSocketPath((await getDockerClient()).uri),
+          source: remoteDockerUnixSocketPath,
           target: "/var/run/docker.sock",
         },
       ])
