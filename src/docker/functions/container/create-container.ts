@@ -102,7 +102,7 @@ const getPortBindings = (exposedPorts: PortWithOptionalBinding[]): DockerodePort
     if (hasHostBinding(exposedPort)) {
       dockerodePortBindings[exposedPort.container] = [{ HostPort: exposedPort.host.toString() }];
     } else {
-      dockerodePortBindings[exposedPort] = [{ HostPort: "" }];
+      dockerodePortBindings[exposedPort] = [{ HostPort: "0" }];
     }
   }
   return dockerodePortBindings;
