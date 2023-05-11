@@ -11,7 +11,7 @@ import { ConfigurationStrategy } from "./strategy/configuration-strategy";
 import { UnixSocketStrategy } from "./strategy/unix-socket-strategy";
 import { NpipeSocketStrategy } from "./strategy/npipe-socket-strategy";
 import { ContainerRuntime } from "../types";
-import { TestcontainersCloudStrategy } from "./strategy/testcontainers-cloud-strategy";
+import { TestcontainersHostStrategy } from "./strategy/testcontainers-host-strategy";
 
 export type DockerClient = DockerClientStrategyResult & {
   host: string;
@@ -35,7 +35,7 @@ export async function getDockerClient(): Promise<DockerClient> {
   }
 
   const strategies: DockerClientStrategy[] = [
-    new TestcontainersCloudStrategy(),
+    new TestcontainersHostStrategy(),
     new ConfigurationStrategy(),
     new UnixSocketStrategy(),
     new RootlessUnixSocketStrategy(),

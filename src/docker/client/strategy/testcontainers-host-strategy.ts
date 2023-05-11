@@ -5,13 +5,13 @@ import { URL } from "url";
 import { DockerClientStrategyResult } from "../docker-client";
 import { DockerClientStrategy } from "./docker-client-strategy";
 
-export class TestcontainersCloudStrategy implements DockerClientStrategy {
+export class TestcontainersHostStrategy implements DockerClientStrategy {
   private host!: string;
 
   async init(): Promise<void> {
-    const { tccHost } = await getDockerClientConfig();
-    if (tccHost) {
-      this.host = tccHost;
+    const { tcHost } = await getDockerClientConfig();
+    if (tcHost) {
+      this.host = tcHost;
     }
   }
 
@@ -37,6 +37,6 @@ export class TestcontainersCloudStrategy implements DockerClientStrategy {
   }
 
   getName(): string {
-    return "TestcontainersCloudStrategy";
+    return "TestcontainersHostStrategy";
   }
 }
