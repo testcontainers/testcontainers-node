@@ -46,6 +46,7 @@ export class ConfigurationStrategy implements DockerClientStrategy {
         DOCKER_TLS_VERIFY: this.dockerTlsVerify,
         DOCKER_CERT_PATH: this.dockerCertPath,
       },
+      allowUserOverrides: true,
     };
   }
 

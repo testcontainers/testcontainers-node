@@ -11,6 +11,7 @@ import { ConfigurationStrategy } from "./strategy/configuration-strategy";
 import { UnixSocketStrategy } from "./strategy/unix-socket-strategy";
 import { NpipeSocketStrategy } from "./strategy/npipe-socket-strategy";
 import { ContainerRuntime } from "../types";
+import { TestcontainersHostStrategy } from "./strategy/testcontainers-host-strategy";
 
 export type DockerClient = DockerClientStrategyResult & {
   host: string;
@@ -23,6 +24,7 @@ export type DockerClientStrategyResult = {
   uri: string;
   dockerode: Dockerode;
   composeEnvironment: NodeJS.ProcessEnv;
+  allowUserOverrides: boolean;
 };
 
 let dockerClient: DockerClient;
@@ -33,6 +35,7 @@ export async function getDockerClient(): Promise<DockerClient> {
   }
 
   const strategies: DockerClientStrategy[] = [
+    new TestcontainersHostStrategy(),
     new ConfigurationStrategy(),
     new UnixSocketStrategy(),
     new RootlessUnixSocketStrategy(),
@@ -43,18 +46,34 @@ export async function getDockerClient(): Promise<DockerClient> {
     if (strategy.init) {
       await strategy.init();
     }
+
     if (strategy.isApplicable()) {
       log.debug(`Found Docker client strategy "${strategy.getName()}"`);
-      const { uri, dockerode, composeEnvironment } = await strategy.getDockerClient();
+      const { uri, dockerode, composeEnvironment, allowUserOverrides } = await strategy.getDockerClient();
 
       log.debug(`Testing Docker client strategy "${uri}"...`);
       if (await isDockerDaemonReachable(dockerode)) {
         const info = await getSystemInfo(dockerode);
         const containerRuntime: ContainerRuntime = uri.includes("podman.sock") ? "podman" : "docker";
-        const host = await resolveHost(dockerode, containerRuntime, info.dockerInfo.indexServerAddress, uri);
+        const host = await resolveHost(
+          dockerode,
+          containerRuntime,
+          info.dockerInfo.indexServerAddress,
+          uri,
+          allowUserOverrides
+        );
         const hostIps = await lookupHostIps(host);
-        logDockerClient(strategy.getName(), host, hostIps);
-        dockerClient = { uri, containerRuntime, host, hostIps, dockerode, info, composeEnvironment };
+        dockerClient = {
+          uri,
+          containerRuntime,
+          host,
+          hostIps,
+          dockerode,
+          info,
+          composeEnvironment,
+          allowUserOverrides,
+        };
+        logDockerClient(strategy.getName(), dockerClient);
         return dockerClient;
       } else {
         log.warn(`Docker client strategy "${strategy.getName()}" is not working`);
@@ -75,7 +94,7 @@ async function isDockerDaemonReachable(dockerode: Dockerode): Promise<boolean> {
   }
 }
 
-function logDockerClient(strategyName: string, host: string, hostIps: HostIps) {
+function logDockerClient(strategyName: string, { host, hostIps }: DockerClient) {
   if (!log.enabled()) {
     return;
   }

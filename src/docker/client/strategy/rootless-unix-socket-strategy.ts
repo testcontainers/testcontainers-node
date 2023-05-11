@@ -60,6 +60,7 @@ export class RootlessUnixSocketStrategy implements DockerClientStrategy {
       uri: `unix://${this.socketPath}`,
       dockerode: new Dockerode({ socketPath: this.socketPath }),
       composeEnvironment: {},
+      allowUserOverrides: true,
     };
   }
 

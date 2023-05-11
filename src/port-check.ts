@@ -2,7 +2,6 @@ import { Socket } from "net";
 import { execContainer } from "./docker/functions/container/exec-container";
 import { log } from "./logger";
 import Dockerode from "dockerode";
-
 import { ContainerRuntime } from "./docker/types";
 
 export interface PortCheck {
