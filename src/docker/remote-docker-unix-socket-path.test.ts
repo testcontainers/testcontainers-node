@@ -9,10 +9,10 @@ test("should return TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE when provided", () => 
   expect(actual).toEqual("/var/run/another.sock");
 });
 
-test("should return /run/guest-services/docker.sock on Docker Desktop", () => {
+test("should return /var/run/docker.sock on Docker Desktop", () => {
   const dockerClient = createDockerClient({ uri: "unix:///var/run/docker.sock", os: "Docker Desktop" });
   const actual = getRemoteDockerUnixSocketPath(dockerClient, "linux", {});
-  expect(actual).toEqual("/run/guest-services/docker.sock");
+  expect(actual).toEqual("/var/run/docker.sock");
 });
 
 test("should return /var/run/docker.sock when URI is not a unix socket", () => {

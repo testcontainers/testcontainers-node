@@ -13,7 +13,7 @@ export const getRemoteDockerUnixSocketPath = (
 
   let socketPath: string;
   if (dockerClient.info.dockerInfo.operatingSystem === "Docker Desktop") {
-    socketPath = "/run/guest-services/docker.sock";
+    socketPath = "/var/run/docker.sock";
   } else if (dockerClient.uri.startsWith("unix://")) {
     socketPath = dockerClient.uri.replace("unix://", "");
   } else {
