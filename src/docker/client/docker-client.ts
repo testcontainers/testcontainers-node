@@ -1,7 +1,7 @@
 import Dockerode from "dockerode";
 import { log } from "../../logger";
 import { HostIps, lookupHostIps } from "../lookup-host-ips";
-import { getSystemInfo } from "../../system-info";
+import { getSystemInfo, SystemInfo } from "../../system-info";
 import { RootlessUnixSocketStrategy } from "./strategy/rootless-unix-socket-strategy";
 import { streamToString } from "../../stream-utils";
 import { Readable } from "stream";
@@ -17,7 +17,7 @@ export type DockerClient = DockerClientStrategyResult & {
   host: string;
   containerRuntime: ContainerRuntime;
   hostIps: HostIps;
-  indexServerAddress: string;
+  info: SystemInfo;
 };
 
 export type DockerClientStrategyResult = {
@@ -53,9 +53,15 @@ export async function getDockerClient(): Promise<DockerClient> {
 
       log.debug(`Testing Docker client strategy "${uri}"...`);
       if (await isDockerDaemonReachable(dockerode)) {
-        const indexServerAddress = (await getSystemInfo(dockerode)).dockerInfo.indexServerAddress;
+        const info = await getSystemInfo(dockerode);
         const containerRuntime: ContainerRuntime = uri.includes("podman.sock") ? "podman" : "docker";
-        const host = await resolveHost(dockerode, containerRuntime, indexServerAddress, uri, allowUserOverrides);
+        const host = await resolveHost(
+          dockerode,
+          containerRuntime,
+          info.dockerInfo.indexServerAddress,
+          uri,
+          allowUserOverrides
+        );
         const hostIps = await lookupHostIps(host);
         dockerClient = {
           uri,
@@ -63,14 +69,14 @@ export async function getDockerClient(): Promise<DockerClient> {
           host,
           hostIps,
           dockerode,
-          indexServerAddress,
+          info,
           composeEnvironment,
           allowUserOverrides,
         };
         logDockerClient(strategy.getName(), dockerClient);
         return dockerClient;
       } else {
-        log.warn(`Docker client strategy ${strategy.getName()} is not reachable`);
+        log.warn(`Docker client strategy "${strategy.getName()}" is not working`);
       }
     }
   }
