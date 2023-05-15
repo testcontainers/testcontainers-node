@@ -12,6 +12,7 @@ MacOS:
 ```bash
 {% raw %}
 export DOCKER_HOST=unix://$(podman machine inspect --format '{{.ConnectionInfo.PodmanSocket.Path}}')
+export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock
 {% endraw %}
 ```
 
@@ -24,12 +25,16 @@ export DOCKER_HOST=unix://${XDG_RUNTIME_DIR}/podman/podman.sock
 
 **Resource reaper does not work on MacOS**
 
-The resource reaper is a process which runs in the background and cleans up containers and images after they are no longer needed. It is not possible to run the resource reaper on MacOS with Podman due to permission limitations, it fails with "Operation not supported" errors.
-
-One workaround is to disable the resource reaper:
+When running rootless, the resource reaper will not work, disable it:
 
 ```bash
 export TESTCONTAINERS_RYUK_DISABLED=true
+```
+
+When running rootful, the resource reaper can be made to work by telling it to run privileged:
+
+```bash
+export TESTCONTAINERS_RYUK_PRIVILEGED=true
 ```
 
 ## Colima
@@ -58,11 +63,9 @@ export NODE_OPTIONS=--dns-result-order=ipv4first
 
 **Port forwarding delays: [https://github.com/abiosoft/colima/issues/71](https://github.com/abiosoft/colima/issues/71)**
 
-You have a container which binds a port, and once bound logs a message saying "Ready". You would expect to be able to connect to the port once that log message is received. However the way Colima works is it periodically checks for exposed ports, and then port forwards them. This means there can be a delay of several seconds before you can connect to the container port. Attempts to do so before the port is forwarded result in connection refused errors. This means wait strategies such as waiting for a health check or a log message are insufficient when using Colima.
+The way Colima works is it periodically checks for exposed ports, and then forwards them. This means there can be a delay of several seconds before you can connect to the container port. Attempts to do so before the port is forwarded result in connection refused errors. This means wait strategies such as waiting for a health check or a log message are insufficient when using Colima.
 
-Workarounds:
-
-Use a composite wait strategy, where you can additionally wait for a port to be bound, on top of an existing wait strategy. For example:
+You can use a composite wait strategy to additionally wait for a port to be bound, on top of an existing wait strategy. For example:
 
 ```javascript
 const { GenericContainer, Wait } = require("testcontainers");
@@ -86,4 +89,4 @@ export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock
 
 ### Known issues
 
-**Same issues as [Colima](#colima).**
+Same issues as [Colima](#colima).
