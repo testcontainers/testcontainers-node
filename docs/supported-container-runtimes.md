@@ -11,7 +11,7 @@ Works out of the box.
 MacOS:
 ```bash
 {% raw %}
-export DOCKER_HOST=$(podman machine inspect --format '{{.ConnectionInfo.PodmanSocket.Path}}')
+export DOCKER_HOST=unix://$(podman machine inspect --format '{{.ConnectionInfo.PodmanSocket.Path}}')
 {% endraw %}
 ```
 
