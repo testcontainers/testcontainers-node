@@ -12,12 +12,20 @@ export type DockerClientConfig = {
   dockerCertPath?: string;
 };
 
-export const getDockerClientConfig = async (env: NodeJS.ProcessEnv = process.env): Promise<DockerClientConfig> => {
-  const dockerClientConfig: DockerClientConfig = {
-    ...(await loadFromFile()),
-    ...loadFromEnv(env),
-  };
-  logDockerClientConfig(dockerClientConfig);
+let dockerClientConfig: DockerClientConfig;
+
+export type GetDockerClientConfig = (env?: NodeJS.ProcessEnv) => Promise<DockerClientConfig>;
+
+export const getDockerClientConfig: GetDockerClientConfig = async (
+  env: NodeJS.ProcessEnv = process.env
+): Promise<DockerClientConfig> => {
+  if (!dockerClientConfig) {
+    dockerClientConfig = {
+      ...(await loadFromFile()),
+      ...loadFromEnv(env),
+    };
+    logDockerClientConfig(dockerClientConfig);
+  }
   return dockerClientConfig;
 };
 

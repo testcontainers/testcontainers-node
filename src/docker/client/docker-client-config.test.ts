@@ -1,113 +1,126 @@
-import { existsSync } from "fs";
-import { readFile } from "fs/promises";
-import { getDockerClientConfig } from "./docker-client-config";
+import type { GetDockerClientConfig } from "./docker-client-config";
 
-jest.mock("fs", () => ({ existsSync: jest.fn() }));
-jest.mock("fs/promises", () => ({ readFile: jest.fn() }));
+const mockExistsSync = jest.fn();
+jest.mock("fs", () => ({ existsSync: mockExistsSync }));
+const mockReadFile = jest.fn();
+jest.mock("fs/promises", () => ({ readFile: mockReadFile }));
 
-const mockedExistsSync = jest.mocked(existsSync);
-const mockedReadFile = jest.mocked(readFile);
+let getDockerClientConfig: GetDockerClientConfig;
 
-describe("getDockerClientConfig", () => {
-  afterEach(() => {
-    jest.resetModules();
+beforeEach(async () => {
+  getDockerClientConfig = (await import("./docker-client-config")).getDockerClientConfig;
+});
+
+afterEach(() => {
+  jest.resetModules();
+});
+
+test("should not set anything", async () => {
+  const dockerClientConfig = await getDockerClientConfig({});
+
+  expect(dockerClientConfig.dockerHost).toBeUndefined();
+  expect(dockerClientConfig.dockerTlsVerify).toBeUndefined();
+  expect(dockerClientConfig.dockerCertPath).toBeUndefined();
+});
+
+describe("environment", () => {
+  beforeEach(() => {
+    mockExistsSync.mockReturnValue(false);
   });
 
-  it("should not set anything", async () => {
-    const dockerClientConfig = await getDockerClientConfig({});
+  test("should set the host", async () => {
+    const dockerClientConfig = await getDockerClientConfig({
+      DOCKER_HOST: "tcp://my.docker.host:1234",
+    });
 
-    expect(dockerClientConfig.dockerHost).toBeUndefined();
+    expect(dockerClientConfig.dockerHost).toBe("tcp://my.docker.host:1234");
     expect(dockerClientConfig.dockerTlsVerify).toBeUndefined();
     expect(dockerClientConfig.dockerCertPath).toBeUndefined();
   });
 
-  describe("environment", () => {
-    beforeEach(() => {
-      mockedExistsSync.mockReturnValue(false);
+  test("should set TLS verify", async () => {
+    const dockerClientConfig = await getDockerClientConfig({
+      DOCKER_HOST: "tcp://my.docker.host:1234",
+      DOCKER_TLS_VERIFY: "1",
     });
 
-    it("should set the host", async () => {
-      const dockerClientConfig = await getDockerClientConfig({
-        DOCKER_HOST: "tcp://my.docker.host:1234",
-      });
-
-      expect(dockerClientConfig.dockerHost).toBe("tcp://my.docker.host:1234");
-      expect(dockerClientConfig.dockerTlsVerify).toBeUndefined();
-      expect(dockerClientConfig.dockerCertPath).toBeUndefined();
-    });
-
-    it("should set TLS verify", async () => {
-      const dockerClientConfig = await getDockerClientConfig({
-        DOCKER_HOST: "tcp://my.docker.host:1234",
-        DOCKER_TLS_VERIFY: "1",
-      });
-
-      expect(dockerClientConfig.dockerHost).toBe("tcp://my.docker.host:1234");
-      expect(dockerClientConfig.dockerTlsVerify).toBe("1");
-      expect(dockerClientConfig.dockerCertPath).toBeUndefined();
-    });
-
-    it("should set the cert path", async () => {
-      const dockerClientConfig = await getDockerClientConfig({
-        DOCKER_HOST: "tcp://my.docker.host:1234",
-        DOCKER_TLS_VERIFY: "1",
-        DOCKER_CERT_PATH: "/some/path",
-      });
-
-      expect(dockerClientConfig.dockerHost).toBe("tcp://my.docker.host:1234");
-      expect(dockerClientConfig.dockerTlsVerify).toBe("1");
-      expect(dockerClientConfig.dockerCertPath).toBe("/some/path");
-    });
+    expect(dockerClientConfig.dockerHost).toBe("tcp://my.docker.host:1234");
+    expect(dockerClientConfig.dockerTlsVerify).toBe("1");
+    expect(dockerClientConfig.dockerCertPath).toBeUndefined();
   });
 
-  describe("testcontainers.properties file", () => {
-    beforeEach(() => {
-      mockedExistsSync.mockReturnValue(true);
+  test("should set the cert path", async () => {
+    const dockerClientConfig = await getDockerClientConfig({
+      DOCKER_HOST: "tcp://my.docker.host:1234",
+      DOCKER_TLS_VERIFY: "1",
+      DOCKER_CERT_PATH: "/some/path",
     });
 
-    it("should set the tc host", async () => {
-      mockedReadFile.mockResolvedValueOnce("tc.host=tcp://my.docker.host:1234");
+    expect(dockerClientConfig.dockerHost).toBe("tcp://my.docker.host:1234");
+    expect(dockerClientConfig.dockerTlsVerify).toBe("1");
+    expect(dockerClientConfig.dockerCertPath).toBe("/some/path");
+  });
+});
 
-      const dockerClientConfig = await getDockerClientConfig({});
+describe("testcontainers.properties file", () => {
+  beforeEach(() => {
+    mockExistsSync.mockReturnValue(true);
+  });
 
-      expect(dockerClientConfig.tcHost).toBe("tcp://my.docker.host:1234");
-    });
+  test("should set the tc host", async () => {
+    mockReadFile.mockResolvedValueOnce("tc.host=tcp://my.docker.host:1234");
 
-    it("should set the host", async () => {
-      mockedReadFile.mockResolvedValueOnce("docker.host=tcp://my.docker.host:1234");
+    const dockerClientConfig = await getDockerClientConfig({});
 
-      const dockerClientConfig = await getDockerClientConfig({});
+    expect(dockerClientConfig.tcHost).toBe("tcp://my.docker.host:1234");
+  });
 
-      expect(dockerClientConfig.dockerHost).toBe("tcp://my.docker.host:1234");
-      expect(dockerClientConfig.dockerTlsVerify).toBeUndefined();
-      expect(dockerClientConfig.dockerCertPath).toBeUndefined();
-    });
+  test("should set the host", async () => {
+    mockReadFile.mockResolvedValueOnce("docker.host=tcp://my.docker.host:1234");
 
-    it("should set TLS verify", async () => {
-      mockedReadFile.mockResolvedValueOnce(`
+    const dockerClientConfig = await getDockerClientConfig({});
+
+    expect(dockerClientConfig.dockerHost).toBe("tcp://my.docker.host:1234");
+    expect(dockerClientConfig.dockerTlsVerify).toBeUndefined();
+    expect(dockerClientConfig.dockerCertPath).toBeUndefined();
+  });
+
+  test("should set TLS verify", async () => {
+    mockReadFile.mockResolvedValueOnce(`
         docker.host=tcp://my.docker.host:1234
         docker.tls.verify=1
       `);
 
-      const dockerClientConfig = await getDockerClientConfig({});
+    const dockerClientConfig = await getDockerClientConfig({});
 
-      expect(dockerClientConfig.dockerHost).toBe("tcp://my.docker.host:1234");
-      expect(dockerClientConfig.dockerTlsVerify).toBe("1");
-      expect(dockerClientConfig.dockerCertPath).toBeUndefined();
-    });
+    expect(dockerClientConfig.dockerHost).toBe("tcp://my.docker.host:1234");
+    expect(dockerClientConfig.dockerTlsVerify).toBe("1");
+    expect(dockerClientConfig.dockerCertPath).toBeUndefined();
+  });
 
-    it("should set the cert path", async () => {
-      mockedReadFile.mockResolvedValueOnce(`
+  test("should set the cert path", async () => {
+    mockReadFile.mockResolvedValueOnce(`
         docker.host=tcp://my.docker.host:1234
         docker.tls.verify=1
         docker.cert.path=/some/path
       `);
 
-      const dockerClientConfig = await getDockerClientConfig({});
+    const dockerClientConfig = await getDockerClientConfig({});
 
-      expect(dockerClientConfig.dockerHost).toBe("tcp://my.docker.host:1234");
-      expect(dockerClientConfig.dockerTlsVerify).toBe("1");
-      expect(dockerClientConfig.dockerCertPath).toBe("/some/path");
-    });
+    expect(dockerClientConfig.dockerHost).toBe("tcp://my.docker.host:1234");
+    expect(dockerClientConfig.dockerTlsVerify).toBe("1");
+    expect(dockerClientConfig.dockerCertPath).toBe("/some/path");
   });
+});
+
+test("should cache the result", async () => {
+  mockExistsSync.mockReturnValue(true);
+  mockReadFile.mockResolvedValueOnce("tc.host=tcp://my.docker.host:1234");
+
+  await getDockerClientConfig({});
+  const dockerClientConfig = await getDockerClientConfig({});
+
+  expect(dockerClientConfig.tcHost).toBe("tcp://my.docker.host:1234");
+  expect(mockExistsSync).toHaveBeenCalledTimes(1);
+  expect(mockReadFile).toHaveBeenCalledTimes(1);
 });
