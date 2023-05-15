@@ -9,6 +9,10 @@
 <!--/codeinclude-->
 
 <!--codeinclude-->
+[Connect and execute query using URI:](../../src/modules/mysql/mysql-container.test.ts) inside_block:uriConnect
+<!--/codeinclude-->
+
+<!--codeinclude-->
 [Set username:](../../src/modules/mysql/mysql-container.test.ts) inside_block:setUsername
 <!--/codeinclude-->
 

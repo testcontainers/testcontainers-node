@@ -88,6 +88,16 @@ export class StartedMySqlContainer extends AbstractStartedContainer {
     return this.rootPassword;
   }
 
+  public getConnectionUri(isRoot = false): string {
+    const url = new URL("", "mysql://");
+    url.hostname = this.getHost();
+    url.port = this.getPort().toString();
+    url.pathname = this.getDatabase();
+    url.username = isRoot ? "root" : this.getUsername();
+    url.password = isRoot ? this.getRootPassword() : this.getUserPassword();
+    return url.toString();
+  }
+
   public async executeQuery(query: string, additionalFlags: string[] = []): Promise<string> {
     const result = await this.startedTestContainer.exec([
       "mysql",
