@@ -24,12 +24,16 @@ export DOCKER_HOST=unix://${XDG_RUNTIME_DIR}/podman/podman.sock
 
 **Resource reaper does not work on MacOS**
 
-The resource reaper is a process which runs in the background and cleans up containers and images after they are no longer needed. It is not possible to run the resource reaper on MacOS with Podman due to permission limitations, it fails with "Operation not supported" errors.
-
-One workaround is to disable the resource reaper:
+When running rootless, the resource reaper will not work, disable it:
 
 ```bash
 export TESTCONTAINERS_RYUK_DISABLED=true
+```
+
+When running rootful, the resource reaper can be made to work by telling it to run privileged:
+
+```bash
+export TESTCONTAINERS_RYUK_PRIVILEGED=true
 ```
 
 ## Colima
