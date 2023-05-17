@@ -19,8 +19,8 @@ abstract class AbstractRetryStrategy<T, U> implements RetryStrategy<T, U> {
     timeout: number
   ): Promise<T | U>;
 
-  protected hasTimedOut(timeout: number, startTime: Time): boolean {
-    return this.clock.getTime() - startTime > timeout;
+  protected getTimeRemaining(startTime: Time, timeout: number): number {
+    return timeout - (this.clock.getTime() - startTime);
   }
 
   protected wait(duration: number): Promise<void> {
@@ -39,33 +39,24 @@ export class IntervalRetryStrategy<T, U> extends AbstractRetryStrategy<T, U> {
     onTimeout: () => U,
     timeout: number
   ): Promise<T | U> {
-    let timedOut = false;
-    const timeoutPromise = new Promise<T>((resolve, reject) =>
-      setTimeout(() => {
-        timedOut = true;
-        reject();
-      }, timeout).unref()
-    );
+    const startTime = this.clock.getTime();
+    const timeoutPromise = new Promise<T>((resolve, reject) => setTimeout(() => reject(), timeout).unref());
 
-    let result;
-    let attemptNumber = 0;
+    const doRetry = async (attemptCount = 0): Promise<T | U> => {
+      if (this.getTimeRemaining(startTime, timeout) < 0) {
+        return onTimeout();
+      }
 
-    // eslint-disable-next-line no-constant-condition
-    while (!timedOut) {
       try {
-        result = await Promise.race<T>([fn(attemptNumber++), timeoutPromise]);
+        const result = await Promise.race<T>([fn(++attemptCount), timeoutPromise]);
         if (await predicate(result)) {
-          break;
+          return result;
         }
       } catch {}
-
       await this.wait(this.interval);
-    }
+      return doRetry(attemptCount);
+    };
 
-    if (!result) {
-      return onTimeout();
-    } else {
-      return result;
-    }
+    return doRetry();
   }
 }
