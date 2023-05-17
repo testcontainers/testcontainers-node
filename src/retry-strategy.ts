@@ -53,6 +53,7 @@ export class IntervalRetryStrategy<T, U> extends AbstractRetryStrategy<T, U> {
           return result;
         }
       } catch {}
+
       await this.wait(this.interval);
       return doRetry(attemptCount);
     };
