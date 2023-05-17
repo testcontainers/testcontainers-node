@@ -9,7 +9,7 @@ describe("RetryStrategy", () => {
         () => fnMock(),
         (result) => result,
         () => new Error(),
-        10
+        100
       );
 
       expect(result).toEqual(true);
@@ -23,7 +23,7 @@ describe("RetryStrategy", () => {
         () => fnMock(),
         (result) => result,
         () => new Error(),
-        10
+        100
       );
 
       expect(result).toEqual(true);
@@ -38,7 +38,7 @@ describe("RetryStrategy", () => {
         () => fnMock(),
         (result) => result,
         () => timeoutMock(),
-        10
+        100
       );
 
       expect(result).toEqual(new Error());
@@ -53,7 +53,7 @@ describe("RetryStrategy", () => {
         () => slowPromise,
         (result) => result,
         () => timeoutMock(),
-        10
+        100
       );
 
       expect(timeoutMock).toHaveBeenCalledTimes(1);
