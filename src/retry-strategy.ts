@@ -51,7 +51,7 @@ export class IntervalRetryStrategy<T, U> extends AbstractRetryStrategy<T, U> {
     let attemptNumber = 0;
 
     // eslint-disable-next-line no-constant-condition
-    while (true) {
+    while (!timedOut) {
       try {
         result = await Promise.race<T>([fn(attemptNumber++), timeoutPromise]);
         if (await predicate(result)) {
@@ -59,13 +59,13 @@ export class IntervalRetryStrategy<T, U> extends AbstractRetryStrategy<T, U> {
         }
       } catch {}
 
-      if (timedOut) {
-        return onTimeout();
-      }
-
       await this.wait(this.interval);
     }
 
-    return result;
+    if (!result) {
+      return onTimeout();
+    } else {
+      return result;
+    }
   }
 }
