@@ -44,5 +44,19 @@ describe("RetryStrategy", () => {
       expect(result).toEqual(new Error());
       expect(timeoutMock).toHaveBeenCalledTimes(1);
     });
+
+    it("should invoke timeout handler on timeout while function is running", async () => {
+      const timeoutMock = jest.fn().mockReturnValue(new Error());
+      const slowPromise = new Promise<boolean>((resolve) => setTimeout(() => resolve(true), 10_000).unref());
+
+      await new IntervalRetryStrategy<boolean, Error>(1).retryUntil(
+        () => slowPromise,
+        (result) => result,
+        () => timeoutMock(),
+        10
+      );
+
+      expect(timeoutMock).toHaveBeenCalledTimes(1);
+    });
   });
 });

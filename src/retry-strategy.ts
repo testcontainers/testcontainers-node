@@ -39,17 +39,31 @@ export class IntervalRetryStrategy<T, U> extends AbstractRetryStrategy<T, U> {
     onTimeout: () => U,
     timeout: number
   ): Promise<T | U> {
-    const startTime = this.clock.getTime();
+    let timedOut = false;
+    const timeoutPromise = new Promise<T>((resolve, reject) =>
+      setTimeout(() => {
+        timedOut = true;
+        reject();
+      }, timeout).unref()
+    );
 
+    let result;
     let attemptNumber = 0;
-    let result = await fn(attemptNumber++);
 
-    while (!(await predicate(result))) {
-      if (this.hasTimedOut(timeout, startTime)) {
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      try {
+        result = await Promise.race<T>([fn(attemptNumber++), timeoutPromise]);
+        if (await predicate(result)) {
+          break;
+        }
+      } catch {}
+
+      if (timedOut) {
         return onTimeout();
       }
+
       await this.wait(this.interval);
-      result = await fn(attemptNumber++);
     }
 
     return result;
