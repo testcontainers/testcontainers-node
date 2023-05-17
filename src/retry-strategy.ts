@@ -19,8 +19,8 @@ abstract class AbstractRetryStrategy<T, U> implements RetryStrategy<T, U> {
     timeout: number
   ): Promise<T | U>;
 
-  protected getTimeRemaining(startTime: Time, timeout: number): number {
-    return timeout - (this.clock.getTime() - startTime);
+  protected hasTimedOut(timeout: number, startTime: Time): boolean {
+    return this.clock.getTime() - startTime > timeout;
   }
 
   protected wait(duration: number): Promise<void> {
@@ -43,7 +43,7 @@ export class IntervalRetryStrategy<T, U> extends AbstractRetryStrategy<T, U> {
     const timeoutPromise = new Promise<T>((resolve, reject) => setTimeout(() => reject(), timeout).unref());
 
     const doRetry = async (attemptCount = 0): Promise<T | U> => {
-      if (this.getTimeRemaining(startTime, timeout) < 0) {
+      if (this.hasTimedOut(timeout, startTime)) {
         return onTimeout();
       }
 
