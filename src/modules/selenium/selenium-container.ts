@@ -3,6 +3,8 @@ import { AbstractStartedContainer } from "../abstract-started-container";
 import { Wait } from "../../wait-strategy/wait";
 import { StartedTestContainer, StopOptions, StoppedTestContainer } from "../../test-container";
 import { Network, StartedNetwork } from "../../network";
+import { createReadStream, createWriteStream } from "fs";
+import tar from "tar-fs";
 
 const SELENIUM_PORT = 4444;
 const VNC_PORT = 5900;
@@ -10,6 +12,7 @@ const SELENIUM_NETWORK_ALIAS = "selenium";
 
 export class SeleniumContainer extends GenericContainer {
   private recording = false;
+  private target?: string;
 
   constructor(image = "selenium/standalone-chrome:112.0") {
     super(image);
@@ -17,7 +20,6 @@ export class SeleniumContainer extends GenericContainer {
 
   protected override async beforeContainerStarted(): Promise<void> {
     this.withExposedPorts(SELENIUM_PORT, VNC_PORT)
-      // .withBindMounts([{ source: "/dev/shm", target: "/dev/shm", mode: "rw" }])
       .withSharedMemorySize(512 * 1024 * 1024)
       .withWaitStrategy(
         Wait.forHttp("/wd/hub/status", SELENIUM_PORT).forResponsePredicate((response) => {
@@ -30,8 +32,9 @@ export class SeleniumContainer extends GenericContainer {
       );
   }
 
-  public withRecording(): this {
+  public withRecording(target: string): this {
     this.recording = true;
+    this.target = target;
     return this;
   }
 
@@ -43,14 +46,7 @@ export class SeleniumContainer extends GenericContainer {
 
     const ffmpegContainer = await new GenericContainer("selenium/video:ffmpeg-4.3.1-20230508")
       .withNetwork(network)
-      .withBindMounts([
-        // { source: "/dev/shm", target: "/dev/shm", mode: "rw" },
-        { source: "/tmp/videos", target: "/videos", mode: "rw" },
-      ])
-      .withEnvironment({
-        DISPLAY_CONTAINER_NAME: SELENIUM_NETWORK_ALIAS,
-        FILE_NAME: startedSeleniumContainer.getId() + ".mp4",
-      })
+      .withEnvironment({ DISPLAY_CONTAINER_NAME: SELENIUM_NETWORK_ALIAS })
       .withWaitStrategy(Wait.forLogMessage(/.*video-recording entered RUNNING state.*/))
       .start();
 
@@ -75,10 +71,23 @@ export class StartedSeleniumContainer extends AbstractStartedContainer {
   }
 
   override async stop(options?: Partial<StopOptions>): Promise<StoppedTestContainer> {
-    const stoppedTestContainer = super.stop(options);
-    await this.startedFfmpegContainer.stop({ timeout: 60_000 }); // give time to save video
+    const stoppedSeleniumContainer = super.stop(options);
+    const stoppedFfmpegContainer = await this.startedFfmpegContainer.stop({ removeContainer: false, timeout: 60_000 }); // give time to save video
+
+    const videoArchiveStream = await stoppedFfmpegContainer.getArchive("/videos/video.mp4");
+    await new Promise<void>((resolve) => {
+      const writeStream = createWriteStream("/tmp/videos/test.tar");
+      videoArchiveStream.pipe(writeStream);
+      writeStream.on("close", () => {
+        const source = createReadStream("/tmp/videos/test.tar");
+        const dest = tar.extract("/tmp/videos");
+        source.pipe(dest);
+        source.on("close", () => resolve());
+      });
+    });
+
     // await this.network.stop();
 
-    return stoppedTestContainer;
+    return stoppedSeleniumContainer;
   }
 }

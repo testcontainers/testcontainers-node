@@ -16,6 +16,7 @@ export { PullPolicy, DefaultPullPolicy, AlwaysPullPolicy } from "./pull-policy";
 export { InspectResult } from "./docker/functions/container/inspect-container";
 
 export { AbstractStartedContainer } from "./modules/abstract-started-container";
+export { AbstractStoppedContainer } from "./modules/abstract-stopped-container";
 export { PostgreSqlContainer, StartedPostgreSqlContainer } from "./modules/postgresql/postgresql-container";
 export { KafkaContainer, StartedKafkaContainer } from "./modules/kafka/kafka-container";
 export { Neo4jContainer, StartedNeo4jContainer } from "./modules/neo4j/neo4j-container";

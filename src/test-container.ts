@@ -3,16 +3,16 @@ import { PullPolicy } from "./pull-policy";
 import { WaitStrategy } from "./wait-strategy/wait-strategy";
 import { Readable } from "stream";
 import {
-  ExecResult,
-  ExtraHost,
-  TmpFs,
-  Labels,
-  Ulimits,
   BindMount,
-  FileToCopy,
   ContentToCopy,
   Environment,
+  ExecResult,
+  ExtraHost,
+  FileToCopy,
+  Labels,
   ResourcesQuota,
+  TmpFs,
+  Ulimits,
 } from "./docker/types";
 import { StartedNetwork } from "./network";
 
@@ -51,6 +51,7 @@ export interface RestartOptions {
 
 export interface StopOptions {
   timeout: number;
+  removeContainer: boolean;
   removeVolumes: boolean;
 }
 
@@ -61,31 +62,21 @@ export interface DockerComposeDownOptions {
 
 export interface StartedTestContainer {
   stop(options?: Partial<StopOptions>): Promise<StoppedTestContainer>;
-
   restart(options?: Partial<RestartOptions>): Promise<void>;
-
   getHost(): string;
-
   getFirstMappedPort(): number;
-
   getMappedPort(port: number): number;
-
   getName(): string;
-
   getLabels(): Labels;
-
   getId(): string;
-
   getNetworkNames(): string[];
-
   getNetworkId(networkName: string): string;
-
   getIpAddress(networkName: string): string;
-
+  getArchive(filePath: string): Promise<NodeJS.ReadableStream>;
   exec(command: string[]): Promise<ExecResult>;
-
   logs(): Promise<Readable>;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface StoppedTestContainer {}
+export interface StoppedTestContainer {
+  getArchive(filePath: string): Promise<NodeJS.ReadableStream>;
+}

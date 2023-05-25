@@ -15,6 +15,7 @@ import { WaitStrategy } from "../wait-strategy/wait-strategy";
 import { waitForContainer } from "../wait-for-container";
 import { getDockerClient } from "../docker/client/docker-client";
 import AsyncLock from "async-lock";
+import { getContainerArchive } from "../docker/functions/container/get-container-archive";
 
 export class StartedGenericContainer implements StartedTestContainer {
   private stoppedContainer?: StoppedTestContainer;
@@ -73,16 +74,18 @@ export class StartedGenericContainer implements StartedTestContainer {
       await this.containerIsStopping();
     }
 
-    const resolvedOptions: StopOptions = { timeout: 0, removeVolumes: true, ...options };
+    const resolvedOptions: StopOptions = { removeContainer: true, timeout: 0, removeVolumes: true, ...options };
     await stopContainer(this.container, { timeout: resolvedOptions.timeout });
-    await removeContainer(this.container, { removeVolumes: resolvedOptions.removeVolumes });
+    if (resolvedOptions.removeContainer) {
+      await removeContainer(this.container, { removeVolumes: resolvedOptions.removeVolumes });
+    }
     log.info(`Stopped container`, { containerId: this.container.id });
 
     if (this.containerIsStopped) {
       await this.containerIsStopped();
     }
 
-    return new StoppedGenericContainer();
+    return new StoppedGenericContainer(this.container);
   }
 
   public getHost(): string {
@@ -119,6 +122,13 @@ export class StartedGenericContainer implements StartedTestContainer {
 
   public getIpAddress(networkName: string): string {
     return this.inspectResult.networkSettings[networkName].ipAddress;
+  }
+
+  public async getArchive(filePath: string): Promise<NodeJS.ReadableStream> {
+    log.debug(`Getting archive "${filePath}"...`, { containerId: this.container.id });
+    const stream = await getContainerArchive({ container: this.container, path: filePath });
+    log.debug(`Got archive "${filePath}"`, { containerId: this.container.id });
+    return stream;
   }
 
   public async exec(command: string[]): Promise<ExecResult> {

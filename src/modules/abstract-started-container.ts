@@ -63,6 +63,10 @@ export class AbstractStartedContainer implements StartedTestContainer {
     return this.startedTestContainer.getIpAddress(networkName);
   }
 
+  public getArchive(path: string): Promise<NodeJS.ReadableStream> {
+    return this.startedTestContainer.getArchive(path);
+  }
+
   public exec(command: string[]): Promise<ExecResult> {
     return this.startedTestContainer.exec(command);
   }
