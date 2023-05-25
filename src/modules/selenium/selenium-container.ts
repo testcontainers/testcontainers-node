@@ -113,19 +113,21 @@ export class StoppedSeleniumRecordingContainer extends StoppedSeleniumContainer 
   }
 
   async exportVideo(target: string): Promise<void> {
-    log.debug("Extracting archive from container...", { containerId: this.getId() });
-    const archiveStream = await this.stoppedFfmpegContainer.getArchive("/videos/video.mp4");
-    log.debug("Extracted archive from container", { containerId: this.getId() });
+    const ffmpegContainerId = this.stoppedFfmpegContainer.getId();
 
-    log.debug("Unpacking archive...", { containerId: this.getId() });
+    log.debug("Extracting archive from container...", { containerId: ffmpegContainerId });
+    const archiveStream = await this.stoppedFfmpegContainer.getArchive("/videos/video.mp4");
+    log.debug("Extracted archive from container", { containerId: ffmpegContainerId });
+
+    log.debug("Unpacking archive...", { containerId: ffmpegContainerId });
     const destinationDir = tmp.dirSync();
     await this.extractTarStreamToDest(archiveStream, destinationDir.name);
-    log.debug("Unpacked archive", { containerId: this.getId() });
+    log.debug("Unpacked archive", { containerId: ffmpegContainerId });
 
     const videoFile = path.resolve(destinationDir.name, "video.mp4");
     await rename(videoFile, target);
     destinationDir.removeCallback();
-    log.debug(`Extracted video to "${target}"`, { containerId: this.getId() });
+    log.debug(`Extracted video to "${target}"`, { containerId: ffmpegContainerId });
   }
 
   private async extractTarStreamToDest(tarStream: NodeJS.ReadableStream, dest: string): Promise<void> {
