@@ -77,13 +77,13 @@ export class SeleniumRecordingContainer extends SeleniumContainer {
 
     const startedSeleniumContainer = await super.start();
 
-    const ffmpegContainer = await new GenericContainer("selenium/video:ffmpeg-4.3.1-20230508")
+    const startedFfmpegContainer = await new GenericContainer("selenium/video:ffmpeg-4.3.1-20230508")
       .withNetwork(network)
       .withEnvironment({ DISPLAY_CONTAINER_NAME: SELENIUM_NETWORK_ALIAS })
       .withWaitStrategy(Wait.forLogMessage(/.*video-recording entered RUNNING state.*/))
       .start();
 
-    return new StartedSeleniumRecordingContainer(startedSeleniumContainer, ffmpegContainer, network);
+    return new StartedSeleniumRecordingContainer(startedSeleniumContainer, startedFfmpegContainer, network);
   }
 }
 

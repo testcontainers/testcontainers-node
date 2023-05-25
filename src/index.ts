@@ -30,3 +30,11 @@ export {
   NatsTlsOptions,
 } from "./modules/nats/nats-container";
 export { MongoDBContainer, StartedMongoDBContainer } from "./modules/mongodb/mongodb-container";
+export {
+  SeleniumContainer,
+  SeleniumRecordingContainer,
+  StartedSeleniumContainer,
+  StartedSeleniumRecordingContainer,
+  StoppedSeleniumContainer,
+  StoppedSeleniumRecordingContainer,
+} from "./modules/selenium/selenium-container";
