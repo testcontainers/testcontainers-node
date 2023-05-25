@@ -2,20 +2,19 @@ import { GenericContainer } from "../../generic-container/generic-container";
 import { AbstractStartedContainer } from "../abstract-started-container";
 import { Wait } from "../../wait-strategy/wait";
 import { StartedTestContainer, StopOptions, StoppedTestContainer } from "../../test-container";
-import { Network, StartedNetwork } from "../../network";
-import tar from "tar-fs";
-import tmp from "tmp";
-import path from "path";
 import { AbstractStoppedContainer } from "../abstract-stopped-container";
+import { Network, StartedNetwork } from "../../network";
 import { log } from "../../logger";
+import { rename } from "fs/promises";
+import tmp from "tmp";
+import tar from "tar-fs";
+import path from "path";
 
 const SELENIUM_PORT = 4444;
 const VNC_PORT = 5900;
 const SELENIUM_NETWORK_ALIAS = "selenium";
 
 export class SeleniumContainer extends GenericContainer {
-  private recording = false;
-
   constructor(image = "selenium/standalone-chrome:112.0") {
     super(image);
   }
@@ -34,35 +33,19 @@ export class SeleniumContainer extends GenericContainer {
       );
   }
 
-  public withRecording(): this {
-    this.recording = true;
-    return this;
+  public withRecording(): SeleniumRecordingContainer {
+    return new SeleniumRecordingContainer(this.image);
   }
 
-  public override async start(): Promise<StartedSeleniumContainer> {
-    const network = await new Network().start();
-    this.withNetwork(network);
-    this.withNetworkAliases(SELENIUM_NETWORK_ALIAS);
-    const startedSeleniumContainer = await super.start();
-
-    const ffmpegContainer = await new GenericContainer("selenium/video:ffmpeg-4.3.1-20230508")
-      .withNetwork(network)
-      .withEnvironment({ DISPLAY_CONTAINER_NAME: SELENIUM_NETWORK_ALIAS })
-      .withWaitStrategy(Wait.forLogMessage(/.*video-recording entered RUNNING state.*/))
-      .start();
-
-    return new StartedSeleniumContainer(startedSeleniumContainer, ffmpegContainer, network);
+  override async start(): Promise<StartedSeleniumContainer> {
+    return new StartedSeleniumContainer(await super.start());
   }
 }
 
 export class StartedSeleniumContainer extends AbstractStartedContainer {
   private readonly serverUrl: string;
 
-  constructor(
-    startedTestContainer: StartedTestContainer,
-    private readonly startedFfmpegContainer: StartedTestContainer,
-    private readonly network: StartedNetwork
-  ) {
+  constructor(startedTestContainer: StartedTestContainer) {
     super(startedTestContainer);
     this.serverUrl = `http://${this.getHost()}:${this.getMappedPort(4444)}/wd/hub`;
   }
@@ -72,30 +55,84 @@ export class StartedSeleniumContainer extends AbstractStartedContainer {
   }
 
   override async stop(options?: Partial<StopOptions>): Promise<StoppedSeleniumContainer> {
-    const stoppedSeleniumContainer = await super.stop(options);
-    const stoppedFfmpegContainer = await this.startedFfmpegContainer.stop({ removeContainer: false, timeout: 60_000 });
-    return new StoppedSeleniumContainer(stoppedSeleniumContainer, stoppedFfmpegContainer);
+    return new StoppedSeleniumContainer(await super.stop(options));
   }
 }
 
 export class StoppedSeleniumContainer extends AbstractStoppedContainer {
+  constructor(private readonly stoppedSeleniumContainer: StoppedTestContainer) {
+    super(stoppedSeleniumContainer);
+  }
+}
+
+export class SeleniumRecordingContainer extends SeleniumContainer {
+  constructor(image: string) {
+    super(image);
+  }
+
+  public override async start(): Promise<StartedSeleniumRecordingContainer> {
+    const network = await new Network().start();
+    this.withNetwork(network);
+    this.withNetworkAliases(SELENIUM_NETWORK_ALIAS);
+
+    const startedSeleniumContainer = await super.start();
+
+    const ffmpegContainer = await new GenericContainer("selenium/video:ffmpeg-4.3.1-20230508")
+      .withNetwork(network)
+      .withEnvironment({ DISPLAY_CONTAINER_NAME: SELENIUM_NETWORK_ALIAS })
+      .withWaitStrategy(Wait.forLogMessage(/.*video-recording entered RUNNING state.*/))
+      .start();
+
+    return new StartedSeleniumRecordingContainer(startedSeleniumContainer, ffmpegContainer, network);
+  }
+}
+
+export class StartedSeleniumRecordingContainer extends StartedSeleniumContainer {
   constructor(
-    private readonly stoppedSeleniumContainer: StoppedTestContainer,
+    startedSeleniumContainer: StartedTestContainer,
+    private readonly startedFfmpegContainer: StartedTestContainer,
+    private readonly network: StartedNetwork
+  ) {
+    super(startedSeleniumContainer);
+  }
+
+  override async stop(options?: Partial<StopOptions>): Promise<StoppedSeleniumRecordingContainer> {
+    const stoppedSeleniumContainer = await super.stop(options);
+    const stoppedFfmpegContainer = await this.startedFfmpegContainer.stop({ removeContainer: false, timeout: 60_000 });
+    await this.network.stop();
+    return new StoppedSeleniumRecordingContainer(stoppedSeleniumContainer, stoppedFfmpegContainer);
+  }
+}
+
+export class StoppedSeleniumRecordingContainer extends StoppedSeleniumContainer {
+  constructor(
+    stoppedSeleniumContainer: StoppedTestContainer,
     private readonly stoppedFfmpegContainer: StoppedTestContainer
   ) {
     super(stoppedSeleniumContainer);
   }
 
-  async exportVideo(): Promise<string> {
-    log.debug("Extracting video archive...", { containerId: this.getId() });
+  async exportVideo(target: string): Promise<void> {
+    log.debug("Extracting archive from container...", { containerId: this.getId() });
     const archiveStream = await this.stoppedFfmpegContainer.getArchive("/videos/video.mp4");
+    log.debug("Extracted archive from container", { containerId: this.getId() });
+
+    log.debug("Unpacking archive...", { containerId: this.getId() });
     const destinationDir = tmp.dirSync();
+    await this.extractTarStreamToDest(archiveStream, destinationDir.name);
+    log.debug("Unpacked archive", { containerId: this.getId() });
+
+    const videoFile = path.resolve(destinationDir.name, "video.mp4");
+    await rename(videoFile, target);
+    destinationDir.removeCallback();
+    log.debug(`Extracted video to "${target}"`, { containerId: this.getId() });
+  }
+
+  private async extractTarStreamToDest(tarStream: NodeJS.ReadableStream, dest: string): Promise<void> {
     await new Promise<void>((resolve) => {
-      archiveStream.pipe(tar.extract(destinationDir.name));
-      archiveStream.on("close", resolve);
+      const destination = tar.extract(dest);
+      tarStream.pipe(destination);
+      destination.on("finish", resolve);
     });
-    const video = path.resolve(destinationDir.name, "video.mp4");
-    log.debug(`Extracted video archive to "${video}"`, { containerId: this.getId() });
-    return video;
   }
 }
