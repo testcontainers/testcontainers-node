@@ -440,3 +440,22 @@ const container = await new GenericContainer("alpine")
   })
   .start();
 ```
+
+## Fetching files/directories
+
+Files and directories can be fetched from the container as a tar archive. The archive is returned to you as a readable stream.
+
+This works when a container has started:
+
+```javascript
+const container = await new GenericContainer("alpine").start();
+const tarArchiveStream = await container.getArchive("/var/log")
+```
+
+And when a container is stopped but not removed:
+
+```javascript
+const container = await new GenericContainer("alpine").start();
+const stoppedContainer = await container.stop({ remove: false });
+const tarArchiveStream = await stoppedContainer.getArchive("/videos/video.mp4")
+```

@@ -51,7 +51,7 @@ export interface RestartOptions {
 
 export interface StopOptions {
   timeout: number;
-  removeContainer: boolean;
+  remove: boolean;
   removeVolumes: boolean;
 }
 

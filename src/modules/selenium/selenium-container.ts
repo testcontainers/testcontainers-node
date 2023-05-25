@@ -98,7 +98,7 @@ export class StartedSeleniumRecordingContainer extends StartedSeleniumContainer 
 
   override async stop(options?: Partial<StopOptions>): Promise<StoppedSeleniumRecordingContainer> {
     const stoppedSeleniumContainer = await super.stop(options);
-    const stoppedFfmpegContainer = await this.startedFfmpegContainer.stop({ removeContainer: false, timeout: 60_000 });
+    const stoppedFfmpegContainer = await this.startedFfmpegContainer.stop({ remove: false, timeout: 60_000 });
     await this.network.stop();
     return new StoppedSeleniumRecordingContainer(stoppedSeleniumContainer, stoppedFfmpegContainer);
   }
