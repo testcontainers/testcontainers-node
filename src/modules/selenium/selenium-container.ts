@@ -3,8 +3,11 @@ import { AbstractStartedContainer } from "../abstract-started-container";
 import { Wait } from "../../wait-strategy/wait";
 import { StartedTestContainer, StopOptions, StoppedTestContainer } from "../../test-container";
 import { Network, StartedNetwork } from "../../network";
-import { createReadStream, createWriteStream } from "fs";
 import tar from "tar-fs";
+import tmp from "tmp";
+import path from "path";
+import { AbstractStoppedContainer } from "../abstract-stopped-container";
+import { log } from "../../logger";
 
 const SELENIUM_PORT = 4444;
 const VNC_PORT = 5900;
@@ -12,7 +15,6 @@ const SELENIUM_NETWORK_ALIAS = "selenium";
 
 export class SeleniumContainer extends GenericContainer {
   private recording = false;
-  private target?: string;
 
   constructor(image = "selenium/standalone-chrome:112.0") {
     super(image);
@@ -32,9 +34,8 @@ export class SeleniumContainer extends GenericContainer {
       );
   }
 
-  public withRecording(target: string): this {
+  public withRecording(): this {
     this.recording = true;
-    this.target = target;
     return this;
   }
 
@@ -70,24 +71,31 @@ export class StartedSeleniumContainer extends AbstractStartedContainer {
     return this.serverUrl;
   }
 
-  override async stop(options?: Partial<StopOptions>): Promise<StoppedTestContainer> {
-    const stoppedSeleniumContainer = super.stop(options);
-    const stoppedFfmpegContainer = await this.startedFfmpegContainer.stop({ removeContainer: false, timeout: 60_000 }); // give time to save video
+  override async stop(options?: Partial<StopOptions>): Promise<StoppedSeleniumContainer> {
+    const stoppedSeleniumContainer = await super.stop(options);
+    const stoppedFfmpegContainer = await this.startedFfmpegContainer.stop({ removeContainer: false, timeout: 60_000 });
+    return new StoppedSeleniumContainer(stoppedSeleniumContainer, stoppedFfmpegContainer);
+  }
+}
 
-    const videoArchiveStream = await stoppedFfmpegContainer.getArchive("/videos/video.mp4");
+export class StoppedSeleniumContainer extends AbstractStoppedContainer {
+  constructor(
+    private readonly stoppedSeleniumContainer: StoppedTestContainer,
+    private readonly stoppedFfmpegContainer: StoppedTestContainer
+  ) {
+    super(stoppedSeleniumContainer);
+  }
+
+  async exportVideo(): Promise<string> {
+    log.debug("Extracting video archive...", { containerId: this.getId() });
+    const archiveStream = await this.stoppedFfmpegContainer.getArchive("/videos/video.mp4");
+    const destinationDir = tmp.dirSync();
     await new Promise<void>((resolve) => {
-      const writeStream = createWriteStream("/tmp/videos/test.tar");
-      videoArchiveStream.pipe(writeStream);
-      writeStream.on("close", () => {
-        const source = createReadStream("/tmp/videos/test.tar");
-        const dest = tar.extract("/tmp/videos");
-        source.pipe(dest);
-        source.on("close", () => resolve());
-      });
+      archiveStream.pipe(tar.extract(destinationDir.name));
+      archiveStream.on("close", resolve);
     });
-
-    // await this.network.stop();
-
-    return stoppedSeleniumContainer;
+    const video = path.resolve(destinationDir.name, "video.mp4");
+    log.debug(`Extracted video archive to "${video}"`, { containerId: this.getId() });
+    return video;
   }
 }

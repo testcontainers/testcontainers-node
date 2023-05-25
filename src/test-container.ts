@@ -72,11 +72,12 @@ export interface StartedTestContainer {
   getNetworkNames(): string[];
   getNetworkId(networkName: string): string;
   getIpAddress(networkName: string): string;
-  getArchive(filePath: string): Promise<NodeJS.ReadableStream>;
+  getArchive(path: string): Promise<NodeJS.ReadableStream>;
   exec(command: string[]): Promise<ExecResult>;
   logs(): Promise<Readable>;
 }
 
 export interface StoppedTestContainer {
-  getArchive(filePath: string): Promise<NodeJS.ReadableStream>;
+  getId(): string;
+  getArchive(path: string): Promise<NodeJS.ReadableStream>;
 }
