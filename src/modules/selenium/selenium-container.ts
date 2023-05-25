@@ -5,7 +5,7 @@ import { StartedTestContainer, StopOptions, StoppedTestContainer } from "../../t
 import { AbstractStoppedContainer } from "../abstract-stopped-container";
 import { Network, StartedNetwork } from "../../network";
 import { log } from "../../logger";
-import { rename } from "fs/promises";
+import { copyFile } from "fs/promises";
 import tmp from "tmp";
 import tar from "tar-fs";
 import path from "path";
@@ -120,13 +120,12 @@ export class StoppedSeleniumRecordingContainer extends StoppedSeleniumContainer 
     log.debug("Extracted archive from container", { containerId: ffmpegContainerId });
 
     log.debug("Unpacking archive...", { containerId: ffmpegContainerId });
-    const destinationDir = tmp.dirSync();
+    const destinationDir = tmp.dirSync({ keep: false });
     await this.extractTarStreamToDest(archiveStream, destinationDir.name);
     log.debug("Unpacked archive", { containerId: ffmpegContainerId });
 
     const videoFile = path.resolve(destinationDir.name, "video.mp4");
-    await rename(videoFile, target);
-    destinationDir.removeCallback();
+    await copyFile(videoFile, target);
     log.debug(`Extracted video to "${target}"`, { containerId: ffmpegContainerId });
   }
 

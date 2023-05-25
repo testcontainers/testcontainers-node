@@ -31,11 +31,10 @@ describe("SeleniumContainer", () => {
       await driver.quit();
       const stoppedSeleniumContainer = await container.stop();
 
-      const tmpFile = tmp.fileSync({ prefix: `video-${browser}`, postfix: ".mp4" });
+      const tmpFile = tmp.fileSync({ keep: false, prefix: `video-${browser}`, postfix: ".mp4" });
       await stoppedSeleniumContainer.saveRecording(tmpFile.name);
 
       expect(fs.existsSync(tmpFile.name)).toBe(true);
-      tmpFile.removeCallback();
     });
   });
 });
