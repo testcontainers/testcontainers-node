@@ -418,6 +418,11 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
+  public withSharedMemorySize(bytes: number): this {
+    this.opts.sharedMemorySize = bytes;
+    return this;
+  }
+
   public withLogConsumer(logConsumer: (stream: Readable) => unknown): this {
     this.logConsumer = logConsumer;
     return this;

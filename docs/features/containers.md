@@ -212,6 +212,14 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+### With shared memory size
+
+```javascript
+const container = await new GenericContainer("alpine")
+  .withSharedMemorySize(512 * 1024 * 1024)
+  .start();
+```
+
 ## Stopping a container
 
 Testcontainers by default will not wait until the container has stopped. It will simply issue the stop command and return immediately. This is to save time when running tests.

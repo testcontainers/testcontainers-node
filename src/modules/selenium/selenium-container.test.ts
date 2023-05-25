@@ -15,8 +15,6 @@ describe("SeleniumContainer", () => {
       const container = await new SeleniumContainer(image).start();
       const driver = new Builder().forBrowser(Browser[browser]).usingServer(container.getServerUrl()).build();
 
-      console.log(container.getMappedPort(7900));
-
       try {
         await driver.get("https://testcontainers.com");
         expect(await driver.getTitle()).toEqual("Testcontainers");
@@ -24,6 +22,10 @@ describe("SeleniumContainer", () => {
         await driver.quit();
         await container.stop();
       }
+    });
+
+    it("should record video", async () => {
+      // todo
     });
   });
 });

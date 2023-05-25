@@ -18,53 +18,30 @@ import { StartedNetwork } from "./network";
 
 export interface TestContainer {
   start(): Promise<StartedTestContainer>;
-
   withEnvironment(environment: Environment): this;
-
   withCommand(command: string[]): this;
-
   withEntrypoint(entrypoint: string[]): this;
-
   withTmpFs(tmpFs: TmpFs): this;
-
   withUlimits(ulimits: Ulimits): this;
-
   withAddedCapabilities(...capabilities: string[]): this;
-
   withDroppedCapabilities(...capabilities: string[]): this;
-
   withExposedPorts(...ports: PortWithOptionalBinding[]): this;
-
   withBindMounts(bindMounts: BindMount[]): this;
-
   withWaitStrategy(waitStrategy: WaitStrategy): this;
-
   withStartupTimeout(startupTimeoutMs: number): this;
-
   withNetwork(network: StartedNetwork): this;
-
   withNetworkMode(networkMode: string): this;
-
   withExtraHosts(extraHosts: ExtraHost[]): this;
-
   withDefaultLogDriver(): this;
-
   withPrivilegedMode(): this;
-
   withUser(user: string): this;
-
   withPullPolicy(pullPolicy: PullPolicy): this;
-
   withReuse(): this;
-
   withCopyFilesToContainer(filesToCopy: FileToCopy[]): this;
-
   withCopyContentToContainer(contentsToCopy: ContentToCopy[]): this;
-
   withWorkingDir(workingDir: string): this;
-
   withResourcesQuota(resourcesQuota: ResourcesQuota): this;
-
+  withSharedMemorySize(bytes: number): this;
   withLogConsumer(logConsumer: (stream: Readable) => unknown): this;
 }
 
