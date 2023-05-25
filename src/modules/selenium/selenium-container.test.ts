@@ -32,7 +32,7 @@ describe("SeleniumContainer", () => {
       const stoppedSeleniumContainer = await container.stop();
 
       const tmpFile = tmp.fileSync({ prefix: `video-${browser}`, postfix: ".mp4" });
-      await stoppedSeleniumContainer.exportVideo(tmpFile.name);
+      await stoppedSeleniumContainer.saveRecording(tmpFile.name);
 
       expect(fs.existsSync(tmpFile.name)).toBe(true);
       tmpFile.removeCallback();

@@ -112,7 +112,7 @@ export class StoppedSeleniumRecordingContainer extends StoppedSeleniumContainer 
     super(stoppedSeleniumContainer);
   }
 
-  async exportVideo(target: string): Promise<void> {
+  async saveRecording(target: string): Promise<void> {
     const ffmpegContainerId = this.stoppedFfmpegContainer.getId();
 
     log.debug("Extracting archive from container...", { containerId: ffmpegContainerId });
