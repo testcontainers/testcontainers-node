@@ -43,12 +43,12 @@ describe("SeleniumContainer", () => {
       await driver.quit();
       const stoppedContainer = await container.stop();
 
-      const tmpFilePath = tmp.fileSync({ keep: false, prefix: `video-${browser}`, postfix: ".mp4" });
-      await stoppedContainer.saveRecording(tmpFilePath.name);
+      const videoFilePath = tmp.fileSync({ keep: false, prefix: `video-${browser}`, postfix: ".mp4" });
+      const videoFileName = path.basename(videoFilePath.name);
+      await stoppedContainer.saveRecording(videoFilePath.name);
 
-      const tmpFileName = path.basename(tmpFilePath.name);
-      await ffmpegContainer.copyFilesToContainer([{ source: tmpFilePath.name, target: `/tmp/${tmpFileName}` }]);
-      const { exitCode } = await ffmpegContainer.exec(["ffprobe", `/tmp/${tmpFileName}`]);
+      await ffmpegContainer.copyFilesToContainer([{ source: videoFilePath.name, target: `/tmp/${videoFileName}` }]);
+      const { exitCode } = await ffmpegContainer.exec(["ffprobe", `/tmp/${videoFileName}`]);
       expect(exitCode).toBe(0);
     });
   });
