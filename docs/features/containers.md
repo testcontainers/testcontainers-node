@@ -449,8 +449,8 @@ Files and content can be copied to a started container:
 
 ```javascript
 const container = await new GenericContainer("alpine").start();
-container.copyFilesToContainer([{ source: "file.txt", target: "/tmp/file1.txt" }]);
-container.copyContentToContainer([{ content: "Hello world!", target: "/tmp/file2.txt" }]);
+await container.copyFilesToContainer([{ source: "file.txt", target: "/tmp/file1.txt" }]);
+await container.copyContentToContainer([{ content: "Hello world!", target: "/tmp/file2.txt" }]);
 ```
 
 ### Copy files/directories from a container
