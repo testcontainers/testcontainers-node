@@ -7,7 +7,7 @@ export class AbstractStoppedContainer implements StoppedTestContainer {
     return this.stoppedTestContainer.getId();
   }
 
-  getArchive(path: string): Promise<NodeJS.ReadableStream> {
-    return this.stoppedTestContainer.getArchive(path);
+  copyArchiveFromContainer(path: string): Promise<NodeJS.ReadableStream> {
+    return this.stoppedTestContainer.copyArchiveFromContainer(path);
   }
 }

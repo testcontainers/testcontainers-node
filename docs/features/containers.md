@@ -449,7 +449,7 @@ This works when a container has started:
 
 ```javascript
 const container = await new GenericContainer("alpine").start();
-const tarArchiveStream = await container.getArchive("/var/log")
+const tarArchiveStream = await container.copyArchiveFromContainer("/var/log")
 ```
 
 And when a container is stopped but not removed:
@@ -457,5 +457,5 @@ And when a container is stopped but not removed:
 ```javascript
 const container = await new GenericContainer("alpine").start();
 const stoppedContainer = await container.stop({ remove: false });
-const tarArchiveStream = await stoppedContainer.getArchive("/var/log/syslog")
+const tarArchiveStream = await stoppedContainer.copyArchiveFromContainer("/var/log/syslog")
 ```

@@ -14,6 +14,8 @@ const SELENIUM_PORT = 4444;
 const VNC_PORT = 5900;
 const SELENIUM_NETWORK_ALIAS = "selenium";
 
+export const SELENIUM_VIDEO_IMAGE = "selenium/video:ffmpeg-4.3.1-20230508";
+
 export class SeleniumContainer extends GenericContainer {
   constructor(image = "selenium/standalone-chrome:112.0") {
     super(image);
@@ -77,7 +79,7 @@ export class SeleniumRecordingContainer extends SeleniumContainer {
 
     const startedSeleniumContainer = await super.start();
 
-    const startedFfmpegContainer = await new GenericContainer("selenium/video:ffmpeg-4.3.1-20230508")
+    const startedFfmpegContainer = await new GenericContainer(SELENIUM_VIDEO_IMAGE)
       .withNetwork(network)
       .withEnvironment({ DISPLAY_CONTAINER_NAME: SELENIUM_NETWORK_ALIAS })
       .withWaitStrategy(Wait.forLogMessage(/.*video-recording entered RUNNING state.*/))
@@ -116,7 +118,7 @@ export class StoppedSeleniumRecordingContainer extends StoppedSeleniumContainer 
     const ffmpegContainerId = this.stoppedFfmpegContainer.getId();
 
     log.debug("Extracting archive from container...", { containerId: ffmpegContainerId });
-    const archiveStream = await this.stoppedFfmpegContainer.getArchive("/videos/video.mp4");
+    const archiveStream = await this.stoppedFfmpegContainer.copyArchiveFromContainer("/videos/video.mp4");
     log.debug("Extracted archive from container", { containerId: ffmpegContainerId });
 
     log.debug("Unpacking archive...", { containerId: ffmpegContainerId });

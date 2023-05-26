@@ -10,10 +10,10 @@ export class StoppedGenericContainer implements StoppedTestContainer {
     return this.container.id;
   }
 
-  getArchive(path: string): Promise<NodeJS.ReadableStream> {
-    log.debug(`Getting archive "${path}"...`, { containerId: this.container.id });
+  copyArchiveFromContainer(path: string): Promise<NodeJS.ReadableStream> {
+    log.debug(`Copying archive "${path}" from container...`, { containerId: this.container.id });
     const stream = getContainerArchive({ container: this.container, path: path });
-    log.debug(`Got archive "${path}"`, { containerId: this.container.id });
+    log.debug(`Copied archive "${path}" from container`, { containerId: this.container.id });
     return stream;
   }
 }

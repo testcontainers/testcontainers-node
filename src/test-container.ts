@@ -72,12 +72,14 @@ export interface StartedTestContainer {
   getNetworkNames(): string[];
   getNetworkId(networkName: string): string;
   getIpAddress(networkName: string): string;
-  getArchive(path: string): Promise<NodeJS.ReadableStream>;
+  copyArchiveFromContainer(path: string): Promise<NodeJS.ReadableStream>;
+  copyFilesToContainer(filesToCopy: FileToCopy[]): Promise<void>;
+  copyContentToContainer(contentsToCopy: ContentToCopy[]): Promise<void>;
   exec(command: string[]): Promise<ExecResult>;
   logs(): Promise<Readable>;
 }
 
 export interface StoppedTestContainer {
   getId(): string;
-  getArchive(path: string): Promise<NodeJS.ReadableStream>;
+  copyArchiveFromContainer(path: string): Promise<NodeJS.ReadableStream>;
 }

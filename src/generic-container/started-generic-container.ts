@@ -1,6 +1,6 @@
 import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
 import Dockerode from "dockerode";
-import { ExecResult, Labels } from "../docker/types";
+import { ContentToCopy, ExecResult, FileToCopy, Labels } from "../docker/types";
 import { inspectContainer, InspectResult } from "../docker/functions/container/inspect-container";
 import { BoundPorts } from "../bound-ports";
 import { containerLog, log } from "../logger";
@@ -16,6 +16,8 @@ import { waitForContainer } from "../wait-for-container";
 import { getDockerClient } from "../docker/client/docker-client";
 import AsyncLock from "async-lock";
 import { getContainerArchive } from "../docker/functions/container/get-container-archive";
+import archiver from "archiver";
+import { putContainerArchive } from "../docker/functions/container/put-container-archive";
 
 export class StartedGenericContainer implements StartedTestContainer {
   private stoppedContainer?: StoppedTestContainer;
@@ -124,10 +126,28 @@ export class StartedGenericContainer implements StartedTestContainer {
     return this.inspectResult.networkSettings[networkName].ipAddress;
   }
 
-  public async getArchive(path: string): Promise<NodeJS.ReadableStream> {
-    log.debug(`Getting archive "${path}"...`, { containerId: this.container.id });
+  public async copyFilesToContainer(filesToCopy: FileToCopy[]): Promise<void> {
+    log.debug(`Copying files to container...`, { containerId: this.container.id });
+    const tar = archiver("tar");
+    filesToCopy.forEach(({ source, target }) => tar.file(source, { name: target }));
+    tar.finalize();
+    await putContainerArchive({ container: this.container, stream: tar, containerPath: "/" });
+    log.debug(`Copied files to container`, { containerId: this.container.id });
+  }
+
+  public async copyContentToContainer(contentsToCopy: ContentToCopy[]): Promise<void> {
+    log.debug(`Copying content to container...`, { containerId: this.container.id });
+    const tar = archiver("tar");
+    contentsToCopy.forEach(({ content, target }) => tar.append(content, { name: target }));
+    tar.finalize();
+    await putContainerArchive({ container: this.container, stream: tar, containerPath: "/" });
+    log.debug(`Copied content to container`, { containerId: this.container.id });
+  }
+
+  public async copyArchiveFromContainer(path: string): Promise<NodeJS.ReadableStream> {
+    log.debug(`Copying archive "${path}" from container...`, { containerId: this.container.id });
     const stream = await getContainerArchive({ container: this.container, path: path });
-    log.debug(`Got archive "${path}"`, { containerId: this.container.id });
+    log.debug(`Copied archive "${path}" from container`, { containerId: this.container.id });
     return stream;
   }
 

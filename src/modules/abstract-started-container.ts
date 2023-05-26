@@ -1,5 +1,5 @@
 import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
-import { ExecResult, Labels } from "../docker/types";
+import { ContentToCopy, ExecResult, FileToCopy, Labels } from "../docker/types";
 import { Readable } from "stream";
 
 export class AbstractStartedContainer implements StartedTestContainer {
@@ -63,8 +63,16 @@ export class AbstractStartedContainer implements StartedTestContainer {
     return this.startedTestContainer.getIpAddress(networkName);
   }
 
-  public getArchive(path: string): Promise<NodeJS.ReadableStream> {
-    return this.startedTestContainer.getArchive(path);
+  public async copyFilesToContainer(filesToCopy: FileToCopy[]): Promise<void> {
+    return this.startedTestContainer.copyFilesToContainer(filesToCopy);
+  }
+
+  public async copyContentToContainer(contentsToCopy: ContentToCopy[]): Promise<void> {
+    return this.startedTestContainer.copyContentToContainer(contentsToCopy);
+  }
+
+  public copyArchiveFromContainer(path: string): Promise<NodeJS.ReadableStream> {
+    return this.startedTestContainer.copyArchiveFromContainer(path);
   }
 
   public exec(command: string[]): Promise<ExecResult> {
