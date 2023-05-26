@@ -124,10 +124,10 @@ export class StartedGenericContainer implements StartedTestContainer {
     return this.inspectResult.networkSettings[networkName].ipAddress;
   }
 
-  public async getArchive(filePath: string): Promise<NodeJS.ReadableStream> {
-    log.debug(`Getting archive "${filePath}"...`, { containerId: this.container.id });
-    const stream = await getContainerArchive({ container: this.container, path: filePath });
-    log.debug(`Got archive "${filePath}"`, { containerId: this.container.id });
+  public async getArchive(path: string): Promise<NodeJS.ReadableStream> {
+    log.debug(`Getting archive "${path}"...`, { containerId: this.container.id });
+    const stream = await getContainerArchive({ container: this.container, path: path });
+    log.debug(`Got archive "${path}"`, { containerId: this.container.id });
     return stream;
   }
 
