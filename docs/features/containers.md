@@ -441,11 +441,21 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
-## Fetching files/directories
+## Copying files
 
-Files and directories can be fetched from a container as a tar archive. The archive is returned as a readable stream.
+### Copy files/content to a container
 
-This works when a container has started:
+Files and content can be copied to a started container:
+
+```javascript
+const container = await new GenericContainer("alpine").start();
+container.copyFilesToContainer([{ source: "file.txt", target: "/tmp/file1.txt" }]);
+container.copyContentToContainer([{ content: "Hello world!", target: "/tmp/file2.txt" }]);
+```
+
+### Copy files/directories from a container
+
+Files and directories can be fetched from a container as a tar archive. The archive is returned as a readable stream. This works when a container has started:
 
 ```javascript
 const container = await new GenericContainer("alpine").start();
