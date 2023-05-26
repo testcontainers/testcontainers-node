@@ -225,21 +225,28 @@ const container = await new GenericContainer("alpine")
 Testcontainers by default will not wait until the container has stopped. It will simply issue the stop command and return immediately. This is to save time when running tests.
 
 ```javascript
-const container = await new GenericContainer("postgres").start();
+const container = await new GenericContainer("alpine").start();
 await container.stop();
 ```
 
 If you need to wait for the container to be stopped, you can provide a timeout:
 
 ```javascript
-const container = await new GenericContainer("postgres").start();
+const container = await new GenericContainer("alpine").start();
 await container.stop({ timeout: 10000 }); // ms
+```
+
+You can disable automatic removal of the container, which is useful for debugging, or if for example you want to copy content from the container once it has stopped:
+
+```javascript
+const container = await new GenericContainer("alpine").start();
+await container.stop({ remove: false });
 ```
 
 Volumes created by the container are removed when stopped. This is configurable:
 
 ```javascript
-const container = await new GenericContainer("postgres").start();
+const container = await new GenericContainer("alpine").start();
 await container.stop({ removeVolumes: false });
 ```
 
