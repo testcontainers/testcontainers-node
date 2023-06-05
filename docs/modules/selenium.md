@@ -41,7 +41,6 @@ A video recording of the browser session can be enabled and saved to disk once t
 const container = await new SeleniumContainer("selenium/standalone-chrome:112.0")
   .withRecording()
   .start();
-
 ...
 
 const stoppedContainer = await container.stop();

@@ -23,7 +23,7 @@ export class SeleniumContainer extends GenericContainer {
 
   protected override async beforeContainerStarted(): Promise<void> {
     this.withExposedPorts(SELENIUM_PORT, VNC_PORT)
-      .withSharedMemorySize(512 * 1024 * 1024)
+      .withSharedMemorySize(2 * 1024 * 1024 * 1024)
       .withWaitStrategy(
         Wait.forHttp("/wd/hub/status", SELENIUM_PORT).forResponsePredicate((response) => {
           try {

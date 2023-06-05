@@ -36,18 +36,18 @@ describe("SeleniumContainer", () => {
       await container.stop();
     });
 
-    it("should record video and save to disk", async () => {
+    it(`should record video and save to disk for ${browser}`, async () => {
       const container = await new SeleniumContainer(image).withRecording().start();
       const driver = new Builder().forBrowser(Browser[browser]).usingServer(container.getServerUrl()).build();
       await driver.get("https://testcontainers.com");
       await driver.quit();
       const stoppedContainer = await container.stop();
 
-      const videoFilePath = tmp.fileSync({ keep: false, prefix: `video-${browser}`, postfix: ".mp4" });
-      const videoFileName = path.basename(videoFilePath.name);
-      await stoppedContainer.saveRecording(videoFilePath.name);
+      const videoFilePath = tmp.fileSync({ keep: false, prefix: `video-${browser}`, postfix: ".mp4" }).name;
+      const videoFileName = path.basename(videoFilePath);
+      await stoppedContainer.saveRecording(videoFilePath);
 
-      await ffmpegContainer.copyFilesToContainer([{ source: videoFilePath.name, target: `/tmp/${videoFileName}` }]);
+      await ffmpegContainer.copyFilesToContainer([{ source: videoFilePath, target: `/tmp/${videoFileName}` }]);
       const { exitCode } = await ffmpegContainer.exec(["ffprobe", `/tmp/${videoFileName}`]);
       expect(exitCode).toBe(0);
     });
