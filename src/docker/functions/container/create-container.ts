@@ -31,6 +31,7 @@ export type CreateContainerOptions = {
   user?: string;
   workingDir?: string;
   resourcesQuota?: ResourcesQuota;
+  sharedMemorySize?: number;
 };
 
 export const createContainer = async (options: CreateContainerOptions): Promise<Dockerode.Container> => {
@@ -64,6 +65,7 @@ export const createContainer = async (options: CreateContainerOptions): Promise<
         CapDrop: options.droppedCapabilities,
         Memory: options.resourcesQuota?.memory,
         NanoCpus: options.resourcesQuota?.cpu,
+        ShmSize: options.sharedMemorySize,
       },
     });
     log.info(`Created container for image "${options.imageName}"`, { containerId: container.id });

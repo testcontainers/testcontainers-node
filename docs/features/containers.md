@@ -212,26 +212,41 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+### With shared memory size
+
+```javascript
+const container = await new GenericContainer("alpine")
+  .withSharedMemorySize(512 * 1024 * 1024)
+  .start();
+```
+
 ## Stopping a container
 
 Testcontainers by default will not wait until the container has stopped. It will simply issue the stop command and return immediately. This is to save time when running tests.
 
 ```javascript
-const container = await new GenericContainer("postgres").start();
+const container = await new GenericContainer("alpine").start();
 await container.stop();
 ```
 
 If you need to wait for the container to be stopped, you can provide a timeout:
 
 ```javascript
-const container = await new GenericContainer("postgres").start();
+const container = await new GenericContainer("alpine").start();
 await container.stop({ timeout: 10000 }); // ms
+```
+
+You can disable automatic removal of the container, which is useful for debugging, or if for example you want to copy content from the container once it has stopped:
+
+```javascript
+const container = await new GenericContainer("alpine").start();
+await container.stop({ remove: false });
 ```
 
 Volumes created by the container are removed when stopped. This is configurable:
 
 ```javascript
-const container = await new GenericContainer("postgres").start();
+const container = await new GenericContainer("alpine").start();
 await container.stop({ removeVolumes: false });
 ```
 
@@ -431,4 +446,33 @@ const container = await new GenericContainer("alpine")
     stream.on("end", () => console.log("Stream closed"));
   })
   .start();
+```
+
+## Copying files
+
+### Copy files/content to a container
+
+Files and content can be copied to a started container:
+
+```javascript
+const container = await new GenericContainer("alpine").start();
+await container.copyFilesToContainer([{ source: "file.txt", target: "/tmp/file1.txt" }]);
+await container.copyContentToContainer([{ content: "Hello world!", target: "/tmp/file2.txt" }]);
+```
+
+### Copy files/directories from a container
+
+Files and directories can be fetched from a container as a tar archive. The archive is returned as a readable stream. This works when a container has started:
+
+```javascript
+const container = await new GenericContainer("alpine").start();
+const tarArchiveStream = await container.copyArchiveFromContainer("/var/log")
+```
+
+And when a container is stopped but not removed:
+
+```javascript
+const container = await new GenericContainer("alpine").start();
+const stoppedContainer = await container.stop({ remove: false });
+const tarArchiveStream = await stoppedContainer.copyArchiveFromContainer("/var/log/syslog")
 ```
