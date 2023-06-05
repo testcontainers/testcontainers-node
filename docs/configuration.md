@@ -40,5 +40,5 @@ Configuration of Testcontainers and its behaviours:
 | TESTCONTAINERS_RYUK_DISABLED          | true                      | Disable ryuk                             |
 | TESTCONTAINERS_RYUK_PORT              | 65515                     | Set ryuk host port (not recommended)     |
 | TESTCONTAINERS_SSHD_PORT              | 65515                     | Set SSHd host port (not recommended)     |
-| RYUK_CONTAINER_IMAGE                  | testcontainers/ryuk:0.4.0 | Custom image for ryuk                    |
+| RYUK_CONTAINER_IMAGE                  | testcontainers/ryuk:0.5.1 | Custom image for ryuk                    |
 | SSHD_CONTAINER_IMAGE                  | testcontainers/sshd:1.1.0 | Custom image for SSHd                    |
