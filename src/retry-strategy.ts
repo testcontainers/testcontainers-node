@@ -39,23 +39,20 @@ export class IntervalRetryStrategy<T, U> extends AbstractRetryStrategy<T, U> {
     onTimeout: () => U,
     timeout: number
   ): Promise<T | U> {
-    const startTime = this.clock.getTime();
     const timeoutPromise = new Promise<T>((resolve, reject) => setTimeout(() => reject(), timeout).unref());
 
     const doRetry = async (attemptCount = 0): Promise<T | U> => {
-      if (this.hasTimedOut(timeout, startTime)) {
-        return onTimeout();
-      }
-
       try {
         const result = await Promise.race<T>([fn(++attemptCount), timeoutPromise]);
         if (await predicate(result)) {
           return result;
         }
-      } catch {}
+      } catch {
+        return onTimeout();
+      }
 
       await this.wait(this.interval);
-      return doRetry(attemptCount);
+      return await doRetry(attemptCount);
     };
 
     return doRetry();
