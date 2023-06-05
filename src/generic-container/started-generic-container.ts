@@ -1,6 +1,6 @@
 import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
 import Dockerode from "dockerode";
-import { ExecResult, Labels } from "../docker/types";
+import { ContentToCopy, ExecResult, FileToCopy, Labels } from "../docker/types";
 import { inspectContainer, InspectResult } from "../docker/functions/container/inspect-container";
 import { BoundPorts } from "../bound-ports";
 import { containerLog, log } from "../logger";
@@ -15,6 +15,9 @@ import { WaitStrategy } from "../wait-strategy/wait-strategy";
 import { waitForContainer } from "../wait-for-container";
 import { getDockerClient } from "../docker/client/docker-client";
 import AsyncLock from "async-lock";
+import { getContainerArchive } from "../docker/functions/container/get-container-archive";
+import archiver from "archiver";
+import { putContainerArchive } from "../docker/functions/container/put-container-archive";
 
 export class StartedGenericContainer implements StartedTestContainer {
   private stoppedContainer?: StoppedTestContainer;
@@ -73,16 +76,18 @@ export class StartedGenericContainer implements StartedTestContainer {
       await this.containerIsStopping();
     }
 
-    const resolvedOptions: StopOptions = { timeout: 0, removeVolumes: true, ...options };
+    const resolvedOptions: StopOptions = { remove: true, timeout: 0, removeVolumes: true, ...options };
     await stopContainer(this.container, { timeout: resolvedOptions.timeout });
-    await removeContainer(this.container, { removeVolumes: resolvedOptions.removeVolumes });
+    if (resolvedOptions.remove) {
+      await removeContainer(this.container, { removeVolumes: resolvedOptions.removeVolumes });
+    }
     log.info(`Stopped container`, { containerId: this.container.id });
 
     if (this.containerIsStopped) {
       await this.containerIsStopped();
     }
 
-    return new StoppedGenericContainer();
+    return new StoppedGenericContainer(this.container);
   }
 
   public getHost(): string {
@@ -119,6 +124,31 @@ export class StartedGenericContainer implements StartedTestContainer {
 
   public getIpAddress(networkName: string): string {
     return this.inspectResult.networkSettings[networkName].ipAddress;
+  }
+
+  public async copyFilesToContainer(filesToCopy: FileToCopy[]): Promise<void> {
+    log.debug(`Copying files to container...`, { containerId: this.container.id });
+    const tar = archiver("tar");
+    filesToCopy.forEach(({ source, target }) => tar.file(source, { name: target }));
+    tar.finalize();
+    await putContainerArchive({ container: this.container, stream: tar, containerPath: "/" });
+    log.debug(`Copied files to container`, { containerId: this.container.id });
+  }
+
+  public async copyContentToContainer(contentsToCopy: ContentToCopy[]): Promise<void> {
+    log.debug(`Copying content to container...`, { containerId: this.container.id });
+    const tar = archiver("tar");
+    contentsToCopy.forEach(({ content, target }) => tar.append(content, { name: target }));
+    tar.finalize();
+    await putContainerArchive({ container: this.container, stream: tar, containerPath: "/" });
+    log.debug(`Copied content to container`, { containerId: this.container.id });
+  }
+
+  public async copyArchiveFromContainer(path: string): Promise<NodeJS.ReadableStream> {
+    log.debug(`Copying archive "${path}" from container...`, { containerId: this.container.id });
+    const stream = await getContainerArchive({ container: this.container, path: path });
+    log.debug(`Copied archive "${path}" from container`, { containerId: this.container.id });
+    return stream;
   }
 
   public async exec(command: string[]): Promise<ExecResult> {
