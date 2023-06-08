@@ -43,7 +43,7 @@
     "async-lock": "^1.4.0",
     "byline": "^5.0.0",
     "debug": "^4.3.4",
-    "docker-compose": "^0.23.19",
+    "docker-compose": "^0.24.1",
     "dockerode": "^3.3.5",
     "get-port": "^5.1.1",
     "node-fetch": "^2.6.9",
