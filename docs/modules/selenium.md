@@ -46,3 +46,29 @@ const container = await new SeleniumContainer("selenium/standalone-chrome:112.0"
 const stoppedContainer = await container.stop();
 await stoppedContainer.saveRecording("/tmp/videos/recording.mp4");
 ```
+
+## Troubleshooting
+
+### ARM architecture
+
+Selenium images are not available for ARM architectures. Luckily, there are equivalent, ARM compatible images available via [Seleniarm](https://hub.docker.com/u/seleniarm):
+
+```
+seleniarm/standalone-chromium:112.0
+seleniarm/standalone-firefox:112.0
+```
+
+```javascript
+const { SeleniumContainer } = require("testcontainers");
+
+const container = await new SeleniumContainer("seleniarm/standalone-chromium:112.0")
+  .start();
+
+const driver = new Builder()
+  .forBrowser(Browser.CHROME)
+  .usingServer(container.getServerUrl())
+  .build();
+
+await driver.get("https://testcontainers.com");
+await driver.quit();
+```
