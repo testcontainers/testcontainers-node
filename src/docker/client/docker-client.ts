@@ -44,7 +44,7 @@ export async function getDockerClient(): Promise<DockerClient> {
 
   for (const strategy of strategies) {
     try {
-      const dockerClient = await checkStrategy(strategy);
+      const dockerClient = await tryToCreateDockerClient(strategy);
       if (dockerClient) {
         logDockerClient(strategy.getName(), dockerClient);
         return dockerClient;
@@ -57,7 +57,7 @@ export async function getDockerClient(): Promise<DockerClient> {
   throw new Error("No Docker client strategy found");
 }
 
-async function checkStrategy(strategy: DockerClientStrategy): Promise<DockerClient | undefined> {
+async function tryToCreateDockerClient(strategy: DockerClientStrategy): Promise<DockerClient | undefined> {
   if (strategy.init) {
     await strategy.init();
   }
