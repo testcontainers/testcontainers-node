@@ -24,4 +24,4 @@ See [contributors](https://github.com/testcontainers/testcontainers-node/graphs/
 
 ----
 
-Join our [Slack workspace](https://slack.testcontainers.org/) | [Testcontainers OSS](https://www.testcontainers.org/) | [Testcontainers Cloud](https://www.testcontainers.cloud/)
+Join our [Slack workspace](https://slack.testcontainers.org/) | [Testcontainers OSS](https://java.testcontainers.org/) | [Testcontainers Cloud](https://www.testcontainers.cloud/)
