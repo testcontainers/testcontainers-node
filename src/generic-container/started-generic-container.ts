@@ -151,11 +151,16 @@ export class StartedGenericContainer implements StartedTestContainer {
     return stream;
   }
 
-  public async exec(command: string[]): Promise<ExecResult> {
+  public async exec(command: string | string[]): Promise<ExecResult> {
     const { dockerode, containerRuntime } = await getDockerClient();
-    log.debug(`Executing command "${command.join(" ")}"...`, { containerId: this.container.id });
-    const output = await execContainer(dockerode, containerRuntime, this.container, command);
-    log.debug(`Executed command "${command.join(" ")}"...`, { containerId: this.container.id });
+
+    const commandArr = Array.isArray(command) ? command : command.split(" ");
+    const commandStr = commandArr.join(" ");
+
+    log.debug(`Executing command "${commandStr}"...`, { containerId: this.container.id });
+    const output = await execContainer(dockerode, containerRuntime, this.container, commandArr);
+    log.debug(`Executed command "${commandStr}"...`, { containerId: this.container.id });
+
     return output;
   }
 
