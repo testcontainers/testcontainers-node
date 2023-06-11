@@ -46,7 +46,7 @@ describe("KafkaContainer", () => {
     const zooKeeperPort = 2181;
     const zookeeperContainer = await new GenericContainer("confluentinc/cp-zookeeper:5.5.4")
       .withNetwork(network)
-      .withNetworkAliases("zookeeper")
+      .withNetworkAliases(zooKeeperHost)
       .withEnvironment({ ZOOKEEPER_CLIENT_PORT: zooKeeperPort.toString() })
       .withExposedPorts(zooKeeperPort)
       .start();
@@ -113,6 +113,7 @@ describe("KafkaContainer", () => {
       });
       await kafkaContainer.stop();
     });
+    // }
 
     it(`should expose SASL_SSL listener over Docker network`, async () => {
       const network = await new Network().start();
