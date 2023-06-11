@@ -150,8 +150,8 @@ export class KafkaContainer extends GenericContainer {
 
     let bootstrapServers = `PLAINTEXT://${container.getHost()}:${container.getMappedPort(KAFKA_PORT)}`;
     if (this.saslSslConfig) {
-      if (this.networkMode && this.networkAliases.length > 0) {
-        bootstrapServers = `${bootstrapServers},SECURE://${this.networkAliases[0]}:${this.saslSslConfig.port}`;
+      if (this.networkMode) {
+        bootstrapServers = `${bootstrapServers},SECURE://${inspectResult.hostname}:${this.saslSslConfig.port}`;
       } else {
         bootstrapServers = `${bootstrapServers},SECURE://${container.getHost()}:${container.getMappedPort(
           this.saslSslConfig.port
