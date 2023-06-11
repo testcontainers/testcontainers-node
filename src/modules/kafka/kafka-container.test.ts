@@ -74,11 +74,11 @@ describe("KafkaContainer", () => {
     await originalKafkaContainer.stop();
   });
 
-  describe("when a set of certificates is provided", () => {
+  describe("when SASL SSL config listener provided", () => {
     const certificatesDir = path.resolve(__dirname, ".", "test-certs");
 
     // ssl {
-    it(`should expose SASL_SSL listener when configured`, async () => {
+    it(`should connect locally`, async () => {
       const kafkaContainer = await new KafkaContainer()
         .withSaslSslListener({
           port: 9094,
@@ -115,7 +115,7 @@ describe("KafkaContainer", () => {
     });
     // }
 
-    it(`should expose SASL_SSL listener over Docker network`, async () => {
+    it(`should connect within Docker network`, async () => {
       const network = await new Network().start();
 
       const kafkaContainer = await new KafkaContainer()
@@ -143,7 +143,7 @@ describe("KafkaContainer", () => {
 
       const kafkaCliContainer = await new GenericContainer(KAFKA_IMAGE)
         .withNetwork(network)
-        .withCommand(["sleep", "infinity"])
+        .withCommand(["bash", "-c", "echo 'START'; sleep infinity"])
         .withCopyFilesToContainer([
           {
             source: path.resolve(certificatesDir, "kafka.client.truststore.pem"),
@@ -161,7 +161,7 @@ describe("KafkaContainer", () => {
               sasl.jaas.config=org.apache.kafka.common.security.scram.ScramLoginModule required \\
                 username="app-user" \\
                 password="userPassword";
-        `,
+            `,
             target: "/etc/kafka/consumer.properties",
           },
         ])
