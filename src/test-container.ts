@@ -75,7 +75,7 @@ export interface StartedTestContainer {
   copyArchiveFromContainer(path: string): Promise<NodeJS.ReadableStream>;
   copyFilesToContainer(filesToCopy: FileToCopy[]): Promise<void>;
   copyContentToContainer(contentsToCopy: ContentToCopy[]): Promise<void>;
-  exec(command: string[]): Promise<ExecResult>;
+  exec(command: string | string[]): Promise<ExecResult>;
   logs(): Promise<Readable>;
 }
 

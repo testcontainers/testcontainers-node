@@ -43,45 +43,55 @@ export async function getDockerClient(): Promise<DockerClient> {
   ];
 
   for (const strategy of strategies) {
-    if (strategy.init) {
-      await strategy.init();
-    }
-
-    if (strategy.isApplicable()) {
-      log.debug(`Found Docker client strategy "${strategy.getName()}"`);
-      const { uri, dockerode, composeEnvironment, allowUserOverrides } = await strategy.getDockerClient();
-
-      log.debug(`Testing Docker client strategy "${uri}"...`);
-      if (await isDockerDaemonReachable(dockerode)) {
-        const info = await getSystemInfo(dockerode);
-        const containerRuntime: ContainerRuntime = uri.includes("podman.sock") ? "podman" : "docker";
-        const host = await resolveHost(
-          dockerode,
-          containerRuntime,
-          info.dockerInfo.indexServerAddress,
-          uri,
-          allowUserOverrides
-        );
-        const hostIps = await lookupHostIps(host);
-        dockerClient = {
-          uri,
-          containerRuntime,
-          host,
-          hostIps,
-          dockerode,
-          info,
-          composeEnvironment,
-          allowUserOverrides,
-        };
+    try {
+      const dockerClient = await tryToCreateDockerClient(strategy);
+      if (dockerClient) {
         logDockerClient(strategy.getName(), dockerClient);
         return dockerClient;
-      } else {
-        log.warn(`Docker client strategy "${strategy.getName()}" is not working`);
       }
+    } catch (err) {
+      log.warn(`Docker client strategy "${strategy.getName()}" threw: "${err}"`);
     }
   }
 
   throw new Error("No Docker client strategy found");
+}
+
+async function tryToCreateDockerClient(strategy: DockerClientStrategy): Promise<DockerClient | undefined> {
+  if (strategy.init) {
+    await strategy.init();
+  }
+
+  if (strategy.isApplicable()) {
+    const { uri, dockerode, composeEnvironment, allowUserOverrides } = await strategy.getDockerClient();
+
+    log.debug(`Testing Docker client strategy "${strategy.getName()}" with URI "${uri}"...`);
+    if (await isDockerDaemonReachable(dockerode)) {
+      const info = await getSystemInfo(dockerode);
+      const containerRuntime: ContainerRuntime = uri.includes("podman.sock") ? "podman" : "docker";
+      const host = await resolveHost(
+        dockerode,
+        containerRuntime,
+        info.dockerInfo.indexServerAddress,
+        uri,
+        allowUserOverrides
+      );
+      const hostIps = await lookupHostIps(host);
+      dockerClient = {
+        uri,
+        containerRuntime,
+        host,
+        hostIps,
+        dockerode,
+        info,
+        composeEnvironment,
+        allowUserOverrides,
+      };
+      return dockerClient;
+    } else {
+      log.warn(`Docker client strategy "${strategy.getName()}" does not work`);
+    }
+  }
 }
 
 async function isDockerDaemonReachable(dockerode: Dockerode): Promise<boolean> {
@@ -89,7 +99,7 @@ async function isDockerDaemonReachable(dockerode: Dockerode): Promise<boolean> {
     const response = await dockerode.ping();
     return (await streamToString(Readable.from(response))) === "OK";
   } catch (err) {
-    log.warn(`Docker daemon is not reachable: ${err}`);
+    log.warn(`Docker daemon is not reachable: "${err}"`);
     return false;
   }
 }
@@ -99,5 +109,5 @@ function logDockerClient(strategyName: string, { host, hostIps }: DockerClient) 
     return;
   }
   const formattedHostIps = hostIps.map((hostIp) => hostIp.address).join(", ");
-  log.info(`Using Docker client strategy "${strategyName}", Docker host "${host}" (${formattedHostIps})`);
+  log.info(`Docker client strategy "${strategyName}" works, ${host} (${formattedHostIps})`);
 }

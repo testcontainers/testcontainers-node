@@ -75,7 +75,7 @@ export class AbstractStartedContainer implements StartedTestContainer {
     return this.startedTestContainer.copyArchiveFromContainer(path);
   }
 
-  public exec(command: string[]): Promise<ExecResult> {
+  public exec(command: string | string[]): Promise<ExecResult> {
     return this.startedTestContainer.exec(command);
   }
 
