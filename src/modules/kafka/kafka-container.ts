@@ -147,11 +147,16 @@ export class KafkaContainer extends GenericContainer {
 
   private async updateAdvertisedListeners(container: StartedTestContainer, inspectResult: InspectResult) {
     const brokerAdvertisedListener = `BROKER://${inspectResult.hostname}:${KAFKA_BROKER_PORT}`;
+
     let bootstrapServers = `PLAINTEXT://${container.getHost()}:${container.getMappedPort(KAFKA_PORT)}`;
     if (this.saslSslConfig) {
-      bootstrapServers = `${bootstrapServers},SECURE://${container.getHost()}:${container.getMappedPort(
-        this.saslSslConfig.port
-      )}`;
+      if (this.networkMode) {
+        bootstrapServers = `${bootstrapServers},SECURE://${inspectResult.hostname}:${this.saslSslConfig.port}`;
+      } else {
+        bootstrapServers = `${bootstrapServers},SECURE://${container.getHost()}:${container.getMappedPort(
+          this.saslSslConfig.port
+        )}`;
+      }
     }
 
     const { output, exitCode } = await container.exec([

@@ -46,7 +46,7 @@ describe("KafkaContainer", () => {
     const zooKeeperPort = 2181;
     const zookeeperContainer = await new GenericContainer("confluentinc/cp-zookeeper:5.5.4")
       .withNetwork(network)
-      .withNetworkAliases("zookeeper")
+      .withNetworkAliases(zooKeeperHost)
       .withEnvironment({ ZOOKEEPER_CLIENT_PORT: zooKeeperPort.toString() })
       .withExposedPorts(zooKeeperPort)
       .start();
@@ -74,11 +74,11 @@ describe("KafkaContainer", () => {
     await originalKafkaContainer.stop();
   });
 
-  describe("when a set of certificates is provided", () => {
+  describe("when SASL SSL config listener provided", () => {
     const certificatesDir = path.resolve(__dirname, ".", "test-certs");
 
     // ssl {
-    it(`should expose SASL_SSL listener if configured`, async () => {
+    it(`should connect locally`, async () => {
       const kafkaContainer = await new KafkaContainer()
         .withSaslSslListener({
           port: 9094,
@@ -114,6 +114,72 @@ describe("KafkaContainer", () => {
       await kafkaContainer.stop();
     });
     // }
+
+    it(`should connect within Docker network`, async () => {
+      const network = await new Network().start();
+
+      const kafkaContainer = await new KafkaContainer()
+        .withNetwork(network)
+        .withNetworkAliases("kafka")
+        .withSaslSslListener({
+          port: 9094,
+          sasl: {
+            mechanism: "SCRAM-SHA-512",
+            user: {
+              name: "app-user",
+              password: "userPassword",
+            },
+          },
+          keystore: {
+            content: fs.readFileSync(path.resolve(certificatesDir, "kafka.server.keystore.pfx")),
+            passphrase: "serverKeystorePassword",
+          },
+          truststore: {
+            content: fs.readFileSync(path.resolve(certificatesDir, "kafka.server.truststore.pfx")),
+            passphrase: "serverTruststorePassword",
+          },
+        })
+        .start();
+
+      const kafkaCliContainer = await new GenericContainer(KAFKA_IMAGE)
+        .withNetwork(network)
+        .withCommand(["bash", "-c", "echo 'START'; sleep infinity"])
+        .withCopyFilesToContainer([
+          {
+            source: path.resolve(certificatesDir, "kafka.client.truststore.pem"),
+            target: "/truststore.pem",
+          },
+        ])
+        .withCopyContentToContainer([
+          {
+            content: `
+              security.protocol=SASL_SSL
+              ssl.truststore.location=/truststore.pem
+              ssl.truststore.type=PEM
+              ssl.endpoint.identification.algorithm=
+              sasl.mechanism=SCRAM-SHA-512
+              sasl.jaas.config=org.apache.kafka.common.security.scram.ScramLoginModule required \\
+                username="app-user" \\
+                password="userPassword";
+            `,
+            target: "/etc/kafka/consumer.properties",
+          },
+        ])
+        .start();
+
+      await kafkaCliContainer.exec(
+        "kafka-topics --create --topic test-topic --bootstrap-server kafka:9094 --command-config /etc/kafka/consumer.properties"
+      );
+      const { output, exitCode } = await kafkaCliContainer.exec(
+        "kafka-topics --list --bootstrap-server kafka:9094 --command-config /etc/kafka/consumer.properties"
+      );
+
+      expect(exitCode).toBe(0);
+      expect(output).toContain("test-topic");
+
+      await kafkaCliContainer.stop();
+      await kafkaContainer.stop();
+    });
   });
 
   const testPubSub = async (kafkaContainer: StartedTestContainer, additionalConfig: Partial<KafkaConfig> = {}) => {
