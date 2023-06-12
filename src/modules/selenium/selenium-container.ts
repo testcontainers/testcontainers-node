@@ -22,20 +22,15 @@ export class SeleniumContainer extends GenericContainer {
   }
 
   protected override async beforeContainerStarted(): Promise<void> {
-    this.withExposedPorts(SELENIUM_PORT, VNC_PORT)
-      .withSharedMemorySize(2 * 1024 * 1024 * 1024)
-      .withWaitStrategy(
-        Wait.forAll([
-          Wait.forListeningPorts(),
-          Wait.forHttp("/wd/hub/status", SELENIUM_PORT).forResponsePredicate((response) => {
-            try {
-              return JSON.parse(response).value.ready;
-            } catch {
-              return false;
-            }
-          }),
-        ])
-      );
+    this.withExposedPorts(SELENIUM_PORT, VNC_PORT).withWaitStrategy(
+      Wait.forHttp("/wd/hub/status", SELENIUM_PORT).forResponsePredicate((response) => {
+        try {
+          return JSON.parse(response).value.ready;
+        } catch {
+          return false;
+        }
+      })
+    );
   }
 
   public withRecording(): SeleniumRecordingContainer {
