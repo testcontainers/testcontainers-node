@@ -168,12 +168,10 @@ describe("KafkaContainer", () => {
         .start();
 
       await kafkaCliContainer.exec(
-        "kafka-topics --create --topic test-topic --bootstrap-server kafka:9094 --command-config /etc/kafka/consumer.properties".split(
-          " "
-        )
+        "kafka-topics --create --topic test-topic --bootstrap-server kafka:9094 --command-config /etc/kafka/consumer.properties"
       );
       const { output, exitCode } = await kafkaCliContainer.exec(
-        "kafka-topics --list --bootstrap-server kafka:9094 --command-config /etc/kafka/consumer.properties".split(" ")
+        "kafka-topics --list --bootstrap-server kafka:9094 --command-config /etc/kafka/consumer.properties"
       );
 
       expect(exitCode).toBe(0);
