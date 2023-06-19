@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   windows:
-    runs-on: windows-2022
+    runs-on: [self-hosted, Windows, X64]
     steps:
       - name: Code checkout
         uses: actions/checkout@v3
