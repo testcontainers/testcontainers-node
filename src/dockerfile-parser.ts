@@ -1,4 +1,3 @@
-import { EOL } from "os";
 import { promises as fs } from "fs";
 import { log } from "./logger";
 import { DockerImageName } from "./docker-image-name";
@@ -21,7 +20,7 @@ export const getDockerfileImages = async (dockerfile: string, buildArgs: BuildAr
 async function parseImages(dockerfile: string): Promise<string[]> {
   return Array.from(
     (await fs.readFile(dockerfile, "utf8"))
-      .split(EOL)
+      .split(/\r?\n/)
       .filter((line) => line.toUpperCase().startsWith("FROM"))
       .map((line) => line.split(" ").filter(isNotEmptyString)[1])
       .reduce((prev, next) => prev.add(next), new Set<string>())
