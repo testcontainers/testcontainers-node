@@ -14,5 +14,5 @@ COPY index.js .
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 CMD ["node", "index.js"]
 
-HEALTHCHECK --start-period=60s --interval=1s --timeout=3s --retries=3 \
+HEALTHCHECK --start-period=10s --interval=1s --timeout=1s --retries=1 \
     CMD curl -f http://localhost:8080/hello-world || exit 1

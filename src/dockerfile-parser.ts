@@ -11,7 +11,7 @@ export const getDockerfileImages = async (dockerfile: string, buildArgs: BuildAr
   try {
     return (await parseImages(dockerfile))
       .map((line) => line.replace(buildArgRegex, (_, arg) => buildArgs[arg] ?? ""))
-      .map((line) => DockerImageName.fromString(line));
+      .map((line) => DockerImageName.fromString(line.trim()));
   } catch (err) {
     log.error(`Failed to read Dockerfile "${dockerfile}": ${err}`);
     throw err;

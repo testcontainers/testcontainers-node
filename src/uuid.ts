@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import { hash } from "./hash";
 
 export interface Uuid {
   nextUuid(): string;
@@ -6,6 +7,6 @@ export interface Uuid {
 
 export class RandomUuid implements Uuid {
   public nextUuid(): string {
-    return crypto.createHash("md5").update(crypto.randomUUID()).digest("hex").substring(0, 12);
+    return hash(crypto.randomUUID()).substring(0, 12);
   }
 }
