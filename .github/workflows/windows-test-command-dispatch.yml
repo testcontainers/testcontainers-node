@@ -15,4 +15,5 @@ jobs:
           token: ${{ secrets.REPO_TOKEN }}
           commands: windows-test
           issue-type: pull-request
+          permission: maintain
           reactions: false
