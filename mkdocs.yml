@@ -17,6 +17,7 @@ theme:
 
 extra_css:
   - 'site/css/extra.css'
+  - 'site/css/tc-header.css'
 
 plugins:
   - search
