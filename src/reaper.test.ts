@@ -83,11 +83,11 @@ describe("Reaper", () => {
       const imageName = `${new RandomUuid().nextUuid()}:${new RandomUuid().nextUuid()}`;
       const context = path.resolve(path.resolve(fixtures, "docker", "docker"));
       await GenericContainer.fromDockerfile(context).build(imageName);
+      expect(await checkImageExists(imageName)).toBe(true);
 
       const reaperContainerId = await getReaperContainerId();
       await stopReaper();
 
-      expect(await checkImageExists(imageName)).toBe(true);
       await waitForExpect(async () => {
         expect(await checkImageExists(imageName)).toBe(false);
         expect(await getContainerIds()).not.toContain(reaperContainerId);

@@ -8,6 +8,6 @@ services:
     healthcheck:
       test: "curl -f http://localhost:8080/hello-world || exit 1"
       interval: 1s
-      timeout: 3s
-      retries: 10
+      timeout: 1s
+      retries: 1
       start_period: 10s
