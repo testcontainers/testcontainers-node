@@ -21,7 +21,7 @@ export class TestcontainersHostStrategy implements DockerClientStrategy {
     dockerOptions.host = hostname;
     dockerOptions.port = port;
 
-    const dockerode = new Dockerode(dockerOptions);
+    // const dockerode = new Dockerode(dockerOptions);
     // dockerOptions.headers = { "x-tc-sid": await getSessionId(dockerode) };
 
     return {
