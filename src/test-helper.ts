@@ -1,5 +1,4 @@
 import { Readable } from "stream";
-import { ReaperInstance } from "./reaper";
 import { getDockerClient } from "./docker/client/docker-client";
 import { StartedDockerComposeEnvironment } from "./docker-compose-environment/started-docker-compose-environment";
 import fetch from "node-fetch";
@@ -71,14 +70,6 @@ export const getVolumeNames = async (): Promise<string[]> => {
   const { dockerode } = await getDockerClient();
   const { Volumes: volumes } = await dockerode.listVolumes();
   return volumes.map((volume) => volume.Name);
-};
-
-export const getReaperContainerId = async (): Promise<string> => {
-  return (await ReaperInstance.getInstance()).getContainerId();
-};
-
-export const stopReaper = async (): Promise<void> => {
-  return ReaperInstance.stopInstance();
 };
 
 export const composeContainerName = async (serviceName: string, index = 1): Promise<string> => {

@@ -48,6 +48,7 @@ export class GenericContainer implements TestContainer {
     return new GenericContainerBuilder(context, dockerfileName);
   }
 
+  private sessionId?: string;
   protected opts: CreateContainerOptions;
   protected startupTimeout?: number;
   protected waitStrategy: WaitStrategy = Wait.forListeningPorts();
@@ -82,7 +83,8 @@ export class GenericContainer implements TestContainer {
     });
 
     if (!this.opts.reusable && !this.opts.imageName.isReaper()) {
-      await ReaperInstance.getInstance();
+      const reaper = await ReaperInstance.getInstance();
+      this.sessionId = reaper.getSessionId();
     }
 
     if (this.beforeContainerStarted) {
@@ -162,7 +164,7 @@ export class GenericContainer implements TestContainer {
   }
 
   private async startContainer(createContainerOptions: CreateContainerOptions): Promise<StartedTestContainer> {
-    const container = await createContainer(createContainerOptions);
+    const container = await createContainer(this.sessionId, createContainerOptions);
 
     if (!this.opts.imageName.isHelperContainer() && PortForwarderInstance.isRunning()) {
       const portForwarder = await PortForwarderInstance.getInstance();

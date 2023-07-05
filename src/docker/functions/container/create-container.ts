@@ -34,7 +34,10 @@ export type CreateContainerOptions = {
   sharedMemorySize?: number;
 };
 
-export const createContainer = async (options: CreateContainerOptions): Promise<Dockerode.Container> => {
+export const createContainer = async (
+  sessionId: string | undefined,
+  options: CreateContainerOptions
+): Promise<Dockerode.Container> => {
   try {
     log.info(`Creating container for image "${options.imageName}"...`);
     const { dockerode } = await getDockerClient();
@@ -47,7 +50,7 @@ export const createContainer = async (options: CreateContainerOptions): Promise<
       ExposedPorts: getExposedPorts(options.exposedPorts),
       Cmd: options.command,
       Entrypoint: options.entrypoint,
-      Labels: createLabels(options.reusable, options.imageName, options.labels),
+      Labels: createLabels(sessionId, options.reusable, options.labels),
       Healthcheck: getHealthCheck(options.healthCheck),
       WorkingDir: options.workingDir,
       HostConfig: {

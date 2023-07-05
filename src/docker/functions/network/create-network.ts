@@ -15,7 +15,7 @@ export type CreateNetworkOptions = {
   options?: { [key: string]: string };
 };
 
-export const createNetwork = async (options: CreateNetworkOptions): Promise<string> => {
+export const createNetwork = async (sessionId: string, options: CreateNetworkOptions): Promise<string> => {
   try {
     log.info(`Creating network "${options.name}"...`);
     const { dockerode } = await getDockerClient();
@@ -29,7 +29,7 @@ export const createNetwork = async (options: CreateNetworkOptions): Promise<stri
       Ingress: options.ingress,
       EnableIPv6: options.enableIPv6,
       Options: options.options,
-      Labels: { ...options.labels, ...createLabels(false) },
+      Labels: { ...options.labels, ...createLabels(sessionId, false) },
     });
     log.info(`Created network "${options.name}"`);
 

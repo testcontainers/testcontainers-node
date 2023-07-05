@@ -1,6 +1,5 @@
 import { getDockerClientConfig } from "../docker-client-config";
 import Dockerode, { DockerOptions } from "dockerode";
-import { sessionId } from "../../session-id";
 import { URL } from "url";
 import { promises as fs } from "fs";
 import path from "path";
@@ -22,7 +21,8 @@ export class ConfigurationStrategy implements DockerClientStrategy {
   }
 
   async getDockerClient(): Promise<DockerClientStrategyResult> {
-    const dockerOptions: DockerOptions = { headers: { "x-tc-sid": sessionId } };
+    const dockerOptions: DockerOptions = {};
+    // const dockerOptions: DockerOptions = { headers: { "x-tc-sid": sessionId } };
 
     const { pathname, hostname, port } = new URL(this.dockerHost);
     if (hostname !== "") {

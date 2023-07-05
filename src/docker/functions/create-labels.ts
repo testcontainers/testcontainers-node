@@ -1,19 +1,13 @@
-import { DockerImageName } from "../../docker-image-name";
-import { sessionId } from "../session-id";
 import {
   LABEL_TESTCONTAINERS,
   LABEL_TESTCONTAINERS_LANG,
-  LABEL_TESTCONTAINERS_VERSION,
   LABEL_TESTCONTAINERS_SESSION_ID,
+  LABEL_TESTCONTAINERS_VERSION,
 } from "../../labels";
 import { version } from "../../../package.json";
 import { Labels } from "../types";
 
-export const createLabels = (
-  reusable: boolean,
-  dockerImageName?: DockerImageName,
-  extraLabels: Labels = {}
-): Labels => {
+export const createLabels = (sessionId: string | undefined, reusable: boolean, extraLabels: Labels = {}): Labels => {
   const labels: Labels = {
     ...extraLabels,
     [LABEL_TESTCONTAINERS]: "true",
@@ -21,7 +15,7 @@ export const createLabels = (
     [LABEL_TESTCONTAINERS_VERSION]: version,
   };
 
-  if (!reusable) {
+  if (!reusable && sessionId) {
     labels[LABEL_TESTCONTAINERS_SESSION_ID] = sessionId;
   }
 

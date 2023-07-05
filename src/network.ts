@@ -25,10 +25,10 @@ export class Network {
       ...this.createNetworkOptions,
     };
 
-    await ReaperInstance.getInstance();
+    const reaper = await ReaperInstance.getInstance();
 
     log.info(`Starting network "${name}"...`);
-    const id = await createNetwork(options);
+    const id = await createNetwork(reaper.getSessionId(), options);
     log.info(`Started network "${name}" with ID "${id}"`);
 
     return new StartedNetwork(id, options);
