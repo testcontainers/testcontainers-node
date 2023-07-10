@@ -46,6 +46,7 @@
     "docker-compose": "^0.24.1",
     "dockerode": "^3.3.5",
     "get-port": "^5.1.1",
+    "mqtt": "^4.3.7",
     "node-fetch": "^2.6.11",
     "properties-reader": "^2.2.0",
     "ssh-remote-port-forward": "^1.0.4",
