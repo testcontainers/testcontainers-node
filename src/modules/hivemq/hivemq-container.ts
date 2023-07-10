@@ -9,15 +9,11 @@ const START_LOG_MESSAGE_REGEX = /(.*)Started HiveMQ in(.*)/i;
 const HIVEMQ_BASE_PATH = "/opt/hivemq";
 const MQTT_PORT = 1883;
 
-export enum HiveMQDockerImageName {
-  COMMUNITY_EDITION = "hivemq/hivemq-ce",
-}
-
 export class HiveMQContainer extends GenericContainer {
   private temporaryFileSystemOptions = new Map<string, string>();
 
-  constructor() {
-    super(HiveMQDockerImageName.COMMUNITY_EDITION);
+  constructor(image = "hivemq/hivemq-ce:2023.5") {
+    super(image);
 
     this.withExposedPorts(MQTT_PORT)
       .withWaitStrategy(Wait.forLogMessage(START_LOG_MESSAGE_REGEX))
