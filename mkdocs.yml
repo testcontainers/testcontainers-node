@@ -42,6 +42,7 @@ nav:
   - Modules:
       - ArangoDB: modules/arangodb.md
       - Elastic Search: modules/elastic-search.md
+      - HiveMQ: modules/hivemq.md
       - Kafka: modules/kafka.md
       - MongoDB: modules/mongodb.md
       - MySQL: modules/mysql.md
