@@ -17,7 +17,7 @@ describe("HiveMQContainer", () => {
     });
 
     testMqttClient.on("connect", () => {
-      testMqttClient.subscribe("test", function (error) {
+      testMqttClient.subscribe("test", (error) => {
         if (!error) {
           testMqttClient.publish("test", "Test Message");
         }
