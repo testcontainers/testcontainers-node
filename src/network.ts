@@ -1,8 +1,8 @@
 import { RandomUuid, Uuid } from "./uuid";
 import { log } from "./logger";
-import { ReaperInstance } from "./reaper";
 import { createNetwork, CreateNetworkOptions } from "./docker/functions/network/create-network";
 import { removeNetwork } from "./docker/functions/network/remove-network";
+import { getDockerClient } from "./docker/client/docker-client";
 
 export class Network {
   constructor(
@@ -25,10 +25,9 @@ export class Network {
       ...this.createNetworkOptions,
     };
 
-    const reaper = await ReaperInstance.getInstance();
-
     log.info(`Starting network "${name}"...`);
-    const id = await createNetwork(reaper.getSessionId(), options);
+    const { sessionId } = await getDockerClient();
+    const id = await createNetwork(sessionId, options);
     log.info(`Started network "${name}" with ID "${id}"`);
 
     return new StartedNetwork(id, options);

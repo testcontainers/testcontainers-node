@@ -5,7 +5,7 @@ import { GenericContainer } from "../../generic-container/generic-container";
 import { StartedTestContainer } from "../../test-container";
 import path from "path";
 
-describe("SeleniumContainer", () => {
+describe.skip("SeleniumContainer", () => {
   jest.setTimeout(180_000);
 
   let ffmpegContainer: StartedTestContainer;

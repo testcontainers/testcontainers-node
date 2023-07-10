@@ -84,8 +84,6 @@ export class DockerComposeEnvironment {
   public async up(services?: Array<string>): Promise<StartedDockerComposeEnvironment> {
     log.info(`Starting DockerCompose environment "${this.projectName}"...`);
 
-    (await ReaperInstance.getInstance()).addProject(this.projectName);
-
     const options = {
       filePath: this.composeFilePath,
       files: this.composeFiles,
@@ -110,6 +108,7 @@ export class DockerComposeEnvironment {
       await dockerComposePull(options, services);
     }
     await dockerComposeUp({ ...options, commandOptions, composeOptions, environment: this.environment }, services);
+    (await ReaperInstance.getInstance()).addProject(this.projectName);
 
     const startedContainers = (await listContainers()).filter(
       (container) => container.Labels["com.docker.compose.project"] === this.projectName

@@ -2,8 +2,7 @@ import { isDefined } from "../../../type-guards";
 import { existsSync } from "fs";
 import path from "path";
 import os from "os";
-import Dockerode from "dockerode";
-import { DockerClientStrategyResult } from "../docker-client";
+import { DockerClientStrategyResult } from "../docker-client-types";
 import { DockerClientStrategy } from "./docker-client-strategy";
 
 export class RootlessUnixSocketStrategy implements DockerClientStrategy {
@@ -58,7 +57,7 @@ export class RootlessUnixSocketStrategy implements DockerClientStrategy {
   async getDockerClient(): Promise<DockerClientStrategyResult> {
     return {
       uri: `unix://${this.socketPath}`,
-      dockerode: new Dockerode({ socketPath: this.socketPath }),
+      dockerOptions: { socketPath: this.socketPath },
       composeEnvironment: {},
       allowUserOverrides: true,
     };

@@ -1,7 +1,7 @@
 import Dockerode from "dockerode";
 import { log } from "../../logger";
-import { HostIps, lookupHostIps } from "../lookup-host-ips";
-import { getSystemInfo, SystemInfo } from "../../system-info";
+import { lookupHostIps } from "../lookup-host-ips";
+import { getSystemInfo } from "../../system-info";
 import { RootlessUnixSocketStrategy } from "./strategy/rootless-unix-socket-strategy";
 import { streamToString } from "../../stream-utils";
 import { Readable } from "stream";
@@ -12,20 +12,12 @@ import { UnixSocketStrategy } from "./strategy/unix-socket-strategy";
 import { NpipeSocketStrategy } from "./strategy/npipe-socket-strategy";
 import { ContainerRuntime } from "../types";
 import { TestcontainersHostStrategy } from "./strategy/testcontainers-host-strategy";
-
-export type DockerClient = DockerClientStrategyResult & {
-  host: string;
-  containerRuntime: ContainerRuntime;
-  hostIps: HostIps;
-  info: SystemInfo;
-};
-
-export type DockerClientStrategyResult = {
-  uri: string;
-  dockerode: Dockerode;
-  composeEnvironment: NodeJS.ProcessEnv;
-  allowUserOverrides: boolean;
-};
+import { ReaperInstance } from "../../reaper";
+import { getSessionId } from "../../session-id";
+import { RandomUuid } from "../../uuid";
+import { DockerClient, UnitialisedDockerClient } from "./docker-client-types";
+import { writeFile } from "fs/promises";
+import lockFile from "proper-lockfile";
 
 let dockerClient: DockerClient;
 
@@ -44,9 +36,28 @@ export async function getDockerClient(): Promise<DockerClient> {
 
   for (const strategy of strategies) {
     try {
-      const dockerClient = await tryToCreateDockerClient(strategy);
-      if (dockerClient) {
-        logDockerClient(strategy.getName(), dockerClient);
+      const uninitDockerClient = await tryToCreateDockerClient(strategy);
+      if (uninitDockerClient) {
+        logDockerClient(strategy.getName(), uninitDockerClient);
+
+        let releaseLock;
+        try {
+          await writeFile(__dirname + "/tc.lock", "");
+          releaseLock = await lockFile.lock(__dirname + "/tc.lock", { retries: 10 });
+          const sessionId = await getSessionId(new Dockerode(uninitDockerClient.dockerOptions), new RandomUuid());
+          uninitDockerClient.dockerOptions = {
+            ...uninitDockerClient.dockerOptions,
+            headers: { "x-tc-sid": sessionId.sessionId },
+          };
+          uninitDockerClient.dockerode = new Dockerode(uninitDockerClient.dockerOptions);
+          dockerClient = { ...uninitDockerClient, sessionId: sessionId.sessionId };
+          await ReaperInstance.createInstance(dockerClient, sessionId);
+        } finally {
+          if (releaseLock) {
+            await releaseLock();
+          }
+        }
+
         return dockerClient;
       }
     } catch (err) {
@@ -57,15 +68,16 @@ export async function getDockerClient(): Promise<DockerClient> {
   throw new Error("No Docker client strategy found");
 }
 
-async function tryToCreateDockerClient(strategy: DockerClientStrategy): Promise<DockerClient | undefined> {
+async function tryToCreateDockerClient(strategy: DockerClientStrategy): Promise<UnitialisedDockerClient | undefined> {
   if (strategy.init) {
     await strategy.init();
   }
 
   if (strategy.isApplicable()) {
-    const { uri, dockerode, composeEnvironment, allowUserOverrides } = await strategy.getDockerClient();
+    const { uri, dockerOptions, composeEnvironment, allowUserOverrides } = await strategy.getDockerClient();
 
     log.debug(`Testing Docker client strategy "${strategy.getName()}" with URI "${uri}"...`);
+    const dockerode = new Dockerode(dockerOptions);
     if (await isDockerDaemonReachable(dockerode)) {
       const info = await getSystemInfo(dockerode);
       const containerRuntime: ContainerRuntime = uri.includes("podman.sock") ? "podman" : "docker";
@@ -77,17 +89,17 @@ async function tryToCreateDockerClient(strategy: DockerClientStrategy): Promise<
         allowUserOverrides
       );
       const hostIps = await lookupHostIps(host);
-      dockerClient = {
+      return {
         uri,
         containerRuntime,
         host,
         hostIps,
-        dockerode,
+        dockerOptions,
         info,
         composeEnvironment,
         allowUserOverrides,
+        dockerode,
       };
-      return dockerClient;
     } else {
       log.warn(`Docker client strategy "${strategy.getName()}" does not work`);
     }
@@ -104,7 +116,7 @@ async function isDockerDaemonReachable(dockerode: Dockerode): Promise<boolean> {
   }
 }
 
-function logDockerClient(strategyName: string, { host, hostIps }: DockerClient) {
+function logDockerClient(strategyName: string, { host, hostIps }: UnitialisedDockerClient) {
   if (!log.enabled()) {
     return;
   }

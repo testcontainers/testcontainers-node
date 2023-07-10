@@ -4,7 +4,6 @@ import { BoundPorts } from "../bound-ports";
 import { containerLog, log } from "../logger";
 import { PortWithOptionalBinding } from "../port";
 import { DefaultPullPolicy, PullPolicy } from "../pull-policy";
-import { ReaperInstance } from "../reaper";
 import { DockerImageName } from "../docker-image-name";
 import { StartedTestContainer, TestContainer } from "../test-container";
 import { WaitStrategy } from "../wait-strategy/wait-strategy";
@@ -48,7 +47,6 @@ export class GenericContainer implements TestContainer {
     return new GenericContainerBuilder(context, dockerfileName);
   }
 
-  private sessionId?: string;
   protected opts: CreateContainerOptions;
   protected startupTimeout?: number;
   protected waitStrategy: WaitStrategy = Wait.forListeningPorts();
@@ -81,11 +79,6 @@ export class GenericContainer implements TestContainer {
       imageName: this.opts.imageName,
       force: this.pullPolicy.shouldPull(),
     });
-
-    if (!this.opts.reusable && !this.opts.imageName.isReaper()) {
-      const reaper = await ReaperInstance.getInstance();
-      this.sessionId = reaper.getSessionId();
-    }
 
     if (this.beforeContainerStarted) {
       await this.beforeContainerStarted();
@@ -164,7 +157,8 @@ export class GenericContainer implements TestContainer {
   }
 
   private async startContainer(createContainerOptions: CreateContainerOptions): Promise<StartedTestContainer> {
-    const container = await createContainer(this.sessionId, createContainerOptions);
+    const { sessionId } = await getDockerClient();
+    const container = await createContainer(sessionId, createContainerOptions);
 
     if (!this.opts.imageName.isHelperContainer() && PortForwarderInstance.isRunning()) {
       const portForwarder = await PortForwarderInstance.getInstance();

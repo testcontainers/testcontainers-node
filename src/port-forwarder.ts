@@ -6,7 +6,6 @@ import { StartedTestContainer } from "./test-container";
 import { RandomUuid } from "./uuid";
 import { getDockerClient } from "./docker/client/docker-client";
 import { SSHD_IMAGE } from "./images";
-import { ReaperInstance } from "./reaper";
 
 export class PortForwarder {
   constructor(private readonly sshConnection: SshConnection, private readonly container: StartedTestContainer) {}
@@ -54,10 +53,9 @@ export class PortForwarderInstance {
       ? { container: 22, host: Number(process.env["TESTCONTAINERS_SSHD_PORT"]) }
       : 22;
 
-    const reaper = await ReaperInstance.getInstance();
-
+    const { sessionId } = await getDockerClient();
     const container = await new GenericContainer(SSHD_IMAGE)
-      .withName(`testcontainers-port-forwarder-${reaper.getSessionId()}`)
+      .withName(`testcontainers-port-forwarder-${sessionId}`)
       .withExposedPorts(containerPort)
       .withEnvironment({ PASSWORD: password })
       .withCommand([

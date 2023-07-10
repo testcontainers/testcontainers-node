@@ -1,7 +1,7 @@
 import { getDockerClientConfig } from "../docker-client-config";
-import Dockerode, { DockerOptions } from "dockerode";
+import { DockerOptions } from "dockerode";
 import { URL } from "url";
-import { DockerClientStrategyResult } from "../docker-client";
+import { DockerClientStrategyResult } from "../docker-client-types";
 import { DockerClientStrategy } from "./docker-client-strategy";
 
 export class TestcontainersHostStrategy implements DockerClientStrategy {
@@ -21,12 +21,9 @@ export class TestcontainersHostStrategy implements DockerClientStrategy {
     dockerOptions.host = hostname;
     dockerOptions.port = port;
 
-    // const dockerode = new Dockerode(dockerOptions);
-    // dockerOptions.headers = { "x-tc-sid": await getSessionId(dockerode) };
-
     return {
       uri: this.host,
-      dockerode: new Dockerode(dockerOptions),
+      dockerOptions,
       composeEnvironment: {
         DOCKER_HOST: this.host,
       },
