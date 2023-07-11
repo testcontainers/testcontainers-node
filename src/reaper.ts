@@ -10,10 +10,8 @@ import { getRemoteDockerUnixSocketPath } from "./docker/remote-docker-unix-socke
 import { PartialDockerClient } from "./docker/client/docker-client-types";
 import Dockerode from "dockerode";
 
-export interface Reaper {
+interface Reaper {
   addProject(projectName: string): void;
-
-  stop(): void;
 }
 
 class RealReaper implements Reaper {
@@ -22,18 +20,10 @@ class RealReaper implements Reaper {
   public addProject(projectName: string): void {
     this.socket.write(`label=com.docker.compose.project=${projectName}\r\n`);
   }
-
-  public stop(): void {
-    this.socket.end();
-  }
 }
 
 class DisabledReaper implements Reaper {
   public addProject(): void {
-    // noop
-  }
-
-  public stop(): void {
     // noop
   }
 }
@@ -57,14 +47,6 @@ export class ReaperInstance {
   public static async getInstance(): Promise<Reaper> {
     return this.instance;
   }
-
-  // public static async stopInstance(): Promise<void> {
-  //   if (this.instance) {
-  //     const reaper = await this.instance;
-  //     reaper.stop();
-  //     this.instance = undefined;
-  //   }
-  // }
 
   private static isEnabled(): boolean {
     return process.env.TESTCONTAINERS_RYUK_DISABLED !== "true";

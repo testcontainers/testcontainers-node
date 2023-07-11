@@ -39,6 +39,7 @@ import { waitForContainer } from "../wait-for-container";
 import { initCreateContainerOptions } from "./create-container-options";
 import { Wait } from "../wait-strategy/wait";
 import { Readable } from "stream";
+import { DockerClient } from "../docker/client/docker-client-types";
 
 const reusableContainerCreationLock = new AsyncLock();
 
@@ -73,9 +74,9 @@ export class GenericContainer implements TestContainer {
   protected containerStarting?(inspectResult: InspectResult, reused: boolean): Promise<void>;
 
   public async start(): Promise<StartedTestContainer> {
-    const { dockerode, info } = await getDockerClient();
+    const dockerClient = await getDockerClient();
 
-    await pullImage(dockerode, info.dockerInfo.indexServerAddress, {
+    await pullImage(dockerClient.dockerode, dockerClient.info.dockerInfo.indexServerAddress, {
       imageName: this.opts.imageName,
       force: this.pullPolicy.shouldPull(),
     });
@@ -90,44 +91,33 @@ export class GenericContainer implements TestContainer {
       const portForwarder = await PortForwarderInstance.getInstance();
       this.opts.extraHosts.push({ host: "host.testcontainers.internal", ipAddress: portForwarder.getIpAddress() });
     }
-
-    if (this.networkAliases.length > 0) {
-      this.opts.networkMode = undefined;
-    } else {
-      this.opts.networkMode = this.networkMode;
-    }
+    this.opts.networkMode = this.networkAliases.length > 0 ? undefined : this.networkMode;
 
     if (this.opts.reusable) {
-      const containerHash = hash(JSON.stringify(this.opts));
-      this.opts.labels = {
-        ...this.opts.labels,
-        [LABEL_TESTCONTAINERS_CONTAINER_HASH]: containerHash,
-      };
-      log.debug(`Container reuse has been enabled with hash "${containerHash}"`);
-
-      // We might have several async processes try to create a reusable container
-      // at once, to avoid possibly creating too many of these, use a lock
-      // on the containerHash, this ensures that only single reusable instance is created
-      return reusableContainerCreationLock.acquire(containerHash, async () => {
-        const container = await getContainerByHash(containerHash);
-
-        if (container !== undefined) {
-          log.debug(`Found container to reuse with hash "${containerHash}"`, { containerId: container.id });
-          return this.reuseContainer(container);
-        } else {
-          log.debug("No container found to reuse");
-          return this.startContainer(this.opts);
-        }
-      });
-    } else {
-      return this.startContainer(this.opts);
+      return this.reuseOrStartContainer(dockerClient);
     }
+    return this.startContainer(dockerClient, this.opts);
   }
 
-  private async reuseContainer(container: Dockerode.Container) {
-    const { host, hostIps } = await getDockerClient();
+  private async reuseOrStartContainer(dockerClient: DockerClient) {
+    const containerHash = hash(JSON.stringify(this.opts));
+    this.opts.labels = { ...this.opts.labels, [LABEL_TESTCONTAINERS_CONTAINER_HASH]: containerHash };
+    log.debug(`Container reuse has been enabled with hash "${containerHash}"`);
+
+    return reusableContainerCreationLock.acquire(containerHash, async () => {
+      const container = await getContainerByHash(containerHash);
+      if (container !== undefined) {
+        log.debug(`Found container to reuse with hash "${containerHash}"`, { containerId: container.id });
+        return this.reuseContainer(dockerClient, container);
+      }
+      log.debug("No container found to reuse");
+      return this.startContainer(dockerClient, this.opts);
+    });
+  }
+
+  private async reuseContainer(dockerClient: DockerClient, container: Dockerode.Container) {
     const inspectResult = await inspectContainer(container);
-    const boundPorts = BoundPorts.fromInspectResult(hostIps, inspectResult).filter(this.opts.exposedPorts);
+    const boundPorts = BoundPorts.fromInspectResult(dockerClient.hostIps, inspectResult).filter(this.opts.exposedPorts);
     if (this.startupTimeout !== undefined) {
       this.waitStrategy.withStartupTimeout(this.startupTimeout);
     }
@@ -140,7 +130,7 @@ export class GenericContainer implements TestContainer {
 
     const startedContainer = new StartedGenericContainer(
       container,
-      host,
+      dockerClient.host,
       inspectResult,
       boundPorts,
       inspectResult.name,
@@ -156,22 +146,14 @@ export class GenericContainer implements TestContainer {
     return startedContainer;
   }
 
-  private async startContainer(createContainerOptions: CreateContainerOptions): Promise<StartedTestContainer> {
-    const { sessionId } = await getDockerClient();
-    const container = await createContainer(sessionId, createContainerOptions);
+  private async startContainer(
+    dockerClient: DockerClient,
+    createContainerOptions: CreateContainerOptions
+  ): Promise<StartedTestContainer> {
+    const container = await createContainer(dockerClient.sessionId, createContainerOptions);
 
     if (!this.opts.imageName.isHelperContainer() && PortForwarderInstance.isRunning()) {
-      const portForwarder = await PortForwarderInstance.getInstance();
-      const portForwarderNetworkId = portForwarder.getNetworkId();
-      const excludedNetworks = [portForwarderNetworkId, "none", "host"];
-
-      if (!this.networkMode || !excludedNetworks.includes(this.networkMode)) {
-        await connectNetwork({
-          containerId: container.id,
-          networkId: portForwarderNetworkId,
-          networkAliases: [],
-        });
-      }
+      await this.connectContainerToPortForwarder(container);
     }
 
     if (this.networkMode && this.networkAliases.length > 0) {
@@ -195,9 +177,8 @@ export class GenericContainer implements TestContainer {
     await startContainer(container);
     log.info(`Started container for image "${this.opts.imageName}"`, { containerId: container.id });
 
-    const { host, hostIps } = await getDockerClient();
     const inspectResult = await inspectContainer(container);
-    const boundPorts = BoundPorts.fromInspectResult(hostIps, inspectResult).filter(this.opts.exposedPorts);
+    const boundPorts = BoundPorts.fromInspectResult(dockerClient.hostIps, inspectResult).filter(this.opts.exposedPorts);
     if (this.startupTimeout !== undefined) {
       this.waitStrategy.withStartupTimeout(this.startupTimeout);
     }
@@ -224,7 +205,7 @@ export class GenericContainer implements TestContainer {
 
     const startedContainer = new StartedGenericContainer(
       container,
-      host,
+      dockerClient.host,
       inspectResult,
       boundPorts,
       inspectResult.name,
@@ -238,6 +219,20 @@ export class GenericContainer implements TestContainer {
     }
 
     return startedContainer;
+  }
+
+  private async connectContainerToPortForwarder(container: Dockerode.Container) {
+    const portForwarder = await PortForwarderInstance.getInstance();
+    const portForwarderNetworkId = portForwarder.getNetworkId();
+    const excludedNetworks = [portForwarderNetworkId, "none", "host"];
+
+    if (!this.networkMode || !excludedNetworks.includes(this.networkMode)) {
+      await connectNetwork({
+        containerId: container.id,
+        networkId: portForwarderNetworkId,
+        networkAliases: [],
+      });
+    }
   }
 
   /**
