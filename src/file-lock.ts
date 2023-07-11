@@ -1,12 +1,12 @@
 import path from "path";
 import tmp from "tmp";
-import { open } from "fs/promises";
+import { writeFile } from "fs/promises";
 import { log } from "./logger";
 import lockFile from "proper-lockfile";
 
 export async function withFileLock<T>(fileName: string, fn: () => T): Promise<T> {
   const file = path.resolve(tmp.tmpdir, fileName);
-  await open(file, "w");
+  await writeFile(file, "");
 
   let releaseLockFn;
   try {
