@@ -13,7 +13,6 @@ import { NpipeSocketStrategy } from "./strategy/npipe-socket-strategy";
 import { ContainerRuntime } from "../types";
 import { TestcontainersHostStrategy } from "./strategy/testcontainers-host-strategy";
 import { ReaperInstance } from "../../reaper";
-import { getSessionId } from "../../session-id";
 import { RandomUuid } from "../../uuid";
 import { DockerClient, UnitialisedDockerClient } from "./docker-client-types";
 import { writeFile } from "fs/promises";
@@ -43,15 +42,22 @@ export async function getDockerClient(): Promise<DockerClient> {
         let releaseLock;
         try {
           await writeFile(__dirname + "/tc.lock", "");
-          releaseLock = await lockFile.lock(__dirname + "/tc.lock", { retries: 10 });
-          const sessionId = await getSessionId(new Dockerode(uninitDockerClient.dockerOptions), new RandomUuid());
+          releaseLock = await lockFile.lock(__dirname + "/tc.lock", { retries: { forever: true } });
+
+          const dockerode = new Dockerode(uninitDockerClient.dockerOptions);
+          const containers = await dockerode.listContainers();
+          const reaperContainer = containers.find(
+            (container) => container.Labels["org.testcontainers.ryuk"] === "true"
+          );
+          const sessionId = reaperContainer?.Labels["org.testcontainers.session-id"] ?? new RandomUuid().nextUuid();
+
           uninitDockerClient.dockerOptions = {
             ...uninitDockerClient.dockerOptions,
-            headers: { "x-tc-sid": sessionId.sessionId },
+            headers: { "x-tc-sid": sessionId },
           };
           uninitDockerClient.dockerode = new Dockerode(uninitDockerClient.dockerOptions);
-          dockerClient = { ...uninitDockerClient, sessionId: sessionId.sessionId };
-          await ReaperInstance.createInstance(dockerClient, sessionId);
+          dockerClient = { ...uninitDockerClient, sessionId: sessionId };
+          await ReaperInstance.createInstance(dockerClient, sessionId, reaperContainer);
         } finally {
           if (releaseLock) {
             await releaseLock();

@@ -7,13 +7,11 @@ import { LABEL_TESTCONTAINERS_SESSION_ID } from "./labels";
 import { Wait } from "./wait-strategy/wait";
 import { IntervalRetryStrategy } from "./retry-strategy";
 import { getRemoteDockerUnixSocketPath } from "./docker/remote-docker-unix-socket-path";
-import { SessionId } from "./session-id";
 import { UnitialisedDockerClient } from "./docker/client/docker-client-types";
+import Dockerode from "dockerode";
 
 export interface Reaper {
   addProject(projectName: string): void;
-
-  getSessionId(): string;
 
   // stop(): void;
 }
@@ -28,10 +26,6 @@ class RealReaper implements Reaper {
   // public stop(): void {
   //   this.socket.end();
   // }
-
-  getSessionId(): string {
-    return this.sessionId;
-  }
 }
 
 class DisabledReaper implements Reaper {
@@ -42,18 +36,18 @@ class DisabledReaper implements Reaper {
   // public stop(): void {
   //   noop
   // }
-
-  getSessionId(): string {
-    return "";
-  }
 }
 
 export class ReaperInstance {
   private static instance: Promise<Reaper>;
 
-  public static async createInstance(dockerClient: UnitialisedDockerClient, sessionId: SessionId): Promise<void> {
+  public static async createInstance(
+    dockerClient: UnitialisedDockerClient,
+    sessionId: string,
+    reaperContainer?: Dockerode.ContainerInfo
+  ): Promise<void> {
     if (this.isEnabled()) {
-      this.instance = this.createRealInstance(dockerClient, sessionId);
+      this.instance = this.createRealInstance(dockerClient, sessionId, reaperContainer);
       await this.instance;
     } else {
       this.instance = this.createDisabledInstance();
@@ -87,35 +81,29 @@ export class ReaperInstance {
 
   private static async createRealInstance(
     dockerClient: UnitialisedDockerClient,
-    sessionId: SessionId
+    sessionId: string,
+    reaperContainer?: Dockerode.ContainerInfo
   ): Promise<Reaper> {
     const containerPort: PortWithOptionalBinding = process.env["TESTCONTAINERS_RYUK_PORT"]
       ? { container: 8080, host: Number(process.env["TESTCONTAINERS_RYUK_PORT"]) }
       : 8080;
 
-    // const containers = await dockerClient.dockerode.listContainers();
-    // const ryukContainer = containers.find((container) => container.Labels["org.testcontainers.ryuk"] === "true");
-
-    if (sessionId.container) {
-      // const sessionId = ryukContainer.Labels["org.testcontainers.session-id"];
-      log.debug(`Reusing existing Reaper for session "${sessionId.sessionId}"...`);
-      const port = sessionId.container.Ports.find((port) => port.PrivatePort == 8080)?.PublicPort;
+    if (reaperContainer) {
+      log.debug(`Reusing existing Reaper for session "${sessionId}"...`);
+      const port = reaperContainer.Ports.find((port) => port.PrivatePort == 8080)?.PublicPort;
       if (!port) {
         throw new Error();
       }
-      const socket = await this.connectToReaper(dockerClient.host, port, sessionId.sessionId, sessionId.container.Id);
-      return new RealReaper(sessionId.sessionId, socket);
+      const socket = await this.connectToReaper(dockerClient.host, port, sessionId, reaperContainer.Id);
+      return new RealReaper(sessionId, socket);
     }
 
-    // const sessionId = new RandomUuid().nextUuid();
     const remoteDockerUnixSocketPath = getRemoteDockerUnixSocketPath(dockerClient);
-    log.debug(
-      `Creating new Reaper for session "${sessionId.sessionId}" with socket path "${remoteDockerUnixSocketPath}"...`
-    );
+    log.debug(`Creating new Reaper for session "${sessionId}" with socket path "${remoteDockerUnixSocketPath}"...`);
     const container = new GenericContainer(REAPER_IMAGE)
-      .withName(`testcontainers-ryuk-${sessionId.sessionId}`)
+      .withName(`testcontainers-ryuk-${sessionId}`)
       .withExposedPorts(containerPort)
-      .withLabels({ [LABEL_TESTCONTAINERS_SESSION_ID]: sessionId.sessionId })
+      .withLabels({ [LABEL_TESTCONTAINERS_SESSION_ID]: sessionId })
       .withBindMounts([
         {
           source: remoteDockerUnixSocketPath,
@@ -134,8 +122,8 @@ export class ReaperInstance {
     const host = startedContainer.getHost();
     const port = startedContainer.getMappedPort(8080);
 
-    const socket = await this.connectToReaper(host, port, sessionId.sessionId, containerId);
-    return new RealReaper(sessionId.sessionId, socket);
+    const socket = await this.connectToReaper(host, port, sessionId, containerId);
+    return new RealReaper(sessionId, socket);
   }
 
   private static async connectToReaper(
