@@ -4,7 +4,6 @@ import { resolveContainerName } from "../docker-compose/functions/container-name
 import { StartedGenericContainer } from "../generic-container/started-generic-container";
 import { containerLog, log } from "../logger";
 import { WaitStrategy } from "../wait-strategy/wait-strategy";
-import { ReaperInstance } from "../reaper";
 import { RandomUuid, Uuid } from "../uuid";
 import { Environment } from "../docker/types";
 import { listContainers } from "../docker/functions/container/list-containers";
@@ -19,6 +18,7 @@ import { waitForContainer } from "../wait-for-container";
 import { DefaultPullPolicy, PullPolicy } from "../pull-policy";
 import { dockerComposePull } from "../docker-compose/functions/docker-compose-pull";
 import { Wait } from "../wait-strategy/wait";
+import { registerComposeProjectForCleanup } from "../reaper";
 
 export class DockerComposeEnvironment {
   private readonly composeFilePath: string;
@@ -108,7 +108,7 @@ export class DockerComposeEnvironment {
       await dockerComposePull(options, services);
     }
     await dockerComposeUp({ ...options, commandOptions, composeOptions, environment: this.environment }, services);
-    (await ReaperInstance.getInstance()).addProject(this.projectName);
+    await registerComposeProjectForCleanup(this.projectName);
 
     const startedContainers = (await listContainers()).filter(
       (container) => container.Labels["com.docker.compose.project"] === this.projectName

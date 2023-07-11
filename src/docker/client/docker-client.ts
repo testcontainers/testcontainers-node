@@ -12,10 +12,10 @@ import { UnixSocketStrategy } from "./strategy/unix-socket-strategy";
 import { NpipeSocketStrategy } from "./strategy/npipe-socket-strategy";
 import { ContainerRuntime } from "../types";
 import { TestcontainersHostStrategy } from "./strategy/testcontainers-host-strategy";
-import { ReaperInstance } from "../../reaper";
 import { RandomUuid } from "../../uuid";
 import { DockerClient, PartialDockerClient } from "./docker-client-types";
 import { withFileLock } from "../../file-lock";
+import { registerSessionIdForCleanup, startReaper } from "../../reaper";
 
 let dockerClient: DockerClient;
 
@@ -67,10 +67,11 @@ async function initialiseStrategy(strategy: DockerClientStrategy): Promise<Docke
       ...partialDockerClient,
       sessionId,
       dockerOptions,
-      dockerode: new Dockerode(partialDockerClient.dockerOptions),
+      dockerode: new Dockerode(dockerOptions),
     };
 
-    await ReaperInstance.createInstance(dockerClient, sessionId, reaperContainer);
+    await startReaper(dockerClient, sessionId, reaperContainer);
+    await registerSessionIdForCleanup(sessionId);
   });
 
   return dockerClient;
