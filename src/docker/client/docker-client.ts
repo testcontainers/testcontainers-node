@@ -15,8 +15,7 @@ import { TestcontainersHostStrategy } from "./strategy/testcontainers-host-strat
 import { ReaperInstance } from "../../reaper";
 import { RandomUuid } from "../../uuid";
 import { DockerClient, UnitialisedDockerClient } from "./docker-client-types";
-import { writeFile } from "fs/promises";
-import lockFile from "proper-lockfile";
+import { withFileLock } from "../../file-lock";
 
 let dockerClient: DockerClient;
 
@@ -39,11 +38,7 @@ export async function getDockerClient(): Promise<DockerClient> {
       if (uninitDockerClient) {
         logDockerClient(strategy.getName(), uninitDockerClient);
 
-        let releaseLock;
-        try {
-          await writeFile(__dirname + "/tc.lock", "");
-          releaseLock = await lockFile.lock(__dirname + "/tc.lock", { retries: { forever: true } });
-
+        await withFileLock("tc.lock", async () => {
           const dockerode = new Dockerode(uninitDockerClient.dockerOptions);
           const containers = await dockerode.listContainers();
           const reaperContainer = containers.find(
@@ -58,11 +53,7 @@ export async function getDockerClient(): Promise<DockerClient> {
           uninitDockerClient.dockerode = new Dockerode(uninitDockerClient.dockerOptions);
           dockerClient = { ...uninitDockerClient, sessionId: sessionId };
           await ReaperInstance.createInstance(dockerClient, sessionId, reaperContainer);
-        } finally {
-          if (releaseLock) {
-            await releaseLock();
-          }
-        }
+        });
 
         return dockerClient;
       }

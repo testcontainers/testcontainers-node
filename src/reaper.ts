@@ -13,7 +13,7 @@ import Dockerode from "dockerode";
 export interface Reaper {
   addProject(projectName: string): void;
 
-  // stop(): void;
+  stop(): void;
 }
 
 class RealReaper implements Reaper {
@@ -23,9 +23,9 @@ class RealReaper implements Reaper {
     this.socket.write(`label=com.docker.compose.project=${projectName}\r\n`);
   }
 
-  // public stop(): void {
-  //   this.socket.end();
-  // }
+  public stop(): void {
+    this.socket.end();
+  }
 }
 
 class DisabledReaper implements Reaper {
@@ -33,9 +33,9 @@ class DisabledReaper implements Reaper {
     // noop
   }
 
-  // public stop(): void {
-  //   noop
-  // }
+  public stop(): void {
+    // noop
+  }
 }
 
 export class ReaperInstance {
