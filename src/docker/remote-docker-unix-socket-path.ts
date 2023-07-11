@@ -1,7 +1,7 @@
-import { UnitialisedDockerClient } from "./client/docker-client-types";
+import { PartialDockerClient } from "./client/docker-client-types";
 
 export const getRemoteDockerUnixSocketPath = (
-  dockerClient: UnitialisedDockerClient,
+  dockerClient: PartialDockerClient,
   platform: NodeJS.Platform = process.platform,
   env: NodeJS.ProcessEnv = process.env
 ): string => {

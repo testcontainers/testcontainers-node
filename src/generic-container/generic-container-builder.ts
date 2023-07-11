@@ -1,7 +1,6 @@
 import { AuthConfig, BuildArgs, RegistryConfig } from "../docker/types";
 import { DefaultPullPolicy, PullPolicy } from "../pull-policy";
 import { RandomUuid, Uuid } from "../uuid";
-import { ReaperInstance } from "../reaper";
 import { DockerImageName } from "../docker-image-name";
 import path from "path";
 import { log } from "../logger";

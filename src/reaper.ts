@@ -7,7 +7,7 @@ import { LABEL_TESTCONTAINERS_SESSION_ID } from "./labels";
 import { Wait } from "./wait-strategy/wait";
 import { IntervalRetryStrategy } from "./retry-strategy";
 import { getRemoteDockerUnixSocketPath } from "./docker/remote-docker-unix-socket-path";
-import { UnitialisedDockerClient } from "./docker/client/docker-client-types";
+import { PartialDockerClient } from "./docker/client/docker-client-types";
 import Dockerode from "dockerode";
 
 export interface Reaper {
@@ -42,7 +42,7 @@ export class ReaperInstance {
   private static instance: Promise<Reaper>;
 
   public static async createInstance(
-    dockerClient: UnitialisedDockerClient,
+    dockerClient: PartialDockerClient,
     sessionId: string,
     reaperContainer?: Dockerode.ContainerInfo
   ): Promise<void> {
@@ -80,7 +80,7 @@ export class ReaperInstance {
   }
 
   private static async createRealInstance(
-    dockerClient: UnitialisedDockerClient,
+    dockerClient: PartialDockerClient,
     sessionId: string,
     reaperContainer?: Dockerode.ContainerInfo
   ): Promise<Reaper> {

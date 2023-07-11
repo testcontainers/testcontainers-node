@@ -3,11 +3,11 @@ import { HostIps } from "../lookup-host-ips";
 import { SystemInfo } from "../../system-info";
 import { ContainerRuntime } from "../types";
 
-export type DockerClient = UnitialisedDockerClient & {
+export type DockerClient = PartialDockerClient & {
   sessionId: string;
 };
 
-export type UnitialisedDockerClient = DockerClientStrategyResult & {
+export type PartialDockerClient = DockerClientStrategyResult & {
   dockerode: Dockerode;
   host: string;
   containerRuntime: ContainerRuntime;
