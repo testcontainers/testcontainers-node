@@ -6,23 +6,52 @@ describe("HiveMQContainer", () => {
 
   // connect {
   it("should connect to HiveMQ Community Edition via MQTT.js", async () => {
+    const TEST_TOPIC = "test/topic";
+    const TEST_MESSAGE = "Test_Message";
+
     const hiveMQContainer = await new HiveMQContainer().start();
 
     const testMqttClient = mqtt.connect(hiveMQContainer.getConnectionString());
 
-    testMqttClient.on("message", (topic, message) => {
-      expect(message.toString()).toEqual("Test Message");
+    async function onConnect() {
+      return new Promise((resolve) => {
+        testMqttClient.on("connect", () => {
+          resolve(undefined);
+        });
+      });
+    }
 
-      testMqttClient.end();
-    });
+    async function onSubscribe() {
+      return new Promise((resolve, reject) => {
+        testMqttClient.subscribe(TEST_TOPIC, (error) => {
+          if (error) {
+            reject();
+          }
 
-    testMqttClient.on("connect", () => {
-      testMqttClient.subscribe("test", (error) => {
-        if (!error) {
-          testMqttClient.publish("test", "Test Message");
-        }
+          resolve(undefined);
+        });
+      });
+    }
+
+    await onConnect();
+    await onSubscribe();
+
+    const messagePromise = new Promise<string>((resolve) => {
+      testMqttClient.on("message", (topic, message) => {
+        resolve(message.toString());
       });
     });
+
+    const publishPromise = new Promise((resolve) => {
+      testMqttClient.publish(TEST_TOPIC, TEST_MESSAGE);
+      resolve(undefined);
+    });
+
+    const [messageResponse] = await Promise.all([messagePromise, publishPromise]);
+
+    expect(messageResponse).toEqual(TEST_MESSAGE);
+
+    testMqttClient.end();
   });
   // }
 });
