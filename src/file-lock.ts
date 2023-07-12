@@ -5,8 +5,7 @@ import { log } from "./logger";
 import lockFile from "proper-lockfile";
 
 export async function withFileLock<T>(fileName: string, fn: () => T): Promise<T> {
-  const file = path.resolve(tmp.tmpdir, fileName);
-  await writeFile(file, "");
+  const file = await createEmptyTmpFile(fileName);
 
   let releaseLockFn;
   try {
@@ -21,4 +20,10 @@ export async function withFileLock<T>(fileName: string, fn: () => T): Promise<T>
       log.debug(`Released lock file "${file}"`);
     }
   }
+}
+
+async function createEmptyTmpFile(fileName: string): Promise<string> {
+  const file = path.resolve(tmp.tmpdir, fileName);
+  await writeFile(file, "");
+  return file;
 }

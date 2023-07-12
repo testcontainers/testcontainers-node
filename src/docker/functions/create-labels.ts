@@ -7,7 +7,7 @@ import {
 import { version } from "../../../package.json";
 import { Labels } from "../types";
 
-export const createLabels = (sessionId: string | undefined, reusable: boolean, extraLabels: Labels = {}): Labels => {
+export const createLabels = (sessionId: string, reusable: boolean, extraLabels: Labels = {}): Labels => {
   const labels: Labels = {
     ...extraLabels,
     [LABEL_TESTCONTAINERS]: "true",
@@ -15,7 +15,7 @@ export const createLabels = (sessionId: string | undefined, reusable: boolean, e
     [LABEL_TESTCONTAINERS_VERSION]: version,
   };
 
-  if (!reusable && sessionId) {
+  if (!reusable) {
     labels[LABEL_TESTCONTAINERS_SESSION_ID] = sessionId;
   }
 

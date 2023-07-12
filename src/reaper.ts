@@ -82,7 +82,6 @@ async function createAndStartReaperContainer(sessionId: string, socketPath: stri
   const container = new GenericContainer(REAPER_IMAGE)
     .withName(`testcontainers-ryuk-${sessionId}`)
     .withExposedPorts(exposedPort)
-    .withLabels({ [LABEL_TESTCONTAINERS_SESSION_ID]: sessionId })
     .withBindMounts([{ source: socketPath, target: "/var/run/docker.sock" }])
     .withWaitStrategy(Wait.forLogMessage(/.+ Started!/));
 

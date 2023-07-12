@@ -35,7 +35,7 @@ export type CreateContainerOptions = {
 };
 
 export const createContainer = async (
-  sessionId: string | undefined,
+  sessionId: string,
   options: CreateContainerOptions
 ): Promise<Dockerode.Container> => {
   try {
