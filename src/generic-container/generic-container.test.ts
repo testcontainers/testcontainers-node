@@ -266,13 +266,59 @@ describe("GenericContainer", () => {
   it("should copy file to container", async () => {
     const source = path.resolve(fixtures, "docker", "test.txt");
     const target = "/tmp/test.txt";
+
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withCopyFilesToContainer([{ source, target }])
       .withExposedPorts(8080)
       .start();
-    const { output } = await container.exec(["cat", target]);
 
-    expect(output).toEqual(expect.stringContaining("hello world"));
+    expect((await container.exec(["cat", target])).output).toEqual(expect.stringContaining("hello world"));
+    expect((await container.exec(`stat -c "%a %n" ${target}`)).output).toContain("644");
+
+    await container.stop();
+  });
+
+  it("should copy file to container with permissions", async () => {
+    const source = path.resolve(fixtures, "docker", "test.txt");
+    const target = "/tmp/test.txt";
+    const mode = parseInt("0777", 8);
+
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withCopyFilesToContainer([{ source, target, mode }])
+      .withExposedPorts(8080)
+      .start();
+
+    expect((await container.exec(`stat -c "%a %n" ${target}`)).output).toContain("777");
+
+    await container.stop();
+  });
+
+  it("should copy directory to container", async () => {
+    const source = path.resolve(fixtures, "docker");
+    const target = "/tmp";
+
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withCopyDirectoriesToContainer([{ source, target }])
+      .withExposedPorts(8080)
+      .start();
+
+    expect((await container.exec("cat /tmp/test.txt")).output).toEqual(expect.stringContaining("hello world"));
+    expect((await container.exec(`stat -c "%a %n" /tmp/test.txt`)).output).toContain("644");
+
+    await container.stop();
+  });
+
+  it("should copy directory to container with permissions", async () => {
+    const source = path.resolve(fixtures, "docker");
+    const target = "/tmp/newdir";
+    const mode = parseInt("0777", 8);
+
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withCopyDirectoriesToContainer([{ source, target, mode }])
+      .withExposedPorts(8080)
+      .start();
+
+    expect((await container.exec(`stat -c "%a %n" /tmp/newdir/test.txt`)).output).toContain("777");
 
     await container.stop();
   });
@@ -280,13 +326,29 @@ describe("GenericContainer", () => {
   it("should copy content to container", async () => {
     const content = "hello world";
     const target = "/tmp/test.txt";
+
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withCopyContentToContainer([{ content, target }])
       .withExposedPorts(8080)
       .start();
-    const { output } = await container.exec(["cat", target]);
 
-    expect(output).toEqual(expect.stringContaining(content));
+    expect((await container.exec(["cat", target])).output).toEqual(expect.stringContaining(content));
+    expect((await container.exec(`stat -c "%a %n" ${target}`)).output).toContain("644");
+
+    await container.stop();
+  });
+
+  it("should copy content to container with permissions", async () => {
+    const content = "hello world";
+    const target = "/tmp/test.txt";
+    const mode = parseInt("0777", 8);
+
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withCopyContentToContainer([{ content, target, mode }])
+      .withExposedPorts(8080)
+      .start();
+
+    expect((await container.exec(`stat -c "%a %n" ${target}`)).output).toContain("777");
 
     await container.stop();
   });

@@ -15,13 +15,17 @@ export type BindMount = {
 export type FileToCopy = {
   source: string;
   target: string;
+  mode?: number;
 };
+
+export type DirectoryToCopy = FileToCopy;
 
 export type Content = string | Buffer | Readable;
 
 export type ContentToCopy = {
   content: Content;
   target: string;
+  mode?: number;
 };
 
 export type TmpFs = { [dir in string]: string };

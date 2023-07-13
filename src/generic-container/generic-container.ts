@@ -11,6 +11,7 @@ import { PortForwarderInstance } from "../port-forwarder";
 import {
   BindMount,
   ContentToCopy,
+  DirectoryToCopy,
   Environment,
   ExtraHost,
   FileToCopy,
@@ -51,11 +52,13 @@ export class GenericContainer implements TestContainer {
   protected opts: CreateContainerOptions;
   protected startupTimeout?: number;
   protected waitStrategy: WaitStrategy = Wait.forListeningPorts();
-  protected tarToCopy?: archiver.Archiver;
   protected networkMode?: string;
   protected networkAliases: string[] = [];
   protected pullPolicy: PullPolicy = new DefaultPullPolicy();
   protected logConsumer?: (stream: Readable) => unknown;
+  protected filesToCopy: FileToCopy[] = [];
+  protected directoriesToCopy: DirectoryToCopy[] = [];
+  protected contentsToCopy: ContentToCopy[] = [];
 
   constructor(readonly image: string) {
     const imageName = DockerImageName.fromString(image);
@@ -164,9 +167,10 @@ export class GenericContainer implements TestContainer {
       });
     }
 
-    if (this.tarToCopy) {
-      this.tarToCopy.finalize();
-      await putContainerArchive({ container, stream: this.tarToCopy, containerPath: "/" });
+    if (this.filesToCopy.length > 0 || this.directoriesToCopy.length > 0 || this.contentsToCopy.length > 0) {
+      const archive = this.createArchiveToCopyToContainer();
+      archive.finalize();
+      await putContainerArchive({ container, stream: archive, containerPath: "/" });
     }
 
     log.info(`Starting container for image "${this.opts.imageName}"...`, { containerId: container.id });
@@ -233,6 +237,22 @@ export class GenericContainer implements TestContainer {
         networkAliases: [],
       });
     }
+  }
+
+  private createArchiveToCopyToContainer(): archiver.Archiver {
+    const tar = archiver("tar");
+
+    for (const { source, target, mode } of this.filesToCopy) {
+      tar.file(source, { name: target, mode });
+    }
+    for (const { source, target, mode } of this.directoriesToCopy) {
+      tar.directory(source, target, { mode });
+    }
+    for (const { content, target, mode } of this.contentsToCopy) {
+      tar.append(content, { name: target, mode });
+    }
+
+    return tar;
   }
 
   /**
@@ -375,22 +395,18 @@ export class GenericContainer implements TestContainer {
   }
 
   public withCopyFilesToContainer(filesToCopy: FileToCopy[]): this {
-    const tar = this.getTarToCopy();
-    filesToCopy.forEach(({ source, target }) => tar.file(source, { name: target }));
+    this.filesToCopy = [...this.filesToCopy, ...filesToCopy];
+    return this;
+  }
+
+  public withCopyDirectoriesToContainer(directoriesToCopy: DirectoryToCopy[]): this {
+    this.directoriesToCopy = [...this.directoriesToCopy, ...directoriesToCopy];
     return this;
   }
 
   public withCopyContentToContainer(contentsToCopy: ContentToCopy[]): this {
-    const tar = this.getTarToCopy();
-    contentsToCopy.forEach(({ content, target }) => tar.append(content, { name: target }));
+    this.contentsToCopy = [...this.contentsToCopy, ...contentsToCopy];
     return this;
-  }
-
-  protected getTarToCopy(): archiver.Archiver {
-    if (!this.tarToCopy) {
-      this.tarToCopy = archiver("tar");
-    }
-    return this.tarToCopy;
   }
 
   public withWorkingDir(workingDir: string): this {
@@ -399,13 +415,10 @@ export class GenericContainer implements TestContainer {
   }
 
   public withResourcesQuota({ memory, cpu }: ResourcesQuota): this {
-    // Memory and CPU units from here: https://docs.docker.com/engine/api/v1.42/#tag/Container/operation/ContainerCreate
-    // see Memory, NanoCpus parameters
-    const ram = memory !== undefined ? memory * 1024 ** 3 : undefined;
-    const cpuQuota = cpu !== undefined ? cpu * 10 ** 9 : undefined;
-
-    this.opts.resourcesQuota = { memory: ram, cpu: cpuQuota };
-
+    this.opts.resourcesQuota = {
+      memory: memory !== undefined ? memory * 1024 ** 3 : undefined,
+      cpu: cpu !== undefined ? cpu * 10 ** 9 : undefined,
+    };
     return this;
   }
 
