@@ -385,13 +385,13 @@ export class GenericContainer implements TestContainer {
 
   public withCopyFilesToContainer(filesToCopy: FileToCopy[]): this {
     const tar = this.getTarToCopy();
-    filesToCopy.forEach(({ source, target, mode }) => tar.file(source, { name: target, mode: mode }));
+    filesToCopy.forEach(({ source, target, mode }) => tar.file(source, { name: target, mode }));
     return this;
   }
 
   public withCopyContentToContainer(contentsToCopy: ContentToCopy[]): this {
     const tar = this.getTarToCopy();
-    contentsToCopy.forEach(({ content, target, mode }) => tar.append(content, { name: target, mode: mode }));
+    contentsToCopy.forEach(({ content, target, mode }) => tar.append(content, { name: target, mode }));
     return this;
   }
 
