@@ -18,6 +18,8 @@ export type FileToCopy = {
   mode?: number;
 };
 
+export type DirectoryToCopy = FileToCopy;
+
 export type Content = string | Buffer | Readable;
 
 export type ContentToCopy = {
