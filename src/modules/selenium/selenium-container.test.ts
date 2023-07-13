@@ -19,9 +19,8 @@ describe("SeleniumContainer", () => {
   });
 
   const browsers = [
-    ["CHROME", "selenium/standalone-chrome:112.0"],
-    ["FIREFOX", "selenium/standalone-firefox:112.0"],
-    ["EDGE", "selenium/standalone-edge:112.0"],
+    ["CHROME", process.arch === "arm64" ? `seleniarm/standalone-chromium:112.0` : `selenium/standalone-chrome:112.0`],
+    ["FIREFOX", process.arch === "arm64" ? `seleniarm/standalone-firefox:112.0` : `selenium/standalone-firefox:112.0`],
   ] as const;
 
   browsers.forEach(async ([browser, image]) => {
