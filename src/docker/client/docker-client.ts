@@ -62,7 +62,10 @@ async function initialiseStrategy(strategy: DockerClientStrategy): Promise<Docke
     const reaperContainer = containers.find((container) => container.Labels["org.testcontainers.ryuk"] === "true");
     const sessionId = reaperContainer?.Labels["org.testcontainers.session-id"] ?? new RandomUuid().nextUuid();
 
-    const dockerOptions = { ...partialDockerClient.dockerOptions, headers: { "x-tc-sid": sessionId } };
+    const dockerOptions = {
+      ...partialDockerClient.dockerOptions,
+      headers: { ...partialDockerClient.dockerOptions.headers, "x-tc-sid": sessionId },
+    };
     dockerClient = {
       ...partialDockerClient,
       sessionId,

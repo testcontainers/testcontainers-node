@@ -9,6 +9,7 @@ import { getRemoteDockerUnixSocketPath } from "./docker/remote-docker-unix-socke
 import { PartialDockerClient } from "./docker/client/docker-client-types";
 import Dockerode from "dockerode";
 import { StartedTestContainer } from "./test-container";
+import { getDockerClient } from "./docker/client/docker-client";
 
 const isReaperEnabled = process.env.TESTCONTAINERS_RYUK_DISABLED !== "true";
 
@@ -16,14 +17,14 @@ let reaper: Reaper;
 
 export async function registerSessionIdForCleanup(sessionId: string): Promise<void> {
   if (!reaper) {
-    throw new Error("Reaper not started");
+    await getDockerClient();
   }
   (await reaper).addSession(sessionId);
 }
 
 export async function registerComposeProjectForCleanup(project: string): Promise<void> {
   if (!reaper) {
-    throw new Error("Reaper not started");
+    await getDockerClient();
   }
   (await reaper).addProject(project);
 }
