@@ -106,6 +106,45 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+An optional `mode` can be specified in octal:
+
+```javascript
+const container = await new GenericContainer("alpine")
+  .withCopyFilesToContainer([{ 
+    source: "/local/file.txt", 
+    target: "/remote/file1.txt",
+    mode: parseInt("0644", 8)
+  }])
+  .withCopyContentToContainer([{ 
+    content: "hello world",
+    target: "/remote/file2.txt",
+    mode: parseInt("0644", 8)
+  }])
+  .start();
+```
+
+### Copy archive from container
+
+Files and directories can be fetched from a started or stopped container as a tar archive. The archive is returned as a readable stream:
+
+```javascript
+const container = await new GenericContainer("alpine")
+  .start();
+
+const tarArchiveStream = await container.copyArchiveFromContainer("/var/log")
+```
+
+And when a container is stopped but not removed:
+
+```javascript
+const container = await new GenericContainer("alpine")
+  .start();
+
+const stoppedContainer = await container.stop({ remove: false });
+
+const tarArchiveStream = await stoppedContainer.copyArchiveFromContainer("/var/log/syslog")
+```
+
 ### With working directory
 
 ```javascript
@@ -446,33 +485,4 @@ const container = await new GenericContainer("alpine")
     stream.on("end", () => console.log("Stream closed"));
   })
   .start();
-```
-
-## Copying files
-
-### Copy files/content to a container
-
-Files and content can be copied to a started container:
-
-```javascript
-const container = await new GenericContainer("alpine").start();
-await container.copyFilesToContainer([{ source: "file.txt", target: "/tmp/file1.txt" }]);
-await container.copyContentToContainer([{ content: "Hello world!", target: "/tmp/file2.txt" }]);
-```
-
-### Copy files/directories from a container
-
-Files and directories can be fetched from a container as a tar archive. The archive is returned as a readable stream. This works when a container has started:
-
-```javascript
-const container = await new GenericContainer("alpine").start();
-const tarArchiveStream = await container.copyArchiveFromContainer("/var/log")
-```
-
-And when a container is stopped but not removed:
-
-```javascript
-const container = await new GenericContainer("alpine").start();
-const stoppedContainer = await container.stop({ remove: false });
-const tarArchiveStream = await stoppedContainer.copyArchiveFromContainer("/var/log/syslog")
 ```
