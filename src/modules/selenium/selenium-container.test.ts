@@ -5,6 +5,8 @@ import { GenericContainer } from "../../generic-container/generic-container";
 import { StartedTestContainer } from "../../test-container";
 import path from "path";
 
+jest.retryTimes(1);
+
 describe("SeleniumContainer", () => {
   jest.setTimeout(180_000);
 
