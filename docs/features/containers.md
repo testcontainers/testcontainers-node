@@ -91,14 +91,17 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
-### With files/content
+### With files/directories/content
+
+Copy files/directories or content to a container before it starts:
 
 ```javascript
 const container = await new GenericContainer("alpine")
   .withCopyFilesToContainer([{ 
     source: "/local/file.txt", 
     target: "/remote/file1.txt"
-  }, {
+  }])
+  .withCopyDirectoriesToContainer([{
     source: "/localdir",
     target: "/some/nested/remotedir"
   }])
@@ -109,7 +112,7 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
-An optional `mode` can be specified in octal:
+An optional `mode` can be specified in octal for setting file permissions:
 
 ```javascript
 const container = await new GenericContainer("alpine")
@@ -117,7 +120,8 @@ const container = await new GenericContainer("alpine")
     source: "/local/file.txt", 
     target: "/remote/file1.txt",
     mode: parseInt("0644", 8)
-  }, {
+  }])
+  .withCopyDirectoriesToContainer([{
     source: "/localdir",
     target: "/some/nested/remotedir",
     mode: parseInt("0644", 8)
@@ -135,20 +139,15 @@ const container = await new GenericContainer("alpine")
 Files and directories can be fetched from a started or stopped container as a tar archive. The archive is returned as a readable stream:
 
 ```javascript
-const container = await new GenericContainer("alpine")
-  .start();
-
+const container = await new GenericContainer("alpine").start();
 const tarArchiveStream = await container.copyArchiveFromContainer("/var/log")
 ```
 
 And when a container is stopped but not removed:
 
 ```javascript
-const container = await new GenericContainer("alpine")
-  .start();
-
+const container = await new GenericContainer("alpine").start();
 const stoppedContainer = await container.stop({ remove: false });
-
 const tarArchiveStream = await stoppedContainer.copyArchiveFromContainer("/var/log/syslog")
 ```
 

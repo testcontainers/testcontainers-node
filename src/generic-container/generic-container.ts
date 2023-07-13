@@ -12,6 +12,7 @@ import { PortForwarderInstance } from "../port-forwarder";
 import {
   BindMount,
   ContentToCopy,
+  DirectoryToCopy,
   Environment,
   ExtraHost,
   FileToCopy,
@@ -40,7 +41,6 @@ import { waitForContainer } from "../wait-for-container";
 import { initCreateContainerOptions } from "./create-container-options";
 import { Wait } from "../wait-strategy/wait";
 import { Readable } from "stream";
-import fs from "fs";
 
 const reusableContainerCreationLock = new AsyncLock();
 
@@ -57,6 +57,7 @@ export class GenericContainer implements TestContainer {
   protected pullPolicy: PullPolicy = new DefaultPullPolicy();
   protected logConsumer?: (stream: Readable) => unknown;
   protected filesToCopy: FileToCopy[] = [];
+  protected directoriesToCopy: DirectoryToCopy[] = [];
   protected contentsToCopy: ContentToCopy[] = [];
 
   constructor(readonly image: string) {
@@ -188,8 +189,8 @@ export class GenericContainer implements TestContainer {
       });
     }
 
-    if (this.filesToCopy.length > 0 || this.contentsToCopy.length > 0) {
-      const archive = await this.createArchiveToCopyToContainer();
+    if (this.filesToCopy.length > 0 || this.directoriesToCopy.length > 0 || this.contentsToCopy.length > 0) {
+      const archive = this.createArchiveToCopyToContainer();
       archive.finalize();
       await putContainerArchive({ container, stream: archive, containerPath: "/" });
     }
@@ -247,22 +248,15 @@ export class GenericContainer implements TestContainer {
     return startedContainer;
   }
 
-  private async createArchiveToCopyToContainer(): Promise<archiver.Archiver> {
+  private createArchiveToCopyToContainer(): archiver.Archiver {
     const tar = archiver("tar");
 
     for (const { source, target, mode } of this.filesToCopy) {
-      try {
-        const stat = await fs.promises.lstat(source);
-        if (stat.isDirectory()) {
-          tar.directory(source, target, { mode });
-        } else {
-          tar.file(source, { name: target, mode });
-        }
-      } catch (err) {
-        log.warn(`File or directory to copy "${source}" does not exist`);
-      }
+      tar.file(source, { name: target, mode });
     }
-
+    for (const { source, target, mode } of this.directoriesToCopy) {
+      tar.directory(source, target, { mode });
+    }
     for (const { content, target, mode } of this.contentsToCopy) {
       tar.append(content, { name: target, mode });
     }
@@ -411,6 +405,11 @@ export class GenericContainer implements TestContainer {
 
   public withCopyFilesToContainer(filesToCopy: FileToCopy[]): this {
     this.filesToCopy = [...this.filesToCopy, ...filesToCopy];
+    return this;
+  }
+
+  public withCopyDirectoriesToContainer(directoriesToCopy: DirectoryToCopy[]): this {
+    this.directoriesToCopy = [...this.directoriesToCopy, ...directoriesToCopy];
     return this;
   }
 

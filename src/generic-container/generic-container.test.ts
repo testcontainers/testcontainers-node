@@ -298,7 +298,7 @@ describe("GenericContainer", () => {
     const target = "/tmp";
 
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
-      .withCopyFilesToContainer([{ source, target }])
+      .withCopyDirectoriesToContainer([{ source, target }])
       .withExposedPorts(8080)
       .start();
 
@@ -314,7 +314,7 @@ describe("GenericContainer", () => {
     const mode = parseInt("0777", 8);
 
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
-      .withCopyFilesToContainer([{ source, target, mode }])
+      .withCopyDirectoriesToContainer([{ source, target, mode }])
       .withExposedPorts(8080)
       .start();
 

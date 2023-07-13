@@ -5,6 +5,7 @@ import { Readable } from "stream";
 import {
   BindMount,
   ContentToCopy,
+  DirectoryToCopy,
   Environment,
   ExecResult,
   ExtraHost,
@@ -38,6 +39,7 @@ export interface TestContainer {
   withPullPolicy(pullPolicy: PullPolicy): this;
   withReuse(): this;
   withCopyFilesToContainer(filesToCopy: FileToCopy[]): this;
+  withCopyDirectoriesToContainer(directoriesToCopy: DirectoryToCopy[]): this;
   withCopyContentToContainer(contentsToCopy: ContentToCopy[]): this;
   withWorkingDir(workingDir: string): this;
   withResourcesQuota(resourcesQuota: ResourcesQuota): this;
