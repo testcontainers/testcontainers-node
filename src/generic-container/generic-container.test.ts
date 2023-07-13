@@ -293,6 +293,36 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
+  it("should copy directory to container", async () => {
+    const source = path.resolve(fixtures, "docker");
+    const target = "/tmp";
+
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withCopyFilesToContainer([{ source, target }])
+      .withExposedPorts(8080)
+      .start();
+
+    expect((await container.exec("cat /tmp/test.txt")).output).toEqual(expect.stringContaining("hello world"));
+    expect((await container.exec(`stat -c "%a %n" /tmp/test.txt`)).output).toContain("644");
+
+    await container.stop();
+  });
+
+  it("should copy directory to container with permissions", async () => {
+    const source = path.resolve(fixtures, "docker");
+    const target = "/tmp/newdir";
+    const mode = parseInt("0777", 8);
+
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withCopyFilesToContainer([{ source, target, mode }])
+      .withExposedPorts(8080)
+      .start();
+
+    expect((await container.exec(`stat -c "%a %n" /tmp/newdir/test.txt`)).output).toContain("777");
+
+    await container.stop();
+  });
+
   it("should copy content to container", async () => {
     const content = "hello world";
     const target = "/tmp/test.txt";

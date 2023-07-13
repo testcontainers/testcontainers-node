@@ -98,6 +98,9 @@ const container = await new GenericContainer("alpine")
   .withCopyFilesToContainer([{ 
     source: "/local/file.txt", 
     target: "/remote/file1.txt"
+  }, {
+    source: "/localdir",
+    target: "/some/nested/remotedir"
   }])
   .withCopyContentToContainer([{ 
     content: "hello world",
@@ -113,6 +116,10 @@ const container = await new GenericContainer("alpine")
   .withCopyFilesToContainer([{ 
     source: "/local/file.txt", 
     target: "/remote/file1.txt",
+    mode: parseInt("0644", 8)
+  }, {
+    source: "/localdir",
+    target: "/some/nested/remotedir",
     mode: parseInt("0644", 8)
   }])
   .withCopyContentToContainer([{ 
