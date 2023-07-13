@@ -4,7 +4,6 @@ import { GenericContainer } from "./generic-container/generic-container";
 import { PortWithOptionalBinding } from "./port";
 import { StartedTestContainer } from "./test-container";
 import { RandomUuid } from "./uuid";
-import { sessionId } from "./docker/session-id";
 import { getDockerClient } from "./docker/client/docker-client";
 import { SSHD_IMAGE } from "./images";
 
@@ -54,6 +53,7 @@ export class PortForwarderInstance {
       ? { container: 22, host: Number(process.env["TESTCONTAINERS_SSHD_PORT"]) }
       : 22;
 
+    const { sessionId } = await getDockerClient();
     const container = await new GenericContainer(SSHD_IMAGE)
       .withName(`testcontainers-port-forwarder-${sessionId}`)
       .withExposedPorts(containerPort)

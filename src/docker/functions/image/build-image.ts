@@ -21,7 +21,7 @@ export type BuildImageOptions = {
   cache: boolean;
 };
 
-export const buildImage = async (options: BuildImageOptions): Promise<void> => {
+export const buildImage = async (sessionId: string, options: BuildImageOptions): Promise<void> => {
   try {
     log.info(`Building image "${options.imageName.toString()}" with context "${options.context}"...`);
 
@@ -45,7 +45,7 @@ export const buildImage = async (options: BuildImageOptions): Promise<void> => {
       nocache: !options.cache,
       buildargs: options.buildArgs,
       t: options.imageName.toString(),
-      labels: createLabels(false, options.imageName),
+      labels: createLabels(sessionId, false),
       registryconfig: options.registryConfig,
       pull: options.pullPolicy.shouldPull() ? "true" : undefined,
     };

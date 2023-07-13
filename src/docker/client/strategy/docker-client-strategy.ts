@@ -1,4 +1,4 @@
-import { DockerClientStrategyResult } from "../docker-client";
+import { DockerClientStrategyResult } from "../docker-client-types";
 
 export interface DockerClientStrategy {
   init?(): Promise<void>;

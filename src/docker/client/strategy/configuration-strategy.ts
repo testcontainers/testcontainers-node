@@ -1,10 +1,9 @@
 import { getDockerClientConfig } from "../docker-client-config";
-import Dockerode, { DockerOptions } from "dockerode";
-import { sessionId } from "../../session-id";
+import { DockerOptions } from "dockerode";
 import { URL } from "url";
 import { promises as fs } from "fs";
 import path from "path";
-import { DockerClientStrategyResult } from "../docker-client";
+import { DockerClientStrategyResult } from "../docker-client-types";
 import { DockerClientStrategy } from "./docker-client-strategy";
 
 export class ConfigurationStrategy implements DockerClientStrategy {
@@ -22,7 +21,7 @@ export class ConfigurationStrategy implements DockerClientStrategy {
   }
 
   async getDockerClient(): Promise<DockerClientStrategyResult> {
-    const dockerOptions: DockerOptions = { headers: { "x-tc-sid": sessionId } };
+    const dockerOptions: DockerOptions = {};
 
     const { pathname, hostname, port } = new URL(this.dockerHost);
     if (hostname !== "") {
@@ -40,7 +39,7 @@ export class ConfigurationStrategy implements DockerClientStrategy {
 
     return {
       uri: this.dockerHost,
-      dockerode: new Dockerode(dockerOptions),
+      dockerOptions,
       composeEnvironment: {
         DOCKER_HOST: this.dockerHost,
         DOCKER_TLS_VERIFY: this.dockerTlsVerify,

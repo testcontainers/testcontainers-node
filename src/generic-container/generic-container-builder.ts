@@ -1,7 +1,6 @@
 import { AuthConfig, BuildArgs, RegistryConfig } from "../docker/types";
 import { DefaultPullPolicy, PullPolicy } from "../pull-policy";
 import { RandomUuid, Uuid } from "../uuid";
-import { ReaperInstance } from "../reaper";
 import { DockerImageName } from "../docker-image-name";
 import path from "path";
 import { log } from "../logger";
@@ -42,7 +41,7 @@ export class GenericContainerBuilder {
   public async build(image = `localhost/${this.uuid.nextUuid()}:${this.uuid.nextUuid()}`): Promise<GenericContainer> {
     const imageName = DockerImageName.fromString(image);
 
-    await ReaperInstance.getInstance();
+    const { sessionId } = await getDockerClient();
 
     const dockerfile = path.resolve(this.context, this.dockerfileName);
     log.debug(`Preparing to build Dockerfile "${dockerfile}" as image "${imageName}"...`);
@@ -50,7 +49,7 @@ export class GenericContainerBuilder {
     const { dockerode, info } = await getDockerClient();
     const registryConfig = await this.getRegistryConfig(info.dockerInfo.indexServerAddress, imageNames);
 
-    await buildImage({
+    await buildImage(sessionId, {
       imageName: imageName,
       context: this.context,
       dockerfileName: this.dockerfileName,

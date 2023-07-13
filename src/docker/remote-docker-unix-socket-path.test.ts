@@ -1,5 +1,5 @@
 import { getRemoteDockerUnixSocketPath } from "./remote-docker-unix-socket-path";
-import { DockerClient } from "./client/docker-client";
+import { DockerClient } from "./client/docker-client-types";
 
 test("should return TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE when provided", () => {
   const dockerClient = createDockerClient({ uri: "unix:///var/run/docker.sock" });
