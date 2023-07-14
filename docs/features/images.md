@@ -14,6 +14,16 @@ const container = await GenericContainer
 const startedContainer = await container.start();
 ```
 
+Images are built by default with a randomly generated name and are deleted on exit. If you wish to keep the built images between test runs, you can provide a name and specify not to delete the image:
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await GenericContainer
+  .fromDockerfile("/path/to/build-context")
+  .build("my-custom-image", { deleteOnExit: false });
+```
+
 ### With pull policy
 
 Testcontainers will automatically pull an image if it doesn't exist. This is configurable:

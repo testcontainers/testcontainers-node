@@ -2,11 +2,21 @@ import path from "path";
 import { GenericContainer } from "./generic-container";
 import { AlwaysPullPolicy } from "../pull-policy";
 import { Wait } from "../wait-strategy/wait";
-import { checkContainerIsHealthy, getDockerEventStream, waitForDockerEvent } from "../test-helper";
+import {
+  checkContainerIsHealthy,
+  deleteImageByName,
+  getDockerEventStream,
+  getImageLabelsByName,
+  waitForDockerEvent,
+} from "../test-helper";
+import { RandomUuid } from "../uuid";
+import { getDockerClient } from "../docker/client/docker-client";
+import { LABEL_TESTCONTAINERS_SESSION_ID } from "../labels";
 
 describe("GenericContainer Dockerfile", () => {
   jest.setTimeout(180_000);
 
+  const uuidGen = new RandomUuid();
   const fixtures = path.resolve(__dirname, "..", "..", "fixtures", "docker");
 
   it("should build and start", async () => {
@@ -17,6 +27,31 @@ describe("GenericContainer Dockerfile", () => {
     await checkContainerIsHealthy(startedContainer);
 
     await startedContainer.stop();
+  });
+
+  it("should have a session ID label to be cleaned up by the Reaper", async () => {
+    const context = path.resolve(fixtures, "docker");
+    const imageName = `${uuidGen.nextUuid()}:${uuidGen.nextUuid()}`;
+
+    await GenericContainer.fromDockerfile(context).build(imageName);
+
+    const { sessionId } = await getDockerClient();
+    const imageLabels = await getImageLabelsByName(imageName);
+    expect(imageLabels[LABEL_TESTCONTAINERS_SESSION_ID]).toEqual(sessionId);
+
+    await deleteImageByName(imageName);
+  });
+
+  it("should not have a session ID label when delete on exit set to false", async () => {
+    const context = path.resolve(fixtures, "docker");
+    const imageName = `${uuidGen.nextUuid()}:${uuidGen.nextUuid()}`;
+
+    await GenericContainer.fromDockerfile(context).build(imageName, { deleteOnExit: false });
+
+    const imageLabels = await getImageLabelsByName(imageName);
+    expect(imageLabels[LABEL_TESTCONTAINERS_SESSION_ID]).toBeUndefined();
+
+    await deleteImageByName(imageName);
   });
 
   // https://github.com/containers/podman/issues/17779

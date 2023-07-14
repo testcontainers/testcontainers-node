@@ -11,6 +11,10 @@ import { GenericContainer } from "./generic-container";
 import { getDockerClient } from "../docker/client/docker-client";
 import { imageExists } from "../docker/functions/image/image-exists";
 
+export type BuildOptions = {
+  deleteOnExit: boolean;
+};
+
 export class GenericContainerBuilder {
   private buildArgs: BuildArgs = {};
   private pullPolicy: PullPolicy = new DefaultPullPolicy();
@@ -37,8 +41,10 @@ export class GenericContainerBuilder {
     return this;
   }
 
-  // https://github.com/containers/buildah/issues/1034
-  public async build(image = `localhost/${this.uuid.nextUuid()}:${this.uuid.nextUuid()}`): Promise<GenericContainer> {
+  public async build(
+    image = `localhost/${this.uuid.nextUuid()}:${this.uuid.nextUuid()}`,
+    options: BuildOptions = { deleteOnExit: true }
+  ): Promise<GenericContainer> {
     const imageName = DockerImageName.fromString(image);
 
     const { sessionId } = await getDockerClient();
@@ -56,6 +62,7 @@ export class GenericContainerBuilder {
       buildArgs: this.buildArgs,
       pullPolicy: this.pullPolicy,
       cache: this.cache,
+      deleteOnExit: options.deleteOnExit,
       registryConfig,
     });
     const container = new GenericContainer(imageName.toString());

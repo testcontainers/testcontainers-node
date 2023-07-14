@@ -94,3 +94,14 @@ export const waitForDockerEvent = async (eventStream: Readable, eventName: strin
     });
   });
 };
+
+export async function getImageLabelsByName(imageName: string): Promise<{ [label: string]: string }> {
+  const { dockerode } = await getDockerClient();
+  const imageInfo = await dockerode.getImage(imageName).inspect();
+  return imageInfo.Config.Labels;
+}
+
+export async function deleteImageByName(imageName: string): Promise<void> {
+  const { dockerode } = await getDockerClient();
+  await dockerode.getImage(imageName).remove();
+}
