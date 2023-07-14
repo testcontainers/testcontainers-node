@@ -16,6 +16,7 @@ import { LABEL_TESTCONTAINERS_SESSION_ID } from "../labels";
 describe("GenericContainer Dockerfile", () => {
   jest.setTimeout(180_000);
 
+  const uuidGen = new RandomUuid();
   const fixtures = path.resolve(__dirname, "..", "..", "fixtures", "docker");
 
   it("should build and start", async () => {
@@ -29,7 +30,6 @@ describe("GenericContainer Dockerfile", () => {
   });
 
   it("should have a session ID label to be cleaned up by the Reaper", async () => {
-    const uuidGen = new RandomUuid();
     const context = path.resolve(fixtures, "docker");
     const imageName = `${uuidGen.nextUuid()}:${uuidGen.nextUuid()}`;
 
@@ -43,7 +43,6 @@ describe("GenericContainer Dockerfile", () => {
   });
 
   it("should not have a session ID label when delete on exit set to false", async () => {
-    const uuidGen = new RandomUuid();
     const context = path.resolve(fixtures, "docker");
     const imageName = `${uuidGen.nextUuid()}:${uuidGen.nextUuid()}`;
 
