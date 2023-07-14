@@ -19,6 +19,7 @@ export type BuildImageOptions = {
   pullPolicy: PullPolicy;
   registryConfig: RegistryConfig;
   cache: boolean;
+  deleteOnExit: boolean;
 };
 
 export const buildImage = async (sessionId: string, options: BuildImageOptions): Promise<void> => {
@@ -45,7 +46,7 @@ export const buildImage = async (sessionId: string, options: BuildImageOptions):
       nocache: !options.cache,
       buildargs: options.buildArgs,
       t: options.imageName.toString(),
-      labels: createLabels(sessionId, false),
+      labels: createLabels(sessionId, !options.deleteOnExit),
       registryconfig: options.registryConfig,
       pull: options.pullPolicy.shouldPull() ? "true" : undefined,
     };
