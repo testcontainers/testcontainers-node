@@ -37,6 +37,7 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
           if (++count === this.times) {
             stream.destroy();
             clearTimeout(timeout);
+            log.debug(`Log wait strategy complete`, { containerId: container.id });
             resolve();
           }
         }

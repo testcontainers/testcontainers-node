@@ -110,6 +110,8 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
       },
       this.startupTimeout
     );
+
+    log.debug(`HTTP wait strategy complete`, { containerId: container.id });
   }
 
   private getAgent(): Agent | undefined {

@@ -26,7 +26,10 @@ export class CompositeWaitStrategy extends AbstractWaitStrategy {
       Promise.all(
         this.waitStrategies.map((waitStrategy) => waitStrategy.waitUntilReady(container, boundPorts, startTime))
       )
-        .then(() => resolve())
+        .then(() => {
+          log.debug(`Composite wait strategy complete`, { containerId: container.id });
+          resolve();
+        })
         .catch((err) => reject(err))
         .finally(() => {
           if (deadlineTimeout) {

@@ -28,6 +28,7 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
       await this.waitForPort(container, hostPort, portCheck);
       log.debug(`Host port ${hostPort} ready`, { containerId: container.id });
     }
+    log.debug(`Host port wait strategy complete`, { containerId: container.id });
   }
 
   private async waitForInternalPorts(
