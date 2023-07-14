@@ -25,13 +25,16 @@ export class SeleniumContainer extends GenericContainer {
     this.withExposedPorts(SELENIUM_PORT, VNC_PORT)
       .withSharedMemorySize(2 * 1024 * 1024 * 1024)
       .withWaitStrategy(
-        Wait.forHttp("/wd/hub/status", SELENIUM_PORT).forResponsePredicate((response) => {
-          try {
-            return JSON.parse(response).value.ready;
-          } catch {
-            return false;
-          }
-        })
+        Wait.forAll([
+          Wait.forListeningPorts(),
+          Wait.forHttp("/wd/hub/status", SELENIUM_PORT).forResponsePredicate((response) => {
+            try {
+              return JSON.parse(response).value.ready;
+            } catch {
+              return false;
+            }
+          }),
+        ])
       );
   }
 
