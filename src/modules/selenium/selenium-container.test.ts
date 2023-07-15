@@ -1,19 +1,55 @@
-import { SELENIUM_VIDEO_IMAGE, SeleniumContainer } from "./selenium-container";
-import { Browser, Builder } from "selenium-webdriver";
+import {
+  SELENIUM_VIDEO_IMAGE,
+  SeleniumContainer,
+  StartedSeleniumContainer,
+  StartedSeleniumRecordingContainer,
+} from "./selenium-container";
+import { Browser, Builder, WebDriver } from "selenium-webdriver";
 import tmp from "tmp";
 import { GenericContainer } from "../../generic-container/generic-container";
 import { StartedTestContainer } from "../../test-container";
 import path from "path";
 
-jest.retryTimes(1);
+jest.retryTimes(1, { logErrorsBeforeRetry: true });
 
 describe("SeleniumContainer", () => {
   jest.setTimeout(180_000);
 
   let ffmpegContainer: StartedTestContainer;
+  let seleniumContainer: StartedSeleniumContainer | undefined;
+  let seleniumRecordingContainer: StartedSeleniumRecordingContainer | undefined;
+  let driver: WebDriver | undefined;
 
   beforeAll(async () => {
     ffmpegContainer = await new GenericContainer(SELENIUM_VIDEO_IMAGE).withCommand(["sleep", "infinity"]).start();
+  });
+
+  afterEach(async () => {
+    if (driver) {
+      try {
+        await driver.quit();
+      } catch {
+        // ignore
+      } finally {
+        driver = undefined;
+      }
+    }
+    if (seleniumContainer) {
+      try {
+        await seleniumContainer.stop();
+      } finally {
+        seleniumContainer = undefined;
+      }
+    }
+    if (seleniumRecordingContainer) {
+      try {
+        await seleniumRecordingContainer.stop();
+      } catch {
+        // ignore
+      } finally {
+        seleniumRecordingContainer = undefined;
+      }
+    }
   });
 
   afterAll(async () => {
@@ -27,22 +63,25 @@ describe("SeleniumContainer", () => {
 
   browsers.forEach(async ([browser, image]) => {
     it(`should work for ${browser}`, async () => {
-      const container = await new SeleniumContainer(image).start();
-      const driver = new Builder().forBrowser(Browser[browser]).usingServer(container.getServerUrl()).build();
+      seleniumContainer = await new SeleniumContainer(image).start();
+      driver = new Builder().forBrowser(Browser[browser]).usingServer(seleniumContainer.getServerUrl()).build();
 
       await driver.get("https://testcontainers.com");
       expect(await driver.getTitle()).toEqual("Testcontainers");
 
       await driver.quit();
-      await container.stop();
+      await seleniumContainer.stop();
     });
 
     it(`should record video and save to disk for ${browser}`, async () => {
-      const container = await new SeleniumContainer(image).withRecording().start();
-      const driver = new Builder().forBrowser(Browser[browser]).usingServer(container.getServerUrl()).build();
+      seleniumRecordingContainer = await new SeleniumContainer(image).withRecording().start();
+      driver = new Builder()
+        .forBrowser(Browser[browser])
+        .usingServer(seleniumRecordingContainer.getServerUrl())
+        .build();
       await driver.get("https://testcontainers.com");
       await driver.quit();
-      const stoppedContainer = await container.stop();
+      const stoppedContainer = await seleniumRecordingContainer.stop();
 
       const videoFilePath = tmp.fileSync({ keep: false, prefix: `video-${browser}`, postfix: ".mp4" }).name;
       const videoFileName = path.basename(videoFilePath);
