@@ -28,7 +28,7 @@
     "docs:serve": "docker-compose up",
     "clean": "rimraf dist",
     "test": "cross-env DEBUG=testcontainers* jest",
-    "test:ci": "npm run test -- --runInBand --coverage",
+    "test:ci": "npm run test -- --runInBand --coverage --detectOpenHandles",
     "format": "prettier --write package.json \"src/**/*.ts\"",
     "lint": "eslint --fix package.json \"src/**/*.ts\"",
     "lint:ci": "eslint package.json \"src/**/*.ts\" --max-warnings=0",
