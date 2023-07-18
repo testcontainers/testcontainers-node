@@ -23,7 +23,7 @@ export class SeleniumContainer extends GenericContainer {
 
   protected override async beforeContainerStarted(): Promise<void> {
     this.withExposedPorts(SELENIUM_PORT, VNC_PORT)
-      .withSharedMemorySize(512 * 1024 * 1024)
+      .withSharedMemorySize(2 * 1024 * 1024 * 1024)
       .withWaitStrategy(
         Wait.forAll([
           Wait.forListeningPorts(),
@@ -84,7 +84,6 @@ export class SeleniumRecordingContainer extends SeleniumContainer {
 
     const startedFfmpegContainer = await new GenericContainer(SELENIUM_VIDEO_IMAGE)
       .withNetwork(network)
-      .withSharedMemorySize(512 * 1024 * 1024)
       .withEnvironment({ DISPLAY_CONTAINER_NAME: SELENIUM_NETWORK_ALIAS })
       .withWaitStrategy(Wait.forLogMessage(/.*video-recording entered RUNNING state.*/))
       .start();
