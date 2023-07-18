@@ -30,7 +30,7 @@ describe("SeleniumContainer", () => {
       log.error("===== STARTING SELENIUM CONTAINER");
       const container = await new SeleniumContainer(image).start();
       log.error("===== STARTING WEBDRIVER");
-      const driver = new Builder().forBrowser(Browser[browser]).usingServer(container.getServerUrl()).build();
+      const driver = await new Builder().forBrowser(Browser[browser]).usingServer(container.getServerUrl()).build();
 
       log.error("===== NAV TO TESTCONTAINERS.COM");
       await driver.get("https://testcontainers.com");
@@ -49,7 +49,7 @@ describe("SeleniumContainer", () => {
       log.error("===== STARTING SELENIUM CONTAINER");
       const container = await new SeleniumContainer(image).withRecording().start();
       log.error("===== STARTING WEBDRIVER");
-      const driver = new Builder().forBrowser(Browser[browser]).usingServer(container.getServerUrl()).build();
+      const driver = await new Builder().forBrowser(Browser[browser]).usingServer(container.getServerUrl()).build();
       log.error("===== NAV TO TESTCONTAINERS.COM");
       await driver.get("https://testcontainers.com");
       log.error("===== QUIT DRIVER");
