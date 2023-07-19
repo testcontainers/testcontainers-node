@@ -340,7 +340,7 @@ describe("GenericContainer", () => {
     const target = "/tmp";
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
 
-    container.copyDirectoriesToContainer([{ source, target }]);
+    await container.copyDirectoriesToContainer([{ source, target }]);
 
     expect((await container.exec("cat /tmp/test.txt")).output).toEqual(expect.stringContaining("hello world"));
 
@@ -382,7 +382,7 @@ describe("GenericContainer", () => {
     const target = "/tmp/test.txt";
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
 
-    container.copyContentToContainer([{ content, target }]);
+    await container.copyContentToContainer([{ content, target }]);
 
     expect((await container.exec(["cat", target])).output).toEqual(expect.stringContaining(content));
 
