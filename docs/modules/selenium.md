@@ -14,7 +14,7 @@ const { SeleniumContainer } = require("testcontainers");
 const container = await new SeleniumContainer("selenium/standalone-chrome:112.0")
   .start();
 
-const driver = new Builder()
+const driver = await new Builder()
   .forBrowser(Browser.CHROME)
   .usingServer(container.getServerUrl())
   .build();
@@ -29,7 +29,7 @@ You can use any Selenium supported web browser by providing the appropriate imag
 const container = await new SeleniumContainer("selenium/standalone-edge:112.0")
   .start();
 
-const driver = new Builder()
+const driver = await new Builder()
   .forBrowser(Browser.EDGE)
   ...
   .build();
@@ -64,7 +64,7 @@ const { SeleniumContainer } = require("testcontainers");
 const container = await new SeleniumContainer("seleniarm/standalone-chromium:112.0")
   .start();
 
-const driver = new Builder()
+const driver = await new Builder()
   .forBrowser(Browser.CHROME)
   .usingServer(container.getServerUrl())
   .build();
