@@ -1,5 +1,7 @@
 # Compose
 
+**Note:** Compose currently uses docker-compose (v1). If you are having problems see the [Troubleshooting](#Troubleshooting) section below
+
 ## Starting a Docker compose environment
 
 Create and start a Docker Compose environment:
@@ -141,4 +143,19 @@ Interact with the containers in your compose environment as you would any other 
 
 ```javascript
 const container = environment.getContainer("alpine-1");
+```
+
+## Troubleshooting
+Compose currently uses docker-compose (v1) (see https://docs.docker.com/compose/migrate/). If you are using docker compose (v2), then a workaround is to download [docker-compose v1 standalone](https://docs.docker.com/compose/install/standalone/) and override `process.env.PATH` so it takes precedence over your local installation. Example:
+
+Download standalone version in a local folder:
+```bash
+mkdir bin
+curl -SL https://github.com/docker/compose/releases/download/v2.20.0/docker-compose-linux-x86_64 -o ./bin/docker-compose
+```
+
+Then before using DockerComposeEnvironment setup PATH:
+```javascript
+process.env.PATH=`${__dirname}/bin:${process.env.PATH}`;
+const environment = await new DockerComposeEnvironment(composeFilePath, composeFile).up();
 ```
