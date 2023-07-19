@@ -5,8 +5,6 @@ import { GenericContainer } from "../../generic-container/generic-container";
 import { StartedTestContainer } from "../../test-container";
 import path from "path";
 
-jest.retryTimes(1);
-
 describe("SeleniumContainer", () => {
   jest.setTimeout(180_000);
 
@@ -28,7 +26,7 @@ describe("SeleniumContainer", () => {
   browsers.forEach(async ([browser, image]) => {
     it(`should work for ${browser}`, async () => {
       const container = await new SeleniumContainer(image).start();
-      const driver = new Builder().forBrowser(Browser[browser]).usingServer(container.getServerUrl()).build();
+      const driver = await new Builder().forBrowser(Browser[browser]).usingServer(container.getServerUrl()).build();
 
       await driver.get("https://testcontainers.com");
       expect(await driver.getTitle()).toEqual("Testcontainers");
@@ -39,7 +37,7 @@ describe("SeleniumContainer", () => {
 
     it(`should record video and save to disk for ${browser}`, async () => {
       const container = await new SeleniumContainer(image).withRecording().start();
-      const driver = new Builder().forBrowser(Browser[browser]).usingServer(container.getServerUrl()).build();
+      const driver = await new Builder().forBrowser(Browser[browser]).usingServer(container.getServerUrl()).build();
       await driver.get("https://testcontainers.com");
       await driver.quit();
       const stoppedContainer = await container.stop();

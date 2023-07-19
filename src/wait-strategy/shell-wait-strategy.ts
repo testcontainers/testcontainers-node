@@ -33,5 +33,7 @@ export class ShellWaitStrategy extends AbstractWaitStrategy {
       },
       this.startupTimeout
     );
+
+    log.debug(`Shell wait strategy complete`, { containerId: container.id });
   }
 }

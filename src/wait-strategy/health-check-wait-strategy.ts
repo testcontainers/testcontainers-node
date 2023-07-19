@@ -26,5 +26,7 @@ export class HealthCheckWaitStrategy extends AbstractWaitStrategy {
       log.error(message, { containerId: container.id });
       throw new Error(message);
     }
+
+    log.debug(`Health check wait strategy complete`, { containerId: container.id });
   }
 }
