@@ -1,6 +1,6 @@
 import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
 import Dockerode from "dockerode";
-import { ContentToCopy, ExecResult, FileToCopy, Labels } from "../docker/types";
+import { ContentToCopy, DirectoryToCopy, ExecResult, FileToCopy, Labels } from "../docker/types";
 import { inspectContainer, InspectResult } from "../docker/functions/container/inspect-container";
 import { BoundPorts } from "../bound-ports";
 import { containerLog, log } from "../logger";
@@ -133,6 +133,15 @@ export class StartedGenericContainer implements StartedTestContainer {
     tar.finalize();
     await putContainerArchive({ container: this.container, stream: tar, containerPath: "/" });
     log.debug(`Copied files to container`, { containerId: this.container.id });
+  }
+
+  public async copyDirectoriesToContainer(directoriesToCopy: DirectoryToCopy[]): Promise<void> {
+    log.debug(`Copying directories to container...`, { containerId: this.container.id });
+    const tar = archiver("tar");
+    directoriesToCopy.forEach(({ source, target }) => tar.directory(source, target));
+    tar.finalize();
+    await putContainerArchive({ container: this.container, stream: tar, containerPath: "/" });
+    log.debug(`Copied directories to container`, { containerId: this.container.id });
   }
 
   public async copyContentToContainer(contentsToCopy: ContentToCopy[]): Promise<void> {

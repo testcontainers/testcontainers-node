@@ -293,6 +293,18 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
+  it("should copy file to started container", async () => {
+    const source = path.resolve(fixtures, "docker", "test.txt");
+    const target = "/tmp/test.txt";
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
+
+    await container.copyFilesToContainer([{ source, target }]);
+
+    expect((await container.exec(["cat", target])).output).toEqual(expect.stringContaining("hello world"));
+
+    await container.stop();
+  });
+
   it("should copy directory to container", async () => {
     const source = path.resolve(fixtures, "docker");
     const target = "/tmp";
@@ -323,6 +335,18 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
+  it("should copy directory to started container", async () => {
+    const source = path.resolve(fixtures, "docker");
+    const target = "/tmp";
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
+
+    container.copyDirectoriesToContainer([{ source, target }]);
+
+    expect((await container.exec("cat /tmp/test.txt")).output).toEqual(expect.stringContaining("hello world"));
+
+    await container.stop();
+  });
+
   it("should copy content to container", async () => {
     const content = "hello world";
     const target = "/tmp/test.txt";
@@ -349,6 +373,18 @@ describe("GenericContainer", () => {
       .start();
 
     expect((await container.exec(`stat -c "%a %n" ${target}`)).output).toContain("777");
+
+    await container.stop();
+  });
+
+  it("should copy content to started container", async () => {
+    const content = "hello world";
+    const target = "/tmp/test.txt";
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
+
+    container.copyContentToContainer([{ content, target }]);
+
+    expect((await container.exec(["cat", target])).output).toEqual(expect.stringContaining(content));
 
     await container.stop();
   });
