@@ -188,14 +188,12 @@ export class GenericContainer implements TestContainer {
     }
 
     if (containerLog.enabled() || this.logConsumer !== undefined) {
-      const logStream = await containerLogs(container);
-
       if (this.logConsumer !== undefined) {
-        this.logConsumer(logStream);
+        this.logConsumer(await containerLogs(container));
       }
 
       if (containerLog.enabled()) {
-        logStream
+        (await containerLogs(container))
           .on("data", (data) => containerLog.trace(data.trim(), { containerId: container.id }))
           .on("err", (data) => containerLog.error(data.trim(), { containerId: container.id }));
       }

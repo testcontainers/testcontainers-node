@@ -112,6 +112,25 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+Or after it starts:
+
+```javascript
+const container = await new GenericContainer("alpine").start();
+
+container.copyFilesToContainer([{ 
+  source: "/local/file.txt", 
+  target: "/remote/file1.txt"
+}])
+container.copyDirectoriesToContainer([{
+  source: "/localdir",
+  target: "/some/nested/remotedir"
+}])
+container.copyContentToContainer([{ 
+  content: "hello world",
+  target: "/remote/file2.txt"
+}])
+````
+
 An optional `mode` can be specified in octal for setting file permissions:
 
 ```javascript

@@ -1,5 +1,5 @@
 import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
-import { ContentToCopy, ExecResult, FileToCopy, Labels } from "../docker/types";
+import { ContentToCopy, DirectoryToCopy, ExecResult, FileToCopy, Labels } from "../docker/types";
 import { Readable } from "stream";
 
 export class AbstractStartedContainer implements StartedTestContainer {
@@ -65,6 +65,10 @@ export class AbstractStartedContainer implements StartedTestContainer {
 
   public async copyFilesToContainer(filesToCopy: FileToCopy[]): Promise<void> {
     return this.startedTestContainer.copyFilesToContainer(filesToCopy);
+  }
+
+  public async copyDirectoriesToContainer(directoriesToCopy: DirectoryToCopy[]): Promise<void> {
+    return this.startedTestContainer.copyDirectoriesToContainer(directoriesToCopy);
   }
 
   public async copyContentToContainer(contentsToCopy: ContentToCopy[]): Promise<void> {

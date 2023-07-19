@@ -75,6 +75,7 @@ export interface StartedTestContainer {
   getNetworkId(networkName: string): string;
   getIpAddress(networkName: string): string;
   copyArchiveFromContainer(path: string): Promise<NodeJS.ReadableStream>;
+  copyDirectoriesToContainer(directoriesToCopy: DirectoryToCopy[]): Promise<void>;
   copyFilesToContainer(filesToCopy: FileToCopy[]): Promise<void>;
   copyContentToContainer(contentsToCopy: ContentToCopy[]): Promise<void>;
   exec(command: string | string[]): Promise<ExecResult>;
