@@ -1,5 +1,5 @@
 import { log } from "./logger";
-import { version as dockerComposeV1Version, v2 as dockerComposeV2 } from "docker-compose";
+import dockerComposeV1, { v2 as dockerComposeV2 } from "docker-compose";
 import { DockerInfo, getDockerInfo } from "./docker/functions/get-info";
 import Dockerode from "dockerode";
 
@@ -59,7 +59,7 @@ export type DockerComposeCompatibility = "v1" | "v2";
 const getDockerComposeInfo = async (): Promise<DockerComposeInfo | undefined> => {
   try {
     return {
-      version: (await dockerComposeV1Version()).data.version,
+      version: (await dockerComposeV1.version()).data.version,
       compatability: "v1",
     };
   } catch (err) {
@@ -69,7 +69,7 @@ const getDockerComposeInfo = async (): Promise<DockerComposeInfo | undefined> =>
         compatability: "v2",
       };
     } catch {
-      log.info(`Unable to detect docker-compose version, is it installed? ${err}`);
+      log.warn(`Unable to detect DockerCompose version, is it installed? ${err}`);
       return undefined;
     }
   }

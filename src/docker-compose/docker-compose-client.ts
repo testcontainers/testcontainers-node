@@ -56,7 +56,9 @@ class DockerComposeV1Client implements DockerComposeClient {
       }
       log.info(`Pulled DockerCompose environment`);
     } catch (err) {
-      await handleAndRethrow(err, async () => log.error(`Failed to pull DockerCompose environment images: ${err}`));
+      await handleAndRethrow(err, async (error: Error) =>
+        log.error(`Failed to pull DockerCompose environment images: ${error.message}`)
+      );
     }
   }
 
@@ -66,7 +68,9 @@ class DockerComposeV1Client implements DockerComposeClient {
       await v1.stop(await defaultDockerComposeOptions(options));
       log.info(`Stopped DockerCompose environment`);
     } catch (err) {
-      await handleAndRethrow(err, async () => log.error(`Failed to stop DockerCompose environment: ${err}`));
+      await handleAndRethrow(err, async (error: Error) =>
+        log.error(`Failed to stop DockerCompose environment: ${error.message}`)
+      );
     }
   }
 
@@ -79,7 +83,9 @@ class DockerComposeV1Client implements DockerComposeClient {
       });
       log.info(`Downed DockerCompose environment`);
     } catch (err) {
-      await handleAndRethrow(err, async () => log.error(`Failed to down DockerCompose environment: ${err}`));
+      await handleAndRethrow(err, async (error: Error) =>
+        log.error(`Failed to down DockerCompose environment: ${error.message}`)
+      );
     }
   }
 }
@@ -118,7 +124,9 @@ class DockerComposeV2Client implements DockerComposeClient {
       }
       log.info(`Pulled DockerCompose environment`);
     } catch (err) {
-      await handleAndRethrow(err, async () => log.error(`Failed to pull DockerCompose environment images: ${err}`));
+      await handleAndRethrow(err, async (error: Error) =>
+        log.error(`Failed to pull DockerCompose environment images: ${error.message}`)
+      );
     }
   }
 
@@ -128,7 +136,9 @@ class DockerComposeV2Client implements DockerComposeClient {
       await v2.stop(await defaultDockerComposeOptions(options));
       log.info(`Stopped DockerCompose environment`);
     } catch (err) {
-      await handleAndRethrow(err, async () => log.error(`Failed to stop DockerCompose environment: ${err}`));
+      await handleAndRethrow(err, async (error: Error) =>
+        log.error(`Failed to stop DockerCompose environment: ${error.message}`)
+      );
     }
   }
 
@@ -141,7 +151,9 @@ class DockerComposeV2Client implements DockerComposeClient {
       });
       log.info(`Downed DockerCompose environment`);
     } catch (err) {
-      await handleAndRethrow(err, async () => log.error(`Failed to down DockerCompose environment: ${err}`));
+      await handleAndRethrow(err, async (error: Error) =>
+        log.error(`Failed to down DockerCompose environment: ${error.message}`)
+      );
     }
   }
 }
@@ -166,16 +178,7 @@ class MissingDockerComposeClient implements DockerComposeClient {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function handleAndRethrow(err: any, handle: (error: Error) => Promise<void>): Promise<never> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function parseError(err: any): Error {
-    if (err instanceof Error) {
-      return err;
-    } else {
-      return new Error(err.err.trim());
-    }
-  }
-
-  const error = parseError(err);
+  const error = err instanceof Error ? err : new Error(err.err.trim());
   await handle(error);
   throw error;
 }
