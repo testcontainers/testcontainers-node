@@ -1,5 +1,5 @@
 import { DownedDockerComposeEnvironment } from "./downed-docker-compose-environment";
-import { DockerComposeDownOptions, DockerComposeOptions } from "../docker-compose/docker-compose-options";
+import { DockerComposeDownOptions, DockerComposeOptions } from "@testcontainers/docker-compose";
 import { getDockerClient } from "../docker/client/docker-client";
 
 export class StoppedDockerComposeEnvironment {

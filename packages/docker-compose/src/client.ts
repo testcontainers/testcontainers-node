@@ -1,28 +1,32 @@
-import { DockerComposeDownOptions, DockerComposeOptions } from "./docker-compose-options";
-import { log, pullLog } from "../logger";
+import { defaultDockerComposeOptions, DockerComposeDownOptions, DockerComposeOptions } from "./options";
+import { log, pullLog } from "@testcontainers/logger";
 import v1, { v2 } from "docker-compose";
-import { defaultDockerComposeOptions } from "./docker-compose-options";
-import { DockerComposeCompatibility } from "../system-info";
+import { getDockerComposeInfo } from "./info";
 
 export interface DockerComposeClient {
+  version: string;
   up: (options: DockerComposeOptions, services?: Array<string>) => Promise<void>;
   pull: (options: DockerComposeOptions, services?: Array<string>) => Promise<void>;
   stop: (options: DockerComposeOptions) => Promise<void>;
   down: (options: DockerComposeOptions, downOptions: DockerComposeDownOptions) => Promise<void>;
 }
 
-export function getDockerComposeClient(compat?: DockerComposeCompatibility): DockerComposeClient {
-  switch (compat) {
+export async function getDockerComposeClient(): Promise<DockerComposeClient> {
+  const info = await getDockerComposeInfo();
+
+  switch (info?.compatability) {
     case undefined:
       return new MissingDockerComposeClient();
     case "v1":
-      return new DockerComposeV1Client();
+      return new DockerComposeV1Client(info.version);
     case "v2":
-      return new DockerComposeV2Client();
+      return new DockerComposeV2Client(info.version);
   }
 }
 
 class DockerComposeV1Client implements DockerComposeClient {
+  constructor(public readonly version: string) {}
+
   async up(options: DockerComposeOptions, services: Array<string> | undefined): Promise<void> {
     try {
       if (services) {
@@ -91,6 +95,8 @@ class DockerComposeV1Client implements DockerComposeClient {
 }
 
 class DockerComposeV2Client implements DockerComposeClient {
+  constructor(public readonly version: string) {}
+
   async up(options: DockerComposeOptions, services: Array<string> | undefined): Promise<void> {
     try {
       if (services) {
@@ -159,6 +165,8 @@ class DockerComposeV2Client implements DockerComposeClient {
 }
 
 class MissingDockerComposeClient implements DockerComposeClient {
+  readonly version = "N/A";
+
   up(): Promise<void> {
     throw new Error("DockerCompose is not installed");
   }

@@ -1,17 +1,21 @@
-import { log } from "./logger";
+import { log } from "@testcontainers/logger";
 import dockerComposeV1, { v2 as dockerComposeV2 } from "docker-compose";
 import { DockerInfo, getDockerInfo } from "./docker/functions/get-info";
 import Dockerode from "dockerode";
+import { DockerComposeClient } from "@testcontainers/docker-compose";
 
 let systemInfo: SystemInfo;
 
 export type SystemInfo = {
   nodeInfo: NodeInfo;
   dockerInfo: DockerInfo;
-  dockerComposeInfo?: DockerComposeInfo;
+  dockerComposeInfo?: { version: string };
 };
 
-export const getSystemInfo = async (dockerode: Dockerode): Promise<SystemInfo> => {
+export const getSystemInfo = async (
+  dockerode: Dockerode,
+  dockerComposeClient: DockerComposeClient
+): Promise<SystemInfo> => {
   if (systemInfo !== undefined) {
     return systemInfo;
   }
@@ -19,7 +23,7 @@ export const getSystemInfo = async (dockerode: Dockerode): Promise<SystemInfo> =
   log.debug("Fetching system info...");
   const nodeInfo = getNodeInfo();
   const dockerInfo = await getDockerInfo(dockerode);
-  const dockerComposeInfo = await getDockerComposeInfo();
+  const dockerComposeInfo = { version: dockerComposeClient.version };
   systemInfo = { nodeInfo, dockerInfo, dockerComposeInfo };
 
   log.debug(
@@ -27,9 +31,7 @@ export const getSystemInfo = async (dockerode: Dockerode): Promise<SystemInfo> =
       dockerInfo.operatingSystem
     }, Version: ${dockerInfo.serverVersion}, Arch: ${dockerInfo.architecture}, CPUs: ${dockerInfo.cpus}, Memory: ${
       dockerInfo.memory
-    }, Compose installed: ${dockerComposeInfo !== undefined}, Compose version: ${
-      dockerComposeInfo?.version ?? "N/A"
-    }, Compose compatibility: ${dockerComposeInfo?.compatability ?? "N/A"}`
+    }, Compose version: ${dockerComposeInfo?.version ?? "N/A"}`
   );
 
   return systemInfo;
@@ -47,30 +49,4 @@ const getNodeInfo = () => {
     architecture: process.arch,
     platform: process.platform,
   };
-};
-
-export type DockerComposeInfo = {
-  version: string;
-  compatability: DockerComposeCompatibility;
-};
-
-export type DockerComposeCompatibility = "v1" | "v2";
-
-const getDockerComposeInfo = async (): Promise<DockerComposeInfo | undefined> => {
-  try {
-    return {
-      version: (await dockerComposeV1.version()).data.version,
-      compatability: "v1",
-    };
-  } catch (err) {
-    try {
-      return {
-        version: (await dockerComposeV2.version()).data.version,
-        compatability: "v2",
-      };
-    } catch {
-      log.warn(`Unable to detect DockerCompose version, is it installed? ${err}`);
-      return undefined;
-    }
-  }
 };

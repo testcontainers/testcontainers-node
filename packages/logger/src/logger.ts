@@ -1,7 +1,5 @@
 import debug, { IDebugger } from "debug";
 
-type Message = string;
-
 type Options = {
   containerId?: string;
   imageName?: string;
@@ -18,27 +16,27 @@ export class Logger {
     return this.logger.enabled;
   }
 
-  public trace(message: Message, options?: Options): void {
+  public trace(message: string, options?: Options): void {
     this.logger(this.formatMessage(message, "TRACE", options));
   }
 
-  public debug(message: Message, options?: Options): void {
+  public debug(message: string, options?: Options): void {
     this.logger(this.formatMessage(message, "DEBUG", options));
   }
 
-  public info(message: Message, options?: Options): void {
+  public info(message: string, options?: Options): void {
     this.logger(this.formatMessage(message, "INFO", options));
   }
 
-  public warn(message: Message, options?: Options): void {
+  public warn(message: string, options?: Options): void {
     this.logger(this.formatMessage(message, "WARN", options));
   }
 
-  public error(message: Message, options?: Options): void {
+  public error(message: string, options?: Options): void {
     this.logger(this.formatMessage(message, "ERROR", options));
   }
 
-  private formatMessage(message: Message, level: string, options?: Options): string {
+  private formatMessage(message: string, level: string, options?: Options): string {
     return `${this.showLevel ? `[${level}] ` : ""}${this.renderOptions(options)}${message}`;
   }
 

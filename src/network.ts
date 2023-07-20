@@ -1,5 +1,5 @@
 import { RandomUuid, Uuid } from "./uuid";
-import { log } from "./logger";
+import { log } from "@testcontainers/logger";
 import { createNetwork, CreateNetworkOptions } from "./docker/functions/network/create-network";
 import { removeNetwork } from "./docker/functions/network/remove-network";
 import { getDockerClient } from "./docker/client/docker-client";

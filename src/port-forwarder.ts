@@ -1,5 +1,5 @@
 import { createSshConnection, SshConnection } from "ssh-remote-port-forward";
-import { log } from "./logger";
+import { log } from "@testcontainers/logger";
 import { GenericContainer } from "./generic-container/generic-container";
 import { PortWithOptionalBinding } from "./port";
 import { StartedTestContainer } from "./test-container";

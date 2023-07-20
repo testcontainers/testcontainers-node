@@ -1,5 +1,5 @@
 import { IncomingMessage } from "http";
-import { log } from "../../../logger";
+import { log } from "@testcontainers/logger";
 import Dockerode from "dockerode";
 import { demuxStream } from "../demux-stream";
 import { Readable } from "stream";

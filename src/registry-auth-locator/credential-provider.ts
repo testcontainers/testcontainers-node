@@ -1,5 +1,5 @@
 import { CredentialProviderGetResponse, CredentialProviderListResponse, DockerConfig } from "./types";
-import { log } from "../logger";
+import { log } from "@testcontainers/logger";
 import { exec, spawn } from "child_process";
 import { RegistryAuthLocator } from "./registry-auth-locator";
 import { AuthConfig } from "../docker/types";

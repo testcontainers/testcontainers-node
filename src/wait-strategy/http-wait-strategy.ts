@@ -5,7 +5,7 @@ import { IntervalRetryStrategy } from "../retry-strategy";
 import fetch, { Response } from "node-fetch";
 import https, { Agent } from "https";
 import { getDockerClient } from "../docker/client/docker-client";
-import { log } from "../logger";
+import { log } from "@testcontainers/logger";
 
 export class HttpWaitStrategy extends AbstractWaitStrategy {
   private readonly path: string;

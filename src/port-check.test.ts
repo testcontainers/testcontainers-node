@@ -1,4 +1,4 @@
-import { log } from "./logger";
+import { log } from "@testcontainers/logger";
 import { execContainer } from "./docker/functions/container/exec-container";
 import Dockerode from "dockerode";
 import { InternalPortCheck } from "./port-check";

@@ -1,6 +1,6 @@
 import { HealthCheckStatus, Labels, NetworkSettings, Ports } from "../../types";
 import Dockerode, { ContainerInspectInfo } from "dockerode";
-import { log } from "../../../logger";
+import { log } from "@testcontainers/logger";
 
 export type InspectResult = {
   name: string;

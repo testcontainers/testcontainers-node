@@ -1,5 +1,5 @@
 import Dockerode from "dockerode";
-import { log } from "../../logger";
+import { log } from "@testcontainers/logger";
 import { lookupHostIps } from "../lookup-host-ips";
 import { getSystemInfo } from "../../system-info";
 import { RootlessUnixSocketStrategy } from "./strategy/rootless-unix-socket-strategy";
@@ -16,7 +16,7 @@ import { RandomUuid } from "../../uuid";
 import { DockerClient, PartialDockerClient } from "./docker-client-types";
 import { withFileLock } from "../../file-lock";
 import { registerSessionIdForCleanup, startReaper } from "../../reaper";
-import { getDockerComposeClient } from "../../docker-compose/docker-compose-client";
+import { getDockerComposeClient } from "@testcontainers/docker-compose";
 
 let dockerClient: DockerClient;
 
@@ -92,7 +92,8 @@ async function tryToCreateDockerClient(strategy: DockerClientStrategy): Promise<
     log.debug(`Testing Docker client strategy "${strategy.getName()}" with URI "${dockerClientStrategyResult.uri}"...`);
     const dockerode = new Dockerode(dockerClientStrategyResult.dockerOptions);
     if (await isDockerDaemonReachable(dockerode)) {
-      const info = await getSystemInfo(dockerode);
+      const dockerComposeClient = await getDockerComposeClient();
+      const info = await getSystemInfo(dockerode, dockerComposeClient);
       const containerRuntime: ContainerRuntime = dockerClientStrategyResult.uri.includes("podman.sock")
         ? "podman"
         : "docker";
@@ -104,7 +105,6 @@ async function tryToCreateDockerClient(strategy: DockerClientStrategy): Promise<
         dockerClientStrategyResult.allowUserOverrides
       );
       const hostIps = await lookupHostIps(host);
-      const dockerComposeClient = await getDockerComposeClient(info.dockerComposeInfo?.compatability);
       return {
         ...dockerClientStrategyResult,
         containerRuntime,

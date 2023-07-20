@@ -3,7 +3,7 @@ import { DefaultPullPolicy, PullPolicy } from "../pull-policy";
 import { RandomUuid, Uuid } from "../uuid";
 import { DockerImageName } from "../docker-image-name";
 import path from "path";
-import { log } from "../logger";
+import { log } from "@testcontainers/logger";
 import { getDockerfileImages } from "../dockerfile-parser";
 import { buildImage } from "../docker/functions/image/build-image";
 import { getAuthConfig } from "../registry-auth-locator/get-auth-config";

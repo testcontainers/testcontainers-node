@@ -1,6 +1,6 @@
 import Dockerode from "dockerode";
 import { BoundPorts } from "../bound-ports";
-import { log } from "../logger";
+import { log } from "@testcontainers/logger";
 import { containerLogs } from "../docker/functions/container/container-logs";
 import byline from "byline";
 import { AbstractWaitStrategy } from "./wait-strategy";

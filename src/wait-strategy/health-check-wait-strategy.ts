@@ -1,5 +1,5 @@
 import Dockerode from "dockerode";
-import { log } from "../logger";
+import { log } from "@testcontainers/logger";
 import { IntervalRetryStrategy } from "../retry-strategy";
 import { HealthCheckStatus } from "../docker/types";
 import { inspectContainer } from "../docker/functions/container/inspect-container";

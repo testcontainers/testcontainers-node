@@ -73,8 +73,8 @@ export const getVolumeNames = async (): Promise<string[]> => {
 };
 
 export const composeContainerName = async (serviceName: string, index = 1): Promise<string> => {
-  const { dockerode } = await getDockerClient();
-  const { dockerComposeInfo } = await getSystemInfo(dockerode);
+  const { dockerode, dockerComposeClient } = await getDockerClient();
+  const { dockerComposeInfo } = await getSystemInfo(dockerode, dockerComposeClient);
   return dockerComposeInfo?.version.startsWith("1.") ? `${serviceName}_${index}` : `${serviceName}-${index}`;
 };
 

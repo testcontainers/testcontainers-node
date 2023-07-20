@@ -3,7 +3,7 @@ import Dockerode from "dockerode";
 import { ContentToCopy, DirectoryToCopy, ExecResult, FileToCopy, Labels } from "../docker/types";
 import { inspectContainer, InspectResult } from "../docker/functions/container/inspect-container";
 import { BoundPorts } from "../bound-ports";
-import { containerLog, log } from "../logger";
+import { containerLog, log } from "@testcontainers/logger";
 import { removeContainer } from "../docker/functions/container/remove-container";
 import { execContainer } from "../docker/functions/container/exec-container";
 import { Readable } from "stream";

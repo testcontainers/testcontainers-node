@@ -1,6 +1,6 @@
 import Dockerode, { NetworkInspectInfo } from "dockerode";
 import { URL } from "url";
-import { log } from "../logger";
+import { log } from "@testcontainers/logger";
 import { runInContainer } from "./functions/run-in-container";
 import { existsSync } from "fs";
 import { ContainerRuntime } from "./types";

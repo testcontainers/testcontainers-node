@@ -1,4 +1,4 @@
-import { log } from "../../../logger";
+import { log } from "@testcontainers/logger";
 import { DockerImageName } from "../../../docker-image-name";
 import { getDockerClient } from "../../client/docker-client";
 import Dockerode, { PortMap as DockerodePortBindings } from "dockerode";

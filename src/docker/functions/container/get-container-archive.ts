@@ -1,5 +1,5 @@
 import Dockerode from "dockerode";
-import { log } from "../../../logger";
+import { log } from "@testcontainers/logger";
 
 export type GetContainerArchiveOptions = {
   container: Dockerode.Container;

@@ -1,8 +1,8 @@
 import { StartedGenericContainer } from "../generic-container/started-generic-container";
-import { log } from "../logger";
+import { log } from "@testcontainers/logger";
 import { StoppedDockerComposeEnvironment } from "./stopped-docker-compose-environment";
 import { DownedDockerComposeEnvironment } from "./downed-docker-compose-environment";
-import { DockerComposeDownOptions, DockerComposeOptions } from "../docker-compose/docker-compose-options";
+import { DockerComposeDownOptions, DockerComposeOptions } from "@testcontainers/docker-compose";
 import { getDockerClient } from "../docker/client/docker-client";
 
 export class StartedDockerComposeEnvironment {

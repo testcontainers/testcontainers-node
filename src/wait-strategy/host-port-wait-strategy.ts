@@ -1,7 +1,7 @@
 import { HostPortCheck, InternalPortCheck, PortCheck } from "../port-check";
 import Dockerode from "dockerode";
 import { BoundPorts } from "../bound-ports";
-import { log } from "../logger";
+import { log } from "@testcontainers/logger";
 import { IntervalRetryStrategy } from "../retry-strategy";
 import { AbstractWaitStrategy } from "./wait-strategy";
 import { getDockerClient } from "../docker/client/docker-client";

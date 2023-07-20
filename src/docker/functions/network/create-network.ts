@@ -1,4 +1,4 @@
-import { log } from "../../../logger";
+import { log } from "@testcontainers/logger";
 import { Network } from "dockerode";
 import { getDockerClient } from "../../client/docker-client";
 import { createLabels } from "../create-labels";

@@ -4,6 +4,9 @@
   "version": "9.12.0",
   "main": "dist/src/index",
   "types": "dist/src/index",
+  "workspaces": [
+    "packages/*"
+  ],
   "keywords": [
     "docker",
     "testcontainers"
@@ -37,6 +40,8 @@
   },
   "dependencies": {
     "@balena/dockerignore": "^1.0.2",
+    "@testcontainers/docker-compose": "^1.0.0",
+    "@testcontainers/logger": "^1.0.0",
     "@types/archiver": "^5.3.2",
     "@types/dockerode": "^3.3.19",
     "archiver": "^5.3.1",

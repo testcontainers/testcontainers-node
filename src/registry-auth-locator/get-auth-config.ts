@@ -7,7 +7,7 @@ import { CredHelpers } from "./cred-helpers";
 import { CredsStore } from "./creds-store";
 import { Auths } from "./auths";
 import { RegistryAuthLocator } from "./registry-auth-locator";
-import { log } from "../logger";
+import { log } from "@testcontainers/logger";
 import { AuthConfig } from "../docker/types";
 
 const dockerConfigLocation = process.env.DOCKER_CONFIG || `${os.homedir()}/.docker`;

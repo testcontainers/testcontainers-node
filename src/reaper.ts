@@ -1,5 +1,5 @@
 import { Socket } from "net";
-import { log } from "./logger";
+import { log } from "@testcontainers/logger";
 import { GenericContainer } from "./generic-container/generic-container";
 import { REAPER_IMAGE } from "./images";
 import { LABEL_TESTCONTAINERS_SESSION_ID } from "./labels";

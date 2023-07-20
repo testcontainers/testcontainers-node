@@ -1,6 +1,6 @@
 import { DockerImageName } from "../../../docker-image-name";
 import { PullPolicy } from "../../../pull-policy";
-import { buildLog, log } from "../../../logger";
+import { buildLog, log } from "@testcontainers/logger";
 import tar from "tar-fs";
 import byline from "byline";
 import { getDockerClient } from "../../client/docker-client";

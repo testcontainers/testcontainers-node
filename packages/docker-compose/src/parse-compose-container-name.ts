@@ -1,4 +1,4 @@
-export const resolveContainerName = (projectName: string, containerName: string): string => {
+export const parseComposeContainerName = (projectName: string, containerName: string): string => {
   if (containerName.includes(projectName)) {
     return containerName.substring(`/${projectName}_`.length);
   } else if (containerName.startsWith("/")) {

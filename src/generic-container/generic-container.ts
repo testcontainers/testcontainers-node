@@ -1,7 +1,7 @@
 import archiver from "archiver";
 import AsyncLock from "async-lock";
 import { BoundPorts } from "../bound-ports";
-import { containerLog, log } from "../logger";
+import { containerLog, log } from "@testcontainers/logger";
 import { PortWithOptionalBinding } from "../port";
 import { DefaultPullPolicy, PullPolicy } from "../pull-policy";
 import { DockerImageName } from "../docker-image-name";

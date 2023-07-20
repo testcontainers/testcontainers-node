@@ -4,7 +4,7 @@ import { Wait } from "../../wait-strategy/wait";
 import { StartedTestContainer, StopOptions, StoppedTestContainer } from "../../test-container";
 import { AbstractStoppedContainer } from "../abstract-stopped-container";
 import { Network, StartedNetwork } from "../../network";
-import { log } from "../../logger";
+import { log } from "@testcontainers/logger";
 import { copyFile } from "fs/promises";
 import tmp from "tmp";
 import tar from "tar-fs";

@@ -1,9 +1,7 @@
-import { Environment } from "../docker/types";
-import { composeLog, Logger } from "../logger";
+import { composeLog, Logger } from "@testcontainers/logger";
+import { isNotEmptyString } from "@testcontainers/common";
 import { IDockerComposeOptions } from "docker-compose";
-import { getDockerClient } from "../docker/client/docker-client";
 import { EOL } from "os";
-import { isNotEmptyString } from "../type-guards";
 
 export type DockerComposeOptions = {
   filePath: string;
@@ -11,7 +9,7 @@ export type DockerComposeOptions = {
   projectName: string;
   commandOptions?: string[];
   composeOptions?: string[];
-  environment?: Environment;
+  environment?: NodeJS.ProcessEnv;
   logger?: Logger;
 };
 
@@ -19,7 +17,6 @@ export const defaultDockerComposeOptions = async ({
   environment = {},
   ...options
 }: DockerComposeOptions): Promise<Partial<IDockerComposeOptions>> => {
-  const { composeEnvironment } = await getDockerClient();
   const log = options.logger ?? composeLog;
 
   return {
@@ -40,7 +37,6 @@ export const defaultDockerComposeOptions = async ({
     env: {
       ...process.env,
       COMPOSE_PROJECT_NAME: options.projectName,
-      ...composeEnvironment,
       ...environment,
     },
   };

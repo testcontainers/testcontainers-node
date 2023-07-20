@@ -1,0 +1,18 @@
+{
+  "name": "@testcontainers/docker-compose",
+  "version": "1.0.0",
+  "description": "",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "tsc --build",
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@testcontainers/common": "^1.0.0",
+    "@testcontainers/logger": "^1.0.0",
+    "docker-compose": "^0.24.1"
+  }
+}

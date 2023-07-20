@@ -2,7 +2,7 @@ import Dockerode, { DockerOptions } from "dockerode";
 import { HostIps } from "../lookup-host-ips";
 import { SystemInfo } from "../../system-info";
 import { ContainerRuntime } from "../types";
-import { DockerComposeClient } from "../../docker-compose/docker-compose-client";
+import { DockerComposeClient } from "@testcontainers/docker-compose";
 
 export type DockerClient = PartialDockerClient & {
   sessionId: string;

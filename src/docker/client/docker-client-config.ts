@@ -1,5 +1,5 @@
 import path from "path";
-import { log } from "../../logger";
+import { log } from "@testcontainers/logger";
 import { homedir } from "os";
 import { existsSync } from "fs";
 import { readFile } from "fs/promises";

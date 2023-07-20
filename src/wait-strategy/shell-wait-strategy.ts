@@ -1,5 +1,5 @@
 import Dockerode from "dockerode";
-import { log } from "../logger";
+import { log } from "@testcontainers/logger";
 import { AbstractWaitStrategy } from "./wait-strategy";
 import { IntervalRetryStrategy } from "../retry-strategy";
 import { execContainer } from "../docker/functions/container/exec-container";

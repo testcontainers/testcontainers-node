@@ -1,4 +1,4 @@
-import { log } from "../../../logger";
+import { log } from "@testcontainers/logger";
 import Dockerode from "dockerode";
 
 export type StopContainerOptions = {

@@ -1,8 +1,8 @@
 import { ContainerInfo } from "dockerode";
 import { BoundPorts } from "../bound-ports";
-import { resolveContainerName } from "../docker-compose/container-name-resolver";
+import { parseComposeContainerName } from "@testcontainers/docker-compose";
 import { StartedGenericContainer } from "../generic-container/started-generic-container";
-import { containerLog, log } from "../logger";
+import { containerLog, log } from "@testcontainers/logger";
 import { WaitStrategy } from "../wait-strategy/wait-strategy";
 import { RandomUuid, Uuid } from "../uuid";
 import { Environment } from "../docker/types";
@@ -80,7 +80,7 @@ export class DockerComposeEnvironment {
 
   public async up(services?: Array<string>): Promise<StartedDockerComposeEnvironment> {
     log.info(`Starting DockerCompose environment "${this.projectName}"...`);
-    const { dockerComposeClient } = await getDockerClient();
+    const { composeEnvironment, dockerComposeClient } = await getDockerClient();
     await registerComposeProjectForCleanup(this.projectName);
 
     const options = {
@@ -111,7 +111,7 @@ export class DockerComposeEnvironment {
         ...options,
         commandOptions,
         composeOptions,
-        environment: this.environment,
+        environment: { ...composeEnvironment, ...this.environment },
       },
       services
     );
@@ -134,7 +134,7 @@ export class DockerComposeEnvironment {
       await Promise.all(
         startedContainers.map(async (startedContainer) => {
           const container = await getContainerById(startedContainer.Id);
-          const containerName = resolveContainerName(this.projectName, startedContainer.Names[0]);
+          const containerName = parseComposeContainerName(this.projectName, startedContainer.Names[0]);
 
           const { host, hostIps } = await getDockerClient();
           const inspectResult = await inspectContainer(container);

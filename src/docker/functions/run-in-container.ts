@@ -1,4 +1,4 @@
-import { log } from "../../logger";
+import { log } from "@testcontainers/logger";
 import { DockerImageName } from "../../docker-image-name";
 import { pullImage } from "./image/pull-image";
 import { startContainer } from "./container/start-container";

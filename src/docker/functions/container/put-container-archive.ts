@@ -1,6 +1,6 @@
 import { Readable } from "stream";
 import Dockerode from "dockerode";
-import { log } from "../../../logger";
+import { log } from "@testcontainers/logger";
 import { streamToString } from "../../../stream-utils";
 
 export type PutContainerArchiveOptions = {

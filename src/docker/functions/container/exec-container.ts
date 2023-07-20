@@ -1,7 +1,7 @@
 import { Readable } from "stream";
 import { ContainerRuntime, ExecResult } from "../../types";
 import Dockerode from "dockerode";
-import { execLog, log } from "../../../logger";
+import { execLog, log } from "@testcontainers/logger";
 import byline from "byline";
 import { demuxStream } from "../demux-stream";
 

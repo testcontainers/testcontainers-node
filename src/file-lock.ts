@@ -1,7 +1,7 @@
 import path from "path";
 import tmp from "tmp";
 import { writeFile } from "fs/promises";
-import { log } from "./logger";
+import { log } from "@testcontainers/logger";
 import lockFile from "proper-lockfile";
 
 export async function withFileLock<T>(fileName: string, fn: () => T): Promise<T> {

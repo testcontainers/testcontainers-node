@@ -1,5 +1,5 @@
 import { DockerImageName } from "../../../docker-image-name";
-import { log, pullLog } from "../../../logger";
+import { log, pullLog } from "@testcontainers/logger";
 import { imageExists } from "./image-exists";
 import Dockerode from "dockerode";
 import { getAuthConfig } from "../../../registry-auth-locator/get-auth-config";

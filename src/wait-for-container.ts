@@ -1,6 +1,6 @@
 import Dockerode from "dockerode";
 import { BoundPorts } from "./bound-ports";
-import { log } from "./logger";
+import { log } from "@testcontainers/logger";
 import { stopContainer } from "./docker/functions/container/stop-container";
 import { removeContainer } from "./docker/functions/container/remove-container";
 import { WaitStrategy } from "./wait-strategy/wait-strategy";

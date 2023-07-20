@@ -6,7 +6,9 @@
     "outDir": "dist",
     "strict": true,
     "esModuleInterop": true,
-    "lib": ["es2017"],
+    "lib": [
+      "es2017"
+    ],
     "skipLibCheck": true,
     "noImplicitOverride": true,
     "resolveJsonModule": true
@@ -15,5 +17,16 @@
     "dist",
     "node_modules",
     "src/modules/kafka/test-certs/**/*"
+  ],
+  "references": [
+    {
+      "path": "./packages/common"
+    },
+    {
+      "path": "./packages/logger"
+    },
+    {
+      "path": "./packages/docker-compose"
+    }
   ]
 }

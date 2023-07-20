@@ -1,0 +1,3 @@
+export { DockerComposeClient, getDockerComposeClient } from "./client";
+export { DockerComposeOptions, DockerComposeDownOptions } from "./options";
+export { parseComposeContainerName } from "./parse-compose-container-name";

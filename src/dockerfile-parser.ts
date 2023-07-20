@@ -1,5 +1,5 @@
 import { promises as fs } from "fs";
-import { log } from "./logger";
+import { log } from "@testcontainers/logger";
 import { DockerImageName } from "./docker-image-name";
 import { BuildArgs } from "./docker/types";
 import { isNotEmptyString } from "./type-guards";
