@@ -2,6 +2,7 @@ import Dockerode, { DockerOptions } from "dockerode";
 import { HostIps } from "../lookup-host-ips";
 import { SystemInfo } from "../../system-info";
 import { ContainerRuntime } from "../types";
+import { DockerComposeClient } from "../../docker-compose/docker-compose-client";
 
 export type DockerClient = PartialDockerClient & {
   sessionId: string;
@@ -9,6 +10,7 @@ export type DockerClient = PartialDockerClient & {
 
 export type PartialDockerClient = DockerClientStrategyResult & {
   dockerode: Dockerode;
+  dockerComposeClient: DockerComposeClient;
   host: string;
   containerRuntime: ContainerRuntime;
   hostIps: HostIps;

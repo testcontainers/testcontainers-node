@@ -1,14 +1,14 @@
-import { dockerComposeDown } from "../docker-compose/functions/docker-compose-down";
 import { DownedDockerComposeEnvironment } from "./downed-docker-compose-environment";
-import { DockerComposeOptions } from "../docker-compose/docker-compose-options";
-import { DockerComposeDownOptions } from "../test-container";
+import { DockerComposeDownOptions, DockerComposeOptions } from "../docker-compose/docker-compose-options";
+import { getDockerClient } from "../docker/client/docker-client";
 
 export class StoppedDockerComposeEnvironment {
   constructor(private readonly options: DockerComposeOptions) {}
 
   public async down(options: Partial<DockerComposeDownOptions> = {}): Promise<DownedDockerComposeEnvironment> {
+    const { dockerComposeClient } = await getDockerClient();
     const resolvedOptions: DockerComposeDownOptions = { timeout: 0, removeVolumes: true, ...options };
-    await dockerComposeDown(this.options, resolvedOptions);
+    await dockerComposeClient.down(this.options, resolvedOptions);
     return new DownedDockerComposeEnvironment();
   }
 }

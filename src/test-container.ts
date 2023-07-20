@@ -57,11 +57,6 @@ export interface StopOptions {
   removeVolumes: boolean;
 }
 
-export interface DockerComposeDownOptions {
-  timeout: number;
-  removeVolumes: boolean;
-}
-
 export interface StartedTestContainer {
   stop(options?: Partial<StopOptions>): Promise<StoppedTestContainer>;
   restart(options?: Partial<RestartOptions>): Promise<void>;

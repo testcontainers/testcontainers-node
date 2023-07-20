@@ -16,6 +16,7 @@ import { RandomUuid } from "../../uuid";
 import { DockerClient, PartialDockerClient } from "./docker-client-types";
 import { withFileLock } from "../../file-lock";
 import { registerSessionIdForCleanup, startReaper } from "../../reaper";
+import { getDockerComposeClient } from "../../docker-compose/docker-compose-client";
 
 let dockerClient: DockerClient;
 
@@ -103,6 +104,7 @@ async function tryToCreateDockerClient(strategy: DockerClientStrategy): Promise<
         dockerClientStrategyResult.allowUserOverrides
       );
       const hostIps = await lookupHostIps(host);
+      const dockerComposeClient = await getDockerComposeClient(info.dockerComposeInfo?.compatability);
       return {
         ...dockerClientStrategyResult,
         containerRuntime,
@@ -110,6 +112,7 @@ async function tryToCreateDockerClient(strategy: DockerClientStrategy): Promise<
         hostIps,
         info,
         dockerode,
+        dockerComposeClient,
       };
     } else {
       log.warn(`Docker client strategy "${strategy.getName()}" does not work`);
