@@ -1,5 +1,5 @@
 import { log } from "./logger";
-import { version as dockerComposeVersion } from "docker-compose";
+import dockerComposeV1, { v2 as dockerComposeV2 } from "docker-compose";
 import { DockerInfo, getDockerInfo } from "./docker/functions/get-info";
 import Dockerode from "dockerode";
 
@@ -27,7 +27,9 @@ export const getSystemInfo = async (dockerode: Dockerode): Promise<SystemInfo> =
       dockerInfo.operatingSystem
     }, Version: ${dockerInfo.serverVersion}, Arch: ${dockerInfo.architecture}, CPUs: ${dockerInfo.cpus}, Memory: ${
       dockerInfo.memory
-    }, Compose installed: ${dockerComposeInfo !== undefined}, Compose version: ${dockerComposeInfo?.version ?? "N/A"}`
+    }, Compose installed: ${dockerComposeInfo !== undefined}, Compose version: ${
+      dockerComposeInfo?.version ?? "N/A"
+    }, Compose compatibility: ${dockerComposeInfo?.compatability ?? "N/A"}`
   );
 
   return systemInfo;
@@ -49,15 +51,26 @@ const getNodeInfo = () => {
 
 export type DockerComposeInfo = {
   version: string;
+  compatability: DockerComposeCompatibility;
 };
+
+export type DockerComposeCompatibility = "v1" | "v2";
 
 const getDockerComposeInfo = async (): Promise<DockerComposeInfo | undefined> => {
   try {
     return {
-      version: (await dockerComposeVersion()).data.version,
+      version: (await dockerComposeV1.version()).data.version,
+      compatability: "v1",
     };
   } catch (err) {
-    log.info(`Unable to detect docker-compose version, is it installed? ${err}`);
-    return undefined;
+    try {
+      return {
+        version: (await dockerComposeV2.version()).data.version,
+        compatability: "v2",
+      };
+    } catch {
+      log.warn(`Unable to detect DockerCompose version, is it installed? ${err}`);
+      return undefined;
+    }
   }
 };

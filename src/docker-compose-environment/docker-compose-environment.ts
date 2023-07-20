@@ -1,6 +1,6 @@
 import { ContainerInfo } from "dockerode";
 import { BoundPorts } from "../bound-ports";
-import { resolveContainerName } from "../docker-compose/functions/container-name-resolver";
+import { resolveContainerName } from "../docker-compose/container-name-resolver";
 import { StartedGenericContainer } from "../generic-container/started-generic-container";
 import { containerLog, log } from "../logger";
 import { WaitStrategy } from "../wait-strategy/wait-strategy";
@@ -12,11 +12,8 @@ import { getDockerClient } from "../docker/client/docker-client";
 import { inspectContainer } from "../docker/functions/container/inspect-container";
 import { containerLogs } from "../docker/functions/container/container-logs";
 import { StartedDockerComposeEnvironment } from "./started-docker-compose-environment";
-import { dockerComposeDown } from "../docker-compose/functions/docker-compose-down";
-import { dockerComposeUp } from "../docker-compose/functions/docker-compose-up";
 import { waitForContainer } from "../wait-for-container";
 import { DefaultPullPolicy, PullPolicy } from "../pull-policy";
-import { dockerComposePull } from "../docker-compose/functions/docker-compose-pull";
 import { Wait } from "../wait-strategy/wait";
 import { registerComposeProjectForCleanup } from "../reaper";
 
@@ -83,6 +80,7 @@ export class DockerComposeEnvironment {
 
   public async up(services?: Array<string>): Promise<StartedDockerComposeEnvironment> {
     log.info(`Starting DockerCompose environment "${this.projectName}"...`);
+    const { dockerComposeClient } = await getDockerClient();
     await registerComposeProjectForCleanup(this.projectName);
 
     const options = {
@@ -106,9 +104,17 @@ export class DockerComposeEnvironment {
     this.profiles.forEach((profile) => composeOptions.push("--profile", profile));
 
     if (this.pullPolicy.shouldPull()) {
-      await dockerComposePull(options, services);
+      await dockerComposeClient.pull(options, services);
     }
-    await dockerComposeUp({ ...options, commandOptions, composeOptions, environment: this.environment }, services);
+    await dockerComposeClient.up(
+      {
+        ...options,
+        commandOptions,
+        composeOptions,
+        environment: this.environment,
+      },
+      services
+    );
 
     const startedContainers = (await listContainers()).filter(
       (container) => container.Labels["com.docker.compose.project"] === this.projectName
@@ -150,7 +156,7 @@ export class DockerComposeEnvironment {
             await waitForContainer(container, waitStrategy, boundPorts);
           } catch (err) {
             try {
-              await dockerComposeDown(options, { removeVolumes: true, timeout: 0 });
+              await dockerComposeClient.down(options, { removeVolumes: true, timeout: 0 });
             } catch {
               log.warn(`Failed to stop DockerCompose environment after failed up`);
             }
