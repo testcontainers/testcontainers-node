@@ -1,4 +1,11 @@
-import { Container, ContainerCreateOptions, ContainerInfo, ContainerLogsOptions, Network } from "dockerode";
+import {
+  Container,
+  ContainerCreateOptions,
+  ContainerInfo,
+  ContainerInspectInfo,
+  ContainerLogsOptions,
+  Network,
+} from "dockerode";
 import { Readable } from "stream";
 import { ExecResult } from "./types";
 
@@ -16,6 +23,8 @@ export interface ContainerClient {
   create(opts: ContainerCreateOptions): Promise<Container>;
 
   start(container: Container): Promise<void>;
+
+  inspect(container: Container): Promise<ContainerInspectInfo>;
 
   stop(container: Container, opts?: { timeout: number }): Promise<void>;
 

@@ -1,9 +1,12 @@
 import { getContainerPort, PortWithOptionalBinding, resolveHostPortBinding } from "./port";
 import { InspectResult } from "./docker/functions/container/inspect-container";
 import { HostIps } from "./docker/lookup-host-ips";
+import { ContainerRuntimeClient } from "@testcontainers/container-runtime";
 
 export class BoundPorts {
   private readonly ports = new Map<number, number>();
+
+  constructor(private readonly client: ContainerRuntimeClient) {}
 
   public getBinding(port: number): number {
     const binding = this.ports.get(port);
@@ -33,8 +36,8 @@ export class BoundPorts {
     return this.ports;
   }
 
-  public filter(ports: PortWithOptionalBinding[]): BoundPorts {
-    const boundPorts = new BoundPorts();
+  public filter(client: ContainerRuntimeClient, ports: PortWithOptionalBinding[]): BoundPorts {
+    const boundPorts = new BoundPorts(client);
 
     const containerPorts = ports.map((port) => getContainerPort(port));
 
@@ -47,8 +50,12 @@ export class BoundPorts {
     return boundPorts;
   }
 
-  public static fromInspectResult(hostIps: HostIps, inspectResult: InspectResult): BoundPorts {
-    const boundPorts = new BoundPorts();
+  public static fromInspectResult(
+    client: ContainerRuntimeClient,
+    hostIps: HostIps,
+    inspectResult: InspectResult
+  ): BoundPorts {
+    const boundPorts = new BoundPorts(client);
 
     Object.entries(inspectResult.ports).forEach(([containerPort, hostBindings]) => {
       const hostPort = resolveHostPortBinding(hostIps, hostBindings);

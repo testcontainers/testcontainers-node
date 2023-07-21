@@ -40,7 +40,7 @@
   },
   "dependencies": {
     "@balena/dockerignore": "^1.0.2",
-    "@testcontainers/docker-compose": "^1.0.0",
+    "@testcontainers/container-runtime": "^1.0.0",
     "@testcontainers/logger": "^1.0.0",
     "@types/archiver": "^5.3.2",
     "@types/dockerode": "^3.3.19",

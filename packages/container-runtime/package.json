@@ -1,5 +1,5 @@
 {
-  "name": "@testcontainers/docker-compose",
+  "name": "@testcontainers/container-runtime",
   "version": "1.0.0",
   "description": "",
   "main": "build/index.js",
@@ -11,8 +11,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@testcontainers/common": "^1.0.0",
-    "@testcontainers/logger": "^1.0.0",
-    "docker-compose": "^0.24.1"
+    "@testcontainers/common": "^1.0.0"
   }
 }

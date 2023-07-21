@@ -1,10 +1,10 @@
 import { log } from "@testcontainers/logger";
-import { DockerImageName } from "../../docker-image-name";
-import { pullImage } from "./image/pull-image";
-import { startContainer } from "./container/start-container";
-import { attachContainer } from "./container/attach-container";
 import Dockerode from "dockerode";
-import { streamToString } from "../../stream-utils";
+import { pullImage } from "./pull-image";
+import { ImageName } from "../image-name";
+import { attachContainer } from "./attach-container";
+import { streamToString } from "@testcontainers/common";
+import { startContainer } from "./start-container";
 
 export const runInContainer = async (
   dockerode: Dockerode,
@@ -13,7 +13,7 @@ export const runInContainer = async (
   command: string[]
 ): Promise<string | undefined> => {
   try {
-    await pullImage(dockerode, indexServerAddress, { imageName: DockerImageName.fromString(image), force: false });
+    await pullImage(dockerode, indexServerAddress, { imageName: ImageName.fromString(image), force: false });
 
     log.debug(`Creating container: ${image} with command "${command.join(" ")}"...`);
     const container = await dockerode.createContainer({ Image: image, Cmd: command });

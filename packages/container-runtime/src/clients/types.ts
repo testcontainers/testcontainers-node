@@ -11,16 +11,22 @@ export type NodeInfo = {
 };
 
 export type ContainerRuntimeInfo = {
+  host: string;
+  hostIps: HostIp[];
+  indexServerAddress: string;
   serverVersion: number;
   operatingSystem: string;
   operatingSystemType: string;
   architecture: string;
   cpus: number;
   memory: number;
-  indexServerAddress: string;
 };
 
-export type ComposeInfo = {
-  version: string;
-  compatability: "v1" | "v2";
-};
+export type ComposeInfo =
+  | {
+      version: string;
+      compatability: "v1" | "v2";
+    }
+  | undefined;
+
+export type HostIp = { address: string; family: number };

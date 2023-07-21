@@ -1,6 +1,6 @@
 import { ContainerRuntimeClient } from "../clients/client";
 import { ContainerRuntimeClientStrategyResult } from "./types";
-import { ComposeClient, getComposeClient } from "../clients/compose/compose-client";
+import { getComposeClient } from "../clients/compose/compose-client";
 import { DockerContainerClient } from "../clients/container/docker-container-client";
 import { DockerImageClient } from "../clients/image/docker-image-client";
 import { DockerNetworkClient } from "../clients/network/docker-network-client";
@@ -8,6 +8,8 @@ import { PodmanContainerClient } from "../clients/container/podman-container-cli
 import Dockerode from "dockerode";
 import { ComposeInfo, ContainerRuntimeInfo, Info, NodeInfo } from "../clients/types";
 import { isDefined, isEmptyString } from "@testcontainers/common";
+import { lookupHostIps } from "../utils/lookup-host-ips";
+import { resolveHost } from "../utils/resolve-host";
 
 export interface ContainerRuntimeClientStrategy {
   getName(): string;
@@ -36,12 +38,6 @@ export abstract class AbstractContainerRuntimeClientStrategy implements Containe
     const imageClient = new DockerImageClient(dockerode, "");
     const networkClient = new DockerNetworkClient(dockerode);
 
-    const info = await this.getInfo(dockerode, composeClient);
-
-    return new ContainerRuntimeClient(info, composeClient, containerClient, imageClient, networkClient);
-  }
-
-  private async getInfo(dockerode: Dockerode, composeClient: ComposeClient): Promise<Info> {
     const nodeInfo: NodeInfo = {
       version: process.version,
       architecture: process.arch,
@@ -49,6 +45,11 @@ export abstract class AbstractContainerRuntimeClientStrategy implements Containe
     };
 
     const dockerodeInfo = await dockerode.info();
+    const indexServerAddress =
+      !isDefined(dockerodeInfo.IndexServerAddress) || isEmptyString(dockerodeInfo.IndexServerAddress)
+        ? "https://index.docker.io/v1/"
+        : dockerodeInfo.IndexServerAddress;
+    const host = await resolveHost(dockerode, result, indexServerAddress);
     const containerRuntimeInfo: ContainerRuntimeInfo = {
       serverVersion: dockerodeInfo.ServerVersion,
       operatingSystem: dockerodeInfo.OperatingSystem,
@@ -56,13 +57,14 @@ export abstract class AbstractContainerRuntimeClientStrategy implements Containe
       architecture: dockerodeInfo.Architecture,
       cpus: dockerodeInfo.NCPU,
       memory: dockerodeInfo.MemTotal,
-      indexServerAddress:
-        !isDefined(dockerodeInfo.IndexServerAddress) || isEmptyString(dockerodeInfo.IndexServerAddress)
-          ? "https://index.docker.io/v1/"
-          : dockerodeInfo.IndexServerAddress,
+      indexServerAddress: indexServerAddress,
+      host,
+      hostIps: await lookupHostIps(host),
     };
 
     const composeInfo: ComposeInfo = composeClient.info;
-    return { node: nodeInfo, containerRuntime: containerRuntimeInfo, compose: composeInfo };
+    const info: Info = { node: nodeInfo, containerRuntime: containerRuntimeInfo, compose: composeInfo };
+
+    return new ContainerRuntimeClient(info, composeClient, containerClient, imageClient, networkClient);
   }
 }

@@ -1,4 +1,11 @@
-import Dockerode, { Container, ContainerCreateOptions, ContainerInfo, ContainerLogsOptions, Network } from "dockerode";
+import Dockerode, {
+  Container,
+  ContainerCreateOptions,
+  ContainerInfo,
+  ContainerInspectInfo,
+  ContainerLogsOptions,
+  Network,
+} from "dockerode";
 import { log } from "@testcontainers/logger";
 import { PassThrough, Readable } from "stream";
 import { streamToString } from "@testcontainers/common";
@@ -100,6 +107,18 @@ export class DockerContainerClient implements ContainerClient {
       log.debug(`Started container`, { containerId: container.id });
     } catch (err) {
       log.error(`Failed to start container: ${err}`, { containerId: container.id });
+      throw err;
+    }
+  }
+
+  async inspect(container: Dockerode.Container): Promise<ContainerInspectInfo> {
+    try {
+      log.debug(`Inspecting container...`, { containerId: container.id });
+      const inspectInfo = await container.inspect();
+      log.debug(`Inspected container`, { containerId: container.id });
+      return inspectInfo;
+    } catch (err) {
+      log.error(`Failed to inspect container: ${err}`, { containerId: container.id });
       throw err;
     }
   }
