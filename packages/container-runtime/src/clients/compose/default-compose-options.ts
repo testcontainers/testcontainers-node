@@ -4,10 +4,10 @@ import { EOL } from "os";
 import { isNotEmptyString } from "@testcontainers/common";
 import { ComposeOptions } from "./types";
 
-export async function defaultComposeOptions(
+export function defaultComposeOptions(
   environment: NodeJS.ProcessEnv,
   options: ComposeOptions
-): Promise<Partial<IDockerComposeOptions>> {
+): Partial<IDockerComposeOptions> {
   const log = options.logger ?? composeLog;
 
   return {

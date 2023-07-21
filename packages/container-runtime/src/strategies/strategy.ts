@@ -63,6 +63,7 @@ export abstract class AbstractContainerRuntimeClientStrategy implements Containe
     };
 
     const composeInfo: ComposeInfo = composeClient.info;
+
     const info: Info = { node: nodeInfo, containerRuntime: containerRuntimeInfo, compose: composeInfo };
 
     return new ContainerRuntimeClient(info, composeClient, containerClient, imageClient, networkClient);

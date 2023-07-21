@@ -16,7 +16,7 @@ import byline from "byline";
 import { ContainerClient } from "./container-client";
 
 export class DockerContainerClient implements ContainerClient {
-  constructor(protected readonly dockerode: Dockerode) {}
+  constructor(public readonly dockerode: Dockerode) {}
 
   async fetchById(id: string): Promise<Container> {
     try {

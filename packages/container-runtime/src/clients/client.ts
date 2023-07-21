@@ -28,10 +28,16 @@ const strategies: ContainerRuntimeClientStrategy[] = [
   new NpipeSocketStrategy(),
 ];
 
+let containerRuntimeClient: ContainerRuntimeClient;
+
 export async function getContainerRuntimeClient(): Promise<ContainerRuntimeClient> {
+  if (containerRuntimeClient) {
+    return containerRuntimeClient;
+  }
   for (const strategy of strategies) {
     const client = await strategy.initialise();
     if (client) {
+      containerRuntimeClient = client;
       return client;
     }
   }

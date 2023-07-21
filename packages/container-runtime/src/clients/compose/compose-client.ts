@@ -1,7 +1,7 @@
 import { ComposeDownOptions, ComposeOptions } from "./types";
 import { log } from "@testcontainers/logger";
-import v1, { v2 } from "docker-compose";
-import { getComposeInfo } from "./info";
+import v1 from "docker-compose";
+import dockerComposeV1, { v2 as dockerComposeV2, v2 } from "docker-compose";
 import { defaultComposeOptions } from "./default-compose-options";
 import { pullLog } from "../../logger";
 import { ComposeInfo } from "../types";
@@ -24,6 +24,24 @@ export async function getComposeClient(environment: NodeJS.ProcessEnv): Promise<
       return new ComposeV1Client(info, environment);
     case "v2":
       return new ComposeV2Client(info, environment);
+  }
+}
+
+async function getComposeInfo(): Promise<ComposeInfo | undefined> {
+  try {
+    return {
+      version: (await dockerComposeV1.version()).data.version,
+      compatability: "v1",
+    };
+  } catch (err) {
+    try {
+      return {
+        version: (await dockerComposeV2.version()).data.version,
+        compatability: "v2",
+      };
+    } catch {
+      return undefined;
+    }
   }
 }
 

@@ -1,6 +1,6 @@
 import { Clock, SystemClock, Time } from "./clock";
 
-export interface RetryStrategy<T, U> {
+export interface Retry<T, U> {
   retryUntil(
     fn: () => Promise<T>,
     predicate: (result: T) => boolean | Promise<boolean>,
@@ -9,7 +9,7 @@ export interface RetryStrategy<T, U> {
   ): Promise<T | U>;
 }
 
-abstract class AbstractRetryStrategy<T, U> implements RetryStrategy<T, U> {
+abstract class AbstractRetry<T, U> implements Retry<T, U> {
   protected constructor(protected readonly clock: Clock = new SystemClock()) {}
 
   public abstract retryUntil(
@@ -28,7 +28,7 @@ abstract class AbstractRetryStrategy<T, U> implements RetryStrategy<T, U> {
   }
 }
 
-export class IntervalRetryStrategy<T, U> extends AbstractRetryStrategy<T, U> {
+export class IntervalRetry<T, U> extends AbstractRetry<T, U> {
   constructor(private readonly interval: number) {
     super();
   }

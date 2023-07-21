@@ -1,4 +1,4 @@
-export const parseComposeContainerName = (projectName: string, containerName: string): string => {
+export function parseComposeContainerName(projectName: string, containerName: string): string {
   if (containerName.includes(projectName)) {
     return containerName.substring(`/${projectName}_`.length);
   } else if (containerName.startsWith("/")) {
@@ -8,4 +8,4 @@ export const parseComposeContainerName = (projectName: string, containerName: st
       `Unable to resolve container name for container name: "${containerName}", project name: "${projectName}"`
     );
   }
-};
+}

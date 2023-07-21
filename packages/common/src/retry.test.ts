@@ -1,11 +1,11 @@
-import { IntervalRetryStrategy } from "./retry-strategy";
+import { IntervalRetry } from "./retry";
 
-describe("RetryStrategy", () => {
-  describe("IntervalRetryStrategy", () => {
+describe("Retry", () => {
+  describe("IntervalRetry", () => {
     it("should not retry when predicate succeeds", async () => {
       const fnMock = jest.fn().mockResolvedValue(true);
 
-      const result = await new IntervalRetryStrategy<boolean, Error>(1).retryUntil(
+      const result = await new IntervalRetry<boolean, Error>(1).retryUntil(
         () => fnMock(),
         (result) => result,
         () => new Error(),
@@ -19,7 +19,7 @@ describe("RetryStrategy", () => {
     it("should retry when predicate fails", async () => {
       const fnMock = jest.fn().mockResolvedValueOnce(false).mockResolvedValueOnce(true);
 
-      const result = await new IntervalRetryStrategy<boolean, Error>(1).retryUntil(
+      const result = await new IntervalRetry<boolean, Error>(1).retryUntil(
         () => fnMock(),
         (result) => result,
         () => new Error(),
@@ -34,7 +34,7 @@ describe("RetryStrategy", () => {
       const fnMock = jest.fn().mockResolvedValue(false);
       const timeoutMock = jest.fn().mockReturnValue(new Error());
 
-      const result = await new IntervalRetryStrategy<boolean, Error>(1).retryUntil(
+      const result = await new IntervalRetry<boolean, Error>(1).retryUntil(
         () => fnMock(),
         (result) => result,
         () => timeoutMock(),

@@ -1,4 +1,4 @@
-import {
+import Dockerode, {
   Container,
   ContainerCreateOptions,
   ContainerInfo,
@@ -10,6 +10,8 @@ import { Readable } from "stream";
 import { ExecResult } from "./types";
 
 export interface ContainerClient {
+  dockerode: Dockerode;
+
   fetchById(id: string): Promise<Container>;
 
   fetchByLabel(labelName: string, labelValue: string): Promise<Container | undefined>;
