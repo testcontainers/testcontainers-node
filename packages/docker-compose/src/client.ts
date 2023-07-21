@@ -1,7 +1,8 @@
-import { defaultDockerComposeOptions, DockerComposeDownOptions, DockerComposeOptions } from "./options";
+import { DockerComposeDownOptions, DockerComposeOptions } from "./types";
 import { log, pullLog } from "@testcontainers/logger";
 import v1, { v2 } from "docker-compose";
 import { getDockerComposeInfo } from "./info";
+import { defaultDockerComposeOptions } from "./default-docker-compose-options";
 
 export interface DockerComposeClient {
   version: string;

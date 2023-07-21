@@ -1,5 +1,4 @@
 import { log } from "@testcontainers/logger";
-import dockerComposeV1, { v2 as dockerComposeV2 } from "docker-compose";
 import { DockerInfo, getDockerInfo } from "./docker/functions/get-info";
 import Dockerode from "dockerode";
 import { DockerComposeClient } from "@testcontainers/docker-compose";

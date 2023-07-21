@@ -1,0 +1,105 @@
+import Dockerode, { ImageBuildOptions } from "dockerode";
+import { log } from "@testcontainers/logger";
+import { buildLog, pullLog } from "../../logger";
+import byline from "byline";
+import tar from "tar-fs";
+import path from "path";
+import { existsSync, promises as fs } from "fs";
+import dockerIgnore from "@balena/dockerignore";
+import { getAuthConfig } from "../../auth/get-auth-config";
+import { ImageName } from "../../image-name";
+import { ImageClient } from "./image-client";
+
+export class DockerImageClient implements ImageClient {
+  constructor(protected readonly dockerode: Dockerode, protected readonly indexServerAddress: string) {}
+
+  async build(context: string, opts: ImageBuildOptions): Promise<void> {
+    try {
+      log.debug(`Building image "${opts.t}" with context "${context}"...`);
+      const isDockerIgnored = await this.createIsDockerIgnoredFunction(context);
+      const tarStream = tar.pack(context, {
+        ignore: (aPath) => {
+          const relativePath = path.relative(context, aPath);
+          if (relativePath === opts.dockerfile) {
+            return false;
+          } else {
+            return isDockerIgnored(relativePath);
+          }
+        },
+      });
+      await new Promise<void>((resolve) => {
+        this.dockerode
+          .buildImage(tarStream, opts)
+          .then((stream) => byline(stream))
+          .then((stream) => {
+            stream.setEncoding("utf-8");
+            stream.on("data", (line) => {
+              if (buildLog.enabled()) {
+                buildLog.trace(line, { imageName: opts.t });
+              }
+            });
+            stream.on("end", () => resolve());
+          });
+      });
+      log.debug(`Built image "${opts.t}" with context "${context}"`);
+    } catch (err) {
+      log.error(`Failed to build image: ${err}`);
+      throw err;
+    }
+  }
+
+  private async createIsDockerIgnoredFunction(context: string): Promise<(path: string) => boolean> {
+    const dockerIgnoreFilePath = path.join(context, ".dockerignore");
+    if (!existsSync(dockerIgnoreFilePath)) {
+      return () => false;
+    }
+
+    const dockerIgnorePatterns = await fs.readFile(dockerIgnoreFilePath, { encoding: "utf-8" });
+    const instance = dockerIgnore({ ignorecase: false });
+    instance.add(dockerIgnorePatterns);
+    const filter = instance.createFilter();
+
+    return (aPath: string) => !filter(aPath);
+  }
+
+  async exists(imageName: ImageName): Promise<boolean> {
+    try {
+      log.debug(`Checking if image exists "${imageName.string}"...`);
+      await this.dockerode.getImage(imageName.string).inspect();
+      log.debug(`Checked if image exists "${imageName.string}"`);
+      return true;
+    } catch (err) {
+      if (err instanceof Error && err.message.toLowerCase().includes("no such image")) {
+        log.debug(`Checked if image exists "${imageName.string}"`);
+        return false;
+      }
+      log.debug(`Failed to check if image exists "${imageName.string}"`);
+      throw err;
+    }
+  }
+
+  async pull(imageName: ImageName, opts?: { force: boolean }): Promise<void> {
+    try {
+      if (!opts?.force && (await this.exists(imageName))) {
+        log.debug(`"${imageName.string}" already exists`);
+        return;
+      }
+
+      log.debug(`Pulling image "${imageName.string}"...`);
+      const authconfig = await getAuthConfig(imageName.registry ?? this.indexServerAddress);
+      const stream = await this.dockerode.pull(imageName.string, { authconfig });
+      await new Promise<void>((resolve) => {
+        byline(stream).on("data", (line) => {
+          if (pullLog.enabled()) {
+            pullLog.trace(line, { imageName: imageName.string });
+          }
+        });
+        stream.on("end", resolve);
+      });
+      log.debug(`Pulled image "${imageName.string}"`);
+    } catch (err) {
+      log.error(`Failed to pull image "${imageName.string}": ${err}`);
+      throw err;
+    }
+  }
+}

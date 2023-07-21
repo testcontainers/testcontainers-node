@@ -26,6 +26,9 @@
       "path": "./packages/logger"
     },
     {
+      "path": "./packages/container-runtime"
+    },
+    {
       "path": "./packages/docker-compose"
     }
   ]

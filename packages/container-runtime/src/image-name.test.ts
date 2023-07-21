@@ -1,0 +1,119 @@
+import { ImageName } from "./image-name";
+import { REAPER_IMAGE, SSHD_IMAGE } from "./images";
+
+describe("ContainerImage", () => {
+  it("should return whether two image names are equal", () => {
+    const imageName = new ImageName("registry", "image", "tag");
+
+    expect(imageName.equals(new ImageName("registry", "image", "tag"))).toBe(true);
+    expect(imageName.equals(new ImageName("registry", "image", "anotherTag"))).toBe(false);
+    expect(imageName.equals(new ImageName("registry", "anotherImage", "tag"))).toBe(false);
+    expect(imageName.equals(new ImageName("anotherRegistry", "image", "tag"))).toBe(false);
+  });
+
+  it("should return whether the repo tag is for a Reaper", () => {
+    const reaper = ImageName.fromString(REAPER_IMAGE);
+    const notReaper = new ImageName(undefined, "testcontainers/notReaper", "latest");
+
+    expect(reaper.isReaper()).toBe(true);
+    expect(notReaper.isReaper()).toBe(false);
+  });
+
+  it("should return whether the repo tag is for a helper container", () => {
+    const reaper = ImageName.fromString(REAPER_IMAGE);
+    const portForwarder = ImageName.fromString(SSHD_IMAGE);
+    const notHelper = new ImageName(undefined, "testcontainers/notHelper", "latest");
+
+    expect(reaper.isHelperContainer()).toBe(true);
+    expect(portForwarder.isHelperContainer()).toBe(true);
+    expect(notHelper.isHelperContainer()).toBe(false);
+  });
+
+  describe("toString", () => {
+    it("should work with registry", () => {
+      const imageName = new ImageName("registry", "image", "tag");
+      expect(imageName.toString()).toBe("registry/image:tag");
+    });
+
+    it("should work without registry", () => {
+      const imageName = new ImageName(undefined, "image", "tag");
+      expect(imageName.toString()).toBe("image:tag");
+    });
+
+    it("should work with tag being a hash", () => {
+      const imageName = new ImageName(undefined, "image", "sha256:1234abcd1234abcd1234abcd1234abcd");
+      expect(imageName.toString()).toBe("image@sha256:1234abcd1234abcd1234abcd1234abcd");
+    });
+
+    it("should work with registry and tag being a hash", () => {
+      const imageName = new ImageName("registry", "image", "sha256:1234abcd1234abcd1234abcd1234abcd");
+      expect(imageName.toString()).toBe("registry/image@sha256:1234abcd1234abcd1234abcd1234abcd");
+    });
+  });
+
+  describe("fromString", () => {
+    it("should work", () => {
+      const imageName = ImageName.fromString("image:latest");
+
+      expect(imageName.registry).toBeUndefined();
+      expect(imageName.image).toBe("image");
+      expect(imageName.tag).toBe("latest");
+    });
+
+    it("should work without tag", () => {
+      const imageName = ImageName.fromString("image");
+
+      expect(imageName.registry).toBeUndefined();
+      expect(imageName.image).toBe("image");
+      expect(imageName.tag).toBe("latest");
+    });
+
+    it("should work with registry", () => {
+      const imageName = ImageName.fromString("domain.com/image:latest");
+
+      expect(imageName.registry).toBe("domain.com");
+      expect(imageName.image).toBe("image");
+      expect(imageName.tag).toBe("latest");
+    });
+
+    it("should work with registry with port", () => {
+      const imageName = ImageName.fromString("domain.com:5000/image:latest");
+
+      expect(imageName.registry).toBe("domain.com:5000");
+      expect(imageName.image).toBe("image");
+      expect(imageName.tag).toBe("latest");
+    });
+
+    it("should work with registry without tag", () => {
+      const imageName = ImageName.fromString("domain.com/image");
+
+      expect(imageName.registry).toBe("domain.com");
+      expect(imageName.image).toBe("image");
+      expect(imageName.tag).toBe("latest");
+    });
+
+    it("should work with nested image", () => {
+      const imageName = ImageName.fromString("parent/child:latest");
+
+      expect(imageName.registry).toBe(undefined);
+      expect(imageName.image).toBe("parent/child");
+      expect(imageName.tag).toBe("latest");
+    });
+
+    it("should work with registry and nested image", () => {
+      const imageName = ImageName.fromString("domain.com/parent/child:latest");
+
+      expect(imageName.registry).toBe("domain.com");
+      expect(imageName.image).toBe("parent/child");
+      expect(imageName.tag).toBe("latest");
+    });
+
+    it("should work with tag being a hash", () => {
+      const imageName = ImageName.fromString("image@sha256:1234abcd1234abcd1234abcd1234abcd");
+
+      expect(imageName.registry).toBe(undefined);
+      expect(imageName.image).toBe("image");
+      expect(imageName.tag).toBe("sha256:1234abcd1234abcd1234abcd1234abcd");
+    });
+  });
+});
