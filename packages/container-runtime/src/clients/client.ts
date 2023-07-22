@@ -10,9 +10,6 @@ import { RootlessUnixSocketStrategy } from "../strategies/rootless-unix-socket-s
 import { NpipeSocketStrategy } from "../strategies/npipe-socket-strategy";
 import { Info } from "./types";
 import { log } from "@testcontainers/logger";
-import Dockerode from "dockerode";
-import { streamToString } from "@testcontainers/common";
-import { Readable } from "stream";
 
 export class ContainerRuntimeClient {
   constructor(
@@ -42,7 +39,7 @@ export async function getContainerRuntimeClient(): Promise<ContainerRuntimeClien
     try {
       log.debug(`Testing container runtime strategy "${strategy.getName()}"...`);
       const client = await strategy.initialise();
-      if (client && (await isDockerDaemonReachable(client.container.dockerode))) {
+      if (client && (await client.container.ping()) === "OK") {
         containerRuntimeClient = client;
         return client;
       }
@@ -51,14 +48,4 @@ export async function getContainerRuntimeClient(): Promise<ContainerRuntimeClien
     }
   }
   throw new Error();
-}
-
-async function isDockerDaemonReachable(dockerode: Dockerode): Promise<boolean> {
-  try {
-    const response = await dockerode.ping();
-    return (await streamToString(Readable.from(response))) === "OK";
-  } catch (err) {
-    log.warn(`Docker daemon is not reachable: "${err}"`);
-    return false;
-  }
 }

@@ -18,6 +18,18 @@ import { ContainerClient } from "./container-client";
 export class DockerContainerClient implements ContainerClient {
   constructor(public readonly dockerode: Dockerode) {}
 
+  async ping(): Promise<string> {
+    try {
+      log.debug(`Pinging container runtime...`);
+      const response = await streamToString(Readable.from(await this.dockerode.ping()));
+      log.debug(`Pinged container runtime`);
+      return response;
+    } catch (err) {
+      log.warn(`Failed to ping container runtime: "${err}"`);
+      throw err;
+    }
+  }
+
   getById(id: string): Container {
     try {
       log.debug(`Getting container by ID...`, { containerId: id });
