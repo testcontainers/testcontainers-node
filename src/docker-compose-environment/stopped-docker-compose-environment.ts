@@ -1,14 +1,13 @@
-// import { DownedDockerComposeEnvironment } from "./downed-docker-compose-environment";
-// import { DockerComposeDownOptions, DockerComposeOptions } from "@testcontainers/docker-compose";
-// import { getDockerClient } from "../docker/client/docker-client";
-//
-// export class StoppedDockerComposeEnvironment {
-//   constructor(private readonly options: DockerComposeOptions) {}
-//
-//   public async down(options: Partial<DockerComposeDownOptions> = {}): Promise<DownedDockerComposeEnvironment> {
-//     const { dockerComposeClient } = await getDockerClient();
-//     const resolvedOptions: DockerComposeDownOptions = { timeout: 0, removeVolumes: true, ...options };
-//     await dockerComposeClient.down(this.options, resolvedOptions);
-//     return new DownedDockerComposeEnvironment();
-//   }
-// }
+import { DownedDockerComposeEnvironment } from "./downed-docker-compose-environment";
+import { ComposeDownOptions, ComposeOptions, getContainerRuntimeClient } from "@testcontainers/container-runtime";
+
+export class StoppedDockerComposeEnvironment {
+  constructor(private readonly options: ComposeOptions) {}
+
+  public async down(options: Partial<ComposeDownOptions> = {}): Promise<DownedDockerComposeEnvironment> {
+    const client = await getContainerRuntimeClient();
+    const resolvedOptions: ComposeDownOptions = { timeout: 0, removeVolumes: true, ...options };
+    await client.compose.down(this.options, resolvedOptions);
+    return new DownedDockerComposeEnvironment();
+  }
+}

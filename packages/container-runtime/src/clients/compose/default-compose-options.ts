@@ -28,7 +28,7 @@ export function defaultComposeOptions(
     env: {
       ...process.env,
       COMPOSE_PROJECT_NAME: options.projectName,
-      ...environment,
+      ...{ ...environment, ...options.environment },
     },
   };
 }

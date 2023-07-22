@@ -1,5 +1,5 @@
 import { Readable } from "stream";
-// import { StartedDockerComposeEnvironment } from "./docker-compose-environment/started-docker-compose-environment";
+import { StartedDockerComposeEnvironment } from "./docker-compose-environment/started-docker-compose-environment";
 import fetch from "node-fetch";
 import { StartedTestContainer } from "./test-container";
 import https from "https";
@@ -19,13 +19,13 @@ export const checkContainerIsHealthyTls = async (container: StartedTestContainer
   expect(response.status).toBe(200);
 };
 
-// export const checkEnvironmentContainerIsHealthy = async (
-//   startedEnvironment: StartedDockerComposeEnvironment,
-//   containerName: string
-// ): Promise<void> => {
-//   const container = startedEnvironment.getContainer(containerName);
-//   await checkContainerIsHealthy(container);
-// };
+export const checkEnvironmentContainerIsHealthy = async (
+  startedEnvironment: StartedDockerComposeEnvironment,
+  containerName: string
+): Promise<void> => {
+  const container = startedEnvironment.getContainer(containerName);
+  await checkContainerIsHealthy(container);
+};
 
 export const getDockerEventStream = async (opts: GetEventsOptions = {}): Promise<Readable> => {
   const dockerode = (await getContainerRuntimeClient()).container.dockerode;
@@ -71,11 +71,10 @@ export const getVolumeNames = async (): Promise<string[]> => {
   return volumes.map((volume) => volume.Name);
 };
 
-// export const composeContainerName = async (serviceName: string, index = 1): Promise<string> => {
-//   const { dockerode, dockerComposeClient } = await getDockerClient();
-//   const { dockerComposeInfo } = await getSystemInfo(dockerode, dockerComposeClient);
-//   return dockerComposeInfo?.version.startsWith("1.") ? `${serviceName}_${index}` : `${serviceName}-${index}`;
-// };
+export const composeContainerName = async (serviceName: string, index = 1): Promise<string> => {
+  const client = await getContainerRuntimeClient();
+  return client.info.compose?.version.startsWith("1.") ? `${serviceName}_${index}` : `${serviceName}-${index}`;
+};
 
 export const waitForDockerEvent = async (eventStream: Readable, eventName: string, times = 1) => {
   let currentTimes = 0;
