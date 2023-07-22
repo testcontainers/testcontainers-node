@@ -12,13 +12,13 @@ import { ExecResult } from "./types";
 export interface ContainerClient {
   dockerode: Dockerode;
 
-  fetchById(id: string): Promise<Container>;
+  getById(id: string): Container;
 
   fetchByLabel(labelName: string, labelValue: string): Promise<Container | undefined>;
 
   fetchArchive(container: Container, path: string): Promise<NodeJS.ReadableStream>;
 
-  putArchive(container: Container, path: string, stream: Readable): Promise<void>;
+  putArchive(container: Dockerode.Container, stream: Readable, path: string): Promise<void>;
 
   list(): Promise<ContainerInfo[]>;
 

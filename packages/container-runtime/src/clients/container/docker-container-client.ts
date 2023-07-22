@@ -18,14 +18,14 @@ import { ContainerClient } from "./container-client";
 export class DockerContainerClient implements ContainerClient {
   constructor(public readonly dockerode: Dockerode) {}
 
-  async fetchById(id: string): Promise<Container> {
+  getById(id: string): Container {
     try {
-      log.debug(`Fetching container by ID...`, { containerId: id });
+      log.debug(`Getting container by ID...`, { containerId: id });
       const container = this.dockerode.getContainer(id);
-      log.debug(`Fetched container by ID`, { containerId: id });
+      log.debug(`Got container by ID`, { containerId: id });
       return container;
     } catch (err) {
-      log.error(`Failed to fetch container by ID: ${err}`, { containerId: id });
+      log.error(`Failed to get container by ID: ${err}`, { containerId: id });
       throw err;
     }
   }
@@ -45,7 +45,7 @@ export class DockerContainerClient implements ContainerClient {
         return undefined;
       } else {
         log.debug(`Fetched container by label "${labelName}=${labelValue}"`);
-        return await this.fetchById(containers[0].Id);
+        return await this.getById(containers[0].Id);
       }
     } catch (err) {
       log.error(`Failed to fetch container by label "${labelName}=${labelValue}": ${err}`);
@@ -65,7 +65,7 @@ export class DockerContainerClient implements ContainerClient {
     }
   }
 
-  async putArchive(container: Container, path: string, stream: Readable): Promise<void> {
+  async putArchive(container: Dockerode.Container, stream: Readable, path: string): Promise<void> {
     try {
       log.debug(`Putting archive to container...`, { containerId: container.id });
       await streamToString(Readable.from(await container.putArchive(stream, { path })));

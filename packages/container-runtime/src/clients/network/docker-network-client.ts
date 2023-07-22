@@ -5,6 +5,18 @@ import { NetworkClient } from "./network-client";
 export class DockerNetworkClient implements NetworkClient {
   constructor(protected readonly dockerode: Dockerode) {}
 
+  getById(id: string): Network {
+    try {
+      log.debug(`Getting network by ID...`);
+      const network = this.dockerode.getNetwork(id);
+      log.debug(`Got network by ID`);
+      return network;
+    } catch (err) {
+      log.error(`Failed to get network by ID: ${err}`);
+      throw err;
+    }
+  }
+
   async create(opts: NetworkCreateOptions): Promise<Network> {
     try {
       log.debug(`Creating network "${opts.Name}"...`);

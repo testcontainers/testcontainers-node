@@ -1,56 +1,62 @@
-// import { RandomUuid, Uuid } from "./uuid";
-// import { log } from "@testcontainers/logger";
-// import { createNetwork, CreateNetworkOptions } from "./docker/functions/network/create-network";
-// import { removeNetwork } from "./docker/functions/network/remove-network";
-// import { getDockerClient } from "./docker/client/docker-client";
-//
-// export class Network {
-//   constructor(
-//     private readonly createNetworkOptions: Partial<CreateNetworkOptions> = {},
-//     private readonly uuid: Uuid = new RandomUuid()
-//   ) {
-//     this.createNetworkOptions = createNetworkOptions;
-//   }
-//
-//   public async start(): Promise<StartedNetwork> {
-//     const name = this.uuid.nextUuid();
-//     const options = {
-//       name,
-//       driver: "bridge",
-//       checkDuplicate: true,
-//       internal: false,
-//       attachable: false,
-//       ingress: false,
-//       enableIPv6: false,
-//       ...this.createNetworkOptions,
-//     };
-//
-//     log.info(`Starting network "${name}"...`);
-//     const { sessionId } = await getDockerClient();
-//     const id = await createNetwork(sessionId, options);
-//     log.info(`Started network "${name}" with ID "${id}"`);
-//
-//     return new StartedNetwork(id, options);
-//   }
-// }
-//
-// export class StartedNetwork {
-//   constructor(private readonly id: string, private readonly options: CreateNetworkOptions) {}
-//
-//   public getId(): string {
-//     return this.id;
-//   }
-//
-//   public getName(): string {
-//     return this.options.name;
-//   }
-//
-//   public async stop(): Promise<StoppedNetwork> {
-//     log.info(`Stopping network with ID "${this.id}"...`);
-//     await removeNetwork(this.id);
-//     log.info(`Stopped network with ID "${this.id}"`);
-//     return new StoppedNetwork();
-//   }
-// }
-//
-// export class StoppedNetwork {}
+import { log } from "@testcontainers/logger";
+import { RandomUuid, Uuid } from "@testcontainers/common";
+import { ContainerRuntimeClient, getContainerRuntimeClient } from "@testcontainers/container-runtime";
+import { LABEL_TESTCONTAINERS, LABEL_TESTCONTAINERS_LANG } from "./labels";
+import Dockerode from "dockerode";
+
+export class Network {
+  constructor(private readonly uuid: Uuid = new RandomUuid()) {}
+
+  public async start(): Promise<StartedNetwork> {
+    const client = await getContainerRuntimeClient();
+    const name = this.uuid.nextUuid();
+
+    log.info(`Starting network "${name}"...`);
+
+    // const { sessionId } = await getDockerClient();
+    // const id = await createNetwork(sessionId, options);
+
+    const network = await client.network.create({
+      Name: name,
+      CheckDuplicate: true,
+      Driver: "bridge",
+      Internal: false,
+      Attachable: false,
+      Ingress: false,
+      EnableIPv6: false,
+      Labels: {
+        [LABEL_TESTCONTAINERS]: "true",
+        [LABEL_TESTCONTAINERS_LANG]: "node",
+        // [LABEL_TESTCONTAINERS_VERSION]: version,
+      },
+    });
+    log.info(`Started network "${name}" with ID "${network.id}"`);
+
+    return new StartedNetwork(client, name, network);
+  }
+}
+
+export class StartedNetwork {
+  constructor(
+    private readonly client: ContainerRuntimeClient,
+    private readonly name: string,
+    private readonly network: Dockerode.Network
+  ) {}
+
+  public getId(): string {
+    return this.network.id;
+  }
+
+  public getName(): string {
+    return this.name;
+  }
+
+  public async stop(): Promise<StoppedNetwork> {
+    log.info(`Stopping network with ID "${this.network.id}"...`);
+    await this.client.network.remove(this.network);
+    log.info(`Stopped network with ID "${this.network.id}"`);
+    return new StoppedNetwork();
+  }
+}
+
+export class StoppedNetwork {}

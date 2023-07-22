@@ -38,8 +38,8 @@ export class BoundPorts {
     return this.ports;
   }
 
-  public filter(client: ContainerRuntimeClient, ports: PortWithOptionalBinding[]): BoundPorts {
-    const boundPorts = new BoundPorts(client);
+  public filter(ports: PortWithOptionalBinding[]): BoundPorts {
+    const boundPorts = new BoundPorts(this.client);
 
     const containerPorts = ports.map((port) => getContainerPort(port));
 
@@ -52,16 +52,12 @@ export class BoundPorts {
     return boundPorts;
   }
 
-  public static fromInspectResult(
-    client: ContainerRuntimeClient,
-    hostIps: HostIp[],
-    inspectResult: ContainerInspectInfo
-  ): BoundPorts {
+  public static fromInspectResult(client: ContainerRuntimeClient, inspectResult: ContainerInspectInfo): BoundPorts {
     const boundPorts = new BoundPorts(client);
 
     const ports = getPorts(inspectResult);
     Object.entries(ports).forEach(([containerPort, hostBindings]) => {
-      const hostPort = resolveHostPortBinding(hostIps, hostBindings);
+      const hostPort = resolveHostPortBinding(client.info.containerRuntime.hostIps, hostBindings);
       boundPorts.setBinding(parseInt(containerPort), hostPort);
     });
 

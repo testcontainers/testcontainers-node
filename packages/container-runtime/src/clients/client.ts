@@ -9,6 +9,10 @@ import { UnixSocketStrategy } from "../strategies/unix-socket-strategy";
 import { RootlessUnixSocketStrategy } from "../strategies/rootless-unix-socket-strategy";
 import { NpipeSocketStrategy } from "../strategies/npipe-socket-strategy";
 import { Info } from "./types";
+import { log } from "@testcontainers/logger";
+import Dockerode from "dockerode";
+import { streamToString } from "@testcontainers/common";
+import { Readable } from "stream";
 
 export class ContainerRuntimeClient {
   constructor(
@@ -35,11 +39,26 @@ export async function getContainerRuntimeClient(): Promise<ContainerRuntimeClien
     return containerRuntimeClient;
   }
   for (const strategy of strategies) {
-    const client = await strategy.initialise();
-    if (client) {
-      containerRuntimeClient = client;
-      return client;
+    try {
+      log.debug(`Testing container runtime strategy "${strategy.getName()}"...`);
+      const client = await strategy.initialise();
+      if (client && (await isDockerDaemonReachable(client.container.dockerode))) {
+        containerRuntimeClient = client;
+        return client;
+      }
+    } catch {
+      log.debug(`Container runtime strategy "${strategy.getName()}" does not work`);
     }
   }
   throw new Error();
+}
+
+async function isDockerDaemonReachable(dockerode: Dockerode): Promise<boolean> {
+  try {
+    const response = await dockerode.ping();
+    return (await streamToString(Readable.from(response))) === "OK";
+  } catch (err) {
+    log.warn(`Docker daemon is not reachable: "${err}"`);
+    return false;
+  }
 }

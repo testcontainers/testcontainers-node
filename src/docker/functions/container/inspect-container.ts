@@ -1,15 +1,34 @@
-// import { HealthCheckStatus, Labels, NetworkSettings, Ports } from "../../types";
+import { HealthCheckStatus, Labels, NetworkSettings, Ports } from "../../types";
 // import Dockerode, { ContainerInspectInfo } from "dockerode";
 // import { log } from "@testcontainers/logger";
 //
-// export type InspectResult = {
-//   name: string;
-//   hostname: string;
-//   ports: Ports;
-//   healthCheckStatus: HealthCheckStatus;
-//   networkSettings: { [networkName: string]: NetworkSettings };
-//   state: { status: string; running: boolean; startedAt: Date; finishedAt: Date | undefined };
-//   labels: Labels;
+export type InspectResult = {
+  name: string;
+  hostname: string;
+  ports: Ports;
+  healthCheckStatus: HealthCheckStatus;
+  networkSettings: { [networkName: string]: NetworkSettings };
+  state: { status: string; running: boolean; startedAt: Date; finishedAt: Date | undefined };
+  labels: Labels;
+};
+
+// export const inspectResult = async (result: ContainerInspectInfo): Promise<InspectResult> => {
+//   const finishedAt = new Date(inspectResult.State.FinishedAt);
+//
+//   return {
+//     name: inspectResult.Name,
+//     hostname: inspectResult.Config.Hostname,
+//     ports: getPorts(inspectResult),
+//     healthCheckStatus: getHealthCheckStatus(inspectResult),
+//     networkSettings: getNetworkSettings(inspectResult),
+//     state: {
+//       status: inspectResult.State.Status,
+//       running: inspectResult.State.Running,
+//       startedAt: new Date(inspectResult.State.StartedAt),
+//       finishedAt: finishedAt.getTime() < 0 ? undefined : finishedAt,
+//     },
+//     labels: inspectResult.Config.Labels,
+//   };
 // };
 //
 // export const inspectContainer = async (container: Dockerode.Container): Promise<InspectResult> => {

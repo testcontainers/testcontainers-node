@@ -89,6 +89,6 @@ function logDockerClientConfig(config: DockerClientConfig) {
     .map(([key, value]) => `${key}: "${value}"`);
 
   if (configurations.length > 0) {
-    log.debug(`Loaded Docker client configuration, ${configurations.join(", ")}`);
+    log.debug(`Loaded ".testcontainers.properties" file, ${configurations.join(", ")}`);
   }
 }
