@@ -6,17 +6,17 @@ describe("Auths", () => {
 
   describe("getAuthConfig", () => {
     it("should return undefined when auths is undefined", async () => {
-      const dockerConfig: ContainerRuntimeConfig = {};
-      expect(await locator.getAuthConfig("registry-name", dockerConfig)).toBeUndefined();
+      const containerRuntimeConfig: ContainerRuntimeConfig = {};
+      expect(await locator.getAuthConfig("registry-name", containerRuntimeConfig)).toBeUndefined();
     });
 
     it("should return undefined when auths does not contain registry name", async () => {
-      const dockerConfig: ContainerRuntimeConfig = { auths: {} };
-      expect(await locator.getAuthConfig("registry-name", dockerConfig)).toBeUndefined();
+      const containerRuntimeConfig: ContainerRuntimeConfig = { auths: {} };
+      expect(await locator.getAuthConfig("registry-name", containerRuntimeConfig)).toBeUndefined();
     });
 
     it("should return credentials from username and password", async () => {
-      const dockerConfig: ContainerRuntimeConfig = {
+      const containerRuntimeConfig: ContainerRuntimeConfig = {
         auths: {
           "https://registry.example.com": {
             email: "user@example.com",
@@ -31,11 +31,11 @@ describe("Auths", () => {
         email: "user@example.com",
         registryAddress: "https://registry.example.com",
       };
-      expect(await locator.getAuthConfig("https://registry.example.com", dockerConfig)).toEqual(authConfig);
+      expect(await locator.getAuthConfig("https://registry.example.com", containerRuntimeConfig)).toEqual(authConfig);
     });
 
     it("should not return credentials for registry which is a partial match", async () => {
-      const dockerConfig: ContainerRuntimeConfig = {
+      const containerRuntimeConfig: ContainerRuntimeConfig = {
         auths: {
           "https://registry.example.com": {
             email: "user@example.com",
@@ -44,11 +44,11 @@ describe("Auths", () => {
           },
         },
       };
-      expect(await locator.getAuthConfig("registry.example.co", dockerConfig)).toBeUndefined();
+      expect(await locator.getAuthConfig("registry.example.co", containerRuntimeConfig)).toBeUndefined();
     });
 
     it("should return credentials from encoded auth", async () => {
-      const dockerConfig: ContainerRuntimeConfig = {
+      const containerRuntimeConfig: ContainerRuntimeConfig = {
         auths: {
           "https://registry.example.com": {
             email: "user@example.com",
@@ -62,7 +62,7 @@ describe("Auths", () => {
         email: "user@example.com",
         registryAddress: "https://registry.example.com",
       };
-      expect(await locator.getAuthConfig("https://registry.example.com", dockerConfig)).toEqual(authConfig);
+      expect(await locator.getAuthConfig("https://registry.example.com", containerRuntimeConfig)).toEqual(authConfig);
     });
   });
 });

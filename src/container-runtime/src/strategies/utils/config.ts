@@ -5,34 +5,34 @@ import { existsSync } from "fs";
 import { readFile } from "fs/promises";
 import propertiesReader from "properties-reader";
 
-export type DockerClientConfig = {
+export type ContainerRuntimeConfig = {
   tcHost?: string;
   dockerHost?: string;
   dockerTlsVerify?: string;
   dockerCertPath?: string;
 };
 
-let dockerClientConfig: DockerClientConfig;
+let containerRuntimeConfig: ContainerRuntimeConfig;
 
-export type GetDockerClientConfig = (env?: NodeJS.ProcessEnv) => Promise<DockerClientConfig>;
+export type GetContainerRuntimeConfig = (env?: NodeJS.ProcessEnv) => Promise<ContainerRuntimeConfig>;
 
-export const getDockerClientConfig: GetDockerClientConfig = async (
+export const getContainerRuntimeConfig: GetContainerRuntimeConfig = async (
   env: NodeJS.ProcessEnv = process.env
-): Promise<DockerClientConfig> => {
-  if (!dockerClientConfig) {
-    dockerClientConfig = {
+): Promise<ContainerRuntimeConfig> => {
+  if (!containerRuntimeConfig) {
+    containerRuntimeConfig = {
       ...(await loadFromFile()),
       ...loadFromEnv(env),
     };
-    logDockerClientConfig(dockerClientConfig);
+    logDockerClientConfig(containerRuntimeConfig);
   }
-  return dockerClientConfig;
+  return containerRuntimeConfig;
 };
 
 async function loadFromFile() {
   const file = path.resolve(homedir(), ".testcontainers.properties");
 
-  const dockerClientConfig: DockerClientConfig = {};
+  const dockerClientConfig: ContainerRuntimeConfig = {};
 
   if (existsSync(file)) {
     log.debug(`Loading ".testcontainers.properties" file...`);
@@ -64,7 +64,7 @@ async function loadFromFile() {
 }
 
 function loadFromEnv(env: NodeJS.ProcessEnv) {
-  const dockerClientConfig: DockerClientConfig = {};
+  const dockerClientConfig: ContainerRuntimeConfig = {};
 
   if (env["DOCKER_HOST"] !== undefined) {
     dockerClientConfig.dockerHost = env["DOCKER_HOST"];
@@ -79,7 +79,7 @@ function loadFromEnv(env: NodeJS.ProcessEnv) {
   return dockerClientConfig;
 }
 
-function logDockerClientConfig(config: DockerClientConfig) {
+function logDockerClientConfig(config: ContainerRuntimeConfig) {
   if (!log.enabled()) {
     return;
   }

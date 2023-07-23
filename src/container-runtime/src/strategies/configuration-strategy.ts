@@ -1,4 +1,4 @@
-import { getDockerClientConfig } from "./utils/config";
+import { getContainerRuntimeConfig } from "./utils/config";
 import { DockerOptions } from "dockerode";
 import { URL } from "url";
 import { promises as fs } from "fs";
@@ -16,7 +16,7 @@ export class ConfigurationStrategy extends AbstractContainerRuntimeClientStrateg
   }
 
   async getResult(): Promise<ContainerRuntimeClientStrategyResult | undefined> {
-    const { dockerHost, dockerTlsVerify, dockerCertPath } = await getDockerClientConfig();
+    const { dockerHost, dockerTlsVerify, dockerCertPath } = await getContainerRuntimeConfig();
 
     if (!dockerHost) {
       return undefined;

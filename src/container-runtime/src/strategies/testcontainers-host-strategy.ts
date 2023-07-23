@@ -1,4 +1,4 @@
-import { getDockerClientConfig } from "./utils/config";
+import { getContainerRuntimeConfig } from "./utils/config";
 import { DockerOptions } from "dockerode";
 import { URL } from "url";
 import { AbstractContainerRuntimeClientStrategy } from "./strategy";
@@ -10,7 +10,7 @@ export class TestcontainersHostStrategy extends AbstractContainerRuntimeClientSt
   }
 
   async getResult(): Promise<ContainerRuntimeClientStrategyResult | undefined> {
-    const { tcHost } = await getDockerClientConfig();
+    const { tcHost } = await getContainerRuntimeConfig();
 
     if (!tcHost) {
       return;

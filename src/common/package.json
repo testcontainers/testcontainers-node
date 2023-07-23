@@ -5,7 +5,8 @@
   "main": "build/index.js",
   "devDependencies": {},
   "scripts": {
-    "build": "tsc --build"
+    "build": "tsc --build",
+    "test": "jest"
   },
   "keywords": [],
   "author": "",
