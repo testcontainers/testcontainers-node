@@ -1,4 +1,4 @@
-import { getDockerClientConfig } from "../config";
+import { getDockerClientConfig } from "./utils/config";
 import { DockerOptions } from "dockerode";
 import { URL } from "url";
 import { AbstractContainerRuntimeClientStrategy } from "./strategy";

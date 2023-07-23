@@ -32,11 +32,19 @@ export abstract class AbstractContainerRuntimeClientStrategy implements Containe
 
     const dockerode = new Dockerode(result.dockerOptions);
 
+    const dockerodeInfo = await dockerode.info();
+    const indexServerAddress =
+      !isDefined(dockerodeInfo.IndexServerAddress) || isEmptyString(dockerodeInfo.IndexServerAddress)
+        ? "https://index.docker.io/v1/"
+        : dockerodeInfo.IndexServerAddress;
+    const remoteContainerRuntimeSocketPath = getRemoteContainerRuntimeSocketPath(result, dockerodeInfo.OperatingSystem);
+    const host = await resolveHost(dockerode, result, indexServerAddress);
+
     const composeClient = await getComposeClient(result.composeEnvironment);
     const containerClient = result.uri.includes("podman.sock")
       ? new PodmanContainerClient(dockerode)
       : new DockerContainerClient(dockerode);
-    const imageClient = new DockerImageClient(dockerode, "");
+    const imageClient = new DockerImageClient(dockerode, indexServerAddress);
     const networkClient = new DockerNetworkClient(dockerode);
 
     const nodeInfo: NodeInfo = {
@@ -45,13 +53,6 @@ export abstract class AbstractContainerRuntimeClientStrategy implements Containe
       platform: process.platform,
     };
 
-    const dockerodeInfo = await dockerode.info();
-    const remoteContainerRuntimeSocketPath = getRemoteContainerRuntimeSocketPath(result, dockerodeInfo.OperatingSystem);
-    const indexServerAddress =
-      !isDefined(dockerodeInfo.IndexServerAddress) || isEmptyString(dockerodeInfo.IndexServerAddress)
-        ? "https://index.docker.io/v1/"
-        : dockerodeInfo.IndexServerAddress;
-    const host = await resolveHost(dockerode, result, indexServerAddress);
     const containerRuntimeInfo: ContainerRuntimeInfo = {
       host,
       hostIps: await lookupHostIps(host),
