@@ -3,13 +3,13 @@ export interface PullPolicy {
 }
 
 export class DefaultPullPolicy implements PullPolicy {
-  public shouldPull(): boolean {
+  shouldPull(): boolean {
     return false;
   }
 }
 
 export class AlwaysPullPolicy implements PullPolicy {
-  public shouldPull(): boolean {
+  shouldPull(): boolean {
     return true;
   }
 }

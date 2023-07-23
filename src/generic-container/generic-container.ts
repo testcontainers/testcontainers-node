@@ -90,8 +90,8 @@ export class GenericContainer implements TestContainer {
     if (!this.isHelperContainer() && PortForwarderInstance.isRunning()) {
       const portForwarder = await PortForwarderInstance.getInstance();
       this.hostConfig.ExtraHosts = [
-        ...this.hostConfig.ExtraHosts,
-        `"host.testcontainers.internal":${portForwarder.getIpAddress()}`,
+        ...(this.hostConfig.ExtraHosts ?? []),
+        `host.testcontainers.internal:${portForwarder.getIpAddress()}`,
       ];
     }
     this.hostConfig.NetworkMode = this.networkAliases.length > 0 ? undefined : this.networkMode;

@@ -1,4 +1,4 @@
-import Dockerode from "dockerode";
+import { Container } from "dockerode";
 import { BoundPorts } from "./bound-ports";
 import { log } from "@testcontainers/logger";
 import { WaitStrategy } from "./wait-strategy/wait-strategy";
@@ -6,7 +6,7 @@ import { ContainerRuntimeClient } from "@testcontainers/container-runtime";
 
 export const waitForContainer = async (
   client: ContainerRuntimeClient,
-  container: Dockerode.Container,
+  container: Container,
   waitStrategy: WaitStrategy,
   boundPorts: BoundPorts,
   startTime?: Date

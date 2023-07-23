@@ -81,7 +81,7 @@ export class DockerImageClient implements ImageClient {
   async pull(imageName: ImageName, opts?: { force: boolean }): Promise<void> {
     try {
       if (!opts?.force && (await this.exists(imageName))) {
-        log.debug(`"${imageName.string}" already exists`);
+        log.debug(`Image "${imageName.string}" already exists`);
         return;
       }
 

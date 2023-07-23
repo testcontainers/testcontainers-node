@@ -6,6 +6,7 @@ import { StartedTestContainer } from "./test-container";
 import { SSHD_IMAGE } from "./images";
 import { RandomUuid } from "@testcontainers/common";
 import { getContainerRuntimeClient } from "@testcontainers/container-runtime";
+import { getReaper } from "./reaper";
 
 export class PortForwarder {
   constructor(private readonly sshConnection: SshConnection, private readonly container: StartedTestContainer) {}
@@ -46,6 +47,9 @@ export class PortForwarderInstance {
   private static async createInstance(): Promise<PortForwarder> {
     log.debug(`Creating new Port Forwarder...`);
 
+    const client = await getContainerRuntimeClient();
+    const reaper = await getReaper(client);
+
     const username = "root";
     const password = new RandomUuid().nextUuid();
 
@@ -53,10 +57,8 @@ export class PortForwarderInstance {
       ? { container: 22, host: Number(process.env["TESTCONTAINERS_SSHD_PORT"]) }
       : 22;
 
-    // const { sessionId } = await getDockerClient();
-    const sessionId = password;
     const container = await new GenericContainer(SSHD_IMAGE)
-      .withName(`testcontainers-port-forwarder-${sessionId}`)
+      .withName(`testcontainers-port-forwarder-${reaper.sessionId}`)
       .withExposedPorts(containerPort)
       .withEnvironment({ PASSWORD: password })
       .withCommand([
@@ -66,7 +68,6 @@ export class PortForwarderInstance {
       ])
       .start();
 
-    const client = await getContainerRuntimeClient();
     const host = client.info.containerRuntime.host;
     const port = container.getMappedPort(22);
 

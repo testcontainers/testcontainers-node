@@ -2,7 +2,6 @@ import { ContainerRuntimeClient } from "@testcontainers/container-runtime";
 import { IntervalRetry, RandomUuid, withFileLock } from "@testcontainers/common";
 import { log } from "@testcontainers/logger";
 import { ContainerInfo } from "dockerode";
-import { StartedTestContainer } from "./test-container";
 import { GenericContainer } from "./generic-container/generic-container";
 import { REAPER_IMAGE } from "./images";
 import { Wait } from "./wait-strategy/wait";
@@ -18,28 +17,28 @@ export interface Reaper {
 }
 
 let reaper: Reaper;
+let sessionId: string;
 
 export async function getReaper(client: ContainerRuntimeClient): Promise<Reaper> {
-  return await withFileLock("testcontainers-node.lock", async () => {
-    if (reaper) {
-      return reaper;
-    }
+  if (reaper) {
+    return reaper;
+  }
 
+  reaper = await withFileLock("testcontainers-node.lock", async () => {
     const reaperContainer = await findReaperContainer(client);
-    const sessionId = reaperContainer?.Labels["org.testcontainers.session-id"] ?? new RandomUuid().nextUuid();
+    sessionId = reaperContainer?.Labels["org.testcontainers.session-id"] ?? new RandomUuid().nextUuid();
 
     if (process.env.TESTCONTAINERS_RYUK_DISABLED === "true") {
-      reaper = new DisabledReaper(sessionId);
+      return new DisabledReaper(sessionId);
     } else if (reaperContainer) {
-      reaper = await useExistingReaper(reaperContainer, sessionId, client.info.containerRuntime.host);
+      return await useExistingReaper(reaperContainer, sessionId, client.info.containerRuntime.host);
     } else {
-      reaper = await createNewReaper(sessionId, client.info.containerRuntime.remoteSocketPath);
+      return await createNewReaper(sessionId, client.info.containerRuntime.remoteSocketPath);
     }
-
-    reaper.addSession(sessionId);
-
-    return reaper;
   });
+
+  reaper.addSession(sessionId);
+  return reaper;
 }
 
 async function findReaperContainer(client: ContainerRuntimeClient): Promise<ContainerInfo | undefined> {
@@ -49,45 +48,43 @@ async function findReaperContainer(client: ContainerRuntimeClient): Promise<Cont
 
 async function useExistingReaper(reaperContainer: ContainerInfo, sessionId: string, host: string): Promise<Reaper> {
   log.debug(`Reusing existing Reaper for session "${sessionId}"...`);
-  const reaperPort = getReaperPublicPort(reaperContainer);
-  const socket = await connectToReaperSocket(host, reaperPort, reaperContainer.Id);
-  return new RyukReaper(sessionId, socket);
-}
 
-function getReaperPublicPort(reaperContainer: ContainerInfo): number {
-  const port = reaperContainer.Ports.find((port) => port.PrivatePort == 8080)?.PublicPort;
-  if (!port) {
+  const reaperPort = reaperContainer.Ports.find((port) => port.PrivatePort == 8080)?.PublicPort;
+  if (!reaperPort) {
     throw new Error("Expected Reaper to map exposed port 8080");
   }
-  return port;
+
+  const socket = await connectToReaperSocket(host, reaperPort, reaperContainer.Id);
+
+  return new RyukReaper(sessionId, socket);
 }
 
 async function createNewReaper(sessionId: string, remoteSocketPath: string): Promise<Reaper> {
   log.debug(`Creating new Reaper for session "${sessionId}" with socket path "${remoteSocketPath}"...`);
-  const startedContainer = await createAndStartReaperContainer(sessionId, remoteSocketPath);
-  const containerId = startedContainer.getId();
-  const host = startedContainer.getHost();
-  const port = startedContainer.getMappedPort(8080);
-  const socket = await connectToReaperSocket(host, port, containerId);
-  return new RyukReaper(sessionId, socket);
-}
-
-async function createAndStartReaperContainer(sessionId: string, socketPath: string): Promise<StartedTestContainer> {
-  const exposedPort = process.env["TESTCONTAINERS_RYUK_PORT"]
-    ? { container: 8080, host: Number(process.env["TESTCONTAINERS_RYUK_PORT"]) }
-    : 8080;
 
   const container = new GenericContainer(REAPER_IMAGE)
     .withName(`testcontainers-ryuk-${sessionId}`)
-    .withExposedPorts(exposedPort)
-    .withBindMounts([{ source: socketPath, target: "/var/run/docker.sock" }])
+    .withExposedPorts(
+      process.env["TESTCONTAINERS_RYUK_PORT"]
+        ? { container: 8080, host: parseInt(process.env["TESTCONTAINERS_RYUK_PORT"]) }
+        : 8080
+    )
+    .withBindMounts([{ source: remoteSocketPath, target: "/var/run/docker.sock" }])
     .withWaitStrategy(Wait.forLogMessage(/.+ Started!/));
 
   if (process.env.TESTCONTAINERS_RYUK_PRIVILEGED === "true") {
     container.withPrivilegedMode();
   }
 
-  return await container.start();
+  const startedContainer = await container.start();
+
+  const socket = await connectToReaperSocket(
+    startedContainer.getHost(),
+    startedContainer.getMappedPort(8080),
+    startedContainer.getId()
+  );
+
+  return new RyukReaper(sessionId, socket);
 }
 
 async function connectToReaperSocket(host: string, port: number, containerId: string): Promise<Socket> {

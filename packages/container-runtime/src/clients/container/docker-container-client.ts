@@ -159,7 +159,7 @@ export class DockerContainerClient implements ContainerClient {
         stdout: true,
         stderr: true,
       })) as NodeJS.ReadableStream as Readable;
-      const demuxedStream = this.demuxStream(stream);
+      const demuxedStream = this.demuxStream(container.id, stream);
       log.debug(`Attached to container`, { containerId: container.id });
       return demuxedStream;
     } catch (err) {
@@ -178,7 +178,7 @@ export class DockerContainerClient implements ContainerClient {
         since: opts?.since,
       })) as IncomingMessage;
       stream.socket.unref();
-      const demuxedStream = this.demuxStream(stream);
+      const demuxedStream = this.demuxStream(container.id, stream);
       log.debug(`Fetched container logs`, { containerId: container.id });
       return demuxedStream;
     } catch (err) {
@@ -246,9 +246,9 @@ export class DockerContainerClient implements ContainerClient {
     }
   }
 
-  protected async demuxStream(stream: Readable): Promise<Readable> {
+  protected async demuxStream(containerId: string, stream: Readable): Promise<Readable> {
     try {
-      log.debug(`Demuxing stream...`);
+      log.debug(`Demuxing stream...`, { containerId });
       const demuxedStream = new PassThrough({ autoDestroy: true, encoding: "utf-8" });
       this.dockerode.modem.demuxStream(stream, demuxedStream, demuxedStream);
       stream.on("end", () => demuxedStream.end());
@@ -257,7 +257,7 @@ export class DockerContainerClient implements ContainerClient {
           stream.destroy();
         }
       });
-      log.debug(`Demuxed stream`);
+      log.debug(`Demuxed stream`, { containerId });
       return demuxedStream;
     } catch (err) {
       log.error(`Failed to demux stream: ${err}`);

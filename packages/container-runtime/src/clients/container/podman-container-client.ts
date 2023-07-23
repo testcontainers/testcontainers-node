@@ -16,7 +16,7 @@ export class PodmanContainerClient extends DockerContainerClient {
         AttachStderr: true,
       });
 
-      const stream = await this.demuxStream(await exec.start({ stdin: true, Detach: false, Tty: true }));
+      const stream = await this.demuxStream(container.id, await exec.start({ stdin: true, Detach: false, Tty: true }));
       if (opts?.log && execLog.enabled()) {
         byline(stream).on("data", (line) => execLog.trace(line, { containerId: container.id }));
       }
