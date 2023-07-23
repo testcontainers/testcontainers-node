@@ -73,7 +73,7 @@ describe("KafkaContainer", () => {
   });
 
   describe("when SASL SSL config listener provided", () => {
-    const certificatesDir = path.resolve(__dirname, ".", "test-certs");
+    const certificatesDir = path.resolve(__dirname, "..", "test-certs");
 
     // ssl {
     it(`should connect locally`, async () => {
