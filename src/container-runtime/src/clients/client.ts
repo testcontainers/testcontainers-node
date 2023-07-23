@@ -9,7 +9,7 @@ import { UnixSocketStrategy } from "../strategies/unix-socket-strategy";
 import { RootlessUnixSocketStrategy } from "../strategies/rootless-unix-socket-strategy";
 import { NpipeSocketStrategy } from "../strategies/npipe-socket-strategy";
 import { Info } from "./types";
-import { log } from "@testcontainers/logger";
+import { log } from "@testcontainers/common";
 
 export class ContainerRuntimeClient {
   constructor(

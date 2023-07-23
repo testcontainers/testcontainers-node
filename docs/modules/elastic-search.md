@@ -5,9 +5,9 @@
 ## Examples
 
 <!--codeinclude-->
-[Create an index:](../../src/modules/elasticsearch/elasticsearch-container.test.ts) inside_block:createIndex
+[Create an index:](../../src/modules/elastic-search/elasticsearch-container.test.ts) inside_block:createIndex
 <!--/codeinclude-->
 
 <!--codeinclude-->
-[Index a document:](../../src/modules/elasticsearch/elasticsearch-container.test.ts) inside_block:indexDocument
+[Index a document:](../../src/modules/elastic-search/elasticsearch-container.test.ts) inside_block:indexDocument
 <!--/codeinclude-->

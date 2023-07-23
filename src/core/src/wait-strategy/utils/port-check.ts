@@ -1,7 +1,7 @@
 import { Socket } from "net";
-import { log } from "@testcontainers/logger";
 import Dockerode from "dockerode";
 import { ContainerRuntimeClient } from "@testcontainers/container-runtime";
+import { log } from "@testcontainers/common";
 
 export interface PortCheck {
   isBound(port: number): Promise<boolean>;

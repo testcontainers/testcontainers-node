@@ -1,9 +1,9 @@
 import Dockerode from "dockerode";
 import { BoundPorts } from "../bound-ports";
-import { log } from "@testcontainers/logger";
 import byline from "byline";
 import { AbstractWaitStrategy } from "./wait-strategy";
 import { getContainerRuntimeClient } from "@testcontainers/container-runtime";
+import { log } from "@testcontainers/common";
 
 export type Log = string;
 

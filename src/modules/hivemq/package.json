@@ -3,13 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "main": "build/index.js",
-  "scripts": {
-    "build": "tsc --build"
-  },
+  "scripts": {},
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "@testcontainers/hivemq": "^1.0.0"
+  "devDependencies": {
+    "mqtt": "^4.3.7"
   }
 }

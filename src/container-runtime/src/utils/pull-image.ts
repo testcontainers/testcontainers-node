@@ -1,10 +1,10 @@
-import { log } from "@testcontainers/logger";
 import { imageExists } from "./image-exists";
 import Dockerode from "dockerode";
 import byline from "byline";
 import { getAuthConfig } from "../auth/get-auth-config";
 import { ImageName } from "../image-name";
 import { pullLog } from "../logger";
+import { log } from "@testcontainers/common";
 
 export type PullImageOptions = {
   imageName: ImageName;

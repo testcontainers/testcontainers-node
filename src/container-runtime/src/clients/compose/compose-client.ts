@@ -1,10 +1,10 @@
 import { ComposeDownOptions, ComposeOptions } from "./types";
-import { log } from "@testcontainers/logger";
 import v1 from "docker-compose";
 import dockerComposeV1, { v2 as dockerComposeV2, v2 } from "docker-compose";
 import { defaultComposeOptions } from "./default-compose-options";
 import { pullLog } from "../../logger";
 import { ComposeInfo } from "../types";
+import { log } from "@testcontainers/common";
 
 export interface ComposeClient {
   info: ComposeInfo;

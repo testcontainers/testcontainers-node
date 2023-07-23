@@ -1,6 +1,6 @@
 import Dockerode, { Network, NetworkCreateOptions } from "dockerode";
-import { log } from "@testcontainers/logger";
 import { NetworkClient } from "./network-client";
+import { log } from "@testcontainers/common";
 
 export class DockerNetworkClient implements NetworkClient {
   constructor(protected readonly dockerode: Dockerode) {}

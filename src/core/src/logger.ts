@@ -1,3 +1,3 @@
-import { Logger } from "@testcontainers/logger";
+import { Logger } from "@testcontainers/common";
 
 export const containerLog = new Logger("testcontainers:containers", false);

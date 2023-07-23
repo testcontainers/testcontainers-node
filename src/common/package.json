@@ -3,12 +3,19 @@
   "version": "1.0.0",
   "description": "",
   "main": "build/index.js",
-  "devDependencies": {},
   "scripts": {
-    "build": "tsc --build",
-    "test": "jest"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "debug": "^4.3.4",
+    "proper-lockfile": "^4.1.2",
+    "tmp": "^0.2.1"
+  },
+  "devDependencies": {
+    "@types/debug": "^4.1.8",
+    "@types/proper-lockfile": "^4.1.2",
+    "@types/tmp": "^0.2.3"
+  }
 }

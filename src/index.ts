@@ -28,7 +28,7 @@ export { PostgreSqlContainer, StartedPostgreSqlContainer } from "@testcontainers
 export { KafkaContainer, StartedKafkaContainer } from "@testcontainers/kafka";
 export { Neo4jContainer, StartedNeo4jContainer } from "@testcontainers/neo4j";
 export { ArangoDBContainer, StartedArangoContainer } from "@testcontainers/arangodb";
-export { ElasticsearchContainer, StartedElasticsearchContainer } from "@testcontainers/elasticsearch";
+export { ElasticsearchContainer, StartedElasticsearchContainer } from "@testcontainers/elastic-search";
 export { HiveMQContainer, StartedHiveMQContainer } from "@testcontainers/hivemq";
 export { MySqlContainer, StartedMySqlContainer } from "@testcontainers/mysql";
 export { NatsContainer, StartedNatsContainer, NatsConnectionOptions, NatsTlsOptions } from "@testcontainers/nats";

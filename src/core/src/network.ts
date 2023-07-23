@@ -1,5 +1,4 @@
-import { log } from "@testcontainers/logger";
-import { RandomUuid, Uuid } from "@testcontainers/common";
+import { log, RandomUuid, Uuid } from "@testcontainers/common";
 import { ContainerRuntimeClient, getContainerRuntimeClient } from "@testcontainers/container-runtime";
 import {
   LABEL_TESTCONTAINERS,

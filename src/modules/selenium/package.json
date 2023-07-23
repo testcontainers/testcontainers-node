@@ -4,12 +4,12 @@
   "description": "",
   "main": "build/index.js",
   "scripts": {
-    "build": "tsc --build"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "@testcontainers/selenium": "^1.0.0"
+  "devDependencies": {
+    "@types/selenium-webdriver": "^4.1.15",
+    "selenium-webdriver": "^4.10.0"
   }
 }

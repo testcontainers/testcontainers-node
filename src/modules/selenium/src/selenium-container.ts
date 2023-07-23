@@ -1,4 +1,3 @@
-import { log } from "@testcontainers/logger";
 import { copyFile } from "fs/promises";
 import tmp from "tmp";
 import tar from "tar-fs";
@@ -14,6 +13,7 @@ import {
   StoppedTestContainer,
   Wait,
 } from "@testcontainers/core";
+import { log } from "@testcontainers/common";
 
 const SELENIUM_PORT = 4444;
 const VNC_PORT = 5900;

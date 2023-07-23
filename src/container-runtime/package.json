@@ -3,16 +3,25 @@
   "version": "1.0.0",
   "main": "build/index.js",
   "scripts": {
-    "build": "tsc --build",
-    "test": "jest"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@testcontainers/common": "^1.0.0"
+    "@balena/dockerignore": "^1.0.2",
+    "@testcontainers/common": "^1.0.0",
+    "byline": "^5.0.0",
+    "docker-compose": "^0.24.1",
+    "dockerode": "^3.3.5",
+    "node-fetch": "^2.6.12",
+    "properties-reader": "^2.2.0",
+    "tar-fs": "^3.0.4"
   },
-  "types": "./build/index.d.ts",
-  "devDependencies": {},
-  "description": ""
+  "devDependencies": {
+    "@types/byline": "^4.2.33",
+    "@types/dockerode": "^3.3.19",
+    "@types/node-fetch": "^2.6.4",
+    "@types/properties-reader": "^2.1.1",
+    "@types/tar-fs": "^2.0.1"
+  }
 }

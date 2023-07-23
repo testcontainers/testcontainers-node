@@ -1,7 +1,6 @@
 import archiver from "archiver";
 import AsyncLock from "async-lock";
 import { BoundPorts } from "../bound-ports";
-import { log } from "@testcontainers/logger";
 import { getContainerPort, hasHostBinding, PortWithOptionalBinding } from "../port";
 import { DefaultPullPolicy, PullPolicy } from "../pull-policy";
 import { StartedTestContainer, TestContainer } from "../test-container";
@@ -34,7 +33,7 @@ import { Wait } from "../wait-strategy/wait";
 import { Readable } from "stream";
 import { ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "@testcontainers/container-runtime";
 import { Container, ContainerCreateOptions, ContainerInspectInfo, HostConfig } from "dockerode";
-import { hash } from "@testcontainers/common";
+import { hash, log } from "@testcontainers/common";
 import { containerLog } from "../logger";
 import { getReaper, REAPER_IMAGE } from "../reaper";
 // import { version } from "../../package.json";

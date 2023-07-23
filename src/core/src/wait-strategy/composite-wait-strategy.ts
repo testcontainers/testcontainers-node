@@ -1,7 +1,7 @@
 import { AbstractWaitStrategy, WaitStrategy } from "./wait-strategy";
 import Dockerode from "dockerode";
 import { BoundPorts } from "../bound-ports";
-import { log } from "@testcontainers/logger";
+import { log } from "@testcontainers/common";
 
 export class CompositeWaitStrategy extends AbstractWaitStrategy {
   private deadline?: number;

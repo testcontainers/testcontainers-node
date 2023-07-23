@@ -1,6 +1,5 @@
 import { ContainerRuntimeClient } from "@testcontainers/container-runtime";
-import { IntervalRetry, RandomUuid, withFileLock } from "@testcontainers/common";
-import { log } from "@testcontainers/logger";
+import { IntervalRetry, log, RandomUuid, withFileLock } from "@testcontainers/common";
 import { ContainerInfo } from "dockerode";
 import { GenericContainer } from "./generic-container/generic-container";
 import { Wait } from "./wait-strategy/wait";

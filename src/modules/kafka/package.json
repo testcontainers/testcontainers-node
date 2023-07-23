@@ -3,13 +3,12 @@
   "version": "1.0.0",
   "main": "build/index.js",
   "scripts": {
-    "build": "tsc --build"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
-  "dependencies": {
-    "@testcontainers/kafka": "^1.0.0"
+  "devDependencies": {
+    "kafkajs": "^2.2.4"
   }
 }

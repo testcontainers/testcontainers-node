@@ -1,5 +1,5 @@
 import Dockerode from "dockerode";
-import { log } from "@testcontainers/logger";
+import { log } from "@testcontainers/common";
 
 export const startContainer = async (container: Dockerode.Container): Promise<void> => {
   try {

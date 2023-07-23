@@ -4,12 +4,11 @@
   "description": "",
   "main": "build/index.js",
   "scripts": {
-    "build": "tsc --build"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "@testcontainers/neo4j": "^1.0.0"
+  "devDependencies": {
+    "neo4j-driver": "^5.10.0"
   }
 }

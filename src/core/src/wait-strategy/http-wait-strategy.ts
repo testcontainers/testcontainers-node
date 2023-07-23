@@ -3,8 +3,7 @@ import { BoundPorts } from "../bound-ports";
 import { AbstractWaitStrategy } from "./wait-strategy";
 import fetch, { Response } from "node-fetch";
 import https, { Agent } from "https";
-import { log } from "@testcontainers/logger";
-import { IntervalRetry } from "@testcontainers/common";
+import { IntervalRetry, log } from "@testcontainers/common";
 import { getContainerRuntimeClient } from "@testcontainers/container-runtime";
 
 export class HttpWaitStrategy extends AbstractWaitStrategy {

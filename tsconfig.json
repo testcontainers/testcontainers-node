@@ -1,38 +1,44 @@
 {
-  "compilerOptions": {
-    "target": "es6",
-    "module": "commonjs",
-    "declaration": true,
-    "outDir": "dist",
-    "strict": true,
-    "esModuleInterop": true,
-    "lib": [
-      "es2017"
-    ],
-    "skipLibCheck": true,
-    "noImplicitOverride": true,
-    "resolveJsonModule": true
-  },
-  "exclude": [
-    "dist",
-    "node_modules",
-    "src/modules/kafka/test-certs/**/*"
-  ],
+  "files": [],
   "references": [
     {
-      "path": "./packages/common"
+      "path": "./src/common"
     },
     {
-      "path": "./packages/logger"
+      "path": "./src/container-runtime"
     },
     {
-      "path": "./packages/container-runtime"
+      "path": "./src/core"
     },
     {
-      "path": "./packages/core"
+      "path": "./src/modules/arangodb"
     },
     {
-      "path": "./packages/modules/*"
+      "path": "./src/modules/elastic-search"
+    },
+    {
+      "path": "./src/modules/hivemq"
+    },
+    {
+      "path": "./src/modules/kafka"
+    },
+    {
+      "path": "./src/modules/mongodb"
+    },
+    {
+      "path": "./src/modules/mysql"
+    },
+    {
+      "path": "./src/modules/nats"
+    },
+    {
+      "path": "./src/modules/neo4j"
+    },
+    {
+      "path": "./src/modules/postgresql"
+    },
+    {
+      "path": "./src/modules/selenium"
     }
   ]
 }

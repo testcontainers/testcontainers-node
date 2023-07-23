@@ -1,14 +1,13 @@
 {
-  "name": "@testcontainers/nats",
+  "name": "@testcontainers/elastic-search",
   "version": "1.0.0",
-  "description": "",
   "main": "build/index.js",
-  "scripts": {
-  },
+  "scripts": {},
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "nats": "^2.15.1"
-  }
+    "@elastic/elasticsearch": "^7.17.12"
+  },
+  "description": ""
 }

@@ -1,9 +1,9 @@
 import path from "path";
-import { log } from "@testcontainers/logger";
 import { homedir } from "os";
 import { existsSync } from "fs";
 import { readFile } from "fs/promises";
 import propertiesReader from "properties-reader";
+import { log } from "@testcontainers/common";
 
 export type ContainerRuntimeConfig = {
   tcHost?: string;

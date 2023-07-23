@@ -4,12 +4,11 @@
   "description": "",
   "main": "build/index.js",
   "scripts": {
-    "build": "tsc --build"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "@testcontainers/arangodb": "^1.0.0"
+  "devDependencies": {
+    "arangojs": "^8.4.0"
   }
 }

@@ -1,9 +1,8 @@
 import { createSshConnection, SshConnection } from "ssh-remote-port-forward";
-import { log } from "@testcontainers/logger";
 import { GenericContainer } from "./generic-container/generic-container";
 import { PortWithOptionalBinding } from "./port";
 import { StartedTestContainer } from "./test-container";
-import { RandomUuid } from "@testcontainers/common";
+import { log, RandomUuid } from "@testcontainers/common";
 import { getContainerRuntimeClient } from "@testcontainers/container-runtime";
 import { getReaper } from "./reaper";
 

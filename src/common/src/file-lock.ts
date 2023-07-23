@@ -1,8 +1,8 @@
 import path from "path";
 import tmp from "tmp";
 import { writeFile } from "fs/promises";
-import { log } from "@testcontainers/logger";
 import lockFile from "proper-lockfile";
+import { log } from "./logger";
 
 export async function withFileLock<T>(fileName: string, fn: () => T): Promise<T> {
   const file = await createEmptyTmpFile(fileName);

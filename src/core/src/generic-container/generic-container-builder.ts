@@ -1,18 +1,16 @@
 import { AuthConfig, BuildArgs, RegistryConfig } from "../types";
 import { DefaultPullPolicy, PullPolicy } from "../pull-policy";
 import path from "path";
-import { log } from "@testcontainers/logger";
 import { getDockerfileImages } from "../dockerfile-parser";
 import { GenericContainer } from "./generic-container";
-import { RandomUuid, Uuid } from "@testcontainers/common";
-import { getContainerRuntimeClient, ImageName } from "@testcontainers/container-runtime";
+import { log, RandomUuid, Uuid } from "@testcontainers/common";
+import { getAuthConfig, getContainerRuntimeClient, ImageName } from "@testcontainers/container-runtime";
 import {
   LABEL_TESTCONTAINERS,
   LABEL_TESTCONTAINERS_LANG,
   LABEL_TESTCONTAINERS_SESSION_ID,
   LABEL_TESTCONTAINERS_VERSION,
 } from "../labels";
-import { getAuthConfig } from "@testcontainers/container-runtime/build/auth/get-auth-config";
 import { getReaper } from "../reaper";
 // import { version } from "../../package.json";
 

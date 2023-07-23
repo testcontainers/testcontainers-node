@@ -1,6 +1,6 @@
 import { PassThrough, Readable } from "stream";
-import { log } from "@testcontainers/logger";
 import Dockerode from "dockerode";
+import { log } from "@testcontainers/common";
 
 export async function demuxStream(dockerode: Dockerode, stream: Readable): Promise<Readable> {
   try {

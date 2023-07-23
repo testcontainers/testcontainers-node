@@ -1,5 +1,4 @@
 import Dockerode, { ImageBuildOptions } from "dockerode";
-import { log } from "@testcontainers/logger";
 import { buildLog, pullLog } from "../../logger";
 import byline from "byline";
 import tar from "tar-fs";
@@ -9,6 +8,7 @@ import dockerIgnore from "@balena/dockerignore";
 import { getAuthConfig } from "../../auth/get-auth-config";
 import { ImageName } from "../../image-name";
 import { ImageClient } from "./image-client";
+import { log } from "@testcontainers/common";
 
 export class DockerImageClient implements ImageClient {
   constructor(protected readonly dockerode: Dockerode, protected readonly indexServerAddress: string) {}

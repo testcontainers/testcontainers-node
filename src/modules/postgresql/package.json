@@ -4,12 +4,12 @@
   "description": "",
   "main": "build/index.js",
   "scripts": {
-    "build": "tsc --build"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "@testcontainers/postgresql": "^1.0.0"
+  "devDependencies": {
+    "@types/pg": "^8.10.2",
+    "pg": "^8.11.1"
   }
 }

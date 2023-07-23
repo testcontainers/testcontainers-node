@@ -1,8 +1,7 @@
 import { getContainerPort, PortWithOptionalBinding } from "./port";
-import { ContainerRuntimeClient } from "@testcontainers/container-runtime";
+import { ContainerRuntimeClient, HostIp } from "@testcontainers/container-runtime";
 import { HostPortBindings, Ports } from "./types";
 import net from "net";
-import { HostIp } from "@testcontainers/container-runtime/build/clients/types";
 import { ContainerInspectInfo } from "dockerode";
 
 export class BoundPorts {

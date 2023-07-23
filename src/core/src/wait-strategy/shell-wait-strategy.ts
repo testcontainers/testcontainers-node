@@ -1,8 +1,7 @@
 import Dockerode from "dockerode";
-import { log } from "@testcontainers/logger";
 import { AbstractWaitStrategy } from "./wait-strategy";
 import { getContainerRuntimeClient } from "@testcontainers/container-runtime";
-import { IntervalRetry } from "@testcontainers/common";
+import { IntervalRetry, log } from "@testcontainers/common";
 
 export class ShellWaitStrategy extends AbstractWaitStrategy {
   constructor(private readonly command: string) {

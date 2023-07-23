@@ -3,11 +3,19 @@
   "version": "1.0.0",
   "description": "",
   "main": "build/index.js",
-  "devDependencies": {},
   "scripts": {
-    "build": "tsc --build"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "archiver": "^5.3.1",
+    "async-lock": "^1.4.0",
+    "get-port": "^7.0.0",
+    "ssh-remote-port-forward": "^1.0.4"
+  },
+  "devDependencies": {
+    "@types/archiver": "^5.3.2",
+    "@types/async-lock": "^1.4.0"
+  }
 }

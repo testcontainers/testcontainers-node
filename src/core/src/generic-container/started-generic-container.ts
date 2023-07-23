@@ -2,7 +2,6 @@ import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer
 import Dockerode, { ContainerInspectInfo } from "dockerode";
 import { ContentToCopy, DirectoryToCopy, ExecResult, FileToCopy, Labels } from "../types";
 import { BoundPorts } from "../bound-ports";
-import { log } from "@testcontainers/logger";
 import { Readable } from "stream";
 import { StoppedGenericContainer } from "./stopped-generic-container";
 import { WaitStrategy } from "../wait-strategy/wait-strategy";
@@ -11,6 +10,7 @@ import archiver from "archiver";
 import { getContainerRuntimeClient } from "@testcontainers/container-runtime";
 import { containerLog } from "../logger";
 import { waitForContainer } from "../wait-strategy/wait-for-container";
+import { log } from "@testcontainers/common";
 
 export class StartedGenericContainer implements StartedTestContainer {
   private stoppedContainer?: StoppedTestContainer;

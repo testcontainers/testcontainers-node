@@ -6,9 +6,8 @@ import Dockerode, {
   ContainerLogsOptions,
   Network,
 } from "dockerode";
-import { log } from "@testcontainers/logger";
 import { PassThrough, Readable } from "stream";
-import { streamToString } from "@testcontainers/common";
+import { log, streamToString } from "@testcontainers/common";
 import { IncomingMessage } from "http";
 import { ExecResult } from "./types";
 import { execLog } from "../../logger";

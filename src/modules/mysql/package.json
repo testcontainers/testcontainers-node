@@ -4,12 +4,11 @@
   "description": "",
   "main": "build/index.js",
   "scripts": {
-    "build": "tsc --build"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "@testcontainers/mysql": "^1.0.0"
+  "devDependencies": {
+    "mysql2": "^3.5.2"
   }
 }
