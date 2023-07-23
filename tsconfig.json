@@ -27,6 +27,12 @@
     },
     {
       "path": "./packages/container-runtime"
+    },
+    {
+      "path": "./packages/core"
+    },
+    {
+      "path": "./packages/modules/*"
     }
   ]
 }

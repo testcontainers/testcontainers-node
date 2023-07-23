@@ -191,7 +191,9 @@ export class DockerContainerClient implements ContainerClient {
     const chunks: string[] = [];
 
     try {
-      log.debug(`Execing container with command "${command.join(" ")}"...`, { containerId: container.id });
+      if (opts?.log) {
+        log.debug(`Execing container with command "${command.join(" ")}"...`, { containerId: container.id });
+      }
       const exec = await container.exec({
         Cmd: command,
         AttachStdout: true,
@@ -214,7 +216,9 @@ export class DockerContainerClient implements ContainerClient {
       const inspectResult = await exec.inspect();
       const exitCode = inspectResult.ExitCode === null ? -1 : inspectResult.ExitCode;
       const output = chunks.join("");
-      log.debug(`Execed container with command "${command.join(" ")}"...`, { containerId: container.id });
+      if (opts?.log) {
+        log.debug(`Execed container with command "${command.join(" ")}"...`, { containerId: container.id });
+      }
       return { output, exitCode };
     } catch (err) {
       log.error(`Failed to exec container with command "${command.join(" ")}": ${err}: ${chunks.join("")}`, {

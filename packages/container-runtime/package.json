@@ -1,7 +1,6 @@
 {
   "name": "@testcontainers/container-runtime",
   "version": "1.0.0",
-  "description": "",
   "main": "build/index.js",
   "scripts": {
     "build": "tsc --build",
@@ -12,5 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "@testcontainers/common": "^1.0.0"
-  }
+  },
+  "types": "./build/index.d.ts",
+  "devDependencies": {},
+  "description": ""
 }

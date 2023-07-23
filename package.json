@@ -5,7 +5,11 @@
   "main": "dist/src/index",
   "types": "dist/src/index",
   "workspaces": [
-    "packages/*"
+    "packages/common",
+    "packages/container-runtime",
+    "packages/core",
+    "packages/logger",
+    "packages/modules/*"
   ],
   "keywords": [
     "docker",
@@ -40,8 +44,19 @@
   },
   "dependencies": {
     "@balena/dockerignore": "^1.0.2",
+    "@testcontainers/arangodb": "^1.0.0",
     "@testcontainers/container-runtime": "^1.0.0",
+    "@testcontainers/core": "^1.0.0",
+    "@testcontainers/elasticsearch": "^1.0.0",
+    "@testcontainers/hivemq": "^1.0.0",
+    "@testcontainers/kafka": "^1.0.0",
     "@testcontainers/logger": "^1.0.0",
+    "@testcontainers/mongodb": "^1.0.0",
+    "@testcontainers/mysql": "^1.0.0",
+    "@testcontainers/nats": "^1.0.0",
+    "@testcontainers/neo4j": "^1.0.0",
+    "@testcontainers/postgresql": "^1.0.0",
+    "@testcontainers/selenium": "^1.0.0",
     "@types/archiver": "^5.3.2",
     "@types/dockerode": "^3.3.19",
     "archiver": "^5.3.1",
