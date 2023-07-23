@@ -10,6 +10,8 @@ import { Readable } from "stream";
 import { ExecResult } from "./types";
 
 export interface ContainerClient {
+  dockerode: Dockerode;
+
   ping(): Promise<string>;
 
   getById(id: string): Container;

@@ -22,7 +22,13 @@ import {
 } from "../docker/types";
 import { GenericContainerBuilder } from "./generic-container-builder";
 import { StartedGenericContainer } from "./started-generic-container";
-import { LABEL_TESTCONTAINERS, LABEL_TESTCONTAINERS_CONTAINER_HASH, LABEL_TESTCONTAINERS_LANG } from "../labels";
+import {
+  LABEL_TESTCONTAINERS,
+  LABEL_TESTCONTAINERS_CONTAINER_HASH,
+  LABEL_TESTCONTAINERS_LANG,
+  LABEL_TESTCONTAINERS_SESSION_ID,
+  LABEL_TESTCONTAINERS_VERSION,
+} from "../labels";
 import { StartedNetwork } from "../network";
 import { waitForContainer } from "../wait-for-container";
 import { Wait } from "../wait-strategy/wait";
@@ -32,6 +38,8 @@ import { Container, ContainerCreateOptions, ContainerInspectInfo, HostConfig } f
 import { REAPER_IMAGE, SSHD_IMAGE } from "../images";
 import { hash } from "@testcontainers/common";
 import { containerLog } from "../logger";
+import { getReaper } from "../reaper";
+import { version } from "../../package.json";
 
 const reusableContainerCreationLock = new AsyncLock();
 
@@ -73,7 +81,6 @@ export class GenericContainer implements TestContainer {
 
   public async start(): Promise<StartedTestContainer> {
     const client = await getContainerRuntimeClient();
-
     await client.image.pull(this.imageName, { force: this.pullPolicy.shouldPull() });
 
     if (this.beforeContainerStarted) {
@@ -93,14 +100,17 @@ export class GenericContainer implements TestContainer {
       ...this.createOpts.Labels,
       [LABEL_TESTCONTAINERS]: "true",
       [LABEL_TESTCONTAINERS_LANG]: "node",
-      // [LABEL_TESTCONTAINERS_VERSION]: version,
+      [LABEL_TESTCONTAINERS_VERSION]: version,
     };
 
     if (this.reuse) {
       return this.reuseOrStartContainer(client);
     }
 
-    // this.createOpts.Labels = { ...this.createOpts.Labels, [LABEL_TESTCONTAINERS_SESSION_ID]: sessionId };
+    if (!this.isHelperContainer()) {
+      const reaper = await getReaper(client);
+      this.createOpts.Labels = { ...this.createOpts.Labels, [LABEL_TESTCONTAINERS_SESSION_ID]: reaper.sessionId };
+    }
 
     return this.startContainer(client);
   }
@@ -340,7 +350,7 @@ export class GenericContainer implements TestContainer {
       dockerodeExposedPorts[getContainerPort(exposedPort).toString()] = {};
     }
 
-    const dockerodePortBindings: any = {};
+    const dockerodePortBindings: Record<string, Array<Record<string, string>>> = {};
     for (const exposedPort of ports) {
       if (hasHostBinding(exposedPort)) {
         dockerodePortBindings[exposedPort.container] = [{ HostPort: exposedPort.host.toString() }];

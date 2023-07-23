@@ -40,6 +40,7 @@ export async function getContainerRuntimeClient(): Promise<ContainerRuntimeClien
       log.debug(`Testing container runtime strategy "${strategy.getName()}"...`);
       const client = await strategy.initialise();
       if (client && (await client.container.ping()) === "OK") {
+        log.debug(`Container runtime strategy "${strategy.getName()}" works`);
         containerRuntimeClient = client;
         return client;
       }

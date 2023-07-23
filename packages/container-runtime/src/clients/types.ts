@@ -13,6 +13,7 @@ export type NodeInfo = {
 export type ContainerRuntimeInfo = {
   host: string;
   hostIps: HostIp[];
+  remoteSocketPath: string;
   indexServerAddress: string;
   serverVersion: number;
   operatingSystem: string;

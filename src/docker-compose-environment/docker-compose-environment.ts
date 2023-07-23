@@ -12,6 +12,7 @@ import { Wait } from "../wait-strategy/wait";
 import { RandomUuid, Uuid } from "@testcontainers/common";
 import { getContainerRuntimeClient, parseComposeContainerName } from "@testcontainers/container-runtime";
 import { containerLog } from "../logger";
+import { getReaper } from "../reaper";
 
 export class DockerComposeEnvironment {
   private readonly composeFilePath: string;
@@ -77,7 +78,8 @@ export class DockerComposeEnvironment {
   public async up(services?: Array<string>): Promise<StartedDockerComposeEnvironment> {
     log.info(`Starting DockerCompose environment "${this.projectName}"...`);
     const client = await getContainerRuntimeClient();
-    // await registerComposeProjectForCleanup(this.projectName);
+    const reaper = await getReaper(client);
+    reaper.addComposeProject(this.projectName);
 
     const options = {
       filePath: this.composeFilePath,

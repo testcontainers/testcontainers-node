@@ -10,6 +10,7 @@ import { ComposeInfo, ContainerRuntimeInfo, Info, NodeInfo } from "../clients/ty
 import { isDefined, isEmptyString } from "@testcontainers/common";
 import { lookupHostIps } from "../utils/lookup-host-ips";
 import { resolveHost } from "../utils/resolve-host";
+import { getRemoteContainerRuntimeSocketPath } from "../utils/remote-container-runtime-socket-path";
 
 export interface ContainerRuntimeClientStrategy {
   getName(): string;
@@ -45,21 +46,23 @@ export abstract class AbstractContainerRuntimeClientStrategy implements Containe
     };
 
     const dockerodeInfo = await dockerode.info();
+    const remoteContainerRuntimeSocketPath = getRemoteContainerRuntimeSocketPath(result, dockerodeInfo.OperatingSystem);
     const indexServerAddress =
       !isDefined(dockerodeInfo.IndexServerAddress) || isEmptyString(dockerodeInfo.IndexServerAddress)
         ? "https://index.docker.io/v1/"
         : dockerodeInfo.IndexServerAddress;
     const host = await resolveHost(dockerode, result, indexServerAddress);
     const containerRuntimeInfo: ContainerRuntimeInfo = {
+      host,
+      hostIps: await lookupHostIps(host),
+      remoteSocketPath: remoteContainerRuntimeSocketPath,
+      indexServerAddress: indexServerAddress,
       serverVersion: dockerodeInfo.ServerVersion,
       operatingSystem: dockerodeInfo.OperatingSystem,
       operatingSystemType: dockerodeInfo.OSType,
       architecture: dockerodeInfo.Architecture,
       cpus: dockerodeInfo.NCPU,
       memory: dockerodeInfo.MemTotal,
-      indexServerAddress: indexServerAddress,
-      host,
-      hostIps: await lookupHostIps(host),
     };
 
     const composeInfo: ComposeInfo = composeClient.info;
