@@ -1,0 +1,15 @@
+{
+  "name": "@testcontainers/arangodb",
+  "version": "1.0.0",
+  "description": "",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "tsc --build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@testcontainers/arangodb": "^1.0.0"
+  }
+}

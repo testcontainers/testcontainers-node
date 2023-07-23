@@ -1,0 +1,15 @@
+{
+  "name": "@testcontainers/neo4j",
+  "version": "1.0.0",
+  "description": "",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "tsc --build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@testcontainers/neo4j": "^1.0.0"
+  }
+}
