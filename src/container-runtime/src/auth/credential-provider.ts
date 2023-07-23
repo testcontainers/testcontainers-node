@@ -2,7 +2,7 @@ import {
   CredentialProviderGetResponse,
   CredentialProviderListResponse,
   ContainerRuntimeConfig,
-  AuthConfig
+  AuthConfig,
 } from "./types";
 import { log } from "@testcontainers/logger";
 import { exec, spawn } from "child_process";

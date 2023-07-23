@@ -5,11 +5,11 @@
   "main": "dist/src/index",
   "types": "dist/src/index",
   "workspaces": [
-    "packages/common",
-    "packages/container-runtime",
-    "packages/core",
-    "packages/logger",
-    "packages/modules/*"
+    "src/common",
+    "src/container-runtime",
+    "src/core",
+    "src/logger",
+    "src/modules/*"
   ],
   "keywords": [
     "docker",
