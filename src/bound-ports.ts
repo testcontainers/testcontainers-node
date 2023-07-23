@@ -1,6 +1,6 @@
 import { getContainerPort, PortWithOptionalBinding } from "./port";
 import { ContainerRuntimeClient } from "@testcontainers/container-runtime";
-import { HostPortBindings, Ports } from "./docker/types";
+import { HostPortBindings, Ports } from "./types";
 import net from "net";
 import { HostIp } from "@testcontainers/container-runtime/build/clients/types";
 import { ContainerInspectInfo } from "dockerode";
@@ -80,7 +80,7 @@ function getPorts(inspectInfo: ContainerInspectInfo): Ports {
     .reduce((acc, curr) => ({ ...acc, ...curr }), {});
 }
 
-function resolveHostPortBinding(hostIps: HostIp[], hostPortBindings: HostPortBindings): number {
+export function resolveHostPortBinding(hostIps: HostIp[], hostPortBindings: HostPortBindings): number {
   if (isDualStackIp(hostPortBindings)) {
     return hostPortBindings[0].hostPort;
   }

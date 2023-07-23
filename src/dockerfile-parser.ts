@@ -1,6 +1,6 @@
 import { promises as fs } from "fs";
 import { log } from "@testcontainers/logger";
-import { BuildArgs } from "./docker/types";
+import { BuildArgs } from "./types";
 import { ImageName } from "@testcontainers/container-runtime";
 import { isNotEmptyString } from "@testcontainers/common";
 

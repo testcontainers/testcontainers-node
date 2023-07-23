@@ -1,4 +1,5 @@
-import { HostIps, lookupHostIps } from "./lookup-host-ips";
+import { lookupHostIps } from "./lookup-host-ips";
+import { HostIp } from "../clients/types";
 
 const mockDnsLookup = jest.fn();
 jest.mock("dns", () => {
@@ -11,7 +12,7 @@ jest.mock("dns", () => {
 
 describe("lookupHostIps", () => {
   it("should return a list of resolved host IPs when host is not an IP", async () => {
-    const hostIps: HostIps = [{ address: "127.0.0.1", family: 4 }];
+    const hostIps: HostIp[] = [{ address: "127.0.0.1", family: 4 }];
     mockDnsLookup.mockResolvedValueOnce(hostIps);
     expect(await lookupHostIps("localhost")).toEqual(hostIps);
   });

@@ -3,10 +3,11 @@ import { log } from "@testcontainers/logger";
 import { GenericContainer } from "./generic-container/generic-container";
 import { PortWithOptionalBinding } from "./port";
 import { StartedTestContainer } from "./test-container";
-import { SSHD_IMAGE } from "./images";
 import { RandomUuid } from "@testcontainers/common";
 import { getContainerRuntimeClient } from "@testcontainers/container-runtime";
 import { getReaper } from "./reaper";
+
+export const SSHD_IMAGE = process.env["SSHD_CONTAINER_IMAGE"] ?? "testcontainers/sshd:1.1.0";
 
 export class PortForwarder {
   constructor(private readonly sshConnection: SshConnection, private readonly container: StartedTestContainer) {}

@@ -6,7 +6,7 @@ import { getContainerPort, hasHostBinding, PortWithOptionalBinding } from "../po
 import { DefaultPullPolicy, PullPolicy } from "../pull-policy";
 import { StartedTestContainer, TestContainer } from "../test-container";
 import { WaitStrategy } from "../wait-strategy/wait-strategy";
-import { PortForwarderInstance } from "../port-forwarder";
+import { PortForwarderInstance, SSHD_IMAGE } from "../port-forwarder";
 import {
   BindMount,
   ContentToCopy,
@@ -19,7 +19,7 @@ import {
   ResourcesQuota,
   TmpFs,
   Ulimits,
-} from "../docker/types";
+} from "../types";
 import { GenericContainerBuilder } from "./generic-container-builder";
 import { StartedGenericContainer } from "./started-generic-container";
 import {
@@ -30,16 +30,15 @@ import {
   LABEL_TESTCONTAINERS_VERSION,
 } from "../labels";
 import { StartedNetwork } from "../network";
-import { waitForContainer } from "../wait-for-container";
 import { Wait } from "../wait-strategy/wait";
 import { Readable } from "stream";
 import { ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "@testcontainers/container-runtime";
 import { Container, ContainerCreateOptions, ContainerInspectInfo, HostConfig } from "dockerode";
-import { REAPER_IMAGE, SSHD_IMAGE } from "../images";
 import { hash } from "@testcontainers/common";
 import { containerLog } from "../logger";
-import { getReaper } from "../reaper";
+import { getReaper, REAPER_IMAGE } from "../reaper";
 import { version } from "../../package.json";
+import { waitForContainer } from "../wait-strategy/wait-for-container";
 
 const reusableContainerCreationLock = new AsyncLock();
 

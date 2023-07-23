@@ -1,5 +1,15 @@
 import { Readable } from "stream";
 
+export type InspectResult = {
+  name: string;
+  hostname: string;
+  ports: Ports;
+  healthCheckStatus: HealthCheckStatus;
+  networkSettings: { [networkName: string]: NetworkSettings };
+  state: { status: string; running: boolean; startedAt: Date; finishedAt: Date | undefined };
+  labels: Labels;
+};
+
 export type ContainerRuntime = "docker" | "podman";
 
 export type Environment = { [key in string]: string };

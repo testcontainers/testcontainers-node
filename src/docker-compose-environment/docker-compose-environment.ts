@@ -3,16 +3,15 @@ import { BoundPorts } from "../bound-ports";
 import { StartedGenericContainer } from "../generic-container/started-generic-container";
 import { log } from "@testcontainers/logger";
 import { WaitStrategy } from "../wait-strategy/wait-strategy";
-import { Environment } from "../docker/types";
+import { Environment } from "../types";
 import { StartedDockerComposeEnvironment } from "./started-docker-compose-environment";
-import { waitForContainer } from "../wait-for-container";
 import { DefaultPullPolicy, PullPolicy } from "../pull-policy";
 import { Wait } from "../wait-strategy/wait";
-// import { registerComposeProjectForCleanup } from "../reaper";
 import { RandomUuid, Uuid } from "@testcontainers/common";
 import { getContainerRuntimeClient, parseComposeContainerName } from "@testcontainers/container-runtime";
 import { containerLog } from "../logger";
 import { getReaper } from "../reaper";
+import { waitForContainer } from "../wait-strategy/wait-for-container";
 
 export class DockerComposeEnvironment {
   private readonly composeFilePath: string;
@@ -132,7 +131,7 @@ export class DockerComposeEnvironment {
     const startedGenericContainers = (
       await Promise.all(
         startedContainers.map(async (startedContainer) => {
-          const container = await client.container.getById(startedContainer.Id);
+          const container = client.container.getById(startedContainer.Id);
           const containerName = parseComposeContainerName(this.projectName, startedContainer.Names[0]);
 
           const inspectResult = await client.container.inspect(container);

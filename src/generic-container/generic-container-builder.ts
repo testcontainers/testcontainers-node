@@ -1,4 +1,4 @@
-import { AuthConfig, BuildArgs, RegistryConfig } from "../docker/types";
+import { AuthConfig, BuildArgs, RegistryConfig } from "../types";
 import { DefaultPullPolicy, PullPolicy } from "../pull-policy";
 import path from "path";
 import { log } from "@testcontainers/logger";

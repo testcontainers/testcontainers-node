@@ -3,10 +3,11 @@ import { IntervalRetry, RandomUuid, withFileLock } from "@testcontainers/common"
 import { log } from "@testcontainers/logger";
 import { ContainerInfo } from "dockerode";
 import { GenericContainer } from "./generic-container/generic-container";
-import { REAPER_IMAGE } from "./images";
 import { Wait } from "./wait-strategy/wait";
 import { Socket } from "net";
 import { LABEL_TESTCONTAINERS_SESSION_ID } from "./labels";
+
+export const REAPER_IMAGE = process.env["RYUK_CONTAINER_IMAGE"] ?? "testcontainers/ryuk:0.5.1";
 
 export interface Reaper {
   sessionId: string;

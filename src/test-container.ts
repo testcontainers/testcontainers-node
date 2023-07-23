@@ -14,7 +14,7 @@ import {
   ResourcesQuota,
   TmpFs,
   Ulimits,
-} from "./docker/types";
+} from "./types";
 import { StartedNetwork } from "./network";
 
 export interface TestContainer {

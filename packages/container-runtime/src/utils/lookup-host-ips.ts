@@ -1,9 +1,8 @@
 import net from "net";
 import dns from "dns";
+import { HostIp } from "../clients/types";
 
-export type HostIps = Array<{ address: string; family: number }>;
-
-export const lookupHostIps = async (host: string): Promise<HostIps> => {
+export const lookupHostIps = async (host: string): Promise<HostIp[]> => {
   if (net.isIP(host) === 0) {
     return await dns.promises.lookup(host, { all: true });
   } else {
