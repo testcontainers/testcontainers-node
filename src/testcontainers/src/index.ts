@@ -23,26 +23,3 @@ export { InspectResult, Content, ExecResult } from "./types";
 
 export { AbstractStartedContainer } from "./abstract-started-container";
 export { AbstractStoppedContainer } from "./abstract-stopped-container";
-
-// export { PostgreSqlContainer, StartedPostgreSqlContainer } from "./modules/postgresql/postgresql-container";
-// export { KafkaContainer, StartedKafkaContainer } from "./modules/kafka/kafka-container";
-// export { Neo4jContainer, StartedNeo4jContainer } from "./modules/neo4j/neo4j-container";
-// export { ArangoDBContainer, StartedArangoContainer } from "./modules/arangodb/arangodb-container";
-// export { ElasticsearchContainer, StartedElasticsearchContainer } from "./modules/elasticsearch/elasticsearch-container";
-// export { HiveMQContainer, StartedHiveMQContainer } from "./modules/hivemq/hivemq-container";
-// export { MySqlContainer, StartedMySqlContainer } from "./modules/mysql/mysql-container";
-// export {
-//   NatsContainer,
-//   StartedNatsContainer,
-//   NatsConnectionOptions,
-//   NatsTlsOptions,
-// } from "./modules/nats/nats-container";
-// export { MongoDBContainer, StartedMongoDBContainer } from "./modules/mongodb/mongodb-container";
-// export {
-//   SeleniumContainer,
-//   SeleniumRecordingContainer,
-//   StartedSeleniumContainer,
-//   StartedSeleniumRecordingContainer,
-//   StoppedSeleniumContainer,
-//   StoppedSeleniumRecordingContainer,
-// } from "./modules/selenium/selenium-container";

@@ -1,13 +1,4 @@
-import Dockerode, { DockerOptions } from "dockerode";
-
-// export type PartialDockerClient = DockerClientStrategyResult & {
-//   dockerode: Dockerode;
-//   dockerComposeClient: DockerComposeClient;
-//   host: string;
-//   containerRuntime: ContainerRuntime;
-//   hostIps: HostIps;
-//   info: SystemInfo;
-// };
+import { DockerOptions } from "dockerode";
 
 export type ContainerRuntimeClientStrategyResult = {
   uri: string;

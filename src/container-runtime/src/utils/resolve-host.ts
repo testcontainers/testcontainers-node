@@ -8,11 +8,12 @@ import { log } from "@testcontainers/common";
 export const resolveHost = async (
   dockerode: Dockerode,
   strategyResult: ContainerRuntimeClientStrategyResult,
-  indexServerAddress: string
+  indexServerAddress: string,
+  env: NodeJS.ProcessEnv = process.env
 ): Promise<string> => {
   if (strategyResult.allowUserOverrides) {
-    if (process.env.TESTCONTAINERS_HOST_OVERRIDE !== undefined) {
-      return process.env.TESTCONTAINERS_HOST_OVERRIDE;
+    if (env.TESTCONTAINERS_HOST_OVERRIDE !== undefined) {
+      return env.TESTCONTAINERS_HOST_OVERRIDE;
     }
   }
 
