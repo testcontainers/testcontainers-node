@@ -1,4 +1,4 @@
-const { GenericContainer } = require("./dist/src/index");
+const { GenericContainer } = require("./src/core/build/index");
 
 (async () => {
   const container = await new GenericContainer("alpine:3.12")

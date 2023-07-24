@@ -1,11 +1,9 @@
 {
-//  "files": [],
+  "files": [],
   "extends": "./tsconfig.base.json",
-  "compilerOptions": {
-    "rootDir": "src",
-    "outDir": "build"
-  },
-  "exclude": ["./jest.config.ts"],
+  "exclude": [
+    "./jest.config.ts"
+  ],
   "references": [
     {
       "path": "./src/common"

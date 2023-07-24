@@ -1,4 +1,7 @@
 {
+  "exclude": [
+    "**/*.test.ts"
+  ],
   "compilerOptions": {
     "incremental": true,
     "target": "es2022",
@@ -12,15 +15,5 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitOverride": true,
     "composite": true
-
-    //    "outDir": "build",
-    //    "lib": [
-    //      "es2017"
-    //    ],
-    //    "resolveJsonModule": true,
   }
-  //  "exclude": [
-  //    "build",
-  //    "node_modules"
-  //  ],
 }
