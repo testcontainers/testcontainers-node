@@ -22,7 +22,7 @@ export {
   InspectResult,
   AbstractStartedContainer,
   AbstractStoppedContainer,
-} from "@testcontainers/core";
+} from "@testcontainers/testcontainers";
 
 export { PostgreSqlContainer, StartedPostgreSqlContainer } from "@testcontainers/postgresql";
 export { KafkaContainer, StartedKafkaContainer } from "@testcontainers/kafka";

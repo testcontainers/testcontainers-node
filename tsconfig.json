@@ -12,7 +12,7 @@
       "path": "./src/container-runtime"
     },
     {
-      "path": "./src/core"
+      "path": "./src/testcontainers"
     },
     {
       "path": "./src/modules/arangodb"

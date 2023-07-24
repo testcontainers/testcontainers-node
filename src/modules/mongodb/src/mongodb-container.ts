@@ -4,7 +4,7 @@ import {
   GenericContainer,
   StartedTestContainer,
   Wait,
-} from "@testcontainers/core";
+} from "@testcontainers/testcontainers";
 
 const MONGODB_PORT = 27017;
 

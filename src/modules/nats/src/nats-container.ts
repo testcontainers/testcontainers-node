@@ -1,4 +1,4 @@
-import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "@testcontainers/core";
+import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "@testcontainers/testcontainers";
 
 const CLIENT_PORT = 4222;
 const ROUTING_PORT_FOR_CLUSTERING = 6222;

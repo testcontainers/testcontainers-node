@@ -1,4 +1,9 @@
-import { AbstractStartedContainer, Content, GenericContainer, StartedTestContainer } from "@testcontainers/core";
+import {
+  AbstractStartedContainer,
+  Content,
+  GenericContainer,
+  StartedTestContainer,
+} from "@testcontainers/testcontainers";
 import { RandomUuid, Uuid } from "@testcontainers/common";
 import { ContainerInspectInfo } from "dockerode";
 

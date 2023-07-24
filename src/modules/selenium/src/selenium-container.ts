@@ -12,7 +12,7 @@ import {
   StopOptions,
   StoppedTestContainer,
   Wait,
-} from "@testcontainers/core";
+} from "@testcontainers/testcontainers";
 import { log } from "@testcontainers/common";
 
 const SELENIUM_PORT = 4444;

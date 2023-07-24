@@ -1,4 +1,4 @@
-import { AbstractStartedContainer, GenericContainer, StartedTestContainer } from "@testcontainers/core";
+import { AbstractStartedContainer, GenericContainer, StartedTestContainer } from "@testcontainers/testcontainers";
 
 const ELASTIC_SEARCH_HTTP_PORT = 9200;
 

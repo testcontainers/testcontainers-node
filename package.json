@@ -7,7 +7,7 @@
   "workspaces": [
     "src/common",
     "src/container-runtime",
-    "src/core",
+    "src/testcontainers",
     "src/modules/*"
   ],
   "keywords": [

@@ -1,4 +1,4 @@
-import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "@testcontainers/core";
+import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "@testcontainers/testcontainers";
 
 const POSTGRES_PORT = 5432;
 

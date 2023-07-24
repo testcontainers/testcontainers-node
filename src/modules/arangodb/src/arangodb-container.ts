@@ -1,4 +1,4 @@
-import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "@testcontainers/core";
+import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "@testcontainers/testcontainers";
 
 const ARANGODB_PORT = 8529;
 const USERNAME = "root";
