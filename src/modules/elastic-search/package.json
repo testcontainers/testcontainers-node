@@ -9,5 +9,9 @@
   "devDependencies": {
     "@elastic/elasticsearch": "^7.17.12"
   },
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "@testcontainers/common": "^1.0.0",
+    "@testcontainers/testcontainers": "^1.0.0"
+  }
 }

@@ -2,13 +2,16 @@
   "name": "@testcontainers/kafka",
   "version": "1.0.0",
   "main": "build/index.js",
-  "scripts": {
-  },
+  "scripts": {},
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
     "kafkajs": "^2.2.4"
+  },
+  "dependencies": {
+    "@testcontainers/common": "^1.0.0",
+    "@testcontainers/testcontainers": "^1.0.0"
   }
 }

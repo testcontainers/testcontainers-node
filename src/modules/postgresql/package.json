@@ -3,13 +3,16 @@
   "version": "1.0.0",
   "description": "",
   "main": "build/index.js",
-  "scripts": {
-  },
+  "scripts": {},
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@types/pg": "^8.10.2",
     "pg": "^8.11.1"
+  },
+  "dependencies": {
+    "@testcontainers/common": "^1.0.0",
+    "@testcontainers/testcontainers": "^1.0.0"
   }
 }

@@ -9,5 +9,9 @@
   "license": "ISC",
   "devDependencies": {
     "mqtt": "^4.3.7"
+  },
+  "dependencies": {
+    "@testcontainers/common": "^1.0.0",
+    "@testcontainers/testcontainers": "^1.0.0"
   }
 }
