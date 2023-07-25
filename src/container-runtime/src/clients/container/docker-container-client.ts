@@ -174,7 +174,7 @@ export class DockerContainerClient implements ContainerClient {
         follow: true,
         stdout: true,
         stderr: true,
-        since: opts?.since,
+        since: opts?.since ?? 0,
       })) as IncomingMessage;
       stream.socket.unref();
       const demuxedStream = this.demuxStream(container.id, stream);
