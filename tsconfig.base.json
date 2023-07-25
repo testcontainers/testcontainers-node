@@ -1,6 +1,6 @@
 {
   "exclude": [
-    "**/*.test.ts"
+    "./src/**/*.test.ts",
   ],
   "compilerOptions": {
     "incremental": true,

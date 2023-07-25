@@ -2,16 +2,14 @@ import { isDefined } from "@testcontainers/common";
 import { existsSync } from "fs";
 import path from "path";
 import os from "os";
-import { AbstractContainerRuntimeClientStrategy } from "./strategy";
+import { ContainerRuntimeClientStrategy } from "./strategy";
 import { ContainerRuntimeClientStrategyResult } from "./types";
 
-export class RootlessUnixSocketStrategy extends AbstractContainerRuntimeClientStrategy {
+export class RootlessUnixSocketStrategy implements ContainerRuntimeClientStrategy {
   constructor(
     private readonly platform: NodeJS.Platform = process.platform,
     private readonly env: NodeJS.ProcessEnv = process.env
-  ) {
-    super();
-  }
+  ) {}
 
   getName(): string {
     return "RootlessUnixSocketStrategy";

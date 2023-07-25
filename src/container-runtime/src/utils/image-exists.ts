@@ -1,14 +1,25 @@
 import Dockerode from "dockerode";
+import AsyncLock from "async-lock";
 import { ImageName } from "../image-name";
 
-export const imageExists = async (dockerode: Dockerode, imageName: ImageName): Promise<boolean> => {
-  try {
-    await dockerode.getImage(imageName.toString()).inspect();
-    return true;
-  } catch (err) {
-    if (err instanceof Error && err.message.toLowerCase().includes("no such image")) {
-      return false;
+const existingImages = new Set<string>();
+const imageCheckLock = new AsyncLock();
+
+export async function imageExists(dockerode: Dockerode, imageName: ImageName): Promise<boolean> {
+  return imageCheckLock.acquire(imageName.string, async () => {
+    if (existingImages.has(imageName.string)) {
+      return true;
     }
-    throw err;
-  }
-};
+
+    try {
+      await dockerode.getImage(imageName.string).inspect();
+      existingImages.add(imageName.string);
+      return true;
+    } catch (err) {
+      if (err instanceof Error && err.message.toLowerCase().includes("no such image")) {
+        return false;
+      }
+      throw err;
+    }
+  });
+}

@@ -1,7 +1,7 @@
-import { AbstractContainerRuntimeClientStrategy } from "./strategy";
+import { ContainerRuntimeClientStrategy } from "./strategy";
 import { ContainerRuntimeClientStrategyResult } from "./types";
 
-export class NpipeSocketStrategy extends AbstractContainerRuntimeClientStrategy {
+export class NpipeSocketStrategy implements ContainerRuntimeClientStrategy {
   getName(): string {
     return "NpipeSocketStrategy";
   }

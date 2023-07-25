@@ -16,7 +16,6 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
     log.debug(`Waiting for log message "${this.message}"...`, { containerId: container.id });
     const client = await getContainerRuntimeClient();
     const stream = await client.container.logs(container, { since: startTime ? startTime.getTime() / 1000 : 0 });
-
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
         const message = `Log message "${this.message}" not received after ${this.startupTimeout}ms`;

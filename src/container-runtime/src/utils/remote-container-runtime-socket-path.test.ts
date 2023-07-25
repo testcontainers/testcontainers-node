@@ -2,7 +2,10 @@ import { getRemoteContainerRuntimeSocketPath } from "./remote-container-runtime-
 import { ContainerRuntimeClientStrategyResult } from "../strategies/types";
 
 test("should return TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE when provided", () => {
-  const strategyResult = { uri: "unix:///var/run/docker.sock" } as ContainerRuntimeClientStrategyResult;
+  const strategyResult = {
+    uri: "unix:///var/run/docker.sock",
+    allowUserOverrides: true,
+  } as ContainerRuntimeClientStrategyResult;
 
   const actual = getRemoteContainerRuntimeSocketPath(strategyResult, "", "linux", {
     TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE: "/var/run/another.sock",
@@ -12,7 +15,10 @@ test("should return TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE when provided", () => 
 });
 
 test("should return /var/run/docker.sock on Docker Desktop", () => {
-  const strategyResult = { uri: "unix:///var/run/docker.sock" } as ContainerRuntimeClientStrategyResult;
+  const strategyResult = {
+    uri: "unix:///var/run/docker.sock",
+    allowUserOverrides: true,
+  } as ContainerRuntimeClientStrategyResult;
 
   const actual = getRemoteContainerRuntimeSocketPath(strategyResult, "Docker Desktop", "linux", {});
 
@@ -21,7 +27,7 @@ test("should return /var/run/docker.sock on Docker Desktop", () => {
 
 test("should return /var/run/docker.sock when URI is not a unix socket", () => {
   ["tcp://localhost:2375", "npipe:////./pipe/docker_engine"].forEach((uri) => {
-    const strategyResult = { uri } as ContainerRuntimeClientStrategyResult;
+    const strategyResult = { uri, allowUserOverrides: true } as ContainerRuntimeClientStrategyResult;
 
     const actual = getRemoteContainerRuntimeSocketPath(strategyResult, "", "linux", {});
 
@@ -43,7 +49,10 @@ test("should not return TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE when allow user ov
 });
 
 test("should return path of a unix socket", () => {
-  const strategyResult = { uri: "unix:///var/run/docker.sock" } as ContainerRuntimeClientStrategyResult;
+  const strategyResult = {
+    uri: "unix:///var/run/docker.sock",
+    allowUserOverrides: true,
+  } as ContainerRuntimeClientStrategyResult;
 
   const actual = getRemoteContainerRuntimeSocketPath(strategyResult, "", "linux", {});
 
@@ -51,7 +60,10 @@ test("should return path of a unix socket", () => {
 });
 
 test("should prepend / to follow the UNC for Windows", () => {
-  const strategyResult = { uri: "unix:///var/run/docker.sock" } as ContainerRuntimeClientStrategyResult;
+  const strategyResult = {
+    uri: "unix:///var/run/docker.sock",
+    allowUserOverrides: true,
+  } as ContainerRuntimeClientStrategyResult;
 
   const actual = getRemoteContainerRuntimeSocketPath(strategyResult, "", "win32", {});
 

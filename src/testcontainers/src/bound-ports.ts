@@ -7,8 +7,6 @@ import { ContainerInspectInfo } from "dockerode";
 export class BoundPorts {
   private readonly ports = new Map<number, number>();
 
-  constructor(private readonly client: ContainerRuntimeClient) {}
-
   public getBinding(port: number): number {
     const binding = this.ports.get(port);
 
@@ -38,7 +36,7 @@ export class BoundPorts {
   }
 
   public filter(ports: PortWithOptionalBinding[]): BoundPorts {
-    const boundPorts = new BoundPorts(this.client);
+    const boundPorts = new BoundPorts();
 
     const containerPorts = ports.map((port) => getContainerPort(port));
 
@@ -51,12 +49,12 @@ export class BoundPorts {
     return boundPorts;
   }
 
-  public static fromInspectResult(client: ContainerRuntimeClient, inspectResult: ContainerInspectInfo): BoundPorts {
-    const boundPorts = new BoundPorts(client);
+  public static fromInspectResult(hostIps: HostIp[], inspectResult: ContainerInspectInfo): BoundPorts {
+    const boundPorts = new BoundPorts();
 
     const ports = getPorts(inspectResult);
     Object.entries(ports).forEach(([containerPort, hostBindings]) => {
-      const hostPort = resolveHostPortBinding(client.info.containerRuntime.hostIps, hostBindings);
+      const hostPort = resolveHostPortBinding(hostIps, hostBindings);
       boundPorts.setBinding(parseInt(containerPort), hostPort);
     });
 

@@ -46,19 +46,19 @@ export class StartedGenericContainer implements StartedTestContainer {
     await client.container.restart(this.container, resolvedOptions);
 
     this.inspectResult = await client.container.inspect(this.container);
-    const startTime = parseInt(this.inspectResult.State.StartedAt);
+    const startTime = new Date(this.inspectResult.State.StartedAt);
 
     if (containerLog.enabled()) {
-      (await client.container.logs(this.container, { since: startTime }))
+      (await client.container.logs(this.container, { since: startTime.getTime() / 1000 }))
         .on("data", (data) => containerLog.trace(data.trim(), { containerId: this.container.id }))
         .on("err", (data) => containerLog.error(data.trim(), { containerId: this.container.id }));
     }
 
-    this.boundPorts = BoundPorts.fromInspectResult(client, this.inspectResult).filter(
+    this.boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, this.inspectResult).filter(
       Array.from(this.boundPorts.iterator()).map((port) => port[0])
     );
 
-    await waitForContainer(client, this.container, this.waitStrategy, this.boundPorts, new Date(startTime));
+    await waitForContainer(client, this.container, this.waitStrategy, this.boundPorts, startTime);
     log.info(`Restarted container`, { containerId: this.container.id });
   }
 

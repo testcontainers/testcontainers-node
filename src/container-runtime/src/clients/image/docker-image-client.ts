@@ -9,8 +9,12 @@ import { getAuthConfig } from "../../auth/get-auth-config";
 import { ImageName } from "../../image-name";
 import { ImageClient } from "./image-client";
 import { log } from "@testcontainers/common";
+import AsyncLock from "async-lock";
 
 export class DockerImageClient implements ImageClient {
+  private readonly existingImages = new Set<string>();
+  private readonly imageExistsLock = new AsyncLock();
+
   constructor(protected readonly dockerode: Dockerode, protected readonly indexServerAddress: string) {}
 
   async build(context: string, opts: ImageBuildOptions): Promise<void> {
@@ -63,19 +67,25 @@ export class DockerImageClient implements ImageClient {
   }
 
   async exists(imageName: ImageName): Promise<boolean> {
-    try {
-      log.debug(`Checking if image exists "${imageName.string}"...`);
-      await this.dockerode.getImage(imageName.string).inspect();
-      log.debug(`Checked if image exists "${imageName.string}"`);
-      return true;
-    } catch (err) {
-      if (err instanceof Error && err.message.toLowerCase().includes("no such image")) {
-        log.debug(`Checked if image exists "${imageName.string}"`);
-        return false;
+    return this.imageExistsLock.acquire(imageName.string, async () => {
+      if (this.existingImages.has(imageName.string)) {
+        return true;
       }
-      log.debug(`Failed to check if image exists "${imageName.string}"`);
-      throw err;
-    }
+      try {
+        log.debug(`Checking if image exists "${imageName.string}"...`);
+        await this.dockerode.getImage(imageName.string).inspect();
+        this.existingImages.add(imageName.string);
+        log.debug(`Checked if image exists "${imageName.string}"`);
+        return true;
+      } catch (err) {
+        if (err instanceof Error && err.message.toLowerCase().includes("no such image")) {
+          log.debug(`Checked if image exists "${imageName.string}"`);
+          return false;
+        }
+        log.debug(`Failed to check if image exists "${imageName.string}"`);
+        throw err;
+      }
+    });
   }
 
   async pull(imageName: ImageName, opts?: { force: boolean }): Promise<void> {

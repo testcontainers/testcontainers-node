@@ -134,7 +134,7 @@ export class DockerComposeEnvironment {
           const containerName = parseComposeContainerName(this.projectName, startedContainer.Names[0]);
 
           const inspectResult = await client.container.inspect(container);
-          const boundPorts = BoundPorts.fromInspectResult(client, inspectResult);
+          const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, inspectResult);
           const waitStrategy = this.waitStrategy[containerName]
             ? this.waitStrategy[containerName]
             : Wait.forListeningPorts();

@@ -1,8 +1,8 @@
 import { existsSync } from "fs";
-import { AbstractContainerRuntimeClientStrategy } from "./strategy";
+import { ContainerRuntimeClientStrategy } from "./strategy";
 import { ContainerRuntimeClientStrategyResult } from "./types";
 
-export class UnixSocketStrategy extends AbstractContainerRuntimeClientStrategy {
+export class UnixSocketStrategy implements ContainerRuntimeClientStrategy {
   getName(): string {
     return "UnixSocketStrategy";
   }

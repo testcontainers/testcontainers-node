@@ -3,10 +3,10 @@ import { DockerOptions } from "dockerode";
 import { URL } from "url";
 import { promises as fs } from "fs";
 import path from "path";
-import { AbstractContainerRuntimeClientStrategy } from "./strategy";
 import { ContainerRuntimeClientStrategyResult } from "./types";
+import { ContainerRuntimeClientStrategy } from "./strategy";
 
-export class ConfigurationStrategy extends AbstractContainerRuntimeClientStrategy {
+export class ConfigurationStrategy implements ContainerRuntimeClientStrategy {
   private dockerHost!: string;
   private dockerTlsVerify: string | undefined;
   private dockerCertPath: string | undefined;

@@ -24,11 +24,11 @@ export const pullImage = async (
 
     log.info(`Pulling image "${options.imageName}"...`);
     const authconfig = await getAuthConfig(options.imageName.registry ?? indexServerAddress);
-    const stream = await dockerode.pull(options.imageName.toString(), { authconfig });
+    const stream = await dockerode.pull(options.imageName.string, { authconfig });
     return new Promise<void>((resolve) => {
       byline(stream).on("data", (line) => {
         if (pullLog.enabled()) {
-          pullLog.trace(line, { imageName: options.imageName.toString() });
+          pullLog.trace(line, { imageName: options.imageName.string });
         }
       });
       stream.on("end", resolve);

@@ -132,7 +132,9 @@ export class GenericContainer implements TestContainer {
 
   private async reuseContainer(client: ContainerRuntimeClient, container: Container) {
     const inspectResult = await client.container.inspect(container);
-    const boundPorts = BoundPorts.fromInspectResult(client, inspectResult).filter(this.exposedPorts);
+    const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, inspectResult).filter(
+      this.exposedPorts
+    );
     if (this.startupTimeout !== undefined) {
       this.waitStrategy.withStartupTimeout(this.startupTimeout);
     }
@@ -186,7 +188,9 @@ export class GenericContainer implements TestContainer {
     log.info(`Started container for image "${this.createOpts.Image}"`, { containerId: container.id });
 
     const inspectResult = await client.container.inspect(container);
-    const boundPorts = BoundPorts.fromInspectResult(client, inspectResult).filter(this.exposedPorts);
+    const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, inspectResult).filter(
+      this.exposedPorts
+    );
 
     if (this.startupTimeout !== undefined) {
       this.waitStrategy.withStartupTimeout(this.startupTimeout);

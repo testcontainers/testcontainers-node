@@ -10,25 +10,25 @@ describe("ContainerImage", () => {
     expect(imageName.equals(new ImageName("anotherRegistry", "image", "tag"))).toBe(false);
   });
 
-  describe("toString", () => {
+  describe("string", () => {
     it("should work with registry", () => {
       const imageName = new ImageName("registry", "image", "tag");
-      expect(imageName.toString()).toBe("registry/image:tag");
+      expect(imageName.string).toBe("registry/image:tag");
     });
 
     it("should work without registry", () => {
       const imageName = new ImageName(undefined, "image", "tag");
-      expect(imageName.toString()).toBe("image:tag");
+      expect(imageName.string).toBe("image:tag");
     });
 
     it("should work with tag being a hash", () => {
       const imageName = new ImageName(undefined, "image", "sha256:1234abcd1234abcd1234abcd1234abcd");
-      expect(imageName.toString()).toBe("image@sha256:1234abcd1234abcd1234abcd1234abcd");
+      expect(imageName.string).toBe("image@sha256:1234abcd1234abcd1234abcd1234abcd");
     });
 
     it("should work with registry and tag being a hash", () => {
       const imageName = new ImageName("registry", "image", "sha256:1234abcd1234abcd1234abcd1234abcd");
-      expect(imageName.toString()).toBe("registry/image@sha256:1234abcd1234abcd1234abcd1234abcd");
+      expect(imageName.string).toBe("registry/image@sha256:1234abcd1234abcd1234abcd1234abcd");
     });
   });
 
