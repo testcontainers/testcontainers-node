@@ -5,13 +5,13 @@
 ## Examples
 
 <!--codeinclude-->
-[Connect:](../../src/modules/nats/nats-container.test.ts) inside_block:connect
+[Connect:](../../src/modules/nats/src/nats-container.test.ts) inside_block:connect
 <!--/codeinclude-->
 
 <!--codeinclude-->
-[Publish and subscribe:](../../src/modules/nats/nats-container.test.ts) inside_block:pubsub
+[Publish and subscribe:](../../src/modules/nats/src/nats-container.test.ts) inside_block:pubsub
 <!--/codeinclude-->
 
 <!--codeinclude-->
-[Set credentials:](../../src/modules/nats/nats-container.test.ts) inside_block:credentials
+[Set credentials:](../../src/modules/nats/src/nats-container.test.ts) inside_block:credentials
 <!--/codeinclude-->

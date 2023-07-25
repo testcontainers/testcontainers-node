@@ -5,9 +5,9 @@
 ## Examples
 
 <!--codeinclude-->
-[Mongo 4.0.x:](../../src/modules/mongodb/mongodb-container.test.ts) inside_block:connect4
+[Mongo 4.0.x:](../../src/modules/mongodb/src/mongodb-container.test.ts) inside_block:connect4
 <!--/codeinclude-->
 
 <!--codeinclude-->
-[MongoDB 6.0.x:](../../src/modules/mongodb/mongodb-container.test.ts) inside_block:connect6
+[MongoDB 6.0.x:](../../src/modules/mongodb/src/mongodb-container.test.ts) inside_block:connect6
 <!--/codeinclude-->

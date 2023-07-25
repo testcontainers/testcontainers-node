@@ -5,17 +5,17 @@
 ## Examples
 
 <!--codeinclude-->
-[Connect and execute query:](../../src/modules/postgresql/postgresql-container.test.ts) inside_block:connect
+[Connect and execute query:](../../src/modules/postgresql/src/postgresql-container.test.ts) inside_block:connect
 <!--/codeinclude-->
 
 <!--codeinclude-->
-[Connect and execute query using URI:](../../src/modules/postgresql/postgresql-container.test.ts) inside_block:uriConnect
+[Connect and execute query using URI:](../../src/modules/postgresql/src/postgresql-container.test.ts) inside_block:uriConnect
 <!--/codeinclude-->
 
 <!--codeinclude-->
-[Set database:](../../src/modules/postgresql/postgresql-container.test.ts) inside_block:setDatabase
+[Set database:](../../src/modules/postgresql/src/postgresql-container.test.ts) inside_block:setDatabase
 <!--/codeinclude-->
 
 <!--codeinclude-->
-[Set username:](../../src/modules/postgresql/postgresql-container.test.ts) inside_block:setUsername
+[Set username:](../../src/modules/postgresql/src/postgresql-container.test.ts) inside_block:setUsername
 <!--/codeinclude-->

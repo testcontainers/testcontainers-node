@@ -5,17 +5,17 @@
 ## Examples
 
 <!--codeinclude-->
-[Connect and execute query:](../../src/modules/mysql/mysql-container.test.ts) inside_block:connect
+[Connect and execute query:](../../src/modules/mysql/src/mysql-container.test.ts) inside_block:connect
 <!--/codeinclude-->
 
 <!--codeinclude-->
-[Connect and execute query using URI:](../../src/modules/mysql/mysql-container.test.ts) inside_block:uriConnect
+[Connect and execute query using URI:](../../src/modules/mysql/src/mysql-container.test.ts) inside_block:uriConnect
 <!--/codeinclude-->
 
 <!--codeinclude-->
-[Set username:](../../src/modules/mysql/mysql-container.test.ts) inside_block:setUsername
+[Set username:](../../src/modules/mysql/src/mysql-container.test.ts) inside_block:setUsername
 <!--/codeinclude-->
 
 <!--codeinclude-->
-[Execute a query inside the container:](../../src/modules/mysql/mysql-container.test.ts) inside_block:executeQuery
+[Execute a query inside the container:](../../src/modules/mysql/src/mysql-container.test.ts) inside_block:executeQuery
 <!--/codeinclude-->

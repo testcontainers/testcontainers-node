@@ -5,6 +5,6 @@
 ## Example
 
 <!--codeinclude-->
-[](../../src/modules/arangodb/arangodb-container.test.ts) inside_block:connect
+[](../../src/modules/arangodb/src/arangodb-container.test.ts) inside_block:connect
 <!--/codeinclude-->
 
