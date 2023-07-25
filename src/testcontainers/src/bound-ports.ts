@@ -1,5 +1,5 @@
 import { getContainerPort, PortWithOptionalBinding } from "./port";
-import { ContainerRuntimeClient, HostIp } from "@testcontainers/container-runtime";
+import { HostIp } from "@testcontainers/container-runtime";
 import { HostPortBindings, Ports } from "./types";
 import net from "net";
 import { ContainerInspectInfo } from "dockerode";

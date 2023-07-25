@@ -9,7 +9,7 @@ import {
   LABEL_TESTCONTAINERS,
   LABEL_TESTCONTAINERS_LANG,
   LABEL_TESTCONTAINERS_SESSION_ID,
-  LABEL_TESTCONTAINERS_VERSION,
+  // LABEL_TESTCONTAINERS_VERSION,
 } from "../labels";
 import { getReaper } from "../reaper";
 // import { version } from "../../package.json";

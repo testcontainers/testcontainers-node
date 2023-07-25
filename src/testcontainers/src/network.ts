@@ -4,7 +4,7 @@ import {
   LABEL_TESTCONTAINERS,
   LABEL_TESTCONTAINERS_LANG,
   LABEL_TESTCONTAINERS_SESSION_ID,
-  LABEL_TESTCONTAINERS_VERSION,
+  // LABEL_TESTCONTAINERS_VERSION,
 } from "./labels";
 import Dockerode from "dockerode";
 import { getReaper } from "./reaper";

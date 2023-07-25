@@ -26,7 +26,7 @@ import {
   LABEL_TESTCONTAINERS_CONTAINER_HASH,
   LABEL_TESTCONTAINERS_LANG,
   LABEL_TESTCONTAINERS_SESSION_ID,
-  LABEL_TESTCONTAINERS_VERSION,
+  // LABEL_TESTCONTAINERS_VERSION,
 } from "../labels";
 import { StartedNetwork } from "../network";
 import { Wait } from "../wait-strategy/wait";
