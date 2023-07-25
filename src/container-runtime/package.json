@@ -8,7 +8,6 @@
   "license": "ISC",
   "dependencies": {
     "@balena/dockerignore": "^1.0.2",
-    "@testcontainers/common": "^1.0.0",
     "async-lock": "^1.4.0",
     "byline": "^5.0.0",
     "docker-compose": "^0.24.1",
