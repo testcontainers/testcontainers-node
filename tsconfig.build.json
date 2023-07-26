@@ -14,7 +14,8 @@
     "composite": true
   },
   "exclude": [
-    "**/*.test.ts",
-    "**/build"
+    "node_modules",
+    "**/build",
+    "**/*.test.ts"
   ]
 }
