@@ -89,7 +89,7 @@ export class GenericContainer implements TestContainer {
     }
     this.hostConfig.NetworkMode = this.networkAliases.length > 0 ? undefined : this.networkMode;
 
-    this.createOpts.Labels = createLabels();
+    this.createOpts.Labels = { ...createLabels(), ...this.createOpts.Labels };
 
     if (this.reuse) {
       return this.reuseOrStartContainer(client);

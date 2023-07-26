@@ -112,7 +112,7 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
-  it("should set label", async () => {
+  it("should set labels", async () => {
     const labels = {
       ["label-1"]: "value-1",
       ["label-2"]: "value-2",
