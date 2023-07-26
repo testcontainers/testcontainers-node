@@ -1,45 +1,14 @@
 {
-  "extends": "./tsconfig.base.json",
-  "files": [],
-  "references": [
-    {
-      "path": "./src/common"
-    },
-    {
-      "path": "./src/container-runtime"
-    },
-    {
-      "path": "./src/testcontainers"
-    },
-    {
-      "path": "./src/modules/arangodb"
-    },
-    {
-      "path": "./src/modules/elastic-search"
-    },
-    {
-      "path": "./src/modules/hivemq"
-    },
-    {
-      "path": "./src/modules/kafka"
-    },
-    {
-      "path": "./src/modules/mongodb"
-    },
-    {
-      "path": "./src/modules/mysql"
-    },
-    {
-      "path": "./src/modules/nats"
-    },
-    {
-      "path": "./src/modules/neo4j"
-    },
-    {
-      "path": "./src/modules/postgresql"
-    },
-    {
-      "path": "./src/modules/selenium"
+  "extends": "./tsconfig.build.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "paths": {
+      "@testcontainers/*": [
+        "./src/*/src"
+      ]
     }
+  },
+  "exclude": [
+    "**/build"
   ]
 }

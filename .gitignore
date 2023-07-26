@@ -1,6 +1,6 @@
 dist/
 build/
-tsconfig.tsbuildinfo
+*.tsbuildinfo
 node_modules/
 coverage/
 

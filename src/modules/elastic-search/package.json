@@ -2,7 +2,9 @@
   "name": "@testcontainers/elastic-search",
   "version": "1.0.0",
   "main": "build/index.js",
-  "scripts": {},
+  "scripts": {
+    "prepack": "tsc --project tsconfig.build.json"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",

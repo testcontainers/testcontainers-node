@@ -4,6 +4,7 @@
   "description": "",
   "main": "build/index.js",
   "scripts": {
+    "prepack": "tsc --project tsconfig.build.json"
   },
   "keywords": [],
   "author": "",

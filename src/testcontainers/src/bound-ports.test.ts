@@ -1,6 +1,6 @@
 import { BoundPorts, resolveHostPortBinding } from "./bound-ports";
-import { HostIp } from "@testcontainers/container-runtime/build/clients/types";
 import { ContainerInspectInfo } from "dockerode";
+import { HostIp } from "@testcontainers/container-runtime";
 
 describe("BoundPorts", () => {
   it("should return a binding", () => {

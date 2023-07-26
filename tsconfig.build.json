@@ -13,4 +13,8 @@
     "noImplicitOverride": true,
     "composite": true
   },
+  "exclude": [
+    "**/*.test.ts",
+    "**/build"
+  ]
 }
