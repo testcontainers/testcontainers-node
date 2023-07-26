@@ -129,7 +129,7 @@ container.copyContentToContainer([{
   content: "hello world",
   target: "/remote/file2.txt"
 }])
-````
+```
 
 An optional `mode` can be specified in octal for setting file permissions:
 
