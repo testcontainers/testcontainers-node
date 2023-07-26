@@ -1,9 +1,6 @@
 {
-  "files": [],
   "extends": "./tsconfig.base.json",
-  "exclude": [
-    "./jest.config.ts"
-  ],
+  "files": [],
   "references": [
     {
       "path": "./src/common"

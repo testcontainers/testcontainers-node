@@ -1,7 +1,4 @@
 {
-  "exclude": [
-    "./src/**/*.test.ts",
-  ],
   "compilerOptions": {
     "incremental": true,
     "target": "es2022",
@@ -15,5 +12,5 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitOverride": true,
     "composite": true
-  }
+  },
 }
