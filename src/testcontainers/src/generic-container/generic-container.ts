@@ -47,7 +47,7 @@ export class GenericContainer implements TestContainer {
   }
 
   protected createOpts: ContainerCreateOptions;
-  protected hostConfig: HostConfig = {};
+  protected hostConfig: HostConfig;
 
   protected imageName: ImageName;
   protected startupTimeout?: number;
@@ -66,6 +66,7 @@ export class GenericContainer implements TestContainer {
   constructor(image: string) {
     this.imageName = ImageName.fromString(image);
     this.createOpts = { Image: this.imageName.string };
+    this.hostConfig = { AutoRemove: this.imageName.string === REAPER_IMAGE };
   }
 
   private isHelperContainer() {
