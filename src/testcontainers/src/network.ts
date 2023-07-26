@@ -1,6 +1,6 @@
 import { log, RandomUuid, Uuid } from "@testcontainers/common";
 import { ContainerRuntimeClient, getContainerRuntimeClient } from "@testcontainers/container-runtime";
-import { createLabels } from "./labels";
+import { createLabels, LABEL_TESTCONTAINERS_SESSION_ID } from "./labels";
 import Dockerode from "dockerode";
 import { getReaper } from "./reaper";
 
@@ -14,6 +14,9 @@ export class Network {
     const name = this.uuid.nextUuid();
     log.info(`Starting network "${name}"...`);
 
+    const labels = createLabels();
+    labels[LABEL_TESTCONTAINERS_SESSION_ID] = reaper.sessionId;
+
     const network = await client.network.create({
       Name: name,
       CheckDuplicate: true,
@@ -22,7 +25,7 @@ export class Network {
       Attachable: false,
       Ingress: false,
       EnableIPv6: false,
-      Labels: createLabels(reaper.sessionId),
+      Labels: labels,
     });
     log.info(`Started network "${name}" with ID "${network.id}"`);
 

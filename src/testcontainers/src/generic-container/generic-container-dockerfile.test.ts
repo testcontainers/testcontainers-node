@@ -11,6 +11,8 @@ import {
 } from "../test-helper";
 import { LABEL_TESTCONTAINERS_SESSION_ID } from "../labels";
 import { RandomUuid } from "@testcontainers/common";
+import { getReaper } from "../reaper";
+import { getContainerRuntimeClient } from "@testcontainers/container-runtime";
 
 describe("GenericContainer Dockerfile", () => {
   jest.setTimeout(180_000);
@@ -28,18 +30,19 @@ describe("GenericContainer Dockerfile", () => {
     await startedContainer.stop();
   });
 
-  // it("should have a session ID label to be cleaned up by the Reaper", async () => {
-  //   const context = path.resolve(fixtures, "docker");
-  //   const imageName = `${uuidGen.nextUuid()}:${uuidGen.nextUuid()}`;
-  //
-  //   await GenericContainer.fromDockerfile(context).build(imageName);
-  //
-  //   const { sessionId } = await getDockerClient();
-  //   const imageLabels = await getImageLabelsByName(imageName);
-  //   expect(imageLabels[LABEL_TESTCONTAINERS_SESSION_ID]).toEqual(sessionId);
-  //
-  //   await deleteImageByName(imageName);
-  // });
+  it("should have a session ID label to be cleaned up by the Reaper", async () => {
+    const context = path.resolve(fixtures, "docker");
+    const imageName = `${uuidGen.nextUuid()}:${uuidGen.nextUuid()}`;
+
+    await GenericContainer.fromDockerfile(context).build(imageName);
+
+    const client = await getContainerRuntimeClient();
+    const reaper = await getReaper(client);
+    const imageLabels = await getImageLabelsByName(imageName);
+    expect(imageLabels[LABEL_TESTCONTAINERS_SESSION_ID]).toEqual(reaper.sessionId);
+
+    await deleteImageByName(imageName);
+  });
 
   it("should not have a session ID label when delete on exit set to false", async () => {
     const context = path.resolve(fixtures, "docker");

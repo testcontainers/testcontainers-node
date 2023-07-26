@@ -4,7 +4,8 @@
   "description": "",
   "main": "build/index.js",
   "scripts": {
-    "prepack": "tsc --project tsconfig.build.json"
+    "prebuild": "node -p \"'export const LIB_VERSION = ' + JSON.stringify(require('./package.json').version) + ';'\" > src/version.ts",
+    "build": "tsc --project tsconfig.build.json"
   },
   "keywords": [],
   "author": "",
