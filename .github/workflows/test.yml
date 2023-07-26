@@ -214,10 +214,10 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: Install dependencies
         run: npm ci --omit=optional
-      - name: Remove dev dependencies
-        run: npm prune --omit=dev
       - name: TS Build workspaces
         run: npm run prepack -ws
+      - name: Remove dev dependencies
+        run: npm prune --omit=dev
       - name: Run CommonJS module smoke test
         run: node smoke-test.js
       - name: Run ES module smoke test
