@@ -5,14 +5,8 @@ import { getDockerfileImages } from "../dockerfile-parser";
 import { GenericContainer } from "./generic-container";
 import { log, RandomUuid, Uuid } from "@testcontainers/common";
 import { getAuthConfig, getContainerRuntimeClient, ImageName } from "@testcontainers/container-runtime";
-import {
-  LABEL_TESTCONTAINERS,
-  LABEL_TESTCONTAINERS_LANG,
-  LABEL_TESTCONTAINERS_SESSION_ID,
-  // LABEL_TESTCONTAINERS_VERSION,
-} from "../labels";
+import { createLabels } from "../labels";
 import { getReaper } from "../reaper";
-// import { version } from "../../package.json";
 
 export type BuildOptions = {
   deleteOnExit: boolean;
@@ -56,14 +50,7 @@ export class GenericContainerBuilder {
 
     const imageNames = await getDockerfileImages(dockerfile, this.buildArgs);
     const registryConfig = await this.getRegistryConfig(client.info.containerRuntime.indexServerAddress, imageNames);
-    const labels: Record<string, string> = {
-      [LABEL_TESTCONTAINERS]: "true",
-      [LABEL_TESTCONTAINERS_LANG]: "node",
-      // [LABEL_TESTCONTAINERS_VERSION]: version,
-    };
-    if (options.deleteOnExit) {
-      labels[LABEL_TESTCONTAINERS_SESSION_ID] = reaper.sessionId;
-    }
+    const labels = createLabels(reaper.sessionId);
 
     log.info(`Building Dockerfile "${dockerfile}" as image "${imageName}"...`);
     await client.image.build(this.context, {

@@ -1,14 +1,8 @@
 import { log, RandomUuid, Uuid } from "@testcontainers/common";
 import { ContainerRuntimeClient, getContainerRuntimeClient } from "@testcontainers/container-runtime";
-import {
-  LABEL_TESTCONTAINERS,
-  LABEL_TESTCONTAINERS_LANG,
-  LABEL_TESTCONTAINERS_SESSION_ID,
-  // LABEL_TESTCONTAINERS_VERSION,
-} from "./labels";
+import { createLabels } from "./labels";
 import Dockerode from "dockerode";
 import { getReaper } from "./reaper";
-// import { version } from "../package.json";
 
 export class Network {
   constructor(private readonly uuid: Uuid = new RandomUuid()) {}
@@ -28,12 +22,7 @@ export class Network {
       Attachable: false,
       Ingress: false,
       EnableIPv6: false,
-      Labels: {
-        [LABEL_TESTCONTAINERS]: "true",
-        [LABEL_TESTCONTAINERS_LANG]: "node",
-        // [LABEL_TESTCONTAINERS_VERSION]: version,
-        [LABEL_TESTCONTAINERS_SESSION_ID]: reaper.sessionId,
-      },
+      Labels: createLabels(reaper.sessionId),
     });
     log.info(`Started network "${name}" with ID "${network.id}"`);
 
