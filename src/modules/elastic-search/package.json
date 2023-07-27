@@ -1,7 +1,10 @@
 {
   "name": "@testcontainers/elastic-search",
-  "version": "1.0.0",
+  "version": "10.0.0-beta.2",
   "main": "build/index.js",
+  "files": [
+    "build"
+  ],
   "scripts": {
     "build": "tsc --project tsconfig.build.json"
   },
@@ -13,6 +16,6 @@
   },
   "description": "",
   "dependencies": {
-    "@testcontainers/testcontainers": "^1.0.0"
+    "@testcontainers/testcontainers": "*"
   }
 }

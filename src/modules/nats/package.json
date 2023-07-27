@@ -1,8 +1,11 @@
 {
   "name": "@testcontainers/nats",
-  "version": "1.0.0",
+  "version": "10.0.0-beta.2",
   "description": "",
   "main": "build/index.js",
+  "files": [
+    "build"
+  ],
   "scripts": {
     "build": "tsc --project tsconfig.build.json"
   },
@@ -13,6 +16,6 @@
     "nats": "^2.15.1"
   },
   "dependencies": {
-    "@testcontainers/testcontainers": "^1.0.0"
+    "@testcontainers/testcontainers": "*"
   }
 }
