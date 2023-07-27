@@ -1,5 +1,5 @@
 import { GenericContainer } from "./generic-container";
-import { checkContainerIsHealthy } from "../test-helper";
+import { checkContainerIsHealthy } from "../utils/test-helper";
 
 describe("GenericContainer reuse", () => {
   jest.setTimeout(180_000);

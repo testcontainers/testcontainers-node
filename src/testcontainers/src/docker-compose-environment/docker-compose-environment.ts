@@ -1,16 +1,16 @@
 import { ContainerInfo } from "dockerode";
-import { BoundPorts } from "../bound-ports";
 import { StartedGenericContainer } from "../generic-container/started-generic-container";
-import { WaitStrategy } from "../wait-strategy/wait-strategy";
+import { WaitStrategy } from "../wait-strategies/wait-strategy";
 import { Environment } from "../types";
 import { StartedDockerComposeEnvironment } from "./started-docker-compose-environment";
-import { ImagePullPolicy, PullPolicy } from "../pull-policy";
-import { Wait } from "../wait-strategy/wait";
-import { log, RandomUuid, Uuid } from "@testcontainers/common";
-import { getContainerRuntimeClient, parseComposeContainerName } from "@testcontainers/container-runtime";
+import { Wait } from "../wait-strategies/wait";
 import { containerLog } from "../logger";
-import { getReaper } from "../reaper";
-import { waitForContainer } from "../wait-strategy/wait-for-container";
+import { waitForContainer } from "../wait-strategies/wait-for-container";
+import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
+import { log, RandomUuid, Uuid } from "../common";
+import { getContainerRuntimeClient, parseComposeContainerName } from "../container-runtime";
+import { getReaper } from "../reaper/reaper";
+import { BoundPorts } from "../utils/bound-ports";
 
 export class DockerComposeEnvironment {
   private readonly composeFilePath: string;

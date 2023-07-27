@@ -1,12 +1,12 @@
 import { AuthConfig, BuildArgs, RegistryConfig } from "../types";
-import { ImagePullPolicy, PullPolicy } from "../pull-policy";
 import path from "path";
-import { getDockerfileImages } from "../dockerfile-parser";
 import { GenericContainer } from "./generic-container";
-import { log, RandomUuid, Uuid } from "@testcontainers/common";
-import { getAuthConfig, getContainerRuntimeClient, ImageName } from "@testcontainers/container-runtime";
-import { createLabels, LABEL_TESTCONTAINERS_SESSION_ID } from "../labels";
-import { getReaper } from "../reaper";
+import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
+import { log, RandomUuid, Uuid } from "../common";
+import { getAuthConfig, getContainerRuntimeClient, ImageName } from "../container-runtime";
+import { getReaper } from "../reaper/reaper";
+import { getDockerfileImages } from "../utils/dockerfile-parser";
+import { createLabels, LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
 
 export type BuildOptions = {
   deleteOnExit: boolean;
@@ -73,7 +73,6 @@ export class GenericContainerBuilder {
     return Promise.resolve(container);
   }
 
-  // todo should be done by client
   private async getRegistryConfig(indexServerAddress: string, imageNames: ImageName[]): Promise<RegistryConfig> {
     const authConfigs: AuthConfig[] = [];
 

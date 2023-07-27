@@ -6,6 +6,7 @@ import {
   AbstractStartedContainer,
   AbstractStoppedContainer,
   GenericContainer,
+  log,
   Network,
   StartedNetwork,
   StartedTestContainer,
@@ -13,7 +14,6 @@ import {
   StoppedTestContainer,
   Wait,
 } from "@testcontainers/testcontainers";
-import { log } from "@testcontainers/common";
 
 const SELENIUM_PORT = 4444;
 const VNC_PORT = 5900;

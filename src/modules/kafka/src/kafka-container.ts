@@ -2,9 +2,10 @@ import {
   AbstractStartedContainer,
   Content,
   GenericContainer,
+  RandomUuid,
   StartedTestContainer,
+  Uuid,
 } from "@testcontainers/testcontainers";
-import { RandomUuid, Uuid } from "@testcontainers/common";
 import { ContainerInspectInfo } from "dockerode";
 
 const KAFKA_PORT = 9093;

@@ -1,6 +1,6 @@
 import { GenericContainer } from "./generic-container";
-import { checkContainerIsHealthy } from "../test-helper";
-import { RandomUuid } from "@testcontainers/common";
+import { RandomUuid } from "../common";
+import { checkContainerIsHealthy } from "../utils/test-helper";
 
 describe("GenericContainer restart", () => {
   jest.setTimeout(180_000);

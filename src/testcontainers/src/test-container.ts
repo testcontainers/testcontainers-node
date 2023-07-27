@@ -1,6 +1,4 @@
-import { PortWithOptionalBinding } from "./port";
-import { ImagePullPolicy } from "./pull-policy";
-import { WaitStrategy } from "./wait-strategy/wait-strategy";
+import { WaitStrategy } from "./wait-strategies/wait-strategy";
 import { Readable } from "stream";
 import {
   BindMount,
@@ -15,7 +13,9 @@ import {
   TmpFs,
   Ulimits,
 } from "./types";
-import { StartedNetwork } from "./network";
+import { StartedNetwork } from "./network/network";
+import { PortWithOptionalBinding } from "./utils/port";
+import { ImagePullPolicy } from "./utils/pull-policy";
 
 export interface TestContainer {
   start(): Promise<StartedTestContainer>;

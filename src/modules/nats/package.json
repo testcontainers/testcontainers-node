@@ -13,7 +13,6 @@
     "nats": "^2.15.1"
   },
   "dependencies": {
-    "@testcontainers/common": "^1.0.0",
     "@testcontainers/testcontainers": "^1.0.0"
   }
 }

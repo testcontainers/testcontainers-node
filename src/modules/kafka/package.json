@@ -13,7 +13,6 @@
     "kafkajs": "^2.2.4"
   },
   "dependencies": {
-    "@testcontainers/common": "^1.0.0",
     "@testcontainers/testcontainers": "^1.0.0"
   }
 }

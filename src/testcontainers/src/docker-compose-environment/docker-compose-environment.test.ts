@@ -1,8 +1,8 @@
 import fetch from "node-fetch";
 import path from "path";
 import { DockerComposeEnvironment } from "./docker-compose-environment";
-import { Wait } from "../wait-strategy/wait";
-import { PullPolicy } from "../pull-policy";
+import { Wait } from "../wait-strategies/wait";
+import { PullPolicy } from "../utils/pull-policy";
 import {
   checkEnvironmentContainerIsHealthy,
   composeContainerName,
@@ -10,7 +10,7 @@ import {
   getRunningContainerNames,
   getVolumeNames,
   waitForDockerEvent,
-} from "../test-helper";
+} from "../utils/test-helper";
 
 describe("DockerComposeEnvironment", () => {
   jest.setTimeout(180_000);

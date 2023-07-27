@@ -2,15 +2,15 @@ import fetch from "node-fetch";
 import path from "path";
 import getPort from "get-port";
 import { GenericContainer } from "./generic-container";
-import { PullPolicy } from "../pull-policy";
+import { PullPolicy } from "../utils/pull-policy";
 import {
   checkContainerIsHealthy,
   getDockerEventStream,
   getRunningContainerNames,
   waitForDockerEvent,
-} from "../test-helper";
-import { RandomUuid } from "@testcontainers/common";
-import { getContainerRuntimeClient } from "@testcontainers/container-runtime";
+} from "../utils/test-helper";
+import { getContainerRuntimeClient } from "../container-runtime";
+import { RandomUuid } from "../common";
 
 describe("GenericContainer", () => {
   jest.setTimeout(180_000);

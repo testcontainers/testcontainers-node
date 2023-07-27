@@ -13,7 +13,6 @@
     "arangojs": "^8.4.0"
   },
   "dependencies": {
-    "@testcontainers/common": "^1.0.0",
     "@testcontainers/testcontainers": "^1.0.0"
   }
 }

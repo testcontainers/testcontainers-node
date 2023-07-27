@@ -1,18 +1,18 @@
 import path from "path";
 import { GenericContainer } from "./generic-container";
-import { Wait } from "../wait-strategy/wait";
+import { Wait } from "../wait-strategies/wait";
+import { PullPolicy } from "@testcontainers/testcontainers";
+import { RandomUuid } from "../common";
+import { getContainerRuntimeClient } from "../container-runtime";
+import { getReaper } from "../reaper/reaper";
+import { LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
 import {
   checkContainerIsHealthy,
   deleteImageByName,
   getDockerEventStream,
   getImageLabelsByName,
   waitForDockerEvent,
-} from "../test-helper";
-import { LABEL_TESTCONTAINERS_SESSION_ID } from "../labels";
-import { RandomUuid } from "@testcontainers/common";
-import { getReaper } from "../reaper";
-import { getContainerRuntimeClient } from "@testcontainers/container-runtime";
-import { PullPolicy } from "@testcontainers/testcontainers";
+} from "../utils/test-helper";
 
 describe("GenericContainer Dockerfile", () => {
   jest.setTimeout(180_000);

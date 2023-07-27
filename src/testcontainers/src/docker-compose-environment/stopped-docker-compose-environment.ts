@@ -1,5 +1,5 @@
 import { DownedDockerComposeEnvironment } from "./downed-docker-compose-environment";
-import { ComposeDownOptions, ComposeOptions, getContainerRuntimeClient } from "@testcontainers/container-runtime";
+import { ComposeDownOptions, ComposeOptions, getContainerRuntimeClient } from "../container-runtime";
 
 export class StoppedDockerComposeEnvironment {
   constructor(private readonly options: ComposeOptions) {}

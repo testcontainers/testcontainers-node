@@ -1,4 +1,4 @@
-import { PortForwarderInstance } from "./port-forwarder";
+import { PortForwarderInstance } from "./port-forwarder/port-forwarder";
 
 export class TestContainers {
   public static async exposeHostPorts(...ports: number[]): Promise<void> {

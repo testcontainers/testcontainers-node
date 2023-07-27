@@ -14,12 +14,14 @@ export { StartedDockerComposeEnvironment } from "./docker-compose-environment/st
 export { StoppedDockerComposeEnvironment } from "./docker-compose-environment/stopped-docker-compose-environment";
 export { DownedDockerComposeEnvironment } from "./docker-compose-environment/downed-docker-compose-environment";
 
-export { Network, StartedNetwork, StoppedNetwork } from "./network";
+export { Network, StartedNetwork, StoppedNetwork } from "./network/network";
 
-export { Wait } from "./wait-strategy/wait";
-export { StartupCheckStrategy, StartupStatus } from "./wait-strategy/startup-check-strategy";
-export { PullPolicy, ImagePullPolicy } from "./pull-policy";
+export { Wait } from "./wait-strategies/wait";
+export { StartupCheckStrategy, StartupStatus } from "./wait-strategies/startup-check-strategy";
+export { PullPolicy, ImagePullPolicy } from "./utils/pull-policy";
 export { InspectResult, Content, ExecResult } from "./types";
 
-export { AbstractStartedContainer } from "./abstract-started-container";
-export { AbstractStoppedContainer } from "./abstract-stopped-container";
+export { AbstractStartedContainer } from "./generic-container/abstract-started-container";
+export { AbstractStoppedContainer } from "./generic-container/abstract-stopped-container";
+
+export { Uuid, RandomUuid, log } from "./common";

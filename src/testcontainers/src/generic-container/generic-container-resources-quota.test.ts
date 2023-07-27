@@ -1,8 +1,14 @@
 import { GenericContainer } from "./generic-container";
-import { getContainerRuntimeClient } from "@testcontainers/container-runtime";
+import { ContainerRuntimeClient, getContainerRuntimeClient } from "../container-runtime";
 
 describe("GenericContainer resources quota", () => {
   jest.setTimeout(180_000);
+
+  let client: ContainerRuntimeClient;
+
+  beforeAll(async () => {
+    client = await getContainerRuntimeClient();
+  });
 
   if (!process.env["CI_ROOTLESS"]) {
     it("should set resources quota", async () => {
@@ -10,7 +16,6 @@ describe("GenericContainer resources quota", () => {
         .withResourcesQuota({ memory: 0.5, cpu: 1 })
         .start();
 
-      const client = await getContainerRuntimeClient();
       const dockerContainer = await client.container.getById(container.getId());
       const containerInfo = await dockerContainer.inspect();
 
@@ -24,7 +29,6 @@ describe("GenericContainer resources quota", () => {
   it("resources quota should be 0 for cpu and memory if not set by user", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").start();
 
-    const client = await getContainerRuntimeClient();
     const dockerContainer = await client.container.getById(container.getId());
     const containerInfo = await dockerContainer.inspect();
 
@@ -39,7 +43,6 @@ describe("GenericContainer resources quota", () => {
       .withResourcesQuota({ memory: 0.5 })
       .start();
 
-    const client = await getContainerRuntimeClient();
     const dockerContainer = await client.container.getById(container.getId());
     const containerInfo = await dockerContainer.inspect();
 
@@ -55,7 +58,6 @@ describe("GenericContainer resources quota", () => {
         .withResourcesQuota({ cpu: 1 })
         .start();
 
-      const client = await getContainerRuntimeClient();
       const dockerContainer = await client.container.getById(container.getId());
       const containerInfo = await dockerContainer.inspect();
 
