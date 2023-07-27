@@ -5,15 +5,15 @@
 ## Install
 
 ```bash
-npm install @testcontainers/elastic-search --save-dev
+npm install @testcontainers/elasticsearch --save-dev
 ```
 
 ## Examples
 
 <!--codeinclude-->
-[Create an index:](../../src/modules/elastic-search/src/elasticsearch-container.test.ts) inside_block:createIndex
+[Create an index:](../../src/modules/elasticsearch/src/elasticsearch-container.test.ts) inside_block:createIndex
 <!--/codeinclude-->
 
 <!--codeinclude-->
-[Index a document:](../../src/modules/elastic-search/src/elasticsearch-container.test.ts) inside_block:indexDocument
+[Index a document:](../../src/modules/elasticsearch/src/elasticsearch-container.test.ts) inside_block:indexDocument
 <!--/codeinclude-->
