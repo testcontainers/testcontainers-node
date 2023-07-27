@@ -2,7 +2,7 @@ import archiver from "archiver";
 import AsyncLock from "async-lock";
 import { BoundPorts } from "../bound-ports";
 import { getContainerPort, hasHostBinding, PortWithOptionalBinding } from "../port";
-import { DefaultPullPolicy, PullPolicy } from "../pull-policy";
+import { ImagePullPolicy, PullPolicy } from "../pull-policy";
 import { StartedTestContainer, TestContainer } from "../test-container";
 import { WaitStrategy } from "../wait-strategy/wait-strategy";
 import { PortForwarderInstance, SSHD_IMAGE } from "../port-forwarder";
@@ -50,7 +50,7 @@ export class GenericContainer implements TestContainer {
   protected reuse = false;
   protected networkMode?: string;
   protected networkAliases: string[] = [];
-  protected pullPolicy: PullPolicy = new DefaultPullPolicy();
+  protected pullPolicy: ImagePullPolicy = PullPolicy.defaultPolicy();
   protected logConsumer?: (stream: Readable) => unknown;
   protected filesToCopy: FileToCopy[] = [];
   protected directoriesToCopy: DirectoryToCopy[] = [];
@@ -417,7 +417,7 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
-  public withPullPolicy(pullPolicy: PullPolicy): this {
+  public withPullPolicy(pullPolicy: ImagePullPolicy): this {
     this.pullPolicy = pullPolicy;
     return this;
   }

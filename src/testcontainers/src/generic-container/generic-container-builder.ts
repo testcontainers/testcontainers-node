@@ -1,5 +1,5 @@
 import { AuthConfig, BuildArgs, RegistryConfig } from "../types";
-import { DefaultPullPolicy, PullPolicy } from "../pull-policy";
+import { ImagePullPolicy, PullPolicy } from "../pull-policy";
 import path from "path";
 import { getDockerfileImages } from "../dockerfile-parser";
 import { GenericContainer } from "./generic-container";
@@ -14,7 +14,7 @@ export type BuildOptions = {
 
 export class GenericContainerBuilder {
   private buildArgs: BuildArgs = {};
-  private pullPolicy: PullPolicy = new DefaultPullPolicy();
+  private pullPolicy: ImagePullPolicy = PullPolicy.defaultPolicy();
   private cache = true;
 
   constructor(
@@ -28,7 +28,7 @@ export class GenericContainerBuilder {
     return this;
   }
 
-  public withPullPolicy(pullPolicy: PullPolicy): this {
+  public withPullPolicy(pullPolicy: ImagePullPolicy): this {
     this.pullPolicy = pullPolicy;
     return this;
   }

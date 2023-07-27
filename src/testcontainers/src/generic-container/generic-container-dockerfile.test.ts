@@ -1,6 +1,5 @@
 import path from "path";
 import { GenericContainer } from "./generic-container";
-import { AlwaysPullPolicy } from "../pull-policy";
 import { Wait } from "../wait-strategy/wait";
 import {
   checkContainerIsHealthy,
@@ -13,6 +12,7 @@ import { LABEL_TESTCONTAINERS_SESSION_ID } from "../labels";
 import { RandomUuid } from "@testcontainers/common";
 import { getReaper } from "../reaper";
 import { getContainerRuntimeClient } from "@testcontainers/container-runtime";
+import { PullPolicy } from "@testcontainers/testcontainers";
 
 describe("GenericContainer Dockerfile", () => {
   jest.setTimeout(180_000);
@@ -60,7 +60,7 @@ describe("GenericContainer Dockerfile", () => {
   if (!process.env.CI_PODMAN) {
     it("should use pull policy", async () => {
       const dockerfile = path.resolve(fixtures, "docker");
-      const containerSpec = GenericContainer.fromDockerfile(dockerfile).withPullPolicy(new AlwaysPullPolicy());
+      const containerSpec = GenericContainer.fromDockerfile(dockerfile).withPullPolicy(PullPolicy.alwaysPull());
 
       await containerSpec.build();
       const dockerEventStream = await getDockerEventStream();

@@ -1,5 +1,5 @@
 import { PortWithOptionalBinding } from "./port";
-import { PullPolicy } from "./pull-policy";
+import { ImagePullPolicy } from "./pull-policy";
 import { WaitStrategy } from "./wait-strategy/wait-strategy";
 import { Readable } from "stream";
 import {
@@ -36,7 +36,7 @@ export interface TestContainer {
   withDefaultLogDriver(): this;
   withPrivilegedMode(): this;
   withUser(user: string): this;
-  withPullPolicy(pullPolicy: PullPolicy): this;
+  withPullPolicy(pullPolicy: ImagePullPolicy): this;
   withReuse(): this;
   withCopyFilesToContainer(filesToCopy: FileToCopy[]): this;
   withCopyDirectoriesToContainer(directoriesToCopy: DirectoryToCopy[]): this;

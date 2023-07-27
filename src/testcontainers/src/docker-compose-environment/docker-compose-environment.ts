@@ -4,7 +4,7 @@ import { StartedGenericContainer } from "../generic-container/started-generic-co
 import { WaitStrategy } from "../wait-strategy/wait-strategy";
 import { Environment } from "../types";
 import { StartedDockerComposeEnvironment } from "./started-docker-compose-environment";
-import { DefaultPullPolicy, PullPolicy } from "../pull-policy";
+import { ImagePullPolicy, PullPolicy } from "../pull-policy";
 import { Wait } from "../wait-strategy/wait";
 import { log, RandomUuid, Uuid } from "@testcontainers/common";
 import { getContainerRuntimeClient, parseComposeContainerName } from "@testcontainers/container-runtime";
@@ -22,7 +22,7 @@ export class DockerComposeEnvironment {
   private environmentFile = "";
   private profiles: string[] = [];
   private environment: Environment = {};
-  private pullPolicy: PullPolicy = new DefaultPullPolicy();
+  private pullPolicy: ImagePullPolicy = PullPolicy.defaultPolicy();
   private waitStrategy: { [containerName: string]: WaitStrategy } = {};
   private startupTimeout?: number;
 
@@ -58,7 +58,7 @@ export class DockerComposeEnvironment {
     return this;
   }
 
-  public withPullPolicy(pullPolicy: PullPolicy): this {
+  public withPullPolicy(pullPolicy: ImagePullPolicy): this {
     this.pullPolicy = pullPolicy;
     return this;
   }

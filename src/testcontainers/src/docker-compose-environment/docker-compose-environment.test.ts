@@ -2,6 +2,7 @@ import fetch from "node-fetch";
 import path from "path";
 import { DockerComposeEnvironment } from "./docker-compose-environment";
 import { Wait } from "../wait-strategy/wait";
+import { PullPolicy } from "../pull-policy";
 import {
   checkEnvironmentContainerIsHealthy,
   composeContainerName,
@@ -10,7 +11,6 @@ import {
   getVolumeNames,
   waitForDockerEvent,
 } from "../test-helper";
-import { AlwaysPullPolicy } from "../pull-policy";
 
 describe("DockerComposeEnvironment", () => {
   jest.setTimeout(180_000);
@@ -47,7 +47,7 @@ describe("DockerComposeEnvironment", () => {
     const startedEnv1 = await env.up();
     const dockerEventStream = await getDockerEventStream();
     const dockerPullEventPromise = waitForDockerEvent(dockerEventStream, "pull");
-    const startedEnv2 = await env.withPullPolicy(new AlwaysPullPolicy()).up();
+    const startedEnv2 = await env.withPullPolicy(PullPolicy.alwaysPull()).up();
     await dockerPullEventPromise;
 
     dockerEventStream.destroy();
@@ -61,7 +61,7 @@ describe("DockerComposeEnvironment", () => {
     const startedEnv1 = await env.up(["service_2"]);
     const dockerEventStream = await getDockerEventStream();
     const dockerPullEventPromise = waitForDockerEvent(dockerEventStream, "pull");
-    const startedEnv2 = await env.withPullPolicy(new AlwaysPullPolicy()).up(["service_2"]);
+    const startedEnv2 = await env.withPullPolicy(PullPolicy.alwaysPull()).up(["service_2"]);
     await dockerPullEventPromise;
 
     dockerEventStream.destroy();

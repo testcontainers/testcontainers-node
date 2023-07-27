@@ -2,7 +2,7 @@ import fetch from "node-fetch";
 import path from "path";
 import getPort from "get-port";
 import { GenericContainer } from "./generic-container";
-import { AlwaysPullPolicy } from "../pull-policy";
+import { PullPolicy } from "../pull-policy";
 import {
   checkContainerIsHealthy,
   getDockerEventStream,
@@ -233,7 +233,7 @@ describe("GenericContainer", () => {
     const startedContainer1 = await container.start();
     const dockerEventStream = await getDockerEventStream();
     const dockerPullEventPromise = waitForDockerEvent(dockerEventStream, "pull");
-    const startedContainer2 = await container.withPullPolicy(new AlwaysPullPolicy()).start();
+    const startedContainer2 = await container.withPullPolicy(PullPolicy.alwaysPull()).start();
     await dockerPullEventPromise;
 
     dockerEventStream.destroy();

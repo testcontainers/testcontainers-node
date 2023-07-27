@@ -18,7 +18,7 @@ export { Network, StartedNetwork, StoppedNetwork } from "./network";
 
 export { Wait } from "./wait-strategy/wait";
 export { StartupCheckStrategy, StartupStatus } from "./wait-strategy/startup-check-strategy";
-export { PullPolicy, DefaultPullPolicy, AlwaysPullPolicy } from "./pull-policy";
+export { PullPolicy, ImagePullPolicy } from "./pull-policy";
 export { InspectResult, Content, ExecResult } from "./types";
 
 export { AbstractStartedContainer } from "./abstract-started-container";

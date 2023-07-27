@@ -21,10 +21,26 @@ const container = await new GenericContainer("alpine:3.10").start();
 Testcontainers will automatically pull an image if it doesn't exist. This is configurable:
 
 ```javascript
-const { GenericContainer, AlwaysPullPolicy } = require("testcontainers");
+const { GenericContainer, PullPolicy } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
-  .withPullPolicy(new AlwaysPullPolicy())
+  .withPullPolicy(PullPolicy.alwaysPull())
+  .start();
+```
+
+Create a custom pull policy:
+
+```typescript
+const { GenericContainer, ImagePullPolicy } = require("testcontainers");
+
+class CustomPullPolicy implements ImagePullPolicy {
+  public shouldPull(): boolean {
+    return true;
+  }
+}
+
+const container = await new GenericContainer("alpine")
+  .withPullPolicy(new CustomPullPolicy())
   .start();
 ```
 
