@@ -8,10 +8,10 @@ import { log } from "@testcontainers/common";
 
 export interface ComposeClient {
   info: ComposeInfo;
-  up: (options: ComposeOptions, services?: Array<string>) => Promise<void>;
-  pull: (options: ComposeOptions, services?: Array<string>) => Promise<void>;
-  stop: (options: ComposeOptions) => Promise<void>;
-  down: (options: ComposeOptions, downOptions: ComposeDownOptions) => Promise<void>;
+  up(options: ComposeOptions, services?: Array<string>): Promise<void>;
+  pull(options: ComposeOptions, services?: Array<string>): Promise<void>;
+  stop(options: ComposeOptions): Promise<void>;
+  down(options: ComposeOptions, downOptions: ComposeDownOptions): Promise<void>;
 }
 
 export async function getComposeClient(environment: NodeJS.ProcessEnv): Promise<ComposeClient> {
@@ -45,7 +45,6 @@ async function getComposeInfo(): Promise<ComposeInfo | undefined> {
   }
 }
 
-// todo create default compose options once in constructor
 class ComposeV1Client implements ComposeClient {
   constructor(public readonly info: ComposeInfo, private readonly environment: NodeJS.ProcessEnv) {}
 

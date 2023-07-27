@@ -112,11 +112,9 @@ export class DockerComposeEnvironment {
       services
     );
 
-    // todo compose client returns containers for a given project?
     const startedContainers = (await client.container.list()).filter(
       (container) => container.Labels["com.docker.compose.project"] === this.projectName
     );
-
     const startedContainerNames = startedContainers.reduce(
       (containerNames: string[], startedContainer: ContainerInfo) => [
         ...containerNames,
@@ -124,7 +122,6 @@ export class DockerComposeEnvironment {
       ],
       []
     );
-
     log.info(`Started containers "${startedContainerNames.join('", "')}"`);
 
     const startedGenericContainers = (
