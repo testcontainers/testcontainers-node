@@ -53,7 +53,7 @@ import {
   StartedTestContainer,
   StoppedTestContainer,
   GenericContainer
-} from "testcontainers";
+} from "@testcontainers/testcontainers";
 
 const container: TestContainer = new GenericContainer("alpine");
 const startedContainer: StartedTestContainer = await container.start();

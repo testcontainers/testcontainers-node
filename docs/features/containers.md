@@ -367,7 +367,7 @@ import {
   TestContainer,
   StartedTestContainer,
   AbstractStartedContainer
-} from "testcontainers";
+} from "@testcontainers/testcontainers";
 
 class CustomContainer extends GenericContainer {
   constructor() {
@@ -408,7 +408,7 @@ import {
   AbstractStartedContainer, 
   StartedTestContainer, 
   InspectResult 
-} from "testcontainers";
+} from "@testcontainers/testcontainers";
 
 class CustomContainer extends GenericContainer {
   protected override async beforeContainerCreated(): Promise<void> {
