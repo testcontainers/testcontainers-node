@@ -39,6 +39,6 @@ jobs:
           git push
 
       - name: Publish packages to NPM
-        run: npm publish --access public -ws
+        run: npm publish -ws
         env:
           NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
