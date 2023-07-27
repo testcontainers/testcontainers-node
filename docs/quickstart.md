@@ -1,9 +1,9 @@
 # Quickstart
 
-## Installation
+## Install
 
 ```bash
-npm install --save-dev testcontainers
+npm install @testcontainers/testcontainers --save-dev
 ```
 
 ## Example
@@ -14,7 +14,7 @@ Let's spin up and use a Redis container:
 
 ```javascript
 const redis = require("async-redis");
-const { GenericContainer } = require("testcontainers");
+const { GenericContainer } = require("@testcontainers/testcontainers");
 
 describe("Redis", () => {
   let container;

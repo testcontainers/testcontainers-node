@@ -5,7 +5,7 @@
 Create and start any container using a Generic Container:
 
 ```javascript
-const { GenericContainer } = require("testcontainers");
+const { GenericContainer } = require("@testcontainers/testcontainers");
 
 const container = await new GenericContainer("alpine").start();
 ```
@@ -21,7 +21,7 @@ const container = await new GenericContainer("alpine:3.10").start();
 Testcontainers will automatically pull an image if it doesn't exist. This is configurable:
 
 ```javascript
-const { GenericContainer, PullPolicy } = require("testcontainers");
+const { GenericContainer, PullPolicy } = require("@testcontainers/testcontainers");
 
 const container = await new GenericContainer("alpine")
   .withPullPolicy(PullPolicy.alwaysPull())
@@ -31,7 +31,7 @@ const container = await new GenericContainer("alpine")
 Create a custom pull policy:
 
 ```typescript
-const { GenericContainer, ImagePullPolicy } = require("testcontainers");
+const { GenericContainer, ImagePullPolicy } = require("@testcontainers/testcontainers");
 
 class CustomPullPolicy implements ImagePullPolicy {
   public shouldPull(): boolean {

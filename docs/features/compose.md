@@ -5,7 +5,7 @@
 Create and start a Docker Compose environment:
 
 ```javascript
-const { DockerComposeEnvironment } = require("testcontainers");
+const { DockerComposeEnvironment } = require("@testcontainers/testcontainers");
 
 const composeFilePath = "/path/to/build-context";
 const composeFile = "docker-compose.yml";
@@ -44,7 +44,7 @@ const environment = await new DockerComposeEnvironment(composeFilePath, composeF
 ### With a pull policy
 
 ```javascript
-const { DockerComposeEnvironment, AlwaysPullPolicy } = require("testcontainers");
+const { DockerComposeEnvironment, AlwaysPullPolicy } = require("@testcontainers/testcontainers");
 
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
   .withPullPolicy(new AlwaysPullPolicy())

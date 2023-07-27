@@ -3,6 +3,12 @@
 This module allows automatic start up of [HiveMQ's](https://www.hivemq.com/) docker container within
 Jest suites, to enable programmatic testing of JavaScript based MQTT client applications.
 
+## Install
+
+```bash
+npm install @testcontainers/hivemq --save-dev
+```
+
 ## Resources
 
 * [Community forum](https://community.hivemq.com/)

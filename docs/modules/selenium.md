@@ -4,12 +4,18 @@
 distribute scripts across many environments, then you want to use Selenium WebDriver, a
 collection of language specific bindings to drive a browser - the way it is meant to be driven.
 
+## Install
+
+```bash
+npm install @testcontainers/selenium --save-dev
+```
+
 ## Examples
 
 Spin up a Chrome web browser and navigate to a URL:
 
 ```javascript
-const { SeleniumContainer } = require("testcontainers");
+const { SeleniumContainer } = require("@testcontainers/selenium");
 
 const container = await new SeleniumContainer("selenium/standalone-chrome:112.0")
   .start();
@@ -59,7 +65,7 @@ seleniarm/standalone-firefox:112.0
 ```
 
 ```javascript
-const { SeleniumContainer } = require("testcontainers");
+const { SeleniumContainer } = require("@testcontainers/testcontainers");
 
 const container = await new SeleniumContainer("seleniarm/standalone-chromium:112.0")
   .start();

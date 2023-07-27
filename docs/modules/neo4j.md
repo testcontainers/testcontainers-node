@@ -2,6 +2,12 @@
 
 [Neo4j](https://neo4j.com/) is a highly scalable, robust native graph database.
 
+## Install
+
+```bash
+npm install @testcontainers/neo4j --save-dev
+```
+
 ## Examples
 
 <!--codeinclude-->

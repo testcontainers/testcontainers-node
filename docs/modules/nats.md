@@ -2,6 +2,12 @@
 
 [NATS](https://nats.io/) is a simple, secure and high performance open source messaging system for cloud native applications, IoT messaging, and microservices architectures.
 
+## Install
+
+```bash
+npm install @testcontainers/nats --save-dev
+```
+
 ## Examples
 
 <!--codeinclude-->
