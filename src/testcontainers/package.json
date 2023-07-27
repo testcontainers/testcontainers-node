@@ -1,7 +1,7 @@
 {
   "name": "@testcontainers/testcontainers",
   "version": "10.0.0-beta.3",
-  "description": "",
+  "license": "MIT",
   "main": "build/index.js",
   "files": [
     "build"
@@ -10,9 +10,6 @@
     "prebuild": "node -p \"'export const LIB_VERSION = ' + JSON.stringify(require('./package.json').version) + ';'\" > src/version.ts",
     "build": "tsc --project tsconfig.build.json"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "@balena/dockerignore": "^1.0.2",
     "archiver": "^5.3.1",

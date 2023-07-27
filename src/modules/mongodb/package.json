@@ -1,7 +1,7 @@
 {
   "name": "@testcontainers/mongodb",
   "version": "10.0.0-beta.3",
-  "description": "",
+  "license": "MIT",
   "main": "build/index.js",
   "files": [
     "build"
@@ -9,9 +9,6 @@
   "scripts": {
     "build": "tsc --project tsconfig.build.json"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "devDependencies": {
     "mongoose": "^7.4.0"
   },

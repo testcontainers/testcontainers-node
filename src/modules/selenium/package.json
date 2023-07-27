@@ -1,14 +1,11 @@
 {
   "name": "@testcontainers/selenium",
   "version": "10.0.0-beta.3",
-  "description": "",
+  "license": "MIT",
   "main": "build/index.js",
   "scripts": {
     "build": "tsc --project tsconfig.build.json"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "devDependencies": {
     "@types/selenium-webdriver": "^4.1.15",
     "selenium-webdriver": "^4.10.0"
