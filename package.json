@@ -2,8 +2,6 @@
   "name": "testcontainers",
   "author": "Cristian Greco",
   "version": "10.0.0-beta.3",
-  "main": "build/index.js",
-  "types": "build/index.d.ts",
   "workspaces": [
     "src/testcontainers",
     "src/modules/*"
