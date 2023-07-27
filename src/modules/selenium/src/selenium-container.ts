@@ -26,7 +26,7 @@ export class SeleniumContainer extends GenericContainer {
     super(image);
   }
 
-  protected override async beforeContainerStarted(): Promise<void> {
+  protected override async beforeContainerCreated(): Promise<void> {
     this.withExposedPorts(SELENIUM_PORT, VNC_PORT)
       .withSharedMemorySize(2 * 1024 * 1024 * 1024)
       .withWaitStrategy(

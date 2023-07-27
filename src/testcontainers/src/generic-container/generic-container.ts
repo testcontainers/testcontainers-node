@@ -66,7 +66,7 @@ export class GenericContainer implements TestContainer {
     return this.imageName.string === REAPER_IMAGE || this.imageName.string === SSHD_IMAGE;
   }
 
-  protected beforeContainerStarted?(): Promise<void>;
+  protected beforeContainerCreated?(): Promise<void>;
 
   protected containerCreated?(containerId: string): Promise<void>;
 
@@ -76,8 +76,8 @@ export class GenericContainer implements TestContainer {
     const client = await getContainerRuntimeClient();
     await client.image.pull(this.imageName, { force: this.pullPolicy.shouldPull() });
 
-    if (this.beforeContainerStarted) {
-      await this.beforeContainerStarted();
+    if (this.beforeContainerCreated) {
+      await this.beforeContainerCreated();
     }
 
     if (!this.isHelperContainer() && PortForwarderInstance.isRunning()) {
