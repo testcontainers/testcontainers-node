@@ -1,8 +1,11 @@
 {
   "name": "@testcontainers/neo4j",
-  "version": "10.0.0-beta.2",
+  "version": "10.0.0-beta.3",
   "description": "",
   "main": "build/index.js",
+  "files": [
+    "build"
+  ],
   "scripts": {
     "build": "tsc --project tsconfig.build.json"
   },
