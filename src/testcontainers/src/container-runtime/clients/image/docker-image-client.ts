@@ -1,5 +1,4 @@
 import Dockerode, { ImageBuildOptions } from "dockerode";
-import { buildLog, pullLog } from "../../logger";
 import byline from "byline";
 import tar from "tar-fs";
 import path from "path";
@@ -9,7 +8,7 @@ import { getAuthConfig } from "../../auth/get-auth-config";
 import { ImageName } from "../../image-name";
 import { ImageClient } from "./image-client";
 import AsyncLock from "async-lock";
-import { log } from "../../../common";
+import { log, buildLog, pullLog } from "../../../common";
 
 export class DockerImageClient implements ImageClient {
   private readonly existingImages = new Set<string>();

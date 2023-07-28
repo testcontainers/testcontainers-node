@@ -20,7 +20,6 @@ import { StartedGenericContainer } from "./started-generic-container";
 import { Wait } from "../wait-strategies/wait";
 import { Readable } from "stream";
 import { Container, ContainerCreateOptions, ContainerInspectInfo, HostConfig } from "dockerode";
-import { containerLog } from "../logger";
 import { waitForContainer } from "../wait-strategies/wait-for-container";
 import { ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "../container-runtime";
 import { getContainerPort, hasHostBinding, PortWithOptionalBinding } from "../utils/port";
@@ -28,7 +27,7 @@ import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
 import { getReaper, REAPER_IMAGE } from "../reaper/reaper";
 import { PortForwarderInstance, SSHD_IMAGE } from "../port-forwarder/port-forwarder";
 import { createLabels, LABEL_TESTCONTAINERS_CONTAINER_HASH, LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
-import { hash, log } from "../common";
+import { containerLog, hash, log } from "../common";
 import { BoundPorts } from "../utils/bound-ports";
 import { StartedNetwork } from "../network/network";
 

@@ -1,5 +1,5 @@
 import { GenericContainer } from "./generic-container";
-import { containerLog } from "../logger";
+import { containerLog } from "../common";
 
 describe("GenericContainer logs", () => {
   jest.setTimeout(180_000);

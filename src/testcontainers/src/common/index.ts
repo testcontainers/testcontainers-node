@@ -1,4 +1,4 @@
-export { Logger, log } from "./logger";
+export { Logger, log, buildLog, composeLog, pullLog, execLog, containerLog } from "./logger";
 export * from "./type-guards";
 export { hash } from "./hash";
 export { Uuid, RandomUuid } from "./uuid";

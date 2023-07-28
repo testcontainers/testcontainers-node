@@ -1,9 +1,8 @@
 import { Container } from "dockerode";
 import { ExecResult } from "./types";
-import { execLog } from "../../logger";
 import byline from "byline";
 import { DockerContainerClient } from "./docker-container-client";
-import { log } from "../../../common";
+import { execLog, log } from "../../../common";
 
 export class PodmanContainerClient extends DockerContainerClient {
   override async exec(container: Container, command: string[], opts?: { log: boolean }): Promise<ExecResult> {

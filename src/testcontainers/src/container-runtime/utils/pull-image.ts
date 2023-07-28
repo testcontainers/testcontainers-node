@@ -3,8 +3,7 @@ import Dockerode from "dockerode";
 import byline from "byline";
 import { getAuthConfig } from "../auth/get-auth-config";
 import { ImageName } from "../image-name";
-import { pullLog } from "../logger";
-import { log } from "../../common";
+import { log, pullLog } from "../../common";
 
 export type PullImageOptions = {
   imageName: ImageName;

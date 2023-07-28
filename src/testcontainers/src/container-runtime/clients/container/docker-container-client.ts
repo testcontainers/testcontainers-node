@@ -9,10 +9,9 @@ import Dockerode, {
 import { PassThrough, Readable } from "stream";
 import { IncomingMessage } from "http";
 import { ExecResult } from "./types";
-import { execLog } from "../../logger";
 import byline from "byline";
 import { ContainerClient } from "./container-client";
-import { log, streamToString } from "../../../common";
+import { log, execLog, streamToString } from "../../../common";
 
 export class DockerContainerClient implements ContainerClient {
   constructor(public readonly dockerode: Dockerode) {}
