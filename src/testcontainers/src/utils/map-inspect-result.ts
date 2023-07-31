@@ -1,6 +1,5 @@
 import { ContainerInspectInfo } from "dockerode";
-import { InspectResult } from "@testcontainers/testcontainers";
-import { HealthCheckStatus, NetworkSettings, Ports } from "../types";
+import { HealthCheckStatus, NetworkSettings, Ports, InspectResult } from "../types";
 
 export function mapInspectResult(inspectResult: ContainerInspectInfo): InspectResult {
   const finishedAt = new Date(inspectResult.State.FinishedAt);

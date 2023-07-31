@@ -1,7 +1,6 @@
 import { getContainerPort, PortWithOptionalBinding } from "./port";
 import { HostIp } from "../container-runtime";
-import { InspectResult } from "@testcontainers/testcontainers";
-import { HostPortBindings } from "../types";
+import { HostPortBindings, InspectResult } from "../types";
 import net from "net";
 
 export class BoundPorts {
