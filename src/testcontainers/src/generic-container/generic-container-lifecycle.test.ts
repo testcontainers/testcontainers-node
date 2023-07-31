@@ -1,5 +1,4 @@
-import { GenericContainer, AbstractStartedContainer, StartedTestContainer } from "../index";
-import { ContainerInspectInfo } from "dockerode";
+import { AbstractStartedContainer, GenericContainer, InspectResult, StartedTestContainer } from "../index";
 
 describe("GenericContainer lifecycle", () => {
   jest.setTimeout(180_000);
@@ -63,13 +62,13 @@ describe("GenericContainer lifecycle", () => {
       containerCreated(containerId);
     }
 
-    protected override async containerStarting(inspectResult: ContainerInspectInfo, reused: boolean): Promise<void> {
+    protected override async containerStarting(inspectResult: InspectResult, reused: boolean): Promise<void> {
       containerStarting(reused);
     }
 
     protected override async containerStarted(
       container: StartedTestContainer,
-      inspectResult: ContainerInspectInfo,
+      inspectResult: InspectResult,
       reused: boolean
     ): Promise<void> {
       containerStarted(reused);

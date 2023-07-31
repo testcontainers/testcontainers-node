@@ -10,6 +10,7 @@ import {
   ExtraHost,
   FileToCopy,
   HealthCheck,
+  InspectResult,
   Labels,
   ResourcesQuota,
   TmpFs,
@@ -19,7 +20,7 @@ import { GenericContainerBuilder } from "./generic-container-builder";
 import { StartedGenericContainer } from "./started-generic-container";
 import { Wait } from "../wait-strategies/wait";
 import { Readable } from "stream";
-import { Container, ContainerCreateOptions, ContainerInspectInfo, HostConfig } from "dockerode";
+import { Container, ContainerCreateOptions, HostConfig } from "dockerode";
 import { waitForContainer } from "../wait-strategies/wait-for-container";
 import { ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "../container-runtime";
 import { getContainerPort, hasHostBinding, PortWithOptionalBinding } from "../utils/port";
@@ -30,6 +31,7 @@ import { createLabels, LABEL_TESTCONTAINERS_CONTAINER_HASH, LABEL_TESTCONTAINERS
 import { containerLog, hash, log } from "../common";
 import { BoundPorts } from "../utils/bound-ports";
 import { StartedNetwork } from "../network/network";
+import { mapInspectResult } from "../utils/map-inspect-result";
 
 const reusableContainerCreationLock = new AsyncLock();
 
@@ -69,7 +71,7 @@ export class GenericContainer implements TestContainer {
 
   protected containerCreated?(containerId: string): Promise<void>;
 
-  protected containerStarting?(inspectResult: ContainerInspectInfo, reused: boolean): Promise<void>;
+  protected containerStarting?(inspectResult: InspectResult, reused: boolean): Promise<void>;
 
   public async start(): Promise<StartedTestContainer> {
     const client = await getContainerRuntimeClient();
@@ -120,7 +122,8 @@ export class GenericContainer implements TestContainer {
 
   private async reuseContainer(client: ContainerRuntimeClient, container: Container) {
     const inspectResult = await client.container.inspect(container);
-    const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, inspectResult).filter(
+    const mappedInspectResult = mapInspectResult(inspectResult);
+    const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, mappedInspectResult).filter(
       this.exposedPorts
     );
     if (this.startupTimeout !== undefined) {
@@ -128,7 +131,7 @@ export class GenericContainer implements TestContainer {
     }
 
     if (this.containerStarting) {
-      await this.containerStarting(inspectResult, true);
+      await this.containerStarting(mappedInspectResult, true);
     }
 
     await waitForContainer(client, container, this.waitStrategy, boundPorts);
@@ -143,7 +146,7 @@ export class GenericContainer implements TestContainer {
     );
 
     if (this.containerStarted) {
-      await this.containerStarted(startedContainer, inspectResult, true);
+      await this.containerStarted(startedContainer, mappedInspectResult, true);
     }
 
     return startedContainer;
@@ -176,7 +179,8 @@ export class GenericContainer implements TestContainer {
     log.info(`Started container for image "${this.createOpts.Image}"`, { containerId: container.id });
 
     const inspectResult = await client.container.inspect(container);
-    const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, inspectResult).filter(
+    const mappedInspectResult = mapInspectResult(inspectResult);
+    const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, mappedInspectResult).filter(
       this.exposedPorts
     );
 
@@ -197,7 +201,7 @@ export class GenericContainer implements TestContainer {
     }
 
     if (this.containerStarting) {
-      await this.containerStarting(inspectResult, false);
+      await this.containerStarting(mappedInspectResult, false);
     }
 
     await waitForContainer(client, container, this.waitStrategy, boundPorts);
@@ -212,7 +216,7 @@ export class GenericContainer implements TestContainer {
     );
 
     if (this.containerStarted) {
-      await this.containerStarted(startedContainer, inspectResult, false);
+      await this.containerStarted(startedContainer, mappedInspectResult, false);
     }
 
     return startedContainer;
@@ -247,7 +251,7 @@ export class GenericContainer implements TestContainer {
 
   protected containerStarted?(
     container: StartedTestContainer,
-    inspectResult: ContainerInspectInfo,
+    inspectResult: InspectResult,
     reused: boolean
   ): Promise<void>;
 

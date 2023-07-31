@@ -10,6 +10,7 @@ import { waitForContainer } from "../wait-strategies/wait-for-container";
 import { BoundPorts } from "../utils/bound-ports";
 import { containerLog, log } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
+import { mapInspectResult } from "../utils/map-inspect-result";
 
 export class StartedGenericContainer implements StartedTestContainer {
   private stoppedContainer?: StoppedTestContainer;
@@ -45,6 +46,7 @@ export class StartedGenericContainer implements StartedTestContainer {
     await client.container.restart(this.container, resolvedOptions);
 
     this.inspectResult = await client.container.inspect(this.container);
+    const mappedInspectResult = mapInspectResult(this.inspectResult);
     const startTime = new Date(this.inspectResult.State.StartedAt);
 
     if (containerLog.enabled()) {
@@ -53,7 +55,7 @@ export class StartedGenericContainer implements StartedTestContainer {
         .on("err", (data) => containerLog.error(data.trim(), { containerId: this.container.id }));
     }
 
-    this.boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, this.inspectResult).filter(
+    this.boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, mappedInspectResult).filter(
       Array.from(this.boundPorts.iterator()).map((port) => port[0])
     );
 

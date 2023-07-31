@@ -2,11 +2,11 @@ import {
   AbstractStartedContainer,
   Content,
   GenericContainer,
+  InspectResult,
   RandomUuid,
   StartedTestContainer,
   Uuid,
 } from "@testcontainers/testcontainers";
-import { ContainerInspectInfo } from "dockerode";
 
 const KAFKA_PORT = 9093;
 const KAFKA_BROKER_PORT = 9092;
@@ -108,7 +108,7 @@ export class KafkaContainer extends GenericContainer {
 
   protected override async containerStarted(
     container: StartedTestContainer,
-    inspectResult: ContainerInspectInfo
+    inspectResult: InspectResult
   ): Promise<void> {
     await this.updateAdvertisedListeners(container, inspectResult);
     if (this.saslSslConfig) {
@@ -148,13 +148,13 @@ export class KafkaContainer extends GenericContainer {
     }).withExposedPorts(KAFKA_PORT);
   }
 
-  private async updateAdvertisedListeners(container: StartedTestContainer, inspectResult: ContainerInspectInfo) {
-    const brokerAdvertisedListener = `BROKER://${inspectResult.Config.Hostname}:${KAFKA_BROKER_PORT}`;
+  private async updateAdvertisedListeners(container: StartedTestContainer, inspectResult: InspectResult) {
+    const brokerAdvertisedListener = `BROKER://${inspectResult.hostname}:${KAFKA_BROKER_PORT}`;
 
     let bootstrapServers = `PLAINTEXT://${container.getHost()}:${container.getMappedPort(KAFKA_PORT)}`;
     if (this.saslSslConfig) {
       if (this.networkMode) {
-        bootstrapServers = `${bootstrapServers},SECURE://${inspectResult.Config.Hostname}:${this.saslSslConfig.port}`;
+        bootstrapServers = `${bootstrapServers},SECURE://${inspectResult.hostname}:${this.saslSslConfig.port}`;
       } else {
         bootstrapServers = `${bootstrapServers},SECURE://${container.getHost()}:${container.getMappedPort(
           this.saslSslConfig.port

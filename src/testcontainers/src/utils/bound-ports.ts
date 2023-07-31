@@ -1,8 +1,8 @@
 import { getContainerPort, PortWithOptionalBinding } from "./port";
-import { HostPortBindings, Ports } from "../types";
-import net from "net";
-import { ContainerInspectInfo } from "dockerode";
 import { HostIp } from "../container-runtime";
+import { InspectResult } from "@testcontainers/testcontainers";
+import { HostPortBindings } from "../types";
+import net from "net";
 
 export class BoundPorts {
   private readonly ports = new Map<number, number>();
@@ -49,11 +49,10 @@ export class BoundPorts {
     return boundPorts;
   }
 
-  public static fromInspectResult(hostIps: HostIp[], inspectResult: ContainerInspectInfo): BoundPorts {
+  public static fromInspectResult(hostIps: HostIp[], inspectResult: InspectResult): BoundPorts {
     const boundPorts = new BoundPorts();
 
-    const ports = getPorts(inspectResult);
-    Object.entries(ports).forEach(([containerPort, hostBindings]) => {
+    Object.entries(inspectResult.ports).forEach(([containerPort, hostBindings]) => {
       const hostPort = resolveHostPortBinding(hostIps, hostBindings);
       boundPorts.setBinding(parseInt(containerPort), hostPort);
     });
@@ -62,22 +61,7 @@ export class BoundPorts {
   }
 }
 
-function getPorts(inspectInfo: ContainerInspectInfo): Ports {
-  return Object.entries(inspectInfo.NetworkSettings.Ports)
-    .filter(([, hostPorts]) => hostPorts !== null)
-    .map(([containerPortAndProtocol, hostPorts]) => {
-      const containerPort = parseInt(containerPortAndProtocol.split("/")[0]);
-      return {
-        [containerPort]: hostPorts.map((hostPort) => ({
-          hostIp: hostPort.HostIp,
-          hostPort: parseInt(hostPort.HostPort),
-        })),
-      };
-    })
-    .reduce((acc, curr) => ({ ...acc, ...curr }), {});
-}
-
-export function resolveHostPortBinding(hostIps: HostIp[], hostPortBindings: HostPortBindings): number {
+export const resolveHostPortBinding = (hostIps: HostIp[], hostPortBindings: HostPortBindings): number => {
   if (isDualStackIp(hostPortBindings)) {
     return hostPortBindings[0].hostPort;
   }
@@ -89,8 +73,7 @@ export function resolveHostPortBinding(hostIps: HostIp[], hostPortBindings: Host
     }
   }
   throw new Error("No host port found for host IP");
-}
+};
 
-function isDualStackIp(hostPortBindings: HostPortBindings): boolean {
-  return hostPortBindings.length === 1 && hostPortBindings[0].hostIp === "";
-}
+const isDualStackIp = (hostPortBindings: HostPortBindings): boolean =>
+  hostPortBindings.length === 1 && hostPortBindings[0].hostIp === "";

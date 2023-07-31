@@ -1,6 +1,6 @@
 import { BoundPorts, resolveHostPortBinding } from "./bound-ports";
-import { ContainerInspectInfo } from "dockerode";
 import { HostIp } from "../container-runtime";
+import { InspectResult } from "@testcontainers/testcontainers";
 
 describe("BoundPorts", () => {
   it("should return a binding", () => {
@@ -10,58 +10,64 @@ describe("BoundPorts", () => {
     expect(boundPorts.getBinding(1)).toBe(1000);
   });
 
-  describe("get first binding", () => {
-    it("should return", () => {
+  describe("BoundPorts", () => {
+    it("should return a binding", () => {
       const boundPorts = new BoundPorts();
       boundPorts.setBinding(1, 1000);
 
-      expect(boundPorts.getFirstBinding()).toBe(1000);
+      expect(boundPorts.getBinding(1)).toBe(1000);
     });
 
-    it("should throw when not set", () => {
+    describe("get first binding", () => {
+      it("should return", () => {
+        const boundPorts = new BoundPorts();
+        boundPorts.setBinding(1, 1000);
+
+        expect(boundPorts.getFirstBinding()).toBe(1000);
+      });
+
+      it("should throw when not set", () => {
+        const boundPorts = new BoundPorts();
+
+        expect(() => boundPorts.getFirstBinding()).toThrowError("No port bindings found");
+      });
+    });
+
+    it("should return an iterator for all bindings", () => {
       const boundPorts = new BoundPorts();
+      boundPorts.setBinding(1, 1000);
 
-      expect(() => boundPorts.getFirstBinding()).toThrowError("No port bindings found");
+      for (const [internalPort, hostPort] of boundPorts.iterator()) {
+        expect(internalPort).toBe(1);
+        expect(hostPort).toBe(1000);
+      }
     });
-  });
 
-  it("should return an iterator for all bindings", () => {
-    const boundPorts = new BoundPorts();
-    boundPorts.setBinding(1, 1000);
+    it("should instantiate from an inspect result", () => {
+      const inspectResult: Partial<InspectResult> = {
+        ports: {
+          8080: [{ hostIp: "0.0.0.0", hostPort: 10000 }],
+          8081: [{ hostIp: "0.0.0.0", hostPort: 10001 }],
+        },
+      };
+      const hostIps: HostIp[] = [{ address: "127.0.0.1", family: 4 }];
 
-    for (const [internalPort, hostPort] of boundPorts.iterator()) {
-      expect(internalPort).toBe(1);
-      expect(hostPort).toBe(1000);
-    }
-  });
+      const boundPorts = BoundPorts.fromInspectResult(hostIps, inspectResult as InspectResult);
 
-  it("should instantiate from an inspect result", () => {
-    const hostIps: HostIp[] = [{ address: "127.0.0.1", family: 4 }];
-    const networkSettings: Partial<ContainerInspectInfo["NetworkSettings"]> = {
-      Ports: {
-        "8080/tcp": [{ HostIp: "0.0.0.0", HostPort: "10000" }],
-        "8081/tcp": [{ HostIp: "0.0.0.0", HostPort: "10001" }],
-      },
-    };
-    const inspectResult: Partial<ContainerInspectInfo> = {
-      NetworkSettings: networkSettings as ContainerInspectInfo["NetworkSettings"],
-    };
+      expect(boundPorts.getBinding(8080)).toBe(10000);
+      expect(boundPorts.getBinding(8081)).toBe(10001);
+    });
 
-    const boundPorts = BoundPorts.fromInspectResult(hostIps, inspectResult as ContainerInspectInfo);
+    it("should filter port bindings", () => {
+      const boundPorts = new BoundPorts();
+      boundPorts.setBinding(1, 1000);
+      boundPorts.setBinding(2, 2000);
 
-    expect(boundPorts.getBinding(8080)).toBe(10000);
-    expect(boundPorts.getBinding(8081)).toBe(10001);
-  });
+      const filtered = boundPorts.filter([2]);
 
-  it("should filter port bindings", () => {
-    const boundPorts = new BoundPorts();
-    boundPorts.setBinding(1, 1000);
-    boundPorts.setBinding(2, 2000);
-
-    const filtered = boundPorts.filter([2]);
-
-    expect(() => filtered.getBinding(1)).toThrowError("No port binding found for :1");
-    expect(filtered.getBinding(2)).toBe(2000);
+      expect(() => filtered.getBinding(1)).toThrowError("No port binding found for :1");
+      expect(filtered.getBinding(2)).toBe(2000);
+    });
   });
 
   describe("resolveHostPortBinding", () => {

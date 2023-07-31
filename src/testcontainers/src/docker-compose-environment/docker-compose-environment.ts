@@ -10,6 +10,7 @@ import { log, RandomUuid, Uuid, containerLog } from "../common";
 import { getContainerRuntimeClient, parseComposeContainerName } from "../container-runtime";
 import { getReaper } from "../reaper/reaper";
 import { BoundPorts } from "../utils/bound-ports";
+import { mapInspectResult } from "../utils/map-inspect-result";
 
 export class DockerComposeEnvironment {
   private readonly composeFilePath: string;
@@ -130,7 +131,8 @@ export class DockerComposeEnvironment {
           const containerName = parseComposeContainerName(this.projectName, startedContainer.Names[0]);
 
           const inspectResult = await client.container.inspect(container);
-          const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, inspectResult);
+          const mappedInspectResult = mapInspectResult(inspectResult);
+          const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, mappedInspectResult);
           const waitStrategy = this.waitStrategy[containerName]
             ? this.waitStrategy[containerName]
             : Wait.forListeningPorts();
