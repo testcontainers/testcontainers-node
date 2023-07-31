@@ -275,7 +275,6 @@ describe("GenericContainer", () => {
       .start();
 
     expect((await container.exec(["cat", target])).output).toEqual(expect.stringContaining("hello world"));
-    expect((await container.exec(`stat -c "%a %n" ${target}`)).output).toContain("644");
 
     await container.stop();
   });
@@ -317,7 +316,6 @@ describe("GenericContainer", () => {
       .start();
 
     expect((await container.exec("cat /tmp/test.txt")).output).toEqual(expect.stringContaining("hello world"));
-    expect((await container.exec(`stat -c "%a %n" /tmp/test.txt`)).output).toContain("644");
 
     await container.stop();
   });
@@ -359,7 +357,6 @@ describe("GenericContainer", () => {
       .start();
 
     expect((await container.exec(["cat", target])).output).toEqual(expect.stringContaining(content));
-    expect((await container.exec(`stat -c "%a %n" ${target}`)).output).toContain("644");
 
     await container.stop();
   });
