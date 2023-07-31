@@ -34,7 +34,7 @@ jobs:
 
       - name: Git commit and push
         run: |
-          git add **/package.json package-lock.json sonar-project.properties src/testcontainers/src/version.ts
+          git add package.json package-lock.json src/**/package.json sonar-project.properties src/testcontainers/src/version.ts
           git commit -m "${{ github.event.release.tag_name }}"
           git push
 
