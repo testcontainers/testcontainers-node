@@ -2,7 +2,7 @@ import { SELENIUM_VIDEO_IMAGE, SeleniumContainer } from "./selenium-container";
 import { Browser, Builder } from "selenium-webdriver";
 import tmp from "tmp";
 import path from "path";
-import { GenericContainer, StartedTestContainer } from "@testcontainers/testcontainers";
+import { GenericContainer, StartedTestContainer } from "testcontainers";
 
 describe("SeleniumContainer", () => {
   jest.setTimeout(180_000);

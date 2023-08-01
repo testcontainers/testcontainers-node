@@ -5,7 +5,7 @@
 Create and start a new network. Start a container within the network:
 
 ```javascript
-const { GenericContainer, Network } = require("@testcontainers/testcontainers");
+const { GenericContainer, Network } = require("testcontainers");
 
 const network = await new Network().start();
 
@@ -82,7 +82,7 @@ expect((await container.exec(["getent", "hosts", "foo"])).exitCode).toBe(0);
 You can expose a host port to a container:
 
 ```javascript
-const { GenericContainer, TestContainers } = require("@testcontainers/testcontainers");
+const { GenericContainer, TestContainers } = require("testcontainers");
 const { createServer } = require("http");
 
 const server = createServer((req, res) => {

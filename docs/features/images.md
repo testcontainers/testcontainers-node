@@ -5,7 +5,7 @@
 Build and start your own Docker image:
 
 ```javascript
-const { GenericContainer } = require("@testcontainers/testcontainers");
+const { GenericContainer } = require("testcontainers");
 
 const container = await GenericContainer
   .fromDockerfile("/path/to/build-context")
@@ -17,7 +17,7 @@ const startedContainer = await container.start();
 Images are built by default with a randomly generated name and are deleted on exit. If you wish to keep the built images between test runs, you can provide a name and specify not to delete the image:
 
 ```javascript
-const { GenericContainer } = require("@testcontainers/testcontainers");
+const { GenericContainer } = require("testcontainers");
 
 const container = await GenericContainer
   .fromDockerfile("/path/to/build-context")
@@ -29,7 +29,7 @@ const container = await GenericContainer
 Testcontainers will automatically pull an image if it doesn't exist. This is configurable:
 
 ```javascript
-const { GenericContainer, PullPolicy } = require("@testcontainers/testcontainers");
+const { GenericContainer, PullPolicy } = require("testcontainers");
 
 const container = await GenericContainer
   .fromDockerfile("/path/to/build-context")
@@ -40,7 +40,7 @@ const container = await GenericContainer
 Create a custom pull policy:
 
 ```typescript
-const { GenericContainer, ImagePullPolicy } = require("@testcontainers/testcontainers");
+const { GenericContainer, ImagePullPolicy } = require("testcontainers");
 
 class CustomPullPolicy implements ImagePullPolicy {
   public shouldPull(): boolean {

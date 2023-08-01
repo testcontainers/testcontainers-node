@@ -2,7 +2,7 @@ import { Kafka, KafkaConfig, logLevel } from "kafkajs";
 import { KAFKA_IMAGE, KafkaContainer } from "./kafka-container";
 import * as fs from "fs";
 import * as path from "path";
-import { GenericContainer, Network, StartedTestContainer } from "@testcontainers/testcontainers";
+import { GenericContainer, Network, StartedTestContainer } from "testcontainers";
 
 describe("KafkaContainer", () => {
   jest.setTimeout(240_000);

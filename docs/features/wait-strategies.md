@@ -3,7 +3,7 @@
 Note that the startup timeout of all wait strategies is configurable:
 
 ```javascript
-const { GenericContainer } = require("@testcontainers/testcontainers");
+const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
   .withStartupTimeout(120000) // wait 120s
@@ -15,7 +15,7 @@ const container = await new GenericContainer("alpine")
 The default wait strategy used by Testcontainers. It will wait up to 60 seconds for the container's mapped network ports to be bound.
 
 ```javascript
-const { GenericContainer } = require("@testcontainers/testcontainers");
+const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
   .withExposedPorts(6379)
@@ -25,7 +25,7 @@ const container = await new GenericContainer("alpine")
 It can be set explicitly but is not required:
 
 ```javascript
-const { GenericContainer, Wait } = require("@testcontainers/testcontainers");
+const { GenericContainer, Wait } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
   .withExposedPorts(6379)
@@ -38,7 +38,7 @@ const container = await new GenericContainer("alpine")
 Wait until the container has logged a message:
 
 ```javascript
-const { GenericContainer, Wait } = require("@testcontainers/testcontainers");
+const { GenericContainer, Wait } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
   .withWaitStrategy(Wait.forLogMessage("Ready to accept connections"))
@@ -48,7 +48,7 @@ const container = await new GenericContainer("alpine")
 With a regular expression:
 
 ```javascript
-const { GenericContainer, Wait } = require("@testcontainers/testcontainers");
+const { GenericContainer, Wait } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
   .withWaitStrategy(Wait.forLogMessage(/Listening on port \d+/))
@@ -58,7 +58,7 @@ const container = await new GenericContainer("alpine")
 Wait until the container has logged a message a number of times:
 
 ```javascript
-const { GenericContainer, Wait } = require("@testcontainers/testcontainers");
+const { GenericContainer, Wait } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
   .withWaitStrategy(Wait.forLogMessage("Listening on port 8080", 2))
@@ -70,7 +70,7 @@ const container = await new GenericContainer("alpine")
 Wait until the container's health check is successful:
 
 ```javascript
-const { GenericContainer, Wait } = require("@testcontainers/testcontainers");
+const { GenericContainer, Wait } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
   .withWaitStrategy(Wait.forHealthCheck())
@@ -80,7 +80,7 @@ const container = await new GenericContainer("alpine")
 Define your own health check:
 
 ```javascript
-const { GenericContainer, Wait } = require("@testcontainers/testcontainers");
+const { GenericContainer, Wait } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
   .withHealthCheck({
@@ -113,7 +113,7 @@ To execute the test without a shell, use the form: `["CMD", "command", "arg1", "
 Wait for an HTTP request to satisfy a condition. By default, it will wait for a 200 response:
 
 ```javascript
-const { GenericContainer, Wait } = require("@testcontainers/testcontainers");
+const { GenericContainer, Wait } = require("testcontainers");
 
 const container = await new GenericContainer("redis")
   .withWaitStrategy(Wait.forHttp("/health", 8080))
@@ -167,7 +167,7 @@ const container = await new GenericContainer("redis")
 Wait until a shell command returns a successful exit code:
 
 ```javascript
-const { GenericContainer, Wait } = require("@testcontainers/testcontainers");
+const { GenericContainer, Wait } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
   .withWaitStrategy(Wait.forSuccessfulCommand("stat /tmp/app.lock"))
@@ -179,7 +179,7 @@ const container = await new GenericContainer("alpine")
 Multiple wait strategies can be chained together:
 
 ```javascript
-const { GenericContainer, Wait } = require("@testcontainers/testcontainers");
+const { GenericContainer, Wait } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
   .withWaitStrategy(Wait.forAll([
@@ -231,7 +231,7 @@ const {
   GenericContainer, 
   StartupCheckStrategy,
   StartupStatus
-} = require("@testcontainers/testcontainers");
+} = require("testcontainers");
 
 class ReadyAfterDelayWaitStrategy extends StartupCheckStrategy {
   public checkStartupState(dockerClient: Dockerode, containerId: string): Promise<StartupStatus> {

@@ -6,7 +6,7 @@ import {
   RandomUuid,
   StartedTestContainer,
   Uuid,
-} from "@testcontainers/testcontainers";
+} from "testcontainers";
 
 const KAFKA_PORT = 9093;
 const KAFKA_BROKER_PORT = 9092;

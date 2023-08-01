@@ -13,7 +13,7 @@ import {
   StopOptions,
   StoppedTestContainer,
   Wait,
-} from "@testcontainers/testcontainers";
+} from "testcontainers";
 
 const SELENIUM_PORT = 4444;
 const VNC_PORT = 5900;

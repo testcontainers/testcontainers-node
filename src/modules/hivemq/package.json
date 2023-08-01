@@ -16,6 +16,6 @@
     "mqtt": "^4.3.7"
   },
   "dependencies": {
-    "@testcontainers/testcontainers": "*"
+    "testcontainers": "*"
   }
 }

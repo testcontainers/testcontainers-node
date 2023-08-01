@@ -3,7 +3,7 @@
 ## Install
 
 ```bash
-npm install @testcontainers/testcontainers --save-dev
+npm install testcontainers --save-dev
 ```
 
 ## Example
@@ -14,7 +14,7 @@ Let's spin up and use a Redis container:
 
 ```javascript
 const redis = require("async-redis");
-const { GenericContainer } = require("@testcontainers/testcontainers");
+const { GenericContainer } = require("testcontainers");
 
 describe("Redis", () => {
   let container;
@@ -53,7 +53,7 @@ import {
   StartedTestContainer,
   StoppedTestContainer,
   GenericContainer
-} from "@testcontainers/testcontainers";
+} from "testcontainers";
 
 const container: TestContainer = new GenericContainer("alpine");
 const startedContainer: StartedTestContainer = await container.start();

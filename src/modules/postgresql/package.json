@@ -17,6 +17,6 @@
     "pg": "^8.11.1"
   },
   "dependencies": {
-    "@testcontainers/testcontainers": "*"
+    "testcontainers": "*"
   }
 }

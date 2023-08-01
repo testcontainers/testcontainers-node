@@ -1,4 +1,4 @@
-import { AbstractStartedContainer, GenericContainer, StartedTestContainer } from "@testcontainers/testcontainers";
+import { AbstractStartedContainer, GenericContainer, StartedTestContainer } from "testcontainers";
 
 const MYSQL_PORT = 3306;
 

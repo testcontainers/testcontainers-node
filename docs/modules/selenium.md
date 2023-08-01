@@ -65,7 +65,7 @@ seleniarm/standalone-firefox:112.0
 ```
 
 ```javascript
-const { SeleniumContainer } = require("@testcontainers/testcontainers");
+const { SeleniumContainer } = require("@testcontainers/selenium");
 
 const container = await new SeleniumContainer("seleniarm/standalone-chromium:112.0")
   .start();

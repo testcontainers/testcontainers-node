@@ -68,7 +68,7 @@ The way Colima works is it periodically checks for exposed ports, and then forwa
 You can use a composite wait strategy to additionally wait for a port to be bound, on top of an existing wait strategy. For example:
 
 ```javascript
-const { GenericContainer, Wait } = require("@testcontainers/testcontainers");
+const { GenericContainer, Wait } = require("testcontainers");
 
 const container = await new GenericContainer("redis")
   .withWaitStrategy(Wait.forAll([

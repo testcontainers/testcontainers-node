@@ -1,7 +1,22 @@
 {
-  "name": "@testcontainers/testcontainers",
+  "name": "testcontainers",
   "version": "10.0.0-beta.4",
   "license": "MIT",
+  "author": "Cristian Greco",
+  "keywords": [
+    "testing",
+    "docker",
+    "testcontainers"
+  ],
+  "description": "Testcontainers is a NodeJS library that supports tests, providing lightweight, throwaway instances of common databases, Selenium web browsers, or anything else that can run in a Docker container.",
+  "homepage": "https://github.com/testcontainers/testcontainers-node#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/testcontainers/testcontainers-node"
+  },
+  "bugs": {
+    "url": "https://github.com/testcontainers/testcontainers-node/issues"
+  },
   "main": "build/index.js",
   "files": [
     "build"

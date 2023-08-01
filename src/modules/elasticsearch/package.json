@@ -16,6 +16,6 @@
     "@elastic/elasticsearch": "^7.17.12"
   },
   "dependencies": {
-    "@testcontainers/testcontainers": "*"
+    "testcontainers": "*"
   }
 }

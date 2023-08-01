@@ -1,10 +1,4 @@
-import {
-  AbstractStartedContainer,
-  ExecResult,
-  GenericContainer,
-  StartedTestContainer,
-  Wait,
-} from "@testcontainers/testcontainers";
+import { AbstractStartedContainer, ExecResult, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 
 const MONGODB_PORT = 27017;
 

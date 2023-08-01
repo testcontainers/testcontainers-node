@@ -1,7 +1,7 @@
 import path from "path";
 import { GenericContainer } from "./generic-container";
 import { Wait } from "../wait-strategies/wait";
-import { PullPolicy } from "@testcontainers/testcontainers";
+import { PullPolicy } from "../utils/pull-policy";
 import { RandomUuid } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
 import { getReaper } from "../reaper/reaper";

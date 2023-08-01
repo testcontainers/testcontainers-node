@@ -16,6 +16,6 @@
     "neo4j-driver": "^5.10.0"
   },
   "dependencies": {
-    "@testcontainers/testcontainers": "*"
+    "testcontainers": "*"
   }
 }

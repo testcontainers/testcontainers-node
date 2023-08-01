@@ -16,6 +16,6 @@
     "arangojs": "^8.4.0"
   },
   "dependencies": {
-    "@testcontainers/testcontainers": "*"
+    "testcontainers": "*"
   }
 }

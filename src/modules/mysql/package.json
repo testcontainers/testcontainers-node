@@ -16,6 +16,6 @@
     "mysql2": "^3.5.2"
   },
   "dependencies": {
-    "@testcontainers/testcontainers": "*"
+    "testcontainers": "*"
   }
 }

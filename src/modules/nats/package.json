@@ -16,6 +16,6 @@
     "nats": "^2.15.1"
   },
   "dependencies": {
-    "@testcontainers/testcontainers": "*"
+    "testcontainers": "*"
   }
 }

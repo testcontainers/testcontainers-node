@@ -3,8 +3,8 @@
   "compilerOptions": {
     "noEmit": true,
     "paths": {
-      "@testcontainers/*": [
-        "./src/*/src"
+      "testcontainers": [
+        "./src/testcontainers/src"
       ]
     }
   },

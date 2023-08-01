@@ -16,6 +16,6 @@
     "kafkajs": "^2.2.4"
   },
   "dependencies": {
-    "@testcontainers/testcontainers": "*"
+    "testcontainers": "*"
   }
 }
