@@ -1,4 +1,5 @@
 {
+  "name": "testcontainers-monorepo",
   "license": "MIT",
   "workspaces": [
     "src/testcontainers",

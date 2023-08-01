@@ -2,6 +2,22 @@
   "name": "@testcontainers/postgresql",
   "version": "10.0.0-beta.5",
   "license": "MIT",
+  "keywords": [
+    "postgres",
+    "postgresql",
+    "testing",
+    "docker",
+    "testcontainers"
+  ],
+  "description": "PostgreSQL module for Testcontainers",
+  "homepage": "https://github.com/testcontainers/testcontainers-node#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/testcontainers/testcontainers-node"
+  },
+  "bugs": {
+    "url": "https://github.com/testcontainers/testcontainers-node/issues"
+  },
   "main": "build/index.js",
   "files": [
     "build"
