@@ -23,8 +23,8 @@ jobs:
 
       - name: Update versions
         run: |
-          npm --no-git-tag-version version ${{ github.event.release.tag_name }}
           npm version ${{ github.event.release.tag_name }} -ws
+          for module in src/modules/*; do npm install testcontainers@${{ github.event.release.tag_name }} --save -w $module; done
           sed -i -E "s/(sonar.projectVersion)=.+/\1=${{ github.event.release.tag_name }}/" sonar-project.properties
 
       - name: Build packages
@@ -34,7 +34,11 @@ jobs:
 
       - name: Git commit and push
         run: |
-          git add package.json package-lock.json src/**/package.json sonar-project.properties src/testcontainers/src/version.ts
+          git add \
+            package-lock.json \
+            src/**/package.json \
+            src/testcontainers/src/version.ts \
+            sonar-project.properties
           git commit -m "${{ github.event.release.tag_name }}"
           git push
 
