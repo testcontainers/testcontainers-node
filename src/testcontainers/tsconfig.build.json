@@ -1,9 +1,5 @@
 {
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "rootDir": "src",
-    "outDir": "build"
-  },
+  "extends": "./tsconfig.json",
   "exclude": [
     "build",
     "jest.config.ts",
