@@ -120,6 +120,7 @@ jobs:
         run: npm run test:ci -- generic-container.test.ts
 
   rancher-desktop:
+    if: false # https://github.com/rancher-sandbox/rancher-desktop/issues/5285
     runs-on: ${{ matrix.os-version }}
     strategy:
       fail-fast: false
