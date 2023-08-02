@@ -1,5 +1,6 @@
-import { GenericContainer, Network } from "testcontainers";
+import { GenericContainer } from "./generic-container";
 import { getContainerRuntimeClient } from "../container-runtime";
+import { Network } from "../network/network";
 
 describe("GenericContainer network", () => {
   jest.setTimeout(180_000);

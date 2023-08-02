@@ -1,5 +1,6 @@
+import { StoppedTestContainer } from "../test-container";
 import Dockerode from "dockerode";
-import { StoppedTestContainer, log } from "testcontainers";
+import { log } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
 
 export class StoppedGenericContainer implements StoppedTestContainer {

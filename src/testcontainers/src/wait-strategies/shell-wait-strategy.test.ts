@@ -1,4 +1,5 @@
-import { GenericContainer, Wait } from "testcontainers";
+import { GenericContainer } from "../generic-container/generic-container";
+import { Wait } from "./wait";
 
 jest.setTimeout(180_000);
 

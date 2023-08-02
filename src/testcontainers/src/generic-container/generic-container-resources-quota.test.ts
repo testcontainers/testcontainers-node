@@ -1,4 +1,4 @@
-import { GenericContainer } from "testcontainers";
+import { GenericContainer } from "./generic-container";
 import { ContainerRuntimeClient, getContainerRuntimeClient } from "../container-runtime";
 
 describe("GenericContainer resources quota", () => {

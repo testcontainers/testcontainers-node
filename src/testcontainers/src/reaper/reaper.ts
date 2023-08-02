@@ -1,8 +1,9 @@
 import { ContainerInfo } from "dockerode";
-import { GenericContainer, Wait, log } from "testcontainers";
+import { GenericContainer } from "../generic-container/generic-container";
+import { Wait } from "../wait-strategies/wait";
 import { Socket } from "net";
 import { ContainerRuntimeClient } from "../container-runtime";
-import { IntervalRetry, RandomUuid, withFileLock } from "../common";
+import { IntervalRetry, log, RandomUuid, withFileLock } from "../common";
 import { LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
 
 export const REAPER_IMAGE = process.env["RYUK_CONTAINER_IMAGE"] ?? "testcontainers/ryuk:0.5.1";

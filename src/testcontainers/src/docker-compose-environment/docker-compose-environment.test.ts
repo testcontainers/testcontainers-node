@@ -1,6 +1,8 @@
 import fetch from "node-fetch";
 import path from "path";
-import { DockerComposeEnvironment, Wait, PullPolicy } from "testcontainers";
+import { DockerComposeEnvironment } from "./docker-compose-environment";
+import { Wait } from "../wait-strategies/wait";
+import { PullPolicy } from "../utils/pull-policy";
 import {
   checkEnvironmentContainerIsHealthy,
   composeContainerName,

@@ -1,8 +1,9 @@
-import { GetEventsOptions } from "dockerode";
 import { Readable } from "stream";
+import { StartedDockerComposeEnvironment } from "../docker-compose-environment/started-docker-compose-environment";
 import fetch from "node-fetch";
+import { StartedTestContainer } from "../test-container";
 import https from "https";
-import { StartedDockerComposeEnvironment, StartedTestContainer } from "testcontainers";
+import { GetEventsOptions } from "dockerode";
 import { getContainerRuntimeClient } from "../container-runtime";
 
 export const checkContainerIsHealthy = async (container: StartedTestContainer): Promise<void> => {

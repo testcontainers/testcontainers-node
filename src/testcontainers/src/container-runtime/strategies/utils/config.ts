@@ -3,7 +3,7 @@ import { homedir } from "os";
 import { existsSync } from "fs";
 import { readFile } from "fs/promises";
 import propertiesReader from "properties-reader";
-import { log } from "testcontainers";
+import { log } from "../../../common";
 
 export type ContainerRuntimeConfig = {
   tcHost?: string;
