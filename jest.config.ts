@@ -1,12 +1,7 @@
 import type { Config } from "jest";
 
 const config: Config = {
-  preset: "ts-jest",
-  resetMocks: true,
-  restoreMocks: true,
-  moduleNameMapper: {
-    "^testcontainers$": "<rootDir>/src/testcontainers/src",
-  },
+  projects: ["<rootDir>/src/testcontainers/jest.config.ts", "<rootDir>/src/modules/*/jest.config.ts"],
 };
 
 export default config;

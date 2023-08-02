@@ -6,7 +6,6 @@
   },
   "exclude": [
     "build",
-    "jest.config.ts",
-    "src/**/*.test.ts"
+    "jest.config.ts"
   ]
 }

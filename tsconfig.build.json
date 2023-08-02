@@ -12,9 +12,5 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitOverride": true,
     "composite": true
-  },
-  "exclude": [
-    "**/build",
-    "**/*.test.ts"
-  ]
+  }
 }
