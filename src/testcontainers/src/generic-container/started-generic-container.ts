@@ -1,14 +1,24 @@
-import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
 import Dockerode, { ContainerInspectInfo } from "dockerode";
-import { ContentToCopy, DirectoryToCopy, ExecResult, FileToCopy, Labels } from "../types";
-import { Readable } from "stream";
-import { StoppedGenericContainer } from "./stopped-generic-container";
-import { WaitStrategy } from "../wait-strategies/wait-strategy";
 import AsyncLock from "async-lock";
 import archiver from "archiver";
+import { Readable } from "stream";
+import {
+  ContentToCopy,
+  DirectoryToCopy,
+  ExecResult,
+  FileToCopy,
+  Labels,
+  log,
+  RestartOptions,
+  StartedTestContainer,
+  StopOptions,
+  StoppedTestContainer,
+} from "testcontainers";
+import { StoppedGenericContainer } from "./stopped-generic-container";
+import { WaitStrategy } from "../wait-strategies/wait-strategy";
 import { waitForContainer } from "../wait-strategies/wait-for-container";
 import { BoundPorts } from "../utils/bound-ports";
-import { containerLog, log } from "../common";
+import { containerLog } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
 import { mapInspectResult } from "../utils/map-inspect-result";
 

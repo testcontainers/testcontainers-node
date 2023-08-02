@@ -1,4 +1,4 @@
-import { GenericContainer } from "./generic-container";
+import { GenericContainer } from "testcontainers";
 import { containerLog } from "../common";
 
 describe("GenericContainer logs", () => {

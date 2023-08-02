@@ -1,8 +1,7 @@
 import fetch from "node-fetch";
 import path from "path";
 import getPort from "get-port";
-import { GenericContainer } from "./generic-container";
-import { PullPolicy } from "../utils/pull-policy";
+import { GenericContainer, PullPolicy } from "testcontainers";
 import {
   checkContainerIsHealthy,
   getDockerEventStream,

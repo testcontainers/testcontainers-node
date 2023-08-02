@@ -1,4 +1,4 @@
-import { GenericContainer } from "../generic-container/generic-container";
+import { GenericContainer } from "testcontainers";
 import { checkContainerIsHealthy, getRunningContainerNames } from "../utils/test-helper";
 import { RandomUuid } from "../common";
 

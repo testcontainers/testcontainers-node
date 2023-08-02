@@ -1,5 +1,4 @@
-import { GenericContainer } from "../generic-container/generic-container";
-import { Network } from "./network";
+import { GenericContainer, Network } from "testcontainers";
 import { ContainerRuntimeClient, getContainerRuntimeClient } from "../container-runtime";
 
 describe("Network", () => {

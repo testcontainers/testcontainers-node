@@ -1,4 +1,4 @@
-import { GenericContainer } from "./generic-container";
+import { GenericContainer } from "testcontainers";
 import { checkContainerIsHealthy } from "../utils/test-helper";
 
 describe("GenericContainer reuse", () => {

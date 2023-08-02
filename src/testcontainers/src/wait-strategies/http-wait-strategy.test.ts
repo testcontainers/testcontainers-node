@@ -1,5 +1,4 @@
-import { GenericContainer } from "../generic-container/generic-container";
-import { Wait } from "./wait";
+import { GenericContainer, Wait } from "testcontainers";
 import { checkContainerIsHealthy, checkContainerIsHealthyTls } from "../utils/test-helper";
 
 jest.setTimeout(180_000);
