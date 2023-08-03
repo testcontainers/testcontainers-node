@@ -1,0 +1,36 @@
+{
+  "name": "@testcontainers/nats",
+  "version": "10.0.1",
+  "license": "MIT",
+  "keywords": [
+    "nats",
+    "testing",
+    "docker",
+    "testcontainers"
+  ],
+  "description": "NATS module for Testcontainers",
+  "homepage": "https://github.com/testcontainers/testcontainers-node#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/testcontainers/testcontainers-node"
+  },
+  "bugs": {
+    "url": "https://github.com/testcontainers/testcontainers-node/issues"
+  },
+  "main": "build/index.js",
+  "files": [
+    "build"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.build.json"
+  },
+  "devDependencies": {
+    "nats": "^2.15.1"
+  },
+  "dependencies": {
+    "testcontainers": "^10.0.1"
+  }
+}

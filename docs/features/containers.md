@@ -21,10 +21,26 @@ const container = await new GenericContainer("alpine:3.10").start();
 Testcontainers will automatically pull an image if it doesn't exist. This is configurable:
 
 ```javascript
-const { GenericContainer, AlwaysPullPolicy } = require("testcontainers");
+const { GenericContainer, PullPolicy } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
-  .withPullPolicy(new AlwaysPullPolicy())
+  .withPullPolicy(PullPolicy.alwaysPull())
+  .start();
+```
+
+Create a custom pull policy:
+
+```typescript
+const { GenericContainer, ImagePullPolicy } = require("testcontainers");
+
+class CustomPullPolicy implements ImagePullPolicy {
+  public shouldPull(): boolean {
+    return true;
+  }
+}
+
+const container = await new GenericContainer("alpine")
+  .withPullPolicy(new CustomPullPolicy())
   .start();
 ```
 
@@ -110,6 +126,25 @@ const container = await new GenericContainer("alpine")
     target: "/remote/file2.txt"
   }])
   .start();
+```
+
+Or after it starts:
+
+```javascript
+const container = await new GenericContainer("alpine").start();
+
+container.copyFilesToContainer([{ 
+  source: "/local/file.txt", 
+  target: "/remote/file1.txt"
+}])
+container.copyDirectoriesToContainer([{
+  source: "/localdir",
+  target: "/some/nested/remotedir"
+}])
+container.copyContentToContainer([{ 
+  content: "hello world",
+  target: "/remote/file2.txt"
+}])
 ```
 
 An optional `mode` can be specified in octal for setting file permissions:
@@ -376,7 +411,7 @@ import {
 } from "testcontainers";
 
 class CustomContainer extends GenericContainer {
-  protected override async beforeContainerStarted(): Promise<void> {
+  protected override async beforeContainerCreated(): Promise<void> {
     // ...
   }
   

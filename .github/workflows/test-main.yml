@@ -126,6 +126,7 @@ jobs:
         run: npm run test:ci -- generic-container.test.ts
 
   rancher-desktop:
+    if: false # https://github.com/rancher-sandbox/rancher-desktop/issues/5285
     runs-on: ${{ matrix.os-version }}
     strategy:
       fail-fast: false
@@ -220,9 +221,11 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: Install dependencies
         run: npm ci --omit=optional
+      - name: Build workspaces
+        run: npm run build -ws
       - name: Remove dev dependencies
         run: npm prune --omit=dev
       - name: Run CommonJS module smoke test
-        run: node smoke-test.js
+        run: node src/testcontainers/smoke-test.js
       - name: Run ES module smoke test
-        run: node smoke-test.mjs
+        run: node src/testcontainers/smoke-test.mjs

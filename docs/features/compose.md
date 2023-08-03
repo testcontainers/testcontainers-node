@@ -43,11 +43,29 @@ const environment = await new DockerComposeEnvironment(composeFilePath, composeF
 
 ### With a pull policy
 
+Testcontainers will automatically pull an image if it doesn't exist. This is configurable:
+
 ```javascript
-const { DockerComposeEnvironment, AlwaysPullPolicy } = require("testcontainers");
+const { DockerComposeEnvironment, PullPolicy } = require("testcontainers");
 
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
-  .withPullPolicy(new AlwaysPullPolicy())
+  .withPullPolicy(PullPolicy.alwaysPull())
+  .up();
+```
+
+Create a custom pull policy:
+
+```typescript
+const { GenericContainer, ImagePullPolicy } = require("testcontainers");
+
+class CustomPullPolicy implements ImagePullPolicy {
+  public shouldPull(): boolean {
+    return true;
+  }
+}
+
+const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
+  .withPullPolicy(new CustomPullPolicy())
   .up();
 ```
 

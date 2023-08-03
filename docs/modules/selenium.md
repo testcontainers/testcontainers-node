@@ -4,17 +4,23 @@
 distribute scripts across many environments, then you want to use Selenium WebDriver, a
 collection of language specific bindings to drive a browser - the way it is meant to be driven.
 
+## Install
+
+```bash
+npm install @testcontainers/selenium --save-dev
+```
+
 ## Examples
 
 Spin up a Chrome web browser and navigate to a URL:
 
 ```javascript
-const { SeleniumContainer } = require("testcontainers");
+const { SeleniumContainer } = require("@testcontainers/selenium");
 
 const container = await new SeleniumContainer("selenium/standalone-chrome:112.0")
   .start();
 
-const driver = new Builder()
+const driver = await new Builder()
   .forBrowser(Browser.CHROME)
   .usingServer(container.getServerUrl())
   .build();
@@ -29,7 +35,7 @@ You can use any Selenium supported web browser by providing the appropriate imag
 const container = await new SeleniumContainer("selenium/standalone-edge:112.0")
   .start();
 
-const driver = new Builder()
+const driver = await new Builder()
   .forBrowser(Browser.EDGE)
   ...
   .build();
@@ -59,12 +65,12 @@ seleniarm/standalone-firefox:112.0
 ```
 
 ```javascript
-const { SeleniumContainer } = require("testcontainers");
+const { SeleniumContainer } = require("@testcontainers/selenium");
 
 const container = await new SeleniumContainer("seleniarm/standalone-chromium:112.0")
   .start();
 
-const driver = new Builder()
+const driver = await new Builder()
   .forBrowser(Browser.CHROME)
   .usingServer(container.getServerUrl())
   .build();

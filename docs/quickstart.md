@@ -1,9 +1,9 @@
 # Quickstart
 
-## Installation
+## Install
 
 ```bash
-npm install --save-dev testcontainers
+npm install testcontainers --save-dev
 ```
 
 ## Example
