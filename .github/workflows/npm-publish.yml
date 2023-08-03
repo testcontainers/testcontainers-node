@@ -15,6 +15,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
+          registry-url: "https://registry.npmjs.org"
 
       - name: Configure Git
         run: |
@@ -34,12 +35,7 @@ jobs:
 
       - name: Git commit and push
         run: |
-          git add \
-            package-lock.json \
-            src/**/package.json \
-            src/testcontainers/src/version.ts \
-            sonar-project.properties
-          git commit -m "${{ github.event.release.tag_name }}"
+          git commit -am "${{ github.event.release.tag_name }}"
           git push
 
       - name: Publish packages to NPM
