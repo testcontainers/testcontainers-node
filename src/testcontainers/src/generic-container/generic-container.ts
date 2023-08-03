@@ -64,7 +64,11 @@ export class GenericContainer implements TestContainer {
   }
 
   private isHelperContainer() {
-    return this.imageName.string === REAPER_IMAGE || this.imageName.string === SSHD_IMAGE;
+    return this.isReaper() || this.imageName.string === SSHD_IMAGE;
+  }
+
+  private isReaper() {
+    return this.imageName.string === REAPER_IMAGE;
   }
 
   protected beforeContainerCreated?(): Promise<void>;
@@ -96,7 +100,7 @@ export class GenericContainer implements TestContainer {
       return this.reuseOrStartContainer(client);
     }
 
-    if (!this.isHelperContainer()) {
+    if (!this.isReaper()) {
       const reaper = await getReaper(client);
       this.createOpts.Labels = { ...this.createOpts.Labels, [LABEL_TESTCONTAINERS_SESSION_ID]: reaper.sessionId };
     }
