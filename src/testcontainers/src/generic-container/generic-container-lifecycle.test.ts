@@ -19,7 +19,7 @@ describe("GenericContainer lifecycle", () => {
     containerStopped = jest.fn();
   });
 
-  it("should call lifecycle callbacks for a non-reused, custom started generic container", async () => {
+  it("should call lifecycle callbacks for a non-reused, generic container", async () => {
     const container = await new CustomContainerWithCustomStartedContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
       .start();
@@ -34,7 +34,7 @@ describe("GenericContainer lifecycle", () => {
     expect(containerStopped).toHaveBeenCalled();
   });
 
-  it("should call lifecycle callbacks for a reused, custom generic container", async () => {
+  it("should not call lifecycle callbacks for a reused, generic container", async () => {
     const container1 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
       .withReuse()
@@ -47,8 +47,8 @@ describe("GenericContainer lifecycle", () => {
     expect(container1.getId()).toEqual(container2.getId());
     expect(beforeContainerCreated).toHaveBeenCalled();
     expect(containerCreated).not.toHaveBeenCalled();
-    expect(containerStarting).toHaveBeenCalledWith(true);
-    expect(containerStarted).toHaveBeenCalledWith(true);
+    expect(containerStarting).not.toHaveBeenCalled;
+    expect(containerStarted).not.toHaveBeenCalled;
 
     await container1.stop();
   });
