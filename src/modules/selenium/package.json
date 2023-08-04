@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/selenium",
-  "version": "10.0.1",
+  "version": "10.0.2",
   "license": "MIT",
   "keywords": [
     "selenium",
@@ -32,6 +32,6 @@
     "selenium-webdriver": "^4.10.0"
   },
   "dependencies": {
-    "testcontainers": "^10.0.1"
+    "testcontainers": "^10.0.2"
   }
 }
