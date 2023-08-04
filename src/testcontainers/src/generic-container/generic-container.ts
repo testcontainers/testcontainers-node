@@ -134,13 +134,9 @@ export class GenericContainer implements TestContainer {
       this.waitStrategy.withStartupTimeout(this.startupTimeout);
     }
 
-    if (this.containerStarting) {
-      await this.containerStarting(mappedInspectResult, true);
-    }
-
     await waitForContainer(client, container, this.waitStrategy, boundPorts);
 
-    const startedContainer = new StartedGenericContainer(
+    return new StartedGenericContainer(
       container,
       client.info.containerRuntime.host,
       inspectResult,
@@ -148,12 +144,6 @@ export class GenericContainer implements TestContainer {
       inspectResult.Name,
       this.waitStrategy
     );
-
-    if (this.containerStarted) {
-      await this.containerStarted(startedContainer, mappedInspectResult, true);
-    }
-
-    return startedContainer;
   }
 
   private async startContainer(client: ContainerRuntimeClient): Promise<StartedTestContainer> {
