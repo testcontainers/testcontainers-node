@@ -50,7 +50,7 @@ export class StartedPostgreSqlContainer extends AbstractStartedContainer {
     private readonly password: string
   ) {
     super(startedTestContainer);
-    this.port = startedTestContainer.getMappedPort(5432);
+    this.port = startedTestContainer.getMappedPort(POSTGRES_PORT);
   }
 
   public getPort(): number {
