@@ -16,6 +16,7 @@ export class GenericContainerBuilder {
   private buildArgs: BuildArgs = {};
   private pullPolicy: ImagePullPolicy = PullPolicy.defaultPolicy();
   private cache = true;
+  private target?: string;
 
   constructor(
     private readonly context: string,
@@ -35,6 +36,11 @@ export class GenericContainerBuilder {
 
   public withCache(cache: boolean): this {
     this.cache = cache;
+    return this;
+  }
+
+  public withTarget(target: string): this {
+    this.target = target;
     return this;
   }
 
@@ -64,6 +70,7 @@ export class GenericContainerBuilder {
       nocache: !this.cache,
       registryconfig: registryConfig,
       labels,
+      target: this.target,
     });
 
     const container = new GenericContainer(imageName.string);

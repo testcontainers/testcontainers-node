@@ -14,6 +14,17 @@ const container = await GenericContainer
 const startedContainer = await container.start();
 ```
 
+If you wanted to stop the build at a specific stage, you can set the target like so:
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await GenericContainer
+  .fromDockerfile("/path/to/build-context")
+  .withTarget('my-stage')
+  .build();
+```
+
 Images are built by default with a randomly generated name and are deleted on exit. If you wish to keep the built images between test runs, you can provide a name and specify not to delete the image:
 
 ```javascript
