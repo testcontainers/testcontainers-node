@@ -1,7 +1,7 @@
 import { getContainerRuntimeConfig } from "./utils/config";
 import { DockerOptions } from "dockerode";
 import { URL } from "url";
-import { promises as fs } from "fs";
+import fs from "fs/promises";
 import path from "path";
 import { ContainerRuntimeClientStrategyResult } from "./types";
 import { ContainerRuntimeClientStrategy } from "./strategy";
