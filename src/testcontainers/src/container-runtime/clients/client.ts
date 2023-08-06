@@ -57,7 +57,7 @@ export async function getContainerRuntimeClient(): Promise<ContainerRuntimeClien
       log.debug(`Container runtime strategy "${strategy.getName()}" does not work`);
     }
   }
-  throw new Error();
+  throw new Error("Could not find a working container runtime strategy");
 }
 
 async function initStrategy(strategy: ContainerRuntimeClientStrategy): Promise<ContainerRuntimeClient | undefined> {
