@@ -10,7 +10,7 @@ export class UnixSocketStrategy implements ContainerRuntimeClientStrategy {
   }
 
   async getResult(): Promise<ContainerRuntimeClientStrategyResult | undefined> {
-    if (!((this.env.platform === "linux" || this.env.platform === "darwin") && existsSync("/var/run/docker.sock"))) {
+    if ((this.env.platform !== "linux" && this.env.platform !== "darwin") || !existsSync("/var/run/docker.sock")) {
       return;
     }
 
