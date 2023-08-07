@@ -55,7 +55,7 @@ export class DockerContainerClient implements ContainerClient {
         return undefined;
       } else {
         log.debug(`Fetched container by label "${labelName}=${labelValue}"`);
-        return await this.getById(containers[0].Id);
+        return this.getById(containers[0].Id);
       }
     } catch (err) {
       log.error(`Failed to fetch container by label "${labelName}=${labelValue}": ${err}`);

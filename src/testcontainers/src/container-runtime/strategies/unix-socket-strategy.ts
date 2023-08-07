@@ -3,12 +3,14 @@ import { ContainerRuntimeClientStrategy } from "./strategy";
 import { ContainerRuntimeClientStrategyResult } from "./types";
 
 export class UnixSocketStrategy implements ContainerRuntimeClientStrategy {
+  constructor(private readonly platform: NodeJS.Platform = process.platform) {}
+
   getName(): string {
     return "UnixSocketStrategy";
   }
 
   async getResult(): Promise<ContainerRuntimeClientStrategyResult | undefined> {
-    if (process.platform !== "linux" && process.platform !== "darwin" && !existsSync("/var/run/docker.sock")) {
+    if ((this.platform !== "linux" && this.platform !== "darwin") || !existsSync("/var/run/docker.sock")) {
       return;
     }
 
