@@ -63,6 +63,17 @@ const container = await GenericContainer
   .build();
 ```
 
+### With target
+
+Stop the build at a specific stage by specifying a target:
+
+```javascript
+const container = await GenericContainer
+  .fromDockerfile("/path/to/build-context")
+  .withTarget('my-stage')
+  .build();
+```
+
 ### With custom Dockerfile
 
 ```javascript
