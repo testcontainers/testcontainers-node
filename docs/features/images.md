@@ -68,8 +68,6 @@ const container = await GenericContainer
 Stop the build at a specific stage by specifying a target:
 
 ```javascript
-const { GenericContainer } = require("testcontainers");
-
 const container = await GenericContainer
   .fromDockerfile("/path/to/build-context")
   .withTarget('my-stage')
