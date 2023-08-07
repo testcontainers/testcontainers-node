@@ -443,8 +443,8 @@ describe("GenericContainer", () => {
     const firstStartedContainer = await firstContainer.start();
     const secondStartedContainer = await secondContainer.start();
 
-    expect(firstStartedContainer.getLabels().stage).toStrictEqual("first");
-    expect(secondStartedContainer.getLabels().stage).toStrictEqual("second");
+    expect(firstStartedContainer.getLabels().stage).toEqual("first");
+    expect(secondStartedContainer.getLabels().stage).toEqual("second");
 
     await firstStartedContainer.stop();
     await secondStartedContainer.stop();
