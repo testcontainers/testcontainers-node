@@ -25,6 +25,7 @@
     "access": "public"
   },
   "scripts": {
+    "prepack": "shx cp ../../../README.md . && shx cp ../../../LICENSE .",
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {

@@ -3,6 +3,10 @@ build/
 node_modules/
 coverage/
 
+# Package files are copied from the root on pack
+src/**/README.md
+src/**/LICENSE
+
 # IDEs and editors
 /.idea
 .project
