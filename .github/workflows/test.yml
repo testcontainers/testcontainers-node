@@ -52,7 +52,7 @@ jobs:
         runner: [ ubuntu-22.04 ]
         node-version: [ 16.x, 18.x, 20.x ]
         container-runtime: [ docker, docker-rootless, podman, colima, rancher-desktop ]
-    uses: .github/workflows/test-template.yml
+    uses: ./.github/workflows/test-template.yml
     with:
       runner: ${{ matrix.os-version }}
       node-version: ${{ matrix.node-version }}
@@ -78,7 +78,7 @@ jobs:
           - packages/modules/neo4j
           - packages/modules/postgresql
           - packages/modules/selenium
-    uses: .github/workflows/test-template.yml
+    uses: ./.github/workflows/test-template.yml
     with:
       runner: ${{ matrix.os-version }}
       node-version: ${{ matrix.node-version }}
