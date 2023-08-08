@@ -66,11 +66,10 @@ jobs:
       workspace: packages/testcontainers
 
   test-modules:
-    name: ${{ matrix.module }}
+    name: Module (${{ matrix.module }})
     needs: test-testcontainers
     strategy:
       matrix:
-        runner: [ ubuntu-22.04 ]
         node-version: [ 16.x, 18.x, 20.x ]
         container-runtime: [ docker, docker-rootless, podman ]
         include:
