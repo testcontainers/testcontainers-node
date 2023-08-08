@@ -4,8 +4,8 @@ node_modules/
 coverage/
 
 # Package files are copied from the root on pack
-src/**/README.md
-src/**/LICENSE
+packages/**/README.md
+packages/**/LICENSE
 
 # IDEs and editors
 /.idea

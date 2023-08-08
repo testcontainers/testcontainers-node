@@ -11,13 +11,13 @@ npm install @testcontainers/neo4j --save-dev
 ## Examples
 
 <!--codeinclude-->
-[Connect and create a node:](../../src/modules/neo4j/src/neo4j-container.test.ts) inside_block:createNode
+[Connect and create a node:](../../packages/modules/neo4j/src/neo4j-container.test.ts) inside_block:createNode
 <!--/codeinclude-->
 
 <!--codeinclude-->
-[Set password:](../../src/modules/neo4j/src/neo4j-container.test.ts) inside_block:setPassword
+[Set password:](../../packages/modules/neo4j/src/neo4j-container.test.ts) inside_block:setPassword
 <!--/codeinclude-->
 
 <!--codeinclude-->
-[Configure APOC:](../../src/modules/neo4j/src/neo4j-container.test.ts) inside_block:apoc
+[Configure APOC:](../../packages/modules/neo4j/src/neo4j-container.test.ts) inside_block:apoc
 <!--/codeinclude-->
