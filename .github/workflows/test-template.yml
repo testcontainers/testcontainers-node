@@ -45,7 +45,7 @@ jobs:
           echo "CI_PODMAN=true" >> $GITHUB_ENV
 
       - name: Colima constraints
-        if: ${{ inputs.container-runtime == 'colima' && !startsWith(inputs.runner, 'macos' }}
+        if: ${{ inputs.container-runtime == 'colima' && !startsWith(inputs.runner, 'macos') }}
         run: |
           run: echo "::error::Colima is only supported on macOS"
           exit 1
@@ -61,7 +61,7 @@ jobs:
           echo "NODE_OPTIONS=--dns-result-order=ipv4first" >> $GITHUB_ENV
 
       - name: Rancher Desktop constraints
-        if: ${{ inputs.container-runtime == 'rancher-desktop' && !startsWith(inputs.runner, 'macos' }}
+        if: ${{ inputs.container-runtime == 'rancher-desktop' && !startsWith(inputs.runner, 'macos') }}
         run: |
           run: echo "::error::Rancher Desktop is only supported on macOS"
           exit 1
