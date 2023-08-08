@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/mysql",
-  "version": "10.0.2",
+  "version": "10.1.0",
   "license": "MIT",
   "keywords": [
     "mysql",
@@ -32,6 +32,6 @@
     "mysql2": "^3.5.2"
   },
   "dependencies": {
-    "testcontainers": "^10.0.2"
+    "testcontainers": "^10.1.0"
   }
 }
