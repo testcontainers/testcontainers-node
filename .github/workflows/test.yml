@@ -63,7 +63,7 @@ jobs:
 
   test-modules:
     name: ${{ matrix.module }}
-    needs: smoke-test
+    needs: test-testcontainers
     strategy:
       matrix:
         runner: [ ubuntu-22.04 ]
