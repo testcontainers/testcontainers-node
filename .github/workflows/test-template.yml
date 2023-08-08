@@ -12,13 +12,7 @@ on:
         type: string
       container-runtime:
         required: true
-        type: choice
-        options:
-          - docker
-          - docker-rootless
-          - podman
-          - colima
-          - rancher-desktop
+        type: string
       workspace:
         required: true
         type: string
