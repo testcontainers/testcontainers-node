@@ -50,7 +50,7 @@ jobs:
     strategy:
       matrix:
         node-version: [ 16.x, 18.x, 20.x ]
-        container-runtime: [ docker, docker-rootless, podman, colima ]
+        container-runtime: [ docker, docker-rootless, podman ]
         include:
           - container-runtime: docker
             runner: ubuntu-22.04
@@ -58,8 +58,6 @@ jobs:
             runner: ubuntu-22.04
           - container-runtime: podman
             runner: ubuntu-22.04
-          - container-runtime: colima
-            runner: macos-13
     uses: ./.github/workflows/test-template.yml
     with:
       runner: ${{ matrix.runner }}
@@ -74,7 +72,7 @@ jobs:
       matrix:
         runner: [ ubuntu-22.04 ]
         node-version: [ 16.x, 18.x, 20.x ]
-        container-runtime: [ docker, docker-rootless, podman, colima ]
+        container-runtime: [ docker, docker-rootless, podman ]
         include:
           - container-runtime: docker
             runner: ubuntu-22.04
@@ -82,22 +80,20 @@ jobs:
             runner: ubuntu-22.04
           - container-runtime: podman
             runner: ubuntu-22.04
-          - container-runtime: colima
-            runner: macos-13
         module:
-          - packages/modules/arangodb
-          - packages/modules/elasticsearch
-          - packages/modules/hivemq
-          - packages/modules/kafka
-          - packages/modules/mongodb
-          - packages/modules/mysql
-          - packages/modules/nats
-          - packages/modules/neo4j
-          - packages/modules/postgresql
-          - packages/modules/selenium
+          - arangodb
+          - elasticsearch
+          - hivemq
+          - kafka
+          - mongodb
+          - mysql
+          - nats
+          - neo4j
+          - postgresql
+          - selenium
     uses: ./.github/workflows/test-template.yml
     with:
       runner: ${{ matrix.runner }}
       node-version: ${{ matrix.node-version }}
       container-runtime: ${{ matrix.container-runtime }}
-      workspace: ${{ matrix.module }}
+      workspace: packages/modules/${{ matrix.module }}
