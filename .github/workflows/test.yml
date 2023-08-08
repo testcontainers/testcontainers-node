@@ -21,10 +21,10 @@ concurrency:
 jobs:
   smoke-test:
     name: Smoke test
-    runs-on: ${{ matrix.os-version }}
+    runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
-        os-version: [ ubuntu-22.04 ]
+        runner: [ ubuntu-22.04 ]
         node-version: [ 16.x, 18.x, 20.x ]
     steps:
       - name: Code checkout
@@ -54,7 +54,7 @@ jobs:
         container-runtime: [ docker, docker-rootless, podman, colima, rancher-desktop ]
     uses: ./.github/workflows/test-template.yml
     with:
-      runner: ${{ matrix.os-version }}
+      runner: ${{ matrix.runner }}
       node-version: ${{ matrix.node-version }}
       container-runtime: ${{ matrix.container-runtime }}
       workspace: packages/testcontainers
@@ -80,7 +80,7 @@ jobs:
           - packages/modules/selenium
     uses: ./.github/workflows/test-template.yml
     with:
-      runner: ${{ matrix.os-version }}
+      runner: ${{ matrix.runner }}
       node-version: ${{ matrix.node-version }}
       container-runtime: ${{ matrix.container-runtime }}
       workspace: ${{ matrix.module }}
