@@ -19,7 +19,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-
   smoke-test:
     name: Smoke test
     runs-on: ${{ matrix.os-version }}
@@ -59,7 +58,6 @@ jobs:
       node-version: ${{ matrix.node-version }}
       container-runtime: ${{ matrix.container-runtime }}
       workspace: packages/testcontainers
-#      sonarcloud-scan: false
 
   test-modules:
     name: ${{ matrix.module }}
@@ -86,4 +84,3 @@ jobs:
       node-version: ${{ matrix.node-version }}
       container-runtime: ${{ matrix.container-runtime }}
       workspace: ${{ matrix.module }}
-#      sonarcloud-scan: false
