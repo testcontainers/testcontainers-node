@@ -25,7 +25,7 @@ jobs:
       - name: Update versions
         run: |
           npm version ${{ github.event.release.tag_name }} -ws --allow-same-version
-          for module in src/modules/*; do npm install testcontainers@${{ github.event.release.tag_name }} --save -w $module; done
+          for module in packages/modules/*; do npm install testcontainers@${{ github.event.release.tag_name }} --save -w $module; done
           sed -i -E "s/(sonar.projectVersion)=.+/\1=${{ github.event.release.tag_name }}/" sonar-project.properties
 
       - name: Build packages

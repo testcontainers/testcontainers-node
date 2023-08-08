@@ -11,9 +11,9 @@ npm install @testcontainers/elasticsearch --save-dev
 ## Examples
 
 <!--codeinclude-->
-[Create an index:](../../src/modules/elasticsearch/src/elasticsearch-container.test.ts) inside_block:createIndex
+[Create an index:](../../packages/modules/elasticsearch/src/elasticsearch-container.test.ts) inside_block:createIndex
 <!--/codeinclude-->
 
 <!--codeinclude-->
-[Index a document:](../../src/modules/elasticsearch/src/elasticsearch-container.test.ts) inside_block:indexDocument
+[Index a document:](../../packages/modules/elasticsearch/src/elasticsearch-container.test.ts) inside_block:indexDocument
 <!--/codeinclude-->
