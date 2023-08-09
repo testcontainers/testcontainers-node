@@ -1,4 +1,4 @@
-# Elastic Search Module
+# Elasticsearch Module
 
 [Elasticsearch](https://www.elastic.co/elasticsearch/) is a search engine based on the Lucene library. It provides a distributed, multitenant-capable full-text search engine with an HTTP web interface and schema-free JSON documents.
 
