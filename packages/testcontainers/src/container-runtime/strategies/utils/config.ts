@@ -58,6 +58,8 @@ async function loadFromFile() {
     if (dockerCertPath !== null) {
       dockerClientConfig.dockerCertPath = dockerCertPath;
     }
+
+    log.debug(`Loaded ".testcontainers.properties" file`);
   }
 
   return dockerClientConfig;
@@ -89,6 +91,6 @@ function logDockerClientConfig(config: ContainerRuntimeConfig) {
     .map(([key, value]) => `${key}: "${value}"`);
 
   if (configurations.length > 0) {
-    log.debug(`Loaded ".testcontainers.properties" file, ${configurations.join(", ")}`);
+    log.debug(`Found custom configuration: ${configurations.join(", ")}`);
   }
 }
