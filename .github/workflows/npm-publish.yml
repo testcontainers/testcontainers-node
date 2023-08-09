@@ -30,7 +30,7 @@ jobs:
 
       - name: Build packages
         run: |
-          npm ci --no-optional
+          npm ci --omit=optional
           npm run build -ws
 
       - name: Git commit and push
