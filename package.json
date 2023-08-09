@@ -9,7 +9,6 @@
     "pre-commit": "lint-staged",
     "docs:serve": "docker-compose up",
     "test": "cross-env DEBUG=testcontainers* jest",
-    "test:ci": "npm run test -- --runInBand --coverage",
     "format": "prettier --write package.json \"packages/**/*.ts\"",
     "lint": "eslint --fix package.json \"packages/**/*.ts\"",
     "lint:ci": "eslint package.json \"packages/**/*.ts\" --max-warnings=0",

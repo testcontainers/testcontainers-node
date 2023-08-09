@@ -139,4 +139,4 @@ jobs:
         run: npm ci --omit=optional
 
       - name: Run tests
-        run: npm run test:ci -- ${{ inputs.workspace }}
+        run: npm run test -- ${{ inputs.workspace }}
