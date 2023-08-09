@@ -2,7 +2,7 @@
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=116414510&machine=standardLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json&location=EastUs)
 
-[![Test](https://github.com/testcontainers/testcontainers-node/actions/workflows/test-main.yml/badge.svg)](https://github.com/testcontainers/testcontainers-node/actions/workflows/test-main.yml)
+[![Test](https://github.com/testcontainers/testcontainers-node/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/testcontainers/testcontainers-node/actions/workflows/test.yml)
 [![npm version](https://badge.fury.io/js/testcontainers.svg)](https://www.npmjs.com/package/testcontainers)
 [![npm version](https://img.shields.io/npm/dm/testcontainers.svg)](https://www.npmjs.com/package/testcontainers)
 
