@@ -1,17 +1,15 @@
-# Testcontainers
-
-<!-- allow aspect ratio computation to reduce layout shift. CSS enforces max-width: 100% -->
-<img src="site/logo.png" alt="Testcontainers logo" width="1024" height="512"/>
+# Testcontainers for Node.js
 
 <p style="text-align: center"><strong>Not using NodeJS? Here are other supported languages!</strong></p>
 <div class="card-grid">
-    <a href="https://java.testcontainers.org/" class="card-grid-item"><img src="site/language-logos/java.svg"/>Java</a>
-    <a href="https://golang.testcontainers.org/" class="card-grid-item"><img src="site/language-logos/go.svg"/>Go</a>
-    <a href="https://dotnet.testcontainers.org/" class="card-grid-item"><img src="site/language-logos/dotnet.svg"/>.NET</a>
-    <a class="card-grid-item"><img src="site/language-logos/nodejs.svg"/>Node.js</a>
-    <a href="https://testcontainers-python.readthedocs.io/en/latest/" class="card-grid-item"><img src="site/language-logos/python.svg"/>Python</a>
-    <a href="https://docs.rs/testcontainers/latest/testcontainers/" class="card-grid-item"><img src="site/language-logos/rust.svg"/>Rust</a>
-    <a class="card-grid-item" href="https://github.com/testcontainers/testcontainers-hs/"><img src="site/language-logos/haskell.svg"/>Haskell</a>
+    <a href="https://java.testcontainers.org/" class="card-grid-item"><img src="/site/language-logos/java.svg"/>Java</a>
+    <a href="https://golang.testcontainers.org/" class="card-grid-item"><img src="/site/language-logos/go.svg"/>Go</a>
+    <a href="https://dotnet.testcontainers.org/" class="card-grid-item"><img src="/site/language-logos/dotnet.svg"/>.NET</a>
+    <a class="card-grid-item"><img src="/site/language-logos/nodejs.svg"/>Node.js</a>
+    <a href="https://testcontainers-python.readthedocs.io/en/latest/" class="card-grid-item"><img src="/site/language-logos/python.svg"/>Python</a>
+    <a href="https://docs.rs/testcontainers/latest/testcontainers/" class="card-grid-item"><img src="/site/language-logos/rust.svg"/>Rust</a>
+    <a class="card-grid-item" href="https://github.com/testcontainers/testcontainers-hs/"><img src="/site/language-logos/haskell.svg"/>Haskell</a>
+    <a href="https://github.com/testcontainers/testcontainers-ruby/" class="card-grid-item" ><img src="/site/language-logos/ruby.svg"/>Ruby</a>
 </div>
 
 ## About
