@@ -41,7 +41,7 @@ nav:
       - Wait strategies: features/wait-strategies.md
   - Modules:
       - ArangoDB: modules/arangodb.md
-      - Elastic Search: modules/elasticsearch.md
+      - Elasticsearch: modules/elasticsearch.md
       - HiveMQ: modules/hivemq.md
       - Kafka: modules/kafka.md
       - MongoDB: modules/mongodb.md
