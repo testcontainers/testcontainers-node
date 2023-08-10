@@ -11,7 +11,6 @@ import { ExecResult } from "./types";
 
 export interface ContainerClient {
   dockerode: Dockerode;
-  ping(): Promise<string>;
   getById(id: string): Container;
   fetchByLabel(labelName: string, labelValue: string): Promise<Container | undefined>;
   fetchArchive(container: Container, path: string): Promise<NodeJS.ReadableStream>;
