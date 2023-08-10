@@ -24,5 +24,5 @@ Please make sure to check out the hivemq-docs for the [Community Edition](https:
 ## Examples
 
 <!--codeinclude-->
-[Connect with a mqtt.js client to HiveMQ](../../src/modules/hivemq/src/hivemq-container.test.ts) inside_block:connect
+[Connect with a mqtt.js client to HiveMQ](../../packages/modules/hivemq/src/hivemq-container.test.ts) inside_block:connect
 <!--/codeinclude-->

@@ -11,6 +11,6 @@ npm install @testcontainers/arangodb --save-dev
 ## Example
 
 <!--codeinclude-->
-[](../../src/modules/arangodb/src/arangodb-container.test.ts) inside_block:connect
+[](../../packages/modules/arangodb/src/arangodb-container.test.ts) inside_block:connect
 <!--/codeinclude-->
 

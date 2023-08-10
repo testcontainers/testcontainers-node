@@ -1,0 +1,38 @@
+{
+  "name": "@testcontainers/selenium",
+  "version": "10.1.0",
+  "license": "MIT",
+  "keywords": [
+    "selenium",
+    "testing",
+    "docker",
+    "testcontainers"
+  ],
+  "description": "Selenium module for Testcontainers",
+  "homepage": "https://github.com/testcontainers/testcontainers-node#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/testcontainers/testcontainers-node"
+  },
+  "bugs": {
+    "url": "https://github.com/testcontainers/testcontainers-node/issues"
+  },
+  "main": "build/index.js",
+  "files": [
+    "build"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "prepack": "shx cp ../../../README.md . && shx cp ../../../LICENSE .",
+    "build": "tsc --project tsconfig.build.json"
+  },
+  "devDependencies": {
+    "@types/selenium-webdriver": "^4.1.15",
+    "selenium-webdriver": "^4.10.0"
+  },
+  "dependencies": {
+    "testcontainers": "^10.1.0"
+  }
+}
