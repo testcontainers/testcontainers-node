@@ -70,7 +70,7 @@ async function initStrategy(strategy: ContainerRuntimeClientStrategy): Promise<C
 
   const dockerodeOptions: DockerOptions = {
     ...result.dockerOptions,
-    headers: { ...result.dockerOptions.headers, "X-User-Agent": `testcontainers-node/${LIB_VERSION}` },
+    headers: { ...result.dockerOptions.headers, "User-Agent": `tc-node/${LIB_VERSION}` },
   };
   const dockerode = new Dockerode(dockerodeOptions);
 
