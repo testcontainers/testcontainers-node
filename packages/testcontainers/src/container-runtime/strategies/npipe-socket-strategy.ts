@@ -2,14 +2,14 @@ import { ContainerRuntimeClientStrategy } from "./strategy";
 import { ContainerRuntimeClientStrategyResult } from "./types";
 
 export class NpipeSocketStrategy implements ContainerRuntimeClientStrategy {
-  constructor(private readonly env: NodeJS.ProcessEnv = process.env) {}
+  constructor(private readonly platform: NodeJS.Platform = process.platform) {}
 
   getName(): string {
     return "NpipeSocketStrategy";
   }
 
   async getResult(): Promise<ContainerRuntimeClientStrategyResult | undefined> {
-    if (this.env.platform !== "win32") {
+    if (this.platform !== "win32") {
       return;
     }
 
