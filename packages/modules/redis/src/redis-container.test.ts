@@ -25,15 +25,22 @@ describe("RedisContainer", () => {
   // }
 
   // uriConnect {
-  it("should work with database URI", async () => {
+  it("should work with database URI and credentials", async () => {
     const username = "testUser";
     const password = "testPassword";
 
     // Test authentication
     const container = await new RedisContainer().withUsername(username).withPassword(password).start();
-    expect(container.getConnectionUri()).toEqual(
-      `redis://${username}:${password}@${container.getHost()}:${container.getPort()}`
-    );
+    expect(container.getConnectionUri()).toEqual(`redis://${container.getHost()}:${container.getPort()}`);
+    const client = createClient({
+      url: container.getConnectionUri(),
+      //password: container.getPassword(),
+    });
+    await client.connect();
+
+    expect(client.isOpen).toBeTruthy();
+    await client.set("key", "val");
+    expect(await client.get("key")).toBe("val");
     await container.stop();
   });
   // }

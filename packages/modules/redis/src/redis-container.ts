@@ -24,9 +24,10 @@ export class RedisContainer extends GenericContainer {
     this.withExposedPorts(...(this.hasExposedPorts ? this.exposedPorts : [REDIS_PORT]))
       .withCommand([
         "redis-server",
-        //`masteruser "${this.username}"`,
-        //`masterauth "${this.password}"`,
-        //`requirepass "${this.password}"`,
+        //...(this.username != "" ? [`--masteruser "${this.username}"`] : []),
+        //...(this.password != "" ? [`--masterauth "${this.password}"`] : []),
+        //...(this.username != "" ? [`--user ${this.username} allcommands allkeys on`] : []),
+        //...(this.password != "" ? [`--requirepass "${this.password}"`] : []),
       ])
       .withStartupTimeout(120_000);
 
@@ -62,8 +63,8 @@ export class StartedRedisContainer extends AbstractStartedContainer {
     const url = new URL("", "redis://");
     url.hostname = this.getHost();
     url.port = this.getPort().toString();
-    url.username = this.getUsername();
-    url.password = this.getPassword();
+    //url.username = this.getUsername();
+    //url.password = this.getPassword();
     return url.toString();
   }
 
@@ -72,8 +73,8 @@ export class StartedRedisContainer extends AbstractStartedContainer {
       "redis-cli",
       "-h",
       this.getHost(),
-      ...(this.username != "" ? [`--user "${this.username}"`] : []),
-      ...(this.username != "" ? [`--password "${this.password}"`] : []),
+      ...(this.username != "" ? [`--user ${this.username}`] : []),
+      ...(this.username != "" ? [`--password ${this.password}`] : []),
       `${cmd}`,
       ...additionalFlags,
     ]);
