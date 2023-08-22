@@ -9,7 +9,7 @@ import { UnixSocketStrategy } from "../strategies/unix-socket-strategy";
 import { RootlessUnixSocketStrategy } from "../strategies/rootless-unix-socket-strategy";
 import { NpipeSocketStrategy } from "../strategies/npipe-socket-strategy";
 import { ComposeInfo, ContainerRuntimeInfo, Info, NodeInfo } from "./types";
-import Dockerode from "dockerode";
+import Dockerode, { DockerOptions } from "dockerode";
 import { getRemoteContainerRuntimeSocketPath } from "../utils/remote-container-runtime-socket-path";
 import { resolveHost } from "../utils/resolve-host";
 import { PodmanContainerClient } from "./container/podman-container-client";
@@ -18,6 +18,7 @@ import { DockerImageClient } from "./image/docker-image-client";
 import { DockerNetworkClient } from "./network/docker-network-client";
 import { lookupHostIps } from "../utils/lookup-host-ips";
 import { isDefined, isEmptyString, log } from "../../common";
+import { LIB_VERSION } from "../../version";
 
 export class ContainerRuntimeClient {
   constructor(
@@ -67,7 +68,11 @@ async function initStrategy(strategy: ContainerRuntimeClientStrategy): Promise<C
     return undefined;
   }
 
-  const dockerode = new Dockerode(result.dockerOptions);
+  const dockerodeOptions: DockerOptions = {
+    ...result.dockerOptions,
+    headers: { ...result.dockerOptions.headers, "User-Agent": `tc-node/${LIB_VERSION}` },
+  };
+  const dockerode = new Dockerode(dockerodeOptions);
 
   const dockerodeInfo = await dockerode.info();
   const indexServerAddress =
