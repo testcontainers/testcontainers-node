@@ -40,9 +40,9 @@ jobs:
       - name: Remove dev dependencies
         run: npm prune --omit=dev
       - name: Run CommonJS module smoke test
-        run: node packages/testcontainers/smoke-tests/commonjs.js
+        run: DEBUG=testcontainers* node packages/testcontainers/smoke-tests/commonjs.js
       - name: Run ES module smoke test
-        run: node packages/testcontainers/smoke-tests/esm.mjs
+        run: DEBUG=testcontainers* node packages/testcontainers/smoke-tests/esm.mjs
 
   smoke-test-tcc:
     name: Smoke test TCC
@@ -69,7 +69,7 @@ jobs:
       - name: Remove dev dependencies
         run: npm prune --omit=dev
       - name: Run TCC smoke test
-        run: node packages/testcontainers/smoke-tests/tcc-turbo-mode.mjs
+        run: DEBUG=testcontainers* node packages/testcontainers/smoke-tests/tcc-turbo-mode.mjs
 
   test-testcontainers:
     name: Testcontainers
