@@ -81,7 +81,7 @@ jobs:
     name: Testcontainers
     needs:
       - smoke-test
-      - smoke-test-tcc
+      - smoke-test-tcc-turbo-mode
     strategy:
       matrix:
         node-version: [ 16.x, 18.x, 20.x ]
