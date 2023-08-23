@@ -32,7 +32,7 @@ await containerRuntimeClient.container.start(container);
 ### Starting a Docker Compose environment
 
 ```js
-const environment = await containerRuntimeClient.compose.up({ ...})
+const environment = await containerRuntimeClient.compose.up({ ... })
 ```
 
 ### Starting a network
