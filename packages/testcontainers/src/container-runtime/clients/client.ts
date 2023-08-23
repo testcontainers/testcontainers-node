@@ -68,12 +68,14 @@ async function initStrategy(strategy: ContainerRuntimeClientStrategy): Promise<C
     return undefined;
   }
 
+  const xTcSid = new RandomUuid().nextUuid();
+  log.info(`Setting x-tc-sid header to "${xTcSid}"`);
   const dockerodeOptions: DockerOptions = {
     ...result.dockerOptions,
     headers: {
       ...result.dockerOptions.headers,
       "User-Agent": `tc-node/${LIB_VERSION}`,
-      "x-tc-sid": new RandomUuid().nextUuid(),
+      "x-tc-sid": xTcSid,
     },
   };
   const dockerode = new Dockerode(dockerodeOptions);
