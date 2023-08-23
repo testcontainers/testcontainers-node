@@ -74,6 +74,7 @@ jobs:
           node packages/testcontainers/smoke-tests/tcc-turbo-mode.mjs &
           node packages/testcontainers/smoke-tests/tcc-turbo-mode.mjs &
           node packages/testcontainers/smoke-tests/tcc-turbo-mode.mjs &
+          wait
         env:
           DEBUG: testcontainers*
 
