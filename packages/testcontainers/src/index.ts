@@ -8,7 +8,7 @@ export {
 export { GenericContainer } from "./generic-container/generic-container";
 export { GenericContainerBuilder, BuildOptions } from "./generic-container/generic-container-builder";
 export { TestContainers } from "./test-containers";
-export { ContainerRuntimeClient, getContainerRuntimeClient } from "./container-runtime";
+export { ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "./container-runtime";
 export { Uuid, RandomUuid, log } from "./common";
 
 export { DockerComposeEnvironment } from "./docker-compose-environment/docker-compose-environment";
