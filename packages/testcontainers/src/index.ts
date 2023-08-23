@@ -8,6 +8,8 @@ export {
 export { GenericContainer } from "./generic-container/generic-container";
 export { GenericContainerBuilder, BuildOptions } from "./generic-container/generic-container-builder";
 export { TestContainers } from "./test-containers";
+export { ContainerRuntimeClient, getContainerRuntimeClient } from "./container-runtime";
+export { Uuid, RandomUuid, log } from "./common";
 
 export { DockerComposeEnvironment } from "./docker-compose-environment/docker-compose-environment";
 export { StartedDockerComposeEnvironment } from "./docker-compose-environment/started-docker-compose-environment";
@@ -23,5 +25,3 @@ export { InspectResult, Content, ExecResult } from "./types";
 
 export { AbstractStartedContainer } from "./generic-container/abstract-started-container";
 export { AbstractStoppedContainer } from "./generic-container/abstract-stopped-container";
-
-export { Uuid, RandomUuid, log } from "./common";
