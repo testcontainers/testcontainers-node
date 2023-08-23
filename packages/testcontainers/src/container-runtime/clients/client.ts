@@ -17,7 +17,7 @@ import { DockerContainerClient } from "./container/docker-container-client";
 import { DockerImageClient } from "./image/docker-image-client";
 import { DockerNetworkClient } from "./network/docker-network-client";
 import { lookupHostIps } from "../utils/lookup-host-ips";
-import { isDefined, isEmptyString, log } from "../../common";
+import { isDefined, isEmptyString, log, RandomUuid } from "../../common";
 import { LIB_VERSION } from "../../version";
 
 export class ContainerRuntimeClient {
@@ -70,7 +70,11 @@ async function initStrategy(strategy: ContainerRuntimeClientStrategy): Promise<C
 
   const dockerodeOptions: DockerOptions = {
     ...result.dockerOptions,
-    headers: { ...result.dockerOptions.headers, "User-Agent": `tc-node/${LIB_VERSION}` },
+    headers: {
+      ...result.dockerOptions.headers,
+      "User-Agent": `tc-node/${LIB_VERSION}`,
+      "x-tc-sid": new RandomUuid().nextUuid(),
+    },
   };
   const dockerode = new Dockerode(dockerodeOptions);
 
