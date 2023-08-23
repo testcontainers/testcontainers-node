@@ -44,8 +44,8 @@ jobs:
       - name: Run ES module smoke test
         run: DEBUG=testcontainers* node packages/testcontainers/smoke-tests/esm.mjs
 
-  smoke-test-tcc:
-    name: Smoke test TCC
+  smoke-test-tcc-turbo-mode:
+    name: Smoke test TCC turbo mode
     runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
@@ -68,8 +68,14 @@ jobs:
         run: npm run build -ws
       - name: Remove dev dependencies
         run: npm prune --omit=dev
-      - name: Run TCC smoke test
-        run: DEBUG=testcontainers* node packages/testcontainers/smoke-tests/tcc-turbo-mode.mjs
+      - name: Run TCC turbo mode smoke test
+        run: |
+          node packages/testcontainers/smoke-tests/tcc-turbo-mode.mjs &
+          node packages/testcontainers/smoke-tests/tcc-turbo-mode.mjs &
+          node packages/testcontainers/smoke-tests/tcc-turbo-mode.mjs &
+          node packages/testcontainers/smoke-tests/tcc-turbo-mode.mjs &
+        env:
+          DEBUG: testcontainers*
 
   test-testcontainers:
     name: Testcontainers
