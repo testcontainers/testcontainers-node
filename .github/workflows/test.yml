@@ -70,11 +70,11 @@ jobs:
         run: npm prune --omit=dev
       - name: Run TCC turbo mode smoke test
         run: |
-          node packages/testcontainers/smoke-tests/tcc-turbo-mode.mjs &
-          node packages/testcontainers/smoke-tests/tcc-turbo-mode.mjs &
-          node packages/testcontainers/smoke-tests/tcc-turbo-mode.mjs &
-          node packages/testcontainers/smoke-tests/tcc-turbo-mode.mjs &
-          wait
+          parallel --halt now,fail=1 ::: \
+            "node packages/testcontainers/smoke-tests/tcc-turbo-mode.mjs" \
+            "node packages/testcontainers/smoke-tests/tcc-turbo-mode.mjs" \
+            "node packages/testcontainers/smoke-tests/tcc-turbo-mode.mjs" \
+            "node packages/testcontainers/smoke-tests/tcc-turbo-mode.mjs"
         env:
           DEBUG: testcontainers*
 
