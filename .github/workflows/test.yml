@@ -70,7 +70,7 @@ jobs:
         run: npm prune --omit=dev
       - name: Run TCC turbo mode smoke test
         run: |
-          seq 4 | parallel -k --lb --halt now,fail=1 \
+          seq 4 | parallel --lb --halt now,fail=1 \
             "DEBUG=testcontainers* node packages/testcontainers/smoke-tests/tcc-turbo-mode.mjs"
 
   test-testcontainers:
