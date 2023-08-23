@@ -1,4 +1,4 @@
-import { GenericContainer } from "./build/index.js";
+import { GenericContainer } from "../build/index.js";
 
 const MAX_CONCURRENCY = 4;
 
