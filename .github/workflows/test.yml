@@ -40,13 +40,42 @@ jobs:
       - name: Remove dev dependencies
         run: npm prune --omit=dev
       - name: Run CommonJS module smoke test
-        run: node packages/testcontainers/smoke-test.js
+        run: node packages/testcontainers/smoke-tests/commonjs.js
       - name: Run ES module smoke test
-        run: node packages/testcontainers/smoke-test.mjs
+        run: node packages/testcontainers/smoke-tests/esm.mjs
+
+  smoke-test-tcc:
+    name: Smoke test TCC
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        runner: [ ubuntu-22.04 ]
+    steps:
+      - name: Code checkout
+        uses: actions/checkout@v3
+      - name: Setup Testcontainers Cloud Client
+        uses: atomicjar/testcontainers-cloud-setup-action@main
+        with:
+          token: ${{ secrets.TC_CLOUD_TOKEN }}
+          args: --max-concurrency=4
+      - name: Install NodeJS 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: Install dependencies
+        run: npm ci --omit=optional
+      - name: Build workspaces
+        run: npm run build -ws
+      - name: Remove dev dependencies
+        run: npm prune --omit=dev
+      - name: Run TCC smoke test
+        run: node packages/testcontainers/smoke-tests/tcc-turbo-mode.mjs
 
   test-testcontainers:
     name: Testcontainers
-    needs: smoke-test
+    needs:
+      - smoke-test
+      - smoke-test-tcc
     strategy:
       matrix:
         node-version: [ 16.x, 18.x, 20.x ]
