@@ -81,6 +81,7 @@ jobs:
             runner: ubuntu-22.04
         module:
           - arangodb
+          - couchbase
           - elasticsearch
           - hivemq
           - kafka
