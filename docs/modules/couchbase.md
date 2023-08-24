@@ -11,7 +11,10 @@ npm install @testcontainers/couchbase --save-dev
 
 ## Examples
 
+<!--codeinclude-->
+[upsertAndGet:](../../packages/modules/couchbase/src/couchbase-container.test.ts) inside_block:upsertAndGet
+<!--/codeinclude-->
 
 <!--codeinclude-->
-[Connect and execute query:](../../packages/modules/couchbase/src/couchbase-container.test.ts) inside_block:connect
+[Connect and execute query:](../../packages/modules/couchbase/src/couchbase-container.test.ts) inside_block:connectAndQuery
 <!--/codeinclude-->

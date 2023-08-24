@@ -7,6 +7,7 @@ import { CouchbaseService } from "./couchbase-service";
 describe("CouchbaseContainer", () => {
   jest.setTimeout(180_000);
 
+  // upsertAndGet {
   const upsertAndGet = async (
     bucket: Bucket,
     key: string,
@@ -17,6 +18,7 @@ describe("CouchbaseContainer", () => {
 
     return coll.get(key);
   };
+  // }
 
   const flushBucketAndCheckExists = async (
     cluster: Cluster,
@@ -25,10 +27,8 @@ describe("CouchbaseContainer", () => {
   ): Promise<couchbase.ExistsResult> => {
     const coll = bucket.defaultCollection();
 
-    await coll.upsert("testdoc", { foo: "bar" });
-
     await cluster.buckets().flushBucket(bucket.name);
-    return coll.exists("foo");
+    return coll.exists(key);
   };
 
   describe("Enterprise Image", () => {
@@ -47,6 +47,7 @@ describe("CouchbaseContainer", () => {
       }
     });
 
+    // connectAndQuery {
     it("should connect and query using enterprise image", async () => {
       const bucketDefinition = new BucketDefinition("mybucket");
       const container = await new CouchbaseContainer(COUCHBASE_IMAGE_ENTERPRISE).withBucket(bucketDefinition);
@@ -63,6 +64,7 @@ describe("CouchbaseContainer", () => {
 
       expect(result.content).toEqual({ foo: "bar" });
     });
+    // }
 
     it("should flush bucket if flushEnabled and check any document exists", async () => {
       const bucketDefinition = new BucketDefinition("mybucket").withFlushEnabled(true);
