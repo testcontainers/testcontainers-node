@@ -89,8 +89,6 @@ export class MSSQLServerContainer extends GenericContainer {
 }
 
 export class StartedMSSQLServerContainer extends AbstractStartedContainer {
-  private readonly port: number;
-
   constructor(
     startedTestContainer: StartedTestContainer,
     private readonly database: string,
@@ -98,11 +96,10 @@ export class StartedMSSQLServerContainer extends AbstractStartedContainer {
     private readonly password: string
   ) {
     super(startedTestContainer);
-    this.port = startedTestContainer.getMappedPort(MSSQL_PORT);
   }
 
   public getPort(): number {
-    return this.port;
+    return this.getMappedPort(MSSQL_PORT);
   }
 
   public getDatabase(): string {
