@@ -16,19 +16,13 @@ Due to licencing restrictions you are required to accept an EULA for this contai
     Please see the [`microsoft-mssql-server` image documentation](https://hub.docker.com/_/microsoft-mssql-server#environment-variables) for a link to the EULA document.
 
 <!--codeinclude-->
-
 [Connect and execute query:](../../packages/modules/mssqlserver/src/mssqlserver-container.test.ts) inside_block:connect
-
 <!--/codeinclude-->
 
 <!--codeinclude-->
-
 [Connect and execute query using URI:](../../packages/modules/mssqlserver/src/mssqlserver-container.test.ts) inside_block:uriConnect
-
 <!--/codeinclude-->
 
 <!--codeinclude-->
-
 [Set password:](../../packages/modules/mssqlserver/src/mssqlserver-container.test.ts) inside_block:setPassword
-
 <!--/codeinclude-->
