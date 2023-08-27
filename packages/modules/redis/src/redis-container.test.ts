@@ -34,9 +34,9 @@ describe("RedisContainer", () => {
   });
 
   // persistentData {
-  it("should reconnect with volume and persist data", async () => {
-    const volume = fs.mkdtempSync(path.join(os.tmpdir(), "redis-"));
-    const container = await new RedisContainer().withPassword("test").withVolume(volume).start();
+  it("should reconnect with volume and persistence data", async () => {
+    const sourcePath = fs.mkdtempSync(path.join(os.tmpdir(), "redis-"));
+    const container = await new RedisContainer().withPassword("test").withPersistence(sourcePath).start();
     let client = await connectTo(container);
 
     await client.set("key", "val");
@@ -47,7 +47,7 @@ describe("RedisContainer", () => {
 
     await client.disconnect();
     await container.stop();
-    fs.rmSync(volume, { force: true, recursive: true });
+    fs.rmSync(sourcePath, { force: true, recursive: true });
   });
   // }
 

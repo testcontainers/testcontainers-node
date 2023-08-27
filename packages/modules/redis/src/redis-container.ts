@@ -4,7 +4,7 @@ const REDIS_PORT = 6379;
 
 export class RedisContainer extends GenericContainer {
   private password = "";
-  private volume = "";
+  private persistenceVolume = "";
 
   constructor(image = "redis:7.2") {
     super(image);
@@ -15,8 +15,8 @@ export class RedisContainer extends GenericContainer {
     return this;
   }
 
-  public withVolume(volume: string): this {
-    this.volume = volume;
+  public withPersistence(sourcePath: string): this {
+    this.persistenceVolume = sourcePath;
     return this;
   }
 
@@ -25,10 +25,11 @@ export class RedisContainer extends GenericContainer {
       .withCommand([
         "redis-server",
         ...(this.password != "" ? [`--requirepass "${this.password}"`] : []),
-        ...(this.volume != "" ? ["--save 1 1 ", "--appendonly yes"] : []),
+        ...(this.persistenceVolume != "" ? ["--save 1 1 ", "--appendonly yes"] : []),
       ])
       .withStartupTimeout(120_000);
-    if (this.volume != "") this.withBindMounts([{ mode: "rw", source: this.volume, target: "/data" }]);
+    if (this.persistenceVolume != "")
+      this.withBindMounts([{ mode: "rw", source: this.persistenceVolume, target: "/data" }]);
 
     return new StartedRedisContainer(await super.start(), this.password);
   }
