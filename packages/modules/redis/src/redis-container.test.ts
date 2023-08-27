@@ -52,7 +52,7 @@ describe("RedisContainer", () => {
   // }
 
   // startWithCredentials {
-  it("should work with URI and credentials", async () => {
+  it("should start with credentials and login", async () => {
     const password = "testPassword";
 
     // Test authentication
@@ -70,7 +70,7 @@ describe("RedisContainer", () => {
   // }
 
   // executeCommand {
-  it("should execute a query and return the result", async () => {
+  it("should execute container cmd and return the result", async () => {
     const container = await new RedisContainer().start();
 
     const queryResult = await container.executeCliCmd("info", ["clients"]);
