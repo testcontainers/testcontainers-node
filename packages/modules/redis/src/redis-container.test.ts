@@ -57,7 +57,7 @@ describe("RedisContainer", () => {
 
     // Test authentication
     const container = await new RedisContainer().withPassword(password).start();
-    expect(container.getConnectionUri()).toEqual(`redis://:${password}@${container.getHost()}:${container.getPort()}`);
+    expect(container.getConnectionUrl()).toEqual(`redis://:${password}@${container.getHost()}:${container.getPort()}`);
 
     const client = await connectTo(container);
 
@@ -82,7 +82,7 @@ describe("RedisContainer", () => {
   // simpleConnect {
   async function connectTo(container: StartedRedisContainer) {
     const client = createClient({
-      url: container.getConnectionUri(),
+      url: container.getConnectionUrl(),
     });
     await client.connect();
     expect(client.isOpen).toBeTruthy();

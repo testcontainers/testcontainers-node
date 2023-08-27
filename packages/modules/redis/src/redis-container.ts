@@ -48,7 +48,7 @@ export class StartedRedisContainer extends AbstractStartedContainer {
     return this.password;
   }
 
-  public getConnectionUri(): string {
+  public getConnectionUrl(): string {
     const url = new URL("", "redis://");
     url.hostname = this.getHost();
     url.port = this.getPort().toString();
