@@ -11,17 +11,21 @@ npm install @testcontainers/redis --save-dev
 ## Examples
 
 <!--codeinclude-->
-[Connect and execute query:](../../packages/modules/redis/src/redis-container.test.ts) inside_block:connect
+[Start container:](../../packages/modules/redis/src/redis-container.test.ts) inside_block:startContainer
 <!--/codeinclude-->
 
 <!--codeinclude-->
-[Connect and execute query using URI:](../../packages/modules/redis/src/redis-container.test.ts) inside_block:uriConnect
+[Connect redis client to container:](../../packages/modules/redis/src/redis-container.test.ts) inside_block:simpleConnect
 <!--/codeinclude-->
 
 <!--codeinclude-->
-[Set username:](../../packages/modules/redis/src/redis-container.test.ts) inside_block:setUsername
+[Start container with password authentication:](../../packages/modules/redis/src/redis-container.test.ts) inside_block:startWithCredentials
 <!--/codeinclude-->
 
 <!--codeinclude-->
-[Execute a query inside the container:](../../packages/modules/redis/src/redis-container.test.ts) inside_block:executeQuery
+[Define volume for persistent/predefined data:](../../packages/modules/redis/src/redis-container.test.ts) inside_block:persistentData
+<!--/codeinclude-->
+
+<!--codeinclude-->
+[Execute a command inside the container:](../../packages/modules/redis/src/redis-container.test.ts) inside_block:executeCommand
 <!--/codeinclude-->

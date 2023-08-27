@@ -7,7 +7,7 @@ import * as fs from "fs";
 describe("RedisContainer", () => {
   jest.setTimeout(240_000);
 
-  // connect {
+  // startContainer {
   it("should connect and execute set-get", async () => {
     const container = await new RedisContainer().start();
 
@@ -33,6 +33,7 @@ describe("RedisContainer", () => {
     await container.stop();
   });
 
+  // persistentData {
   it("should reconnect with volume and persist data", async () => {
     const volume = fs.mkdtempSync(path.join(os.tmpdir(), "redis-"));
     const container = await new RedisContainer().withPassword("test").withVolume(volume).start();
@@ -48,8 +49,9 @@ describe("RedisContainer", () => {
     await container.stop();
     fs.rmSync(volume, { force: true, recursive: true });
   });
+  // }
 
-  // uriConnect {
+  // startWithCredentials {
   it("should work with URI and credentials", async () => {
     const password = "testPassword";
 
@@ -67,7 +69,7 @@ describe("RedisContainer", () => {
   });
   // }
 
-  // executeQuery {
+  // executeCommand {
   it("should execute a query and return the result", async () => {
     const container = await new RedisContainer().start();
 
@@ -77,6 +79,7 @@ describe("RedisContainer", () => {
     await container.stop();
   });
   // }
+  // simpleConnect {
   async function connectTo(container: StartedRedisContainer) {
     const client = createClient({
       url: container.getConnectionUri(),
@@ -85,4 +88,5 @@ describe("RedisContainer", () => {
     expect(client.isOpen).toBeTruthy();
     return client;
   }
+  // }
 });
