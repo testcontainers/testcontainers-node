@@ -1,21 +1,18 @@
 import { createClient } from "redis";
-import { RedisContainer } from "./redis-container";
+import { RedisContainer, StartedRedisContainer } from "./redis-container";
+import * as os from "os";
+import * as path from "path";
+import * as fs from "fs";
 
 describe("RedisContainer", () => {
   jest.setTimeout(240_000);
 
   // connect {
-  it("should connect and execute query", async () => {
+  it("should connect and execute set-get", async () => {
     const container = await new RedisContainer().start();
 
-    const client = createClient({
-      url: `redis://${container.getHost()}:${container.getPort()}`,
-      username: container.getUsername() != "" ? container.getUsername() : undefined,
-      password: container.getPassword() != "" ? container.getPassword() : undefined,
-    });
-    await client.connect();
+    const client = await connectTo(container);
 
-    expect(client.isOpen).toBeTruthy();
     await client.set("key", "val");
     expect(await client.get("key")).toBe("val");
 
@@ -24,23 +21,48 @@ describe("RedisContainer", () => {
   });
   // }
 
+  it("should connect with password and execute set-get", async () => {
+    const container = await new RedisContainer().withPassword("test").start();
+
+    const client = await connectTo(container);
+
+    await client.set("key", "val");
+    expect(await client.get("key")).toBe("val");
+
+    await client.disconnect();
+    await container.stop();
+  });
+
+  it("should reconnect with volume and persist data", async () => {
+    const volume = fs.mkdtempSync(path.join(os.tmpdir(), "redis-"));
+    const container = await new RedisContainer().withPassword("test").withVolume(volume).start();
+    let client = await connectTo(container);
+
+    await client.set("key", "val");
+    await client.disconnect();
+    await container.restart();
+    client = await connectTo(container);
+    expect(await client.get("key")).toBe("val");
+
+    await client.disconnect();
+    await container.stop();
+    fs.rmSync(volume, { force: true, recursive: true });
+  });
+
   // uriConnect {
-  it("should work with database URI and credentials", async () => {
-    const username = "testUser";
+  it("should work with URI and credentials", async () => {
     const password = "testPassword";
 
     // Test authentication
-    const container = await new RedisContainer().withUsername(username).withPassword(password).start();
-    expect(container.getConnectionUri()).toEqual(`redis://${container.getHost()}:${container.getPort()}`);
-    const client = createClient({
-      url: container.getConnectionUri(),
-      //password: container.getPassword(),
-    });
-    await client.connect();
+    const container = await new RedisContainer().withPassword(password).start();
+    expect(container.getConnectionUri()).toEqual(`redis://:${password}@${container.getHost()}:${container.getPort()}`);
 
-    expect(client.isOpen).toBeTruthy();
+    const client = await connectTo(container);
+
     await client.set("key", "val");
     expect(await client.get("key")).toBe("val");
+
+    await client.disconnect();
     await container.stop();
   });
   // }
@@ -55,4 +77,12 @@ describe("RedisContainer", () => {
     await container.stop();
   });
   // }
+  async function connectTo(container: StartedRedisContainer) {
+    const client = createClient({
+      url: container.getConnectionUri(),
+    });
+    await client.connect();
+    expect(client.isOpen).toBeTruthy();
+    return client;
+  }
 });

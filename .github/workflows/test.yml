@@ -89,6 +89,7 @@ jobs:
           - nats
           - neo4j
           - postgresql
+          - redis
           - selenium
     uses: ./.github/workflows/test-template.yml
     with:

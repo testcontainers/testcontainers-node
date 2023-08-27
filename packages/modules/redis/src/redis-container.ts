@@ -3,16 +3,11 @@ import { AbstractStartedContainer, GenericContainer, StartedTestContainer } from
 const REDIS_PORT = 6379;
 
 export class RedisContainer extends GenericContainer {
-  private username = "";
   private password = "";
+  private volume = "";
 
   constructor(image = "redis:7.2") {
     super(image);
-  }
-
-  public withUsername(username: string): this {
-    this.username = username;
-    return this;
   }
 
   public withPassword(password: string): this {
@@ -20,39 +15,32 @@ export class RedisContainer extends GenericContainer {
     return this;
   }
 
+  public withVolume(volume: string): this {
+    this.volume = volume;
+    return this;
+  }
+
   public override async start(): Promise<StartedRedisContainer> {
     this.withExposedPorts(...(this.hasExposedPorts ? this.exposedPorts : [REDIS_PORT]))
       .withCommand([
         "redis-server",
-        //...(this.username != "" ? [`--masteruser "${this.username}"`] : []),
-        //...(this.password != "" ? [`--masterauth "${this.password}"`] : []),
-        //...(this.username != "" ? [`--user ${this.username} allcommands allkeys on`] : []),
-        //...(this.password != "" ? [`--requirepass "${this.password}"`] : []),
+        ...(this.password != "" ? [`--requirepass "${this.password}"`] : []),
+        ...(this.volume != "" ? ["--save 1 1 ", "--appendonly yes"] : []),
       ])
       .withStartupTimeout(120_000);
+    if (this.volume != "") this.withBindMounts([{ mode: "rw", source: this.volume, target: "/data" }]);
 
-    return new StartedRedisContainer(await super.start(), this.username, this.password);
+    return new StartedRedisContainer(await super.start(), this.password);
   }
 }
 
 export class StartedRedisContainer extends AbstractStartedContainer {
-  private readonly port: number;
-
-  constructor(
-    startedTestContainer: StartedTestContainer,
-    private readonly username: string,
-    private readonly password: string
-  ) {
+  constructor(startedTestContainer: StartedTestContainer, private readonly password: string) {
     super(startedTestContainer);
-    this.port = startedTestContainer.getMappedPort(REDIS_PORT);
   }
 
   public getPort(): number {
-    return this.port;
-  }
-
-  public getUsername(): string {
-    return this.username;
+    return this.getMappedPort(REDIS_PORT);
   }
 
   public getPassword(): string {
@@ -63,8 +51,7 @@ export class StartedRedisContainer extends AbstractStartedContainer {
     const url = new URL("", "redis://");
     url.hostname = this.getHost();
     url.port = this.getPort().toString();
-    //url.username = this.getUsername();
-    //url.password = this.getPassword();
+    url.password = this.getPassword();
     return url.toString();
   }
 
@@ -73,8 +60,7 @@ export class StartedRedisContainer extends AbstractStartedContainer {
       "redis-cli",
       "-h",
       this.getHost(),
-      ...(this.username != "" ? [`--user ${this.username}`] : []),
-      ...(this.username != "" ? [`--password ${this.password}`] : []),
+      ...(this.password != "" ? [`--password ${this.password}`] : []),
       `${cmd}`,
       ...additionalFlags,
     ]);
