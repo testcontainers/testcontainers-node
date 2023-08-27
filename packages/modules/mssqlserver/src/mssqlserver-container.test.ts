@@ -1,13 +1,17 @@
+import { Wait } from "testcontainers";
 import sql, { config } from "mssql";
 import { MSSQLServerContainer } from "./mssqlserver-container";
 
 describe("MSSqlServerContainer", () => {
   jest.setTimeout(180_000);
 
+  // connect {
   it("should connect and return a query result", async () => {
-    const container = await new MSSQLServerContainer().acceptLicense().start();
+    const container = await new MSSQLServerContainer()
+      .acceptLicense()
+      .withWaitStrategy(Wait.forLogMessage(/.*Recovery is complete.*/, 1))
+      .start();
 
-    // connect {
     const sqlConfig: config = {
       user: container.getUsername(),
       password: container.getPassword(),
@@ -36,9 +40,12 @@ describe("MSSqlServerContainer", () => {
 
   // uriConnect {
   it("should work with database URI", async () => {
-    const container = await new MSSQLServerContainer().acceptLicense().start();
-    const connectionString = container.getConnectionUri();
+    const container = await new MSSQLServerContainer()
+      .acceptLicense()
+      .withWaitStrategy(Wait.forLogMessage(/.*Recovery is complete.*/, 1))
+      .start();
 
+    const connectionString = container.getConnectionUri();
     const connection = await sql.connect(connectionString);
 
     const { recordset } = await connection.query`SELECT 1;`;
@@ -52,7 +59,12 @@ describe("MSSqlServerContainer", () => {
   // setPassword {
   it("should throw error with insecure password", async () => {
     try {
-      const container = await new MSSQLServerContainer().acceptLicense().withPassword("password").start();
+      const container = await new MSSQLServerContainer()
+        .acceptLicense()
+        .withPassword("password")
+        .withWaitStrategy(Wait.forLogMessage(/.*Recovery is complete.*/, 1))
+        .start();
+
       await container.stop();
     } catch (err) {
       expect((err as Error).message).toBe(
