@@ -572,17 +572,19 @@ export class CouchbaseContainer extends GenericContainer {
 }
 
 export class StartedCouchbaseContainer extends AbstractStartedContainer {
-  private readonly mappedKvPort: number;
   private readonly host: string;
   private readonly username: string;
   private readonly password: string;
 
   constructor(startedTestContainer: StartedTestContainer, username: string, password: string) {
     super(startedTestContainer);
-    this.mappedKvPort = startedTestContainer.getMappedPort(PORTS.KV_PORT);
     this.host = startedTestContainer.getHost();
     this.username = username;
     this.password = password;
+  }
+
+  private getBootstrapCarrierDirectPort() {
+    return this.getMappedPort(PORTS.KV_PORT);
   }
 
   getUsername() {
@@ -594,6 +596,6 @@ export class StartedCouchbaseContainer extends AbstractStartedContainer {
   }
 
   getConnectionString() {
-    return `couchbase://${this.host}:${this.mappedKvPort}`;
+    return `couchbase://${this.host}:${this.getBootstrapCarrierDirectPort()}`;
   }
 }
