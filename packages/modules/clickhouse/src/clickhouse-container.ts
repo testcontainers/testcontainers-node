@@ -54,8 +54,7 @@ export class ClickhouseContainer extends GenericContainer {
         CLICKHOUSE_PASSWORD: this.password,
       })
       .withWaitStrategy(Wait.forHttp(`/ping`, HTTP_PORT)
-        .forStatusCode(200)
-      )
+        .forStatusCode(200))
       .withStartupTimeout(120_000);
     
     if (this.hostConfigPathXml)

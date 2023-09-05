@@ -24,7 +24,6 @@ describe("ClickhouseContainer", () => {
     await container.stop();
   });
 
-
   it("should work with custom database", async () => {
     const container = await new ClickhouseContainer()
       .withDatabase(`db${(Math.random()*1000000) | 0}`)
