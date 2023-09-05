@@ -1,6 +1,6 @@
 import { AbstractStartedContainer, GenericContainer, StartedTestContainer } from "testcontainers";
 
-const ELASTIC_SEARCH_HTTP_PORT = 9200;
+export const ELASTIC_SEARCH_HTTP_PORT = 9200;
 
 export class ElasticsearchContainer extends GenericContainer {
   constructor(image = "elasticsearch:7.17.7") {
