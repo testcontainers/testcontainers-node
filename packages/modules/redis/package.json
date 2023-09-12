@@ -8,7 +8,7 @@
     "docker",
     "testcontainers"
   ],
-  "description": "redis module for Testcontainers",
+  "description": "Redis module for Testcontainers",
   "homepage": "https://github.com/testcontainers/testcontainers-node#readme",
   "repository": {
     "type": "git",
