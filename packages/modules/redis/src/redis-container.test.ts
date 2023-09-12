@@ -47,7 +47,12 @@ describe("RedisContainer", () => {
 
     await client.disconnect();
     await container.stop();
-    fs.rmSync(sourcePath, { force: true, recursive: true });
+    try {
+      fs.rmSync(sourcePath, { force: true, recursive: true });
+    } catch (e) {
+      //Ignore clean up, when have no access on fs.
+      console.log(e);
+    }
   });
   // }
 
