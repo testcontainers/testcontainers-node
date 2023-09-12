@@ -79,6 +79,7 @@ describe("RedisContainer", () => {
     await container.stop();
   });
   // }
+
   // simpleConnect {
   async function connectTo(container: StartedRedisContainer) {
     const client = createClient({
