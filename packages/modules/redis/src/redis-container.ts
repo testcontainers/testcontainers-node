@@ -3,8 +3,8 @@ import { AbstractStartedContainer, GenericContainer, StartedTestContainer } from
 const REDIS_PORT = 6379;
 
 export class RedisContainer extends GenericContainer {
-  private password = "";
-  private persistenceVolume = "";
+  private password? = "";
+  private persistenceVolume? = "";
 
   constructor(image = "redis:7.2") {
     super(image);
@@ -24,19 +24,18 @@ export class RedisContainer extends GenericContainer {
     this.withExposedPorts(...(this.hasExposedPorts ? this.exposedPorts : [REDIS_PORT]))
       .withCommand([
         "redis-server",
-        ...(this.password != "" ? [`--requirepass "${this.password}"`] : []),
-        ...(this.persistenceVolume != "" ? ["--save 1 1 ", "--appendonly yes"] : []),
+        ...(this.password ? [`--requirepass "${this.password}"`] : []),
+        ...(this.persistenceVolume ? ["--save 1 1 ", "--appendonly yes"] : []),
       ])
       .withStartupTimeout(120_000);
-    if (this.persistenceVolume != "")
-      this.withBindMounts([{ mode: "rw", source: this.persistenceVolume, target: "/data" }]);
+    if (this.persistenceVolume) this.withBindMounts([{ mode: "rw", source: this.persistenceVolume, target: "/data" }]);
 
     return new StartedRedisContainer(await super.start(), this.password);
   }
 }
 
 export class StartedRedisContainer extends AbstractStartedContainer {
-  constructor(startedTestContainer: StartedTestContainer, private readonly password: string) {
+  constructor(startedTestContainer: StartedTestContainer, private readonly password?: string) {
     super(startedTestContainer);
   }
 
@@ -45,7 +44,7 @@ export class StartedRedisContainer extends AbstractStartedContainer {
   }
 
   public getPassword(): string {
-    return this.password;
+    return this.password ? this.password.toString() : "";
   }
 
   public getConnectionUrl(): string {
