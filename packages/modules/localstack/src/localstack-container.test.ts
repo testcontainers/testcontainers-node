@@ -5,7 +5,7 @@ import { CreateBucketCommand } from "@aws-sdk/client-s3";
 describe("LocalStackContainer", () => {
   jest.setTimeout(180_000);
 
-  it("should connect and return a query result", async () => {
+  it("should create a S3 bucket", async () => {
     const container = await new LocalstackContainer().start();
 
     const client = new S3Client({

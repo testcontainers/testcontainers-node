@@ -32,6 +32,6 @@
     "aws-sdk": "^2.1430.0"
   },
   "dependencies": {
-    "testcontainers": "^10.0.2"
+    "testcontainers": "^10.2.1"
   }
 }
