@@ -10,7 +10,7 @@ const PASSWORD_CATEGORY_VALIDATION_PATTERNS = [/[A-Z]+/, /[a-z]+/, /[0-9]+/, /[@
 
 export class MSSQLServerContainer extends GenericContainer {
   private database = "master";
-  private username = "SA";
+  private username = "sa";
   private password = "Passw0rd";
   private edition: Edition = "Developer";
   private acceptEula = "N";
