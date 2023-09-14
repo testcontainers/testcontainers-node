@@ -1,6 +1,6 @@
 import { AbstractStartedContainer, GenericContainer, log, StartedTestContainer, Wait } from "testcontainers";
 
-const LOCALSTACK_PORT = 4566;
+export const LOCALSTACK_PORT = 4566;
 
 export class LocalstackContainer extends GenericContainer {
   constructor(image = "localstack/localstack:2.2.0") {
@@ -13,12 +13,10 @@ export class LocalstackContainer extends GenericContainer {
     if (this.environment[envVar]) {
       // do nothing
       hostnameExternalReason = "explicitly as environment variable";
-    }
-    else if(this.networkAliases && this.networkAliases.length > 0) {
+    } else if (this.networkAliases && this.networkAliases.length > 0) {
       this.environment[envVar] = this.networkAliases.at(this.networkAliases.length - 1) || ""; // use the last network alias set
       hostnameExternalReason = "to match last network alias on container with non-default network";
-    }
-    else {
+    } else {
       this.withEnvironment({ LOCALSTACK_HOST: "localhost" });
       hostnameExternalReason = "to match host-routable address for container";
     }
@@ -35,7 +33,6 @@ export class LocalstackContainer extends GenericContainer {
   public override async start(): Promise<StartedLocalStackContainer> {
     return new StartedLocalStackContainer(await super.start());
   }
-
 }
 
 export class StartedLocalStackContainer extends AbstractStartedContainer {

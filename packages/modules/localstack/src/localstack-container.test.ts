@@ -1,15 +1,18 @@
-import { LocalstackContainer } from "./localstack-container";
+import { LOCALSTACK_PORT, LocalstackContainer } from "./localstack-container";
 import { HeadBucketCommand, S3Client } from "@aws-sdk/client-s3";
 import { CreateBucketCommand } from "@aws-sdk/client-s3";
 import { GenericContainer, log, Network, StartedTestContainer } from "testcontainers";
 
-const runAwsCliAgainstDockerNetworkContainer = async (command: string, awsCliInDockerNetwork: StartedTestContainer): Promise<string> => {
-  const commandParts = `/usr/local/bin/aws --region eu-west-1 ${command} --endpoint-url http://localstack:4566 --no-verify-ssl`;
+const runAwsCliAgainstDockerNetworkContainer = async (
+  command: string,
+  awsCliInDockerNetwork: StartedTestContainer
+): Promise<string> => {
+  const commandParts = `/usr/local/bin/aws --region eu-west-1 ${command} --endpoint-url http://localstack:${LOCALSTACK_PORT} --no-verify-ssl`;
   const execResult = await awsCliInDockerNetwork.exec(commandParts);
   expect(execResult.exitCode).toEqual(0);
   log.info(execResult.output);
   return execResult.output;
-}
+};
 
 describe("LocalStackContainer", () => {
   jest.setTimeout(180_000);
@@ -41,24 +44,27 @@ describe("LocalStackContainer", () => {
   it("should use custom network", async () => {
     const network = await new Network().start();
     const container = await new LocalstackContainer()
-        .withNetwork(network)
-        .withNetworkAliases("notthis", "localstack") // the last alias is used for HOSTNAME_EXTERNAL
-        .start();
+      .withNetwork(network)
+      .withNetworkAliases("notthis", "localstack") // the last alias is used for HOSTNAME_EXTERNAL
+      .start();
 
     const awsCliInDockerNetwork = await new GenericContainer("amazon/aws-cli:2.7.27")
-        .withNetwork(network)
-        .withEntrypoint(["tail"])
-        .withCommand(["-f", "/dev/null"])
-        .withEnvironment({
-          "AWS_ACCESS_KEY_ID": "test",
-          "AWS_SECRET_ACCESS_KEY": "test",
-          "AWS_REGION": "us-east-1",
-        })
-        .start();
+      .withNetwork(network)
+      .withEntrypoint(["tail"])
+      .withCommand(["-f", "/dev/null"])
+      .withEnvironment({
+        AWS_ACCESS_KEY_ID: "test",
+        AWS_SECRET_ACCESS_KEY: "test",
+        AWS_REGION: "us-east-1",
+      })
+      .start();
 
-    const response = await runAwsCliAgainstDockerNetworkContainer("sqs create-queue --queue-name baz", awsCliInDockerNetwork);
-    expect(response).toContain(("http://localstack:4566"));
+    const response = await runAwsCliAgainstDockerNetworkContainer(
+      "sqs create-queue --queue-name baz",
+      awsCliInDockerNetwork
+    );
+    expect(response).toContain(`http://localstack:${LOCALSTACK_PORT}`);
     await container.stop();
-    await awsCliInDockerNetwork.stop()
+    await awsCliInDockerNetwork.stop();
   });
 });
