@@ -31,6 +31,13 @@ export abstract class CredentialProvider implements RegistryAuthLocator {
 
     const response = await this.runCredentialProvider(registry, programName);
 
+    if (response.Username === "<token>") {
+      return {
+        identityToken: response.Secret,
+        registryAddress: response.ServerURL,
+      };
+    }
+
     return {
       username: response.Username,
       password: response.Secret,

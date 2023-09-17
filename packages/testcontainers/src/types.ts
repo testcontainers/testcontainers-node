@@ -65,18 +65,27 @@ export type Labels = { [key: string]: string };
 export type HostPortBindings = Array<{ hostIp: string; hostPort: number }>;
 export type Ports = { [containerPort: number]: HostPortBindings };
 
-export type AuthConfig = {
+export type AuthCredentialConfig = {
   username: string;
   password: string;
   registryAddress: string;
   email?: string;
 };
 
+export type AuthIdentityTokenConfig = {
+  identityToken: string;
+  registryAddress: string;
+};
+
+export type AuthConfig = AuthCredentialConfig | AuthIdentityTokenConfig;
+
 export type RegistryConfig = {
-  [registryAddress: string]: {
-    username: string;
-    password: string;
-  };
+  [registryAddress: string]:
+    | {
+        username: string;
+        password: string;
+      }
+    | { identitytoken: string };
 };
 
 export type BuildArgs = { [key in string]: string };

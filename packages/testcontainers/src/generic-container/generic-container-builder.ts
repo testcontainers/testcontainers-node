@@ -68,7 +68,7 @@ export class GenericContainerBuilder {
       buildargs: this.buildArgs,
       pull: this.pullPolicy ? "true" : undefined,
       nocache: !this.cache,
-      registryconfig: registryConfig,
+      registryconfig: registryConfig as any, // @types/dockerode registry config type is wrong
       labels,
       target: this.target,
     });
@@ -95,6 +95,13 @@ export class GenericContainerBuilder {
 
     return authConfigs
       .map((authConfig) => {
+        if ("identityToken" in authConfig) {
+          return {
+            [authConfig.registryAddress]: {
+              identitytoken: authConfig.identityToken,
+            },
+          };
+        }
         return {
           [authConfig.registryAddress]: {
             username: authConfig.username,

@@ -1,4 +1,4 @@
-import { Auth, AuthConfig, ContainerRuntimeConfig } from "./types";
+import { Auth, AuthConfig, AuthCredentialConfig, ContainerRuntimeConfig } from "./types";
 import { RegistryAuthLocator } from "./registry-auth-locator";
 import { registryMatches } from "./registry-matches";
 
@@ -13,7 +13,7 @@ export class Auths implements RegistryAuthLocator {
       return undefined;
     }
 
-    const authConfig: Partial<AuthConfig> = { registryAddress: registry };
+    const authConfig: Partial<AuthCredentialConfig> = { registryAddress: registry };
 
     if (auth.email) {
       authConfig.email = auth.email;
