@@ -255,4 +255,42 @@ describe("DockerComposeEnvironment", () => {
 
     await startedEnvironment.down();
   });
+
+  it("should start selected container by service without its dependencies", async () => {
+    const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-no-deps.yml")
+      .withNoDeps()
+      .up(["service_2"]);
+
+    await Promise.all(
+      [await composeContainerName("service_2")].map(
+        async (containerName) => await checkEnvironmentContainerIsHealthy(startedEnvironment, containerName)
+      )
+    );
+
+    const service1 = await composeContainerName("service_1");
+    expect(() => startedEnvironment.getContainer(service1)).toThrow(
+      `Cannot get container "${service1}" as it is not running`
+    );
+
+    await startedEnvironment.down();
+  });
+
+  it("should start selected container by service without its dependencies by command options", async () => {
+    const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-no-deps.yml")
+      .withCommandOptions("--no-deps")
+      .up(["service_2"]);
+
+    await Promise.all(
+      [await composeContainerName("service_2")].map(
+        async (containerName) => await checkEnvironmentContainerIsHealthy(startedEnvironment, containerName)
+      )
+    );
+
+    const service1 = await composeContainerName("service_1");
+    expect(() => startedEnvironment.getContainer(service1)).toThrow(
+      `Cannot get container "${service1}" as it is not running`
+    );
+
+    await startedEnvironment.down();
+  });
 });

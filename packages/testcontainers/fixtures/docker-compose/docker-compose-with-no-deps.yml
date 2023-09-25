@@ -1,0 +1,14 @@
+version: "3.5"
+
+services:
+  service_1:
+    image: cristianrgreco/testcontainer:1.1.14
+    ports:
+      - 8080
+  service_2:
+    depends_on:
+      service_1:
+        condition: service_started
+    image: cristianrgreco/testcontainer:1.1.14
+    ports:
+      - 8080

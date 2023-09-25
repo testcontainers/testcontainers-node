@@ -19,6 +19,8 @@ export class DockerComposeEnvironment {
   private projectName: string;
   private build = false;
   private recreate = true;
+  private noDeps = false;
+  private commandOptions: string[] = [];
   private environmentFile = "";
   private profiles: string[] = [];
   private environment: Environment = {};
@@ -58,6 +60,16 @@ export class DockerComposeEnvironment {
     return this;
   }
 
+  public withNoDeps(): this {
+    this.noDeps = true;
+    return this;
+  }
+
+  public withCommandOptions(...commandOptions: string[]): this {
+    this.commandOptions = [...this.commandOptions, ...commandOptions];
+    return this;
+  }
+
   public withPullPolicy(pullPolicy: ImagePullPolicy): this {
     this.pullPolicy = pullPolicy;
     return this;
@@ -92,6 +104,10 @@ export class DockerComposeEnvironment {
     if (!this.recreate) {
       commandOptions.push("--no-recreate");
     }
+    if (this.noDeps) {
+      commandOptions.push("--no-deps");
+    }
+    commandOptions.push(...this.commandOptions);
 
     const composeOptions: string[] = [];
     if (this.environmentFile) {
