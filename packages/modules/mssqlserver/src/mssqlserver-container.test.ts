@@ -1,4 +1,3 @@
-import { Wait } from "testcontainers";
 import sql, { config } from "mssql";
 import { MSSQLServerContainer } from "./mssqlserver-container";
 
@@ -7,10 +6,7 @@ describe("MSSqlServerContainer", () => {
 
   // connect {
   it("should connect and return a query result", async () => {
-    const container = await new MSSQLServerContainer()
-      .acceptLicense()
-      .withWaitStrategy(Wait.forLogMessage(/.*Recovery is complete.*/, 1))
-      .start();
+    const container = await new MSSQLServerContainer().acceptLicense().start();
 
     const sqlConfig: config = {
       user: container.getUsername(),
@@ -40,10 +36,7 @@ describe("MSSqlServerContainer", () => {
 
   // uriConnect {
   it("should work with database URI", async () => {
-    const container = await new MSSQLServerContainer()
-      .acceptLicense()
-      .withWaitStrategy(Wait.forLogMessage(/.*Recovery is complete.*/, 1))
-      .start();
+    const container = await new MSSQLServerContainer().acceptLicense().start();
 
     const connectionString = container.getConnectionUri();
     const connection = await sql.connect(connectionString);

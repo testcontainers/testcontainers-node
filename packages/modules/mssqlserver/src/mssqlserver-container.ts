@@ -1,4 +1,4 @@
-import { AbstractStartedContainer, GenericContainer, StartedTestContainer } from "testcontainers";
+import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 
 const MSSQL_PORT = 1433;
 
@@ -45,6 +45,7 @@ export class MSSQLServerContainer extends GenericContainer {
         MSSQL_PID: this.edition,
         MSSQL_TCP_PORT: String(MSSQL_PORT),
       })
+      .withWaitStrategy(Wait.forLogMessage(/.*Recovery is complete.*/, 1))
       .withStartupTimeout(120_000);
 
     return new StartedMSSQLServerContainer(await super.start(), this.database, this.username, this.password);
