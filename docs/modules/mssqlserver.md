@@ -30,3 +30,7 @@ Due to licencing restrictions you are required to accept an EULA for this contai
 <!--codeinclude-->
 [Throw error with an invalid password:](../../packages/modules/mssqlserver/src/mssqlserver-container.test.ts) inside_block:invalidPassword
 <!--/codeinclude-->
+
+<!--codeinclude-->
+[Use a different edition:](../../packages/modules/mssqlserver/src/mssqlserver-container.test.ts) inside_block:expressEdition
+<!--/codeinclude-->
