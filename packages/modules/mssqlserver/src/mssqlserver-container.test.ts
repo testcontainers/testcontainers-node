@@ -15,7 +15,7 @@ describe("MSSqlServerContainer", () => {
       server: container.getHost(),
       port: container.getPort(),
       pool: {
-        max: 10,
+        max: 1,
         min: 0,
         idleTimeoutMillis: 30000,
       },
@@ -35,7 +35,7 @@ describe("MSSqlServerContainer", () => {
   // }
 
   // uriConnect {
-  it("should work with database URI", async () => {
+  it("should connect and return a query result with database URI", async () => {
     const container = await new MSSQLServerContainer().acceptLicense().start();
 
     const connectionString = container.getConnectionUri();
@@ -46,6 +46,30 @@ describe("MSSqlServerContainer", () => {
 
     await connection.close();
     await container.stop();
+  });
+  // }
+
+  // validPassword {
+  it("should connect and return a query result with valid custom password", async () => {
+    const container = await new MSSQLServerContainer().acceptLicense().withPassword("I!@M#$eCur3").start();
+
+    const connectionString = container.getConnectionUri();
+    const connection = await sql.connect(connectionString);
+
+    const { recordset } = await connection.query`SELECT 1;`;
+    expect(recordset).toStrictEqual([{ "": 1 }]);
+
+    await connection.close();
+    await container.stop();
+  });
+  // }
+
+  // invalidPassword {
+  it("should throw error with invalid password", async () => {
+    const container = new MSSQLServerContainer().acceptLicense().withPassword("password");
+    await expect(container.start()).rejects.toThrow(
+      Error('Log stream ended and message "/.*Recovery is complete.*/" was not received')
+    );
   });
   // }
 });
