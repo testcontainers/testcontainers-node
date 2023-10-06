@@ -5,31 +5,25 @@ import {
   StartedTestContainer,
   StopOptions,
   StoppedTestContainer,
-  Wait,
   BindMount,
+  Wait,
+  // Wait,
 } from "testcontainers";
 
 const PLAYWRIGHT_DEFAULT_PORT = 80;
 
 export class PlaywrightContainer extends GenericContainer {
-  private bindMounts: BindMount[];
+  private readonly bindMounts: BindMount[];
 
-  private port: PortWithOptionalBinding;
-
-  constructor(
-    image = "mcr.microsoft.com/playwright:next-focal-amd64",
-    bindMounts: BindMount[],
-    port = PLAYWRIGHT_DEFAULT_PORT
-  ) {
+  constructor(image = "mcr.microsoft.com/playwright:next-focal-amd64", bindMounts: BindMount[]) {
     super(image);
     this.bindMounts = bindMounts;
-    this.port = port;
   }
 
   protected override async beforeContainerCreated(): Promise<void> {
-    this.withExposedPorts([this.port]).withBindMounts(this.bindMounts);
-    /*
-    .withCommand([
+    this.withExposedPorts(PLAYWRIGHT_DEFAULT_PORT)
+      .withBindMounts(this.bindMounts)
+      /*.withCommand([
         "bash",
         "-c",
         "echo 'START'; sleep infinity",
@@ -37,8 +31,21 @@ export class PlaywrightContainer extends GenericContainer {
         "cd playwright",
         "npm i",
         "npx playwright test",
-      ]);
-    */
+      ])*/
+      .withWaitStrategy(
+        Wait.forAll([
+          Wait.forListeningPorts(),
+          /*Wait.forHttp("/status", PLAYWRIGHT_DEFAULT_PORT).forResponsePredicate((response) => {
+            try {
+              return JSON.parse(response).value.ready;
+            } catch {
+              return false;
+            }
+          }),*/
+        ])
+      );
+
+    this.withBindMounts(this.bindMounts);
   }
 
   override async start(): Promise<StartedPlaywrightContainer> {
@@ -51,7 +58,7 @@ export class StartedPlaywrightContainer extends AbstractStartedContainer {
 
   constructor(startedTestContainer: StartedTestContainer) {
     super(startedTestContainer);
-    this.serverUrl = `http://${this.getHost()}:${this.getMappedPort(PLAYWRIGHT_DEFAULT_PORT)}/wd/hub`;
+    this.serverUrl = `http://${this.getHost()}:${this.getMappedPort(PLAYWRIGHT_DEFAULT_PORT)}`;
   }
 
   getServerUrl(): string {

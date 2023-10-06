@@ -12,23 +12,19 @@ describe("PlaywrightContainer", () => {
   test(`should work for ${process.arch}`, async () => {
     const playwrightExampleProjectDir = path.resolve(__dirname, "..", "example-project");
 
-    const container = await new PlaywrightContainer(
-      image,
-      [
-        {
-          source: path.resolve(playwrightExampleProjectDir),
-          target: "/playwright",
-          mode: "rw",
-        },
-      ],
-      80
-    ).start();
+    const playwrightContainer = await new PlaywrightContainer(image, [
+      {
+        source: path.resolve(playwrightExampleProjectDir),
+        target: "/playwright",
+        mode: "rw",
+      },
+    ]).start();
 
-    const { output, exitCode } = await container.exec(["echo", "hello", "world"]);
+    const { output, exitCode } = await playwrightContainer.exec(["echo", "hello", "world"]);
 
     console.log("output", output);
     console.log("exitCode", exitCode);
 
-    await container.stop();
+    await playwrightContainer.stop();
   });
 });
