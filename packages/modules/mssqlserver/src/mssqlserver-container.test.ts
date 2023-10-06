@@ -72,4 +72,31 @@ describe("MSSqlServerContainer", () => {
     );
   });
   // }
+
+  // expressEdition {
+  it("should start db with express edition", async () => {
+    const container = await new MSSQLServerContainer()
+      .withWaitForMessage(/.*Attribute synchronization manager initialized*/)
+      .acceptLicense()
+      .withEnvironment({ MSSQL_PID: "Express" })
+      .start();
+
+    const { output, exitCode } = await container.exec([
+      "/opt/mssql-tools/bin/sqlcmd",
+      "-S",
+      container.getHost(),
+      "-U",
+      container.getUsername(),
+      "-P",
+      container.getPassword(),
+      "-Q",
+      "SELECT @@VERSION;",
+    ]);
+
+    expect(exitCode).toBe(0);
+    expect(output).toContain("Express Edition");
+
+    await container.stop();
+  });
+  // }
 });

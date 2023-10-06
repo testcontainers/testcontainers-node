@@ -1,17 +1,12 @@
 import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 
 const MSSQL_PORT = 1433;
-
-type ProductKey = `${string}-${string}-${string}-${string}-${string}`;
-
-type Edition = "Evaluation" | "Developer" | "Express" | "Web" | "Standard" | "Enterprise" | ProductKey;
-
 export class MSSQLServerContainer extends GenericContainer {
   private database = "master";
   private username = "sa";
   private password = "Passw0rd";
-  private edition: Edition = "Developer";
   private acceptEula = "N";
+  private message: string | RegExp = /.*Recovery is complete.*/;
 
   constructor(image = "mcr.microsoft.com/mssql/server:2022-latest") {
     super(image);
@@ -32,8 +27,8 @@ export class MSSQLServerContainer extends GenericContainer {
     return this;
   }
 
-  public withEdition(edition: Edition): this {
-    this.edition = edition;
+  public withWaitForMessage(message: string | RegExp): this {
+    this.message = message;
     return this;
   }
 
@@ -42,10 +37,9 @@ export class MSSQLServerContainer extends GenericContainer {
       .withEnvironment({
         ACCEPT_EULA: this.acceptEula,
         MSSQL_SA_PASSWORD: this.password,
-        MSSQL_PID: this.edition,
         MSSQL_TCP_PORT: String(MSSQL_PORT),
       })
-      .withWaitStrategy(Wait.forLogMessage(/.*Recovery is complete.*/, 1))
+      .withWaitStrategy(Wait.forLogMessage(this.message, 1))
       .withStartupTimeout(120_000);
 
     return new StartedMSSQLServerContainer(await super.start(), this.database, this.username, this.password);
