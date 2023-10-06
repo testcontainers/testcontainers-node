@@ -24,5 +24,9 @@ Due to licencing restrictions you are required to accept an EULA for this contai
 <!--/codeinclude-->
 
 <!--codeinclude-->
-[Set password:](../../packages/modules/mssqlserver/src/mssqlserver-container.test.ts) inside_block:setPassword
+[Connect and execute query using a valid custom password:](../../packages/modules/mssqlserver/src/mssqlserver-container.test.ts) inside_block:validPassword
+<!--/codeinclude-->
+
+<!--codeinclude-->
+[Throw error with an invalid password:](../../packages/modules/mssqlserver/src/mssqlserver-container.test.ts) inside_block:invalidPassword
 <!--/codeinclude-->
