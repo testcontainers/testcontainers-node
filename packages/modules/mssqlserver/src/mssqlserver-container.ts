@@ -6,8 +6,6 @@ type ProductKey = `${string}-${string}-${string}-${string}-${string}`;
 
 type Edition = "Evaluation" | "Developer" | "Express" | "Web" | "Standard" | "Enterprise" | ProductKey;
 
-const PASSWORD_CATEGORY_VALIDATION_PATTERNS = [/[A-Z]+/, /[a-z]+/, /[0-9]+/, /[@$!%*?&]+/];
-
 export class MSSQLServerContainer extends GenericContainer {
   private database = "master";
   private username = "sa";
@@ -30,7 +28,6 @@ export class MSSQLServerContainer extends GenericContainer {
   }
 
   public withPassword(password: string): this {
-    this.checkPasswordStrength(password);
     this.password = password;
     return this;
   }
@@ -38,39 +35,6 @@ export class MSSQLServerContainer extends GenericContainer {
   public withEdition(edition: Edition): this {
     this.edition = edition;
     return this;
-  }
-
-  private checkPasswordStrength(password: string) {
-    if (!password) {
-      throw new Error("Null password is not allowed");
-    }
-
-    if (password.length < 8) {
-      throw new Error("Password should be at least 8 characters long");
-    }
-
-    if (password.length > 128) {
-      throw new Error("Password can be up to 128 characters long");
-    }
-
-    let satisfied = 0;
-
-    for (const regex of PASSWORD_CATEGORY_VALIDATION_PATTERNS) {
-      if (regex.test(password)) {
-        satisfied++;
-      }
-    }
-
-    if (satisfied < 3) {
-      throw new Error(
-        "Password must contain characters from three of the following four categories:\n" +
-          " - Latin uppercase letters (A through Z)\n" +
-          " - Latin lowercase letters (a through z)\n" +
-          " - Base 10 digits (0 through 9)\n" +
-          " - Non-alphanumeric characters such as: exclamation point (!), dollar sign ($), number sign (#), " +
-          "or percent (%)."
-      );
-    }
   }
 
   public override async start(): Promise<StartedMSSQLServerContainer> {
