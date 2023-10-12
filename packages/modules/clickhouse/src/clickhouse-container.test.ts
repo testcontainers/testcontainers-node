@@ -2,6 +2,8 @@ import { ClickhouseContainer, StartedClickhouseContainer } from "./clickhouse-co
 import { ClickHouseClient, createClient } from "@clickhouse/client";
 import path from "path";
 
+const CONFIG_FILE_MODE = parseInt("0644", 8)
+
 describe("ClickhouseContainer", () => {
   jest.setTimeout(240_000);
 
@@ -24,28 +26,12 @@ describe("ClickhouseContainer", () => {
     await container.stop();
   });
 
-  it("should work with custom database", async () => {
+  it("should work with custom database and custom yaml config", async () => {
+    const CONFIG_PATH_YAML = "/etc/clickhouse-server/config.d/config.yaml";
     const container = await new ClickhouseContainer()
       .withDatabase(`db${(Math.random()*1000000) | 0}`)
-      .start();
-    const client = createClickhouseContainerHttpClient(container);
-    await _test(client, container.getDatabase());
-    await client.close();
-    await container.stop();
-  });
-
-  it("should work with custom image", async () => {
-    const container = await new ClickhouseContainer("23.8-alpine").start();
-    const client = createClickhouseContainerHttpClient(container);
-    await _test(client, container.getDatabase());
-    await client.close();
-    await container.stop();
-  });
-
-  it("should work with custom xml config", async () => {
-    const container = await new ClickhouseContainer()
       .withPassword("")
-      .withXmlConfigFile(path.join("testdata", "config.xml"))
+      .withCopyFilesToContainer([{source: path.join("testdata", "config.yaml"), target: CONFIG_PATH_YAML, mode: CONFIG_FILE_MODE}])
       .start();
     const client = createClickhouseContainerHttpClient(container);
     await _test(client, container.getDatabase());
@@ -53,17 +39,18 @@ describe("ClickhouseContainer", () => {
     await container.stop();
   });
 
-  it("should work with custom yaml config", async () => {
-    const container = await new ClickhouseContainer()
+  it("should work with custom image and custom xml config example", async () => {
+    const CONFIG_PATH_XML = "/etc/clickhouse-server/config.d/config.xml";
+    const container = await new ClickhouseContainer("23.8-alpine")
       .withPassword("")
-      .withXmlConfigFile(path.join("testdata", "config.yaml"))
+      .withCopyFilesToContainer([{source: path.join("testdata", "config.xml"), target: CONFIG_PATH_XML, mode: CONFIG_FILE_MODE}])
       .start();
     const client = createClickhouseContainerHttpClient(container);
     await _test(client, container.getDatabase());
     await client.close();
     await container.stop();
   });
-  
+
   function createClickhouseContainerHttpClient(container: StartedClickhouseContainer) {
     return createClient({
       host: `http://${container.getHost()}:${container.getHostPorts().http}`,
