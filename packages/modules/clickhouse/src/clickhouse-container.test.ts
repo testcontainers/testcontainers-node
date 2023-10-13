@@ -53,7 +53,7 @@ describe("ClickhouseContainer", () => {
 
   function createClickhouseContainerHttpClient(container: StartedClickhouseContainer) {
     return createClient({
-      host: `http://${container.getHost()}:${container.getHostPorts().http}`,
+      host: container.getHttpUrl("http"),
       username: container.getUsername(),
       password: container.getPassword(),
     });

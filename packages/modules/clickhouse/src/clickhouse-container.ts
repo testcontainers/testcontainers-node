@@ -53,8 +53,8 @@ export class ClickhouseContainer extends GenericContainer {
 }
 
 export class StartedClickhouseContainer extends AbstractStartedContainer {
-  private readonly httpHostPort: number;
-  private readonly nativeHostPort: number;
+  private readonly hostHttpPort: number;
+  private readonly hostNativePort: number;
 
   constructor(
     startedTestContainer: StartedTestContainer,
@@ -65,12 +65,20 @@ export class StartedClickhouseContainer extends AbstractStartedContainer {
     private readonly password: string,
   ) {
     super(startedTestContainer);
-    this.httpHostPort = startedTestContainer.getMappedPort(httpPort);
-    this.nativeHostPort = startedTestContainer.getMappedPort(nativePort);
+    this.hostHttpPort = startedTestContainer.getMappedPort(httpPort);
+    this.hostNativePort = startedTestContainer.getMappedPort(nativePort);
   }
 
-  public getHostPorts(): {http: number; native: number} {
-    return {http: this.httpHostPort, native: this.nativeHostPort}
+  public getHttpUrl(schema: string): string {
+    return this.toUrl(schema, this.hostHttpPort)
+  }
+
+  public getNativeUrl(schema: string): string {
+    return this.toUrl(schema, this.hostNativePort)
+  }
+
+  private toUrl(schema: string, port: number): string {
+    return `${schema}://${this.startedTestContainer.getHost()}:${port}`
   }
 
   public getDatabase(): string {
