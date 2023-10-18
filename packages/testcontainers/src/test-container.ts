@@ -70,6 +70,7 @@ export interface StartedTestContainer {
   getNetworkId(networkName: string): string;
   getIpAddress(networkName: string): string;
   copyArchiveFromContainer(path: string): Promise<NodeJS.ReadableStream>;
+  copyArchiveFromContainerMultiplexed(path: string): Promise<NodeJS.ReadableStream>;
   copyDirectoriesToContainer(directoriesToCopy: DirectoryToCopy[]): Promise<void>;
   copyFilesToContainer(filesToCopy: FileToCopy[]): Promise<void>;
   copyContentToContainer(contentsToCopy: ContentToCopy[]): Promise<void>;

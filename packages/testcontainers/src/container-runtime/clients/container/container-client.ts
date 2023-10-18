@@ -14,6 +14,7 @@ export interface ContainerClient {
   getById(id: string): Container;
   fetchByLabel(labelName: string, labelValue: string): Promise<Container | undefined>;
   fetchArchive(container: Container, path: string): Promise<NodeJS.ReadableStream>;
+  fetchArchiveMultiplexed(container: Container, path: string): Promise<NodeJS.ReadableStream>;
   putArchive(container: Dockerode.Container, stream: Readable, path: string): Promise<void>;
   list(): Promise<ContainerInfo[]>;
   create(opts: ContainerCreateOptions): Promise<Container>;

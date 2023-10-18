@@ -1,10 +1,5 @@
 import { PlaywrightContainer } from "./playwright-container";
-import * as path from "path";
-
-const image =
-  process.arch === "arm64"
-    ? `mcr.microsoft.com/playwright:next-focal-arm64`
-    : `mcr.microsoft.com/playwright:next-focal-amd64`;
+import path from "node:path";
 
 describe("PlaywrightContainer", () => {
   jest.setTimeout(180_000);
@@ -12,19 +7,11 @@ describe("PlaywrightContainer", () => {
   test(`should work for ${process.arch}`, async () => {
     const playwrightExampleProjectDir = path.resolve(__dirname, "..", "example-project");
 
-    const playwrightContainer = await new PlaywrightContainer(image, [
-      {
-        source: path.resolve(playwrightExampleProjectDir),
-        target: "/playwright",
-        mode: "rw",
-      },
-    ]).start();
+    const playwrightContainer = await new PlaywrightContainer(
+      "mcr.microsoft.com/playwright:v1.39.0-alpha-oct-10-2023-jammy",
+      playwrightExampleProjectDir
+    ).start();
 
-    const { output, exitCode } = await playwrightContainer.exec(["echo", "hello", "world"]);
-
-    console.log("output", output);
-    console.log("exitCode", exitCode);
-
-    await playwrightContainer.stop();
+    await playwrightContainer.getHtmlReport("./test-report.html");
   });
 });
