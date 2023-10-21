@@ -69,8 +69,8 @@ export class StartedClickhouseContainer extends AbstractStartedContainer {
     this.hostNativePort = startedTestContainer.getMappedPort(nativePort);
   }
 
-  public getHttpUrl(schema: string): string {
-    return this.toUrl(schema, this.hostHttpPort)
+  public getHttpUrl(): string {
+    return this.toUrl("http", this.hostHttpPort)
   }
 
   public getNativeUrl(schema: string): string {
