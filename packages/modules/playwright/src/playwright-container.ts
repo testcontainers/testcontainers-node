@@ -1,10 +1,13 @@
-import fs from "node:fs";
+import { copyFile } from "node:fs/promises";
+import path from "path";
 import tar from "tar-fs";
+import tmp from "tmp";
 
 import {
   AbstractStartedContainer,
   AbstractStoppedContainer,
   GenericContainer,
+  log,
   StartedNetwork,
   StartedTestContainer,
   StopOptions,
@@ -13,7 +16,9 @@ import {
 
 const PLAYWRIGHT_PORT = 9323;
 
-const PLAYWRIGHT_HTML_REPORT_PATH = "/tmp/playwright.html";
+const PLAYWRIGHT_HTML_REPORT_FILE = "playwright.html";
+
+const PLAYWRIGHT_HTML_REPORT_PATH = `/tmp/${PLAYWRIGHT_HTML_REPORT_FILE}`;
 
 export class PlaywrightContainer extends GenericContainer {
   protected directoryToCopy: string;
@@ -22,6 +27,7 @@ export class PlaywrightContainer extends GenericContainer {
     super(image);
 
     this.directoryToCopy = directoryToCopy;
+
     this.directoriesToCopy = [
       {
         source: directoryToCopy,
@@ -64,12 +70,6 @@ export class StartedPlaywrightContainer extends AbstractStartedContainer {
   }
 }
 
-export class StoppedPlaywrightContainer extends AbstractStoppedContainer {
-  constructor(private readonly stoppedPlaywrightContainer: StoppedTestContainer) {
-    super(stoppedPlaywrightContainer);
-  }
-}
-
 export class StartedPlaywrightReporterContainer extends StartedPlaywrightContainer {
   constructor(
     startedPlaywrightContainer: StartedTestContainer,
@@ -80,18 +80,20 @@ export class StartedPlaywrightReporterContainer extends StartedPlaywrightContain
   }
 
   override async stop(options?: Partial<StopOptions>): Promise<StoppedPlaywrightReporterContainer> {
-    const stoppedSeleniumContainer = await super.stop(options);
-    const stoppedFfmpegContainer = await this.startedFfmpegContainer.stop({ remove: false, timeout: 60_000 });
+    const stoppedPlaywrightContainer = await super.stop(options);
     await this.network.stop();
-    return new StoppedPlaywrightReporterContainer(stoppedSeleniumContainer, stoppedFfmpegContainer);
+    return new StoppedPlaywrightReporterContainer(stoppedPlaywrightContainer);
+  }
+}
+
+export class StoppedPlaywrightContainer extends AbstractStoppedContainer {
+  constructor(private readonly stoppedPlaywrightContainer: StoppedTestContainer) {
+    super(stoppedPlaywrightContainer);
   }
 }
 
 export class StoppedPlaywrightReporterContainer extends StoppedPlaywrightContainer {
-  /*constructor(
-    stoppedSeleniumContainer: StoppedTestContainer,
-    private readonly stoppedFfmpegContainer: StoppedTestContainer
-) {
+  constructor(stoppedSeleniumContainer: StoppedTestContainer) {
     super(stoppedSeleniumContainer);
   }
 
@@ -104,23 +106,23 @@ export class StoppedPlaywrightReporterContainer extends StoppedPlaywrightContain
   }
 
   async getHtmlReport(reportPath: string): Promise<void> {
-    log.debug("Extracting archive from container...", { containerId: this.id });
-    const inputStream = await this.copyArchiveFromContainerMultiplexed(PLAYWRIGHT_HTML_REPORT_PATH);
-    const outputStream = fs.createWriteStream(reportPath);
-
-    await this.extractTarStreamToDest(archiveStream, destinationDir.name);
-
     try {
-      inputStream.pipe(outputStream);
+      const containerId = this.getId();
+      log.debug("Extracting archive from container...", { containerId });
+      const archiveStream = await this.copyArchiveFromContainer(PLAYWRIGHT_HTML_REPORT_PATH);
+      log.debug("Extracted archive from container", { containerId });
 
-      return new Promise<void>((resolve) => {
-        outputStream.on("finish", () => {
-          console.info(`You have successfully created a ${reportPath}.`);
-          resolve();
-        });
-      });
+      log.debug("Unpacking archive...", { containerId });
+      const destinationDir = tmp.dirSync({ keep: false });
+      await this.extractTarStreamToDest(archiveStream, destinationDir.name);
+      log.debug("Unpacked archive", { containerId });
+
+      const reportFile = path.resolve(destinationDir.name, PLAYWRIGHT_HTML_REPORT_FILE);
+      await copyFile(reportFile, reportPath);
+      log.debug(`Extracted report to "${reportPath}"`, { containerId });
     } catch (error) {
-      console.error(`You have and error ${error} creating a ${reportPath}.`);
+      const containerId = this.getId();
+      log.error(`You have and error ${error} extracting archive from container ${containerId} to ${reportPath}.`);
     }
-  }*/
+  }
 }
