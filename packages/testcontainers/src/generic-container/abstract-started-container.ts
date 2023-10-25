@@ -79,10 +79,6 @@ export class AbstractStartedContainer implements StartedTestContainer {
     return this.startedTestContainer.copyArchiveFromContainer(path);
   }
 
-  public copyArchiveFromContainerMultiplexed(path: string): Promise<NodeJS.ReadableStream> {
-    return this.startedTestContainer.copyArchiveFromContainerMultiplexed(path);
-  }
-
   public exec(command: string | string[]): Promise<ExecResult> {
     return this.startedTestContainer.exec(command);
   }

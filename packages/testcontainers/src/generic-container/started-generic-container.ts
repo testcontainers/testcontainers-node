@@ -170,14 +170,6 @@ export class StartedGenericContainer implements StartedTestContainer {
     return stream;
   }
 
-  public async copyArchiveFromContainerMultiplexed(path: string): Promise<NodeJS.ReadableStream> {
-    log.debug(`Copying archive "${path}" from container...`, { containerId: this.container.id });
-    const client = await getContainerRuntimeClient();
-    const stream = await client.container.fetchArchiveMultiplexed(this.container, path);
-    log.debug(`Copied archive "${path}" from container`, { containerId: this.container.id });
-    return stream;
-  }
-
   public async exec(command: string | string[]): Promise<ExecResult> {
     const commandArr = Array.isArray(command) ? command : command.split(" ");
     const commandStr = commandArr.join(" ");
