@@ -1,4 +1,3 @@
-import fs from "node:fs";
 import Dockerode, {
   Container,
   ContainerCreateOptions,
@@ -58,17 +57,6 @@ export class DockerContainerClient implements ContainerClient {
       const archive = await container.getArchive({ path });
       log.debug(`Fetched archive from container`, { containerId: container.id });
       return archive;
-    } catch (err) {
-      log.error(`Failed to fetch archive from container: ${err}`, { containerId: container.id });
-      throw err;
-    }
-  }
-
-  async fetchArchiveMultiplexed(container: Container, path: string): Promise<NodeJS.ReadableStream> {
-    try {
-      log.debug(`Fetching archive from container...`, { containerId: container.id });
-      const stdoutStream = fs.createWriteStream(path);
-      return container.modem.demuxStream(stdoutStream, process.stdout, process.stderr);
     } catch (err) {
       log.error(`Failed to fetch archive from container: ${err}`, { containerId: container.id });
       throw err;
