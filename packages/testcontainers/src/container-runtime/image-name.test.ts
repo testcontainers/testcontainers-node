@@ -30,6 +30,26 @@ describe("ContainerImage", () => {
       const imageName = new ImageName("registry", "image", "sha256:1234abcd1234abcd1234abcd1234abcd");
       expect(imageName.string).toBe("registry/image@sha256:1234abcd1234abcd1234abcd1234abcd");
     });
+
+    it("should not append the `latest` tag to image IDs", () => {
+      const imageName = new ImageName(
+        undefined,
+        "aa285b773a2c042056883845aea893a743d358a5d40f61734fa228fde93dae6f",
+        "latest"
+      );
+      expect(imageName.string).toBe("aa285b773a2c042056883845aea893a743d358a5d40f61734fa228fde93dae6f");
+    });
+
+    it("should keep other tags (not `latest`) on image IDs", () => {
+      // Note that the resulting image ID will not be accepted by docker.
+      // However, not treating tags other than `latests` specially is probably less surprising.
+      const imageName = new ImageName(
+        undefined,
+        "aa285b773a2c042056883845aea893a743d358a5d40f61734fa228fde93dae6f",
+        "1"
+      );
+      expect(imageName.string).toBe("aa285b773a2c042056883845aea893a743d358a5d40f61734fa228fde93dae6f:1");
+    });
   });
 
   describe("fromString", () => {
@@ -95,6 +115,14 @@ describe("ContainerImage", () => {
       expect(imageName.registry).toBe(undefined);
       expect(imageName.image).toBe("image");
       expect(imageName.tag).toBe("sha256:1234abcd1234abcd1234abcd1234abcd");
+    });
+
+    it("should work with image being an image ID", () => {
+      const imageName = ImageName.fromString("aa285b773a2c042056883845aea893a743d358a5d40f61734fa228fde93dae6f");
+
+      expect(imageName.registry).toBe(undefined);
+      expect(imageName.image).toBe("aa285b773a2c042056883845aea893a743d358a5d40f61734fa228fde93dae6f");
+      expect(imageName.tag).toBe("latest");
     });
   });
 });
