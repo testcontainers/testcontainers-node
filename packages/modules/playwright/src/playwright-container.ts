@@ -8,7 +8,6 @@ import {
   AbstractStoppedContainer,
   GenericContainer,
   log,
-  StartedNetwork,
   StartedTestContainer,
   StopOptions,
   StoppedTestContainer,
@@ -65,38 +64,6 @@ export class StartedPlaywrightContainer extends AbstractStartedContainer {
     return this.copyArchiveFromContainer(PLAYWRIGHT_HTML_REPORT_PATH);
   }
 
-  override async stop(options?: Partial<StopOptions>): Promise<StoppedPlaywrightContainer> {
-    return new StoppedPlaywrightContainer(await super.stop(options));
-  }
-}
-
-export class StartedPlaywrightReporterContainer extends StartedPlaywrightContainer {
-  constructor(
-    startedPlaywrightContainer: StartedTestContainer,
-    private readonly startedReportContainer: StartedTestContainer,
-    private readonly network: StartedNetwork
-  ) {
-    super(startedPlaywrightContainer);
-  }
-
-  override async stop(options?: Partial<StopOptions>): Promise<StoppedPlaywrightReporterContainer> {
-    const stoppedPlaywrightContainer = await super.stop(options);
-    await this.network.stop();
-    return new StoppedPlaywrightReporterContainer(stoppedPlaywrightContainer);
-  }
-}
-
-export class StoppedPlaywrightContainer extends AbstractStoppedContainer {
-  constructor(private readonly stoppedPlaywrightContainer: StoppedTestContainer) {
-    super(stoppedPlaywrightContainer);
-  }
-}
-
-export class StoppedPlaywrightReporterContainer extends StoppedPlaywrightContainer {
-  constructor(stoppedSeleniumContainer: StoppedTestContainer) {
-    super(stoppedSeleniumContainer);
-  }
-
   private async extractTarStreamToDest(tarStream: NodeJS.ReadableStream, dest: string): Promise<void> {
     await new Promise<void>((resolve) => {
       const destination = tar.extract(dest);
@@ -124,5 +91,15 @@ export class StoppedPlaywrightReporterContainer extends StoppedPlaywrightContain
       const containerId = this.getId();
       log.error(`You have and error ${error} extracting archive from container ${containerId} to ${reportPath}.`);
     }
+  }
+
+  override async stop(options?: Partial<StopOptions>): Promise<StoppedPlaywrightContainer> {
+    return new StoppedPlaywrightContainer(await super.stop(options));
+  }
+}
+
+export class StoppedPlaywrightContainer extends AbstractStoppedContainer {
+  constructor(private readonly stoppedPlaywrightContainer: StoppedTestContainer) {
+    super(stoppedPlaywrightContainer);
   }
 }
