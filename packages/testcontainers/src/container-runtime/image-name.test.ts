@@ -41,7 +41,10 @@ describe("ContainerImage", () => {
     });
 
     it("should keep other tags (not `latest`) on image IDs", () => {
-      // Note that the resulting image ID will not be accepted by docker.
+      // Note that the resulting image ID will not be accepted by Docker:
+      //
+      // > "invalid repository name [...], cannot specify 64-byte hexadecimal strings"
+      //
       // However, not treating tags other than `latests` specially is probably less surprising.
       const imageName = new ImageName(
         undefined,
@@ -123,6 +126,19 @@ describe("ContainerImage", () => {
       expect(imageName.registry).toBe(undefined);
       expect(imageName.image).toBe("aa285b773a2c042056883845aea893a743d358a5d40f61734fa228fde93dae6f");
       expect(imageName.tag).toBe("latest");
+    });
+
+    it("should work with image being an image ID and an explicit tag", () => {
+      // Note: Such an ID will not be accepted by docker:
+      //
+      // > "invalid repository name [...], cannot specify 64-byte hexadecimal strings"
+      //
+      // However, parsing it this way is probably least surprising.
+      const imageName = ImageName.fromString("aa285b773a2c042056883845aea893a743d358a5d40f61734fa228fde93dae6f:1");
+
+      expect(imageName.registry).toBe(undefined);
+      expect(imageName.image).toBe("aa285b773a2c042056883845aea893a743d358a5d40f61734fa228fde93dae6f");
+      expect(imageName.tag).toBe("1");
     });
   });
 });
