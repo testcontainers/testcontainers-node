@@ -31,30 +31,30 @@
   },
   "dependencies": {
     "@balena/dockerignore": "^1.0.2",
-    "archiver": "^5.3.1",
+    "archiver": "^5.3.2",
     "async-lock": "^1.4.0",
     "byline": "^5.0.0",
     "debug": "^4.3.4",
     "docker-compose": "^0.24.2",
     "dockerode": "^3.3.5",
     "get-port": "^5.1.1",
-    "node-fetch": "^2.6.12",
+    "node-fetch": "^2.7.0",
     "proper-lockfile": "^4.1.2",
-    "properties-reader": "^2.2.0",
+    "properties-reader": "^2.3.0",
     "ssh-remote-port-forward": "^1.0.4",
     "tar-fs": "^3.0.4",
     "tmp": "^0.2.1"
   },
   "devDependencies": {
-    "@types/archiver": "^5.3.2",
-    "@types/async-lock": "^1.4.0",
-    "@types/byline": "^4.2.33",
-    "@types/debug": "^4.1.8",
-    "@types/dockerode": "^3.3.19",
-    "@types/node-fetch": "^2.6.4",
-    "@types/proper-lockfile": "^4.1.2",
-    "@types/properties-reader": "^2.1.1",
-    "@types/tar-fs": "^2.0.1",
-    "@types/tmp": "^0.2.3"
+    "@types/archiver": "^5.3.4",
+    "@types/async-lock": "^1.4.1",
+    "@types/byline": "^4.2.35",
+    "@types/debug": "^4.1.10",
+    "@types/dockerode": "^3.3.21",
+    "@types/node-fetch": "^2.6.7",
+    "@types/proper-lockfile": "^4.1.3",
+    "@types/properties-reader": "^2.1.2",
+    "@types/tar-fs": "^2.0.3",
+    "@types/tmp": "^0.2.5"
   }
 }
