@@ -7,11 +7,13 @@ describe("PlaywrightContainer", () => {
   test(`should pass example tests and create a report for ${process.arch}`, async () => {
     const playwrightExampleProjectDir = path.resolve(__dirname, "..", "example-project");
 
-    const playwrightContainer = await new PlaywrightContainer(
-      "mcr.microsoft.com/playwright:v1.38.1-jammy",
-      playwrightExampleProjectDir
-    ).start();
+    const startedPlaywrightReportingContainer = await new PlaywrightContainer(
+      "mcr.microsoft.com/playwright:v1.38.1-jammy"
+    )
+      .withReporting(playwrightExampleProjectDir)
+      .start();
 
-    await playwrightContainer.getHtmlReport("./test-report.html");
+    const stoppedPlaywrightReportingContainer = await startedPlaywrightReportingContainer.stop();
+    await stoppedPlaywrightReportingContainer.getHtmlReport("./test-report.html");
   });
 });

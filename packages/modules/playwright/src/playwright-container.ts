@@ -19,28 +19,23 @@ const PLAYWRIGHT_HTML_REPORT_FILE = "playwright.html";
 
 const PLAYWRIGHT_HTML_REPORT_PATH = `/tmp/${PLAYWRIGHT_HTML_REPORT_FILE}`;
 
+const PLAYWRIGHT_WORKING_DIRECTORY = "/playwright";
+
 export class PlaywrightContainer extends GenericContainer {
-  protected directoryToCopy: string;
-
-  constructor(image: string, directoryToCopy: string) {
+  constructor(image: string) {
     super(image);
-
-    this.directoryToCopy = directoryToCopy;
-
-    this.directoriesToCopy = [
-      {
-        source: directoryToCopy,
-        target: "/playwright",
-        mode: 755,
-      },
-    ];
   }
 
   protected override async beforeContainerCreated(): Promise<void> {
-    this.withExposedPorts(9323)
-      .withWorkingDir("/playwright")
+    this.withExposedPorts(PLAYWRIGHT_PORT)
+      .withWorkingDir(PLAYWRIGHT_WORKING_DIRECTORY)
+      .withCopyDirectoriesToContainer(this.directoriesToCopy)
       .withEnvironment({ PLAYWRIGHT_HTML_REPORT: PLAYWRIGHT_HTML_REPORT_PATH })
       .withEntrypoint(["bash", "-c", "npm install && npx playwright test --reporter=html"]);
+  }
+
+  public withReporting(directoryToCopy: string): PlaywrightReportingContainer {
+    return new PlaywrightReportingContainer(this.imageName.string, directoryToCopy);
   }
 
   override async start(): Promise<StartedPlaywrightContainer> {
@@ -58,6 +53,57 @@ export class StartedPlaywrightContainer extends AbstractStartedContainer {
 
   getServerUrl(): string {
     return this.serverUrl;
+  }
+
+  override async stop(options?: Partial<StopOptions>): Promise<StoppedPlaywrightContainer> {
+    const stoppedPlaywrightContainer = await super.stop(options);
+    return new StoppedPlaywrightContainer(stoppedPlaywrightContainer);
+  }
+}
+
+export class StoppedPlaywrightContainer extends AbstractStoppedContainer {
+  constructor(stoppedPlaywrightContainer: StoppedTestContainer) {
+    super(stoppedPlaywrightContainer);
+  }
+}
+
+export class PlaywrightReportingContainer extends PlaywrightContainer {
+  protected directoryToCopy: string;
+
+  constructor(image: string, directoryToCopy: string) {
+    super(image);
+
+    this.directoryToCopy = directoryToCopy;
+
+    this.directoriesToCopy = [
+      {
+        source: directoryToCopy,
+        target: PLAYWRIGHT_WORKING_DIRECTORY,
+        mode: 755,
+      },
+    ];
+  }
+
+  public override async start(): Promise<StartedPlaywrightReportingContainer> {
+    const startedPlaywrightReportingContainer = await super.start();
+    return new StartedPlaywrightReportingContainer(startedPlaywrightReportingContainer);
+  }
+}
+
+export class StartedPlaywrightReportingContainer extends StartedPlaywrightContainer {
+  constructor(startedPlaywrightContainer: StartedTestContainer) {
+    super(startedPlaywrightContainer);
+  }
+
+  override async stop(options?: Partial<StopOptions>): Promise<StoppedPlaywrightReportingContainer> {
+    const stoppedPlaywrightReportingContainer = await super.stop(options);
+    return new StoppedPlaywrightReportingContainer(stoppedPlaywrightReportingContainer);
+  }
+}
+
+export class StoppedPlaywrightReportingContainer extends StoppedPlaywrightContainer {
+  constructor(stoppedPlaywrightReportingContainer: StoppedTestContainer) {
+    super(stoppedPlaywrightReportingContainer);
   }
 
   async streamHtmlReport(): Promise<NodeJS.ReadableStream> {
@@ -91,15 +137,5 @@ export class StartedPlaywrightContainer extends AbstractStartedContainer {
       const containerId = this.getId();
       log.error(`You have and error ${error} extracting archive from container ${containerId} to ${reportPath}.`);
     }
-  }
-
-  override async stop(options?: Partial<StopOptions>): Promise<StoppedPlaywrightContainer> {
-    return new StoppedPlaywrightContainer(await super.stop(options));
-  }
-}
-
-export class StoppedPlaywrightContainer extends AbstractStoppedContainer {
-  constructor(private readonly stoppedPlaywrightContainer: StoppedTestContainer) {
-    super(stoppedPlaywrightContainer);
   }
 }
