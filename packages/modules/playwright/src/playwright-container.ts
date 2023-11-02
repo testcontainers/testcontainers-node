@@ -22,11 +22,6 @@ const PLAYWRIGHT_CONTAINER_TEMPORARY_HTML_REPORT_PATH = `/tmp/${PLAYWRIGHT_HTML_
 
 const PLAYWRIGHT_CONTAINER_WORKING_DIRECTORY = "/playwright";
 
-type PlaywrightFlags = {
-  report: boolean;
-  ui: boolean;
-};
-
 export class PlaywrightContainer extends GenericContainer {
   protected sourceDirectoryToCopy: string;
 
