@@ -4,16 +4,11 @@ import path from "node:path";
 describe("PlaywrightContainer", () => {
   jest.setTimeout(180_000);
 
-  test(`should pass example tests and create a report for ${process.arch}`, async () => {
-    const playwrightExampleProjectDir = path.resolve(__dirname, "..", "example-project");
+  const PLAYWRIGHT_IMAGE = "mcr.microsoft.com/playwright:v1.39.0-jammy";
+  const exampleProjectDirectory = path.resolve(__dirname, "..", "example-project");
+  const reportPath = path.resolve(__dirname, "..", "reports", "test.html");
 
-    const startedPlaywrightReportingContainer = await new PlaywrightContainer(
-      "mcr.microsoft.com/playwright:v1.38.1-jammy"
-    )
-      .withReporting(playwrightExampleProjectDir)
-      .start();
-
-    const stoppedPlaywrightReportingContainer = await startedPlaywrightReportingContainer.stop();
-    await stoppedPlaywrightReportingContainer.getHtmlReport("./test-report.html");
+  test(`should pass example tests creating a report for ${process.arch}`, async () => {
+    await new PlaywrightContainer(PLAYWRIGHT_IMAGE, exampleProjectDirectory).withReporting(reportPath).start();
   });
 });
