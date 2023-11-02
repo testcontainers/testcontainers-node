@@ -11,7 +11,6 @@ import {
   StopOptions,
   StoppedTestContainer,
   log,
-  Wait,
 } from "testcontainers";
 
 const PLAYWRIGHT_CONTAINER_PORT = 9323;
@@ -43,8 +42,7 @@ export class PlaywrightContainer extends GenericContainer {
     this.withExposedPorts(PLAYWRIGHT_CONTAINER_PORT)
       .withWorkingDir(PLAYWRIGHT_CONTAINER_WORKING_DIRECTORY)
       .withCopyDirectoriesToContainer(this.directoriesToCopy)
-      .withWaitStrategy(Wait.forListeningPorts())
-      .withCommand(["sleep", "infinity"]);
+      .withEntrypoint(["bash", "-c", "npm install && npx playwright test --reporter=html"]);
   }
 
   public withReporting(target: string): PlaywrightReportingContainer {
@@ -52,16 +50,7 @@ export class PlaywrightContainer extends GenericContainer {
   }
 
   override async start(): Promise<StartedPlaywrightContainer> {
-    const startedContainer = await super.start();
-
-    const commands = ["npm install", "npx playwright test --reporter=html"];
-
-    for (const command of commands) {
-      const lol = await startedContainer.exec(command);
-      log.info(lol.output);
-    }
-
-    return new StartedPlaywrightContainer(startedContainer);
+    return new StartedPlaywrightContainer(await super.start());
   }
 }
 
@@ -87,6 +76,10 @@ export class PlaywrightReportingContainer extends PlaywrightContainer {
   constructor(image: string, source: string, target: string) {
     super(image, source);
     this.target = target;
+  }
+
+  protected override async beforeContainerCreated(): Promise<void> {
+    this.withCommand(["bash", "-c", "tail -f /dev/null"]);
   }
 
   public override async start(): Promise<StartedPlaywrightReportingContainer> {
