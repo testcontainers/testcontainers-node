@@ -8,7 +8,7 @@ describe("PlaywrightContainer", () => {
   const exampleProjectDirectory = path.resolve(__dirname, "..", "example-project");
   const reportPath = path.resolve(__dirname, "..", "reports", "test.html");
 
-  test(`should pass example tests creating a report for ${process.arch}`, async () => {
+  it(`should pass example tests creating a report for ${process.arch}`, async () => {
     await new PlaywrightContainer(PLAYWRIGHT_IMAGE, exampleProjectDirectory).withReporting(reportPath).start();
   });
 });
