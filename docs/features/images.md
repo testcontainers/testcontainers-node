@@ -90,3 +90,27 @@ const container = await GenericContainer
   .withCache(false)
   .build();
 ```
+
+### Dynamic build context
+
+If you would like to send a build context that you created in code (maybe you have a dynamic Dockerfile), you can send 
+the build context as a `NodeJS.ReadableStream` since the Docker Daemon accepts it as a _tar_ file. You can use the 
+[tar-fs](https://www.npmjs.com/package/tar-fs) (or [tar-stream](https://www.npmjs.com/package/tar-stream)) package to 
+create a custom dynamic context.
+
+```javascript
+const tar = require('tar-stream');
+
+const tarStream = tar.pack();
+tarStream.entry({ name: 'alpine.Dockerfile' }, 
+  `
+    FROM alpine:latest
+    CMD ["sleep", "infinity"]
+  `
+);
+tarStream.finalize();
+
+const container = await GenericContainer
+  .fromContextArchive(tarStream, 'alpine.Dockerfile')
+  .build();
+```

@@ -36,7 +36,26 @@ import { mapInspectResult } from "../utils/map-inspect-result";
 const reusableContainerCreationLock = new AsyncLock();
 
 export class GenericContainer implements TestContainer {
+  /**
+   * Create a docker image from a Dockerfile.
+   *
+   * @param context - The build context directory path.
+   * @param dockerfileName - The name of the Dockerfile. Default is `Dockerfile`.
+   */
   public static fromDockerfile(context: string, dockerfileName = "Dockerfile"): GenericContainerBuilder {
+    return new GenericContainerBuilder(context, dockerfileName);
+  }
+
+  /**
+   * Create a docker image from a context archive stream.
+   *
+   * @param context - The build context archive stream.
+   * @param dockerfileName - The name of the Dockerfile. Default is `Dockerfile`.
+   */
+  public static fromContextArchive(
+    context: NodeJS.ReadableStream,
+    dockerfileName = "Dockerfile"
+  ): GenericContainerBuilder {
     return new GenericContainerBuilder(context, dockerfileName);
   }
 

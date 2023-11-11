@@ -1,4 +1,6 @@
+import fs from "fs";
 import path from "path";
+import tar from "tar-stream";
 import { GenericContainer } from "./generic-container";
 import { Wait } from "../wait-strategies/wait";
 import { PullPolicy } from "../utils/pull-policy";
@@ -99,6 +101,30 @@ describe("GenericContainer Dockerfile", () => {
     const startedContainer = await container.withWaitStrategy(Wait.forLogMessage(message)).start();
 
     await new Promise<void>((resolve) => setTimeout(resolve, 1000));
+
+    await startedContainer.stop();
+  });
+});
+
+describe("GenericContainer fromContextArchive", () => {
+  jest.setTimeout(180_000);
+
+  const fixtures = path.resolve(__dirname, "..", "..", "fixtures", "docker");
+
+  it("should build and start", async () => {
+    const fixturesCtx = path.resolve(fixtures, "docker");
+
+    // Generate a context stream with a Dockerfile named "alpine.Dockerfile"
+    const tarStream = tar.pack();
+    tarStream.entry({ name: "alpine.Dockerfile" }, fs.readFileSync(path.join(fixturesCtx, "Dockerfile")));
+    tarStream.entry({ name: "index.js" }, fs.readFileSync(path.join(fixturesCtx, "index.js")));
+    tarStream.entry({ name: "test.txt" }, "hello world");
+    tarStream.finalize();
+
+    const container = await GenericContainer.fromContextArchive(tarStream, "alpine.Dockerfile").build();
+    const startedContainer = await container.withExposedPorts(8080).start();
+
+    await checkContainerIsHealthy(startedContainer);
 
     await startedContainer.stop();
   });

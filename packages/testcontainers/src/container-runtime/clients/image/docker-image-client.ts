@@ -1,14 +1,11 @@
 import Dockerode, { ImageBuildOptions } from "dockerode";
 import byline from "byline";
-import tar from "tar-fs";
-import path from "path";
-import { existsSync, promises as fs } from "fs";
-import dockerIgnore from "@balena/dockerignore";
 import { getAuthConfig } from "../../auth/get-auth-config";
 import { ImageName } from "../../image-name";
 import { ImageClient } from "./image-client";
 import AsyncLock from "async-lock";
 import { log, buildLog, pullLog } from "../../../common";
+import stream from "stream";
 
 export class DockerImageClient implements ImageClient {
   private readonly existingImages = new Set<string>();
@@ -16,23 +13,12 @@ export class DockerImageClient implements ImageClient {
 
   constructor(protected readonly dockerode: Dockerode, protected readonly indexServerAddress: string) {}
 
-  async build(context: string, opts: ImageBuildOptions): Promise<void> {
+  async build(context: stream.Readable, opts: ImageBuildOptions): Promise<void> {
     try {
-      log.debug(`Building image "${opts.t}" with context "${context}"...`);
-      const isDockerIgnored = await this.createIsDockerIgnoredFunction(context);
-      const tarStream = tar.pack(context, {
-        ignore: (aPath) => {
-          const relativePath = path.relative(context, aPath);
-          if (relativePath === opts.dockerfile) {
-            return false;
-          } else {
-            return isDockerIgnored(relativePath);
-          }
-        },
-      });
+      log.debug(`Building image "${opts.t}"...`);
       await new Promise<void>((resolve) => {
         this.dockerode
-          .buildImage(tarStream, opts)
+          .buildImage(context, opts)
           .then((stream) => byline(stream))
           .then((stream) => {
             stream.setEncoding("utf-8");
@@ -44,25 +30,11 @@ export class DockerImageClient implements ImageClient {
             stream.on("end", () => resolve());
           });
       });
-      log.debug(`Built image "${opts.t}" with context "${context}"`);
+      log.debug(`Built image "${opts.t}"`);
     } catch (err) {
       log.error(`Failed to build image: ${err}`);
       throw err;
     }
-  }
-
-  private async createIsDockerIgnoredFunction(context: string): Promise<(path: string) => boolean> {
-    const dockerIgnoreFilePath = path.join(context, ".dockerignore");
-    if (!existsSync(dockerIgnoreFilePath)) {
-      return () => false;
-    }
-
-    const dockerIgnorePatterns = await fs.readFile(dockerIgnoreFilePath, { encoding: "utf-8" });
-    const instance = dockerIgnore({ ignorecase: false });
-    instance.add(dockerIgnorePatterns);
-    const filter = instance.createFilter();
-
-    return (aPath: string) => !filter(aPath);
   }
 
   async exists(imageName: ImageName): Promise<boolean> {

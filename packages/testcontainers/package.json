@@ -55,6 +55,8 @@
     "@types/proper-lockfile": "^4.1.3",
     "@types/properties-reader": "^2.1.2",
     "@types/tar-fs": "^2.0.3",
-    "@types/tmp": "^0.2.5"
+    "@types/tar-stream": "^3.1.3",
+    "@types/tmp": "^0.2.5",
+    "tar-stream": "^3.1.6"
   }
 }

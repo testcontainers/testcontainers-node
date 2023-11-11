@@ -7,6 +7,10 @@ import { getAuthConfig, getContainerRuntimeClient, ImageName } from "../containe
 import { getReaper } from "../reaper/reaper";
 import { getDockerfileImages } from "../utils/dockerfile-parser";
 import { createLabels, LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
+import tar from "tar-fs";
+import { existsSync, promises as fs } from "fs";
+import dockerIgnore from "@balena/dockerignore";
+import Dockerode from "dockerode";
 
 export type BuildOptions = {
   deleteOnExit: boolean;
@@ -19,12 +23,12 @@ export class GenericContainerBuilder {
   private target?: string;
 
   constructor(
-    private readonly context: string,
+    private readonly context: NodeJS.ReadableStream | string,
     private readonly dockerfileName: string,
     private readonly uuid: Uuid = new RandomUuid()
   ) {}
 
-  public withBuildArgs(buildArgs: BuildArgs): GenericContainerBuilder {
+  public withBuildArgs(buildArgs: BuildArgs): this {
     this.buildArgs = buildArgs;
     return this;
   }
@@ -44,6 +48,12 @@ export class GenericContainerBuilder {
     return this;
   }
 
+  /**
+   * Build the image.
+   *
+   * @param image - The image name to tag the built image with.
+   * @param options - Options for the build. Defaults to `{ deleteOnExit: true }`.
+   */
   public async build(
     image = `localhost/${this.uuid.nextUuid()}:${this.uuid.nextUuid()}`,
     options: BuildOptions = { deleteOnExit: true }
@@ -52,26 +62,49 @@ export class GenericContainerBuilder {
     const reaper = await getReaper(client);
 
     const imageName = ImageName.fromString(image);
-    const dockerfile = path.resolve(this.context, this.dockerfileName);
-
-    const imageNames = await getDockerfileImages(dockerfile, this.buildArgs);
-    const registryConfig = await this.getRegistryConfig(client.info.containerRuntime.indexServerAddress, imageNames);
     const labels = createLabels();
     if (options.deleteOnExit) {
       labels[LABEL_TESTCONTAINERS_SESSION_ID] = reaper.sessionId;
     }
 
-    log.info(`Building Dockerfile "${dockerfile}" as image "${imageName}"...`);
-    await client.image.build(this.context, {
+    let contextStream: NodeJS.ReadableStream;
+    const imageBuildOptions: Dockerode.ImageBuildOptions = {
       t: imageName.string,
       dockerfile: this.dockerfileName,
       buildargs: this.buildArgs,
       pull: this.pullPolicy ? "true" : undefined,
       nocache: !this.cache,
-      registryconfig: registryConfig,
       labels,
       target: this.target,
-    });
+    };
+
+    if (typeof this.context !== "string") {
+      contextStream = this.context;
+    } else {
+      // Get the registry config for the images in the Dockerfile
+      const dockerfile = path.resolve(this.context, this.dockerfileName);
+      const imageNames = await getDockerfileImages(dockerfile, this.buildArgs);
+      imageBuildOptions.registryconfig = await this.getRegistryConfig(
+        client.info.containerRuntime.indexServerAddress,
+        imageNames
+      );
+
+      // Create a tar stream of the context directory, excluding the files that are ignored by .dockerignore
+      const dockerignoreFilter = await newDockerignoreFilter(this.context);
+      contextStream = tar.pack(this.context, {
+        ignore: (aPath) => {
+          const relativePath = path.relative(<string>this.context, aPath);
+          if (relativePath === this.dockerfileName) {
+            return false;
+          } else {
+            return dockerignoreFilter(relativePath);
+          }
+        },
+      });
+    }
+
+    log.info(`Building Dockerfile "${this.dockerfileName}" as image "${imageName.string}"...`);
+    await client.image.build(contextStream, imageBuildOptions);
 
     const container = new GenericContainer(imageName.string);
     if (!(await client.image.exists(imageName))) {
@@ -104,4 +137,18 @@ export class GenericContainerBuilder {
       })
       .reduce((prev, next) => ({ ...prev, ...next }), {} as RegistryConfig);
   }
+}
+
+async function newDockerignoreFilter(context: string): Promise<(path: string) => boolean> {
+  const dockerIgnoreFilePath = path.join(context, ".dockerignore");
+  if (!existsSync(dockerIgnoreFilePath)) {
+    return () => false;
+  }
+
+  const dockerIgnorePatterns = await fs.readFile(dockerIgnoreFilePath, { encoding: "utf-8" });
+  const instance = dockerIgnore({ ignorecase: false });
+  instance.add(dockerIgnorePatterns);
+  const filter = instance.createFilter();
+
+  return (aPath: string) => !filter(aPath);
 }
