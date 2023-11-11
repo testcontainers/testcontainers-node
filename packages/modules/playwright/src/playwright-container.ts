@@ -14,12 +14,9 @@ import {
 } from "testcontainers";
 
 const PLAYWRIGHT_CONTAINER_PORT = 9323;
-
-const PLAYWRIGHT_HTML_REPORT_FILE = "playwright.html";
-
-const PLAYWRIGHT_CONTAINER_TEMPORARY_HTML_REPORT_PATH = `/tmp/${PLAYWRIGHT_HTML_REPORT_FILE}`;
-
 const PLAYWRIGHT_CONTAINER_WORKING_DIRECTORY = "/playwright";
+const PLAYWRIGHT_HTML_REPORT_FILE = "playwright.html";
+const PLAYWRIGHT_CONTAINER_TEMPORARY_HTML_REPORT_PATH = `/tmp/${PLAYWRIGHT_HTML_REPORT_FILE}`;
 
 export class PlaywrightContainer extends GenericContainer {
   protected sourceDirectoryToCopy: string;
@@ -93,6 +90,7 @@ export class StartedPlaywrightReportingContainer extends StartedPlaywrightContai
   constructor(startedPlaywrightContainer: StartedTestContainer, target: string) {
     super(startedPlaywrightContainer);
     this.target = target;
+    this.saveHtmlReport(target);
   }
 
   private async extractTarStreamToDest(tarStream: NodeJS.ReadableStream, dest: string): Promise<void> {
@@ -125,7 +123,6 @@ export class StartedPlaywrightReportingContainer extends StartedPlaywrightContai
   }
 
   override async stop(options?: Partial<StopOptions>): Promise<StoppedPlaywrightReportingContainer> {
-    await this.saveHtmlReport(this.target);
     const stoppedPlaywrightReportingContainer = await super.stop(options);
     return new StoppedPlaywrightReportingContainer(stoppedPlaywrightReportingContainer);
   }
