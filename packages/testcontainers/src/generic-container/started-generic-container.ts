@@ -1,5 +1,5 @@
 import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
-import Dockerode, { ContainerInspectInfo } from "dockerode";
+import Dockerode, { ContainerInspectInfo, ContainerLogsOptions } from "dockerode";
 import { ContentToCopy, DirectoryToCopy, ExecResult, FileToCopy, Labels } from "../types";
 import { Readable } from "stream";
 import { StoppedGenericContainer } from "./stopped-generic-container";
@@ -181,8 +181,9 @@ export class StartedGenericContainer implements StartedTestContainer {
     return output;
   }
 
-  public async logs(): Promise<Readable> {
+  public async logs(opts?: ContainerLogsOptions): Promise<Readable> {
     const client = await getContainerRuntimeClient();
-    return client.container.logs(this.container);
+
+    return client.container.logs(this.container, opts);
   }
 }
