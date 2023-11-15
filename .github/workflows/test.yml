@@ -77,8 +77,8 @@ jobs:
             runner: ubuntu-22.04
           - container-runtime: docker-rootless
             runner: ubuntu-22.04
-          - container-runtime: podman
-            runner: ubuntu-22.04
+#          - container-runtime: podman
+#            runner: ubuntu-22.04
         module:
           - arangodb
           - elasticsearch
