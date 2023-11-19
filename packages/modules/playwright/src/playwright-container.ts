@@ -13,20 +13,12 @@ import {
   log,
 } from "testcontainers";
 
-const PLAYWRIGHT_CONTAINER_PORT = 9323;
-const PLAYWRIGHT_CONTAINER_WORKING_DIRECTORY = "/playwright";
-const PLAYWRIGHT_CONTAINER_HTML_REPORT_FILE = "index.html";
-const PLAYWRIGHT_CONTAINER_REPORTS_DIRECTORY = "playwright-report";
-
-const playwrightContainerReportsPath = path.resolve(
-  PLAYWRIGHT_CONTAINER_WORKING_DIRECTORY,
-  PLAYWRIGHT_CONTAINER_REPORTS_DIRECTORY
-);
-
-const playwrightContainerHtmlReportPath = path.resolve(
-  playwrightContainerReportsPath,
-  PLAYWRIGHT_CONTAINER_HTML_REPORT_FILE
-);
+// const CONTAINER_PORT = 9323;
+const CONTAINER_WORKING_DIRECTORY = "/playwright";
+const CONTAINER_HTML_REPORT_FILE = "index.html";
+const CONTAINER_REPORTS_DIRECTORY = "playwright-report";
+const CONTAINER_REPORTS_DIRECTORY_PATH = path.resolve(CONTAINER_WORKING_DIRECTORY, CONTAINER_REPORTS_DIRECTORY);
+const CONTAINER_HTML_REPORT_PATH = path.resolve(CONTAINER_REPORTS_DIRECTORY_PATH, CONTAINER_HTML_REPORT_FILE);
 
 export class PlaywrightContainer extends GenericContainer {
   protected sourceDirectoryToCopy: string;
@@ -39,7 +31,7 @@ export class PlaywrightContainer extends GenericContainer {
     this.directoriesToCopy = [
       {
         source: sourceDirectoryToCopy,
-        target: PLAYWRIGHT_CONTAINER_WORKING_DIRECTORY,
+        target: CONTAINER_WORKING_DIRECTORY,
         mode: 755,
       },
     ];
@@ -75,17 +67,19 @@ export class PlaywrightReportingContainer extends PlaywrightContainer {
     super(image, source);
   }
 
-  protected override async beforeContainerCreated(): Promise<void> {
-    this.withExposedPorts(PLAYWRIGHT_CONTAINER_PORT)
-      .withWorkingDir(PLAYWRIGHT_CONTAINER_WORKING_DIRECTORY)
-      .withCopyDirectoriesToContainer(this.directoriesToCopy)
-      .withCommand(["sleep", "infinity"]);
-  }
-
   public override async start(): Promise<StartedPlaywrightReportingContainer> {
-    const startedPlaywrightReportingContainer = new StartedPlaywrightReportingContainer(await super.start());
-    await startedPlaywrightReportingContainer.exec(["npx", "playwright", "test", "--reporter=html"]);
-    return startedPlaywrightReportingContainer;
+    this.withWorkingDir(CONTAINER_WORKING_DIRECTORY)
+      .withCopyDirectoriesToContainer(this.directoriesToCopy)
+      //.withCommand(["sleep", "infinity"]);
+      .withEntrypoint(["sh", "-c", "sleep infinity"]);
+
+    const startedTestContainer = await super.start();
+
+    // await startedTestContainer.exec(["npm", "install"]);
+    // await startedTestContainer.exec(["npm", "playwright", "test", "--reporter=html"]);
+    // await startedTestContainer.exec(["sleep", "infinity"]);
+
+    return new StartedPlaywrightReportingContainer(startedTestContainer);
   }
 }
 
@@ -117,7 +111,7 @@ export class StoppedPlaywrightReportingContainer extends StoppedPlaywrightContai
     try {
       const containerId = this.getId();
       log.debug("Extracting archive from container...", { containerId });
-      const archiveStream = await this.copyArchiveFromContainer(playwrightContainerHtmlReportPath);
+      const archiveStream = await this.copyArchiveFromContainer(CONTAINER_HTML_REPORT_PATH);
       log.debug("Extracted archive from container", { containerId });
 
       log.debug("Unpacking archive...", { containerId });
@@ -125,7 +119,7 @@ export class StoppedPlaywrightReportingContainer extends StoppedPlaywrightContai
       await this.extractTarStreamToDest(archiveStream, destinationDir.name);
       log.debug("Unpacked archive", { containerId });
 
-      const reportFile = path.resolve(destinationDir.name, PLAYWRIGHT_CONTAINER_HTML_REPORT_FILE);
+      const reportFile = path.resolve(destinationDir.name, CONTAINER_HTML_REPORT_FILE);
       await copyFile(reportFile, target);
       log.debug(`Extracted report from "${target}"`, { containerId });
     } catch (error) {
