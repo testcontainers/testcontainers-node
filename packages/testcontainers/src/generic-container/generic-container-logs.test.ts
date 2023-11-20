@@ -26,6 +26,16 @@ describe("GenericContainer logs", () => {
     await container.stop();
   });
 
+  it("should stream logs with timestamps from a started container", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
+    const currentYear = new Date().getFullYear().toString();
+
+    const stream = await container.logs({timestamps: true});
+    const log: string = await new Promise((resolve) => stream.on("data", (line) => resolve(line)));
+    expect(log.startsWith(currentYear)).toBe(true);
+    await container.stop();
+  });
+
   it("should stream logs from a running container after restart", async () => {
     const containerLogTraceSpy = jest.spyOn(containerLog, "trace");
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
