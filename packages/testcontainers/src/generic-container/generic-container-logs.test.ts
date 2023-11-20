@@ -27,21 +27,25 @@ describe("GenericContainer logs", () => {
     await container.stop();
   });
 
-  it("should stream logs with ContainerLogsOptions from a started container", async () => {
+  it("should stream logs with since option from a started container", async () => {
     const pauseMs = 5 * 1000;
-    const logBeforeSleep = 'first';
-    const logAfterSleep = 'second';
-    const container = await new GenericContainer("alpine")
-      .withEntrypoint(["/bin/sh", "-c" , `echo ${logBeforeSleep} && sleep ${pauseMs / 1000} && echo ${logAfterSleep} && sleep infinity`])
+    const logBeforeSleep = "first";
+    const logAfterSleep = "second";
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withEntrypoint([
+        "/bin/sh",
+        "-c",
+        `echo ${logBeforeSleep} && sleep ${pauseMs / 1000} && echo ${logAfterSleep} && sleep infinity`,
+      ])
       .withWaitStrategy(Wait.forLogMessage(logBeforeSleep))
       .start();
 
-    await new Promise(resolve => setTimeout(resolve, pauseMs));
+    await new Promise((resolve) => setTimeout(resolve, pauseMs));
 
     const inSleepTimestamp = new Date().getTime() - pauseMs + 1000;
     const since = Math.floor(inSleepTimestamp / 1000);
 
-    const stream = await container.logs({since});
+    const stream = await container.logs({ since });
     const log: string = await new Promise((resolve) => stream.on("data", (line) => resolve(line.trim())));
 
     expect(log).toBe(logAfterSleep);
