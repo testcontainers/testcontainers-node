@@ -1,5 +1,6 @@
 import { GenericContainer } from "./generic-container";
 import { containerLog } from "../common";
+import { Wait } from "../wait-strategies/wait";
 
 describe("GenericContainer logs", () => {
   jest.setTimeout(180_000);
@@ -27,12 +28,24 @@ describe("GenericContainer logs", () => {
   });
 
   it("should stream logs with ContainerLogsOptions from a started container", async () => {
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
-    const currentYear = new Date().getFullYear().toString();
+    const pauseMs = 5 * 1000;
+    const logBeforeSleep = 'first';
+    const logAfterSleep = 'second';
+    const container = await new GenericContainer("alpine")
+      .withEntrypoint(["/bin/sh", "-c" , `echo ${logBeforeSleep} && sleep ${pauseMs / 1000} && echo ${logAfterSleep} && sleep infinity`])
+      .withWaitStrategy(Wait.forLogMessage(logBeforeSleep))
+      .start();
 
-    const stream = await container.logs({timestamps: true});
-    const log: string = await new Promise((resolve) => stream.on("data", (line) => resolve(line)));
-    expect(log.startsWith(currentYear)).toBe(true);
+    await new Promise(resolve => setTimeout(resolve, pauseMs));
+
+    const inSleepTimestamp = new Date().getTime() - pauseMs + 1000;
+    const since = Math.floor(inSleepTimestamp / 1000);
+
+    const stream = await container.logs({since});
+    const log: string = await new Promise((resolve) => stream.on("data", (line) => resolve(line.trim())));
+
+    expect(log).toBe(logAfterSleep);
+
     await container.stop();
   });
 

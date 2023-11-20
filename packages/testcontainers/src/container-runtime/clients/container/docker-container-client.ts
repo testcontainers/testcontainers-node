@@ -158,7 +158,6 @@ export class DockerContainerClient implements ContainerClient {
     try {
       log.debug(`Fetching container logs...`, { containerId: container.id });
       const stream = (await container.logs({
-        ...opts,
         follow: true,
         stdout: true,
         stderr: true,
