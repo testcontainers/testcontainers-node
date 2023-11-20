@@ -26,7 +26,7 @@ describe("GenericContainer logs", () => {
     await container.stop();
   });
 
-  it("should stream logs with timestamps from a started container", async () => {
+  it("should stream logs with ContainerLogsOptions from a started container", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
     const currentYear = new Date().getFullYear().toString();
 

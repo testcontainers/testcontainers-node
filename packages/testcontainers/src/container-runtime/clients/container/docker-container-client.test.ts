@@ -4,7 +4,7 @@ import { DockerContainerClient } from "./docker-container-client";
 describe("DockerContainerClient", () => {
   jest.setTimeout(180_000);
 
-  it("should stream logs with timestamps from a started container by containerClient", async () => {
+  it("should stream logs with ContainerLogsOptions from a started container by containerClient", async () => {
     const dockerode = new Dockerode();
     const containerClient = new DockerContainerClient(dockerode);
     const currentYear = new Date().getFullYear().toString();
