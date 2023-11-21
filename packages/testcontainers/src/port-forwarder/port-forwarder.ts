@@ -3,7 +3,6 @@ import { GenericContainer } from "../generic-container/generic-container";
 import { StartedTestContainer } from "../test-container";
 import { log, RandomUuid } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
-import { getReaper } from "../reaper/reaper";
 import { PortWithOptionalBinding } from "../utils/port";
 
 export const SSHD_IMAGE = process.env["SSHD_CONTAINER_IMAGE"] ?? "testcontainers/sshd:1.1.0";
@@ -46,9 +45,7 @@ export class PortForwarderInstance {
 
   private static async createInstance(): Promise<PortForwarder> {
     log.debug(`Creating new Port Forwarder...`);
-
     const client = await getContainerRuntimeClient();
-    const reaper = await getReaper(client);
 
     const username = "root";
     const password = new RandomUuid().nextUuid();
@@ -57,8 +54,9 @@ export class PortForwarderInstance {
       ? { container: 22, host: Number(process.env["TESTCONTAINERS_SSHD_PORT"]) }
       : 22;
 
+    const portForwarderId = new RandomUuid().nextUuid();
     const container = await new GenericContainer(SSHD_IMAGE)
-      .withName(`testcontainers-port-forwarder-${reaper.sessionId}`)
+      .withName(`testcontainers-port-forwarder-${portForwarderId}`)
       .withExposedPorts(containerPort)
       .withEnvironment({ PASSWORD: password })
       .withCommand([
