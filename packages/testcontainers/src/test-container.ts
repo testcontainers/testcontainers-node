@@ -16,7 +16,6 @@ import {
 import { StartedNetwork } from "./network/network";
 import { PortWithOptionalBinding } from "./utils/port";
 import { ImagePullPolicy } from "./utils/pull-policy";
-import { ContainerLogsOptions } from "dockerode";
 
 export interface TestContainer {
   start(): Promise<StartedTestContainer>;
@@ -75,7 +74,7 @@ export interface StartedTestContainer {
   copyFilesToContainer(filesToCopy: FileToCopy[]): Promise<void>;
   copyContentToContainer(contentsToCopy: ContentToCopy[]): Promise<void>;
   exec(command: string | string[]): Promise<ExecResult>;
-  logs(opts?: ContainerLogsOptions): Promise<Readable>;
+  logs(opts?: { since?: number }): Promise<Readable>;
 }
 
 export interface StoppedTestContainer {

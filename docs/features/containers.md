@@ -516,6 +516,8 @@ const container = await new GenericContainer("alpine").start();
   .on("end", () => console.log("Stream closed"));
 ```
 
+Also you can pass `{ since?: number }` (UNIX timestamp) option to stream logs from specific time.
+
 Or a consumer can be provided before start. This is useful for example if your container is failing to start:
 
 ```javascript

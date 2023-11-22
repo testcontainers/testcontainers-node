@@ -1,7 +1,6 @@
 import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
 import { ContentToCopy, DirectoryToCopy, ExecResult, FileToCopy, Labels } from "../types";
 import { Readable } from "stream";
-import { ContainerLogsOptions } from "dockerode";
 
 export class AbstractStartedContainer implements StartedTestContainer {
   constructor(protected readonly startedTestContainer: StartedTestContainer) {}
@@ -84,7 +83,7 @@ export class AbstractStartedContainer implements StartedTestContainer {
     return this.startedTestContainer.exec(command);
   }
 
-  public logs(opts?: ContainerLogsOptions): Promise<Readable> {
+  public logs(opts?: { since?: number }): Promise<Readable> {
     return this.startedTestContainer.logs(opts);
   }
 }
