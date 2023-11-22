@@ -8,7 +8,7 @@ import {
   GenericContainer,
   log,
   Network,
-  StartedNetwork,
+  StoppableNetwork,
   StartedTestContainer,
   StopOptions,
   StoppedTestContainer,
@@ -76,10 +76,6 @@ export class StoppedSeleniumContainer extends AbstractStoppedContainer {
 }
 
 export class SeleniumRecordingContainer extends SeleniumContainer {
-  constructor(image: string) {
-    super(image);
-  }
-
   public override async start(): Promise<StartedSeleniumRecordingContainer> {
     const network = await new Network().start();
     this.withNetwork(network);
@@ -101,7 +97,7 @@ export class StartedSeleniumRecordingContainer extends StartedSeleniumContainer 
   constructor(
     startedSeleniumContainer: StartedTestContainer,
     private readonly startedFfmpegContainer: StartedTestContainer,
-    private readonly network: StartedNetwork
+    private readonly network: StoppableNetwork
   ) {
     super(startedSeleniumContainer);
   }

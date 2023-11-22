@@ -16,7 +16,13 @@ export { StartedDockerComposeEnvironment } from "./docker-compose-environment/st
 export { StoppedDockerComposeEnvironment } from "./docker-compose-environment/stopped-docker-compose-environment";
 export { DownedDockerComposeEnvironment } from "./docker-compose-environment/downed-docker-compose-environment";
 
-export { Network, StartedNetwork, StoppedNetwork } from "./network/network";
+export {
+  Network,
+  StartedBridgeNetwork,
+  StoppableNetwork,
+  StartedNetwork,
+  StartedExistingNetwork,
+} from "./network/network";
 
 export { Wait } from "./wait-strategies/wait";
 export { StartupCheckStrategy, StartupStatus } from "./wait-strategies/startup-check-strategy";

@@ -11,6 +11,51 @@ describe("Network", () => {
     client = await getContainerRuntimeClient();
   });
 
+  it("should create a network and retrieve it by id", async () => {
+    //// Given
+    const preexistingNetwork = await new Network().start();
+    const preexistingNetworkName = preexistingNetwork.getName();
+    const preexistingNetworkId = preexistingNetwork.getId();
+
+    //// When
+    const network = await Network.getNetwork(preexistingNetworkId);
+
+    //// Then
+    expect(network.getName()).toEqual(preexistingNetworkName);
+    expect(network.getId()).toEqual(preexistingNetworkId);
+
+    //// Cleanup
+    await preexistingNetwork.stop();
+  });
+
+  it("should create a network and retrieve it by name", async () => {
+    //// Given
+    const preexistingNetwork = await new Network().start();
+    const preexistingNetworkName = preexistingNetwork.getName();
+    const preexistingNetworkId = preexistingNetwork.getId();
+
+    //// When
+    const network = await Network.getNetwork(preexistingNetworkName);
+
+    //// Then
+    expect(network.getName()).toEqual(preexistingNetworkName);
+    expect(network.getId()).toEqual(preexistingNetworkId);
+
+    //// Cleanup
+    await preexistingNetwork.stop();
+  });
+
+  it("should fail if network does not exist", async () => {
+    //// Given
+    const networkId = "non-existing-network-asdfghkl";
+
+    //// When
+    const network = Network.getNetwork(networkId);
+
+    //// Then
+    await expect(network).rejects.toThrow(/no such network/);
+  });
+
   it("should start container via network mode", async () => {
     const network = await new Network().start();
 
