@@ -521,7 +521,7 @@ Also you can pass `{ since?: number }` (UNIX timestamp) option to stream logs fr
 ```javascript
 const msInSec = 1000;
 const tenSecondsAgoMs = new Date().getTime() - 10 * msInSec;
-const since = tenSecondsAgo / msInSec;
+const since = tenSecondsAgoMs / msInSec;
 
 (await container.logs({since}))
   .on("data", line => console.log(line))
