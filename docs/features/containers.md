@@ -554,3 +554,14 @@ const container = await new GenericContainer("alpine")
   })
   .start();
 ```
+
+You can specify a point in time as a UNIX timestamp from which you want the logs to start: 
+
+```javascript
+const msInSec = 1000;
+const tenSecondsAgoMs = new Date().getTime() - 10 * msInSec;
+const since = tenSecondsAgoMs / msInSec;
+
+(await container.logs({ since }))
+  .on("data", line => console.log(line))
+```
