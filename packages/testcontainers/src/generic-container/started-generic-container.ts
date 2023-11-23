@@ -1,6 +1,6 @@
 import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
 import Dockerode, { ContainerInspectInfo } from "dockerode";
-import { ContentToCopy, DirectoryToCopy, ExecResult, FileToCopy, Labels } from "../types";
+import { ContentToCopy, DirectoryToCopy, ExecOptions, ExecResult, FileToCopy, Labels } from "../types";
 import { Readable } from "stream";
 import { StoppedGenericContainer } from "./stopped-generic-container";
 import { WaitStrategy } from "../wait-strategies/wait-strategy";
@@ -170,12 +170,12 @@ export class StartedGenericContainer implements StartedTestContainer {
     return stream;
   }
 
-  public async exec(command: string | string[]): Promise<ExecResult> {
+  public async exec(command: string | string[], opts?: Partial<ExecOptions>): Promise<ExecResult> {
     const commandArr = Array.isArray(command) ? command : command.split(" ");
     const commandStr = commandArr.join(" ");
     const client = await getContainerRuntimeClient();
     log.debug(`Executing command "${commandStr}"...`, { containerId: this.container.id });
-    const output = await client.container.exec(this.container, commandArr);
+    const output = await client.container.exec(this.container, commandArr, opts);
     log.debug(`Executed command "${commandStr}"...`, { containerId: this.container.id });
 
     return output;
