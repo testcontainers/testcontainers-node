@@ -516,17 +516,6 @@ const container = await new GenericContainer("alpine").start();
   .on("end", () => console.log("Stream closed"));
 ```
 
-Also you can pass `{ since?: number }` (UNIX timestamp) option to stream logs from specific time.
-
-```javascript
-const msInSec = 1000;
-const tenSecondsAgoMs = new Date().getTime() - 10 * msInSec;
-const since = tenSecondsAgoMs / msInSec;
-
-(await container.logs({since}))
-  .on("data", line => console.log(line))
-```
-
 Or a consumer can be provided before start. This is useful for example if your container is failing to start:
 
 ```javascript
@@ -537,4 +526,15 @@ const container = await new GenericContainer("alpine")
     stream.on("end", () => console.log("Stream closed"));
   })
   .start();
+```
+
+You can specify a point in time as a UNIX timestamp from which you want the logs to start: 
+
+```javascript
+const msInSec = 1000;
+const tenSecondsAgoMs = new Date().getTime() - 10 * msInSec;
+const since = tenSecondsAgoMs / msInSec;
+
+(await container.logs({ since }))
+  .on("data", line => console.log(line))
 ```
