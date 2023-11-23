@@ -85,6 +85,7 @@ jobs:
           - hivemq
           - kafka
           - mongodb
+          - mssqlserver
           - mysql
           - nats
           - neo4j
