@@ -74,7 +74,7 @@ export interface StartedTestContainer {
   copyFilesToContainer(filesToCopy: FileToCopy[]): Promise<void>;
   copyContentToContainer(contentsToCopy: ContentToCopy[]): Promise<void>;
   exec(command: string | string[]): Promise<ExecResult>;
-  logs(): Promise<Readable>;
+  logs(opts?: { since?: number }): Promise<Readable>;
 }
 
 export interface StoppedTestContainer {
