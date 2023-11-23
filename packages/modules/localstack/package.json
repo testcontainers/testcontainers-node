@@ -29,7 +29,7 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "aws-sdk": "^2.1430.0"
+    "@aws-sdk/client-s3": "^3.456.0"
   },
   "dependencies": {
     "testcontainers": "^10.2.1"

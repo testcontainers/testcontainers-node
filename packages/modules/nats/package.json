@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/nats",
-  "version": "10.2.1",
+  "version": "10.2.2",
   "license": "MIT",
   "keywords": [
     "nats",
@@ -29,9 +29,9 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "nats": "^2.15.1"
+    "nats": "^2.17.0"
   },
   "dependencies": {
-    "testcontainers": "^10.2.1"
+    "testcontainers": "^10.2.2"
   }
 }
