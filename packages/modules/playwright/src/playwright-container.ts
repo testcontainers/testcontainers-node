@@ -68,12 +68,17 @@ export class PlaywrightReportingContainer extends PlaywrightContainer {
   }
 
   public override async start(): Promise<StartedPlaywrightReportingContainer> {
-    this.withWorkingDir(CONTAINER_WORKING_DIRECTORY)
-      .withCopyDirectoriesToContainer(this.directoriesToCopy)
-      //.withCommand(["sleep", "infinity"]);
-      .withEntrypoint(["sh", "-c", "sleep infinity"]);
+    // this.withWorkingDir(CONTAINER_WORKING_DIRECTORY).withCopyDirectoriesToContainer(this.directoriesToCopy);
+    //.withCommand(["sleep", "infinity"]);
+    // .withEntrypoint(["sh", "-c", "sleep infinity"]);
 
-    const startedTestContainer = await super.start();
+    const startedTestContainer = await super
+      .withWorkingDir(CONTAINER_WORKING_DIRECTORY)
+      .withCopyDirectoriesToContainer(this.directoriesToCopy)
+      .withCommand(["sleep", "infinity"])
+      //.withCommand(["npm", "install"])
+      //.withCommand(["npm", "playwright", "test", "--reporter=html"])
+      .start();
 
     // await startedTestContainer.exec(["npm", "install"]);
     // await startedTestContainer.exec(["npm", "playwright", "test", "--reporter=html"]);
@@ -84,19 +89,8 @@ export class PlaywrightReportingContainer extends PlaywrightContainer {
 }
 
 export class StartedPlaywrightReportingContainer extends StartedPlaywrightContainer {
-  constructor(startedPlaywrightContainer: StartedTestContainer) {
-    super(startedPlaywrightContainer);
-  }
-
-  override async stop(options?: Partial<StopOptions>): Promise<StoppedPlaywrightReportingContainer> {
-    const stoppedPlaywrightReportingContainer = await super.stop(options);
-    return new StoppedPlaywrightReportingContainer(stoppedPlaywrightReportingContainer);
-  }
-}
-
-export class StoppedPlaywrightReportingContainer extends StoppedPlaywrightContainer {
-  constructor(stoppedPlaywrightReportingContainer: StoppedTestContainer) {
-    super(stoppedPlaywrightReportingContainer);
+  constructor(startedTestContainer: StartedTestContainer) {
+    super(startedTestContainer);
   }
 
   private async extractTarStreamToDest(tarStream: NodeJS.ReadableStream, dest: string): Promise<void> {
@@ -125,5 +119,16 @@ export class StoppedPlaywrightReportingContainer extends StoppedPlaywrightContai
     } catch (error) {
       log.error(`${error}`);
     }
+  }
+
+  override async stop(options?: Partial<StopOptions>): Promise<StoppedPlaywrightReportingContainer> {
+    const stoppedPlaywrightReportingContainer = await super.stop(options);
+    return new StoppedPlaywrightReportingContainer(stoppedPlaywrightReportingContainer);
+  }
+}
+
+export class StoppedPlaywrightReportingContainer extends StoppedPlaywrightContainer {
+  constructor(stoppedPlaywrightReportingContainer: StoppedTestContainer) {
+    super(stoppedPlaywrightReportingContainer);
   }
 }
