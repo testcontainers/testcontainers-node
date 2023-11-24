@@ -8,44 +8,83 @@ describe("PortForwarder Reuse", () => {
   let randomPort: number;
   let server: Server;
 
-  beforeEach(async () => {
-    randomPort = await new RandomUniquePortGenerator().generatePort();
-
-    await new Promise<void>((resolve) => {
-      server = createServer((req, res) => {
-        res.writeHead(200);
-        res.end("hello world");
-      });
-      server.listen(randomPort, resolve);
-    });
-  });
-
   afterEach(() => {
     server.close();
     jest.resetModules();
   });
 
-  it("should not conflict when port forwarder is already running 1", async () => {
-    const { TestContainers } = await import("../test-containers");
-    await TestContainers.exposeHostPorts(randomPort);
+  describe("Different host ports", () => {
+    beforeEach(async () => {
+      randomPort = await new RandomUniquePortGenerator().generatePort();
+      server = await createTestServer(randomPort);
+    });
 
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").start();
+    it("1", async () => {
+      const { TestContainers } = await import("../test-containers");
+      await TestContainers.exposeHostPorts(randomPort);
 
-    const { output } = await container.exec(["curl", "-s", `http://host.testcontainers.internal:${randomPort}`]);
-    expect(output).toEqual(expect.stringContaining("hello world"));
+      const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").start();
 
-    await container.stop();
+      const { output } = await container.exec(["curl", "-s", `http://host.testcontainers.internal:${randomPort}`]);
+      expect(output).toEqual(expect.stringContaining("hello world"));
+
+      await container.stop();
+    });
+
+    it("2", async () => {
+      const { TestContainers } = await import("../test-containers");
+      await TestContainers.exposeHostPorts(randomPort);
+
+      const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").start();
+
+      const { output } = await container.exec(["curl", "-s", `http://host.testcontainers.internal:${randomPort}`]);
+      expect(output).toEqual(expect.stringContaining("hello world"));
+
+      await container.stop();
+    });
   });
 
-  it("should not conflict when port forwarder is already running 2", async () => {
-    const { TestContainers } = await import("../test-containers");
-    await TestContainers.exposeHostPorts(randomPort);
+  describe("Same host ports", () => {
+    beforeAll(async () => {
+      randomPort = await new RandomUniquePortGenerator().generatePort();
+    });
 
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").start();
+    beforeEach(async () => {
+      server = await createTestServer(randomPort);
+    });
 
-    const { output } = await container.exec(["curl", "-s", `http://host.testcontainers.internal:${randomPort}`]);
-    expect(output).toEqual(expect.stringContaining("hello world"));
+    it("1", async () => {
+      const { TestContainers } = await import("../test-containers");
+      await TestContainers.exposeHostPorts(randomPort);
 
-    await container.stop();
+      const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").start();
+
+      const { output } = await container.exec(["curl", "-s", `http://host.testcontainers.internal:${randomPort}`]);
+      expect(output).toEqual(expect.stringContaining("hello world"));
+
+      await container.stop();
+    });
+
+    it("2", async () => {
+      const { TestContainers } = await import("../test-containers");
+      await TestContainers.exposeHostPorts(randomPort);
+
+      const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").start();
+
+      const { output } = await container.exec(["curl", "-s", `http://host.testcontainers.internal:${randomPort}`]);
+      expect(output).toEqual(expect.stringContaining("hello world"));
+
+      await container.stop();
+    });
   });
 });
+
+async function createTestServer(port: number): Promise<Server> {
+  return await new Promise<Server>((resolve) => {
+    const server = createServer((req, res) => {
+      res.writeHead(200);
+      res.end("hello world");
+    });
+    server.listen(port, () => resolve(server));
+  });
+}
