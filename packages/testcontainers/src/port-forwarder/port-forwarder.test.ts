@@ -10,59 +10,135 @@ describe("PortForwarder", () => {
   let randomPort: number;
   let server: Server;
 
-  beforeEach(async () => {
-    randomPort = await new RandomUniquePortGenerator().generatePort();
-
-    await new Promise<void>((resolve) => {
-      server = createServer((req, res) => {
-        res.writeHead(200);
-        res.end("hello world");
-      });
-      server.listen(randomPort, resolve);
-    });
-  });
-
   afterEach(() => {
     server.close();
   });
 
-  it("should expose host ports to the container", async () => {
-    await TestContainers.exposeHostPorts(randomPort);
+  describe("Behaviour", () => {
+    beforeEach(async () => {
+      randomPort = await new RandomUniquePortGenerator().generatePort();
+      server = await createTestServer(randomPort);
+    });
 
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").start();
+    it("should expose host ports to the container", async () => {
+      await TestContainers.exposeHostPorts(randomPort);
 
-    const { output } = await container.exec(["curl", "-s", `http://host.testcontainers.internal:${randomPort}`]);
-    expect(output).toEqual(expect.stringContaining("hello world"));
+      const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").start();
 
-    await container.stop();
+      const { output } = await container.exec(["curl", "-s", `http://host.testcontainers.internal:${randomPort}`]);
+      expect(output).toEqual(expect.stringContaining("hello world"));
+
+      await container.stop();
+    });
+
+    it("should expose host ports to the container with custom network", async () => {
+      await TestContainers.exposeHostPorts(randomPort);
+
+      const network = await new Network().start();
+      const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withNetwork(network).start();
+
+      const { output } = await container.exec(["curl", "-s", `http://host.testcontainers.internal:${randomPort}`]);
+      expect(output).toEqual(expect.stringContaining("hello world"));
+
+      await container.stop();
+      await network.stop();
+    });
+
+    it("should expose host ports to the container with custom network and network alias", async () => {
+      await TestContainers.exposeHostPorts(randomPort);
+
+      const network = await new Network().start();
+      const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+        .withNetwork(network)
+        .withNetworkAliases("foo")
+        .start();
+
+      const { output } = await container.exec(["curl", "-s", `http://host.testcontainers.internal:${randomPort}`]);
+      expect(output).toEqual(expect.stringContaining("hello world"));
+
+      await container.stop();
+      await network.stop();
+    });
   });
 
-  it("should expose host ports to the container with custom network", async () => {
-    await TestContainers.exposeHostPorts(randomPort);
+  describe("Reuse", () => {
+    afterEach(() => {
+      jest.resetModules();
+    });
 
-    const network = await new Network().start();
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withNetwork(network).start();
+    describe("Different host ports", () => {
+      beforeEach(async () => {
+        randomPort = await new RandomUniquePortGenerator().generatePort();
+        server = await createTestServer(randomPort);
+      });
 
-    const { output } = await container.exec(["curl", "-s", `http://host.testcontainers.internal:${randomPort}`]);
-    expect(output).toEqual(expect.stringContaining("hello world"));
+      it("1", async () => {
+        const { TestContainers } = await import("../test-containers");
+        await TestContainers.exposeHostPorts(randomPort);
 
-    await container.stop();
-    await network.stop();
-  });
+        const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").start();
 
-  it("should expose host ports to the container with custom network and network alias", async () => {
-    await TestContainers.exposeHostPorts(randomPort);
+        const { output } = await container.exec(["curl", "-s", `http://host.testcontainers.internal:${randomPort}`]);
+        expect(output).toEqual(expect.stringContaining("hello world"));
 
-    const network = await new Network().start();
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
-      .withNetwork(network)
-      .withNetworkAliases("foo")
-      .start();
+        await container.stop();
+      });
 
-    const { output } = await container.exec(["curl", "-s", `http://host.testcontainers.internal:${randomPort}`]);
-    expect(output).toEqual(expect.stringContaining("hello world"));
+      it("2", async () => {
+        const { TestContainers } = await import("../test-containers");
+        await TestContainers.exposeHostPorts(randomPort);
 
-    await container.stop();
-    await network.stop();
+        const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").start();
+
+        const { output } = await container.exec(["curl", "-s", `http://host.testcontainers.internal:${randomPort}`]);
+        expect(output).toEqual(expect.stringContaining("hello world"));
+
+        await container.stop();
+      });
+    });
+
+    describe("Same host ports", () => {
+      beforeAll(async () => {
+        randomPort = await new RandomUniquePortGenerator().generatePort();
+      });
+
+      beforeEach(async () => {
+        server = await createTestServer(randomPort);
+      });
+
+      it("1", async () => {
+        const { TestContainers } = await import("../test-containers");
+        await TestContainers.exposeHostPorts(randomPort);
+
+        const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").start();
+
+        const { output } = await container.exec(["curl", "-s", `http://host.testcontainers.internal:${randomPort}`]);
+        expect(output).toEqual(expect.stringContaining("hello world"));
+
+        await container.stop();
+      });
+
+      it("2", async () => {
+        const { TestContainers } = await import("../test-containers");
+        await TestContainers.exposeHostPorts(randomPort);
+
+        const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").start();
+
+        const { output } = await container.exec(["curl", "-s", `http://host.testcontainers.internal:${randomPort}`]);
+        expect(output).toEqual(expect.stringContaining("hello world"));
+
+        await container.stop();
+      });
+    });
   });
 });
+
+async function createTestServer(port: number): Promise<Server> {
+  return await new Promise<Server>((resolve) => {
+    const server = createServer((req, res) => {
+      res.writeHead(200);
+      res.end("hello world");
+    });
+    server.listen(port, () => resolve(server));
+  });
+}
