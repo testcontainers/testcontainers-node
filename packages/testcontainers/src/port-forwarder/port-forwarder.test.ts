@@ -134,11 +134,10 @@ describe("PortForwarder", () => {
 });
 
 async function createTestServer(port: number): Promise<Server> {
-  return await new Promise<Server>((resolve) => {
-    const server = createServer((req, res) => {
-      res.writeHead(200);
-      res.end("hello world");
-    });
-    server.listen(port, () => resolve(server));
+  const server = createServer((req, res) => {
+    res.writeHead(200);
+    res.end("hello world");
   });
+  await new Promise<void>((resolve) => server.listen(port, resolve));
+  return server;
 }
