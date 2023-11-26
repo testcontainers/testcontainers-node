@@ -51,6 +51,40 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
+  it("should execute a command in a different working directory", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
+
+    const { output, exitCode } = await container.exec(["pwd"], { workingDir: "/var/log" });
+
+    expect(exitCode).toBe(0);
+    expect(output).toEqual(expect.stringContaining("/var/log"));
+
+    await container.stop();
+  });
+
+  it("should execute a command with custom environment variables", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
+
+    const { output, exitCode } = await container.exec(["env"], { env: { TEST_ENV: "test" } });
+
+    expect(exitCode).toBe(0);
+    expect(output).toEqual(expect.stringContaining("TEST_ENV=test"));
+
+    await container.stop();
+  });
+
+  it("should execute a command with a different user", async () => {
+    // By default, node:alpine runs as root
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
+
+    const { output, exitCode } = await container.exec("whoami", { user: "node" });
+
+    expect(exitCode).toBe(0);
+    expect(output).toEqual(expect.stringContaining("node"));
+
+    await container.stop();
+  });
+
   it("should set environment variables", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withEnvironment({ customKey: "customValue" })

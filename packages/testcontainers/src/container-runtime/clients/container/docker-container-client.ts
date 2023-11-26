@@ -4,11 +4,12 @@ import Dockerode, {
   ContainerInfo,
   ContainerInspectInfo,
   ContainerLogsOptions,
+  ExecCreateOptions,
   Network,
 } from "dockerode";
 import { PassThrough, Readable } from "stream";
 import { IncomingMessage } from "http";
-import { ExecResult } from "./types";
+import { ExecOptions, ExecResult } from "./types";
 import byline from "byline";
 import { ContainerClient } from "./container-client";
 import { log, execLog, streamToString } from "../../../common";
@@ -173,21 +174,31 @@ export class DockerContainerClient implements ContainerClient {
     }
   }
 
-  async exec(container: Container, command: string[], opts?: { log: boolean }): Promise<ExecResult> {
-    const chunks: string[] = [];
+  async exec(container: Container, command: string[], opts?: Partial<ExecOptions>): Promise<ExecResult> {
+    const execOptions: ExecCreateOptions = {
+      Cmd: command,
+      AttachStdout: true,
+      AttachStderr: true,
+    };
 
+    if (opts?.env !== undefined) {
+      execOptions.Env = Object.entries(opts.env).map(([key, value]) => `${key}=${value}`);
+    }
+    if (opts?.workingDir !== undefined) {
+      execOptions.WorkingDir = opts.workingDir;
+    }
+    if (opts?.user !== undefined) {
+      execOptions.User = opts.user;
+    }
+
+    const chunks: string[] = [];
     try {
       if (opts?.log) {
         log.debug(`Execing container with command "${command.join(" ")}"...`, { containerId: container.id });
       }
-      const exec = await container.exec({
-        Cmd: command,
-        AttachStdout: true,
-        AttachStderr: true,
-      });
 
+      const exec = await container.exec(execOptions);
       const stream = await exec.start({ stdin: true, Detach: false, Tty: true });
-
       if (opts?.log && execLog.enabled()) {
         byline(stream).on("data", (line) => execLog.trace(line, { containerId: container.id }));
       }
@@ -200,7 +211,7 @@ export class DockerContainerClient implements ContainerClient {
       stream.destroy();
 
       const inspectResult = await exec.inspect();
-      const exitCode = inspectResult.ExitCode === null ? -1 : inspectResult.ExitCode;
+      const exitCode = inspectResult.ExitCode ?? -1;
       const output = chunks.join("");
       if (opts?.log) {
         log.debug(`Execed container with command "${command.join(" ")}"...`, { containerId: container.id });
