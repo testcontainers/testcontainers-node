@@ -67,18 +67,17 @@ export class PlaywrightReportingContainer extends PlaywrightContainer {
     super(image, source);
   }
 
-  public override async start(): Promise<StartedPlaywrightReportingContainer> {
-    const startedTestContainer = await super
-      .withWorkingDir(CONTAINER_WORKING_DIRECTORY)
+  protected override async beforeContainerCreated(): Promise<void> {
+    this.withWorkingDir(CONTAINER_WORKING_DIRECTORY)
       .withCopyDirectoriesToContainer(this.directoriesToCopy)
-      // .withCommand(["sleep", "infinity"])
-      //.withCommand(["npm", "install"])
-      //.withCommand(["npm", "playwright", "test", "--reporter=html"])
-      .start();
+      .withEntrypoint(["/bin/sh", "-c", `sleep infinity`]);
+  }
 
-    // await startedTestContainer.exec(["npm", "install"]);
-    // await startedTestContainer.exec(["npm", "playwright", "test", "--reporter=html"]);
-    // await startedTestContainer.exec(["sleep", "infinity"]);
+  public override async start(): Promise<StartedPlaywrightReportingContainer> {
+    const startedTestContainer = await super.start();
+
+    await startedTestContainer.exec(["npm", "install"]);
+    await startedTestContainer.exec(["npm", "playwright", "test", "--reporter=html"]);
 
     return new StartedPlaywrightReportingContainer(startedTestContainer);
   }

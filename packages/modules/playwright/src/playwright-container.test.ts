@@ -15,7 +15,8 @@ describe("PlaywrightContainer", () => {
     )
       .withReporting()
       .start();
-    // await startedPlaywrightReportingContainer.saveHtmlReport(pathToSaveReport);
-    // await startedPlaywrightReportingContainer.stop({ remove: false });
+
+    await startedPlaywrightReportingContainer.saveHtmlReport(pathToSaveReport);
+    await startedPlaywrightReportingContainer.stop({ remove: false });
   });
 });
