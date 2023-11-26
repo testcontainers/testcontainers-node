@@ -1,4 +1,4 @@
-import path from "node:path";
+import path from "path";
 import { PlaywrightContainer } from "./playwright-container";
 
 describe("PlaywrightContainer", () => {
@@ -15,11 +15,7 @@ describe("PlaywrightContainer", () => {
     )
       .withReporting()
       .start();
-
-    await startedPlaywrightReportingContainer.saveHtmlReport(pathToSaveReport);
-    await startedPlaywrightReportingContainer.stop({ remove: false });
-
-    // const stoppedPlaywrightReportingContainer = await startedPlaywrightReportingContainer.stop({ remove: false });
-    // await stoppedPlaywrightReportingContainer.saveHtmlReport(pathToSaveReport);
+    // await startedPlaywrightReportingContainer.saveHtmlReport(pathToSaveReport);
+    // await startedPlaywrightReportingContainer.stop({ remove: false });
   });
 });

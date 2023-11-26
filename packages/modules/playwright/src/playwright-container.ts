@@ -1,5 +1,5 @@
-import { copyFile } from "node:fs/promises";
-import path from "node:path";
+import { copyFile } from "fs/promises";
+import path from "path";
 import tar from "tar-fs";
 import tmp from "tmp";
 
@@ -68,14 +68,10 @@ export class PlaywrightReportingContainer extends PlaywrightContainer {
   }
 
   public override async start(): Promise<StartedPlaywrightReportingContainer> {
-    // this.withWorkingDir(CONTAINER_WORKING_DIRECTORY).withCopyDirectoriesToContainer(this.directoriesToCopy);
-    //.withCommand(["sleep", "infinity"]);
-    // .withEntrypoint(["sh", "-c", "sleep infinity"]);
-
     const startedTestContainer = await super
       .withWorkingDir(CONTAINER_WORKING_DIRECTORY)
       .withCopyDirectoriesToContainer(this.directoriesToCopy)
-      .withCommand(["sleep", "infinity"])
+      // .withCommand(["sleep", "infinity"])
       //.withCommand(["npm", "install"])
       //.withCommand(["npm", "playwright", "test", "--reporter=html"])
       .start();

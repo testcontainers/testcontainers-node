@@ -6,7 +6,7 @@ const config: Config = {
   moduleNameMapper: {
     "^testcontainers$": path.resolve(__dirname, "../../testcontainers/src"),
   },
-  modulePathIgnorePatterns: [__dirname + "/example-project"],
+  modulePathIgnorePatterns: [__dirname, "../example-project"],
 };
 
 export default config;
