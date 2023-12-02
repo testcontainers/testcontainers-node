@@ -29,10 +29,10 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "dependencies": {
-    "couchbase": "3.2.5",
     "testcontainers": "^10.1.0"
   },
   "devDependencies": {
+    "couchbase": "3.2.5",
     "@types/couchbase": "^2.4.1"
   }
 }
