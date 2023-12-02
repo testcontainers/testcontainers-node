@@ -40,6 +40,7 @@ nav:
       - Networking: features/networking.md
       - Compose: features/compose.md
       - Wait strategies: features/wait-strategies.md
+      - Advanced: features/advanced.md
   - Modules:
       - ArangoDB: modules/arangodb.md
       - Couchbase: modules/couchbase.md

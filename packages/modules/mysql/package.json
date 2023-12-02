@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/mysql",
-  "version": "10.2.1",
+  "version": "10.3.2",
   "license": "MIT",
   "keywords": [
     "mysql",
@@ -29,9 +29,9 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "mysql2": "^3.6.0"
+    "mysql2": "^3.6.2"
   },
   "dependencies": {
-    "testcontainers": "^10.2.1"
+    "testcontainers": "^10.3.2"
   }
 }

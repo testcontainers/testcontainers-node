@@ -5,6 +5,7 @@ import {
   ContentToCopy,
   DirectoryToCopy,
   Environment,
+  ExecOptions,
   ExecResult,
   ExtraHost,
   FileToCopy,
@@ -73,8 +74,8 @@ export interface StartedTestContainer {
   copyDirectoriesToContainer(directoriesToCopy: DirectoryToCopy[]): Promise<void>;
   copyFilesToContainer(filesToCopy: FileToCopy[]): Promise<void>;
   copyContentToContainer(contentsToCopy: ContentToCopy[]): Promise<void>;
-  exec(command: string | string[]): Promise<ExecResult>;
-  logs(): Promise<Readable>;
+  exec(command: string | string[], opts?: Partial<ExecOptions>): Promise<ExecResult>;
+  logs(opts?: { since?: number }): Promise<Readable>;
 }
 
 export interface StoppedTestContainer {

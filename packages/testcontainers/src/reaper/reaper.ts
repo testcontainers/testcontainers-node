@@ -43,7 +43,9 @@ export async function getReaper(client: ContainerRuntimeClient): Promise<Reaper>
 
 async function findReaperContainer(client: ContainerRuntimeClient): Promise<ContainerInfo | undefined> {
   const containers = await client.container.list();
-  return containers.find((container) => container.Labels["org.testcontainers.ryuk"] === "true");
+  return containers.find(
+    (container) => container.State === "running" && container.Labels["org.testcontainers.ryuk"] === "true"
+  );
 }
 
 async function useExistingReaper(reaperContainer: ContainerInfo, sessionId: string, host: string): Promise<Reaper> {
