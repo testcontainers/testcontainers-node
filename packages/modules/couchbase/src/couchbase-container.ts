@@ -82,6 +82,7 @@ export class CouchbaseContainer extends GenericContainer {
     return this;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private async doHttpRequest(host: string, port: number, path: string, method: string, body: any, auth = false) {
     try {
       return await fetch(`http://${host}:${port}${path}`, {
