@@ -214,7 +214,8 @@ export class CouchbaseContainer extends GenericContainer {
   private async renameNode(container: StartedTestContainer, inspectResult: InspectResult) {
     log.debug(`Renaming Couchbase Node from localhost to ${container.getHost()}`);
 
-    const internalIpAddress = inspectResult.networkSettings.bridge.ipAddress;
+    const networkName = container.getNetworkNames()[0];
+    const internalIpAddress = inspectResult.networkSettings[networkName].ipAddress;
     const body = new URLSearchParams();
     body.append("hostname", internalIpAddress);
 
