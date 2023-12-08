@@ -21,6 +21,7 @@ describe("LocalStackContainer", () => {
 
     const client = new S3Client({
       endpoint: container.getConnectionUri(),
+      forcePathStyle: true,
       region: "us-east-1",
       credentials: {
         secretAccessKey: "test",

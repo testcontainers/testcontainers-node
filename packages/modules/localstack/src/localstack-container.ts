@@ -36,21 +36,18 @@ export class LocalstackContainer extends GenericContainer {
 }
 
 export class StartedLocalStackContainer extends AbstractStartedContainer {
-  private readonly port: number;
-
   constructor(startedTestContainer: StartedTestContainer) {
     super(startedTestContainer);
-    this.port = startedTestContainer.getMappedPort(LOCALSTACK_PORT);
   }
 
   public getPort(): number {
-    return this.port;
+    return this.startedTestContainer.getMappedPort(LOCALSTACK_PORT);
   }
 
   /**
    * @returns A connection URI in the form of `http://host:port`
    */
   public getConnectionUri(): string {
-    return "http://" + this.getHost() + ":" + this.getPort().toString();
+    return `http://${this.getHost()}:${this.getPort().toString()}`;
   }
 }
