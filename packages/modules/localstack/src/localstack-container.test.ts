@@ -50,8 +50,8 @@ describe("LocalStackContainer", () => {
 
     const awsCliInDockerNetwork = await new GenericContainer("amazon/aws-cli:2.7.27")
       .withNetwork(network)
-      .withEntrypoint(["tail"])
-      .withCommand(["-f", "/dev/null"])
+      .withEntrypoint(["bash"])
+      .withCommand(["-c", "echo 'START'; sleep infinity"])
       .withEnvironment({
         AWS_ACCESS_KEY_ID: "test",
         AWS_SECRET_ACCESS_KEY: "test",
