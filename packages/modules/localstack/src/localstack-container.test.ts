@@ -16,6 +16,7 @@ const runAwsCliAgainstDockerNetworkContainer = async (
 describe("LocalStackContainer", () => {
   jest.setTimeout(180_000);
 
+  // createS3Bucket {
   it("should create a S3 bucket", async () => {
     const container = await new LocalstackContainer().start();
 
@@ -32,14 +33,15 @@ describe("LocalStackContainer", () => {
       Bucket: "testcontainers",
     };
     const command = new CreateBucketCommand(input);
+
     const createBucketResponse = await client.send(command);
     expect(createBucketResponse.$metadata.httpStatusCode).toEqual(200);
-
     const headBucketResponse = await client.send(new HeadBucketCommand(input));
     expect(headBucketResponse.$metadata.httpStatusCode).toEqual(200);
 
     await container.stop();
   });
+  // }
 
   it("should use custom network", async () => {
     const network = await new Network().start();
