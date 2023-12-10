@@ -84,6 +84,7 @@ jobs:
           - elasticsearch
           - hivemq
           - kafka
+          - localstack
           - mongodb
           - mysql
           - nats
