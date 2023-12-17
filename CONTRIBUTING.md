@@ -3,7 +3,7 @@
 [Create an issue](https://github.com/testcontainers/testcontainers-node/issues) if you find any bugs.
 
 [Create a pull request](https://github.com/testcontainers/testcontainers-node/pulls) if you wish to fix an issue or provide an enhancement. Please be sure to:
-* Discuss with the authors on an issue ticket or discussion prior to doing anything big.
+* Discuss with the authors via an issue or discussion prior to doing anything big.
 * Follow the style, structure and naming conventions of the rest of the project.
 * Make commits atomic and easy to merge.
 * Run the Git hooks when making commits to ensure the code is linted and correctly formatted.
@@ -11,11 +11,7 @@
 
 ## Documentation
 
-The documentation is a static site built with [MkDocs](https://www.mkdocs.org/). We use the [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) theme, which offers a number of useful extensions to MkDocs.
-
-In addition, we use a [custom plugin](https://github.com/rnorth/mkdocs-codeinclude-plugin) for inclusion of code snippets.
-
-We publish our documentation using Netlify.
+The documentation is a static site built with [MkDocs](https://www.mkdocs.org/) and the [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) theme. In addition, we use a [custom plugin](https://github.com/rnorth/mkdocs-codeinclude-plugin) for inclusion of code snippets. We publish our documentation using Netlify.
 
 ### Previewing rendered content
 
