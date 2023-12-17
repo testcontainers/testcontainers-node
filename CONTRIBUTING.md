@@ -15,11 +15,11 @@ The documentation is a static site built with [MkDocs](https://www.mkdocs.org/) 
 
 ### Previewing rendered content
 
-#### Using Docker locally
+#### Using Docker
 
 The root of the project contains a `docker-compose.yml` file. Simply run `docker-compose up` and then access the docs at [http://localhost:8000](http://localhost:8000).
 
-#### Using Python locally
+#### Using Python
 
 * Ensure that you have Python 3.8.0 or higher.
 * Set up a virtualenv and run `pip install -r requirements.txt` in the `testcontainers-node` root directory.
@@ -27,5 +27,4 @@ The root of the project contains a `docker-compose.yml` file. Simply run `docker
 
 #### PR Preview deployments
 
-Note that documentation for pull requests will automatically be published by Netlify as 'deploy previews'.
-These deployment previews can be accessed via the `deploy/netlify` check that appears for each pull request.
+Documentation for pull requests will automatically be published by Netlify as 'deploy previews'. These deployment previews can be accessed via the `deploy/netlify` check that appears for each pull request.
