@@ -2,7 +2,7 @@
 
 [Create an issue](https://github.com/testcontainers/testcontainers-node/issues) if you find any bugs.
 
-[Create a pull request](https://github.com/testcontainers/testcontainers-go/pulls) if you wish to fix an issue or provide an enhancement. Please be sure to:
+[Create a pull request](https://github.com/testcontainers/testcontainers-node/pulls) if you wish to fix an issue or provide an enhancement. Please be sure to:
 * Discuss with the authors on an issue ticket or discussion prior to doing anything big.
 * Follow the style, structure and naming conventions of the rest of the project.
 * Make commits atomic and easy to merge.
@@ -26,7 +26,7 @@ The root of the project contains a `docker-compose.yml` file. Simply run `docker
 #### Using Python locally
 
 * Ensure that you have Python 3.8.0 or higher.
-* Set up a virtualenv and run `pip install -r requirements.txt` in the `testcontainers-java` root directory.
+* Set up a virtualenv and run `pip install -r requirements.txt` in the `testcontainers-node` root directory.
 * Once Python dependencies have been installed, run `mkdocs serve` to start a local auto-updating MkDocs server.
 
 #### PR Preview deployments
