@@ -7,7 +7,7 @@
 * Follow the style, structure and naming conventions of the rest of the project.
 * Make commits atomic and easy to merge.
 * Run the Git hooks when making commits to ensure the code is linted and correctly formatted.
-* Verify all tests are passing with `npm test`
+* Verify all tests are passing with `npm test`.
 
 ## Documentation
 
