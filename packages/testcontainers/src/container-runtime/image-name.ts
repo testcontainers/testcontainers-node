@@ -1,6 +1,8 @@
 export class ImageName {
   public readonly string: string;
 
+  private static readonly hexRE = /^[0-9a-f]{64}$/i;
+
   constructor(
     public readonly registry: string | undefined,
     public readonly image: string,
@@ -12,6 +14,14 @@ export class ImageName {
       } else {
         this.string = `${this.registry}/${this.image}:${this.tag}`;
       }
+    } else if (this.tag === "latest" && ImageName.hexRE.test(this.image)) {
+      // 64 byte hex string. This refers to an image sha256 directly.
+      // Do not put the tag as the docker does not accept it.
+      // It will fail with:
+      //
+      //    invalid repository name (<image>), cannot specify 64-byte hexadecimal strings.
+      //
+      this.string = this.image;
     } else if (this.tag.startsWith("sha256:")) {
       this.string = `${this.image}@${this.tag}`;
     } else {

@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/postgresql",
-  "version": "10.2.1",
+  "version": "10.4.0",
   "license": "MIT",
   "keywords": [
     "postgres",
@@ -30,10 +30,10 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "@types/pg": "^8.10.2",
-    "pg": "^8.11.2"
+    "@types/pg": "^8.10.7",
+    "pg": "^8.11.3"
   },
   "dependencies": {
-    "testcontainers": "^10.2.1"
+    "testcontainers": "^10.4.0"
   }
 }

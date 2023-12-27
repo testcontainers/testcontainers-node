@@ -1,14 +1,15 @@
 {
-  "name": "@testcontainers/mongodb",
+  "name": "@testcontainers/localstack",
   "version": "10.4.0",
   "license": "MIT",
   "keywords": [
-    "mongodb",
+    "localstack",
+    "aws",
     "testing",
     "docker",
     "testcontainers"
   ],
-  "description": "MongoDB module for Testcontainers",
+  "description": "LocalStack module for Testcontainers",
   "homepage": "https://github.com/testcontainers/testcontainers-node#readme",
   "repository": {
     "type": "git",
@@ -28,10 +29,10 @@
     "prepack": "shx cp ../../../README.md . && shx cp ../../../LICENSE .",
     "build": "tsc --project tsconfig.build.json"
   },
-  "devDependencies": {
-    "mongoose": "^7.6.3"
-  },
   "dependencies": {
     "testcontainers": "^10.4.0"
+  },
+  "devDependencies": {
+    "@aws-sdk/client-s3": "^3.468.0"
   }
 }
