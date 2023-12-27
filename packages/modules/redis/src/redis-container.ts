@@ -1,10 +1,13 @@
-import { AbstractStartedContainer, GenericContainer, StartedTestContainer } from "testcontainers";
+import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
+import path from "path";
 
 const REDIS_PORT = 6379;
 
 export class RedisContainer extends GenericContainer {
+  private readonly importFilePath = "/tmp/import.redis";
   private password? = "";
   private persistenceVolume? = "";
+  private initialImportScriptFile? = "";
 
   constructor(image = "redis:7.2") {
     super(image);
@@ -19,6 +22,12 @@ export class RedisContainer extends GenericContainer {
     this.persistenceVolume = sourcePath;
     return this;
   }
+  /* Expect data to be in redis import script format, see https://developer.redis.com/explore/import/*/
+
+  public withInitialData(importScriptFile: string): this {
+    this.initialImportScriptFile = importScriptFile;
+    return this;
+  }
 
   public override async start(): Promise<StartedRedisContainer> {
     this.withExposedPorts(...(this.hasExposedPorts ? this.exposedPorts : [REDIS_PORT]))
@@ -27,10 +36,32 @@ export class RedisContainer extends GenericContainer {
         ...(this.password ? [`--requirepass "${this.password}"`] : []),
         ...(this.persistenceVolume ? ["--save 1 1 ", "--appendonly yes"] : []),
       ])
-      .withStartupTimeout(120_000);
+      .withStartupTimeout(120_000)
+      .withWaitStrategy(Wait.forLogMessage("Ready to accept connections tcp"));
     if (this.persistenceVolume) this.withBindMounts([{ mode: "rw", source: this.persistenceVolume, target: "/data" }]);
+    if (this.initialImportScriptFile) {
+      this.withCopyFilesToContainer([
+        {
+          mode: 666,
+          source: this.initialImportScriptFile,
+          target: this.importFilePath,
+        },
+        {
+          mode: 777,
+          source: path.join(__dirname, "import.sh"),
+          target: "/tmp/import.sh",
+        },
+      ]);
+    }
+    const startedRedisContainer = new StartedRedisContainer(await super.start(), this.password);
+    if (this.initialImportScriptFile) await this.importInitialData(startedRedisContainer);
+    return startedRedisContainer;
+  }
 
-    return new StartedRedisContainer(await super.start(), this.password);
+  private async importInitialData(container: StartedRedisContainer) {
+    const re = await container.exec(`/tmp/import.sh ${this.password}`);
+    if (re.exitCode != 0 || re.output.includes("ERR"))
+      throw Error(`Could not import initial data from ${this.initialImportScriptFile}: ${re.output}`);
   }
 }
 
@@ -58,9 +89,7 @@ export class StartedRedisContainer extends AbstractStartedContainer {
   public async executeCliCmd(cmd: string, additionalFlags: string[] = []): Promise<string> {
     const result = await this.startedTestContainer.exec([
       "redis-cli",
-      "-h",
-      this.getHost(),
-      ...(this.password != "" ? [`--password ${this.password}`] : []),
+      ...(this.password != "" ? [`-a ${this.password}`] : []),
       `${cmd}`,
       ...additionalFlags,
     ]);

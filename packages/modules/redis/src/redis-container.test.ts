@@ -56,6 +56,25 @@ describe("RedisContainer", () => {
   });
   // }
 
+  // initial data import {
+  it("should load initial data and can read it", async () => {
+    const container = await new RedisContainer()
+      .withPassword("test")
+      .withInitialData(path.join(__dirname, "initData.redis"))
+      .start();
+    const client = await connectTo(container);
+    const user = {
+      first_name: "David",
+      last_name: "Bloom",
+      dob: "03-MAR-1981",
+    };
+    expect(await client.get("user:002")).toBe(JSON.stringify(user));
+
+    await client.disconnect();
+    await container.stop();
+  });
+  // }
+
   // startWithCredentials {
   it("should start with credentials and login", async () => {
     const password = "testPassword";
