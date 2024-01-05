@@ -66,6 +66,7 @@ export interface StartedTestContainer {
   getMappedPort(port: number): number;
   getName(): string;
   getLabels(): Labels;
+  getEnvironment(): Record<string, string>;
   getId(): string;
   getNetworkNames(): string[];
   getNetworkId(networkName: string): string;

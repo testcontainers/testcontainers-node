@@ -109,6 +109,15 @@ export class StartedGenericContainer implements StartedTestContainer {
     return this.inspectResult.Config.Labels;
   }
 
+  public getEnvironment(): Record<string, string> {
+    const environment: Record<string, string> = {};
+    this.inspectResult.Config.Env.forEach(env => {
+      const kv: string[] = env.split('=');
+      environment[kv[0]] = kv[1];
+    })
+    return environment;
+  }
+
   public getNetworkNames(): string[] {
     return Object.keys(this.getNetworkSettings());
   }
