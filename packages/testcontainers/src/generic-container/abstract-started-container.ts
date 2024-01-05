@@ -48,7 +48,7 @@ export class AbstractStartedContainer implements StartedTestContainer {
   }
 
   public getEnvironment(): Record<string, string> {
-    return this.startedTestContainer.getEnvironment();  
+    return this.startedTestContainer.getEnvironment();
   }
 
   public getId(): string {

@@ -111,10 +111,10 @@ export class StartedGenericContainer implements StartedTestContainer {
 
   public getEnvironment(): Record<string, string> {
     const environment: Record<string, string> = {};
-    this.inspectResult.Config.Env.forEach(env => {
-      const kv: string[] = env.split('=');
+    this.inspectResult.Config.Env.forEach((env) => {
+      const kv: string[] = env.split("=");
       environment[kv[0]] = kv[1];
-    })
+    });
     return environment;
   }
 

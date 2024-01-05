@@ -2,9 +2,9 @@ import { AbstractStartedContainer, GenericContainer, log, StartedTestContainer, 
 
 export const LOCALSTACK_PORT = 4566;
 
-const DEFAULT_REGION = 'us-east-1';
-const DEFAULT_AWS_ACCESS_KEY_ID = 'test';
-const DEFAULT_AWS_SECRET_ACCESS_KEY = 'test';
+const DEFAULT_REGION = "us-east-1";
+const DEFAULT_AWS_ACCESS_KEY_ID = "test";
+const DEFAULT_AWS_SECRET_ACCESS_KEY = "test";
 
 export class LocalstackContainer extends GenericContainer {
   constructor(image = "localstack/localstack:2.2.0") {
@@ -60,24 +60,24 @@ export class StartedLocalStackContainer extends AbstractStartedContainer {
    * @returns A default region
    */
   public getRegion(): string {
-    return this.startedTestContainer.getEnvironment()['DEFAULT_REGION'] || DEFAULT_REGION;
+    return this.startedTestContainer.getEnvironment()["DEFAULT_REGION"] || DEFAULT_REGION;
   }
 
   /**
    * Provides a default access key that is preconfigured to communicate with a given simulated service.
-     * <a href="https://github.com/localstack/localstack/blob/master/doc/interaction/README.md?plain=1#L32">AWS Access Key</a>
+   * <a href="https://github.com/localstack/localstack/blob/master/doc/interaction/README.md?plain=1#L32">AWS Access Key</a>
    * @returns A default access key
    */
   public getAccessKey(): string {
-    return this.startedTestContainer.getEnvironment()['AWS_ACCESS_KEY_ID'] || DEFAULT_AWS_ACCESS_KEY_ID;
+    return this.startedTestContainer.getEnvironment()["AWS_ACCESS_KEY_ID"] || DEFAULT_AWS_ACCESS_KEY_ID;
   }
 
   /**
    * Provides a default secret key that is preconfigured to communicate with a given simulated service.
-     * <a href="https://github.com/localstack/localstack/blob/master/doc/interaction/README.md?plain=1#L32">AWS Secret Key</a>
+   * <a href="https://github.com/localstack/localstack/blob/master/doc/interaction/README.md?plain=1#L32">AWS Secret Key</a>
    * @returns A default secret key
    */
   public getSecretKey(): string {
-    return this.startedTestContainer.getEnvironment()['AWS_SECRET_ACCESS_KEY'] || DEFAULT_AWS_SECRET_ACCESS_KEY;
+    return this.startedTestContainer.getEnvironment()["AWS_SECRET_ACCESS_KEY"] || DEFAULT_AWS_SECRET_ACCESS_KEY;
   }
 }

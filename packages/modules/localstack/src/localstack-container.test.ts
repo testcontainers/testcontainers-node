@@ -73,13 +73,13 @@ describe("LocalStackContainer", () => {
   it("should use access environment variables and default creds", async () => {
     const container = await new LocalstackContainer()
       .withEnvironment({
-        DEFAULT_REGION: 'eu-west-3'
+        DEFAULT_REGION: "eu-west-3",
       })
       .start();
 
-    expect(container.getRegion()).toBe('eu-west-3');
-    expect(container.getAccessKey()).toBe('test');
-    expect(container.getSecretKey()).toBe('test');
+    expect(container.getRegion()).toBe("eu-west-3");
+    expect(container.getAccessKey()).toBe("test");
+    expect(container.getSecretKey()).toBe("test");
 
     await container.stop();
   });
