@@ -40,6 +40,7 @@ nav:
       - Networking: features/networking.md
       - Compose: features/compose.md
       - Wait strategies: features/wait-strategies.md
+      - Advanced: features/advanced.md
   - Modules:
       - ArangoDB: modules/arangodb.md
       - Elasticsearch: modules/elasticsearch.md
@@ -52,4 +53,5 @@ nav:
       - Neo4J: modules/neo4j.md
       - PostgreSQL: modules/postgresql.md
       - Selenium: modules/selenium.md
+      - Redis: modules/redis.md
   - Configuration: configuration.md

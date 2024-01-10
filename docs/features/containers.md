@@ -495,6 +495,9 @@ const container = await new GenericContainer("alpine")
 
 ## Running commands
 
+To run a command inside an already started container use the `exec` method. The command will be run in the container's 
+working directory, returning the command output and exit code:
+
 ```javascript
 const container = await new GenericContainer("alpine")
   .withCommand(["sleep", "infinity"])
@@ -502,6 +505,30 @@ const container = await new GenericContainer("alpine")
 
 const { output, exitCode } = await container.exec(["echo", "hello", "world"]);
 ```
+
+The following options can be provided to modify the command execution:
+
+1. **`user`:** The user, and optionally, group to run the exec process inside the container. Format is one of: `user`, `user:group`, `uid`, or `uid:gid`.
+
+2. **`workingDir`:** The working directory for the exec process inside the container.
+
+3. **`env`:** A map of environment variables to set inside the container.
+
+
+```javascript
+const container = await new GenericContainer("alpine")
+  .withCommand(["sleep", "infinity"])
+  .start();
+
+const { output, exitCode } = await container.exec(["echo", "hello", "world"], {
+	workingDir: "/app/src/",
+	user: "1000:1000",
+	env: {
+		"VAR1": "enabled",
+		"VAR2": "/app/debug.log",
+	}
+});
+````
 
 ## Streaming logs
 
@@ -526,4 +553,15 @@ const container = await new GenericContainer("alpine")
     stream.on("end", () => console.log("Stream closed"));
   })
   .start();
+```
+
+You can specify a point in time as a UNIX timestamp from which you want the logs to start: 
+
+```javascript
+const msInSec = 1000;
+const tenSecondsAgoMs = new Date().getTime() - 10 * msInSec;
+const since = tenSecondsAgoMs / msInSec;
+
+(await container.logs({ since }))
+  .on("data", line => console.log(line))
 ```

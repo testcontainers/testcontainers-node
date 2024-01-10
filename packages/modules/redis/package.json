@@ -1,14 +1,14 @@
 {
-  "name": "@testcontainers/mongodb",
-  "version": "10.4.0",
+  "name": "@testcontainers/redis",
+  "version": "10.2.1",
   "license": "MIT",
   "keywords": [
-    "mongodb",
+    "redis",
     "testing",
     "docker",
     "testcontainers"
   ],
-  "description": "MongoDB module for Testcontainers",
+  "description": "Redis module for Testcontainers",
   "homepage": "https://github.com/testcontainers/testcontainers-node#readme",
   "repository": {
     "type": "git",
@@ -29,9 +29,10 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "mongoose": "^7.6.3"
+    "@types/redis": "^4.0.11",
+    "redis": "^4.6.7"
   },
   "dependencies": {
-    "testcontainers": "^10.4.0"
+    "testcontainers": "^10.2.1"
   }
 }

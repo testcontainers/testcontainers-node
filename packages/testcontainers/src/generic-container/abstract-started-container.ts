@@ -1,5 +1,5 @@
 import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
-import { ContentToCopy, DirectoryToCopy, ExecResult, FileToCopy, Labels } from "../types";
+import { ContentToCopy, DirectoryToCopy, ExecOptions, ExecResult, FileToCopy, Labels } from "../types";
 import { Readable } from "stream";
 
 export class AbstractStartedContainer implements StartedTestContainer {
@@ -79,11 +79,11 @@ export class AbstractStartedContainer implements StartedTestContainer {
     return this.startedTestContainer.copyArchiveFromContainer(path);
   }
 
-  public exec(command: string | string[]): Promise<ExecResult> {
-    return this.startedTestContainer.exec(command);
+  public exec(command: string | string[], opts?: Partial<ExecOptions>): Promise<ExecResult> {
+    return this.startedTestContainer.exec(command, opts);
   }
 
-  public logs(): Promise<Readable> {
-    return this.startedTestContainer.logs();
+  public logs(opts?: { since?: number }): Promise<Readable> {
+    return this.startedTestContainer.logs(opts);
   }
 }
