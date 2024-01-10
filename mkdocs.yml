@@ -52,4 +52,5 @@ nav:
       - Neo4J: modules/neo4j.md
       - PostgreSQL: modules/postgresql.md
       - Selenium: modules/selenium.md
+      - Redis: modules/redis.md
   - Configuration: configuration.md
