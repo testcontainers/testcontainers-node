@@ -67,14 +67,24 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
   public async waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void> {
     log.debug(`Waiting for HTTP...`, { containerId: container.id });
 
-    const waitingFinished = { value: false };
+    const exitStatus = 'exited';
+    let containerExited = false;
     const client = await getContainerRuntimeClient();
-    const healthCheckPromise = new IntervalRetry<Response | undefined, Error>(this.readTimeout).retryUntil(
+
+    await new IntervalRetry<Response | undefined, Error>(this.readTimeout).retryUntil(
       async () => {
         try {
           const url = `${this.protocol}://${client.info.containerRuntime.host}:${boundPorts.getBinding(this.port)}${
             this.path
           }`;
+          const containerStatus = (await client.container.inspect(container)).State.Status;
+
+          if (containerStatus === exitStatus) {
+            containerExited = true;
+
+            return;
+          }
+
           return await fetch(url, {
             method: this.method,
             timeout: this.readTimeout,
@@ -86,7 +96,7 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
         }
       },
       async (response) => {
-        if (waitingFinished.value) {
+        if (containerExited) {
           return true;
         }
 
@@ -112,25 +122,14 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
       this.startupTimeout
     );
 
-    await Promise.race([this.waitContainerNotExited(container, waitingFinished), healthCheckPromise])
-      .finally(() => waitingFinished.value = true)
+    if (containerExited) {
+      return this.handleContainerExit(container);
+    }
 
     log.debug(`HTTP wait strategy complete`, { containerId: container.id });
   }
 
-  private async waitContainerNotExited(container: Dockerode.Container, waitingFinished: {value: boolean}) {
-    const exitStatus = 'exited';
-    const status = await new IntervalRetry<string, null>(500).retryUntil(
-      async () => (await container.inspect()).State.Status,
-      (status) => waitingFinished.value || status === exitStatus,
-      () => null,
-      this.startupTimeout + 500 // delay for timeout after healthCheck
-    );
-
-    if (status !== exitStatus) {
-      return
-    }
-
+  private async handleContainerExit(container: Dockerode.Container) {
     const tail = 50;
     const lastLogs: string[] = [];
     const client = await getContainerRuntimeClient();
