@@ -16,7 +16,7 @@ async function stopStartingContainer(container: GenericContainer, name: string) 
         .catch(() => false),
     (status) => status,
     () => false,
-    20000
+    10000
   );
 
   if (!status) throw Error('failed start container');
@@ -114,7 +114,7 @@ describe("HttpWaitStrategy", () => {
     const lastLogs = data.join('\n');
     const container = new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
-      .withStartupTimeout(30000)
+      .withStartupTimeout(20000)
       .withEntrypoint(["/bin/sh", "-c", `${echoCmd} && sleep infinity`])
       .withWaitStrategy(Wait.forHttp("/hello-world", 8080, true))
       .withName(name);
@@ -132,7 +132,7 @@ describe("HttpWaitStrategy", () => {
     const lastLogs = data.slice(tail * -1).join('\n');
     const container = new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
-      .withStartupTimeout(30000)
+      .withStartupTimeout(20000)
       .withEntrypoint(["/bin/sh", "-c", `${echoCmd} && sleep infinity`])
       .withWaitStrategy(Wait.forHttp("/hello-world", 8080, true))
       .withName(name);
