@@ -6,7 +6,6 @@ import { IntervalRetry } from "../common";
 
 jest.setTimeout(180_000);
 
-process.env.TESTCONTAINERS_RYUK_DISABLED = 'true';
 async function stopStartingContainer(container: GenericContainer, name: string) {
   const client = await getContainerRuntimeClient();
   const containerStartPromise = container.start();
