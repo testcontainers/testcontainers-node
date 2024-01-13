@@ -1,8 +1,30 @@
 import { GenericContainer } from "../generic-container/generic-container";
 import { Wait } from "./wait";
 import { checkContainerIsHealthy, checkContainerIsHealthyTls } from "../utils/test-helper";
+import { getContainerRuntimeClient } from "../container-runtime";
+import { IntervalRetry } from "../common";
 
 jest.setTimeout(180_000);
+
+process.env.TESTCONTAINERS_RYUK_DISABLED = 'true';
+async function stopStartingContainer(container: GenericContainer, name: string) {
+  const client = await getContainerRuntimeClient();
+  const containerStartPromise = container.start();
+
+  const status = await new IntervalRetry<boolean, boolean>(500).retryUntil(
+    () => client.container.getById(name).inspect()
+        .then(i => i.State.Running)
+        .catch(() => false),
+    (status) => status,
+    () => false,
+    20000
+  );
+
+  if (!status) throw Error('failed start container');
+
+  await client.container.getById(name).stop();
+  await containerStartPromise;
+}
 
 describe("HttpWaitStrategy", () => {
   it("should wait for 200", async () => {
@@ -83,6 +105,42 @@ describe("HttpWaitStrategy", () => {
         .withWaitStrategy(Wait.forHttp("/hello-world", 8080).forResponsePredicate(() => false))
         .start()
     ).rejects.toThrowError("URL /hello-world not accessible after 3000ms");
+  });
+
+  it("should fail if container exited before healthcheck pass", async () => {
+    const name = 'container-name';
+    const data = [1,2,3];
+    const tail = 50;
+    const echoCmd = data.map(i => `echo ${i}`).join(' && ');
+    const lastLogs = data.join('\n');
+    const container = new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withExposedPorts(8080)
+      .withStartupTimeout(30000)
+      .withEntrypoint(["/bin/sh", "-c", `${echoCmd} && sleep infinity`])
+      .withWaitStrategy(Wait.forHttp("/hello-world", 8080, true))
+      .withName(name);
+
+    await expect(
+      stopStartingContainer(container, name)
+    ).rejects.toThrowError(new Error(`Container exited during HTTP healthCheck, last ${tail} logs: ${lastLogs}`));
+  });
+
+  it("should log only $tail logs if container exited before healthcheck pass", async () => {
+    const name = 'container-name';
+    const tail = 50;
+    const data = [...Array(tail + 5).keys()];
+    const echoCmd = data.map(i => `echo ${i}`).join(' && ');
+    const lastLogs = data.slice(tail * -1).join('\n');
+    const container = new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withExposedPorts(8080)
+      .withStartupTimeout(30000)
+      .withEntrypoint(["/bin/sh", "-c", `${echoCmd} && sleep infinity`])
+      .withWaitStrategy(Wait.forHttp("/hello-world", 8080, true))
+      .withName(name);
+
+    await expect(
+      stopStartingContainer(container, name)
+    ).rejects.toThrowError(new Error(`Container exited during HTTP healthCheck, last ${tail} logs: ${lastLogs}`));
   });
 
   it("should set method", async () => {

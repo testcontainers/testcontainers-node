@@ -14,7 +14,7 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
   private _allowInsecure = false;
   private readTimeout = 1000;
 
-  constructor(private readonly path: string, private readonly port: number, private readonly shutdownOnExit = false) {
+  constructor(private readonly path: string, private readonly port: number, private readonly failOnExitedContainer = false) {
     super();
   }
 
@@ -67,6 +67,7 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
   public async waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void> {
     log.debug(`Waiting for HTTP...`, { containerId: container.id });
 
+    const waitingFinished = { value: false };
     const client = await getContainerRuntimeClient();
     const healthCheckPromise = new IntervalRetry<Response | undefined, Error>(this.readTimeout).retryUntil(
       async () => {
@@ -85,6 +86,10 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
         }
       },
       async (response) => {
+        if (waitingFinished.value) {
+          return true;
+        }
+
         if (response === undefined) {
           return false;
         } else if (!this.predicates.length) {
@@ -107,34 +112,47 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
       this.startupTimeout
     );
 
-    await Promise.race([this.waitContainerNotExited(container), healthCheckPromise]);
+    await Promise.race([this.waitContainerNotExited(container, waitingFinished), healthCheckPromise])
+      .finally(() => waitingFinished.value = true)
 
     log.debug(`HTTP wait strategy complete`, { containerId: container.id });
   }
 
-  private async waitContainerNotExited(container: Dockerode.Container) {
+  private async waitContainerNotExited(container: Dockerode.Container, waitingFinished: {value: boolean}) {
     const exitStatus = 'exited';
-    const timeout = this.startupTimeout + 1000; // added 1 sec to avoid race condition
     const status = await new IntervalRetry<string, null>(500).retryUntil(
       async () => (await container.inspect()).State.Status,
-      (status) => status === exitStatus,
+      (status) => waitingFinished.value || status === exitStatus,
       () => null,
-      timeout
+      this.startupTimeout + 500 // delay for timeout after healthCheck
     );
 
-    if (status === null) {
-      return;
+    if (status !== exitStatus) {
+      return
     }
 
-    if (status === exitStatus) {
-      const tail = 50;
-      const lastLogs = (await container.logs({ tail, stdout: true, stderr: true })).toString();
-      const message = `container exited, last ${tail} logs: ${lastLogs}`;
+    const tail = 50;
+    const lastLogs: string[] = [];
+    const client = await getContainerRuntimeClient();
+    let message: string;
 
-      log.error(message, { containerId: container.id });
+    try {
+      const stream = await client.container.logs(container, {tail});
 
-      if (this.shutdownOnExit) throw new Error(message);
+      await new Promise((res) => {
+        stream
+          .on('data', d => lastLogs.push(d.trim()))
+          .on('end', res);
+      });
+
+      message = `Container exited during HTTP healthCheck, last ${tail} logs: ${lastLogs.join('\n')}`;
+    } catch (err) {
+      message = 'Container exited during HTTP healthCheck, failed to get last logs';
     }
+
+    log.error(message, { containerId: container.id });
+
+    if (this.failOnExitedContainer) throw new Error(message);
   }
 
   private getAgent(): Agent | undefined {
