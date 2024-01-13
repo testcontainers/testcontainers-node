@@ -23,8 +23,8 @@ export class Wait {
     return new HealthCheckWaitStrategy();
   }
 
-  public static forHttp(path: string, port: number, shutdownOnExit = false): HttpWaitStrategy {
-    return new HttpWaitStrategy(path, port, shutdownOnExit);
+  public static forHttp(path: string, port: number, failOnExitedContainer = false): HttpWaitStrategy {
+    return new HttpWaitStrategy(path, port, failOnExitedContainer);
   }
 
   public static forSuccessfulCommand(command: string): ShellWaitStrategy {
