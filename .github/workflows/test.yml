@@ -86,6 +86,7 @@ jobs:
           - kafka
           - localstack
           - mongodb
+          - mssqlserver
           - mysql
           - nats
           - neo4j
