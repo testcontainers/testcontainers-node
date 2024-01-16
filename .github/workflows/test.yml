@@ -67,6 +67,7 @@ jobs:
 
   get-modules:
     runs-on: ubuntu-22.04
+    needs: test-testcontainers
     outputs:
       modules: ${{steps.list_modules.outputs.matrix}}
     steps:
