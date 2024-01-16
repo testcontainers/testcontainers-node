@@ -92,6 +92,7 @@ jobs:
           - postgresql
           - redis
           - selenium
+          - supertokens
     uses: ./.github/workflows/test-template.yml
     with:
       runner: ${{ matrix.runner }}
