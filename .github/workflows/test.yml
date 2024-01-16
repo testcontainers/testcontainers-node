@@ -65,7 +65,8 @@ jobs:
       container-runtime: ${{ matrix.container-runtime }}
       workspace: packages/testcontainers
 
-  get-modules:
+  list-modules:
+    name: List modules
     runs-on: ubuntu-22.04
     needs: test-testcontainers
     outputs:
@@ -73,11 +74,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - id: list_modules
-        run: echo "::set-output name=modules::$(ls packages/modules | jq -cnR '[inputs | select(length>0)]')"
+        run: echo "modules=$(ls packages/modules | jq -cnR '[inputs | select(length>0)]'))" >> $GITHUB_OUTPUT
 
   test-modules:
     name: Module (${{ matrix.module }})
-    needs: [ test-testcontainers, get-modules ]
+    needs: [ test-testcontainers, list-modules ]
     strategy:
       matrix:
         node-version: [ 18.x, 20.x ]
@@ -89,7 +90,7 @@ jobs:
             runner: ubuntu-22.04
           - container-runtime: podman
             runner: ubuntu-22.04
-        module: ${{ fromJson(needs.get-modules.outputs.modules) }}
+        module: ${{ fromJson(needs.list-modules.outputs.modules) }}
     uses: ./.github/workflows/test-template.yml
     with:
       runner: ${{ matrix.runner }}
