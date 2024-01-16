@@ -528,7 +528,7 @@ const { output, exitCode } = await container.exec(["echo", "hello", "world"], {
 		"VAR2": "/app/debug.log",
 	}
 });
-````
+```
 
 ## Streaming logs
 
