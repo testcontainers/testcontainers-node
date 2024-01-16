@@ -65,9 +65,18 @@ jobs:
       container-runtime: ${{ matrix.container-runtime }}
       workspace: packages/testcontainers
 
+  get-modules:
+    runs-on: ubuntu-22.04
+    outputs:
+      modules: ${{steps.list_dirs.outputs.matrix}}
+    steps:
+      - uses: actions/checkout@v2
+      - id: list_modules
+        run: echo "::set-output name=modules::$(ls packages/modules | jq -cnR '[inputs | select(length>0)]')"
+
   test-modules:
     name: Module (${{ matrix.module }})
-    needs: test-testcontainers
+    needs: [ test-testcontainers, get-modules ]
     strategy:
       matrix:
         node-version: [ 18.x, 20.x ]
@@ -79,19 +88,7 @@ jobs:
             runner: ubuntu-22.04
           - container-runtime: podman
             runner: ubuntu-22.04
-        module:
-          - arangodb
-          - elasticsearch
-          - hivemq
-          - kafka
-          - localstack
-          - mongodb
-          - mysql
-          - nats
-          - neo4j
-          - postgresql
-          - redis
-          - selenium
+        module: ${{fromJson(needs.get-modules.outputs.modules)}}
     uses: ./.github/workflows/test-template.yml
     with:
       runner: ${{ matrix.runner }}
