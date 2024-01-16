@@ -69,7 +69,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: test-testcontainers
     outputs:
-      modules: ${{steps.list_modules.outputs.matrix}}
+      modules: ${{ steps.list_modules.outputs.modules }}
     steps:
       - uses: actions/checkout@v2
       - id: list_modules
@@ -89,7 +89,7 @@ jobs:
             runner: ubuntu-22.04
           - container-runtime: podman
             runner: ubuntu-22.04
-        module: ${{fromJson(needs.get-modules.outputs.modules)}}
+        module: ${{ fromJson(needs.get-modules.outputs.modules) }}
     uses: ./.github/workflows/test-template.yml
     with:
       runner: ${{ matrix.runner }}
