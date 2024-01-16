@@ -1,14 +1,16 @@
 {
-  "name": "@testcontainers/mysql",
-  "version": "10.5.0",
+  "name": "@testcontainers/mssqlserver",
+  "version": "10.2.1",
   "license": "MIT",
   "keywords": [
-    "mysql",
+    "mssqlserver",
+    "mssql",
+    "sqlserver",
     "testing",
     "docker",
     "testcontainers"
   ],
-  "description": "MySQL module for Testcontainers",
+  "description": "MSSQL Server module for Testcontainers",
   "homepage": "https://github.com/testcontainers/testcontainers-node#readme",
   "repository": {
     "type": "git",
@@ -29,9 +31,10 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "mysql2": "^3.6.2"
+    "@types/mssql": "^8.1.2",
+    "mssql": "^10.0.1"
   },
   "dependencies": {
-    "testcontainers": "^10.5.0"
+    "testcontainers": "^10.2.1"
   }
 }

@@ -48,8 +48,10 @@ nav:
       - Kafka: modules/kafka.md
       - MongoDB: modules/mongodb.md
       - MySQL: modules/mysql.md
+      - MSSQLServer: modules/mssqlserver.md
       - Nats: modules/nats.md
       - Neo4J: modules/neo4j.md
       - PostgreSQL: modules/postgresql.md
       - Selenium: modules/selenium.md
+      - Redis: modules/redis.md
   - Configuration: configuration.md
