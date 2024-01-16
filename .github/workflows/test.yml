@@ -68,7 +68,7 @@ jobs:
   get-modules:
     runs-on: ubuntu-22.04
     outputs:
-      modules: ${{steps.list_dirs.outputs.matrix}}
+      modules: ${{steps.list_modules.outputs.matrix}}
     steps:
       - uses: actions/checkout@v2
       - id: list_modules
