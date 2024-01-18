@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/redis",
-  "version": "10.5.0",
+  "version": "10.6.0",
   "license": "MIT",
   "keywords": [
     "redis",
@@ -33,6 +33,6 @@
     "redis": "^4.6.7"
   },
   "dependencies": {
-    "testcontainers": "^10.5.0"
+    "testcontainers": "^10.6.0"
   }
 }
