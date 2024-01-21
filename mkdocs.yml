@@ -55,4 +55,5 @@ nav:
       - PostgreSQL: modules/postgresql.md
       - Selenium: modules/selenium.md
       - Redis: modules/redis.md
+      - Localstack: modules/localstack.md
   - Configuration: configuration.md
