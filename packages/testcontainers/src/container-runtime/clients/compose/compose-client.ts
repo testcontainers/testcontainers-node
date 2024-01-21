@@ -29,14 +29,14 @@ export async function getComposeClient(environment: NodeJS.ProcessEnv): Promise<
 async function getComposeInfo(): Promise<ComposeInfo | undefined> {
   try {
     return {
-      version: (await dockerComposeV1.version()).data.version,
-      compatability: "v1",
+      version: (await dockerComposeV2.version()).data.version,
+      compatability: "v2",
     };
   } catch (err) {
     try {
       return {
-        version: (await dockerComposeV2.version()).data.version,
-        compatability: "v2",
+        version: (await dockerComposeV1.version()).data.version,
+        compatability: "v1",
       };
     } catch {
       return undefined;
