@@ -4,6 +4,7 @@ const IMAGE_NAME = "clickhouse/clickhouse-server";
 const DEFAULT_IMAGE_VER = "23.3.8.21-alpine";
 
 const HTTP_PORT = 8123;
+const HTTPS_PORT = 8443;
 const NATIVE_PORT = 9000;
 
 export class ClickhouseContainer extends GenericContainer {
@@ -31,7 +32,7 @@ export class ClickhouseContainer extends GenericContainer {
   }
 
   public override async start(): Promise<StartedClickhouseContainer> {
-    this.withExposedPorts(...(this.hasExposedPorts ? this.exposedPorts : [HTTP_PORT, NATIVE_PORT]))
+    this.withExposedPorts(...(this.hasExposedPorts ? this.exposedPorts : [HTTP_PORT, HTTPS_PORT, NATIVE_PORT]))
       .withEnvironment({
         CLICKHOUSE_DB: this.database,
         CLICKHOUSE_USER: this.username,
@@ -42,6 +43,7 @@ export class ClickhouseContainer extends GenericContainer {
     return new StartedClickhouseContainer(
       await super.start(),
       HTTP_PORT,
+      HTTPS_PORT,
       NATIVE_PORT,
       this.database,
       this.username,
@@ -52,11 +54,13 @@ export class ClickhouseContainer extends GenericContainer {
 
 export class StartedClickhouseContainer extends AbstractStartedContainer {
   private readonly hostHttpPort: number;
+  private readonly hostHttpsPort: number;
   private readonly hostNativePort: number;
 
   constructor(
     startedTestContainer: StartedTestContainer,
     httpPort: number,
+    httpsPort: number,
     nativePort: number,
     private readonly database: string,
     private readonly username: string,
@@ -64,6 +68,7 @@ export class StartedClickhouseContainer extends AbstractStartedContainer {
   ) {
     super(startedTestContainer);
     this.hostHttpPort = startedTestContainer.getMappedPort(httpPort);
+    this.hostHttpsPort = startedTestContainer.getMappedPort(httpsPort);
     this.hostNativePort = startedTestContainer.getMappedPort(nativePort);
   }
 
@@ -71,8 +76,13 @@ export class StartedClickhouseContainer extends AbstractStartedContainer {
     return this.toUrl("http", this.hostHttpPort);
   }
 
-  public getNativeUrl(schema: string): string {
-    return this.toUrl(schema, this.hostNativePort);
+  public getHttpsUrl(): string {
+    return this.toUrl("https", this.hostHttpsPort);
+  }
+
+  // The official clickhouse-js client doesn't support the native protocol for now. See https://github.com/ClickHouse/clickhouse-js
+  public getNativeUrl(): string {
+    return this.toUrl("tcp", this.hostNativePort);
   }
 
   private toUrl(schema: string, port: number): string {
