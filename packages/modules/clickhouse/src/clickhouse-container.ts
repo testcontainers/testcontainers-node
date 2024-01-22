@@ -3,9 +3,13 @@ import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait 
 const IMAGE_NAME = "clickhouse/clickhouse-server";
 const DEFAULT_IMAGE_VER = "23.3.8.21-alpine";
 
+// The official clickhouse-js client doesn't support the native protocol for now. See https://github.com/ClickHouse/clickhouse-js
+// However, clickhouse-client implements the native protocol so its useful to expose the native ports. See https://clickhouse.com/docs/en/interfaces/cli#clickhouse-client
+
 const HTTP_PORT = 8123;
 const HTTPS_PORT = 8443;
-const NATIVE_PORT = 9000;
+const NATIVE_TCP_PORT = 9000;
+const NATIVE_TCPS_PORT = 9440;
 
 export class ClickhouseContainer extends GenericContainer {
   private database = "test";
@@ -32,7 +36,9 @@ export class ClickhouseContainer extends GenericContainer {
   }
 
   public override async start(): Promise<StartedClickhouseContainer> {
-    this.withExposedPorts(...(this.hasExposedPorts ? this.exposedPorts : [HTTP_PORT, HTTPS_PORT, NATIVE_PORT]))
+    this.withExposedPorts(
+      ...(this.hasExposedPorts ? this.exposedPorts : [HTTP_PORT, HTTPS_PORT, NATIVE_TCP_PORT, NATIVE_TCPS_PORT])
+    )
       .withEnvironment({
         CLICKHOUSE_DB: this.database,
         CLICKHOUSE_USER: this.username,
@@ -44,7 +50,8 @@ export class ClickhouseContainer extends GenericContainer {
       await super.start(),
       HTTP_PORT,
       HTTPS_PORT,
-      NATIVE_PORT,
+      NATIVE_TCP_PORT,
+      NATIVE_TCPS_PORT,
       this.database,
       this.username,
       this.password
@@ -55,13 +62,15 @@ export class ClickhouseContainer extends GenericContainer {
 export class StartedClickhouseContainer extends AbstractStartedContainer {
   private readonly hostHttpPort: number;
   private readonly hostHttpsPort: number;
-  private readonly hostNativePort: number;
+  private readonly hostNativeTcpPort: number;
+  private readonly hostNativeTcpsPort: number;
 
   constructor(
     startedTestContainer: StartedTestContainer,
     httpPort: number,
     httpsPort: number,
-    nativePort: number,
+    nativeTcpPort: number,
+    nativeTcpsPort: number,
     private readonly database: string,
     private readonly username: string,
     private readonly password: string
@@ -69,7 +78,8 @@ export class StartedClickhouseContainer extends AbstractStartedContainer {
     super(startedTestContainer);
     this.hostHttpPort = startedTestContainer.getMappedPort(httpPort);
     this.hostHttpsPort = startedTestContainer.getMappedPort(httpsPort);
-    this.hostNativePort = startedTestContainer.getMappedPort(nativePort);
+    this.hostNativeTcpPort = startedTestContainer.getMappedPort(nativeTcpPort);
+    this.hostNativeTcpsPort = startedTestContainer.getMappedPort(nativeTcpsPort);
   }
 
   public getHttpUrl(): string {
@@ -78,11 +88,6 @@ export class StartedClickhouseContainer extends AbstractStartedContainer {
 
   public getHttpsUrl(): string {
     return this.toUrl("https", this.hostHttpsPort);
-  }
-
-  // The official clickhouse-js client doesn't support the native protocol for now. See https://github.com/ClickHouse/clickhouse-js
-  public getNativeUrl(): string {
-    return this.toUrl("tcp", this.hostNativePort);
   }
 
   private toUrl(schema: string, port: number): string {
