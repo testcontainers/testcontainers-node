@@ -3,7 +3,7 @@ import { ClickHouseClient, createClient } from "@clickhouse/client";
 import path from "path";
 import { RandomUuid } from "testcontainers";
 
-const CONFIG_FILE_MODE = parseInt("0644", 8)
+const CONFIG_FILE_MODE = parseInt("0644", 8);
 
 describe("ClickhouseContainer", () => {
   jest.setTimeout(240_000);
@@ -17,7 +17,7 @@ describe("ClickhouseContainer", () => {
   });
 
   it("should work with custom credentials", async () => {
-    const uuid = new RandomUuid()
+    const uuid = new RandomUuid();
     const container = await new ClickhouseContainer()
       .withUsername(`un-${uuid.nextUuid()}`)
       .withPassword(`pass-${uuid.nextUuid()}`)
@@ -29,12 +29,14 @@ describe("ClickhouseContainer", () => {
   });
 
   it("should work with custom database and custom yaml config", async () => {
-    const uuid = new RandomUuid()
+    const uuid = new RandomUuid();
     const CONFIG_PATH_YAML = "/etc/clickhouse-server/config.d/config.yaml";
     const container = await new ClickhouseContainer()
       .withDatabase(`db-${uuid.nextUuid()}`)
       .withPassword("")
-      .withCopyFilesToContainer([{source: path.join("testdata", "config.yaml"), target: CONFIG_PATH_YAML, mode: CONFIG_FILE_MODE}])
+      .withCopyFilesToContainer([
+        { source: path.join("testdata", "config.yaml"), target: CONFIG_PATH_YAML, mode: CONFIG_FILE_MODE },
+      ])
       .start();
     const client = createClickhouseContainerHttpClient(container);
     await testExample(client, container.getDatabase());
@@ -46,7 +48,9 @@ describe("ClickhouseContainer", () => {
     const CONFIG_PATH_XML = "/etc/clickhouse-server/config.d/config.xml";
     const container = await new ClickhouseContainer("23.8-alpine")
       .withPassword("")
-      .withCopyFilesToContainer([{source: path.join("testdata", "config.xml"), target: CONFIG_PATH_XML, mode: CONFIG_FILE_MODE}])
+      .withCopyFilesToContainer([
+        { source: path.join("testdata", "config.xml"), target: CONFIG_PATH_XML, mode: CONFIG_FILE_MODE },
+      ])
       .start();
     const client = createClickhouseContainerHttpClient(container);
     await testExample(client, container.getDatabase());
@@ -63,7 +67,7 @@ describe("ClickhouseContainer", () => {
   }
 
   async function testExample(client: ClickHouseClient, db: string) {
-    const tableName = 'array_json_each_row';
+    const tableName = "array_json_each_row";
     await client.command({
       query: `DROP TABLE IF EXISTS ${db}.${tableName}`,
     });
@@ -78,15 +82,18 @@ describe("ClickhouseContainer", () => {
     await client.insert({
       table: `${db}.${tableName}`,
       values: [
-        { id: 42, name: 'foo' },
-        { id: 42, name: 'bar' },
+        { id: 42, name: "foo" },
+        { id: 42, name: "bar" },
       ],
-      format: 'JSONEachRow',
+      format: "JSONEachRow",
     });
     const rows = await client.query({
       query: `SELECT * FROM ${db}.${tableName}`,
-      format: 'JSONEachRow',
+      format: "JSONEachRow",
     });
-    expect(await rows.json()).toEqual([{id:"42",name:"foo"},{id:"42",name:"bar"}]);   
+    expect(await rows.json()).toEqual([
+      { id: "42", name: "foo" },
+      { id: "42", name: "bar" },
+    ]);
   }
 });

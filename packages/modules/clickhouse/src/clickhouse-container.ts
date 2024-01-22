@@ -1,7 +1,7 @@
 import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 
 const IMAGE_NAME = "clickhouse/clickhouse-server";
-const DEFAULT_IMAGE_VER = "23.3.8.21-alpine"
+const DEFAULT_IMAGE_VER = "23.3.8.21-alpine";
 
 const HTTP_PORT = 8123;
 const NATIVE_PORT = 9000;
@@ -37,17 +37,15 @@ export class ClickhouseContainer extends GenericContainer {
         CLICKHOUSE_USER: this.username,
         CLICKHOUSE_PASSWORD: this.password,
       })
-      .withWaitStrategy(Wait.forHttp(`/ping`, HTTP_PORT)
-        .forStatusCode(200))
+      .withWaitStrategy(Wait.forHttp("/ping", HTTP_PORT).forStatusCode(200))
       .withStartupTimeout(120_000);
-    
     return new StartedClickhouseContainer(
       await super.start(),
       HTTP_PORT,
       NATIVE_PORT,
       this.database,
       this.username,
-      this.password,
+      this.password
     );
   }
 }
@@ -62,7 +60,7 @@ export class StartedClickhouseContainer extends AbstractStartedContainer {
     nativePort: number,
     private readonly database: string,
     private readonly username: string,
-    private readonly password: string,
+    private readonly password: string
   ) {
     super(startedTestContainer);
     this.hostHttpPort = startedTestContainer.getMappedPort(httpPort);
@@ -70,15 +68,15 @@ export class StartedClickhouseContainer extends AbstractStartedContainer {
   }
 
   public getHttpUrl(): string {
-    return this.toUrl("http", this.hostHttpPort)
+    return this.toUrl("http", this.hostHttpPort);
   }
 
   public getNativeUrl(schema: string): string {
-    return this.toUrl(schema, this.hostNativePort)
+    return this.toUrl(schema, this.hostNativePort);
   }
 
   private toUrl(schema: string, port: number): string {
-    return `${schema}://${this.startedTestContainer.getHost()}:${port}`
+    return `${schema}://${this.startedTestContainer.getHost()}:${port}`;
   }
 
   public getDatabase(): string {
