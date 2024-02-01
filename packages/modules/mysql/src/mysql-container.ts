@@ -22,21 +22,25 @@ export class MySqlContainer extends GenericContainer {
 
   public withDatabase(database: string): this {
     this.database = database;
+    this.withEnvironment({ ...this.environment, MYSQL_DATABASE: this.database });
     return this;
   }
 
   public withUsername(username: string): this {
     this.username = username;
+    this.withEnvironment({ ...this.environment, MYSQL_USER: this.username });
     return this;
   }
 
   public withRootPassword(rootPassword: string): this {
     this.rootPassword = rootPassword;
+    this.withEnvironment({ ...this.environment, MYSQL_ROOT_PASSWORD: this.rootPassword });
     return this;
   }
 
   public withUserPassword(userPassword: string): this {
     this.userPassword = userPassword;
+    this.withEnvironment({ ...this.environment, MYSQL_PASSWORD: this.userPassword });
     return this;
   }
 
