@@ -10,6 +10,7 @@ export { GenericContainerBuilder, BuildOptions } from "./generic-container/gener
 export { TestContainers } from "./test-containers";
 export { ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "./container-runtime";
 export { Uuid, RandomUuid, log } from "./common";
+export { getContainerPort, PortWithOptionalBinding, PortWithBinding, hasHostBinding } from "./utils/port";
 
 export { DockerComposeEnvironment } from "./docker-compose-environment/docker-compose-environment";
 export { StartedDockerComposeEnvironment } from "./docker-compose-environment/started-docker-compose-environment";

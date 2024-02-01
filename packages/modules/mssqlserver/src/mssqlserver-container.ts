@@ -1,5 +1,11 @@
-import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
-import { getContainerPort, PortWithOptionalBinding } from "testcontainers/build/utils/port";
+import {
+  AbstractStartedContainer,
+  GenericContainer,
+  StartedTestContainer,
+  Wait,
+  getContainerPort,
+  PortWithOptionalBinding,
+} from "testcontainers";
 
 const MSSQL_PORT = 1433;
 export class MSSQLServerContainer extends GenericContainer {
