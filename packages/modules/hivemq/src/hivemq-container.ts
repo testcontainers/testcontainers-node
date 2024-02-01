@@ -8,8 +8,7 @@ const MQTT_PORT = 1883;
 export class HiveMQContainer extends GenericContainer {
   constructor(image = "hivemq/hivemq-ce:2023.5") {
     super(image);
-
-    this.withExposedPorts(...(this.hasExposedPorts ? this.exposedPorts : [MQTT_PORT]))
+    this.withExposedPorts(MQTT_PORT)
       .withWaitStrategy(Wait.forLogMessage(START_LOG_MESSAGE_REGEX))
       .withTmpFs({
         [path.join(HIVEMQ_BASE_PATH, "log")]: "rw",

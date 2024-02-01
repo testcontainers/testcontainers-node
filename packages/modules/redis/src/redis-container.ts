@@ -11,6 +11,31 @@ export class RedisContainer extends GenericContainer {
 
   constructor(image = "redis:7.2") {
     super(image);
+    this.withExposedPorts(REDIS_PORT)
+      .withCommand([
+        "redis-server",
+        ...(this.password ? [`--requirepass "${this.password}"`] : []),
+        ...(this.persistenceVolume ? ["--save 1 1 ", "--appendonly yes"] : []),
+      ])
+      .withStartupTimeout(120_000)
+      .withWaitStrategy(Wait.forLogMessage("Ready to accept connections tcp"));
+    if (this.persistenceVolume) {
+      this.withBindMounts([{ mode: "rw", source: this.persistenceVolume, target: "/data" }]);
+    }
+    if (this.initialImportScriptFile) {
+      this.withCopyFilesToContainer([
+        {
+          mode: 666,
+          source: this.initialImportScriptFile,
+          target: this.importFilePath,
+        },
+        {
+          mode: 777,
+          source: path.join(__dirname, "import.sh"),
+          target: "/tmp/import.sh",
+        },
+      ]);
+    }
   }
 
   public withPassword(password: string): this {
@@ -30,29 +55,6 @@ export class RedisContainer extends GenericContainer {
   }
 
   public override async start(): Promise<StartedRedisContainer> {
-    this.withExposedPorts(...(this.hasExposedPorts ? this.exposedPorts : [REDIS_PORT]))
-      .withCommand([
-        "redis-server",
-        ...(this.password ? [`--requirepass "${this.password}"`] : []),
-        ...(this.persistenceVolume ? ["--save 1 1 ", "--appendonly yes"] : []),
-      ])
-      .withStartupTimeout(120_000)
-      .withWaitStrategy(Wait.forLogMessage("Ready to accept connections tcp"));
-    if (this.persistenceVolume) this.withBindMounts([{ mode: "rw", source: this.persistenceVolume, target: "/data" }]);
-    if (this.initialImportScriptFile) {
-      this.withCopyFilesToContainer([
-        {
-          mode: 666,
-          source: this.initialImportScriptFile,
-          target: this.importFilePath,
-        },
-        {
-          mode: 777,
-          source: path.join(__dirname, "import.sh"),
-          target: "/tmp/import.sh",
-        },
-      ]);
-    }
     const startedRedisContainer = new StartedRedisContainer(await super.start(), this.password);
     if (this.initialImportScriptFile) await this.importInitialData(startedRedisContainer);
     return startedRedisContainer;

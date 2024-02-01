@@ -5,13 +5,13 @@ const MONGODB_PORT = 27017;
 export class MongoDBContainer extends GenericContainer {
   constructor(image = "mongo:4.0.1") {
     super(image);
-  }
-
-  public override async start(): Promise<StartedMongoDBContainer> {
     this.withExposedPorts(MONGODB_PORT)
       .withCommand(["--replSet", "rs0"])
       .withWaitStrategy(Wait.forLogMessage(/.*waiting for connections.*/i))
       .withStartupTimeout(120_000);
+  }
+
+  public override async start(): Promise<StartedMongoDBContainer> {
     return new StartedMongoDBContainer(await super.start());
   }
 

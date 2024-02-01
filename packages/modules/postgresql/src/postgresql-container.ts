@@ -9,6 +9,14 @@ export class PostgreSqlContainer extends GenericContainer {
 
   constructor(image = "postgres:13.3-alpine") {
     super(image);
+    this.withExposedPorts(POSTGRES_PORT)
+      .withEnvironment({
+        POSTGRES_DB: this.database,
+        POSTGRES_USER: this.username,
+        POSTGRES_PASSWORD: this.password,
+      })
+      .withWaitStrategy(Wait.forLogMessage(/.*database system is ready to accept connections.*/, 2))
+      .withStartupTimeout(120_000);
   }
 
   public withDatabase(database: string): this {
@@ -27,15 +35,6 @@ export class PostgreSqlContainer extends GenericContainer {
   }
 
   public override async start(): Promise<StartedPostgreSqlContainer> {
-    this.withExposedPorts(...(this.hasExposedPorts ? this.exposedPorts : [POSTGRES_PORT]))
-      .withEnvironment({
-        POSTGRES_DB: this.database,
-        POSTGRES_USER: this.username,
-        POSTGRES_PASSWORD: this.password,
-      })
-      .withWaitStrategy(Wait.forLogMessage(/.*database system is ready to accept connections.*/, 2))
-      .withStartupTimeout(120_000);
-
     return new StartedPostgreSqlContainer(await super.start(), this.database, this.username, this.password);
   }
 }

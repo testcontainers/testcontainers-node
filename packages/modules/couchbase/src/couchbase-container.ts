@@ -18,7 +18,6 @@ import { IntervalRetry } from "testcontainers/src/common";
 
 export class CouchbaseContainer extends GenericContainer {
   private static readonly DEFAULT_IMAGE_NAME = "couchbase/server";
-
   private static readonly DEFAULT_TAG = "6.5.1";
 
   private username = "Administrator";
@@ -39,6 +38,9 @@ export class CouchbaseContainer extends GenericContainer {
 
   constructor(image = `${CouchbaseContainer.DEFAULT_IMAGE_NAME}:${CouchbaseContainer.DEFAULT_TAG}`) {
     super(image);
+    this.withExposedPorts(...this.getPortsToExpose()).withWaitStrategy(
+      Wait.forLogMessage("Starting Couchbase Server -- Web UI available at http://<ip>:8091")
+    );
   }
 
   withCredentials(username: string, password: string) {
@@ -563,13 +565,7 @@ export class CouchbaseContainer extends GenericContainer {
   }
 
   public override async start(): Promise<StartedCouchbaseContainer> {
-    const startingMessage = "Starting Couchbase Server -- Web UI available at http://<ip>:8091";
-    this.withExposedPorts(...(this.hasExposedPorts ? this.exposedPorts : this.getPortsToExpose())).withWaitStrategy(
-      Wait.forLogMessage(startingMessage)
-    );
-    const startedTestContainer = await super.start();
-
-    return new StartedCouchbaseContainer(startedTestContainer, this.username, this.password);
+    return new StartedCouchbaseContainer(await super.start(), this.username, this.password);
   }
 }
 

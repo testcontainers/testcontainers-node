@@ -10,6 +10,14 @@ export class MySqlContainer extends GenericContainer {
 
   constructor(image = "mysql:8.0.31") {
     super(image);
+    this.withExposedPorts(MYSQL_PORT)
+      .withEnvironment({
+        MYSQL_DATABASE: this.database,
+        MYSQL_ROOT_PASSWORD: this.rootPassword,
+        MYSQL_USER: this.username,
+        MYSQL_PASSWORD: this.userPassword,
+      })
+      .withStartupTimeout(120_000);
   }
 
   public withDatabase(database: string): this {
@@ -33,15 +41,6 @@ export class MySqlContainer extends GenericContainer {
   }
 
   public override async start(): Promise<StartedMySqlContainer> {
-    this.withExposedPorts(...(this.hasExposedPorts ? this.exposedPorts : [MYSQL_PORT]))
-      .withEnvironment({
-        MYSQL_DATABASE: this.database,
-        MYSQL_ROOT_PASSWORD: this.rootPassword,
-        MYSQL_USER: this.username,
-        MYSQL_PASSWORD: this.userPassword,
-      })
-      .withStartupTimeout(120_000);
-
     return new StartedMySqlContainer(
       await super.start(),
       this.database,
