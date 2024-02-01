@@ -1,14 +1,14 @@
 {
-  "name": "@testcontainers/neo4j",
+  "name": "@testcontainers/redis",
   "version": "10.6.0",
   "license": "MIT",
   "keywords": [
-    "neo4j",
+    "redis",
     "testing",
     "docker",
     "testcontainers"
   ],
-  "description": "Neo4J module for Testcontainers",
+  "description": "Redis module for Testcontainers",
   "homepage": "https://github.com/testcontainers/testcontainers-node#readme",
   "repository": {
     "type": "git",
@@ -29,7 +29,8 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "neo4j-driver": "^5.14.0"
+    "@types/redis": "^4.0.11",
+    "redis": "^4.6.7"
   },
   "dependencies": {
     "testcontainers": "^10.6.0"
