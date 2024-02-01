@@ -1,4 +1,5 @@
 import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
+import { getContainerPort, PortWithOptionalBinding } from "testcontainers/build/utils/port";
 
 const MSSQL_PORT = 1433;
 export class MSSQLServerContainer extends GenericContainer {
@@ -22,6 +23,7 @@ export class MSSQLServerContainer extends GenericContainer {
 
   public acceptLicense(): this {
     this.acceptEula = "Y";
+    this.withEnvironment({ ...this.environment, ACCEPT_EULA: this.acceptEula });
     return this;
   }
 
@@ -32,12 +34,18 @@ export class MSSQLServerContainer extends GenericContainer {
 
   public withPassword(password: string): this {
     this.password = password;
+    this.withEnvironment({ ...this.environment, MSSQL_SA_PASSWORD: this.password });
     return this;
   }
 
   public withWaitForMessage(message: string | RegExp): this {
     this.message = message;
     return this;
+  }
+
+  public override withExposedPorts(...ports: PortWithOptionalBinding[]): this {
+    this.withEnvironment({ ...this.environment, MSSQL_TCP_PORT: String(getContainerPort(ports[0])) });
+    return super.withExposedPorts(...ports);
   }
 
   public override async start(): Promise<StartedMSSQLServerContainer> {
