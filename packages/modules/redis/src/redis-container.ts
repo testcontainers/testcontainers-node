@@ -40,17 +40,40 @@ export class RedisContainer extends GenericContainer {
 
   public withPassword(password: string): this {
     this.password = password;
+    this.withCommand([
+      "redis-server",
+      ...(this.password ? [`--requirepass "${this.password}"`] : []),
+      ...(this.persistenceVolume ? ["--save 1 1 ", "--appendonly yes"] : []),
+    ]);
     return this;
   }
 
   public withPersistence(sourcePath: string): this {
     this.persistenceVolume = sourcePath;
+    this.withCommand([
+      "redis-server",
+      ...(this.password ? [`--requirepass "${this.password}"`] : []),
+      ...(this.persistenceVolume ? ["--save 1 1 ", "--appendonly yes"] : []),
+    ]);
+    this.withBindMounts([{ mode: "rw", source: this.persistenceVolume, target: "/data" }]);
     return this;
   }
-  /* Expect data to be in redis import script format, see https://developer.redis.com/explore/import/*/
 
+  /* Expect data to be in redis import script format, see https://developer.redis.com/explore/import/*/
   public withInitialData(importScriptFile: string): this {
     this.initialImportScriptFile = importScriptFile;
+    this.withCopyFilesToContainer([
+      {
+        mode: 666,
+        source: this.initialImportScriptFile,
+        target: this.importFilePath,
+      },
+      {
+        mode: 777,
+        source: path.join(__dirname, "import.sh"),
+        target: "/tmp/import.sh",
+      },
+    ]);
     return this;
   }
 
