@@ -83,7 +83,7 @@ export class AbstractStartedContainer implements StartedTestContainer {
     return this.startedTestContainer.exec(command, opts);
   }
 
-  public logs(opts?: { since?: number, tail?: number }): Promise<Readable> {
+  public logs(opts?: { since?: number; tail?: number }): Promise<Readable> {
     return this.startedTestContainer.logs(opts);
   }
 }

@@ -11,15 +11,18 @@ async function stopStartingContainer(container: GenericContainer, name: string) 
   const containerStartPromise = container.start();
 
   const status = await new IntervalRetry<boolean, boolean>(500).retryUntil(
-    () => client.container.getById(name).inspect()
-        .then(i => i.State.Running)
+    () =>
+      client.container
+        .getById(name)
+        .inspect()
+        .then((i) => i.State.Running)
         .catch(() => false),
     (status) => status,
     () => false,
     10000
   );
 
-  if (!status) throw Error('failed start container');
+  if (!status) throw Error("failed start container");
 
   await client.container.getById(name).stop();
   await containerStartPromise;
@@ -107,11 +110,11 @@ describe("HttpWaitStrategy", () => {
   });
 
   it("should fail if container exited before healthcheck pass", async () => {
-    const name = 'container-name';
-    const data = [1,2,3];
+    const name = "container-name";
+    const data = [1, 2, 3];
     const tail = 50;
-    const echoCmd = data.map(i => `echo ${i}`).join(' && ');
-    const lastLogs = data.join('\n');
+    const echoCmd = data.map((i) => `echo ${i}`).join(" && ");
+    const lastLogs = data.join("\n");
     const container = new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
       .withStartupTimeout(20000)
@@ -119,17 +122,17 @@ describe("HttpWaitStrategy", () => {
       .withWaitStrategy(Wait.forHttp("/hello-world", 8080, true))
       .withName(name);
 
-    await expect(
-      stopStartingContainer(container, name)
-    ).rejects.toThrowError(new Error(`Container exited during HTTP healthCheck, last ${tail} logs: ${lastLogs}`));
+    await expect(stopStartingContainer(container, name)).rejects.toThrowError(
+      new Error(`Container exited during HTTP healthCheck, last ${tail} logs: ${lastLogs}`)
+    );
   });
 
   it("should log only $tail logs if container exited before healthcheck pass", async () => {
-    const name = 'container-name';
+    const name = "container-name";
     const tail = 50;
     const data = [...Array(tail + 5).keys()];
-    const echoCmd = data.map(i => `echo ${i}`).join(' && ');
-    const lastLogs = data.slice(tail * -1).join('\n');
+    const echoCmd = data.map((i) => `echo ${i}`).join(" && ");
+    const lastLogs = data.slice(tail * -1).join("\n");
     const container = new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
       .withStartupTimeout(20000)
@@ -137,9 +140,9 @@ describe("HttpWaitStrategy", () => {
       .withWaitStrategy(Wait.forHttp("/hello-world", 8080, true))
       .withName(name);
 
-    await expect(
-      stopStartingContainer(container, name)
-    ).rejects.toThrowError(new Error(`Container exited during HTTP healthCheck, last ${tail} logs: ${lastLogs}`));
+    await expect(stopStartingContainer(container, name)).rejects.toThrowError(
+      new Error(`Container exited during HTTP healthCheck, last ${tail} logs: ${lastLogs}`)
+    );
   });
 
   it("should set method", async () => {

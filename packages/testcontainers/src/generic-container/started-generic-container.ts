@@ -181,7 +181,7 @@ export class StartedGenericContainer implements StartedTestContainer {
     return output;
   }
 
-  public async logs(opts?: { since?: number, tail?: number }): Promise<Readable> {
+  public async logs(opts?: { since?: number; tail?: number }): Promise<Readable> {
     const client = await getContainerRuntimeClient();
 
     return client.container.logs(this.container, opts);

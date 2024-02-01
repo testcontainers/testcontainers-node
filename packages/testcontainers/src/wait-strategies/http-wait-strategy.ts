@@ -14,7 +14,11 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
   private _allowInsecure = false;
   private readTimeout = 1000;
 
-  constructor(private readonly path: string, private readonly port: number, private readonly failOnExitedContainer = false) {
+  constructor(
+    private readonly path: string,
+    private readonly port: number,
+    private readonly failOnExitedContainer = false
+  ) {
     super();
   }
 
@@ -67,7 +71,7 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
   public async waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void> {
     log.debug(`Waiting for HTTP...`, { containerId: container.id });
 
-    const exitStatus = 'exited';
+    const exitStatus = "exited";
     let containerExited = false;
     const client = await getContainerRuntimeClient();
 
@@ -136,17 +140,15 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
     let message: string;
 
     try {
-      const stream = await client.container.logs(container, {tail});
+      const stream = await client.container.logs(container, { tail });
 
       await new Promise((res) => {
-        stream
-          .on('data', d => lastLogs.push(d.trim()))
-          .on('end', res);
+        stream.on("data", (d) => lastLogs.push(d.trim())).on("end", res);
       });
 
-      message = `Container exited during HTTP healthCheck, last ${tail} logs: ${lastLogs.join('\n')}`;
+      message = `Container exited during HTTP healthCheck, last ${tail} logs: ${lastLogs.join("\n")}`;
     } catch (err) {
-      message = 'Container exited during HTTP healthCheck, failed to get last logs';
+      message = "Container exited during HTTP healthCheck, failed to get last logs";
     }
 
     log.error(message, { containerId: container.id });
