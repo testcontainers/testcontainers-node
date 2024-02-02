@@ -7,6 +7,17 @@ const HTTP_MANAGEMENT_PORT = 8222;
 const USER_ARGUMENT_KEY = "--user";
 const PASS_ARGUMENT_KEY = "--pass";
 
+function buildCmdsFromArgs(args: { [p: string]: string }): string[] {
+  const result: string[] = [];
+  result.push("nats-server");
+
+  for (const argsKey in args) {
+    result.push(argsKey);
+    result.push(args[argsKey]);
+  }
+  return result;
+}
+
 export class NatsContainer extends GenericContainer {
   private args: { [name: string]: string } = {};
 
@@ -19,32 +30,24 @@ export class NatsContainer extends GenericContainer {
       .withExposedPorts(CLIENT_PORT, ROUTING_PORT_FOR_CLUSTERING, HTTP_MANAGEMENT_PORT)
       .withWaitStrategy(Wait.forLogMessage(/.*Server is ready.*/))
       .withStartupTimeout(120_000);
-
-    function buildCmdsFromArgs(args: { [p: string]: string }): string[] {
-      const result: string[] = [];
-      result.push("nats-server");
-
-      for (const argsKey in args) {
-        result.push(argsKey);
-        result.push(args[argsKey]);
-      }
-      return result;
-    }
   }
 
   public withUsername(user: string): this {
     this.args[USER_ARGUMENT_KEY] = user;
+    this.withCommand(buildCmdsFromArgs(this.args));
     return this;
   }
 
   public withPass(pass: string): this {
     this.args[PASS_ARGUMENT_KEY] = pass;
+    this.withCommand(buildCmdsFromArgs(this.args));
     return this;
   }
 
   public withArg(name: string, value: string) {
     name = NatsContainer.ensureDashInFrontOfArgumentName(name);
     this.args[name] = value;
+    this.withCommand(buildCmdsFromArgs(this.args));
     return this;
   }
 

@@ -33,11 +33,16 @@ export class Neo4jContainer extends GenericContainer {
 
   public withPassword(password: string): this {
     this.password = password;
+    this.withEnvironment({ NEO4J_AUTH: `${USERNAME}/${this.password}` });
     return this;
   }
 
   public withApoc(): this {
     this.apoc = true;
+    this.withEnvironment({
+      NEO4JLABS_PLUGINS: '["apoc"]',
+      NEO4J_dbms_security_procedures_unrestricted: "apoc.*",
+    });
     return this;
   }
 
