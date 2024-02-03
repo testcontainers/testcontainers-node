@@ -12,13 +12,32 @@ export class RedisContainer extends GenericContainer {
   constructor(image = "redis:7.2") {
     super(image);
     this.withExposedPorts(REDIS_PORT)
-      .withCommand([
-        "redis-server",
-        ...(this.password ? [`--requirepass "${this.password}"`] : []),
-        ...(this.persistenceVolume ? ["--save 1 1 ", "--appendonly yes"] : []),
-      ])
       .withStartupTimeout(120_000)
       .withWaitStrategy(Wait.forLogMessage("Ready to accept connections tcp"));
+  }
+
+  public withPassword(password: string): this {
+    this.password = password;
+    return this;
+  }
+
+  public withPersistence(sourcePath: string): this {
+    this.persistenceVolume = sourcePath;
+    return this;
+  }
+
+  /* Expect data to be in redis import script format, see https://developer.redis.com/explore/import/*/
+  public withInitialData(importScriptFile: string): this {
+    this.initialImportScriptFile = importScriptFile;
+    return this;
+  }
+
+  public override async start(): Promise<StartedRedisContainer> {
+    this.withCommand([
+      "redis-server",
+      ...(this.password ? [`--requirepass "${this.password}"`] : []),
+      ...(this.persistenceVolume ? ["--save 1 1 ", "--appendonly yes"] : []),
+    ]);
     if (this.persistenceVolume) {
       this.withBindMounts([{ mode: "rw", source: this.persistenceVolume, target: "/data" }]);
     }
@@ -36,48 +55,6 @@ export class RedisContainer extends GenericContainer {
         },
       ]);
     }
-  }
-
-  public withPassword(password: string): this {
-    this.password = password;
-    this.withCommand([
-      "redis-server",
-      ...(this.password ? [`--requirepass "${this.password}"`] : []),
-      ...(this.persistenceVolume ? ["--save 1 1 ", "--appendonly yes"] : []),
-    ]);
-    return this;
-  }
-
-  public withPersistence(sourcePath: string): this {
-    this.persistenceVolume = sourcePath;
-    this.withCommand([
-      "redis-server",
-      ...(this.password ? [`--requirepass "${this.password}"`] : []),
-      ...(this.persistenceVolume ? ["--save 1 1 ", "--appendonly yes"] : []),
-    ]);
-    this.withBindMounts([{ mode: "rw", source: this.persistenceVolume, target: "/data" }]);
-    return this;
-  }
-
-  /* Expect data to be in redis import script format, see https://developer.redis.com/explore/import/*/
-  public withInitialData(importScriptFile: string): this {
-    this.initialImportScriptFile = importScriptFile;
-    this.withCopyFilesToContainer([
-      {
-        mode: 666,
-        source: this.initialImportScriptFile,
-        target: this.importFilePath,
-      },
-      {
-        mode: 777,
-        source: path.join(__dirname, "import.sh"),
-        target: "/tmp/import.sh",
-      },
-    ]);
-    return this;
-  }
-
-  public override async start(): Promise<StartedRedisContainer> {
     const startedRedisContainer = new StartedRedisContainer(await super.start(), this.password);
     if (this.initialImportScriptFile) await this.importInitialData(startedRedisContainer);
     return startedRedisContainer;

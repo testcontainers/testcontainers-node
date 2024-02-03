@@ -23,31 +23,28 @@ export class NatsContainer extends GenericContainer {
 
   constructor(image = "nats:2.8.4-alpine") {
     super(image);
+
     this.args[USER_ARGUMENT_KEY] = "test";
     this.args[PASS_ARGUMENT_KEY] = "test";
 
-    this.withCommand(buildCmdsFromArgs(this.args))
-      .withExposedPorts(CLIENT_PORT, ROUTING_PORT_FOR_CLUSTERING, HTTP_MANAGEMENT_PORT)
+    this.withExposedPorts(CLIENT_PORT, ROUTING_PORT_FOR_CLUSTERING, HTTP_MANAGEMENT_PORT)
       .withWaitStrategy(Wait.forLogMessage(/.*Server is ready.*/))
       .withStartupTimeout(120_000);
   }
 
   public withUsername(user: string): this {
     this.args[USER_ARGUMENT_KEY] = user;
-    this.withCommand(buildCmdsFromArgs(this.args));
     return this;
   }
 
   public withPass(pass: string): this {
     this.args[PASS_ARGUMENT_KEY] = pass;
-    this.withCommand(buildCmdsFromArgs(this.args));
     return this;
   }
 
   public withArg(name: string, value: string) {
     name = NatsContainer.ensureDashInFrontOfArgumentName(name);
     this.args[name] = value;
-    this.withCommand(buildCmdsFromArgs(this.args));
     return this;
   }
 
@@ -64,6 +61,7 @@ export class NatsContainer extends GenericContainer {
   }
 
   public override async start(): Promise<StartedNatsContainer> {
+    this.withCommand(buildCmdsFromArgs(this.args));
     return new StartedNatsContainer(await super.start(), this.getUser(), this.getPass());
   }
 
