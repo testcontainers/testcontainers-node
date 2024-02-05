@@ -1,32 +1,8 @@
 import { GenericContainer } from "../generic-container/generic-container";
 import { Wait } from "./wait";
-import { checkContainerIsHealthy, checkContainerIsHealthyTls } from "../utils/test-helper";
-import { getContainerRuntimeClient } from "../container-runtime";
-import { IntervalRetry } from "../common";
+import { checkContainerIsHealthy, checkContainerIsHealthyTls, stopStartingContainer } from "../utils/test-helper";
 
 jest.setTimeout(180_000);
-
-async function stopStartingContainer(container: GenericContainer, name: string) {
-  const client = await getContainerRuntimeClient();
-  const containerStartPromise = container.start();
-
-  const status = await new IntervalRetry<boolean, boolean>(500).retryUntil(
-    () =>
-      client.container
-        .getById(name)
-        .inspect()
-        .then((i) => i.State.Running)
-        .catch(() => false),
-    (status) => status,
-    () => false,
-    10000
-  );
-
-  if (!status) throw Error("failed start container");
-
-  await client.container.getById(name).stop();
-  await containerStartPromise;
-}
 
 describe("HttpWaitStrategy", () => {
   it("should wait for 200", async () => {

@@ -19,6 +19,7 @@ export { DownedDockerComposeEnvironment } from "./docker-compose-environment/dow
 export { Network, StartedNetwork, StoppedNetwork } from "./network/network";
 
 export { Wait } from "./wait-strategies/wait";
+export { HttpWaitStrategyOptions } from "./wait-strategies/http-wait-strategy";
 export { StartupCheckStrategy, StartupStatus } from "./wait-strategies/startup-check-strategy";
 export { PullPolicy, ImagePullPolicy } from "./utils/pull-policy";
 export { InspectResult, Content, ExecOptions, ExecResult } from "./types";

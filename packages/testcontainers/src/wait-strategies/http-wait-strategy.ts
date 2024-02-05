@@ -21,7 +21,7 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
   constructor(
     private readonly path: string,
     private readonly port: number,
-    private readonly options?: HttpWaitStrategyOptions
+    private readonly options: HttpWaitStrategyOptions
   ) {
     super();
   }
@@ -78,7 +78,7 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
     const exitStatus = "exited";
     let containerExited = false;
     const client = await getContainerRuntimeClient();
-    const {abortOnContainerExit} = this.options || {};
+    const {abortOnContainerExit} = this.options;
 
     await new IntervalRetry<Response | undefined, Error>(this.readTimeout).retryUntil(
       async () => {
@@ -86,12 +86,15 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
           const url = `${this.protocol}://${client.info.containerRuntime.host}:${boundPorts.getBinding(this.port)}${
             this.path
           }`;
-          const containerStatus = (await client.container.inspect(container)).State.Status;
 
-          if (containerStatus === exitStatus) {
-            containerExited = true;
+          if (abortOnContainerExit) {
+            const containerStatus = (await client.container.inspect(container)).State.Status;
 
-            return;
+            if (containerStatus === exitStatus) {
+              containerExited = true;
+
+              return;
+            }
           }
 
           return await fetch(url, {

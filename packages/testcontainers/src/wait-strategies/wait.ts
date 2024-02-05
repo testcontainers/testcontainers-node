@@ -23,7 +23,7 @@ export class Wait {
     return new HealthCheckWaitStrategy();
   }
 
-  public static forHttp(path: string, port: number, options: HttpWaitStrategyOptions = {}): HttpWaitStrategy {
+  public static forHttp(path: string, port: number, options: HttpWaitStrategyOptions = { abortOnContainerExit: false }): HttpWaitStrategy {
     return new HttpWaitStrategy(path, port, options);
   }
 
