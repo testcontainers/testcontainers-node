@@ -6,6 +6,7 @@ const USERNAME = "root";
 export class ArangoDBContainer extends GenericContainer {
   constructor(image = "arangodb:3.10.0", private password = "test") {
     super(image);
+    this.withExposedPorts(ARANGODB_PORT).withWaitStrategy(Wait.forLogMessage("Have fun!")).withStartupTimeout(120_000);
   }
 
   public withPassword(password: string): this {
@@ -14,11 +15,7 @@ export class ArangoDBContainer extends GenericContainer {
   }
 
   public override async start(): Promise<StartedArangoContainer> {
-    this.withExposedPorts(...(this.hasExposedPorts ? this.exposedPorts : [ARANGODB_PORT]))
-      .withWaitStrategy(Wait.forLogMessage("Have fun!"))
-      .withEnvironment({ ARANGO_ROOT_PASSWORD: this.password })
-      .withStartupTimeout(120_000);
-
+    this.withEnvironment({ ARANGO_ROOT_PASSWORD: this.password });
     return new StartedArangoContainer(await super.start(), this.password);
   }
 }

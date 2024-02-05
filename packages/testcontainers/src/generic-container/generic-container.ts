@@ -328,10 +328,6 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
-  protected get hasExposedPorts(): boolean {
-    return this.exposedPorts.length !== 0;
-  }
-
   public withExposedPorts(...ports: PortWithOptionalBinding[]): this {
     const exposedPorts: { [port: string]: Record<string, never> } = {};
     for (const exposedPort of ports) {
