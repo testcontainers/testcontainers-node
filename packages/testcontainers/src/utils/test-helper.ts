@@ -5,6 +5,8 @@ import { StartedTestContainer } from "../test-container";
 import https from "https";
 import { GetEventsOptions } from "dockerode";
 import { getContainerRuntimeClient } from "../container-runtime";
+import { GenericContainer } from "../generic-container/generic-container";
+import { IntervalRetry } from "../common";
 
 export const checkContainerIsHealthy = async (container: StartedTestContainer): Promise<void> => {
   const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
@@ -102,4 +104,26 @@ export async function getImageLabelsByName(imageName: string): Promise<{ [label:
 export async function deleteImageByName(imageName: string): Promise<void> {
   const dockerode = (await getContainerRuntimeClient()).container.dockerode;
   await dockerode.getImage(imageName).remove();
+}
+
+export async function stopStartingContainer(container: GenericContainer, name: string) {
+  const client = await getContainerRuntimeClient();
+  const containerStartPromise = container.start();
+
+  const status = await new IntervalRetry<boolean, boolean>(500).retryUntil(
+    () =>
+      client.container
+        .getById(name)
+        .inspect()
+        .then((i) => i.State.Running)
+        .catch(() => false),
+    (status) => status,
+    () => false,
+    10000
+  );
+
+  if (!status) throw Error("failed start container");
+
+  await client.container.getById(name).stop();
+  await containerStartPromise;
 }
