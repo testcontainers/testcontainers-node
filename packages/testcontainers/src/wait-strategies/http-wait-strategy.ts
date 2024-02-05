@@ -78,7 +78,7 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
     const exitStatus = "exited";
     let containerExited = false;
     const client = await getContainerRuntimeClient();
-    const {abortOnContainerExit} = this.options;
+    const { abortOnContainerExit } = this.options;
 
     await new IntervalRetry<Response | undefined, Error>(this.readTimeout).retryUntil(
       async () => {
