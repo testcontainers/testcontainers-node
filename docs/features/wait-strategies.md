@@ -120,6 +120,16 @@ const container = await new GenericContainer("redis")
   .start();
 ```
 
+Stop waiting after container exited if waiting for container restart not needed.
+
+```javascript
+const { GenericContainer, Wait } = require("testcontainers");
+
+const container = await new GenericContainer("redis")
+  .withWaitStrategy(Wait.forHttp("/health", 8080, { abortOnContainerExit: true }))
+  .start();
+```
+
 ### For status code
 
 ```javascript

@@ -6,6 +6,10 @@ import { BoundPorts } from "../utils/bound-ports";
 import { IntervalRetry, log } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
 
+export interface HttpWaitStrategyOptions {
+  abortOnContainerExit?: boolean;
+}
+
 export class HttpWaitStrategy extends AbstractWaitStrategy {
   private protocol = "http";
   private method = "GET";
@@ -17,7 +21,7 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
   constructor(
     private readonly path: string,
     private readonly port: number,
-    private readonly failOnExitedContainer = false
+    private readonly options?: HttpWaitStrategyOptions
   ) {
     super();
   }
@@ -74,6 +78,7 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
     const exitStatus = "exited";
     let containerExited = false;
     const client = await getContainerRuntimeClient();
+    const {abortOnContainerExit} = this.options || {};
 
     await new IntervalRetry<Response | undefined, Error>(this.readTimeout).retryUntil(
       async () => {
@@ -100,7 +105,7 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
         }
       },
       async (response) => {
-        if (containerExited) {
+        if (abortOnContainerExit && containerExited) {
           return true;
         }
 
@@ -126,7 +131,7 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
       this.startupTimeout
     );
 
-    if (containerExited) {
+    if (abortOnContainerExit && containerExited) {
       return this.handleContainerExit(container);
     }
 
@@ -153,7 +158,7 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
 
     log.error(message, { containerId: container.id });
 
-    if (this.failOnExitedContainer) throw new Error(message);
+    throw new Error(message);
   }
 
   private getAgent(): Agent | undefined {

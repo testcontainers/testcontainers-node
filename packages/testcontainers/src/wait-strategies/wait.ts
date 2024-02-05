@@ -1,5 +1,5 @@
 import { WaitStrategy } from "./wait-strategy";
-import { HttpWaitStrategy } from "./http-wait-strategy";
+import { HttpWaitStrategy, HttpWaitStrategyOptions } from "./http-wait-strategy";
 import { HealthCheckWaitStrategy } from "./health-check-wait-strategy";
 import { Log, LogWaitStrategy } from "./log-wait-strategy";
 import { ShellWaitStrategy } from "./shell-wait-strategy";
@@ -23,8 +23,8 @@ export class Wait {
     return new HealthCheckWaitStrategy();
   }
 
-  public static forHttp(path: string, port: number, failOnExitedContainer = false): HttpWaitStrategy {
-    return new HttpWaitStrategy(path, port, failOnExitedContainer);
+  public static forHttp(path: string, port: number, options: HttpWaitStrategyOptions = {}): HttpWaitStrategy {
+    return new HttpWaitStrategy(path, port, options);
   }
 
   public static forSuccessfulCommand(command: string): ShellWaitStrategy {
