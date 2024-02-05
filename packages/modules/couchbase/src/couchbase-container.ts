@@ -129,7 +129,7 @@ export class CouchbaseContainer extends GenericContainer {
     const waitStrategies: WaitStrategy[] = [];
 
     waitStrategies.push(
-      new HttpWaitStrategy("/pools/default", PORTS.MGMT_PORT)
+      Wait.forHttp("/pools/default", PORTS.MGMT_PORT)
         .withBasicCredentials(this.username, this.password)
         .forStatusCode(200)
         .forResponsePredicate((response) => {
@@ -145,7 +145,7 @@ export class CouchbaseContainer extends GenericContainer {
 
     if (this.enabledServices.has(CouchbaseService.QUERY)) {
       waitStrategies.push(
-        new HttpWaitStrategy("/admin/ping", PORTS.QUERY_PORT)
+        Wait.forHttp("/admin/ping", PORTS.QUERY_PORT)
           .withBasicCredentials(this.username, this.password)
           .forStatusCode(200)
       );
@@ -153,7 +153,7 @@ export class CouchbaseContainer extends GenericContainer {
 
     if (this.enabledServices.has(CouchbaseService.ANALYTICS)) {
       waitStrategies.push(
-        new HttpWaitStrategy("/admin/ping", PORTS.ANALYTICS_PORT)
+        Wait.forHttp("/admin/ping", PORTS.ANALYTICS_PORT)
           .withBasicCredentials(this.username, this.password)
           .forStatusCode(200)
       );
@@ -161,7 +161,7 @@ export class CouchbaseContainer extends GenericContainer {
 
     if (this.enabledServices.has(CouchbaseService.EVENTING)) {
       waitStrategies.push(
-        new HttpWaitStrategy("/api/v1/config", PORTS.EVENTING_PORT)
+        Wait.forHttp("/api/v1/config", PORTS.EVENTING_PORT)
           .withBasicCredentials(this.username, this.password)
           .forStatusCode(200)
       );
@@ -174,7 +174,7 @@ export class CouchbaseContainer extends GenericContainer {
     inspectResult: InspectResult,
     startedTestContainer: StartedTestContainer
   ) {
-    return new HttpWaitStrategy("/pools", PORTS.MGMT_PORT)
+    return Wait.forHttp("/pools", PORTS.MGMT_PORT)
       .forStatusCode(200)
       .waitUntilReady(
         client.container.getById(startedTestContainer.getId()),
@@ -386,7 +386,7 @@ export class CouchbaseContainer extends GenericContainer {
 
       await this.checkResponse(response, `Could not create bucket ${bucket.getName()}`);
 
-      await new HttpWaitStrategy(`/pools/default/b/${bucket.getName()}`, PORTS.MGMT_PORT)
+      await Wait.forHttp(`/pools/default/b/${bucket.getName()}`, PORTS.MGMT_PORT)
         .withBasicCredentials(this.username, this.password)
         .forStatusCode(200)
         .forResponsePredicate((response) => {
