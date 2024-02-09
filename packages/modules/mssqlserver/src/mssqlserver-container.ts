@@ -1,6 +1,7 @@
 import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 
 const MSSQL_PORT = 1433;
+
 export class MSSQLServerContainer extends GenericContainer {
   private database = "master";
   private username = "sa";
@@ -10,6 +11,7 @@ export class MSSQLServerContainer extends GenericContainer {
 
   constructor(image = "mcr.microsoft.com/mssql/server:2022-latest") {
     super(image);
+    this.withExposedPorts(MSSQL_PORT).withWaitStrategy(Wait.forLogMessage(this.message, 1)).withStartupTimeout(120_000);
   }
 
   public acceptLicense(): this {
@@ -33,15 +35,11 @@ export class MSSQLServerContainer extends GenericContainer {
   }
 
   public override async start(): Promise<StartedMSSQLServerContainer> {
-    this.withExposedPorts(...(this.hasExposedPorts ? this.exposedPorts : [MSSQL_PORT]))
-      .withEnvironment({
-        ACCEPT_EULA: this.acceptEula,
-        MSSQL_SA_PASSWORD: this.password,
-        MSSQL_TCP_PORT: String(MSSQL_PORT),
-      })
-      .withWaitStrategy(Wait.forLogMessage(this.message, 1))
-      .withStartupTimeout(120_000);
-
+    this.withEnvironment({
+      ACCEPT_EULA: this.acceptEula,
+      MSSQL_SA_PASSWORD: this.password,
+      MSSQL_TCP_PORT: String(MSSQL_PORT),
+    });
     return new StartedMSSQLServerContainer(await super.start(), this.database, this.username, this.password);
   }
 }

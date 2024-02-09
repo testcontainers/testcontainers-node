@@ -6,6 +6,10 @@ import { BoundPorts } from "../utils/bound-ports";
 import { IntervalRetry, log } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
 
+export interface HttpWaitStrategyOptions {
+  abortOnContainerExit?: boolean;
+}
+
 export class HttpWaitStrategy extends AbstractWaitStrategy {
   private protocol = "http";
   private method = "GET";
@@ -14,7 +18,11 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
   private _allowInsecure = false;
   private readTimeout = 1000;
 
-  constructor(private readonly path: string, private readonly port: number) {
+  constructor(
+    private readonly path: string,
+    private readonly port: number,
+    private readonly options: HttpWaitStrategyOptions
+  ) {
     super();
   }
 
@@ -66,7 +74,11 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
 
   public async waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void> {
     log.debug(`Waiting for HTTP...`, { containerId: container.id });
+
+    const exitStatus = "exited";
+    let containerExited = false;
     const client = await getContainerRuntimeClient();
+    const { abortOnContainerExit } = this.options;
 
     await new IntervalRetry<Response | undefined, Error>(this.readTimeout).retryUntil(
       async () => {
@@ -74,6 +86,17 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
           const url = `${this.protocol}://${client.info.containerRuntime.host}:${boundPorts.getBinding(this.port)}${
             this.path
           }`;
+
+          if (abortOnContainerExit) {
+            const containerStatus = (await client.container.inspect(container)).State.Status;
+
+            if (containerStatus === exitStatus) {
+              containerExited = true;
+
+              return;
+            }
+          }
+
           return await fetch(url, {
             method: this.method,
             timeout: this.readTimeout,
@@ -85,6 +108,10 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
         }
       },
       async (response) => {
+        if (abortOnContainerExit && containerExited) {
+          return true;
+        }
+
         if (response === undefined) {
           return false;
         } else if (!this.predicates.length) {
@@ -107,7 +134,34 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
       this.startupTimeout
     );
 
+    if (abortOnContainerExit && containerExited) {
+      return this.handleContainerExit(container);
+    }
+
     log.debug(`HTTP wait strategy complete`, { containerId: container.id });
+  }
+
+  private async handleContainerExit(container: Dockerode.Container) {
+    const tail = 50;
+    const lastLogs: string[] = [];
+    const client = await getContainerRuntimeClient();
+    let message: string;
+
+    try {
+      const stream = await client.container.logs(container, { tail });
+
+      await new Promise((res) => {
+        stream.on("data", (d) => lastLogs.push(d.trim())).on("end", res);
+      });
+
+      message = `Container exited during HTTP healthCheck, last ${tail} logs: ${lastLogs.join("\n")}`;
+    } catch (err) {
+      message = "Container exited during HTTP healthCheck, failed to get last logs";
+    }
+
+    log.error(message, { containerId: container.id });
+
+    throw new Error(message);
   }
 
   private getAgent(): Agent | undefined {

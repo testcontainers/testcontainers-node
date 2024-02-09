@@ -162,6 +162,7 @@ export class DockerContainerClient implements ContainerClient {
         follow: true,
         stdout: true,
         stderr: true,
+        tail: opts?.tail ?? -1,
         since: opts?.since ?? 0,
       })) as IncomingMessage;
       stream.socket.unref();

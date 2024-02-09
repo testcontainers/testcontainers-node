@@ -7,7 +7,6 @@ import {
   Wait,
 } from "testcontainers";
 import { WaitStrategy } from "testcontainers/src/wait-strategies/wait-strategy";
-import { HttpWaitStrategy } from "testcontainers/src/wait-strategies/http-wait-strategy";
 import { BoundPorts } from "testcontainers/src/utils/bound-ports";
 import { ContainerRuntimeClient, getContainerRuntimeClient } from "testcontainers/src/container-runtime";
 import { CouchbaseService } from "./couchbase-service";
@@ -18,7 +17,6 @@ import { IntervalRetry } from "testcontainers/src/common";
 
 export class CouchbaseContainer extends GenericContainer {
   private static readonly DEFAULT_IMAGE_NAME = "couchbase/server";
-
   private static readonly DEFAULT_TAG = "6.5.1";
 
   private username = "Administrator";
@@ -39,6 +37,9 @@ export class CouchbaseContainer extends GenericContainer {
 
   constructor(image = `${CouchbaseContainer.DEFAULT_IMAGE_NAME}:${CouchbaseContainer.DEFAULT_TAG}`) {
     super(image);
+    this.withExposedPorts(...this.getPortsToExpose()).withWaitStrategy(
+      Wait.forLogMessage("Starting Couchbase Server -- Web UI available at http://<ip>:8091")
+    );
   }
 
   withCredentials(username: string, password: string) {
@@ -129,7 +130,7 @@ export class CouchbaseContainer extends GenericContainer {
     const waitStrategies: WaitStrategy[] = [];
 
     waitStrategies.push(
-      new HttpWaitStrategy("/pools/default", PORTS.MGMT_PORT)
+      Wait.forHttp("/pools/default", PORTS.MGMT_PORT)
         .withBasicCredentials(this.username, this.password)
         .forStatusCode(200)
         .forResponsePredicate((response) => {
@@ -145,7 +146,7 @@ export class CouchbaseContainer extends GenericContainer {
 
     if (this.enabledServices.has(CouchbaseService.QUERY)) {
       waitStrategies.push(
-        new HttpWaitStrategy("/admin/ping", PORTS.QUERY_PORT)
+        Wait.forHttp("/admin/ping", PORTS.QUERY_PORT)
           .withBasicCredentials(this.username, this.password)
           .forStatusCode(200)
       );
@@ -153,7 +154,7 @@ export class CouchbaseContainer extends GenericContainer {
 
     if (this.enabledServices.has(CouchbaseService.ANALYTICS)) {
       waitStrategies.push(
-        new HttpWaitStrategy("/admin/ping", PORTS.ANALYTICS_PORT)
+        Wait.forHttp("/admin/ping", PORTS.ANALYTICS_PORT)
           .withBasicCredentials(this.username, this.password)
           .forStatusCode(200)
       );
@@ -161,7 +162,7 @@ export class CouchbaseContainer extends GenericContainer {
 
     if (this.enabledServices.has(CouchbaseService.EVENTING)) {
       waitStrategies.push(
-        new HttpWaitStrategy("/api/v1/config", PORTS.EVENTING_PORT)
+        Wait.forHttp("/api/v1/config", PORTS.EVENTING_PORT)
           .withBasicCredentials(this.username, this.password)
           .forStatusCode(200)
       );
@@ -174,7 +175,7 @@ export class CouchbaseContainer extends GenericContainer {
     inspectResult: InspectResult,
     startedTestContainer: StartedTestContainer
   ) {
-    return new HttpWaitStrategy("/pools", PORTS.MGMT_PORT)
+    return Wait.forHttp("/pools", PORTS.MGMT_PORT)
       .forStatusCode(200)
       .waitUntilReady(
         client.container.getById(startedTestContainer.getId()),
@@ -386,7 +387,7 @@ export class CouchbaseContainer extends GenericContainer {
 
       await this.checkResponse(response, `Could not create bucket ${bucket.getName()}`);
 
-      await new HttpWaitStrategy(`/pools/default/b/${bucket.getName()}`, PORTS.MGMT_PORT)
+      await Wait.forHttp(`/pools/default/b/${bucket.getName()}`, PORTS.MGMT_PORT)
         .withBasicCredentials(this.username, this.password)
         .forStatusCode(200)
         .forResponsePredicate((response) => {
@@ -563,13 +564,7 @@ export class CouchbaseContainer extends GenericContainer {
   }
 
   public override async start(): Promise<StartedCouchbaseContainer> {
-    const startingMessage = "Starting Couchbase Server -- Web UI available at http://<ip>:8091";
-    this.withExposedPorts(...(this.hasExposedPorts ? this.exposedPorts : this.getPortsToExpose())).withWaitStrategy(
-      Wait.forLogMessage(startingMessage)
-    );
-    const startedTestContainer = await super.start();
-
-    return new StartedCouchbaseContainer(startedTestContainer, this.username, this.password);
+    return new StartedCouchbaseContainer(await super.start(), this.username, this.password);
   }
 }
 
