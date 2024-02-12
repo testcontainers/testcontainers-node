@@ -70,7 +70,8 @@ export class PlaywrightReportingContainer extends PlaywrightContainer {
   protected override async beforeContainerCreated(): Promise<void> {
     this.withWorkingDir(CONTAINER_WORKING_DIRECTORY)
       .withCopyDirectoriesToContainer(this.directoriesToCopy)
-      .withEntrypoint(["/bin/sh", "-c", `sleep infinity`]);
+      .withEntrypoint(["/bin/sleep"])
+      .withCommand(["infinity"]);
   }
 
   public override async start(): Promise<StartedPlaywrightReportingContainer> {
@@ -78,7 +79,6 @@ export class PlaywrightReportingContainer extends PlaywrightContainer {
 
     await startedTestContainer.exec(["npm", "install"]);
     await startedTestContainer.exec(["npm", "playwright", "test", "--reporter=html"]);
-    await startedTestContainer.exec(["sleep infinity"]);
 
     return new StartedPlaywrightReportingContainer(startedTestContainer);
   }
