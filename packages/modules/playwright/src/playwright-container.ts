@@ -76,9 +76,8 @@ export class PlaywrightReportingContainer extends PlaywrightContainer {
 
   public override async start(): Promise<StartedPlaywrightReportingContainer> {
     const startedTestContainer = await super.start();
-
-    await startedTestContainer.exec(["npm", "install"]);
-    await startedTestContainer.exec(["npm", "playwright", "test", "--reporter=html"]);
+    await startedTestContainer.exec(["npm", "i"]);
+    await startedTestContainer.exec(["npx", "playwright", "test", "--reporter=html"]);
 
     return new StartedPlaywrightReportingContainer(startedTestContainer);
   }
@@ -101,7 +100,7 @@ export class StartedPlaywrightReportingContainer extends StartedPlaywrightContai
     try {
       const containerId = this.getId();
       log.debug("Extracting archive from container...", { containerId });
-      const archiveStream = await this.copyArchiveFromContainer(CONTAINER_HTML_REPORT_PATH);
+      const archiveStream = await this.copyArchiveFromContainer("/playwright-report/index.html");
       log.debug("Extracted archive from container", { containerId });
 
       log.debug("Unpacking archive...", { containerId });
