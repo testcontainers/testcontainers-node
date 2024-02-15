@@ -61,7 +61,7 @@ export class GenericContainerBuilder {
       labels[LABEL_TESTCONTAINERS_SESSION_ID] = reaper.sessionId;
     }
 
-    log.info(`Building Dockerfile "${dockerfile}" as image "${imageName}"...`);
+    log.info(`Building Dockerfile "${dockerfile}" as image "${JSON.stringify(imageName)}"...`);
     await client.image.build(this.context, {
       t: imageName.string,
       dockerfile: this.dockerfileName,
