@@ -56,4 +56,5 @@ nav:
       - PostgreSQL: modules/postgresql.md
       - Redis: modules/redis.md
       - Selenium: modules/selenium.md
+      - Smocker: modules/smocker.md
   - Configuration: configuration.md
