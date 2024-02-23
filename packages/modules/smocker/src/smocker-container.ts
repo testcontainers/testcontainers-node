@@ -23,7 +23,7 @@ export class StartedSmockerContainer extends AbstractStartedContainer {
    */
   public getApiUri(): string {
     const hostname = this.getHost();
-    const url = new URL("http://"+hostname);
+    const url = new URL("http://" + hostname);
     url.port = this.getMappedPort(8081).toString();
     return url.toString();
   }
@@ -33,7 +33,7 @@ export class StartedSmockerContainer extends AbstractStartedContainer {
    */
   public getMockUri(): string {
     const hostname = this.getHost();
-    const url = new URL("http://"+hostname);
+    const url = new URL("http://" + hostname);
     url.port = this.getMappedPort(8080).toString();
     return url.toString();
   }
