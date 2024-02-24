@@ -13,7 +13,7 @@ export class RedisContainer extends GenericContainer {
     super(image);
     this.withExposedPorts(REDIS_PORT)
       .withStartupTimeout(120_000)
-      .withWaitStrategy(Wait.forLogMessage("Ready to accept connections tcp"));
+      .withWaitStrategy(Wait.forLogMessage("Ready to accept connections"));
   }
 
   public withPassword(password: string): this {
