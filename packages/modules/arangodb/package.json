@@ -29,7 +29,7 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "arangojs": "^8.6.0"
+    "arangojs": "^8.7.0"
   },
   "dependencies": {
     "testcontainers": "^10.7.1"
