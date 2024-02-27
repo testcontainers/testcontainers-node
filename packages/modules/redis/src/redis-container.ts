@@ -11,6 +11,9 @@ export class RedisContainer extends GenericContainer {
 
   constructor(image = "redis:7.2") {
     super(image);
+    this.withExposedPorts(REDIS_PORT)
+      .withStartupTimeout(120_000)
+      .withWaitStrategy(Wait.forLogMessage("Ready to accept connections tcp"));
   }
 
   public withPassword(password: string): this {
@@ -22,23 +25,22 @@ export class RedisContainer extends GenericContainer {
     this.persistenceVolume = sourcePath;
     return this;
   }
-  /* Expect data to be in redis import script format, see https://developer.redis.com/explore/import/*/
 
+  /* Expect data to be in redis import script format, see https://developer.redis.com/explore/import/*/
   public withInitialData(importScriptFile: string): this {
     this.initialImportScriptFile = importScriptFile;
     return this;
   }
 
   public override async start(): Promise<StartedRedisContainer> {
-    this.withExposedPorts(...(this.hasExposedPorts ? this.exposedPorts : [REDIS_PORT]))
-      .withCommand([
-        "redis-server",
-        ...(this.password ? [`--requirepass "${this.password}"`] : []),
-        ...(this.persistenceVolume ? ["--save 1 1 ", "--appendonly yes"] : []),
-      ])
-      .withStartupTimeout(120_000)
-      .withWaitStrategy(Wait.forLogMessage("Ready to accept connections tcp"));
-    if (this.persistenceVolume) this.withBindMounts([{ mode: "rw", source: this.persistenceVolume, target: "/data" }]);
+    this.withCommand([
+      "redis-server",
+      ...(this.password ? [`--requirepass "${this.password}"`] : []),
+      ...(this.persistenceVolume ? ["--save 1 1 ", "--appendonly yes"] : []),
+    ]);
+    if (this.persistenceVolume) {
+      this.withBindMounts([{ mode: "rw", source: this.persistenceVolume, target: "/data" }]);
+    }
     if (this.initialImportScriptFile) {
       this.withCopyFilesToContainer([
         {

@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/neo4j",
-  "version": "10.5.0",
+  "version": "10.7.1",
   "license": "MIT",
   "keywords": [
     "neo4j",
@@ -32,6 +32,6 @@
     "neo4j-driver": "^5.14.0"
   },
   "dependencies": {
-    "testcontainers": "^10.5.0"
+    "testcontainers": "^10.7.1"
   }
 }

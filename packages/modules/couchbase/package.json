@@ -1,14 +1,14 @@
 {
-  "name": "@testcontainers/arangodb",
+  "name": "@testcontainers/couchbase",
   "version": "10.7.1",
   "license": "MIT",
   "keywords": [
-    "arangodb",
+    "couchbase",
     "testing",
     "docker",
     "testcontainers"
   ],
-  "description": "ArangoDB module for Testcontainers",
+  "description": "Couchbase module for Testcontainers",
   "homepage": "https://github.com/testcontainers/testcontainers-node#readme",
   "repository": {
     "type": "git",
@@ -28,10 +28,11 @@
     "prepack": "shx cp ../../../README.md . && shx cp ../../../LICENSE .",
     "build": "tsc --project tsconfig.build.json"
   },
-  "devDependencies": {
-    "arangojs": "^8.6.0"
-  },
   "dependencies": {
     "testcontainers": "^10.7.1"
+  },
+  "devDependencies": {
+    "@types/couchbase": "^2.4.1",
+    "couchbase": "3.2.5"
   }
 }
