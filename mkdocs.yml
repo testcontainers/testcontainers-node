@@ -56,4 +56,5 @@ nav:
       - PostgreSQL: modules/postgresql.md
       - Redis: modules/redis.md
       - Selenium: modules/selenium.md
+      - Supertokens: modules/supertokens.md
   - Configuration: configuration.md
