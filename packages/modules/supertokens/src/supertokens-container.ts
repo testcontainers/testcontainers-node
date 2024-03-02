@@ -8,7 +8,7 @@ export class SupertokensContainer extends GenericContainer {
   }
 
   protected override async beforeContainerCreated(): Promise<void> {
-    this.withExposedPorts(...(this.hasExposedPorts ? this.exposedPorts : [SUPERTOKENS_PORT]))
+    this.withExposedPorts(...(this.exposedPorts ?? [SUPERTOKENS_PORT]))
       .withWaitStrategy(Wait.forHttp("/hello", SUPERTOKENS_PORT))
       .withStartupTimeout(120_000);
   }
