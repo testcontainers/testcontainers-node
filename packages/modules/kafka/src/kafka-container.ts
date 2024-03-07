@@ -11,6 +11,10 @@ import {
 const KAFKA_PORT = 9093;
 const KAFKA_BROKER_PORT = 9092;
 const DEFAULT_ZOOKEEPER_PORT = 2181;
+const DEFAULT_CLUSTER_ID = "4L6g3nShT-eMCtK--X86sw";
+
+// https://docs.confluent.io/platform/7.0.0/release-notes/index.html#ak-raft-kraft
+const MIN_KRAFT_VERSION = "7.0.0";
 
 export const KAFKA_IMAGE = "confluentinc/cp-kafka:7.2.2";
 
@@ -36,10 +40,16 @@ interface PKCS12CertificateStore {
   passphrase: string;
 }
 
+enum KafkaMode {
+  EMBEDDED_ZOOKEEPER,
+  PROVIDED_ZOOKEEPER,
+  KRAFT,
+}
+
 export class KafkaContainer extends GenericContainer {
   private readonly uuid: Uuid = new RandomUuid();
 
-  private isZooKeeperProvided = false;
+  private mode = KafkaMode.EMBEDDED_ZOOKEEPER;
   private zooKeeperHost?: string;
   private zooKeeperPort?: number;
   private saslSslConfig?: SaslSslListenerOptions;
@@ -61,10 +71,18 @@ export class KafkaContainer extends GenericContainer {
   }
 
   public withZooKeeper(host: string, port: number): this {
-    this.isZooKeeperProvided = true;
+    this.mode = KafkaMode.PROVIDED_ZOOKEEPER;
     this.zooKeeperHost = host;
     this.zooKeeperPort = port;
 
+    return this;
+  }
+
+  public withKraft(): this {
+    this.verifyMinKraftVersion()
+    this.mode = KafkaMode.KRAFT;
+    this.zooKeeperHost = undefined;
+    this.zooKeeperPort = undefined;
     return this;
   }
 
@@ -84,9 +102,9 @@ export class KafkaContainer extends GenericContainer {
     }
 
     let command = "#!/bin/bash\n";
-    if (this.isZooKeeperProvided) {
+    if (this.mode === KafkaMode.PROVIDED_ZOOKEEPER) {
       this.withEnvironment({ KAFKA_ZOOKEEPER_CONNECT: `${this.zooKeeperHost}:${this.zooKeeperPort}` });
-    } else {
+    } else if (this.mode === KafkaMode.EMBEDDED_ZOOKEEPER) {
       this.zooKeeperHost = this.uuid.nextUuid();
       this.zooKeeperPort = DEFAULT_ZOOKEEPER_PORT;
       this.withExposedPorts(this.zooKeeperPort);
@@ -95,9 +113,27 @@ export class KafkaContainer extends GenericContainer {
       command += "echo 'dataDir=/var/lib/zookeeper/data' >> zookeeper.properties\n";
       command += "echo 'dataLogDir=/var/lib/zookeeper/log' >> zookeeper.properties\n";
       command += "zookeeper-server-start zookeeper.properties &\n";
+    } else { // Kraft
+      const firstNetworkAlias = this.networkAliases[0];
+      const networkAlias = Boolean(this.networkMode) ? firstNetworkAlias : "localhost";
+      this.withEnvironment({
+        CLUSTER_ID: DEFAULT_CLUSTER_ID,
+        KAFKA_NODE_ID: this.environment["KAFKA_BROKER_ID"],
+        KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: this.environment["KAFKA_LISTENER_SECURITY_PROTOCOL_MAP"] + ",CONTROLLER:PLAINTEXT",
+        KAFKA_LISTENERS: this.environment["KAFKA_LISTENERS"] + "CONTROLLER://0.0.0.0:9094",
+        KAFKA_PROCESS_ROLES: "broker,controller",
+        KAFKA_CONTROLLER_QUORUM_VOTERS: `${this.environment["KAFKA_BROKER_ID"]}@${networkAlias}:9094`,
+        KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER",
+      });
+      command += "sed -i '/KAFKA_ZOOKEEPER_CONNECT/d' /etc/confluent/docker/configure\n";
+      command +=  "echo 'kafka-storage format --ignore-formatted -t \"" +
+            this.environment["CLUSTER_ID"] +
+            "\" -c /etc/kafka/kafka.properties' >> /etc/confluent/docker/configure\n";
     }
 
-    command += "echo '' > /etc/confluent/docker/ensure \n";
+    if (this.mode != KafkaMode.KRAFT || this.isLessThanCP740()) {
+      command += "echo '' > /etc/confluent/docker/ensure \n";
+    }
     command += "/etc/confluent/docker/run \n";
     this.withCommand(["sh", "-c", command]);
   }
@@ -199,6 +235,24 @@ export class KafkaContainer extends GenericContainer {
     if (exitCode !== 0) {
       throw new Error(`Kafka container configuration failed with exit code ${exitCode}: ${output}`);
     }
+  }
+
+  private verifyMinKraftVersion() {
+    if (this.imageName.tag === "latest") {
+      return
+    }
+    const parts = this.imageName.tag.split(".")
+    if (parts.length == 1 || Number(parts[0]) < 7) {
+      throw new Error(`Provided Confluent Platform's version ${this.imageName.tag} is not supported in Kraft mode (must be ${MIN_KRAFT_VERSION} or above)`)
+    }
+  }
+
+  private isLessThanCP740(): boolean {
+    if (this.imageName.tag === "latest") {
+      return false;
+    }
+    const parts = this.imageName.tag.split(".");
+    return !(parts.length > 1 && Number(parts[0]) >= 7 && Number(parts[1]) > 4);
   }
 }
 

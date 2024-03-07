@@ -180,6 +180,14 @@ describe("KafkaContainer", () => {
     });
   });
 
+  it("should work in kraft mode", async () => {
+    const kafkaContainer = await new KafkaContainer().withKraft().withExposedPorts(9093).start();
+
+    await testPubSub(kafkaContainer);
+
+    await kafkaContainer.stop();
+  })
+
   const testPubSub = async (kafkaContainer: StartedTestContainer, additionalConfig: Partial<KafkaConfig> = {}) => {
     const kafka = new Kafka({
       logLevel: logLevel.NOTHING,
