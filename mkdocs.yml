@@ -48,11 +48,12 @@ nav:
       - HiveMQ: modules/hivemq.md
       - Kafka: modules/kafka.md
       - Localstack: modules/localstack.md
-      - MongoDB: modules/mongodb.md
       - MSSQLServer: modules/mssqlserver.md
+      - MongoDB: modules/mongodb.md
       - MySQL: modules/mysql.md
       - Nats: modules/nats.md
       - Neo4J: modules/neo4j.md
+      - Playwright: modules/playwright.md
       - PostgreSQL: modules/postgresql.md
       - Redis: modules/redis.md
       - Selenium: modules/selenium.md
