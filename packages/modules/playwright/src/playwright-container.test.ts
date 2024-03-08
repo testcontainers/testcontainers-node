@@ -9,7 +9,7 @@ describe("PlaywrightContainer", () => {
   const playwrightSaveReportsDirectory = path.resolve(__dirname, "..", "example-reports");
   const playwrightProjectDirectory = path.resolve(__dirname, "..", "example-project");
 
-  it(`should pass example tests with build in line reporter for ${process.arch}`, async () => {
+  it(`should pass example tests with a dot build in reporter for ${process.arch}`, async () => {
     const startedPlaywrightBuildInReporterContainer = await new PlaywrightContainer(
       PLAYWRIGHT_IMAGE,
       playwrightProjectDirectory
@@ -17,7 +17,38 @@ describe("PlaywrightContainer", () => {
       .withBuildInReporter("dot")
       .start();
 
+    const { exitCode } = await startedPlaywrightBuildInReporterContainer.exec([
+      "npx",
+      "playwright",
+      "test",
+      "--reporter=dot",
+    ]);
+
     await startedPlaywrightBuildInReporterContainer.stop();
+
+    expect(exitCode).toBe(0);
+  });
+
+  it(`should pass example tests with a line build in reporter for ${process.arch}`, async () => {
+    const startedPlaywrightBuildInReporterContainer = await new PlaywrightContainer(
+      PLAYWRIGHT_IMAGE,
+      playwrightProjectDirectory
+    )
+      .withBuildInReporter("line")
+      .start();
+
+    const { output, exitCode } = await startedPlaywrightBuildInReporterContainer.exec([
+      "npx",
+      "playwright",
+      "test",
+      "--reporter=line",
+    ]);
+
+    await startedPlaywrightBuildInReporterContainer.stop();
+
+    expect(exitCode).toBe(0);
+    expect(output).toContain("Running 6 tests");
+    expect(output).toContain("6 passed");
   });
 
   it(`should pass example tests creating an html reporter for ${process.arch}`, async () => {
