@@ -76,30 +76,39 @@ describe("KafkaContainer", () => {
     const certificatesDir = path.resolve(__dirname, "..", "test-certs");
 
     // ssl {
-    it(`should connect locally`, async () => {
-      const kafkaContainer = await new KafkaContainer()
-        .withSaslSslListener({
-          port: 9094,
-          sasl: {
-            mechanism: "SCRAM-SHA-512",
-            user: {
-              name: "app-user",
-              password: "userPassword",
-            },
+    it.each([
+      {
+        name: "withZookeeper",
+        configure: (kafkaContainer: KafkaContainer) => ({}),
+      },
+      {
+        name: "withKraft",
+        configure: (kafkaContainer: KafkaContainer) => kafkaContainer.withKraft(),
+      },
+    ])(`should connect locally $name`, async ({ name, configure }) => {
+      const kafkaContainer = await new KafkaContainer().withSaslSslListener({
+        port: 9096,
+        sasl: {
+          mechanism: "SCRAM-SHA-512",
+          user: {
+            name: "app-user",
+            password: "userPassword",
           },
-          keystore: {
-            content: fs.readFileSync(path.resolve(certificatesDir, "kafka.server.keystore.pfx")),
-            passphrase: "serverKeystorePassword",
-          },
-          truststore: {
-            content: fs.readFileSync(path.resolve(certificatesDir, "kafka.server.truststore.pfx")),
-            passphrase: "serverTruststorePassword",
-          },
-        })
-        .start();
+        },
+        keystore: {
+          content: fs.readFileSync(path.resolve(certificatesDir, "kafka.server.keystore.pfx")),
+          passphrase: "serverKeystorePassword",
+        },
+        truststore: {
+          content: fs.readFileSync(path.resolve(certificatesDir, "kafka.server.truststore.pfx")),
+          passphrase: "serverTruststorePassword",
+        },
+      });
+      configure(kafkaContainer);
+      const startedKafkaContainer = await kafkaContainer.start();
 
-      await testPubSub(kafkaContainer, {
-        brokers: [`${kafkaContainer.getHost()}:${kafkaContainer.getMappedPort(9094)}`],
+      await testPubSub(startedKafkaContainer, {
+        brokers: [`${startedKafkaContainer.getHost()}:${startedKafkaContainer.getMappedPort(9096)}`],
         sasl: {
           username: "app-user",
           password: "userPassword",
@@ -109,7 +118,7 @@ describe("KafkaContainer", () => {
           ca: [fs.readFileSync(path.resolve(certificatesDir, "kafka.client.truststore.pem"))],
         },
       });
-      await kafkaContainer.stop();
+      await startedKafkaContainer.stop();
     });
     // }
 
@@ -180,13 +189,13 @@ describe("KafkaContainer", () => {
     });
   });
 
-  it("should work in kraft mode", async () => {
+  it("should connect using kraft", async () => {
     const kafkaContainer = await new KafkaContainer().withKraft().withExposedPorts(9093).start();
 
     await testPubSub(kafkaContainer);
 
     await kafkaContainer.stop();
-  })
+  });
 
   const testPubSub = async (kafkaContainer: StartedTestContainer, additionalConfig: Partial<KafkaConfig> = {}) => {
     const kafka = new Kafka({
