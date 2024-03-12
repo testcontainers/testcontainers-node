@@ -8,11 +8,15 @@ export class QdrantContainer extends GenericContainer {
   private apiKey: string | undefined;
   private configFilePath: string | undefined;
 
-  constructor(image = "qdrant/qdrant:latest") {
+  constructor(image = "qdrant/qdrant:v1.8.1") {
     super(image);
     this.withExposedPorts(QDRANT_REST_PORT, QDRANT_GRPC_PORT);
-    this.withWaitStrategy(Wait.forLogMessage(/Actix runtime found; starting in Actix runtime/));
-    this.withWaitStrategy(Wait.forHttp("/readyz", QDRANT_REST_PORT));
+    this.withWaitStrategy(
+      Wait.forAll([
+        Wait.forLogMessage(/Actix runtime found; starting in Actix runtime/),
+        Wait.forHttp("/readyz", QDRANT_REST_PORT),
+      ])
+    );
   }
 
   public withApiKey(apiKey: string): this {
