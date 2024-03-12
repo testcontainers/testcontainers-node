@@ -23,6 +23,7 @@ const WAIT_FOR_SCRIPT_MESSAGE = "Waiting for script...";
 
 // https://docs.confluent.io/platform/7.0.0/release-notes/index.html#ak-raft-kraft
 const MIN_KRAFT_VERSION = "7.0.0";
+const MIN_KRAFT_SASL_VERSION = "7.5.0";
 
 export const KAFKA_IMAGE = "confluentinc/cp-kafka:7.2.2";
 
@@ -120,8 +121,6 @@ export class KafkaContainer extends GenericContainer {
       this.withEnvironment({ KAFKA_ZOOKEEPER_CONNECT: `localhost:${this.zooKeeperPort}` });
     } else {
       // Kraft
-      const firstNetworkAlias = this.networkAliases[0];
-      const networkAlias = this.networkMode ? firstNetworkAlias : "localhost";
       this.withEnvironment({
         CLUSTER_ID: DEFAULT_CLUSTER_ID,
         KAFKA_NODE_ID: this.environment["KAFKA_BROKER_ID"],
@@ -129,7 +128,7 @@ export class KafkaContainer extends GenericContainer {
           this.environment["KAFKA_LISTENER_SECURITY_PROTOCOL_MAP"] + ",CONTROLLER:PLAINTEXT",
         KAFKA_LISTENERS: `${this.environment["KAFKA_LISTENERS"]},CONTROLLER://0.0.0.0:${KAFKA_CONTROLLER_PORT}`,
         KAFKA_PROCESS_ROLES: "broker,controller",
-        KAFKA_CONTROLLER_QUORUM_VOTERS: `${this.environment["KAFKA_BROKER_ID"]}@${networkAlias}:${KAFKA_CONTROLLER_PORT}`,
+        KAFKA_CONTROLLER_QUORUM_VOTERS: `${this.environment["KAFKA_BROKER_ID"]}@${network}:${KAFKA_CONTROLLER_PORT}`,
         KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER",
       });
     }
@@ -146,6 +145,11 @@ export class KafkaContainer extends GenericContainer {
   }
 
   public override async start(): Promise<StartedKafkaContainer> {
+    if (this.mode === KafkaMode.KRAFT && this.saslSslConfig && this.isLessThanCP(7, 5)) {
+      throw new Error(
+        `Provided Confluent Platform's version ${this.imageName.tag} is not supported in Kraft mode with sasl (must be ${MIN_KRAFT_SASL_VERSION} or above)`
+      );
+    }
     return new StartedKafkaContainer(await super.start());
   }
 
@@ -158,12 +162,17 @@ export class KafkaContainer extends GenericContainer {
     // exporting KAFKA_ADVERTISED_LISTENERS with the container hostname
     command += `export KAFKA_ADVERTISED_LISTENERS=${advertisedListeners}\n`;
 
-    if (this.mode !== KafkaMode.KRAFT || this.isLessThanCP740()) {
+    if (this.mode !== KafkaMode.KRAFT || this.isLessThanCP(7, 4)) {
       // Optimization: skip the checks
       command += "echo '' > /etc/confluent/docker/ensure \n";
     }
-    if (this.mode === KafkaMode.KRAFT && this.isLessThanCP740()) {
-      command += this.commandKraft();
+    if (this.mode === KafkaMode.KRAFT) {
+      if (this.saslSslConfig) {
+        command += this.commandKraftCreateUser(this.saslSslConfig);
+      }
+      if (this.isLessThanCP(7, 4)) {
+        command += this.commandKraft();
+      }
     } else if (this.mode === KafkaMode.EMBEDDED_ZOOKEEPER) {
       command += this.commandZookeeper();
     }
@@ -179,8 +188,7 @@ export class KafkaContainer extends GenericContainer {
     );
     await waitForContainer(client, dockerContainer, this.originalWaitinStrategy, boundPorts);
 
-    if (this.saslSslConfig) {
-      // TODO this should happen before start in kraft case
+    if (this.saslSslConfig && this.mode !== KafkaMode.KRAFT) {
       await this.createUser(container, this.saslSslConfig.sasl);
     }
   }
@@ -256,39 +264,36 @@ export class KafkaContainer extends GenericContainer {
   }
 
   private verifyMinKraftVersion() {
-    if (this.imageName.tag === "latest") {
-      return;
-    }
-    const parts = this.imageName.tag.split(".");
-    if (parts.length == 1 || Number(parts[0]) < 7) {
+    if (this.isLessThanCP(7)) {
       throw new Error(
         `Provided Confluent Platform's version ${this.imageName.tag} is not supported in Kraft mode (must be ${MIN_KRAFT_VERSION} or above)`
       );
     }
   }
 
-  private isLessThanCP740(): boolean {
+  private isLessThanCP(max: number, min = 0, patch = 0): boolean {
     if (this.imageName.tag === "latest") {
       return false;
     }
     const parts = this.imageName.tag.split(".");
-    return !(parts.length > 1 && Number(parts[0]) >= 7 && Number(parts[1]) > 4);
+    return !(parts.length > 2 && Number(parts[0]) >= max && Number(parts[1]) >= min && Number(parts[2]) >= patch);
+  }
+
+  private commandKraftCreateUser(saslOptions: SaslSslListenerOptions): string {
+    return (
+      "echo 'kafka-storage format --ignore-formatted " +
+      `-t "${this.environment["CLUSTER_ID"]}" ` +
+      "-c /etc/kafka/kafka.properties " +
+      `--add-scram "${saslOptions.sasl.mechanism}=[name=${saslOptions.sasl.user.name},password=${saslOptions.sasl.user.password}]"' >> /etc/confluent/docker/configure\n`
+    );
   }
 
   private commandKraft(): string {
     let command = "sed -i '/KAFKA_ZOOKEEPER_CONNECT/d' /etc/confluent/docker/configure\n";
     command +=
-      "echo 'kafka-storage format --ignore-formatted -t \"" +
-      this.environment["CLUSTER_ID"] +
-      "\" -c /etc/kafka/kafka.properties' >> /etc/confluent/docker/configure\n";
-    if (this.saslSslConfig) {
-      command +=
-        "kafka-storage format [-h] --config CONFIG " +
-        "--cluster-id CLUSTER_ID " +
-        "--add-scram SCRAM_CREDENTIAL " +
-        "--release-version RELEASE_VERSION] " +
-        "--ignore-formatted]";
-    }
+      "echo 'kafka-storage format --ignore-formatted " +
+      `-t "${this.environment["CLUSTER_ID"]}" ` +
+      "-c /etc/kafka/kafka.properties' >> /etc/confluent/docker/configure\n";
     return command;
   }
 
