@@ -1,13 +1,13 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "rootDir": "src",
     "outDir": "build",
     "paths": {
       "testcontainers": ["../../testcontainers/src"]
     }
   },
-  "exclude": ["build", "jest.config.ts"],
+  "include": ["src"],
+  "exclude": ["build", "jest.config.ts", "example-project/**/*.spec.ts", "example-project/**/*.ts"],
   "references": [
     {
       "path": "../../testcontainers"
