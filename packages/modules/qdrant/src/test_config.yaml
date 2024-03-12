@@ -1,0 +1,6 @@
+# Qdrant image configuration file for testing
+# Reference: https://qdrant.tech/documentation/guides/configuration/#configuration-file-example
+log_level: INFO
+
+service:
+  api_key: "SOME_TEST_KEY"
