@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/playwright",
-  "version": "10.0.1",
+  "version": "10.7.2",
   "license": "MIT",
   "keywords": [
     "playwright",
@@ -29,9 +29,9 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "@playwright/test": "^1.36.2"
+    "@playwright/test": "^1.42.1"
   },
   "dependencies": {
-    "testcontainers": "^10.0.1"
+    "testcontainers": "^10.7.2"
   }
 }
