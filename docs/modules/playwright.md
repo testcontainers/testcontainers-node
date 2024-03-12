@@ -24,10 +24,14 @@ npm install @testcontainers/playwright --save-dev
   - [x] Run Playwright tests in a playwright container and extract the junit reporter.
   - [x] Run Playwright tests in a playwright container and extract the blob reporter.
   - [ ] Run Playwright tests in a playwright container and extract a list of different kind of reporter.
-- [ ] Run Playwright tests in a playwright container against your app container
-- [ ] Run Tests in UI Mode that user can follow up outside the container using a browser.
-- [ ] Run Trace viewer GUI that user can follow up and control outside the container using a browser.
-- [ ] Debugging Playwright tests with the Playwright inspector in a Playwright container
+- Run Playwright tests against your app
+  - [ ] Run Playwright tests in a playwright container against your app container
+- Run Playwright test in UI mode
+  - [ ] Run Tests in UI Mode that user can follow up outside the container using a browser.
+- Run Playwright trace viewer GUI
+  - [ ] Run Trace viewer GUI that user can follow up and control outside the container using a browser.
+- Debugging Playwright tests
+  - [ ] Debugging Playwright tests with the Playwright inspector in a Playwright container
 
 ## How to use
 
