@@ -7,4 +7,6 @@
 /playwright-report/
 /playwright/.cache/
 /reports/
+
 /example-project/package-lock.json
+/example-reports/
