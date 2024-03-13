@@ -5,7 +5,7 @@ import { PlaywrightContainer } from "./playwright-container";
 describe("PlaywrightContainer", () => {
   jest.setTimeout(180_000);
 
-  const PLAYWRIGHT_IMAGE = "mcr.microsoft.com/playwright:v1.42.1-jammy";
+  const PLAYWRIGHT_IMAGE = "mcr.microsoft.com/playwright:latest";
   const EXTERNAL_PLAYWRIGHT_SAVE_REPORTS_DIRECTORY = path.resolve(__dirname, "..", "example-reports");
   const EXTERNAL_PLAYWRIGHT_PROJECT_DIRECTORY = path.resolve(__dirname, "example-project");
 

@@ -39,7 +39,7 @@ type ContainerReporter = {
 };
 
 export class PlaywrightContainer extends GenericContainer {
-  constructor(image: string, externalPlaywrightTestsDirectoryToCopyIntoContainerWorkingDirectory: string) {
+  constructor(image = "mcr.microsoft.com/playwright:latest", externalPlaywrightTestsDirectoryToCopyIntoContainerWorkingDirectory: string) {
     super(image);
 
     this.directoriesToCopy = [
