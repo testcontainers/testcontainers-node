@@ -3,7 +3,8 @@
   "exclude": [
     "build",
     "jest.config.ts",
-    "src/**/*.test.ts"
+    "src/**/*.test.ts",
+    "src/example-project/**/*",
   ],
   "references": [
     {

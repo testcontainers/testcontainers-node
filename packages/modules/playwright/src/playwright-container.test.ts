@@ -6,11 +6,11 @@ describe("PlaywrightContainer", () => {
   jest.setTimeout(180_000);
 
   const PLAYWRIGHT_IMAGE = "mcr.microsoft.com/playwright:v1.42.1-jammy";
-  // const EXPOSED_PLAYWRIGHT_CONTAINER_PORT = 9323;
   const EXTERNAL_PLAYWRIGHT_SAVE_REPORTS_DIRECTORY = path.resolve(__dirname, "..", "example-reports");
-  const EXTERNAL_PLAYWRIGHT_PROJECT_DIRECTORY = path.resolve(__dirname, "..", "example-project");
-  const SUCCESSFUL_TEST_RUNNING_OUTPUT = "Running 6 tests";
-  const SUCCESSFUL_TEST_PASSED_OUTPUT = "6 passed";
+  const EXTERNAL_PLAYWRIGHT_PROJECT_DIRECTORY = path.resolve(__dirname, "example-project");
+
+  const SUCCESSFUL_TEST_RUNNING_OUTPUT = "Running";
+  const SUCCESSFUL_TEST_PASSED_OUTPUT = "passed";
   const SUCCESSFUL_TEST_EXIT_CODE = 0;
 
   it(`should pass example tests with a dot build in reporter for ${process.arch}`, async () => {

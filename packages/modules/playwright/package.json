@@ -28,9 +28,6 @@
     "test": "cross-env DEBUG=testcontainers* jest",
     "build": "tsc --project tsconfig.build.json"
   },
-  "devDependencies": {
-    "@playwright/test": "^1.42.1"
-  },
   "dependencies": {
     "testcontainers": "^10.7.2"
   }
