@@ -276,7 +276,12 @@ export class KafkaContainer extends GenericContainer {
       return false;
     }
     const parts = this.imageName.tag.split(".");
-    return !(parts.length > 2 && Number(parts[0]) >= max && Number(parts[1]) >= min && Number(parts[2]) >= patch);
+    return !(
+      parts.length > 2 &&
+      (Number(parts[0]) > max ||
+        (Number(parts[0]) === max &&
+          (Number(parts[1]) > min || (Number(parts[1]) === min && Number(parts[2]) >= patch))))
+    );
   }
 
   private commandKraftCreateUser(saslOptions: SaslSslListenerOptions): string {
