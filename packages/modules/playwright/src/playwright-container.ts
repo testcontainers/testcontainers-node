@@ -63,7 +63,12 @@ export class PlaywrightContainer extends GenericContainer {
 
   override async start(): Promise<StartedPlaywrightContainer> {
     const startedTestContainer = await super.start();
-    await startedTestContainer.exec(["npm", "i"]);
+    const { output, exitCode } = await startedTestContainer.exec(["npm", "i"]);
+
+    if (exitCode !== 0) {
+      throw new Error(`Playwright container install dependencies failed with exit code ${exitCode}: ${output}`);
+    }
+
     return new StartedPlaywrightContainer(startedTestContainer);
   }
 }
