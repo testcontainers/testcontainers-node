@@ -185,11 +185,6 @@ export class StartedPlaywrightContainer extends AbstractStartedContainer {
     }
   }
 
-  public openReport(): void {
-    log.debug("Opening report...");
-    log.debug("Open report");
-  }
-
   override async stop(options?: Partial<StopOptions>): Promise<StoppedPlaywrightContainer> {
     return new StoppedPlaywrightContainer(await super.stop(options));
   }
