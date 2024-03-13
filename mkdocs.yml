@@ -54,6 +54,7 @@ nav:
       - Nats: modules/nats.md
       - Neo4J: modules/neo4j.md
       - PostgreSQL: modules/postgresql.md
+      - Qdrant: modules/qdrant.md
       - Redis: modules/redis.md
       - Selenium: modules/selenium.md
   - Configuration: configuration.md
