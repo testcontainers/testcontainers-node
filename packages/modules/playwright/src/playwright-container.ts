@@ -31,16 +31,9 @@ const EXPORTABLE_REPORTER_TYPE = {
 
 type ExportableReporterType = (typeof EXPORTABLE_REPORTER_TYPE)[keyof typeof EXPORTABLE_REPORTER_TYPE];
 
-type ContainerReporter = {
-  type: ExportableReporterType;
-  outputFile?: string;
-  outputDir?: string;
-  fileName?: string;
-};
-
 export class PlaywrightContainer extends GenericContainer {
   constructor(
-    image = "mcr.microsoft.com/playwright:latest",
+    image = "mcr.microsoft.com/playwright:v1.42.1-jammy",
     externalPlaywrightTestsDirectoryToCopyIntoContainerWorkingDirectory: string
   ) {
     super(image);
@@ -96,74 +89,62 @@ export class StartedPlaywrightContainer extends AbstractStartedContainer {
     log.debug(`Created directory path "${directoryPath}" that not exists`);
   }
 
-  private getContainerReporterFile({ type, outputFile, fileName }: ContainerReporter): string {
-    if (type === EXPORTABLE_REPORTER_TYPE.HTML) {
+  private getContainerReporterFile(exportableReporterType: ExportableReporterType): string {
+    if (exportableReporterType === EXPORTABLE_REPORTER_TYPE.HTML) {
       return DEFAULT_HTML_REPORTER_FILE;
     }
 
-    if (type === EXPORTABLE_REPORTER_TYPE.JSON) {
-      return outputFile || DEFAULT_JSON_REPORTER_FILE;
+    if (exportableReporterType === EXPORTABLE_REPORTER_TYPE.JSON) {
+      return DEFAULT_JSON_REPORTER_FILE;
     }
 
-    if (type === EXPORTABLE_REPORTER_TYPE.BLOB) {
-      return fileName || DEFAULT_BLOB_REPORTER_FILE;
+    if (exportableReporterType === EXPORTABLE_REPORTER_TYPE.BLOB) {
+      return DEFAULT_BLOB_REPORTER_FILE;
     }
 
-    if (type === EXPORTABLE_REPORTER_TYPE.JUNIT) {
-      return fileName || DEFAULT_JUNIT_REPORTER_FILE;
+    if (exportableReporterType === EXPORTABLE_REPORTER_TYPE.JUNIT) {
+      return DEFAULT_JUNIT_REPORTER_FILE;
     }
 
     return "";
   }
 
-  private getReporterPath({ type, outputFile, outputDir, fileName }: ContainerReporter): string {
-    const containerReporterFile = this.getContainerReporterFile({ type, outputFile, fileName });
-
-    let containerReporterOutputDir = "";
-    let reporterPath = "";
-
-    if (type === EXPORTABLE_REPORTER_TYPE.HTML) {
-      containerReporterOutputDir = outputDir || DEFAULT_HTML_REPORTER_OUTPUT_DIRECTORY;
-
-      reporterPath = path.format({
+  private getReporterPath(exportableReporterType: ExportableReporterType): string {
+    if (exportableReporterType === EXPORTABLE_REPORTER_TYPE.HTML) {
+      return path.format({
         root: "/ignored",
-        dir: `${CONTAINER_WORKING_DIRECTORY}/${containerReporterOutputDir}`,
-        base: containerReporterFile,
+        dir: `${CONTAINER_WORKING_DIRECTORY}/${DEFAULT_HTML_REPORTER_OUTPUT_DIRECTORY}`,
+        base: DEFAULT_HTML_REPORTER_FILE,
       });
     }
 
-    if (type === EXPORTABLE_REPORTER_TYPE.JSON) {
-      reporterPath = path.join(CONTAINER_WORKING_DIRECTORY, containerReporterFile);
+    if (exportableReporterType === EXPORTABLE_REPORTER_TYPE.JSON) {
+      return path.join(CONTAINER_WORKING_DIRECTORY, DEFAULT_JSON_REPORTER_FILE);
     }
 
-    if (type === EXPORTABLE_REPORTER_TYPE.BLOB) {
-      containerReporterOutputDir = outputDir || DEFAULT_BLOB_REPORTER_OUTPUT_DIRECTORY;
-
-      reporterPath = path.format({
+    if (exportableReporterType === EXPORTABLE_REPORTER_TYPE.BLOB) {
+      return path.format({
         root: "/ignored",
-        dir: `${CONTAINER_WORKING_DIRECTORY}/${containerReporterOutputDir}`,
-        base: containerReporterFile,
+        dir: `${CONTAINER_WORKING_DIRECTORY}/${DEFAULT_BLOB_REPORTER_OUTPUT_DIRECTORY}`,
+        base: DEFAULT_BLOB_REPORTER_FILE,
       });
     }
 
-    if (type === EXPORTABLE_REPORTER_TYPE.JUNIT) {
-      reporterPath = path.format({
-        root: "/ignored",
-        dir: `${CONTAINER_WORKING_DIRECTORY}`,
-        base: containerReporterFile,
-      });
-    }
-
-    return reporterPath;
+    // if exportable reporter type is junit
+    return path.format({
+      root: "/ignored",
+      dir: `${CONTAINER_WORKING_DIRECTORY}`,
+      base: DEFAULT_JUNIT_REPORTER_FILE,
+    });
   }
 
   public async saveReporter(
-    { type, outputFile, outputDir, fileName }: ContainerReporter,
+    exportableReporterType: ExportableReporterType,
     destinationReporterPath: string
   ): Promise<void> {
     try {
       const containerId = this.getId();
-      const reporterPath = this.getReporterPath({ type, outputFile, outputDir, fileName });
+      const reporterPath = this.getReporterPath(exportableReporterType);
 
       log.debug("Extracting archive from container...", { containerId });
       const archiveStream = await this.copyArchiveFromContainer(reporterPath);
@@ -174,7 +155,7 @@ export class StartedPlaywrightContainer extends AbstractStartedContainer {
       await this.extractTarStreamToDestination(archiveStream, destinationDir.name);
       log.debug("Unpacked archive", { containerId });
 
-      const containerReporterFile = this.getContainerReporterFile({ type, outputFile, fileName });
+      const containerReporterFile = this.getContainerReporterFile(exportableReporterType);
       const sourceReporterPath = path.resolve(destinationDir.name, `${containerReporterFile}`);
       const destinationDirectoryPath = path.dirname(destinationReporterPath);
 
