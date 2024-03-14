@@ -5,7 +5,7 @@ import { PlaywrightContainer } from "./playwright-container";
 describe("PlaywrightContainer", () => {
   jest.setTimeout(180_000);
 
-  const PLAYWRIGHT_IMAGE = "mcr.microsoft.com/playwright:latest";
+  const PLAYWRIGHT_IMAGE = "mcr.microsoft.com/playwright:v1.42.1-jammy";
   const EXTERNAL_PLAYWRIGHT_SAVE_REPORTS_DIRECTORY = path.resolve(__dirname, "..", "example-reports");
   const EXTERNAL_PLAYWRIGHT_PROJECT_DIRECTORY = path.resolve(__dirname, "example-project");
 
@@ -13,7 +13,7 @@ describe("PlaywrightContainer", () => {
   const SUCCESSFUL_TEST_PASSED_OUTPUT = "passed";
   const SUCCESSFUL_TEST_EXIT_CODE = 0;
 
-  it(`should pass example tests with a dot build in reporter for ${process.arch}`, async () => {
+  it(`should pass example tests with a dot build in reporter`, async () => {
     const startedPlaywrightBuildInReporterContainer = await new PlaywrightContainer(
       PLAYWRIGHT_IMAGE,
       EXTERNAL_PLAYWRIGHT_PROJECT_DIRECTORY
@@ -33,7 +33,7 @@ describe("PlaywrightContainer", () => {
     expect(exitCode).toBe(SUCCESSFUL_TEST_EXIT_CODE);
   });
 
-  it(`should pass example tests with a line build in reporter for ${process.arch}`, async () => {
+  it(`should pass example tests with a line build in reporter`, async () => {
     const startedPlaywrightBuildInReporterContainer = await new PlaywrightContainer(
       PLAYWRIGHT_IMAGE,
       EXTERNAL_PLAYWRIGHT_PROJECT_DIRECTORY
@@ -53,7 +53,7 @@ describe("PlaywrightContainer", () => {
     expect(exitCode).toBe(SUCCESSFUL_TEST_EXIT_CODE);
   });
 
-  it(`should pass example tests creating an html reporter for ${process.arch}`, async () => {
+  it(`should pass example tests creating an html reporter`, async () => {
     const externalDestinationReporterPath = path.resolve(EXTERNAL_PLAYWRIGHT_SAVE_REPORTS_DIRECTORY, "index.html");
 
     const startedPlaywrightContainer = await new PlaywrightContainer(
@@ -70,13 +70,7 @@ describe("PlaywrightContainer", () => {
       "--reporter=html",
     ]);
 
-    await startedPlaywrightContainer.saveReporter(
-      {
-        type: "html",
-        outputDir: "test-reports",
-      },
-      externalDestinationReporterPath
-    );
+    await startedPlaywrightContainer.saveReporter("html", externalDestinationReporterPath);
 
     expect(output).toContain(SUCCESSFUL_TEST_RUNNING_OUTPUT);
     expect(output).toContain(SUCCESSFUL_TEST_PASSED_OUTPUT);
@@ -88,7 +82,7 @@ describe("PlaywrightContainer", () => {
     await startedPlaywrightContainer.stop();
   });
 
-  it(`should pass example tests creating a json reporter for ${process.arch}`, async () => {
+  it(`should pass example tests creating a json reporter`, async () => {
     const externalDestinationReporterPath = path.resolve(EXTERNAL_PLAYWRIGHT_SAVE_REPORTS_DIRECTORY, "results.json");
 
     const startedPlaywrightContainer = await new PlaywrightContainer(
@@ -105,14 +99,7 @@ describe("PlaywrightContainer", () => {
       "--reporter=json",
     ]);
 
-    await startedPlaywrightContainer.saveReporter(
-      {
-        type: "json",
-        outputFile: "results.json",
-      },
-      externalDestinationReporterPath
-    );
-
+    await startedPlaywrightContainer.saveReporter("json", externalDestinationReporterPath);
     await startedPlaywrightContainer.stop();
 
     expect(output).toContain(SUCCESSFUL_TEST_RUNNING_OUTPUT);
@@ -121,7 +108,7 @@ describe("PlaywrightContainer", () => {
     expect(existsSync(externalDestinationReporterPath)).toBe(true);
   });
 
-  it(`should pass example tests creating a bob reporter for ${process.arch}`, async () => {
+  it(`should pass example tests creating a bob reporter`, async () => {
     const externalDestinationReporterPath = path.resolve(
       EXTERNAL_PLAYWRIGHT_SAVE_REPORTS_DIRECTORY,
       `report-${process.arch}.zip`
@@ -139,13 +126,7 @@ describe("PlaywrightContainer", () => {
       "--reporter=blob",
     ]);
 
-    await startedPlaywrightContainer.saveReporter(
-      {
-        type: "blob",
-      },
-      externalDestinationReporterPath
-    );
-
+    await startedPlaywrightContainer.saveReporter("blob", externalDestinationReporterPath);
     await startedPlaywrightContainer.stop();
 
     expect(output).toContain(SUCCESSFUL_TEST_RUNNING_OUTPUT);
@@ -154,7 +135,7 @@ describe("PlaywrightContainer", () => {
     expect(existsSync(externalDestinationReporterPath)).toBe(true);
   });
 
-  it(`should pass example tests creating a junit reporter for ${process.arch}`, async () => {
+  it(`should pass example tests creating a junit reporter`, async () => {
     const externalDestinationReporterPath = path.resolve(EXTERNAL_PLAYWRIGHT_SAVE_REPORTS_DIRECTORY, `results.xml`);
 
     const startedPlaywrightContainer = await new PlaywrightContainer(
@@ -171,14 +152,7 @@ describe("PlaywrightContainer", () => {
       "--reporter=junit",
     ]);
 
-    await startedPlaywrightContainer.saveReporter(
-      {
-        type: "junit",
-        fileName: "results.xml",
-      },
-      externalDestinationReporterPath
-    );
-
+    await startedPlaywrightContainer.saveReporter("junit", externalDestinationReporterPath);
     await startedPlaywrightContainer.stop();
 
     expect(output).toContain(SUCCESSFUL_TEST_RUNNING_OUTPUT);
