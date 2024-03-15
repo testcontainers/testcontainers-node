@@ -189,6 +189,7 @@ describe("KafkaContainer", () => {
     });
   });
 
+  // connectKraft {
   it("should connect using kraft", async () => {
     const kafkaContainer = await new KafkaContainer().withKraft().withExposedPorts(9093).start();
 
@@ -196,6 +197,7 @@ describe("KafkaContainer", () => {
 
     await kafkaContainer.stop();
   });
+  // }
 
   it("should throw an error when using kraft and and confluence platfom below 7.0.0", async () => {
     expect(() => new KafkaContainer("confluentinc/cp-kafka:6.2.14").withKraft()).toThrow(
