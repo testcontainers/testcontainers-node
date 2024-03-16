@@ -1,3 +1,5 @@
+import { log } from "../common";
+
 export class ImageName {
   public readonly string: string;
 
@@ -8,6 +10,12 @@ export class ImageName {
     public readonly image: string,
     public readonly tag: string
   ) {
+    if (!this.registry) {
+      this.registry = process.env.TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX;
+      if (this.registry) {
+        log.info(`Applying changes to image ${image} with tag ${tag}: added registry ${this.registry}`);
+      }
+    }
     if (this.registry) {
       if (this.tag.startsWith("sha256:")) {
         this.string = `${this.registry}/${this.image}@${this.tag}`;
