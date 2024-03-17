@@ -25,9 +25,8 @@ export class Wait {
     return new HealthCheckWaitStrategy();
   }
 
-  public static async forOneShotStartup(): Promise<WaitStrategy> {
-    const containerRuntimeClient = await getContainerRuntimeClient();
-    return new OneShotStartupCheckStrategy(containerRuntimeClient);
+  public static forOneShotStartup(): WaitStrategy {
+    return new OneShotStartupCheckStrategy();
   }
 
   public static forHttp(

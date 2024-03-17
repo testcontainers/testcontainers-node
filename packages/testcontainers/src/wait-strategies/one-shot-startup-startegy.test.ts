@@ -1,8 +1,6 @@
 import { GenericContainer } from "../generic-container/generic-container";
 import { Wait } from "./wait";
-import { checkContainerIsHealthy, getRunningContainerNames } from "../utils/test-helper";
-import { RandomUuid } from "../common";
-import Dockerode from "dockerode";
+import { checkContainerIsHealthy } from "../utils/test-helper";
 
 jest.setTimeout(180_000);
 

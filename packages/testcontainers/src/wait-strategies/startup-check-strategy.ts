@@ -1,20 +1,22 @@
 import { AbstractWaitStrategy } from "./wait-strategy";
 import Dockerode from "dockerode";
-import { ContainerRuntimeClient } from "../container-runtime";
+import { ContainerRuntimeClient, getContainerRuntimeClient } from "../container-runtime";
 import { IntervalRetry, log } from "../common";
 
 export type StartupStatus = "PENDING" | "SUCCESS" | "FAIL";
 
 export abstract class StartupCheckStrategy extends AbstractWaitStrategy {
-  constructor(private readonly client: ContainerRuntimeClient) {
+  constructor() {
     super();
   }
 
   public abstract checkStartupState(dockerClient: Dockerode, containerId: string): Promise<StartupStatus>;
 
   public override async waitUntilReady(container: Dockerode.Container): Promise<void> {
+    const client = await getContainerRuntimeClient();
+
     const startupStatus = await new IntervalRetry<StartupStatus, Error>(1000).retryUntil(
-      async () => await this.checkStartupState(this.client.container.dockerode, container.id),
+      async () => await this.checkStartupState(client.container.dockerode, container.id),
       (startupStatus) => startupStatus === "SUCCESS" || startupStatus === "FAIL",
       () => {
         const message = `Container not accessible after ${this.startupTimeout}ms`;
