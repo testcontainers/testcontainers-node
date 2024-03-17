@@ -6,7 +6,6 @@ import { ShellWaitStrategy } from "./shell-wait-strategy";
 import { HostPortWaitStrategy } from "./host-port-wait-strategy";
 import { CompositeWaitStrategy } from "./composite-wait-strategy";
 import { OneShotStartupCheckStrategy } from "./one-shot-startup-startegy";
-import { getContainerRuntimeClient } from "../container-runtime";
 
 export class Wait {
   public static forAll(waitStrategies: WaitStrategy[]): CompositeWaitStrategy {

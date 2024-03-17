@@ -19,11 +19,9 @@ jest.mock(
 
 describe("OneShotStartupCheckStrategy", () => {
   it("should wait for log", async () => {
-    const wait = await Wait.forOneShotStartup();
-
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
-      .withWaitStrategy(wait)
+      .withWaitStrategy(Wait.forOneShotStartup())
       .start();
 
     await checkContainerIsHealthy(container);
