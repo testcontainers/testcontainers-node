@@ -179,7 +179,7 @@ export class KafkaContainer extends GenericContainer {
 
     // Run the original command
     command += "/etc/confluent/docker/run \n";
-    container.copyContentToContainer([{ content: command, target: STARTER_SCRIPT, mode: 0o777 }]);
+    await container.copyContentToContainer([{ content: command, target: STARTER_SCRIPT, mode: 0o777 }]);
 
     const client = await getContainerRuntimeClient();
     const dockerContainer = client.container.getById(container.getId());
