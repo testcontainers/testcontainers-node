@@ -33,6 +33,6 @@
   },
   "devDependencies": {
     "@types/couchbase": "^2.4.9",
-    "couchbase": "3.2.7"
+    "couchbase": "4.3.0"
   }
 }
