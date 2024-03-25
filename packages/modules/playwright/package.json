@@ -25,7 +25,7 @@
     "access": "public"
   },
   "scripts": {
-    "test": "cross-env DEBUG=testcontainers* jest",
+    "prepack": "shx cp ../../../README.md . && shx cp ../../../LICENSE .",
     "build": "tsc --project tsconfig.build.json"
   },
   "dependencies": {
