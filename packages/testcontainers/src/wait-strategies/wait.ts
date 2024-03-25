@@ -5,6 +5,7 @@ import { Log, LogWaitStrategy } from "./log-wait-strategy";
 import { ShellWaitStrategy } from "./shell-wait-strategy";
 import { HostPortWaitStrategy } from "./host-port-wait-strategy";
 import { CompositeWaitStrategy } from "./composite-wait-strategy";
+import { OneShotStartupCheckStrategy } from "./one-shot-startup-startegy";
 
 export class Wait {
   public static forAll(waitStrategies: WaitStrategy[]): CompositeWaitStrategy {
@@ -21,6 +22,10 @@ export class Wait {
 
   public static forHealthCheck(): WaitStrategy {
     return new HealthCheckWaitStrategy();
+  }
+
+  public static forOneShotStartup(): WaitStrategy {
+    return new OneShotStartupCheckStrategy();
   }
 
   public static forHttp(
