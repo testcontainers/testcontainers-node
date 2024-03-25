@@ -133,7 +133,7 @@ jobs:
       - name: Install NodeJS ${{ inputs.node-version }}
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ inputs.node-version }}
+          node-version: ${{ matrix.node-version }}
 
       - name: Install dependencies
         run: npm ci --omit=optional
