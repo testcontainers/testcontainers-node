@@ -1,0 +1,12 @@
+# NPM package files
+/.node_modules/
+.node_modules/
+*.node_modules*
+
+/test-results/
+/playwright-report/
+/playwright/.cache/
+/reports/
+
+/src/example-project/package-lock.json
+/example-reports/
