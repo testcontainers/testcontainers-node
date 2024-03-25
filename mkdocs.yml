@@ -45,6 +45,7 @@ nav:
       - ArangoDB: modules/arangodb.md
       - Couchbase: modules/couchbase.md
       - Elasticsearch: modules/elasticsearch.md
+      - GCloud: modules/gcloud.md
       - HiveMQ: modules/hivemq.md
       - Kafka: modules/kafka.md
       - Localstack: modules/localstack.md
@@ -54,6 +55,7 @@ nav:
       - Nats: modules/nats.md
       - Neo4J: modules/neo4j.md
       - PostgreSQL: modules/postgresql.md
+      - Qdrant: modules/qdrant.md
       - Redis: modules/redis.md
       - Selenium: modules/selenium.md
   - Configuration: configuration.md

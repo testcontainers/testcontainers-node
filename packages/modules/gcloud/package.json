@@ -1,14 +1,16 @@
 {
-  "name": "@testcontainers/neo4j",
+  "name": "@testcontainers/gcloud",
   "version": "10.7.2",
   "license": "MIT",
+  "author": "Anietie Asuquo <hello@anietieasuquo.com>",
   "keywords": [
-    "neo4j",
+    "gcloud",
+    "firestore",
     "testing",
     "docker",
     "testcontainers"
   ],
-  "description": "Neo4J module for Testcontainers",
+  "description": "GCloud module for Testcontainers",
   "homepage": "https://github.com/testcontainers/testcontainers-node#readme",
   "repository": {
     "type": "git",
@@ -28,10 +30,11 @@
     "prepack": "shx cp ../../../README.md . && shx cp ../../../LICENSE .",
     "build": "tsc --project tsconfig.build.json"
   },
-  "devDependencies": {
-    "neo4j-driver": "^5.17.0"
-  },
   "dependencies": {
-    "testcontainers": "^10.7.2"
+    "testcontainers": "10.7.2"
+  },
+  "devDependencies": {
+    "@google-cloud/firestore": "7.4.0",
+    "firebase-admin": "12.0.0"
   }
 }

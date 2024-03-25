@@ -156,7 +156,7 @@ export class StartedGenericContainer implements StartedTestContainer {
     log.debug(`Copying content to container...`, { containerId: this.container.id });
     const client = await getContainerRuntimeClient();
     const tar = archiver("tar");
-    contentsToCopy.forEach(({ content, target }) => tar.append(content, { name: target }));
+    contentsToCopy.forEach(({ content, target, mode }) => tar.append(content, { name: target, mode: mode }));
     tar.finalize();
     await client.container.putArchive(this.container, tar, "/");
     log.debug(`Copied content to container`, { containerId: this.container.id });
