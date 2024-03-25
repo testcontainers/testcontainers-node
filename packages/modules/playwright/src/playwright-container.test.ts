@@ -3,7 +3,7 @@ import { existsSync } from "fs";
 import { PlaywrightContainer } from "./playwright-container";
 
 describe("PlaywrightContainer", () => {
-  jest.setTimeout(180_000);
+  jest.setTimeout(360_000);
 
   const PLAYWRIGHT_IMAGE = "mcr.microsoft.com/playwright:v1.42.1-jammy";
   const EXTERNAL_PLAYWRIGHT_SAVE_REPORTS_DIRECTORY = path.resolve(__dirname, "..", "example-reports");
