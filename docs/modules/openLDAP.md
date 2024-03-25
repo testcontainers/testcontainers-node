@@ -1,6 +1,6 @@
 # OpenLDAP Module
 
-[openldap](https://openldap.io/) The open source, in-memory data store used by millions of developers as a database, cache, streaming engine, and message broker.
+[OpenLDAP](https://www.openldap.org/) is an open-source implementation of the LDAP protocol, enabling hierarchical storage and management of directory information.
 
 ## Install
 
