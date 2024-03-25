@@ -56,6 +56,7 @@ nav:
       - Neo4J: modules/neo4j.md
       - PostgreSQL: modules/postgresql.md
       - Qdrant: modules/qdrant.md
+      - OpenLDAP: modules/openLDAP.md
       - Redis: modules/redis.md
       - Selenium: modules/selenium.md
   - Configuration: configuration.md

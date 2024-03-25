@@ -1,0 +1,7 @@
+dn: uid=test.user,ou=users,dc=example,dc=org
+changetype: add
+objectclass: iNetOrgPerson
+cn: Test User
+sn: Test
+mail: test.user@example.org
+userPassword: Password1
