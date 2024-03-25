@@ -16,10 +16,10 @@ import {
 
 const CONTAINER_WORKING_DIRECTORY = "/playwright";
 const DEFAULT_JSON_REPORTER_FILE = "results.json";
-const DEFAULT_HTML_REPORTER_OUTPUT_DIRECTORY = "/test-reports";
+const DEFAULT_HTML_REPORTER_OUTPUT_DIRECTORY = "test-reports";
 const DEFAULT_HTML_REPORTER_FILE = "index.html";
 const DEFAULT_BLOB_REPORTER_FILE = "report.zip";
-const DEFAULT_BLOB_REPORTER_OUTPUT_DIRECTORY = "/blob-report";
+const DEFAULT_BLOB_REPORTER_OUTPUT_DIRECTORY = "blob-report";
 const DEFAULT_JUNIT_REPORTER_FILE = "results.xml";
 
 const EXPORTABLE_REPORTER_TYPE = {
