@@ -45,6 +45,7 @@ nav:
       - ArangoDB: modules/arangodb.md
       #- Couchbase: modules/couchbase.md
       - Elasticsearch: modules/elasticsearch.md
+      - GCloud: modules/gcloud.md
       - HiveMQ: modules/hivemq.md
       - Kafka: modules/kafka.md
       - Localstack: modules/localstack.md

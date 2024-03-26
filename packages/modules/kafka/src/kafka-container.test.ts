@@ -72,34 +72,43 @@ describe("KafkaContainer", () => {
     await originalKafkaContainer.stop();
   });
 
-  describe("when SASL SSL config listener provided", () => {
+  describe.each([
+    {
+      name: "and zookpeer enabled",
+      configure: () => ({}),
+    },
+    {
+      name: "and kraft enabled",
+      configure: (kafkaContainer: KafkaContainer) => kafkaContainer.withKraft(),
+    },
+  ])("when SASL SSL config listener provided $name", ({ configure }) => {
     const certificatesDir = path.resolve(__dirname, "..", "test-certs");
 
     // ssl {
     it(`should connect locally`, async () => {
-      const kafkaContainer = await new KafkaContainer()
-        .withSaslSslListener({
-          port: 9094,
-          sasl: {
-            mechanism: "SCRAM-SHA-512",
-            user: {
-              name: "app-user",
-              password: "userPassword",
-            },
+      const kafkaContainer = await new KafkaContainer("confluentinc/cp-kafka:7.5.0").withSaslSslListener({
+        port: 9096,
+        sasl: {
+          mechanism: "SCRAM-SHA-512",
+          user: {
+            name: "app-user",
+            password: "userPassword",
           },
-          keystore: {
-            content: fs.readFileSync(path.resolve(certificatesDir, "kafka.server.keystore.pfx")),
-            passphrase: "serverKeystorePassword",
-          },
-          truststore: {
-            content: fs.readFileSync(path.resolve(certificatesDir, "kafka.server.truststore.pfx")),
-            passphrase: "serverTruststorePassword",
-          },
-        })
-        .start();
+        },
+        keystore: {
+          content: fs.readFileSync(path.resolve(certificatesDir, "kafka.server.keystore.pfx")),
+          passphrase: "serverKeystorePassword",
+        },
+        truststore: {
+          content: fs.readFileSync(path.resolve(certificatesDir, "kafka.server.truststore.pfx")),
+          passphrase: "serverTruststorePassword",
+        },
+      });
+      configure(kafkaContainer);
+      const startedKafkaContainer = await kafkaContainer.start();
 
-      await testPubSub(kafkaContainer, {
-        brokers: [`${kafkaContainer.getHost()}:${kafkaContainer.getMappedPort(9094)}`],
+      await testPubSub(startedKafkaContainer, {
+        brokers: [`${startedKafkaContainer.getHost()}:${startedKafkaContainer.getMappedPort(9096)}`],
         sasl: {
           username: "app-user",
           password: "userPassword",
@@ -109,7 +118,7 @@ describe("KafkaContainer", () => {
           ca: [fs.readFileSync(path.resolve(certificatesDir, "kafka.client.truststore.pem"))],
         },
       });
-      await kafkaContainer.stop();
+      await startedKafkaContainer.stop();
     });
     // }
 
@@ -178,6 +187,59 @@ describe("KafkaContainer", () => {
       await kafkaCliContainer.stop();
       await kafkaContainer.stop();
     });
+  });
+
+  // connectKraft {
+  it("should connect using kraft", async () => {
+    const kafkaContainer = await new KafkaContainer().withKraft().withExposedPorts(9093).start();
+
+    await testPubSub(kafkaContainer);
+
+    await kafkaContainer.stop();
+  });
+  // }
+
+  it("should throw an error when using kraft and and confluence platfom below 7.0.0", async () => {
+    expect(() => new KafkaContainer("confluentinc/cp-kafka:6.2.14").withKraft()).toThrow(
+      "Provided Confluent Platform's version 6.2.14 is not supported in Kraft mode (must be 7.0.0 or above)"
+    );
+  });
+
+  it("should connect using kraft and custom network", async () => {
+    const network = await new Network().start();
+    const kafkaContainer = await new KafkaContainer().withKraft().withNetwork(network).withExposedPorts(9093).start();
+
+    await testPubSub(kafkaContainer);
+
+    await kafkaContainer.stop();
+    await network.stop();
+  });
+
+  it("should throw an error when using kraft wit sasl and confluence platfom below 7.5.0", async () => {
+    const kafkaContainer = new KafkaContainer("confluentinc/cp-kafka:7.4.0")
+      .withKraft()
+      .withExposedPorts(9093)
+      .withSaslSslListener({
+        port: 9094,
+        sasl: {
+          mechanism: "SCRAM-SHA-512",
+          user: {
+            name: "app-user",
+            password: "userPassword",
+          },
+        },
+        keystore: {
+          content: "fake",
+          passphrase: "serverKeystorePassword",
+        },
+        truststore: {
+          content: "fake",
+          passphrase: "serverTruststorePassword",
+        },
+      });
+    await expect(() => kafkaContainer.start()).rejects.toThrow(
+      "Provided Confluent Platform's version 7.4.0 is not supported in Kraft mode with sasl (must be 7.5.0 or above)"
+    );
   });
 
   const testPubSub = async (kafkaContainer: StartedTestContainer, additionalConfig: Partial<KafkaConfig> = {}) => {
