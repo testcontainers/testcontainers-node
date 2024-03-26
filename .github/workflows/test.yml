@@ -74,7 +74,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - id: list_modules
-        run: echo "modules=$(ls packages/modules | jq 'del(.[] | select(. == "couchbase"))' | jq -cnR '[inputs | select(length>0)]'))" >> $GITHUB_OUTPUT
+        run: echo "modules=$(ls packages/modules | jq 'del(. == "couchbase")' | jq -cnR '[inputs | select(length>0)]'))" >> $GITHUB_OUTPUT
 
   test-modules:
     name: Module (${{ matrix.module }})
