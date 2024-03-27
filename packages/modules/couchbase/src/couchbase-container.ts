@@ -17,7 +17,7 @@ import { IntervalRetry } from "testcontainers/src/common";
 
 export class CouchbaseContainer extends GenericContainer {
   private static readonly DEFAULT_IMAGE_NAME = "couchbase/server";
-  private static readonly DEFAULT_TAG = "7.2.4";
+  private static readonly DEFAULT_TAG = "6.5.1";
 
   private username = "Administrator";
   private password = "password";
@@ -38,7 +38,7 @@ export class CouchbaseContainer extends GenericContainer {
   constructor(image = `${CouchbaseContainer.DEFAULT_IMAGE_NAME}:${CouchbaseContainer.DEFAULT_TAG}`) {
     super(image);
     this.withExposedPorts(...this.getPortsToExpose()).withWaitStrategy(
-      Wait.forLogMessage(`Starting Couchbase Server -- Web UI available at http://<ip>:${PORTS.MGMT_PORT}`)
+      Wait.forLogMessage("Starting Couchbase Server -- Web UI available at http://<ip>:8091")
     );
   }
 
@@ -136,9 +136,6 @@ export class CouchbaseContainer extends GenericContainer {
         .forResponsePredicate((response) => {
           try {
             const jsonResponse = JSON.parse(response);
-
-            log.debug(`Couchbase node status: ${jsonResponse.nodes[0].status}`);
-
             return jsonResponse.nodes[0].status === "healthy";
           } catch (e) {
             log.error(`Unable to parse response: ${response}, error: ${e}`);
@@ -344,7 +341,6 @@ export class CouchbaseContainer extends GenericContainer {
       body,
       true
     );
-
     await this.checkResponse(response, "Could not configure external ports");
   }
 
@@ -545,7 +541,6 @@ export class CouchbaseContainer extends GenericContainer {
     await this.setMemoryQuotas(startedTestContainer);
     await this.configureAdminUser(startedTestContainer);
     await this.configureExternalPorts(startedTestContainer);
-
     if (this.enabledServices.has(CouchbaseService.INDEX)) {
       await this.configureIndexer(startedTestContainer);
     }
