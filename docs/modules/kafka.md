@@ -21,3 +21,7 @@ npm install @testcontainers/kafka --save-dev
 <!--codeinclude-->
 [Connect to Kafka using SSL:](../../packages/modules/kafka/src/kafka-container.test.ts) inside_block:ssl
 <!--/codeinclude-->
+
+<!--codeinclude-->
+[Connect to Kafka using Kraft:](../../packages/modules/kafka/src/kafka-container.test.ts) inside_block:connectKraft
+<!--/codeinclude-->
