@@ -6,11 +6,24 @@ import {
   RandomUuid,
   StartedTestContainer,
   Uuid,
+  Wait,
+  getContainerRuntimeClient,
 } from "testcontainers";
+import { waitForContainer } from "testcontainers/src/wait-strategies/wait-for-container";
+import { BoundPorts } from "testcontainers/src/utils/bound-ports";
+import { WaitStrategy } from "testcontainers/src/wait-strategies/wait-strategy";
 
 const KAFKA_PORT = 9093;
 const KAFKA_BROKER_PORT = 9092;
+const KAFKA_CONTROLLER_PORT = 9094;
 const DEFAULT_ZOOKEEPER_PORT = 2181;
+const DEFAULT_CLUSTER_ID = "4L6g3nShT-eMCtK--X86sw";
+const STARTER_SCRIPT = "/testcontainers_start.sh";
+const WAIT_FOR_SCRIPT_MESSAGE = "Waiting for script...";
+
+// https://docs.confluent.io/platform/7.0.0/release-notes/index.html#ak-raft-kraft
+const MIN_KRAFT_VERSION = "7.0.0";
+const MIN_KRAFT_SASL_VERSION = "7.5.0";
 
 export const KAFKA_IMAGE = "confluentinc/cp-kafka:7.2.2";
 
@@ -36,13 +49,20 @@ interface PKCS12CertificateStore {
   passphrase: string;
 }
 
+enum KafkaMode {
+  EMBEDDED_ZOOKEEPER,
+  PROVIDED_ZOOKEEPER,
+  KRAFT,
+}
+
 export class KafkaContainer extends GenericContainer {
   private readonly uuid: Uuid = new RandomUuid();
 
-  private isZooKeeperProvided = false;
+  private mode = KafkaMode.EMBEDDED_ZOOKEEPER;
   private zooKeeperHost?: string;
   private zooKeeperPort?: number;
   private saslSslConfig?: SaslSslListenerOptions;
+  private originalWaitinStrategy: WaitStrategy;
 
   constructor(image = KAFKA_IMAGE) {
     super(image);
@@ -58,13 +78,22 @@ export class KafkaContainer extends GenericContainer {
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: "0",
       KAFKA_CONFLUENT_SUPPORT_METRICS_ENABLE: "false",
     });
+    this.originalWaitinStrategy = this.waitStrategy;
   }
 
   public withZooKeeper(host: string, port: number): this {
-    this.isZooKeeperProvided = true;
+    this.mode = KafkaMode.PROVIDED_ZOOKEEPER;
     this.zooKeeperHost = host;
     this.zooKeeperPort = port;
 
+    return this;
+  }
+
+  public withKraft(): this {
+    this.verifyMinKraftVersion();
+    this.mode = KafkaMode.KRAFT;
+    this.zooKeeperHost = undefined;
+    this.zooKeeperPort = undefined;
     return this;
   }
 
@@ -83,26 +112,44 @@ export class KafkaContainer extends GenericContainer {
       this.addPlaintextListener();
     }
 
-    let command = "#!/bin/bash\n";
-    if (this.isZooKeeperProvided) {
+    if (this.mode === KafkaMode.PROVIDED_ZOOKEEPER) {
       this.withEnvironment({ KAFKA_ZOOKEEPER_CONNECT: `${this.zooKeeperHost}:${this.zooKeeperPort}` });
-    } else {
+    } else if (this.mode === KafkaMode.EMBEDDED_ZOOKEEPER) {
       this.zooKeeperHost = this.uuid.nextUuid();
       this.zooKeeperPort = DEFAULT_ZOOKEEPER_PORT;
       this.withExposedPorts(this.zooKeeperPort);
       this.withEnvironment({ KAFKA_ZOOKEEPER_CONNECT: `localhost:${this.zooKeeperPort}` });
-      command += "echo 'clientPort=" + this.zooKeeperPort + "' > zookeeper.properties\n";
-      command += "echo 'dataDir=/var/lib/zookeeper/data' >> zookeeper.properties\n";
-      command += "echo 'dataLogDir=/var/lib/zookeeper/log' >> zookeeper.properties\n";
-      command += "zookeeper-server-start zookeeper.properties &\n";
+    } else {
+      // Kraft
+      this.withEnvironment({
+        CLUSTER_ID: DEFAULT_CLUSTER_ID,
+        KAFKA_NODE_ID: this.environment["KAFKA_BROKER_ID"],
+        KAFKA_LISTENER_SECURITY_PROTOCOL_MAP:
+          this.environment["KAFKA_LISTENER_SECURITY_PROTOCOL_MAP"] + ",CONTROLLER:PLAINTEXT",
+        KAFKA_LISTENERS: `${this.environment["KAFKA_LISTENERS"]},CONTROLLER://0.0.0.0:${KAFKA_CONTROLLER_PORT}`,
+        KAFKA_PROCESS_ROLES: "broker,controller",
+        KAFKA_CONTROLLER_QUORUM_VOTERS: `${this.environment["KAFKA_BROKER_ID"]}@${network}:${KAFKA_CONTROLLER_PORT}`,
+        KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER",
+      });
     }
 
-    command += "echo '' > /etc/confluent/docker/ensure \n";
-    command += "/etc/confluent/docker/run \n";
-    this.withCommand(["sh", "-c", command]);
+    // Change the wait strategy to wait for a log message from a fake starter script
+    // so that we can put a real starter script in place at that moment
+    this.originalWaitinStrategy = this.waitStrategy;
+    this.waitStrategy = Wait.forLogMessage(WAIT_FOR_SCRIPT_MESSAGE);
+    this.withEntrypoint(["sh"]);
+    this.withCommand([
+      "-c",
+      `echo '${WAIT_FOR_SCRIPT_MESSAGE}'; while [ ! -f ${STARTER_SCRIPT} ]; do sleep 0.1; done; ${STARTER_SCRIPT}`,
+    ]);
   }
 
   public override async start(): Promise<StartedKafkaContainer> {
+    if (this.mode === KafkaMode.KRAFT && this.saslSslConfig && this.isLessThanCP(7, 5)) {
+      throw new Error(
+        `Provided Confluent Platform's version ${this.imageName.tag} is not supported in Kraft mode with sasl (must be ${MIN_KRAFT_SASL_VERSION} or above)`
+      );
+    }
     return new StartedKafkaContainer(await super.start());
   }
 
@@ -110,8 +157,38 @@ export class KafkaContainer extends GenericContainer {
     container: StartedTestContainer,
     inspectResult: InspectResult
   ): Promise<void> {
-    await this.updateAdvertisedListeners(container, inspectResult);
-    if (this.saslSslConfig) {
+    let command = "#!/bin/bash\n";
+    const advertisedListeners = this.updateAdvertisedListeners(container, inspectResult);
+    // exporting KAFKA_ADVERTISED_LISTENERS with the container hostname
+    command += `export KAFKA_ADVERTISED_LISTENERS=${advertisedListeners}\n`;
+
+    if (this.mode !== KafkaMode.KRAFT || this.isLessThanCP(7, 4)) {
+      // Optimization: skip the checks
+      command += "echo '' > /etc/confluent/docker/ensure \n";
+    }
+    if (this.mode === KafkaMode.KRAFT) {
+      if (this.saslSslConfig) {
+        command += this.commandKraftCreateUser(this.saslSslConfig);
+      }
+      if (this.isLessThanCP(7, 4)) {
+        command += this.commandKraft();
+      }
+    } else if (this.mode === KafkaMode.EMBEDDED_ZOOKEEPER) {
+      command += this.commandZookeeper();
+    }
+
+    // Run the original command
+    command += "/etc/confluent/docker/run \n";
+    await container.copyContentToContainer([{ content: command, target: STARTER_SCRIPT, mode: 0o777 }]);
+
+    const client = await getContainerRuntimeClient();
+    const dockerContainer = client.container.getById(container.getId());
+    const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, inspectResult).filter(
+      this.exposedPorts
+    );
+    await waitForContainer(client, dockerContainer, this.originalWaitinStrategy, boundPorts);
+
+    if (this.saslSslConfig && this.mode !== KafkaMode.KRAFT) {
       await this.createUser(container, this.saslSslConfig.sasl);
     }
   }
@@ -148,8 +225,8 @@ export class KafkaContainer extends GenericContainer {
     }).withExposedPorts(KAFKA_PORT);
   }
 
-  private async updateAdvertisedListeners(container: StartedTestContainer, inspectResult: InspectResult) {
-    const brokerAdvertisedListener = `BROKER://${inspectResult.hostname}:${KAFKA_BROKER_PORT}`;
+  private updateAdvertisedListeners(container: StartedTestContainer, inspectResult: InspectResult): string {
+    let advertisedListeners = `BROKER://${inspectResult.hostname}:${KAFKA_BROKER_PORT}`;
 
     let bootstrapServers = `PLAINTEXT://${container.getHost()}:${container.getMappedPort(KAFKA_PORT)}`;
     if (this.saslSslConfig) {
@@ -161,23 +238,8 @@ export class KafkaContainer extends GenericContainer {
         )}`;
       }
     }
-
-    const { output, exitCode } = await container.exec([
-      "kafka-configs",
-      "--alter",
-      "--bootstrap-server",
-      brokerAdvertisedListener,
-      "--entity-type",
-      "brokers",
-      "--entity-name",
-      this.environment["KAFKA_BROKER_ID"],
-      "--add-config",
-      `advertised.listeners=[${bootstrapServers},${brokerAdvertisedListener}]`,
-    ]);
-
-    if (exitCode !== 0) {
-      throw new Error(`Kafka container configuration failed with exit code ${exitCode}: ${output}`);
-    }
+    advertisedListeners += `,${bootstrapServers}`;
+    return advertisedListeners;
   }
 
   private async createUser(container: StartedTestContainer, { user: { name, password }, mechanism }: SaslOptions) {
@@ -199,6 +261,53 @@ export class KafkaContainer extends GenericContainer {
     if (exitCode !== 0) {
       throw new Error(`Kafka container configuration failed with exit code ${exitCode}: ${output}`);
     }
+  }
+
+  private verifyMinKraftVersion() {
+    if (this.isLessThanCP(7)) {
+      throw new Error(
+        `Provided Confluent Platform's version ${this.imageName.tag} is not supported in Kraft mode (must be ${MIN_KRAFT_VERSION} or above)`
+      );
+    }
+  }
+
+  private isLessThanCP(max: number, min = 0, patch = 0): boolean {
+    if (this.imageName.tag === "latest") {
+      return false;
+    }
+    const parts = this.imageName.tag.split(".");
+    return !(
+      parts.length > 2 &&
+      (Number(parts[0]) > max ||
+        (Number(parts[0]) === max &&
+          (Number(parts[1]) > min || (Number(parts[1]) === min && Number(parts[2]) >= patch))))
+    );
+  }
+
+  private commandKraftCreateUser(saslOptions: SaslSslListenerOptions): string {
+    return (
+      "echo 'kafka-storage format --ignore-formatted " +
+      `-t "${this.environment["CLUSTER_ID"]}" ` +
+      "-c /etc/kafka/kafka.properties " +
+      `--add-scram "${saslOptions.sasl.mechanism}=[name=${saslOptions.sasl.user.name},password=${saslOptions.sasl.user.password}]"' >> /etc/confluent/docker/configure\n`
+    );
+  }
+
+  private commandKraft(): string {
+    let command = "sed -i '/KAFKA_ZOOKEEPER_CONNECT/d' /etc/confluent/docker/configure\n";
+    command +=
+      "echo 'kafka-storage format --ignore-formatted " +
+      `-t "${this.environment["CLUSTER_ID"]}" ` +
+      "-c /etc/kafka/kafka.properties' >> /etc/confluent/docker/configure\n";
+    return command;
+  }
+
+  private commandZookeeper(): string {
+    let command = "echo 'clientPort=" + DEFAULT_ZOOKEEPER_PORT + "' > zookeeper.properties\n";
+    command += "echo 'dataDir=/var/lib/zookeeper/data' >> zookeeper.properties\n";
+    command += "echo 'dataLogDir=/var/lib/zookeeper/log' >> zookeeper.properties\n";
+    command += "zookeeper-server-start zookeeper.properties &\n";
+    return command;
   }
 }
 

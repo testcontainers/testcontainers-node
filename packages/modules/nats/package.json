@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/nats",
-  "version": "10.7.2",
+  "version": "10.8.0",
   "license": "MIT",
   "keywords": [
     "nats",
@@ -32,6 +32,6 @@
     "nats": "^2.19.0"
   },
   "dependencies": {
-    "testcontainers": "^10.7.2"
+    "testcontainers": "^10.8.0"
   }
 }

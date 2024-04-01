@@ -53,6 +53,21 @@ describe("ContainerImage", () => {
       );
       expect(imageName.string).toBe("aa285b773a2c042056883845aea893a743d358a5d40f61734fa228fde93dae6f:1");
     });
+
+    it("should substitute no registry with the one provided via TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX", () => {
+      const oldEnvValue = process.env.TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX;
+      try {
+        process.env.TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX = "custom.com/registry";
+        const imageName = new ImageName(undefined, "image", "tag");
+        expect(imageName.string).toBe("custom.com/registry/image:tag");
+      } finally {
+        if (oldEnvValue === undefined) {
+          delete process.env.TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX;
+        } else {
+          process.env.TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX = oldEnvValue;
+        }
+      }
+    });
   });
 
   describe("fromString", () => {

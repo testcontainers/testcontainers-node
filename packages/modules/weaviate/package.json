@@ -1,14 +1,14 @@
 {
-  "name": "@testcontainers/couchbase",
+  "name": "@testcontainers/weaviate",
   "version": "10.8.0",
   "license": "MIT",
   "keywords": [
-    "couchbase",
+    "weaviate",
     "testing",
     "docker",
     "testcontainers"
   ],
-  "description": "Couchbase module for Testcontainers",
+  "description": "Weaviate module for Testcontainers",
   "homepage": "https://github.com/testcontainers/testcontainers-node#readme",
   "repository": {
     "type": "git",
@@ -28,11 +28,10 @@
     "prepack": "shx cp ../../../README.md . && shx cp ../../../LICENSE .",
     "build": "tsc --project tsconfig.build.json"
   },
+  "devDependencies": {
+    "weaviate-ts-client": "^2.1.0"
+  },
   "dependencies": {
     "testcontainers": "^10.8.0"
-  },
-  "devDependencies": {
-    "@types/couchbase": "^2.4.9",
-    "couchbase": "3.2.7"
   }
 }

@@ -1,14 +1,14 @@
 {
-  "name": "@testcontainers/couchbase",
+  "name": "@testcontainers/qdrant",
   "version": "10.8.0",
   "license": "MIT",
   "keywords": [
-    "couchbase",
+    "qdrant",
     "testing",
     "docker",
     "testcontainers"
   ],
-  "description": "Couchbase module for Testcontainers",
+  "description": "Qdrant module for Testcontainers",
   "homepage": "https://github.com/testcontainers/testcontainers-node#readme",
   "repository": {
     "type": "git",
@@ -28,11 +28,10 @@
     "prepack": "shx cp ../../../README.md . && shx cp ../../../LICENSE .",
     "build": "tsc --project tsconfig.build.json"
   },
+  "devDependencies": {
+    "@qdrant/js-client-rest": "^1.8.0"
+  },
   "dependencies": {
     "testcontainers": "^10.8.0"
-  },
-  "devDependencies": {
-    "@types/couchbase": "^2.4.9",
-    "couchbase": "3.2.7"
   }
 }
