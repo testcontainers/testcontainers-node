@@ -1,5 +1,6 @@
 import {
   AbstractStartedContainer,
+  BoundPorts,
   Content,
   GenericContainer,
   InspectResult,
@@ -7,11 +8,10 @@ import {
   StartedTestContainer,
   Uuid,
   Wait,
+  WaitStrategy,
   getContainerRuntimeClient,
+  waitForContainer,
 } from "testcontainers";
-import { waitForContainer } from "testcontainers/src/wait-strategies/wait-for-container";
-import { BoundPorts } from "testcontainers/src/utils/bound-ports";
-import { WaitStrategy } from "testcontainers/src/wait-strategies/wait-strategy";
 
 const KAFKA_PORT = 9093;
 const KAFKA_BROKER_PORT = 9092;
