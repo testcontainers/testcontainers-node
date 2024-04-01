@@ -58,4 +58,5 @@ nav:
       - Qdrant: modules/qdrant.md
       - Redis: modules/redis.md
       - Selenium: modules/selenium.md
+      - Weaviate: modules/weaviate.md
   - Configuration: configuration.md
