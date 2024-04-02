@@ -1,1 +1,1 @@
-export { ArangoDBContainer, StartedArangoContainer } from "./chromadb-container";
+export { ChromaDBContainer, StartedChromaDBContainer } from "./chromadb-container";
