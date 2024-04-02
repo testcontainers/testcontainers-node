@@ -17,15 +17,13 @@ export class ChromaDBContainer extends GenericContainer {
 
 export class StartedChromaDBContainer extends AbstractStartedContainer {
   private readonly host: string;
-  private readonly port: number;
 
   constructor(startedTestContainer: StartedTestContainer) {
     super(startedTestContainer);
     this.host = this.startedTestContainer.getHost();
-    this.port = this.startedTestContainer.getMappedPort(CHROMADB_PORT);
   }
 
   public getHttpUrl(): string {
-    return `http://${this.host}:${this.port}`;
+    return `http://${this.host}:${this.startedTestContainer.getMappedPort(CHROMADB_PORT)}`;
   }
 }
