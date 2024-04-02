@@ -4,7 +4,7 @@ import { ChromaDBContainer } from "./chromadb-container";
 describe("ChromaDB", () => {
   jest.setTimeout(180_000);
 
-  // connect {
+  // docs {
   it("should connect and return a query result", async () => {
     const container = await new ChromaDBContainer().start();
     const tenant = "test-tenant";
