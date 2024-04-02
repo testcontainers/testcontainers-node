@@ -18,7 +18,15 @@ See [LICENSE](https://github.com/testcontainers/testcontainers-node/blob/main/LI
 
 Copyright (c) 2018 - 2023 Cristian Greco and other authors.
 
+## Contributing
+
 See [contributors](https://github.com/testcontainers/testcontainers-node/graphs/contributors/) for all contributors.
+
+### Updating the docs
+
+To update the docs for your new module, you'll have to:
+ - add a markdown file for your module in the docs/modules/ directory.
+ - add a reference to your new markdown file in the mkdocs.yml file.
 
 ----
 
