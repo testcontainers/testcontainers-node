@@ -10,11 +10,9 @@ export class ImageName {
     public readonly image: string,
     public readonly tag: string
   ) {
-    if (!this.registry) {
-      this.registry = process.env.TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX;
-      if (this.registry) {
-        log.info(`Applying changes to image ${image} with tag ${tag}: added registry ${this.registry}`);
-      }
+    if (!this.registry && process.env.TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX) {
+      this.registry = process.env.TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX.replace(/\/$/, "");
+      log.info(`Applying changes to image ${image} with tag ${tag}: added registry ${this.registry}`);
     }
     if (this.registry) {
       if (this.tag.startsWith("sha256:")) {
