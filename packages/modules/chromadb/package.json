@@ -1,14 +1,14 @@
 {
-  "name": "@testcontainers/redis",
+  "name": "@testcontainers/chromadb",
   "version": "10.8.1",
   "license": "MIT",
   "keywords": [
-    "redis",
+    "chromadb",
     "testing",
     "docker",
     "testcontainers"
   ],
-  "description": "Redis module for Testcontainers",
+  "description": "ChromaDB module for Testcontainers",
   "homepage": "https://github.com/testcontainers/testcontainers-node#readme",
   "repository": {
     "type": "git",
@@ -29,8 +29,7 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "@types/redis": "^4.0.11",
-    "redis": "^4.6.13"
+    "chromadb": "^1.8.1"
   },
   "dependencies": {
     "testcontainers": "^10.8.1"

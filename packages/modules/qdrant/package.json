@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/qdrant",
-  "version": "10.7.2",
+  "version": "10.8.1",
   "license": "MIT",
   "keywords": [
     "qdrant",
@@ -28,11 +28,10 @@
     "prepack": "shx cp ../../../README.md . && shx cp ../../../LICENSE .",
     "build": "tsc --project tsconfig.build.json"
   },
-  
   "devDependencies": {
     "@qdrant/js-client-rest": "^1.8.0"
   },
   "dependencies": {
-    "testcontainers": "^10.7.2"
+    "testcontainers": "^10.8.1"
   }
 }

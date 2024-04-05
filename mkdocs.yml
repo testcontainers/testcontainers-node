@@ -43,6 +43,7 @@ nav:
       - Advanced: features/advanced.md
   - Modules:
       - ArangoDB: modules/arangodb.md
+      - ChromaDB: modules/chromadb.md
       - Couchbase: modules/couchbase.md
       - Elasticsearch: modules/elasticsearch.md
       - GCloud: modules/gcloud.md
@@ -59,4 +60,5 @@ nav:
       - OpenLDAP: modules/openLDAP.md
       - Redis: modules/redis.md
       - Selenium: modules/selenium.md
+      - Weaviate: modules/weaviate.md
   - Configuration: configuration.md
