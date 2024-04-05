@@ -4,9 +4,9 @@ import path from "path";
 const OPENLDAP_PORT = 1389;
 
 export class OpenldapContainer extends GenericContainer {
-  private readonly importFilePath = "/tmp/import.ldif";
+  private readonly importFilePath = "/home/import.ldif";
   private username? = "admin";
-  private password? = "";
+  private password? = "adminpassword";
   private rootDn? = "dc=example,dc=org";
   private baseDn? = "cn=admin,dc=example,dc=org";
   private persistenceVolume? = "";
@@ -14,9 +14,15 @@ export class OpenldapContainer extends GenericContainer {
 
   constructor(image = "bitnami/openldap:latest") {
     super(image);
+    this.withEnvironment({
+      LDAP_ADMIN_USERNAME: this.username ?? "",
+      LDAP_ADMIN_PASSWORD: this.password ?? "",
+      LDAP_ROOT: this.rootDn ?? "",
+      LDAP_BASE: this.baseDn ?? "",
+    });
     this.withExposedPorts(OPENLDAP_PORT)
       .withStartupTimeout(120_000)
-      .withWaitStrategy(Wait.forAll([Wait.forLogMessage("** Starting slapd **"), Wait.forListeningPorts()]));
+      .withWaitStrategy(Wait.forAll([Wait.forLogMessage("slapd starting"), Wait.forListeningPorts()]));
   }
 
   public withUsername(username: string): this {
@@ -62,7 +68,7 @@ export class OpenldapContainer extends GenericContainer {
     if (this.initialImportScriptFile) {
       this.withCopyFilesToContainer([
         {
-          mode: 666,
+          mode: 777,
           source: this.initialImportScriptFile,
           target: this.importFilePath,
         },
@@ -73,13 +79,18 @@ export class OpenldapContainer extends GenericContainer {
         },
       ]);
     }
-    const startedRedisContainer = new StartedOpenldapContainer(await super.start(), this.username, this.password);
+    const startedRedisContainer = new StartedOpenldapContainer(
+      await super.start(),
+      this.username,
+      this.password,
+      this.rootDn
+    );
     if (this.initialImportScriptFile) await this.importInitialData(startedRedisContainer);
     return startedRedisContainer;
   }
 
   private async importInitialData(container: StartedOpenldapContainer) {
-    const re = await container.exec(`/tmp/import.sh ${this.password}`);
+    const re = await container.exec(`/tmp/import.sh "${this.username},${this.rootDn}" ${this.password}`);
     if (re.exitCode != 0 || re.output.includes("ERR"))
       throw Error(`Could not import initial data from ${this.initialImportScriptFile}: ${re.output}`);
   }
@@ -89,7 +100,8 @@ export class StartedOpenldapContainer extends AbstractStartedContainer {
   constructor(
     startedTestContainer: StartedTestContainer,
     private readonly username?: string,
-    private readonly password?: string
+    private readonly password?: string,
+    private readonly rootDn?: string
   ) {
     super(startedTestContainer);
   }
@@ -106,17 +118,20 @@ export class StartedOpenldapContainer extends AbstractStartedContainer {
     return this.password ?? "";
   }
 
+  public getRootDn(): string {
+    return this.rootDn ?? "";
+  }
+
   public getConnectionUrl(): string {
     const url = new URL("", "ldap://");
     url.hostname = this.getHost();
     url.port = this.getPort().toString();
-    url.password = this.getPassword();
     return url.toString();
   }
 
   public async executeCliCmd(cmd: string, additionalFlags: string[] = []): Promise<string> {
     const result = await this.startedTestContainer.exec([
-      "redis-cli",
+      "ldap-cli",
       ...(this.password != "" ? [`-a ${this.password}`] : []),
       `${cmd}`,
       ...additionalFlags,

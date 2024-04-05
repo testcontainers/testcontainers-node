@@ -9,17 +9,23 @@ describe("OpenLdapContainer", () => {
 
   // startContainer {
   it("should connect and execute set-get", async () => {
-    const container = await new OpenldapContainer().start();
+    const container = await new OpenldapContainer().withRootDn("dc=example,dc=org").start();
 
     const client = await connectTo(container);
 
-    await client.add("cn=foo, o=example", {
-      cn: "foo",
-      sn: "bar",
-      email: ["foo@bar.com", "foo1@bar.com"],
-      objectclass: "fooPerson",
+    const newUserName = "foo";
+    const dn = `cn=${newUserName}, ${container.getRootDn()}`;
+    await client.add(dn, {
+      cn: newUserName,
+      uidNumber: "1000",
+      gidNumber: "1000",
+      homeDirectory: `/home/${newUserName}`,
+      uid: newUserName,
+      sn: "LastName",
+      objectclass: ["inetOrgPerson", "posixAccount"],
     });
-    expect(await client.search("key")).toBe("val");
+    const user = await client.search(dn);
+    expect(user.searchEntries[0].object).not.toBeNull();
 
     await client.unbind();
     await container.stop();
@@ -68,12 +74,8 @@ describe("OpenLdapContainer", () => {
       .withInitialLdif(path.join(__dirname, "initData.ldif"))
       .start();
     const client = await connectTo(container);
-    const user = {
-      first_name: "David",
-      last_name: "Bloom",
-      dob: "03-MAR-1981",
-    };
-    expect(client.search("user:002")).toBe(JSON.stringify(user));
+    const user1 = await client.search("uid=testuser1,ou=users,dc=example,dc=com");
+    expect(user1.searchEntries.length).toBe(1);
 
     client.unbind();
     await container.stop();
@@ -87,14 +89,10 @@ describe("OpenLdapContainer", () => {
 
     // Test authentication
     const container = await new OpenldapContainer().withUsername(username).withPassword(password).start();
-    expect(container.getConnectionUrl()).toEqual(
-      `ldap://${username}:${password}@${container.getHost()}:${container.getPort()}`
-    );
-
+    expect(container.getConnectionUrl()).toEqual(`ldap://${container.getHost()}:${container.getPort()}`);
+    expect(container.getUsername()).toEqual(username);
+    expect(container.getPassword()).toEqual(password);
     const client = await connectTo(container);
-
-    //await client.set("key", "val");
-    //expect(await client.get("key")).toBe("val");
 
     await client.unbind();
     await container.stop();
@@ -116,11 +114,8 @@ describe("OpenLdapContainer", () => {
   async function connectTo(container: StartedOpenldapContainer) {
     const client = new Client({
       url: container.getConnectionUrl(),
-      tlsOptions: {
-        rejectUnauthorized: true,
-      },
     });
-    await client.bind(container.getUsername(), container.getPassword());
+    await client.bind(`cn=${container.getUsername()},${container.getRootDn()}`, container.getPassword());
     expect(client.isConnected).toBeTruthy();
     return client;
   }
