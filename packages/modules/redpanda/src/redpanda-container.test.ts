@@ -30,6 +30,32 @@ describe("RedpandaContainer", () => {
   });
   // }
 
+  // connectToAdmin {
+  it("should connect to admin", async () => {
+    const redpandaContainer = await new RedpandaContainer().start();
+    const adminUrl = `${redpandaContainer.getAdminAddress()}/v1`;
+
+    const response = await fetch(adminUrl);
+
+    expect(response.status).toBe(200);
+
+    await redpandaContainer.stop();
+  });
+  // }
+
+  // connectToRestProxy {
+  it("should connect to rest proxy", async () => {
+    const redpandaContainer = await new RedpandaContainer().start();
+    const restProxyUrl = `${redpandaContainer.getRestProxyAddress()}/topics`;
+
+    const response = await fetch(restProxyUrl);
+
+    expect(response.status).toBe(200);
+
+    await redpandaContainer.stop();
+  });
+  // }
+
   const testPubSub = async (
     redpandaContainer: StartedRedpandaContainer,
     additionalConfig: Partial<KafkaConfig> = {}

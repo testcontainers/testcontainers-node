@@ -22,3 +22,11 @@ npm install @testcontainers/redpanda --save-dev
 <!--codeinclude-->
 [Schema registry:](../../packages/modules/redpanda/src/redpanda-container.test.ts) inside_block:connectToSchemaRegistry
 <!--/codeinclude-->
+
+<!--codeinclude-->
+[Admin APIs:](../../packages/modules/redpanda/src/redpanda-container.test.ts) inside_block:connectToAdmin
+<!--/codeinclude-->
+
+<!--codeinclude-->
+[Rest Proxy:](../../packages/modules/redpanda/src/redpanda-container.test.ts) inside_block:connectToRestProxy
+<!--/codeinclude-->
