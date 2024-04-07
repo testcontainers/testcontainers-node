@@ -43,6 +43,7 @@ nav:
       - Advanced: features/advanced.md
   - Modules:
       - ArangoDB: modules/arangodb.md
+      - ChromaDB: modules/chromadb.md
       - Couchbase: modules/couchbase.md
       - Elasticsearch: modules/elasticsearch.md
       - GCloud: modules/gcloud.md

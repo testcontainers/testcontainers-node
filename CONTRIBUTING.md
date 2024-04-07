@@ -13,6 +13,12 @@
 
 The documentation is a static site built with [MkDocs](https://www.mkdocs.org/) and the [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) theme. In addition, we use a [custom plugin](https://github.com/rnorth/mkdocs-codeinclude-plugin) for inclusion of code snippets. We publish our documentation using Netlify.
 
+### Updating the docs
+
+To update the docs for your new module, you'll have to:
+ - add a markdown file for your module in the docs/modules/ directory.
+ - add a reference to your new markdown file in the mkdocs.yml file.
+
 ### Previewing rendered content
 
 #### Using Docker
@@ -28,3 +34,4 @@ The root of the project contains a `docker-compose.yml` file. Simply run `docker
 #### PR Preview deployments
 
 Documentation for pull requests will automatically be published by Netlify as 'deploy previews'. These deployment previews can be accessed via the `deploy/netlify` check that appears for each pull request.
+

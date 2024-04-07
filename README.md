@@ -18,7 +18,12 @@ See [LICENSE](https://github.com/testcontainers/testcontainers-node/blob/main/LI
 
 Copyright (c) 2018 - 2023 Cristian Greco and other authors.
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for how to contribute to this repo.
+
 See [contributors](https://github.com/testcontainers/testcontainers-node/graphs/contributors/) for all contributors.
+
 
 ----
 

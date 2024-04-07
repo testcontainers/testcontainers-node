@@ -10,11 +10,23 @@ export class ImageName {
     public readonly image: string,
     public readonly tag: string
   ) {
-    if (!this.registry) {
-      this.registry = process.env.TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX;
-      if (this.registry) {
-        log.info(`Applying changes to image ${image} with tag ${tag}: added registry ${this.registry}`);
+    if (!this.registry && process.env.TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX) {
+      const prefix = process.env.TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX;
+
+      // Parse the registry. If it's undefined - then the whole prefix is a registry.
+      const registry = ImageName.getRegistry(prefix);
+      this.registry = registry ?? prefix;
+
+      // If the registry is defined, then the imagePrefix is the rest of the prefix.
+      const imagePrefix = registry ? prefix.substring(prefix.indexOf("/") + 1).replace(/\/?$/, "/") : "";
+      const originalImage = this.image;
+      this.image = `${imagePrefix}${this.image}`;
+
+      let message = `Applying changes to image ${originalImage} with tag ${tag}: added registry ${this.registry}`;
+      if (this.image !== originalImage) {
+        message += ` and changed image to ${this.image}`;
       }
+      log.info(message);
     }
     if (this.registry) {
       if (this.tag.startsWith("sha256:")) {
