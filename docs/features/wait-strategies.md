@@ -17,9 +17,7 @@ The default wait strategy used by Testcontainers. It will wait up to 60 seconds 
 ```javascript
 const { GenericContainer } = require("testcontainers");
 
-const container = await new GenericContainer("alpine")
-  .withExposedPorts(6379)
-  .start();
+const container = await new GenericContainer("alpine").withExposedPorts(6379).start();
 ```
 
 It can be set explicitly but is not required:
@@ -72,9 +70,7 @@ Wait until the container's health check is successful:
 ```javascript
 const { GenericContainer, Wait } = require("testcontainers");
 
-const container = await new GenericContainer("alpine")
-  .withWaitStrategy(Wait.forHealthCheck())
-  .start();
+const container = await new GenericContainer("alpine").withWaitStrategy(Wait.forHealthCheck()).start();
 ```
 
 Define your own health check:
@@ -88,7 +84,7 @@ const container = await new GenericContainer("alpine")
     interval: 1000,
     timeout: 3000,
     retries: 5,
-    startPeriod: 1000
+    startPeriod: 1000,
   })
   .withWaitStrategy(Wait.forHealthCheck())
   .start();
@@ -99,13 +95,13 @@ Note that `interval`, `timeout`, `retries` and `startPeriod` are optional as the
 To execute the test with a shell use the form `["CMD-SHELL", "command"]`:
 
 ```javascript
-["CMD-SHELL", "curl -f http://localhost:8000 || exit 1"]
+["CMD-SHELL", "curl -f http://localhost:8000 || exit 1"];
 ```
 
 To execute the test without a shell, use the form: `["CMD", "command", "arg1", "arg2"]`. This may be needed when working with distroless images:
 
 ```javascript
-["CMD", "/usr/bin/wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/hello-world"]
+["CMD", "/usr/bin/wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/hello-world"];
 ```
 
 ## HTTP
@@ -115,9 +111,7 @@ Wait for an HTTP request to satisfy a condition. By default, it will wait for a 
 ```javascript
 const { GenericContainer, Wait } = require("testcontainers");
 
-const container = await new GenericContainer("redis")
-  .withWaitStrategy(Wait.forHttp("/health", 8080))
-  .start();
+const container = await new GenericContainer("redis").withWaitStrategy(Wait.forHttp("/health", 8080)).start();
 ```
 
 Stop waiting after container exited if waiting for container restart not needed.
@@ -184,6 +178,18 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+## One shot startup strategy example
+
+This strategy is intended for use with containers that only run briefly and exit of their own accord. As such, success is deemed to be when the container has stopped with exit code 0.
+
+```javascript
+const { GenericContainer, Wait } = require("testcontainers");
+
+const container = await new GenericContainer("alpine")
+  .withWaitStrategy(Wait.forOneShotStartup()))
+  .start();
+```
+
 ## Composite
 
 Multiple wait strategies can be chained together:
@@ -192,10 +198,7 @@ Multiple wait strategies can be chained together:
 const { GenericContainer, Wait } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
-  .withWaitStrategy(Wait.forAll([
-    Wait.forListeningPorts(),
-    Wait.forLogMessage("Ready to accept connections")
-  ]))
+  .withWaitStrategy(Wait.forAll([Wait.forListeningPorts(), Wait.forLogMessage("Ready to accept connections")]))
   .start();
 ```
 
@@ -205,7 +208,7 @@ The composite wait strategy by default will respect each individual wait strateg
 const w1 = Wait.forListeningPorts().withStartupTimeout(1000);
 const w2 = Wait.forLogMessage("READY").withStartupTimeout(2000);
 
-const composite = Wait.forAll([w1, w2])
+const composite = Wait.forAll([w1, w2]);
 
 expect(w1.getStartupTimeout()).toBe(1000);
 expect(w2.getStartupTimeout()).toBe(2000);
@@ -217,7 +220,7 @@ The startup timeout of inner wait strategies that have not defined their own sta
 const w1 = Wait.forListeningPorts().withStartupTimeout(1000);
 const w2 = Wait.forLogMessage("READY");
 
-const composite = Wait.forAll([w1, w2]).withStartupTimeout(2000)
+const composite = Wait.forAll([w1, w2]).withStartupTimeout(2000);
 
 expect(w1.getStartupTimeout()).toBe(1000);
 expect(w2.getStartupTimeout()).toBe(2000);
@@ -228,7 +231,7 @@ The startup timeout of all wait strategies can be controlled by setting a deadli
 ```javascript
 const w1 = Wait.forListeningPorts();
 const w2 = Wait.forLogMessage("READY");
-const composite = Wait.forAll([w1, w2]).withDeadline(2000)
+const composite = Wait.forAll([w1, w2]).withDeadline(2000);
 ```
 
 ## Other startup strategies
@@ -237,8 +240,8 @@ If these options do not meet your requirements, you can subclass `StartupCheckSt
 
 ```javascript
 const Dockerode = require("dockerode");
-const { 
-  GenericContainer, 
+const {
+  GenericContainer,
   StartupCheckStrategy,
   StartupStatus
 } = require("testcontainers");
