@@ -2,11 +2,13 @@ import { ContainerInfo } from "dockerode";
 import { GenericContainer } from "../generic-container/generic-container";
 import { Wait } from "../wait-strategies/wait";
 import { Socket } from "net";
-import { ContainerRuntimeClient } from "../container-runtime";
+import { ContainerRuntimeClient, ImageName } from "../container-runtime";
 import { IntervalRetry, log, RandomUuid, withFileLock } from "../common";
 import { LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
 
-export const REAPER_IMAGE = process.env["RYUK_CONTAINER_IMAGE"] ?? "testcontainers/ryuk:0.5.1";
+export const REAPER_IMAGE = process.env["RYUK_CONTAINER_IMAGE"]
+  ? ImageName.fromString(process.env["RYUK_CONTAINER_IMAGE"]).string
+  : ImageName.fromString("testcontainers/ryuk:0.5.1").string;
 
 export interface Reaper {
   sessionId: string;
