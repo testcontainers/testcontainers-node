@@ -167,6 +167,7 @@ describe("ContainerImage", () => {
     { customRegistry: "custom.com/registry", expectedRegistry: "custom.com", expectedImagePrefix: "registry/" },
     { customRegistry: "custom.com/registry/", expectedRegistry: "custom.com", expectedImagePrefix: "registry/" },
     { customRegistry: "custom.com", expectedRegistry: "custom.com", expectedImagePrefix: "" },
+    { customRegistry: "custom.com/", expectedRegistry: "custom.com", expectedImagePrefix: "" },
     {
       customRegistry: "custom.com/registry/with/slashes",
       expectedRegistry: "custom.com",
