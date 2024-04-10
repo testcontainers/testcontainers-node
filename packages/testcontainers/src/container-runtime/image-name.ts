@@ -20,7 +20,7 @@ export class ImageName {
       // If the registry is defined, then the imagePrefix is the rest of the prefix.
       let imagePrefix = parsedRegistry ? prefix.substring(prefix.indexOf("/") + 1) : "";
       if (imagePrefix) {
-        imagePrefix = imagePrefix.replace(/\/$/, "/");
+        imagePrefix = imagePrefix.replace(/\/?$/, "/");
       }
       const originalImage = this.image;
       this.image = `${imagePrefix}${this.image}`;
