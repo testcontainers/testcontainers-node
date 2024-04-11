@@ -14,11 +14,14 @@ export class ImageName {
       const prefix = process.env.TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX;
 
       // Parse the registry. If it's undefined - then the whole prefix is a registry.
-      const registry = ImageName.getRegistry(prefix);
-      this.registry = registry ?? prefix;
+      const parsedRegistry = ImageName.getRegistry(prefix);
+      this.registry = parsedRegistry ?? prefix;
 
       // If the registry is defined, then the imagePrefix is the rest of the prefix.
-      const imagePrefix = registry ? prefix.substring(prefix.indexOf("/") + 1).replace(/\/?$/, "/") : "";
+      let imagePrefix = parsedRegistry ? prefix.substring(prefix.indexOf("/") + 1) : "";
+      if (imagePrefix) {
+        imagePrefix = imagePrefix.replace(/\/?$/, "/");
+      }
       const originalImage = this.image;
       this.image = `${imagePrefix}${this.image}`;
 
