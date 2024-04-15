@@ -178,7 +178,7 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
-## One shot startup strategy example
+## One shot
 
 This strategy is intended for use with containers that only run briefly and exit of their own accord. As such, success is deemed to be when the container has stopped with exit code 0.
 
