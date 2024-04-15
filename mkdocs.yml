@@ -58,6 +58,7 @@ nav:
       - PostgreSQL: modules/postgresql.md
       - Qdrant: modules/qdrant.md
       - Redis: modules/redis.md
+      - Redpanda: modules/redpanda.md
       - Selenium: modules/selenium.md
       - Weaviate: modules/weaviate.md
   - Configuration: configuration.md
