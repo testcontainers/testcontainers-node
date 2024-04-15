@@ -1,16 +1,9 @@
 import { GenericContainer } from "../generic-container/generic-container";
 import { StartupCheckStrategy, StartupStatus } from "./startup-check-strategy";
-import { ContainerRuntimeClient, getContainerRuntimeClient } from "../container-runtime";
 
 jest.setTimeout(180_000);
 
 describe("StartupCheckStrategy", () => {
-  let client: ContainerRuntimeClient;
-
-  beforeAll(async () => {
-    client = await getContainerRuntimeClient();
-  });
-
   it("should wait until ready", async () => {
     const waitStrategy = new (class extends StartupCheckStrategy {
       private count = 0;
@@ -23,7 +16,7 @@ describe("StartupCheckStrategy", () => {
           return "SUCCESS";
         }
       }
-    })(client);
+    })();
 
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withWaitStrategy(waitStrategy)
@@ -37,7 +30,7 @@ describe("StartupCheckStrategy", () => {
       public override async checkStartupState(): Promise<StartupStatus> {
         return "PENDING";
       }
-    })(client);
+    })();
 
     await expect(() =>
       new GenericContainer("cristianrgreco/testcontainer:1.1.14")
@@ -55,7 +48,7 @@ describe("StartupCheckStrategy", () => {
         this.count++;
         return "FAIL";
       }
-    })(client);
+    })();
 
     await expect(() =>
       new GenericContainer("cristianrgreco/testcontainer:1.1.14")
