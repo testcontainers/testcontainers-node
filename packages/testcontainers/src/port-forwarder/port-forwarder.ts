@@ -9,7 +9,7 @@ import { LABEL_TESTCONTAINERS_SESSION_ID, LABEL_TESTCONTAINERS_SSHD } from "../u
 
 export const SSHD_IMAGE = process.env["SSHD_CONTAINER_IMAGE"]
   ? ImageName.fromString(process.env["SSHD_CONTAINER_IMAGE"]).string
-  : ImageName.fromString("testcontainers/sshd:1.1.0").string;
+  : ImageName.fromString("testcontainers/sshd:1.2.0").string;
 
 class PortForwarder {
   constructor(
@@ -124,11 +124,6 @@ export class PortForwarderInstance {
       .withExposedPorts(containerPort)
       .withEnvironment({ PASSWORD: this.PASSWORD })
       .withLabels({ [LABEL_TESTCONTAINERS_SSHD]: "true" })
-      .withCommand([
-        "sh",
-        "-c",
-        `echo "${this.USERNAME}:$PASSWORD" | chpasswd && /usr/sbin/sshd -D -o PermitRootLogin=yes -o AddressFamily=inet -o GatewayPorts=yes -o AllowAgentForwarding=yes -o AllowTcpForwarding=yes -o KexAlgorithms=+diffie-hellman-group1-sha1 -o HostkeyAlgorithms=+ssh-rsa`,
-      ])
       .start();
 
     const host = client.info.containerRuntime.host;
