@@ -17,13 +17,17 @@ export class DockerImageClient implements ImageClient {
   constructor(protected readonly dockerode: Dockerode, protected readonly indexServerAddress: string) {}
 
   async build(context: string, opts: ImageBuildOptions): Promise<void> {
+    const cleanOpts = Object.fromEntries(
+      Object.entries(opts).filter(([_, value]) => value !== undefined)
+    ) as ImageBuildOptions;
+
     try {
-      log.debug(`Building image "${opts.t}" with context "${context}"...`);
+      log.debug(`Building image "${cleanOpts.t}" with context "${context}"...`);
       const isDockerIgnored = await this.createIsDockerIgnoredFunction(context);
       const tarStream = tar.pack(context, {
         ignore: (aPath) => {
           const relativePath = path.relative(context, aPath);
-          if (relativePath === opts.dockerfile) {
+          if (relativePath === cleanOpts.dockerfile) {
             return false;
           } else {
             return isDockerIgnored(relativePath);
@@ -32,19 +36,19 @@ export class DockerImageClient implements ImageClient {
       });
       await new Promise<void>((resolve) => {
         this.dockerode
-          .buildImage(tarStream, opts)
+          .buildImage(tarStream, cleanOpts)
           .then((stream) => byline(stream))
           .then((stream) => {
             stream.setEncoding("utf-8");
             stream.on("data", (line) => {
               if (buildLog.enabled()) {
-                buildLog.trace(line, { imageName: opts.t });
+                buildLog.trace(line, { imageName: cleanOpts.t });
               }
             });
             stream.on("end", () => resolve());
           });
       });
-      log.debug(`Built image "${opts.t}" with context "${context}"`);
+      log.debug(`Built image "${cleanOpts.t}" with context "${context}"`);
     } catch (err) {
       log.error(`Failed to build image: ${err}`);
       throw err;

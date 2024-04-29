@@ -66,7 +66,7 @@ export class GenericContainerBuilder {
       t: imageName.string,
       dockerfile: this.dockerfileName,
       buildargs: this.buildArgs,
-      pull: this.pullPolicy ? "true" : undefined,
+      pull: this.pullPolicy.shouldPull() ? "true" : undefined,
       nocache: !this.cache,
       registryconfig: registryConfig,
       labels,
