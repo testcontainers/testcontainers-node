@@ -34,7 +34,7 @@ export abstract class CredentialProvider implements RegistryAuthLocator {
     return {
       username: response.Username,
       password: response.Secret,
-      registryAddress: response.ServerURL,
+      registryAddress: Object.keys(credentials).find((aRegistry) => registryMatches(aRegistry, registry)) as string,
     };
   }
 
