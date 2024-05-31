@@ -1,4 +1,4 @@
-import amqp, { ConsumeMessage } from "amqplib";
+import amqp from "amqplib";
 import { RabbitMQContainer } from "./rabbitmq-container";
 
 describe("RabbitMQContainer", () => {
@@ -16,7 +16,7 @@ describe("RabbitMQContainer", () => {
   // }
 
   // credentials {
-  it("different username and passord", async () => {
+  it("different username and password", async () => {
     const USER = "user";
     const PASSWORD = "password";
 
