@@ -1,4 +1,3 @@
-import path from "path";
 import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 
 const AMQP_PORT = 5672;
@@ -7,7 +6,6 @@ const HTTPS_PORT = 15671;
 const HTTP_PORT = 15672;
 const RABBITMQ_DEFAULT_USER = "guest";
 const RABBITMQ_DEFAULT_PASS = "guest";
-const RABBITMQ_CONFIG_FILE = "/etc/rabbitmq/default_config.conf";
 
 export class RabbitMQContainer extends GenericContainer {
   constructor(image = "rabbitmq:3.12.11-management-alpine") {
@@ -16,15 +14,8 @@ export class RabbitMQContainer extends GenericContainer {
       .withEnvironment({
         RABBITMQ_DEFAULT_USER,
         RABBITMQ_DEFAULT_PASS,
-        RABBITMQ_CONFIG_FILE,
       })
       .withWaitStrategy(Wait.forLogMessage("Server startup complete"))
-      .withCopyFilesToContainer([
-        {
-          source: path.join(__dirname, "rabbitmq-testcontainers.conf"),
-          target: RABBITMQ_CONFIG_FILE,
-        },
-      ])
       .withStartupTimeout(30_000);
   }
 
