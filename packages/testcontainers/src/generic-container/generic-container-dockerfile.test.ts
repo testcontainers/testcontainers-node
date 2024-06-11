@@ -102,4 +102,14 @@ describe("GenericContainer Dockerfile", () => {
 
     await startedContainer.stop();
   });
+
+  it("should work with buildKit", async () => {
+    const context = path.resolve(fixtures, "docker-with-buildkit-features");
+    const container = await GenericContainer.fromDockerfile(context).withBuildKit().build();
+    const startedContainer = await container.withExposedPorts(8080).start();
+
+    await checkContainerIsHealthy(startedContainer);
+
+    await startedContainer.stop();
+  });
 });

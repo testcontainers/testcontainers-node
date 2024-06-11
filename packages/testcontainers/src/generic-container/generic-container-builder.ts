@@ -7,6 +7,7 @@ import { getAuthConfig, getContainerRuntimeClient, ImageName } from "../containe
 import { getReaper } from "../reaper/reaper";
 import { getDockerfileImages } from "../utils/dockerfile-parser";
 import { createLabels, LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
+import type { ImageBuildOptions } from "dockerode";
 
 export type BuildOptions = {
   deleteOnExit: boolean;
@@ -17,6 +18,7 @@ export class GenericContainerBuilder {
   private pullPolicy: ImagePullPolicy = PullPolicy.defaultPolicy();
   private cache = true;
   private target?: string;
+  private useBuildKit = false;
 
   constructor(
     private readonly context: string,
@@ -44,6 +46,11 @@ export class GenericContainerBuilder {
     return this;
   }
 
+  public withBuildKit(useBuildKit = true): this {
+    this.useBuildKit = useBuildKit;
+    return this;
+  }
+
   public async build(
     image = `localhost/${this.uuid.nextUuid()}:${this.uuid.nextUuid()}`,
     options: BuildOptions = { deleteOnExit: true }
@@ -66,12 +73,13 @@ export class GenericContainerBuilder {
       t: imageName.string,
       dockerfile: this.dockerfileName,
       buildargs: this.buildArgs,
-      pull: this.pullPolicy ? "true" : undefined,
+      pull: this.pullPolicy.shouldPull() ? "true" : undefined,
       nocache: !this.cache,
       registryconfig: registryConfig,
       labels,
       target: this.target,
-    });
+      version: this.useBuildKit ? "2" : "1",
+    } as ImageBuildOptions);
 
     const container = new GenericContainer(imageName.string);
     if (!(await client.image.exists(imageName))) {
