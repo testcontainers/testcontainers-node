@@ -91,6 +91,15 @@ const container = await GenericContainer
   .build();
 ```
 
+### Using BuildKit
+
+```javascript
+const container = await GenericContainer
+  .fromDockerfile("/path/to/build-context")
+  .withBuildKit()
+  .build();
+```
+
 ## Image name substitution
 
 Testcontainers supports automatic substitution of Docker image names.

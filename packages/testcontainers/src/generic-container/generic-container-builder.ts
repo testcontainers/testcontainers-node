@@ -78,7 +78,7 @@ export class GenericContainerBuilder {
       registryconfig: registryConfig,
       labels,
       target: this.target,
-      version: this.useBuildKit ? "2" : "1",
+      version: this.useBuildKit ? "2" : undefined,
     } as ImageBuildOptions);
 
     const container = new GenericContainer(imageName.string);
