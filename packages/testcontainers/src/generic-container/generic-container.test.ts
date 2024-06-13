@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import path from "path";
 import getPort from "get-port";
 import { GenericContainer } from "./generic-container";
@@ -93,7 +92,7 @@ describe("GenericContainer", () => {
 
     const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
     const response = await fetch(`${url}/env`);
-    const responseBody = await response.json();
+    const responseBody = (await response.json()) as any;
     expect(responseBody.customKey).toBe("customValue");
 
     await container.stop();
