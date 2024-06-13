@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import path from "path";
 import { DockerComposeEnvironment } from "./docker-compose-environment";
 import { Wait } from "../wait-strategies/wait";
@@ -80,7 +79,7 @@ describe("DockerComposeEnvironment", () => {
 
     const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
     const response = await fetch(`${url}/env`);
-    const responseBody = await response.json();
+    const responseBody = (await response.json()) as any;
 
     expect(responseBody["IS_OVERRIDDEN"]).toBe("true");
 
@@ -173,7 +172,7 @@ describe("DockerComposeEnvironment", () => {
 
     const container = startedEnvironment.getContainer(await composeContainerName("container"));
     const response = await fetch(`http://${container.getHost()}:${container.getMappedPort(8080)}/env`);
-    const responseBody = await response.json();
+    const responseBody = (await response.json()) as any;
     expect(responseBody["ENV_VAR"]).toBe("ENV_VAR_VALUE");
 
     await startedEnvironment.down();
@@ -221,7 +220,7 @@ describe("DockerComposeEnvironment", () => {
 
     const container = startedEnvironment.getContainer(await composeContainerName("container"));
     const response = await fetch(`http://${container.getHost()}:${container.getMappedPort(8080)}/env`);
-    const responseBody = await response.json();
+    const responseBody = (await response.json()) as any;
     expect(responseBody["ENV_VAR"]).toBe("default");
 
     await startedEnvironment.down();
@@ -236,7 +235,7 @@ describe("DockerComposeEnvironment", () => {
 
     const container = startedEnvironment.getContainer(await composeContainerName("container"));
     const response = await fetch(`http://${container.getHost()}:${container.getMappedPort(8080)}/env`);
-    const responseBody = await response.json();
+    const responseBody = (await response.json()) as any;
     expect(responseBody["ENV_VAR"]).toBe("override");
 
     await startedEnvironment.down();

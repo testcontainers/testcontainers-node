@@ -1,8 +1,7 @@
 import { Readable } from "stream";
+import { Agent } from "undici";
 import { StartedDockerComposeEnvironment } from "../docker-compose-environment/started-docker-compose-environment";
-import fetch from "node-fetch";
 import { StartedTestContainer } from "../test-container";
-import https from "https";
 import { GetEventsOptions } from "dockerode";
 import { getContainerRuntimeClient } from "../container-runtime";
 import { GenericContainer } from "../generic-container/generic-container";
@@ -16,8 +15,8 @@ export const checkContainerIsHealthy = async (container: StartedTestContainer): 
 
 export const checkContainerIsHealthyTls = async (container: StartedTestContainer): Promise<void> => {
   const url = `https://${container.getHost()}:${container.getMappedPort(8443)}`;
-  const agent = new https.Agent({ rejectUnauthorized: false });
-  const response = await fetch(`${url}/hello-world`, { agent });
+  const dispatcher = new Agent({ connect: { rejectUnauthorized: false } });
+  const response = await fetch(`${url}/hello-world`, { dispatcher });
   expect(response.status).toBe(200);
 };
 
