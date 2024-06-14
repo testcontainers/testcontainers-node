@@ -14,22 +14,21 @@ export class OllamaContainer extends GenericContainer {
     this.withExposedPorts(OLLAMA_PORT)
       .withWaitStrategy(Wait.forLogMessage("Listening on "))
       .withStartupTimeout(120_000);
-
-    getContainerRuntimeClient().then((client) => {
-      const runtimes = client.info.containerRuntime.runtimes;
-      if (runtimes.includes("nvidia")) {
-        this.hostConfig.DeviceRequests = [
-          {
-            Driver: "nvidia",
-            Count: -1,
-            Capabilities: [["gpu"]],
-          },
-        ];
-      }
-    });
   }
 
   public override async start(): Promise<StartedOllamaContainer> {
+    const containerRuntimeClient = await getContainerRuntimeClient();
+    const runtimes = containerRuntimeClient.info.containerRuntime.runtimes;
+    if (runtimes.includes("nvidia")) {
+      this.hostConfig.DeviceRequests = [
+        {
+          Driver: "nvidia",
+          Count: -1,
+          Capabilities: [["gpu"]],
+        },
+      ];
+    }
+
     return new StartedOllamaContainer(await super.start());
   }
 }
