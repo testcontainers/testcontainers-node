@@ -46,4 +46,10 @@ export class StartedOllamaContainer extends AbstractStartedContainer {
   public getEndpoint(): string {
     return `http://${this.getHost()}:${this.getPort().toString()}`;
   }
+
+  public async commitToImage(imageName: string): Promise<NodeJS.ReadableStream> {
+    const client = await getContainerRuntimeClient();
+    const dockerode = client.container.dockerode;
+    return dockerode.getContainer(this.getId()).commit({ repo: imageName });
+  }
 }
