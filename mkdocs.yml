@@ -43,8 +43,10 @@ nav:
       - Advanced: features/advanced.md
   - Modules:
       - ArangoDB: modules/arangodb.md
+      - ChromaDB: modules/chromadb.md
       - Couchbase: modules/couchbase.md
       - Elasticsearch: modules/elasticsearch.md
+      - GCloud: modules/gcloud.md
       - HiveMQ: modules/hivemq.md
       - Kafka: modules/kafka.md
       - Localstack: modules/localstack.md
@@ -54,6 +56,10 @@ nav:
       - Nats: modules/nats.md
       - Neo4J: modules/neo4j.md
       - PostgreSQL: modules/postgresql.md
+      - Qdrant: modules/qdrant.md
+      - RabbitMQ: modules/rabbitmq.md
       - Redis: modules/redis.md
+      - Redpanda: modules/redpanda.md
       - Selenium: modules/selenium.md
+      - Weaviate: modules/weaviate.md
   - Configuration: configuration.md
