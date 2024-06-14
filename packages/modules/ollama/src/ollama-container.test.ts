@@ -29,5 +29,7 @@ describe("OllamaContainer", () => {
     expect(response2.status).toEqual(200);
     const body2 = await response2.json();
     expect(body2.models[0].name).toContain("all-minilm");
+    await container.stop();
+    await newContainer.stop();
   });
 });
