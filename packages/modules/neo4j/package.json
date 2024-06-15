@@ -29,7 +29,7 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "neo4j-driver": "^5.17.0"
+    "neo4j-driver": "^5.21.0"
   },
   "dependencies": {
     "testcontainers": "^10.9.0"

@@ -29,7 +29,7 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "weaviate-ts-client": "^2.1.0"
+    "weaviate-ts-client": "^2.2.0"
   },
   "dependencies": {
     "testcontainers": "^10.9.0"
