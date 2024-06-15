@@ -3,7 +3,7 @@ import { GenericContainer } from "./generic-container";
 import { Wait } from "../wait-strategies/wait";
 import { PullPolicy } from "../utils/pull-policy";
 import { RandomUuid } from "../common";
-import { getContainerRuntimeClient } from "../container-runtime";
+import { ImageName, getContainerRuntimeClient } from "../container-runtime";
 import { getReaper } from "../reaper/reaper";
 import { LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
 import {
@@ -67,6 +67,25 @@ describe("GenericContainer Dockerfile", () => {
       const dockerPullEventPromise = waitForDockerEvent(dockerEventStream, "pull");
       await containerSpec.build();
       await dockerPullEventPromise;
+
+      dockerEventStream.destroy();
+    });
+
+    it("should not pull existing image without pull policy", async () => {
+      const client = await getContainerRuntimeClient();
+      await client.image.pull(new ImageName("docker.io", "node", "10-alpine"));
+
+      const dockerfile = path.resolve(fixtures, "docker");
+      const containerSpec = GenericContainer.fromDockerfile(dockerfile);
+
+      await containerSpec.build();
+      const dockerEventStream = await getDockerEventStream();
+      const dockerPullEventPromise = waitForDockerEvent(dockerEventStream, "pull");
+      let hasResolved = false;
+      dockerPullEventPromise.then(() => (hasResolved = true));
+      await containerSpec.build();
+
+      expect(hasResolved).toBeFalsy();
 
       dockerEventStream.destroy();
     });
