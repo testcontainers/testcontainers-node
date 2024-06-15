@@ -1,0 +1,35 @@
+import { OllamaContainer } from "./ollama-container";
+
+describe("OllamaContainer", () => {
+  jest.setTimeout(180_000);
+
+  it("should run ollama with default config", async () => {
+    const container = await new OllamaContainer("ollama/ollama:0.1.44").start();
+    const response = await fetch(`${container.getEndpoint()}/api/version`);
+    expect(response.status).toEqual(200);
+    const body = await response.json();
+    expect(body.version).toEqual("0.1.44");
+    await container.stop();
+  });
+
+  it("download model and commit to image", async () => {
+    const container = await new OllamaContainer("ollama/ollama:0.1.44").start();
+    const execResult = await container.exec(["ollama", "pull", "all-minilm"]);
+    console.log(execResult.output);
+    const response = await fetch(`${container.getEndpoint()}/api/tags`);
+    expect(response.status).toEqual(200);
+    const body = await response.json();
+    expect(body.models[0].name).toContain("all-minilm");
+
+    const newImageName: string = "tc-ollama-allminilm-" + (Math.random() + 1).toString(36).substring(4).toLowerCase();
+    await container.commitToImage(newImageName);
+
+    const newContainer = await new OllamaContainer(newImageName).start();
+    const response2 = await fetch(`${newContainer.getEndpoint()}/api/tags`);
+    expect(response2.status).toEqual(200);
+    const body2 = await response2.json();
+    expect(body2.models[0].name).toContain("all-minilm");
+    await container.stop();
+    await newContainer.stop();
+  });
+});

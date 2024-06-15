@@ -21,6 +21,7 @@ export type ContainerRuntimeInfo = {
   architecture: string;
   cpus: number;
   memory: number;
+  runtimes: string[];
 };
 
 export type ComposeInfo =

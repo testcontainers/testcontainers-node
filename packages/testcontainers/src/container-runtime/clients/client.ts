@@ -106,6 +106,7 @@ async function initStrategy(strategy: ContainerRuntimeClientStrategy): Promise<C
     architecture: dockerodeInfo.Architecture,
     cpus: dockerodeInfo.NCPU,
     memory: dockerodeInfo.MemTotal,
+    runtimes: Object.keys(dockerodeInfo.Runtimes),
   };
 
   const composeInfo: ComposeInfo = composeClient.info;
