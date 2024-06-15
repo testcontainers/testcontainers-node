@@ -1,4 +1,5 @@
 import { AuthConfig, BuildArgs, RegistryConfig } from "../types";
+import type { ImageBuildOptions } from "dockerode";
 import path from "path";
 import { GenericContainer } from "./generic-container";
 import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
@@ -62,16 +63,22 @@ export class GenericContainerBuilder {
     }
 
     log.info(`Building Dockerfile "${dockerfile}" as image "${imageName.string}"...`);
-    await client.image.build(this.context, {
+
+    const buildOptions: ImageBuildOptions = {
       t: imageName.string,
       dockerfile: this.dockerfileName,
       buildargs: this.buildArgs,
-      pull: this.pullPolicy.shouldPull() ? "true" : undefined,
       nocache: !this.cache,
       registryconfig: registryConfig,
       labels,
       target: this.target,
-    });
+    };
+
+    if (this.pullPolicy.shouldPull()) {
+      buildOptions.pull = "true";
+    }
+
+    await client.image.build(this.context, buildOptions);
 
     const container = new GenericContainer(imageName.string);
     if (!(await client.image.exists(imageName))) {
