@@ -24,7 +24,9 @@ export abstract class CredentialProvider implements RegistryAuthLocator {
     log.debug(`Executing Docker credential provider "${programName}"`);
 
     const credentials = await this.listCredentials(programName);
-    if (!Object.keys(credentials).some((aRegistry) => registryMatches(aRegistry, registry))) {
+
+    const credentialForRegistry = Object.keys(credentials).find((aRegistry) => registryMatches(aRegistry, registry));
+    if (!credentialForRegistry) {
       log.debug(`No credential found for registry "${registry}"`);
       return undefined;
     }
@@ -34,7 +36,7 @@ export abstract class CredentialProvider implements RegistryAuthLocator {
     return {
       username: response.Username,
       password: response.Secret,
-      registryAddress: Object.keys(credentials).find((aRegistry) => registryMatches(aRegistry, registry)) as string,
+      registryAddress: credentialForRegistry,
     };
   }
 
