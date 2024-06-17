@@ -34,7 +34,7 @@
     "testcontainers": "^10.9.0"
   },
   "devDependencies": {
-    "@google-cloud/firestore": "7.4.0",
-    "firebase-admin": "12.0.0"
+    "@google-cloud/firestore": "7.8.0",
+    "firebase-admin": "12.1.1"
   }
 }
