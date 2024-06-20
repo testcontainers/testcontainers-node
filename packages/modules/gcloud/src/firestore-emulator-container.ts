@@ -3,12 +3,21 @@ import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait 
 const EMULATOR_PORT = 8080;
 const CMD = `gcloud beta emulators firestore start --host-port 0.0.0.0:${EMULATOR_PORT}`;
 const DEFAULT_IMAGE = "gcr.io/google.com/cloudsdktool/cloud-sdk";
+enum DatabaseMode {
+  FirestoreNative = "firestore-native",
+  DatastoreMode = "datastore-mode",
+}
 
 export class FirestoreEmulatorContainer extends GenericContainer {
-  constructor(image = DEFAULT_IMAGE) {
+  constructor(image = DEFAULT_IMAGE, useDatastoreMode = false) {
     super(image);
     this.withExposedPorts(EMULATOR_PORT)
-      .withCommand(["/bin/sh", "-c", CMD])
+      .withCommand([
+        "/bin/sh",
+        "-c",
+        CMD,
+        `--database-mode=${useDatastoreMode ? DatabaseMode.DatastoreMode : DatabaseMode.FirestoreNative}`,
+      ])
       .withWaitStrategy(Wait.forLogMessage(RegExp(".*running.*"), 1))
       .withStartupTimeout(120_000);
   }
