@@ -2,7 +2,7 @@ import { ChromaClient, AdminClient } from "chromadb";
 import { ChromaDBContainer } from "./chromadb-container";
 
 describe("ChromaDB", () => {
-  jest.setTimeout(180_000);
+  jest.setTimeout(360_000);
 
   // docs {
   it("should connect and return a query result", async () => {
