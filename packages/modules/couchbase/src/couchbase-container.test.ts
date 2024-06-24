@@ -119,7 +119,7 @@ describe("CouchbaseContainer", () => {
       expect(result.content).toEqual({ foo: "bar" });
     });
 
-    it.only("should flush bucket if flushEnabled and check any document exists", async () => {
+    it("should flush bucket if flushEnabled and check any document exists", async () => {
       const bucketDefinition = new BucketDefinition("mybucket").withFlushEnabled(true);
       const container = new CouchbaseContainer(COUCHBASE_IMAGE_COMMUNITY).withBucket(bucketDefinition);
 
