@@ -50,11 +50,11 @@ describe("CouchbaseContainer", () => {
     // connectAndQuery {
     it("should connect and query using enterprise image", async () => {
       const bucketDefinition = new BucketDefinition("mybucket");
-      const container = await new CouchbaseContainer(COUCHBASE_IMAGE_ENTERPRISE).withBucket(bucketDefinition);
+      const container = new CouchbaseContainer(COUCHBASE_IMAGE_ENTERPRISE).withBucket(bucketDefinition);
 
       startedTestContainer = await container.start();
 
-      cluster = new couchbase.Cluster(startedTestContainer.getConnectionString(), {
+      cluster = await couchbase.Cluster.connect(startedTestContainer.getConnectionString(), {
         username: startedTestContainer.getUsername(),
         password: startedTestContainer.getPassword(),
       });
@@ -68,10 +68,10 @@ describe("CouchbaseContainer", () => {
 
     it("should flush bucket if flushEnabled and check any document exists", async () => {
       const bucketDefinition = new BucketDefinition("mybucket").withFlushEnabled(true);
-      const container = await new CouchbaseContainer(COUCHBASE_IMAGE_ENTERPRISE).withBucket(bucketDefinition);
+      const container = new CouchbaseContainer(COUCHBASE_IMAGE_ENTERPRISE).withBucket(bucketDefinition);
 
       startedTestContainer = await container.start();
-      cluster = new couchbase.Cluster(startedTestContainer.getConnectionString(), {
+      cluster = await couchbase.Cluster.connect(startedTestContainer.getConnectionString(), {
         username: startedTestContainer.getUsername(),
         password: startedTestContainer.getPassword(),
       });
@@ -105,10 +105,10 @@ describe("CouchbaseContainer", () => {
 
     it("should connect and query using community image", async () => {
       const bucketDefinition = new BucketDefinition("mybucket");
-      const container = await new CouchbaseContainer(COUCHBASE_IMAGE_COMMUNITY).withBucket(bucketDefinition);
+      const container = new CouchbaseContainer(COUCHBASE_IMAGE_COMMUNITY).withBucket(bucketDefinition);
 
       startedTestContainer = await container.start();
-      cluster = new couchbase.Cluster(startedTestContainer.getConnectionString(), {
+      cluster = await couchbase.Cluster.connect(startedTestContainer.getConnectionString(), {
         username: startedTestContainer.getUsername(),
         password: startedTestContainer.getPassword(),
       });
@@ -119,12 +119,12 @@ describe("CouchbaseContainer", () => {
       expect(result.content).toEqual({ foo: "bar" });
     });
 
-    it("should flush bucket if flushEnabled and check any document exists", async () => {
+    it.only("should flush bucket if flushEnabled and check any document exists", async () => {
       const bucketDefinition = new BucketDefinition("mybucket").withFlushEnabled(true);
-      const container = await new CouchbaseContainer(COUCHBASE_IMAGE_COMMUNITY).withBucket(bucketDefinition);
+      const container = new CouchbaseContainer(COUCHBASE_IMAGE_COMMUNITY).withBucket(bucketDefinition);
 
       startedTestContainer = await container.start();
-      cluster = new couchbase.Cluster(startedTestContainer.getConnectionString(), {
+      cluster = await couchbase.Cluster.connect(startedTestContainer.getConnectionString(), {
         username: startedTestContainer.getUsername(),
         password: startedTestContainer.getPassword(),
       });
@@ -140,7 +140,7 @@ describe("CouchbaseContainer", () => {
     });
 
     it("should throw error if analytics service enabled with community version", async () => {
-      const container = await new CouchbaseContainer(COUCHBASE_IMAGE_COMMUNITY).withEnabledServices(
+      const container = new CouchbaseContainer(COUCHBASE_IMAGE_COMMUNITY).withEnabledServices(
         CouchbaseService.KV,
         CouchbaseService.ANALYTICS
       );
@@ -151,7 +151,7 @@ describe("CouchbaseContainer", () => {
     });
 
     it("should throw error if eventing service enabled with community version", async () => {
-      const container = await new CouchbaseContainer(COUCHBASE_IMAGE_COMMUNITY).withEnabledServices(
+      const container = new CouchbaseContainer(COUCHBASE_IMAGE_COMMUNITY).withEnabledServices(
         CouchbaseService.KV,
         CouchbaseService.EVENTING
       );

@@ -193,7 +193,7 @@ export class CouchbaseContainer extends GenericContainer {
     );
     let jsonResponse;
     try {
-      jsonResponse = (await response.json()) as any;
+      jsonResponse = (await response.json()) as { isEnterprise: boolean };
     } catch (e) {
       throw new Error("Couchbase /pools did not return valid JSON");
     }
@@ -446,7 +446,7 @@ export class CouchbaseContainer extends GenericContainer {
             if (response === undefined) {
               return false;
             }
-            const jsonResponse = (await response.json()) as any;
+            const jsonResponse = (await response.json()) as { results: Array<{ present: boolean }> };
             return jsonResponse.results[0].present;
           },
           () => {
@@ -507,7 +507,7 @@ export class CouchbaseContainer extends GenericContainer {
               if (response === undefined) {
                 return false;
               }
-              const jsonResponse = (await response.json()) as any;
+              const jsonResponse = (await response.json()) as { results: Array<{ online: boolean }> };
               return jsonResponse.results[0].online;
             },
             () => {
