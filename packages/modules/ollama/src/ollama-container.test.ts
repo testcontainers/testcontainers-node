@@ -23,13 +23,13 @@ describe("OllamaContainer", () => {
 
     const newImageName: string = "tc-ollama-allminilm-" + (Math.random() + 1).toString(36).substring(4).toLowerCase();
     await container.commitToImage(newImageName);
+    await container.stop();
 
     const newContainer = await new OllamaContainer(newImageName).start();
     const response2 = await fetch(`${newContainer.getEndpoint()}/api/tags`);
     expect(response2.status).toEqual(200);
     const body2 = await response2.json();
     expect(body2.models[0].name).toContain("all-minilm");
-    await container.stop();
     await newContainer.stop();
   });
 });
