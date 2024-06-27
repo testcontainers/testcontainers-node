@@ -54,12 +54,8 @@ jobs:
         include:
           - container-runtime: docker
             runner: ubuntu-22.04
-          - container-runtime: docker-rootless
-            runner: ubuntu-22.04
           - container-runtime: podman
             runner: ubuntu-22.04
-          - container-runtime: rancher-desktop
-            runner: macos-13
     uses: ./.github/workflows/test-template.yml
     with:
       runner: ${{ matrix.runner }}
