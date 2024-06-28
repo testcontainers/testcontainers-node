@@ -50,11 +50,9 @@ jobs:
     strategy:
       matrix:
         node-version: [ 18.x, 20.x ]
-        container-runtime: [ docker, docker-rootless, podman ]
+        container-runtime: [ docker, podman ]
         include:
           - container-runtime: docker
-            runner: ubuntu-22.04
-          - container-runtime: docker-rootless
             runner: ubuntu-22.04
           - container-runtime: podman
             runner: ubuntu-22.04
@@ -81,11 +79,9 @@ jobs:
     strategy:
       matrix:
         node-version: [ 18.x, 20.x ]
-        container-runtime: [ docker, docker-rootless, podman ]
+        container-runtime: [ docker, podman ]
         include:
           - container-runtime: docker
-            runner: ubuntu-22.04
-          - container-runtime: docker-rootless
             runner: ubuntu-22.04
           - container-runtime: podman
             runner: ubuntu-22.04
