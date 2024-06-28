@@ -123,6 +123,14 @@ describe("DockerComposeEnvironment", () => {
     await startedEnvironment.down();
   });
 
+  it("should support failing health check wait strategy", async () => {
+    await expect(
+      new DockerComposeEnvironment(fixtures, "docker-compose-with-healthcheck-unhealthy.yml")
+        .withWaitStrategy(await composeContainerName("container"), Wait.forHealthCheck())
+        .up()
+    ).rejects.toThrow(`Health check failed: unhealthy`);
+  });
+
   if (!process.env.CI_PODMAN) {
     it("should stop the container when the health check wait strategy times out", async () => {
       await expect(
