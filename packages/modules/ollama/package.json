@@ -1,15 +1,14 @@
 {
-  "name": "@testcontainers/postgresql",
+  "name": "@testcontainers/ollama",
   "version": "10.10.0",
   "license": "MIT",
   "keywords": [
-    "postgres",
-    "postgresql",
+    "ollama",
     "testing",
     "docker",
     "testcontainers"
   ],
-  "description": "PostgreSQL module for Testcontainers",
+  "description": "Ollama module for Testcontainers",
   "homepage": "https://github.com/testcontainers/testcontainers-node#readme",
   "repository": {
     "type": "git",
@@ -28,10 +27,6 @@
   "scripts": {
     "prepack": "shx cp ../../../README.md . && shx cp ../../../LICENSE .",
     "build": "tsc --project tsconfig.build.json"
-  },
-  "devDependencies": {
-    "@types/pg": "^8.11.6",
-    "pg": "^8.12.0"
   },
   "dependencies": {
     "testcontainers": "^10.10.0"

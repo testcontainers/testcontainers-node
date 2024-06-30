@@ -57,6 +57,7 @@ nav:
       - Neo4J: modules/neo4j.md
       - PostgreSQL: modules/postgresql.md
       - Qdrant: modules/qdrant.md
+      - RabbitMQ: modules/rabbitmq.md
       - Redis: modules/redis.md
       - Redpanda: modules/redpanda.md
       - Selenium: modules/selenium.md

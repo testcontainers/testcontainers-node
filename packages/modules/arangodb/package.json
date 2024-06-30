@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/arangodb",
-  "version": "10.9.0",
+  "version": "10.10.0",
   "license": "MIT",
   "keywords": [
     "arangodb",
@@ -29,9 +29,9 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "arangojs": "^8.7.0"
+    "arangojs": "^8.8.1"
   },
   "dependencies": {
-    "testcontainers": "^10.9.0"
+    "testcontainers": "^10.10.0"
   }
 }
