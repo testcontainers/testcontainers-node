@@ -55,6 +55,7 @@ nav:
       - MySQL: modules/mysql.md
       - Nats: modules/nats.md
       - Neo4J: modules/neo4j.md
+      - Ollama: modules/ollama.md
       - PostgreSQL: modules/postgresql.md
       - Qdrant: modules/qdrant.md
       - RabbitMQ: modules/rabbitmq.md
