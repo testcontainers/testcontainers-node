@@ -1,7 +1,6 @@
 import Dockerode from "dockerode";
+import { Agent } from "undici";
 import { AbstractWaitStrategy } from "./wait-strategy";
-import fetch, { Response } from "node-fetch";
-import https, { Agent } from "https";
 import { BoundPorts } from "../utils/bound-ports";
 import { IntervalRetry, log } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
@@ -99,9 +98,9 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
 
           return await fetch(url, {
             method: this.method,
-            timeout: this.readTimeout,
+            signal: AbortSignal.timeout(this.readTimeout),
             headers: this.headers,
-            agent: this.getAgent(),
+            dispatcher: this.getAgent(),
           });
         } catch {
           return undefined;
@@ -166,8 +165,10 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
 
   private getAgent(): Agent | undefined {
     if (this._allowInsecure) {
-      return new https.Agent({
-        rejectUnauthorized: false,
+      return new Agent({
+        connect: {
+          rejectUnauthorized: false,
+        },
       });
     }
   }

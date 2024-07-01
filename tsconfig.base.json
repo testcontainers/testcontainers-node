@@ -1,6 +1,9 @@
 {
   "compilerOptions": {
     "incremental": true,
+    "lib": [
+      "ES2022"
+    ],
     "target": "es2022",
     "module": "commonjs",
     "declaration": true,
