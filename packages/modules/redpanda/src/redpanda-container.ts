@@ -30,7 +30,7 @@ export class RedpandaContainer extends GenericContainer {
       .withWaitStrategy(Wait.forLogMessage("Successfully started Redpanda!"))
       .withCopyFilesToContainer([
         {
-          source: path.join(__dirname, "bootstrap.yaml"),
+          source: path.join(__dirname, "../assets/bootstrap.yaml"),
           target: "/etc/redpanda/.bootstrap.yaml",
         },
       ]);
@@ -75,7 +75,7 @@ export class RedpandaContainer extends GenericContainer {
   }
 
   private renderRedpandaFile(host: string, port: number): string {
-    const template = compile(fs.readFileSync(path.join(__dirname, "redpanda.yaml.hbs"), "utf-8"));
+    const template = compile(fs.readFileSync(path.join(__dirname, "../assets/redpanda.yaml.hbs"), "utf-8"));
     return template({
       kafkaApi: {
         advertisedHost: host,
