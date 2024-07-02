@@ -75,7 +75,7 @@ export class RedpandaContainer extends GenericContainer {
   }
 
   private renderRedpandaFile(host: string, port: number): string {
-    const template = compile(fs.readFileSync(path.join(__dirname, "assets","redpanda.yaml.hbs"), "utf-8"));
+    const template = compile(fs.readFileSync(path.join(__dirname, "assets", "redpanda.yaml.hbs"), "utf-8"));
     return template({
       kafkaApi: {
         advertisedHost: host,
