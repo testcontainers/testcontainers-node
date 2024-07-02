@@ -19,15 +19,14 @@
   },
   "main": "build/index.js",
   "files": [
-    "build",
-    "assets"
+    "build"
   ],
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
     "prepack": "shx cp ../../../README.md . && shx cp ../../../LICENSE .",
-    "build": "tsc --project tsconfig.build.json"
+    "build": "tsc --project tsconfig.build.json && shx cp -r src/assets build/"
   },
   "dependencies": {
     "handlebars": "^4.7.8",
