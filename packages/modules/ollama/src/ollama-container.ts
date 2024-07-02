@@ -49,6 +49,8 @@ export class StartedOllamaContainer extends AbstractStartedContainer {
   public async commitToImage(imageName: string): Promise<NodeJS.ReadableStream> {
     const client = await getContainerRuntimeClient();
     const dockerode = client.container.dockerode;
-    return dockerode.getContainer(this.getId()).commit({ repo: imageName });
+    return dockerode
+      .getContainer(this.getId())
+      .commit({ repo: imageName, Labels: { "org.testcontainers.session-id": "" } });
   }
 }
