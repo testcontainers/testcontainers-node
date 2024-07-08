@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/redpanda",
-  "version": "10.10.1",
+  "version": "10.10.2",
   "license": "MIT",
   "keywords": [
     "redpanda",
@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "handlebars": "^4.7.8",
-    "testcontainers": "^10.10.1"
+    "testcontainers": "^10.10.2"
   },
   "devDependencies": {
     "kafkajs": "^2.2.4",
