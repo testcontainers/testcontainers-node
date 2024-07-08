@@ -55,7 +55,10 @@ export async function getContainerRuntimeClient(): Promise<ContainerRuntimeClien
         return client;
       }
     } catch (err) {
-      log.debug(`Container runtime strategy "${strategy.getName()}" does not work: ${err}`);
+      log.debug(`Container runtime strategy "${strategy.getName()}" does not work: "${err}"`);
+      if (err !== null && typeof err === "object" && "stack" in err && typeof err.stack === "string") {
+        log.debug(err.stack);
+      }
     }
   }
   throw new Error("Could not find a working container runtime strategy");
