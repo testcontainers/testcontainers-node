@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/rabbitmq",
-  "version": "10.10.1",
+  "version": "10.10.3",
   "license": "MIT",
   "keywords": [
     "rabbitmq",
@@ -29,7 +29,7 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "dependencies": {
-    "testcontainers": "^10.10.1"
+    "testcontainers": "^10.10.3"
   },
   "devDependencies": {
     "@types/amqplib": "^0.10.5",
