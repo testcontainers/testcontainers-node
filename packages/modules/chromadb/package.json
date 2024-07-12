@@ -29,7 +29,7 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "chromadb": "^1.8.1"
+    "chromadb": "^1.9.1"
   },
   "dependencies": {
     "testcontainers": "^10.10.3"
