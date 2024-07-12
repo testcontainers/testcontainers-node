@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/qdrant",
-  "version": "10.10.0",
+  "version": "10.10.3",
   "license": "MIT",
   "keywords": [
     "qdrant",
@@ -32,6 +32,6 @@
     "@qdrant/js-client-rest": "^1.9.0"
   },
   "dependencies": {
-    "testcontainers": "^10.10.0"
+    "testcontainers": "^10.10.3"
   }
 }
