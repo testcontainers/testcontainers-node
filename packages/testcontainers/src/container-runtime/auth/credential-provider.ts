@@ -36,7 +36,7 @@ export abstract class CredentialProvider implements RegistryAuthLocator {
     return {
       username: response.Username,
       password: response.Secret,
-      registryAddress: response.ServerURL || credentialForRegistry,
+      registryAddress: response.ServerURL ?? credentialForRegistry,
     };
   }
 
