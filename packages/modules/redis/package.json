@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "@types/redis": "^4.0.11",
-    "redis": "^4.6.14"
+    "redis": "^4.6.15"
   },
   "dependencies": {
     "testcontainers": "^10.10.3"
