@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/localstack",
-  "version": "10.10.3",
+  "version": "10.10.4",
   "license": "MIT",
   "keywords": [
     "localstack",
@@ -30,7 +30,7 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "dependencies": {
-    "testcontainers": "^10.10.3"
+    "testcontainers": "^10.10.4"
   },
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.614.0"
