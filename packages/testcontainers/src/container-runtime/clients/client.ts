@@ -55,7 +55,10 @@ export async function getContainerRuntimeClient(): Promise<ContainerRuntimeClien
         return client;
       }
     } catch (err) {
-      log.debug(`Container runtime strategy "${strategy.getName()}" does not work: ${err}`);
+      log.debug(`Container runtime strategy "${strategy.getName()}" does not work: "${err}"`);
+      if (err !== null && typeof err === "object" && "stack" in err && typeof err.stack === "string") {
+        log.debug(err.stack);
+      }
     }
   }
   throw new Error("Could not find a working container runtime strategy");
@@ -119,7 +122,7 @@ async function initStrategy(strategy: ContainerRuntimeClientStrategy): Promise<C
     architecture: dockerodeInfo.Architecture,
     cpus: dockerodeInfo.NCPU,
     memory: dockerodeInfo.MemTotal,
-    runtimes: Object.keys(dockerodeInfo.Runtimes),
+    runtimes: dockerodeInfo.Runtimes ? Object.keys(dockerodeInfo.Runtimes) : [],
   };
 
   const composeInfo: ComposeInfo = composeClient.info;

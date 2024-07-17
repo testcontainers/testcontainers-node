@@ -56,6 +56,23 @@ describe("CredentialProvider", () => {
     ).toBeUndefined();
   });
 
+  it("should default to the registry url when the server url is not returned", async () => {
+    mockExecReturns(JSON.stringify({ "https://registry.example.com": "username" }));
+    mockSpawnReturns(
+      0,
+      JSON.stringify({
+        Username: "username",
+        Secret: "secret",
+      })
+    );
+
+    expect(await credentialProvider.getAuthConfig("https://registry.example.com", containerRuntimeConfig)).toEqual({
+      registryAddress: "https://registry.example.com",
+      username: "username",
+      password: "secret",
+    });
+  });
+
   it("should return undefined when no auth config found for registry", async () => {
     mockExecReturns(JSON.stringify({ registry2: "username" }));
 

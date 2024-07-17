@@ -1,10 +1,4 @@
-import {
-  AbstractStartedContainer,
-  GenericContainer,
-  getContainerRuntimeClient,
-  StartedTestContainer,
-  Wait,
-} from "testcontainers";
+import { AbstractStartedContainer, GenericContainer, getContainerRuntimeClient, Wait } from "testcontainers";
 
 export const OLLAMA_PORT = 11434;
 
@@ -34,10 +28,6 @@ export class OllamaContainer extends GenericContainer {
 }
 
 export class StartedOllamaContainer extends AbstractStartedContainer {
-  constructor(startedTestContainer: StartedTestContainer) {
-    super(startedTestContainer);
-  }
-
   public getPort(): number {
     return this.startedTestContainer.getMappedPort(OLLAMA_PORT);
   }
@@ -49,6 +39,8 @@ export class StartedOllamaContainer extends AbstractStartedContainer {
   public async commitToImage(imageName: string): Promise<NodeJS.ReadableStream> {
     const client = await getContainerRuntimeClient();
     const dockerode = client.container.dockerode;
-    return dockerode.getContainer(this.getId()).commit({ repo: imageName });
+    return dockerode
+      .getContainer(this.getId())
+      .commit({ repo: imageName, Labels: { "org.testcontainers.session-id": "" } });
   }
 }
