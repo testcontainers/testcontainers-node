@@ -3,6 +3,7 @@ import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait 
 const EMULATOR_PORT = 8080;
 const CMD = `gcloud beta emulators firestore start --host-port 0.0.0.0:${EMULATOR_PORT}`;
 const DEFAULT_IMAGE = "gcr.io/google.com/cloudsdktool/cloud-sdk";
+export const FIRESTORE_EMULATOR_IMAGE = DEFAULT_IMAGE;
 
 export class FirestoreEmulatorContainer extends GenericContainer {
   constructor(image = DEFAULT_IMAGE) {

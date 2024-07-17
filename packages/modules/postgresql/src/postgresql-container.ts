@@ -1,5 +1,6 @@
 import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 
+export const POSTGRES_IMAGE = "postgres:13.3-alpine";
 const POSTGRES_PORT = 5432;
 
 export class PostgreSqlContainer extends GenericContainer {
@@ -7,7 +8,7 @@ export class PostgreSqlContainer extends GenericContainer {
   private username = "test";
   private password = "test";
 
-  constructor(image = "postgres:13.3-alpine") {
+  constructor(image = POSTGRES_IMAGE) {
     super(image);
     this.withExposedPorts(POSTGRES_PORT)
       .withWaitStrategy(Wait.forLogMessage(/.*database system is ready to accept connections.*/, 2))

@@ -1,9 +1,10 @@
 import { AbstractStartedContainer, ExecResult, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 
+export const MONGODB_IMAGE = "mongo:4.0.1";
 const MONGODB_PORT = 27017;
 
 export class MongoDBContainer extends GenericContainer {
-  constructor(image = "mongo:4.0.1") {
+  constructor(image = MONGODB_IMAGE) {
     super(image);
     this.withExposedPorts(MONGODB_PORT)
       .withCommand(["--replSet", "rs0"])

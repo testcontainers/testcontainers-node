@@ -1,9 +1,10 @@
 import { AbstractStartedContainer, GenericContainer, getContainerRuntimeClient, Wait } from "testcontainers";
 
+export const OLLAMA_IMAGE = "ollama/ollama";
 export const OLLAMA_PORT = 11434;
 
 export class OllamaContainer extends GenericContainer {
-  constructor(image = "ollama/ollama") {
+  constructor(image = OLLAMA_IMAGE) {
     super(image);
     this.withExposedPorts(OLLAMA_PORT)
       .withWaitStrategy(Wait.forLogMessage("Listening on "))

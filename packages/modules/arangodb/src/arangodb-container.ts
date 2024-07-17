@@ -1,10 +1,11 @@
 import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 
+export const ARANGODB_IMAGE = "arangodb:3.10.0";
 const ARANGODB_PORT = 8529;
 const USERNAME = "root";
 
 export class ArangoDBContainer extends GenericContainer {
-  constructor(image = "arangodb:3.10.0", private password = "test") {
+  constructor(image = ARANGODB_IMAGE, private password = "test") {
     super(image);
     this.withExposedPorts(ARANGODB_PORT).withWaitStrategy(Wait.forLogMessage("Have fun!")).withStartupTimeout(120_000);
   }

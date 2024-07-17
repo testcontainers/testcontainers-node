@@ -1,9 +1,10 @@
 import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 
+export const CHROMADB_IMAGE = "chromadb/chroma:0.4.24";
 const CHROMADB_PORT = 8000;
 
 export class ChromaDBContainer extends GenericContainer {
-  constructor(image = "chromadb/chroma:0.4.24") {
+  constructor(image = CHROMADB_IMAGE) {
     super(image);
     this.withExposedPorts(CHROMADB_PORT)
       .withWaitStrategy(Wait.forHttp("/api/v1/heartbeat", CHROMADB_PORT))

@@ -1,5 +1,6 @@
 import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 
+export const NATS_IMAGE = "nats:2.8.4-alpine";
 const CLIENT_PORT = 4222;
 const ROUTING_PORT_FOR_CLUSTERING = 6222;
 const HTTP_MANAGEMENT_PORT = 8222;
@@ -21,7 +22,7 @@ function buildCmdsFromArgs(args: { [p: string]: string }): string[] {
 export class NatsContainer extends GenericContainer {
   private args: { [name: string]: string } = {};
 
-  constructor(image = "nats:2.8.4-alpine") {
+  constructor(image = NATS_IMAGE) {
     super(image);
 
     this.args[USER_ARGUMENT_KEY] = "test";

@@ -1,6 +1,7 @@
 import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 import path from "path";
 
+export const REDIS_IMAGE = "redis:7.2";
 const REDIS_PORT = 6379;
 
 export class RedisContainer extends GenericContainer {
@@ -9,7 +10,7 @@ export class RedisContainer extends GenericContainer {
   private persistenceVolume? = "";
   private initialImportScriptFile? = "";
 
-  constructor(image = "redis:7.2") {
+  constructor(image = REDIS_IMAGE) {
     super(image);
     this.withExposedPorts(REDIS_PORT)
       .withStartupTimeout(120_000)

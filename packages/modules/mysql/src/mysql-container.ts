@@ -1,5 +1,6 @@
 import { AbstractStartedContainer, GenericContainer, StartedTestContainer } from "testcontainers";
 
+export const MYSQL_IMAGE = "mysql:8.0.31";
 const MYSQL_PORT = 3306;
 
 export class MySqlContainer extends GenericContainer {
@@ -8,7 +9,7 @@ export class MySqlContainer extends GenericContainer {
   private userPassword = "test";
   private rootPassword = "test";
 
-  constructor(image = "mysql:8.0.31") {
+  constructor(image = MYSQL_IMAGE) {
     super(image);
     this.withExposedPorts(MYSQL_PORT).withStartupTimeout(120_000);
   }

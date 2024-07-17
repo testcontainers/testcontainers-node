@@ -13,6 +13,7 @@ import {
   waitForContainer,
 } from "testcontainers";
 
+export const REDPANDA_IMAGE = "docker.redpanda.com/redpandadata/redpanda:v23.3.10";
 const REDPANDA_PORT = 9092;
 const REDPANDA_ADMIN_PORT = 9644;
 const SCHEMA_REGISTRY_PORT = 8081;
@@ -23,7 +24,7 @@ const WAIT_FOR_SCRIPT_MESSAGE = "Waiting for script...";
 export class RedpandaContainer extends GenericContainer {
   private originalWaitinStrategy: WaitStrategy;
 
-  constructor(image = "docker.redpanda.com/redpandadata/redpanda:v23.3.10") {
+  constructor(image = REDPANDA_IMAGE) {
     super(image);
     this.withExposedPorts(REDPANDA_PORT, REDPANDA_ADMIN_PORT, SCHEMA_REGISTRY_PORT, REST_PROXY_PORT)
       .withUser("root:root")

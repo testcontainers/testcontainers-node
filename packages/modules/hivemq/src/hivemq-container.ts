@@ -1,12 +1,13 @@
 import path from "path";
 import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 
+export const HIVE_MQ_IMAGE = "hivemq/hivemq-ce:2023.5";
 const START_LOG_MESSAGE_REGEX = /(.*)Started HiveMQ in(.*)/i;
 const HIVEMQ_BASE_PATH = "/opt/hivemq";
 const MQTT_PORT = 1883;
 
 export class HiveMQContainer extends GenericContainer {
-  constructor(image = "hivemq/hivemq-ce:2023.5") {
+  constructor(image = HIVE_MQ_IMAGE) {
     super(image);
     this.withExposedPorts(MQTT_PORT)
       .withWaitStrategy(Wait.forLogMessage(START_LOG_MESSAGE_REGEX))

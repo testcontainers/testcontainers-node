@@ -1,5 +1,6 @@
 import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 
+export const NEO4J_IMAGE = "neo4j:4.4.12";
 const BOLT_PORT = 7687;
 const HTTP_PORT = 7474;
 const USERNAME = "neo4j";
@@ -9,7 +10,7 @@ export class Neo4jContainer extends GenericContainer {
   private apoc = false;
   private ttl?: number;
 
-  constructor(image = "neo4j:4.4.12") {
+  constructor(image = NEO4J_IMAGE) {
     super(image);
     this.withExposedPorts(BOLT_PORT, HTTP_PORT)
       .withWaitStrategy(Wait.forLogMessage("Started."))

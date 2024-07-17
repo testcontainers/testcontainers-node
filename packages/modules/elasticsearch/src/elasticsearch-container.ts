@@ -1,9 +1,10 @@
 import { AbstractStartedContainer, GenericContainer, StartedTestContainer } from "testcontainers";
 
+export const ELASTIC_SEARCH_IMAGE = "elasticsearch:7.17.7";
 const ELASTIC_SEARCH_HTTP_PORT = 9200;
 
 export class ElasticsearchContainer extends GenericContainer {
-  constructor(image = "elasticsearch:7.17.7") {
+  constructor(image = ELASTIC_SEARCH_IMAGE) {
     super(image);
     this.withExposedPorts(ELASTIC_SEARCH_HTTP_PORT)
       .withEnvironment({ "discovery.type": "single-node" })

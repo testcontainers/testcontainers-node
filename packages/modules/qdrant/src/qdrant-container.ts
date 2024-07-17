@@ -1,5 +1,6 @@
 import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 
+export const QDRANT_IMAGE = "qdrant/qdrant:v1.8.1";
 const QDRANT_REST_PORT = 6333;
 const QDRANT_GRPC_PORT = 6334;
 const QDRANT_CONFIG_FILE_PATH = "/qdrant/config/config.yaml";
@@ -8,7 +9,7 @@ export class QdrantContainer extends GenericContainer {
   private apiKey: string | undefined;
   private configFilePath: string | undefined;
 
-  constructor(image = "qdrant/qdrant:v1.8.1") {
+  constructor(image = QDRANT_IMAGE) {
     super(image);
     this.withExposedPorts(QDRANT_REST_PORT, QDRANT_GRPC_PORT);
     this.withWaitStrategy(

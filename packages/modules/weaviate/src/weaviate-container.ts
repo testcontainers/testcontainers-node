@@ -1,10 +1,11 @@
 import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 
+export const WEAVIATE_IMAGE = "semitechnologies/weaviate:1.24.5";
 const WEAVIATE_HTTP_PORT = 8080;
 const WEAVIATE_GRPC_PORT = 50051;
 
 export class WeaviateContainer extends GenericContainer {
-  constructor(image = "semitechnologies/weaviate:1.24.5") {
+  constructor(image = WEAVIATE_IMAGE) {
     super(image);
     this.withCommand(["--host", "0.0.0.0", "--scheme", "http", "--port", `${WEAVIATE_HTTP_PORT}`]);
     this.withExposedPorts(WEAVIATE_HTTP_PORT, WEAVIATE_GRPC_PORT);

@@ -1,5 +1,6 @@
 import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 
+export const RABBITMQ_IMAGE = "rabbitmq:3.12.11-management-alpine";
 const AMQP_PORT = 5672;
 const AMQPS_PORT = 5671;
 const HTTPS_PORT = 15671;
@@ -8,7 +9,7 @@ const RABBITMQ_DEFAULT_USER = "guest";
 const RABBITMQ_DEFAULT_PASS = "guest";
 
 export class RabbitMQContainer extends GenericContainer {
-  constructor(image = "rabbitmq:3.12.11-management-alpine") {
+  constructor(image = RABBITMQ_IMAGE) {
     super(image);
     this.withExposedPorts(AMQP_PORT, AMQPS_PORT, HTTPS_PORT, HTTP_PORT)
       .withEnvironment({

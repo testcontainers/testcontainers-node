@@ -1,9 +1,10 @@
 import { AbstractStartedContainer, GenericContainer, log, StartedTestContainer, Wait } from "testcontainers";
 
+export const LOCALSTACK_IMAGE = "localstack/localstack:2.2.0";
 export const LOCALSTACK_PORT = 4566;
 
 export class LocalstackContainer extends GenericContainer {
-  constructor(image = "localstack/localstack:2.2.0") {
+  constructor(image = LOCALSTACK_IMAGE) {
     super(image);
     this.resolveHostname();
     this.withExposedPorts(LOCALSTACK_PORT).withWaitStrategy(Wait.forLogMessage("Ready", 1)).withStartupTimeout(120_000);

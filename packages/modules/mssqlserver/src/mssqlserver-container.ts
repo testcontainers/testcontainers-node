@@ -1,5 +1,6 @@
 import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 
+export const MSSQL_IMAGE = "mcr.microsoft.com/mssql/server:2022-latest";
 const MSSQL_PORT = 1433;
 
 export class MSSQLServerContainer extends GenericContainer {
@@ -9,7 +10,7 @@ export class MSSQLServerContainer extends GenericContainer {
   private acceptEula = "N";
   private message: string | RegExp = /.*Recovery is complete.*/;
 
-  constructor(image = "mcr.microsoft.com/mssql/server:2022-latest") {
+  constructor(image = MSSQL_IMAGE) {
     super(image);
     this.withExposedPorts(MSSQL_PORT).withWaitStrategy(Wait.forLogMessage(this.message, 1)).withStartupTimeout(120_000);
   }

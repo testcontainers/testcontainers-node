@@ -15,6 +15,7 @@ import {
   Wait,
 } from "testcontainers";
 
+export const SELENIUM_IMAGE = "selenium/standalone-chrome:112.0";
 const SELENIUM_PORT = 4444;
 const VNC_PORT = 5900;
 const SELENIUM_NETWORK_ALIAS = "selenium";
@@ -22,7 +23,7 @@ const SELENIUM_NETWORK_ALIAS = "selenium";
 export const SELENIUM_VIDEO_IMAGE = "selenium/video:ffmpeg-4.3.1-20230508";
 
 export class SeleniumContainer extends GenericContainer {
-  constructor(image = "selenium/standalone-chrome:112.0") {
+  constructor(image = SELENIUM_IMAGE) {
     super(image);
     this.withExposedPorts(SELENIUM_PORT, VNC_PORT)
       .withSharedMemorySize(2 * 1024 * 1024 * 1024)
