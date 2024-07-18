@@ -23,7 +23,7 @@ export class HealthCheckWaitStrategy extends AbstractWaitStrategy {
 
         const status =
           parsedData.status.split(":").length === 2
-            ? parsedData.status.split(":").pop().trim() // Docker
+            ? parsedData.status.split(":")[1].trim() // Docker
             : parsedData.HealthStatus; // Podman
 
         if (status === "healthy") {
