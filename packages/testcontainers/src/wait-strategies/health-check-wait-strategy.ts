@@ -2,6 +2,7 @@ import Dockerode from "dockerode";
 import { AbstractWaitStrategy } from "./wait-strategy";
 import { log } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
+import { Readable } from "stream";
 
 export class HealthCheckWaitStrategy extends AbstractWaitStrategy {
   public async waitUntilReady(container: Dockerode.Container): Promise<void> {
@@ -9,19 +10,19 @@ export class HealthCheckWaitStrategy extends AbstractWaitStrategy {
 
     const client = await getContainerRuntimeClient();
     const dockerode = client.container.dockerode;
-    const events = await dockerode.getEvents({
+    const events = (await dockerode.getEvents({
       filters: {
         type: ["container"],
         container: [container.id],
         event: ["health_status"],
       },
-    });
+    })) as Readable;
 
     return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const timeout = this.startupTimeout;
-        const message = `Health check not healthy after ${timeout}ms`;
+      const timeout = setTimeout(() => {
+        const message = `Health check not healthy after ${this.startupTimeout}ms`;
         log.error(message, { containerId: container.id });
+        events.destroy();
         reject(new Error(message));
       }, this.startupTimeout);
 
@@ -37,6 +38,8 @@ export class HealthCheckWaitStrategy extends AbstractWaitStrategy {
           reject(new Error(message));
         }
 
+        clearTimeout(timeout);
+        events.destroy();
         log.debug(`Health check wait strategy complete`, { containerId: container.id });
       });
     });
