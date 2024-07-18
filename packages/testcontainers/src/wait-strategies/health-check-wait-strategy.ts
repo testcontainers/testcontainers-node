@@ -20,7 +20,11 @@ export class HealthCheckWaitStrategy extends AbstractWaitStrategy {
 
       containerEvents.on("data", (data) => {
         const parsedData = JSON.parse(data);
-        const status = parsedData.status.split(":").pop().trim();
+
+        const status =
+          parsedData.status.split(":").length === 2
+            ? parsedData.status.split(":").pop().trim() // Docker
+            : parsedData.HealthStatus; // Podman
 
         if (status === "healthy") {
           resolve();
