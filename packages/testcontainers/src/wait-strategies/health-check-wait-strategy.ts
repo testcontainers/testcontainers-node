@@ -18,6 +18,12 @@ export class HealthCheckWaitStrategy extends AbstractWaitStrategy {
         reject(new Error(message));
       }, this.startupTimeout);
 
+      const onTerminalState = () => {
+        clearTimeout(timeout);
+        containerEvents.destroy();
+        log.debug(`Health check wait strategy complete`, { containerId: container.id });
+      };
+
       containerEvents.on("data", (data) => {
         const parsedData = JSON.parse(data);
 
@@ -28,15 +34,13 @@ export class HealthCheckWaitStrategy extends AbstractWaitStrategy {
 
         if (status === "healthy") {
           resolve();
-        } else {
+          onTerminalState();
+        } else if (status === "unhealthy") {
           const message = `Health check failed: ${status}`;
           log.error(message, { containerId: container.id });
           reject(new Error(message));
+          onTerminalState();
         }
-
-        clearTimeout(timeout);
-        containerEvents.destroy();
-        log.debug(`Health check wait strategy complete`, { containerId: container.id });
       });
     });
   }
