@@ -10,10 +10,6 @@ export class Logger {
 
   constructor(namespace: string, private readonly showLevel = true) {
     this.logger = debug(namespace);
-
-    if (process.env.NODE_ENV === "test") {
-      this.logger.log = console.log.bind(console);
-    }
   }
 
   public enabled(): boolean {
