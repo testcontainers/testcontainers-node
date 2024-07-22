@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/selenium",
-  "version": "10.10.3",
+  "version": "10.10.4",
   "license": "MIT",
   "keywords": [
     "selenium",
@@ -29,10 +29,10 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "@types/selenium-webdriver": "^4.1.23",
-    "selenium-webdriver": "^4.21.0"
+    "@types/selenium-webdriver": "^4.1.24",
+    "selenium-webdriver": "^4.22.0"
   },
   "dependencies": {
-    "testcontainers": "^10.10.3"
+    "testcontainers": "^10.10.4"
   }
 }
