@@ -1,6 +1,7 @@
 import fetch from "node-fetch";
 import path from "path";
 import { DockerComposeEnvironment } from "./docker-compose-environment";
+import { RandomUuid } from "../common";
 import { Wait } from "../wait-strategies/wait";
 import { PullPolicy } from "../utils/pull-policy";
 import {
@@ -252,6 +253,17 @@ describe("DockerComposeEnvironment", () => {
         async (containerName) => await checkEnvironmentContainerIsHealthy(startedEnvironment, containerName)
       )
     );
+
+    await startedEnvironment.down();
+  });
+
+  it("should use a custom project name if set", async () => {
+    const customProjectName = `custom-${new RandomUuid().nextUuid()}`;
+    const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml")
+      .withProjectName(customProjectName)
+      .up();
+
+    expect(await getRunningContainerNames()).toContain(`${customProjectName}-container-1`);
 
     await startedEnvironment.down();
   });
