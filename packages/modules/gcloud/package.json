@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/gcloud",
-  "version": "10.10.3",
+  "version": "10.10.4",
   "license": "MIT",
   "author": "Anietie Asuquo <hello@anietieasuquo.com>",
   "keywords": [
@@ -31,10 +31,11 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "dependencies": {
-    "testcontainers": "^10.10.3"
+    "testcontainers": "^10.10.4"
   },
   "devDependencies": {
-    "@google-cloud/firestore": "7.8.0",
-    "firebase-admin": "12.1.1"
+    "@google-cloud/datastore": "^9.0.0",
+    "@google-cloud/firestore": "7.9.0",
+    "firebase-admin": "12.2.0"
   }
 }

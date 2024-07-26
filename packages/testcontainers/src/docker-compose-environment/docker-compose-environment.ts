@@ -73,6 +73,11 @@ export class DockerComposeEnvironment {
     return this;
   }
 
+  public withProjectName(projectName: string): this {
+    this.projectName = projectName;
+    return this;
+  }
+
   public async up(services?: Array<string>): Promise<StartedDockerComposeEnvironment> {
     log.info(`Starting DockerCompose environment "${this.projectName}"...`);
     const client = await getContainerRuntimeClient();
