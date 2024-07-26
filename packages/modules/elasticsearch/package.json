@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/elasticsearch",
-  "version": "10.10.0",
+  "version": "10.10.4",
   "license": "MIT",
   "keywords": [
     "elasticsearch",
@@ -29,9 +29,9 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "@elastic/elasticsearch": "^7.17.13"
+    "@elastic/elasticsearch": "^7.17.14"
   },
   "dependencies": {
-    "testcontainers": "^10.10.0"
+    "testcontainers": "^10.10.4"
   }
 }

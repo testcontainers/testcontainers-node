@@ -1,6 +1,7 @@
 import fetch from "node-fetch";
 import path from "path";
 import { DockerComposeEnvironment } from "./docker-compose-environment";
+import { RandomUuid } from "../common";
 import { Wait } from "../wait-strategies/wait";
 import { PullPolicy } from "../utils/pull-policy";
 import {
@@ -121,6 +122,14 @@ describe("DockerComposeEnvironment", () => {
     await checkEnvironmentContainerIsHealthy(startedEnvironment, await composeContainerName("container"));
 
     await startedEnvironment.down();
+  });
+
+  it("should support failing health check wait strategy", async () => {
+    await expect(
+      new DockerComposeEnvironment(fixtures, "docker-compose-with-healthcheck-unhealthy.yml")
+        .withWaitStrategy(await composeContainerName("container"), Wait.forHealthCheck())
+        .up()
+    ).rejects.toThrow(`Health check failed: unhealthy`);
   });
 
   if (!process.env.CI_PODMAN) {
@@ -252,6 +261,17 @@ describe("DockerComposeEnvironment", () => {
         async (containerName) => await checkEnvironmentContainerIsHealthy(startedEnvironment, containerName)
       )
     );
+
+    await startedEnvironment.down();
+  });
+
+  it("should use a custom project name if set", async () => {
+    const customProjectName = `custom-${new RandomUuid().nextUuid()}`;
+    const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml")
+      .withProjectName(customProjectName)
+      .up();
+
+    expect(await getRunningContainerNames()).toContain(`${customProjectName}-container-1`);
 
     await startedEnvironment.down();
   });

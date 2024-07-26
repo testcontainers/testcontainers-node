@@ -12,7 +12,7 @@ import { IncomingMessage } from "http";
 import { ExecOptions, ExecResult } from "./types";
 import byline from "byline";
 import { ContainerClient } from "./container-client";
-import { log, execLog, streamToString } from "../../../common";
+import { execLog, log, streamToString } from "../../../common";
 
 export class DockerContainerClient implements ContainerClient {
   constructor(public readonly dockerode: Dockerode) {}
@@ -246,6 +246,19 @@ export class DockerContainerClient implements ContainerClient {
       log.error(`Failed to remove container: ${err}`, { containerId: container.id });
       throw err;
     }
+  }
+
+  async events(container: Container, eventNames: string[]): Promise<Readable> {
+    log.debug(`Fetching event stream...`, { containerId: container.id });
+    const stream = (await this.dockerode.getEvents({
+      filters: {
+        type: ["container"],
+        container: [container.id],
+        event: eventNames,
+      },
+    })) as Readable;
+    log.debug(`Fetched event stream...`, { containerId: container.id });
+    return stream;
   }
 
   protected async demuxStream(containerId: string, stream: Readable): Promise<Readable> {

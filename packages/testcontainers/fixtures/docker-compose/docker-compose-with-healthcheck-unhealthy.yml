@@ -1,0 +1,12 @@
+version: "3.5"
+
+services:
+  container:
+    image: cristianrgreco/testcontainer:1.1.14
+    ports:
+      - 8080
+    healthcheck:
+      test: "curl -f http://localhost:8081/hello-world || exit 1"
+      timeout: 3s
+      interval: 1s
+      retries: 0

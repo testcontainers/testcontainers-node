@@ -121,6 +121,16 @@ const environment = await new DockerComposeEnvironment(composeFilePath, composeF
   .up();
 ```
 
+### With custom project name
+
+See [project name](https://docs.docker.com/compose/project-name/).
+
+```javascript
+const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
+  .withProjectName("test")
+  .up();
+```
+
 ## Downing a Docker compose environment
 
 Testcontainers by default will not wait until the environment has downed. It will simply issue the down command and return immediately. This is to save time when running tests.
