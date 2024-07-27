@@ -33,7 +33,6 @@
     "testcontainers": "^10.10.4"
   },
   "devDependencies": {
-    "kafkajs": "^2.2.4",
-    "node-fetch": "^3.3.2"
+    "kafkajs": "^2.2.4"
   }
 }

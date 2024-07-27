@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import path from "path";
 import { DockerComposeEnvironment } from "./docker-compose-environment";
 import { RandomUuid } from "../common";
@@ -19,7 +18,7 @@ describe("DockerComposeEnvironment", () => {
   const fixtures = path.resolve(__dirname, "..", "..", "fixtures", "docker-compose");
 
   it("should throw error when compose file is malformed", async () => {
-    await expect(new DockerComposeEnvironment(fixtures, "docker-compose-malformed.yml").up()).rejects.toThrowError();
+    await expect(new DockerComposeEnvironment(fixtures, "docker-compose-malformed.yml").up()).rejects.toThrow();
   });
 
   it("should start all containers in the compose file", async () => {
@@ -81,7 +80,7 @@ describe("DockerComposeEnvironment", () => {
 
     const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
     const response = await fetch(`${url}/env`);
-    const responseBody = await response.json();
+    const responseBody = (await response.json()) as { [key: string]: string };
 
     expect(responseBody["IS_OVERRIDDEN"]).toBe("true");
 
@@ -109,7 +108,7 @@ describe("DockerComposeEnvironment", () => {
         .withWaitStrategy("custom_container_name", Wait.forLogMessage("unexpected"))
         .withStartupTimeout(0)
         .up()
-    ).rejects.toThrowError(`Log message "unexpected" not received after 0ms`);
+    ).rejects.toThrow(`Log message "unexpected" not received after 0ms`);
 
     expect(await getRunningContainerNames()).not.toContain("custom_container_name");
   });
@@ -139,7 +138,7 @@ describe("DockerComposeEnvironment", () => {
           .withWaitStrategy(await composeContainerName("container"), Wait.forHealthCheck())
           .withStartupTimeout(0)
           .up()
-      ).rejects.toThrowError(`Health check not healthy after 0ms`);
+      ).rejects.toThrow(`Health check not healthy after 0ms`);
 
       expect(await getRunningContainerNames()).not.toContain("container_1");
     });
@@ -182,7 +181,7 @@ describe("DockerComposeEnvironment", () => {
 
     const container = startedEnvironment.getContainer(await composeContainerName("container"));
     const response = await fetch(`http://${container.getHost()}:${container.getMappedPort(8080)}/env`);
-    const responseBody = await response.json();
+    const responseBody = (await response.json()) as { [key: string]: string };
     expect(responseBody["ENV_VAR"]).toBe("ENV_VAR_VALUE");
 
     await startedEnvironment.down();
@@ -191,7 +190,7 @@ describe("DockerComposeEnvironment", () => {
   it("should throw error when you get container that does not exist", async () => {
     const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml").up();
 
-    expect(() => startedEnvironment.getContainer("non_existent_container")).toThrowError(
+    expect(() => startedEnvironment.getContainer("non_existent_container")).toThrow(
       `Cannot get container "non_existent_container" as it is not running`
     );
 
@@ -204,7 +203,7 @@ describe("DockerComposeEnvironment", () => {
     );
 
     await checkEnvironmentContainerIsHealthy(startedEnvironment, await composeContainerName("service_2"));
-    expect(() => startedEnvironment.getContainer("service_1")).toThrowError(
+    expect(() => startedEnvironment.getContainer("service_1")).toThrow(
       `Cannot get container "service_1" as it is not running`
     );
 
@@ -230,7 +229,7 @@ describe("DockerComposeEnvironment", () => {
 
     const container = startedEnvironment.getContainer(await composeContainerName("container"));
     const response = await fetch(`http://${container.getHost()}:${container.getMappedPort(8080)}/env`);
-    const responseBody = await response.json();
+    const responseBody = (await response.json()) as { [key: string]: string };
     expect(responseBody["ENV_VAR"]).toBe("default");
 
     await startedEnvironment.down();
@@ -245,7 +244,7 @@ describe("DockerComposeEnvironment", () => {
 
     const container = startedEnvironment.getContainer(await composeContainerName("container"));
     const response = await fetch(`http://${container.getHost()}:${container.getMappedPort(8080)}/env`);
-    const responseBody = await response.json();
+    const responseBody = (await response.json()) as { [key: string]: string };
     expect(responseBody["ENV_VAR"]).toBe("override");
 
     await startedEnvironment.down();

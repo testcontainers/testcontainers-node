@@ -11,7 +11,6 @@ import { BoundPorts } from "testcontainers/src/utils/bound-ports";
 import { ContainerRuntimeClient, getContainerRuntimeClient } from "testcontainers/src/container-runtime";
 import { CouchbaseService } from "./couchbase-service";
 import { BucketDefinition } from "./bucket-definition";
-import fetch, { Response } from "node-fetch";
 import PORTS from "./ports";
 import { IntervalRetry } from "testcontainers/src/common";
 
@@ -194,7 +193,7 @@ export class CouchbaseContainer extends GenericContainer {
     );
     let jsonResponse;
     try {
-      jsonResponse = await response.json();
+      jsonResponse = (await response.json()) as { isEnterprise: boolean };
     } catch (e) {
       throw new Error("Couchbase /pools did not return valid JSON");
     }
@@ -447,7 +446,7 @@ export class CouchbaseContainer extends GenericContainer {
             if (response === undefined) {
               return false;
             }
-            const jsonResponse = await response.json();
+            const jsonResponse = (await response.json()) as { results: Array<{ present: boolean }> };
             return jsonResponse.results[0].present;
           },
           () => {
@@ -508,7 +507,7 @@ export class CouchbaseContainer extends GenericContainer {
               if (response === undefined) {
                 return false;
               }
-              const jsonResponse = await response.json();
+              const jsonResponse = (await response.json()) as { results: Array<{ online: boolean }> };
               return jsonResponse.results[0].online;
             },
             () => {
