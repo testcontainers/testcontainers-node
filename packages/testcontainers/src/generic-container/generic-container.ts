@@ -278,6 +278,11 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
+  public withPlatform(platform: string): this {
+    this.createOpts.platform = platform;
+    return this;
+  }
+
   public withTmpFs(tmpFs: TmpFs): this {
     this.hostConfig.Tmpfs = { ...this.hostConfig.Tmpfs, ...tmpFs };
     return this;
