@@ -16,6 +16,7 @@ describe("PubSubEmulatorContainer", () => {
     expect(pubsubEmulatorContainer).toBeDefined();
 
     const pubSubClient = new PubSub({
+      projectId: "test-project",
       apiEndpoint: pubsubEmulatorContainer.getEmulatorEndpoint(),
     });
     expect(pubSubClient).toBeDefined();

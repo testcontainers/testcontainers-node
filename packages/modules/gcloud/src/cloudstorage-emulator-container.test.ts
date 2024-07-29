@@ -16,6 +16,7 @@ describe("CloudStorageEmulatorContainer", () => {
     expect(cloudstorageEmulatorContainer).toBeDefined();
 
     const cloudStorageClient = new Storage({
+      projectId: "test-project",
       apiEndpoint: cloudstorageEmulatorContainer.getExternalUrl(),
     });
     expect(cloudStorageClient).toBeDefined();
