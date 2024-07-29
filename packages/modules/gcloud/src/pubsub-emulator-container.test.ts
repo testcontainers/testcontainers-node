@@ -20,7 +20,7 @@ describe("PubSubEmulatorContainer", () => {
     });
     expect(pubSubClient).toBeDefined();
 
-    const [createdTopic, createdTopicMetadata] = await pubSubClient.createTopic("test-topic");
+    const [createdTopic] = await pubSubClient.createTopic("test-topic");
     expect(createdTopic).toBeDefined();
     // Note: topic name format is projects/<projectId>/topics/<topicName>
     expect(createdTopic.name).toContain("test-topic");

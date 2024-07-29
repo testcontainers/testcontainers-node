@@ -4,7 +4,6 @@ import type { StartedTestContainer } from "testcontainers";
 const EMULATOR_PORT = 8085;
 const CMD = "gcloud beta emulators pubsub start --host-port 0.0.0.0:8085";
 const DEFAULT_IMAGE = "gcr.io/google.com/cloudsdktool/google-cloud-cli";
-const CLOUD_SDK_IMAGE_NAME = "gcr.io/google.com/cloudsdktool/cloud-sdk";
 
 export class PubSubEmulatorContainer extends GenericContainer {
   constructor(image = DEFAULT_IMAGE) {
