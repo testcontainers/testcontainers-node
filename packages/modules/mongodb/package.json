@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/mongodb",
-  "version": "10.10.4",
+  "version": "10.11.0",
   "license": "MIT",
   "keywords": [
     "mongodb",
@@ -32,6 +32,6 @@
     "mongoose": "^7.7.0"
   },
   "dependencies": {
-    "testcontainers": "^10.10.4"
+    "testcontainers": "^10.11.0"
   }
 }
