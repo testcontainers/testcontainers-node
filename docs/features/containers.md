@@ -72,7 +72,7 @@ const container = await new GenericContainer("alpine")
 
 **Not recommended.**
 
-Bind mounts are not portable. They do not work with Docker in Docker or in cases where the Docker agent is remote. It is preferred to [copy files/content into the container](../containers#with-filescontent) instead.
+Bind mounts are not portable. They do not work with Docker in Docker or in cases where the Docker agent is remote. It is preferred to [copy files/content into the container](../containers#with-filesdirectoriescontent) instead.
 
 ```javascript
 const container = await new GenericContainer("alpine")
