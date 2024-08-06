@@ -22,6 +22,7 @@ export type ContainerRuntimeInfo = {
   cpus: number;
   memory: number;
   runtimes: string[];
+  labels: string[];
 };
 
 export type ComposeInfo =

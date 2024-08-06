@@ -123,6 +123,7 @@ async function initStrategy(strategy: ContainerRuntimeClientStrategy): Promise<C
     cpus: dockerodeInfo.NCPU,
     memory: dockerodeInfo.MemTotal,
     runtimes: dockerodeInfo.Runtimes ? Object.keys(dockerodeInfo.Runtimes) : [],
+    labels: dockerodeInfo.Labels ? dockerodeInfo.Labels : [],
   };
 
   const composeInfo: ComposeInfo = composeClient.info;
