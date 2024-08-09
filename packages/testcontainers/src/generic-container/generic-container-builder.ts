@@ -18,6 +18,7 @@ export class GenericContainerBuilder {
   private pullPolicy: ImagePullPolicy = PullPolicy.defaultPolicy();
   private cache = true;
   private target?: string;
+  private platform?: string;
 
   constructor(
     private readonly context: string,
@@ -37,6 +38,11 @@ export class GenericContainerBuilder {
 
   public withCache(cache: boolean): this {
     this.cache = cache;
+    return this;
+  }
+
+  public withPlatform(platform: string): this {
+    this.platform = platform;
     return this;
   }
 
@@ -72,6 +78,7 @@ export class GenericContainerBuilder {
       registryconfig: registryConfig,
       labels,
       target: this.target,
+      platform: this.platform,
     };
 
     if (this.pullPolicy.shouldPull()) {

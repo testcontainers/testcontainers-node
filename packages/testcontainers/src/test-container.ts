@@ -36,6 +36,7 @@ export interface TestContainer {
   withExtraHosts(extraHosts: ExtraHost[]): this;
   withDefaultLogDriver(): this;
   withPrivilegedMode(): this;
+  withPlatform(platform: string): this;
   withUser(user: string): this;
   withPullPolicy(pullPolicy: ImagePullPolicy): this;
   withReuse(): this;

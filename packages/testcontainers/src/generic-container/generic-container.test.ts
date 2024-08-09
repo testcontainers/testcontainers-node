@@ -123,6 +123,15 @@ describe("GenericContainer", () => {
     expect(output).toEqual(expect.stringContaining("/tmp"));
   });
 
+  it("should set platform", async () => {
+    const container = await new GenericContainer("amd64/alpine")
+      .withPlatform("linux/amd64")
+      .withExposedPorts(8080)
+      .start();
+
+    await checkContainerIsHealthy(container);
+  });
+
   it("should set entrypoint", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withEntrypoint(["node"])
