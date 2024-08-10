@@ -6,13 +6,21 @@ const CMD = "gcloud beta emulators pubsub start --host-port 0.0.0.0:8085";
 const DEFAULT_IMAGE = "gcr.io/google.com/cloudsdktool/google-cloud-cli";
 
 export class PubSubEmulatorContainer extends GenericContainer {
+  private _projectId?: string;
+
   constructor(image = DEFAULT_IMAGE) {
     super(image);
 
+    const commandLine = `${CMD} --project=${this._projectId ?? "test-project"}`;
     this.withExposedPorts(EMULATOR_PORT)
       .withWaitStrategy(Wait.forLogMessage(/Server started/g, 1))
-      .withCommand(["/bin/sh", "-c", CMD])
+      .withCommand(["/bin/sh", "-c", commandLine])
       .withStartupTimeout(120_000);
+  }
+
+  public withProjectId(projectId: string): PubSubEmulatorContainer {
+    this._projectId = projectId;
+    return this;
   }
 
   public override async start(): Promise<StartedPubSubEmulatorContainer> {
