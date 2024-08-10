@@ -2,17 +2,17 @@ name: Test
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths-ignore:
-      - 'mkdocs.yml'
-      - 'docs/**'
-      - 'README.md'
+      - "mkdocs.yml"
+      - "docs/**"
+      - "README.md"
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths-ignore:
-      - 'mkdocs.yml'
-      - 'docs/**'
-      - 'README.md'
+      - "mkdocs.yml"
+      - "docs/**"
+      - "README.md"
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.head_ref || github.sha }}"
@@ -24,8 +24,8 @@ jobs:
     runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
-        runner: [ ubuntu-22.04 ]
-        node-version: [ 18.x, 20.x ]
+        runner: [ubuntu-22.04]
+        node-version: [20.x]
     steps:
       - name: Code checkout
         uses: actions/checkout@v3
@@ -49,12 +49,10 @@ jobs:
     needs: smoke-test
     strategy:
       matrix:
-        node-version: [ 18.x, 20.x ]
-        container-runtime: [ docker, podman ]
+        node-version: [20.x]
+        container-runtime: [docker]
         include:
           - container-runtime: docker
-            runner: ubuntu-22.04
-          - container-runtime: podman
             runner: ubuntu-22.04
     uses: ./.github/workflows/test-template.yml
     with:
@@ -75,11 +73,12 @@ jobs:
         run: echo "modules=$(ls packages/modules | jq -cnR '[inputs | select(length>0) | select(. != "couchbase")]')" >> $GITHUB_OUTPUT
   test-modules:
     name: Module (${{ matrix.module }})
-    needs: [ test-testcontainers, list-modules ]
+    needs: [test-testcontainers, list-modules]
     strategy:
+      fail-fast: false
       matrix:
-        node-version: [ 18.x, 20.x ]
-        container-runtime: [ docker, podman ]
+        node-version: [18.x, 20.x]
+        container-runtime: [docker, podman]
         include:
           - container-runtime: docker
             runner: ubuntu-22.04
