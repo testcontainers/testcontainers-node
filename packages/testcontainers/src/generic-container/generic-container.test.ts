@@ -124,7 +124,8 @@ describe("GenericContainer", () => {
   });
 
   it("should set platform", async () => {
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+    // This test uses an older version of cristianrgreco/testcontainer as all the other tests are using the latest version and the code doesn't pull the image again when the platform differs at this time
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.13")
       .withWorkingDir("/tmp")
       .withCommand(["node", "../index.js"])
       .withPlatform("linux/amd64")
