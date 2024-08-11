@@ -124,12 +124,15 @@ describe("GenericContainer", () => {
   });
 
   it("should set platform", async () => {
-    const container = await new GenericContainer("amd64/alpine")
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withWorkingDir("/tmp")
+      .withCommand(["node", "../index.js"])
       .withPlatform("linux/amd64")
       .withExposedPorts(8080)
       .start();
 
-    await checkContainerIsHealthy(container);
+    const { output } = await container.exec(["arch"]);
+    expect(output).toEqual(expect.stringContaining("x86_64"));
   });
 
   it("should set entrypoint", async () => {
