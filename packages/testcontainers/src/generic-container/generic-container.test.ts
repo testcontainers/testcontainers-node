@@ -124,9 +124,8 @@ describe("GenericContainer", () => {
   });
 
   it("should set platform", async () => {
-    // This test uses an older version of cristianrgreco/testcontainer as all the other tests are using the latest version and the code doesn't pull the image again when the platform differs at this time
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.13")
-      .withWorkingDir("/tmp")
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withPullPolicy(PullPolicy.alwaysPull())
       .withCommand(["node", "../index.js"])
       .withPlatform("linux/amd64")
       .withExposedPorts(8080)
