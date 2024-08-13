@@ -43,7 +43,7 @@ Cloud Storage mode |CloudStorageEmulatorContainer | [https://hub.docker.com/r/fs
 ### Cloud PubSub mode
 
 <!--codeinclude-->
-[Starting a Cloud PubSub Emulator container with the default image](../../packages/modules/gcloud/src/pubsub-emulator-container.test) inside_block:pubsub6
+[Starting a Cloud PubSub Emulator container with the default image](../../packages/modules/gcloud/src/pubsub-emulator-container.test.ts) inside_block:pubsub6
 <!--/codeinclude-->
 
 ### Cloud Storage mode
