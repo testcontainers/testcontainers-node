@@ -1,11 +1,12 @@
 import { AbstractStartedContainer, GenericContainer, Wait } from "testcontainers";
-import type { InspectResult, StartedTestContainer } from "testcontainers";
+import type { StartedTestContainer } from "testcontainers";
 
 const PORT = 4443;
 const DEFAULT_IMAGE = "fsouza/fake-gcs-server";
 
 export class CloudStorageEmulatorContainer extends GenericContainer {
   private _externalURL?: string;
+  private _publicHost?: string;
 
   constructor(image = DEFAULT_IMAGE) {
     super(image);
@@ -20,24 +21,28 @@ export class CloudStorageEmulatorContainer extends GenericContainer {
     return this;
   }
 
+  public withPublicHost(host: string): CloudStorageEmulatorContainer {
+    this._publicHost = host;
+    return this;
+  }
+
   public override async start(): Promise<StartedCloudStorageEmulatorContainer> {
     // Determine the valid entrypoint command when starting the Cloud Storage server
-    this.withEntrypoint([
+
+    const entrypoint = [
       "fake-gcs-server",
+      // Bind to all interfaces
+      "-host",
+      "0.0.0.0",
+      // Using thre http scheme for the server
       "-scheme",
       "http",
       ...(this._externalURL ? ["-external-url", this._externalURL] : []),
-    ]);
+      ...(this._publicHost ? ["-public-host", this._publicHost] : []),
+    ];
+    this.withEntrypoint(entrypoint);
 
-    return new StartedCloudStorageEmulatorContainer(await super.start());
-  }
-
-  override async containerStarted(
-    container: StartedTestContainer,
-    inspectResult: InspectResult,
-    reused: boolean
-  ): Promise<void> {
-    super.containerStarted?.(container, inspectResult, reused);
+    return new StartedCloudStorageEmulatorContainer(await super.start(), this._externalURL);
   }
 }
 
@@ -45,17 +50,23 @@ export class StartedCloudStorageEmulatorContainer extends AbstractStartedContain
   private _externalURL?: string;
   private _publicHost?: string;
 
+  constructor(startedTestContainer: StartedTestContainer, externalURL?: string, publicHost?: string) {
+    super(startedTestContainer);
+    this._externalURL = externalURL;
+    this._publicHost = publicHost ?? "storage.googleapis.com";
+  }
+
   public async updateExternalUrl(url: string) {
     this._externalURL = url;
     await this.processServerConfigChange();
   }
 
-  public async updatePublicHost(url: string) {
-    this._publicHost = url;
+  public async updatePublicHost(host: string) {
+    this._publicHost = host;
     await this.processServerConfigChange();
   }
 
-  private getInternalServerUrl() {
+  public getEmulatorEndpoint() {
     return `http://${this.getHost()}:${this.getMappedPort(PORT)}`;
   }
 
@@ -63,7 +74,7 @@ export class StartedCloudStorageEmulatorContainer extends AbstractStartedContain
    * Sends a PUT request to the fake-gcs-server to update the server configuration for externalUrl and publicHost.
    */
   private async processServerConfigChange() {
-    const requestUrl = `${this.getInternalServerUrl()}/_internal/config`;
+    const requestUrl = `${this.getEmulatorEndpoint()}/_internal/config`;
     const response = await fetch(requestUrl, {
       method: "PUT",
       headers: {
@@ -93,7 +104,7 @@ export class StartedCloudStorageEmulatorContainer extends AbstractStartedContain
     if (this._externalURL) {
       return this._externalURL;
     } else {
-      return `http://${this.getHost()}:${this.getMappedPort(PORT)}`;
+      return this.getEmulatorEndpoint();
     }
   }
 }

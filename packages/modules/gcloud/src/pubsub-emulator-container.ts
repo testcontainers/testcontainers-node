@@ -23,19 +23,31 @@ export class PubSubEmulatorContainer extends GenericContainer {
 
   public override async start(): Promise<StartedPubSubEmulatorContainer> {
     // Determine the valid command-line prompt when starting the Pub/Sub emulator
-    const commandLine = `${CMD} --project=${this._projectId ?? "test-project"}`;
+    const selectedProjectId = this._projectId ?? "test-project";
+    const commandLine = `${CMD} --project=${selectedProjectId}`;
     this.withCommand(["/bin/sh", "-c", commandLine]);
 
-    return new StartedPubSubEmulatorContainer(await super.start());
+    return new StartedPubSubEmulatorContainer(await super.start(), selectedProjectId);
   }
 }
 
 export class StartedPubSubEmulatorContainer extends AbstractStartedContainer {
+  constructor(startedTestContainer: StartedTestContainer, private readonly projectId: string) {
+    super(startedTestContainer);
+  }
+
   /**
    * @return a <code>host:port</code> pair corresponding to the address on which the emulator is
    * reachable from the test host machine.
    */
   public getEmulatorEndpoint(): string {
     return `${this.getHost()}:${this.getMappedPort(EMULATOR_PORT)}`;
+  }
+
+  /**
+   * @returns the project ID associated with the Pub/Sub emulator.
+   */
+  public getProjectId(): string {
+    return this.projectId;
   }
 }
