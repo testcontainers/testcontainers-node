@@ -11,12 +11,6 @@ export class CloudStorageEmulatorContainer extends GenericContainer {
     super(image);
 
     this.withExposedPorts(PORT)
-      .withEntrypoint([
-        "fake-gcs-server",
-        "-scheme",
-        "http",
-        ...(this._externalURL ? ["-external-url", this._externalURL] : []),
-      ])
       .withWaitStrategy(Wait.forLogMessage(/server started/g, 1))
       .withStartupTimeout(120_000);
   }
@@ -27,6 +21,14 @@ export class CloudStorageEmulatorContainer extends GenericContainer {
   }
 
   public override async start(): Promise<StartedCloudStorageEmulatorContainer> {
+    // Determine the valid entrypoint command when starting the Cloud Storage server
+    this.withEntrypoint([
+      "fake-gcs-server",
+      "-scheme",
+      "http",
+      ...(this._externalURL ? ["-external-url", this._externalURL] : []),
+    ]);
+
     return new StartedCloudStorageEmulatorContainer(await super.start());
   }
 
@@ -42,11 +44,6 @@ export class CloudStorageEmulatorContainer extends GenericContainer {
 export class StartedCloudStorageEmulatorContainer extends AbstractStartedContainer {
   private _externalURL?: string;
   private _publicHost?: string;
-
-  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
-  constructor(startedTestContainer: StartedTestContainer) {
-    super(startedTestContainer);
-  }
 
   public async updateExternalUrl(url: string) {
     this._externalURL = url;
