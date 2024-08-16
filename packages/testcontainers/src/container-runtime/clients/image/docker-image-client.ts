@@ -87,7 +87,7 @@ export class DockerImageClient implements ImageClient {
     });
   }
 
-  async pull(imageName: ImageName, opts?: { force: boolean }): Promise<void> {
+  async pull(imageName: ImageName, opts?: { force: boolean; platform: string | undefined }): Promise<void> {
     try {
       if (!opts?.force && (await this.exists(imageName))) {
         log.debug(`Image "${imageName.string}" already exists`);
@@ -96,7 +96,10 @@ export class DockerImageClient implements ImageClient {
 
       log.debug(`Pulling image "${imageName.string}"...`);
       const authconfig = await getAuthConfig(imageName.registry ?? this.indexServerAddress);
-      const stream = await this.dockerode.pull(imageName.string, { authconfig });
+      const stream = await this.dockerode.pull(imageName.string, {
+        authconfig,
+        platform: opts?.platform,
+      });
       await new Promise<void>((resolve) => {
         byline(stream).on("data", (line) => {
           if (pullLog.enabled()) {
