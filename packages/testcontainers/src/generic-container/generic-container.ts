@@ -79,7 +79,10 @@ export class GenericContainer implements TestContainer {
 
   public async start(): Promise<StartedTestContainer> {
     const client = await getContainerRuntimeClient();
-    await client.image.pull(this.imageName, { force: this.pullPolicy.shouldPull() });
+    await client.image.pull(this.imageName, {
+      force: this.pullPolicy.shouldPull(),
+      platform: this.createOpts.platform,
+    });
 
     if (this.beforeContainerCreated) {
       await this.beforeContainerCreated();
@@ -275,6 +278,11 @@ export class GenericContainer implements TestContainer {
       ...(this.createOpts.Env ?? []),
       ...Object.entries(environment).map(([key, value]) => `${key}=${value}`),
     ];
+    return this;
+  }
+
+  public withPlatform(platform: string): this {
+    this.createOpts.platform = platform;
     return this;
   }
 

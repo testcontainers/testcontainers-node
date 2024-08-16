@@ -123,6 +123,18 @@ describe("GenericContainer", () => {
     expect(output).toEqual(expect.stringContaining("/tmp"));
   });
 
+  it("should set platform", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withPullPolicy(PullPolicy.alwaysPull())
+      .withCommand(["node", "../index.js"])
+      .withPlatform("linux/amd64")
+      .withExposedPorts(8080)
+      .start();
+
+    const { output } = await container.exec(["arch"]);
+    expect(output).toEqual(expect.stringContaining("x86_64"));
+  });
+
   it("should set entrypoint", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withEntrypoint(["node"])
