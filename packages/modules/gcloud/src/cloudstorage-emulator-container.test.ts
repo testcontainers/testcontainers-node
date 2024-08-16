@@ -68,14 +68,6 @@ describe("CloudStorageEmulatorContainer", () => {
   });
 
   it("should be able update the external URL of running instance", async () => {
-    // Enable request interception
-    server.use(
-      http.put("/_internal/config", ({ request }) => {
-        console.log(`incoming request:`, request.body);
-        return HttpResponse.json({}, { status: 200 });
-      })
-    );
-
     const cloudstorageEmulatorContainer = await new CloudStorageEmulatorContainer()
       .withExternalURL("http://cdn.company.local")
       .start();
