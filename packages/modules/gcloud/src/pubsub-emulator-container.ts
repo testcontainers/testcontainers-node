@@ -11,10 +11,8 @@ export class PubSubEmulatorContainer extends GenericContainer {
   constructor(image = DEFAULT_IMAGE) {
     super(image);
 
-    const commandLine = `${CMD} --project=${this._projectId ?? "test-project"}`;
     this.withExposedPorts(EMULATOR_PORT)
       .withWaitStrategy(Wait.forLogMessage(/Server started/g, 1))
-      .withCommand(["/bin/sh", "-c", commandLine])
       .withStartupTimeout(120_000);
   }
 
@@ -24,16 +22,15 @@ export class PubSubEmulatorContainer extends GenericContainer {
   }
 
   public override async start(): Promise<StartedPubSubEmulatorContainer> {
+    // Determine the valid command-line prompt when starting the Pub/Sub emulator
+    const commandLine = `${CMD} --project=${this._projectId ?? "test-project"}`;
+    this.withCommand(["/bin/sh", "-c", commandLine]);
+
     return new StartedPubSubEmulatorContainer(await super.start());
   }
 }
 
 export class StartedPubSubEmulatorContainer extends AbstractStartedContainer {
-  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
-  constructor(startedTestContainer: StartedTestContainer) {
-    super(startedTestContainer);
-  }
-
   /**
    * @return a <code>host:port</code> pair corresponding to the address on which the emulator is
    * reachable from the test host machine.
