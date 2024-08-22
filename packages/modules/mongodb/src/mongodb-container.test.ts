@@ -26,7 +26,7 @@ describe("MongodbContainer", () => {
     expect(
       await fooCollection.findOne({
         value: 1,
-      }),
+      })
     ).toEqual(obj);
 
     await mongoose.disconnect();
@@ -56,7 +56,7 @@ describe("MongodbContainer", () => {
     expect(
       await fooCollection.findOne({
         value: 1,
-      }),
+      })
     ).toEqual(obj);
 
     await mongoose.disconnect();
