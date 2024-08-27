@@ -8,6 +8,7 @@
     "firestore",
     "pubsub",
     "cloudstorage",
+    "gcs",
     "testing",
     "docker",
     "testcontainers"

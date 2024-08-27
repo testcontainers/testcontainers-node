@@ -7,13 +7,12 @@ const DEFAULT_IMAGE = "fsouza/fake-gcs-server";
 export class CloudStorageEmulatorContainer extends GenericContainer {
   private _externalURL?: string;
   private _publicHost?: string;
+  private autoUpdateExternalUrl = true;
 
   constructor(image = DEFAULT_IMAGE) {
     super(image);
 
-    this.withExposedPorts(PORT)
-      .withWaitStrategy(Wait.forLogMessage(/server started/g, 1))
-      .withStartupTimeout(120_000);
+    this.withExposedPorts(PORT).withWaitStrategy(Wait.forLogMessage("server started")).withStartupTimeout(120_000);
   }
 
   public withExternalURL(url: string): CloudStorageEmulatorContainer {
@@ -23,6 +22,11 @@ export class CloudStorageEmulatorContainer extends GenericContainer {
 
   public withPublicHost(host: string): CloudStorageEmulatorContainer {
     this._publicHost = host;
+    return this;
+  }
+
+  public withAutoUpdateExternalUrl(autoUpdateExternalUrl: boolean): this {
+    this.autoUpdateExternalUrl = autoUpdateExternalUrl;
     return this;
   }
 
@@ -42,7 +46,14 @@ export class CloudStorageEmulatorContainer extends GenericContainer {
     ];
     this.withEntrypoint(entrypoint);
 
-    return new StartedCloudStorageEmulatorContainer(await super.start(), this._externalURL);
+    const container = new StartedCloudStorageEmulatorContainer(await super.start(), this._externalURL);
+
+    if (this.autoUpdateExternalUrl && this._externalURL === undefined) {
+      // Done after starting because we don't know the port ahead of time
+      await container.updateExternalUrl(container.getEmulatorEndpoint());
+    }
+
+    return container;
   }
 }
 
@@ -100,11 +111,7 @@ export class StartedCloudStorageEmulatorContainer extends AbstractStartedContain
    * @return a <code>host:port</code> pair corresponding to the address on which the emulator is
    * reachable from the test host machine.
    */
-  public getExternalUrl(): string {
-    if (this._externalURL) {
-      return this._externalURL;
-    } else {
-      return this.getEmulatorEndpoint();
-    }
+  public getExternalUrl(): string | undefined {
+    return this._externalURL;
   }
 }
