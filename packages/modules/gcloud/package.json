@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/gcloud",
-  "version": "10.12.0",
+  "version": "10.13.0",
   "license": "MIT",
   "author": "Anietie Asuquo <hello@anietieasuquo.com>",
   "keywords": [
@@ -34,7 +34,7 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "dependencies": {
-    "testcontainers": "^10.12.0"
+    "testcontainers": "^10.13.0"
   },
   "devDependencies": {
     "@google-cloud/datastore": "^9.0.0",
