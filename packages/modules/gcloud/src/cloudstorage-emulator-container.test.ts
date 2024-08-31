@@ -55,7 +55,7 @@ describe("CloudStorageEmulatorContainer", () => {
     await cloudstorageEmulatorContainer.stop();
   });
 
-  it("should update the external URL", async () => {
+  it("should use the provided external URL", async () => {
     const cloudstorageEmulatorContainer = await new CloudStorageEmulatorContainer()
       .withExternalURL("http://cdn.company.local")
       .start();
@@ -102,6 +102,38 @@ describe("CloudStorageEmulatorContainer", () => {
     expect(cloudstorageEmulatorContainer.getExternalUrl()).toBe("http://files.company.local");
 
     await cloudstorageEmulatorContainer.stop();
+  });
+
+  it("should use emulator endpoint as default external URL", async () => {
+    let configUpdated = false;
+
+    server.events.on("request:start", ({ request }) => {
+      if (request.url.includes("/_internal/config")) configUpdated = true;
+    });
+
+    const container = await new CloudStorageEmulatorContainer().start();
+
+    expect(configUpdated).toBe(true);
+    expect(container.getExternalUrl()).toBe(container.getEmulatorEndpoint());
+    expect((await fetch(`${container.getExternalUrl()}/_internal/healthcheck`)).status).toBe(200);
+
+    await container.stop();
+  });
+
+  it("should allow skipping updating the external URL automatically", async () => {
+    let configUpdated = false;
+
+    server.events.on("request:start", ({ request }) => {
+      if (request.url.includes("/_internal/config")) configUpdated = true;
+    });
+
+    const container = await new CloudStorageEmulatorContainer().withAutoUpdateExternalUrl(false).start();
+
+    expect(configUpdated).toBe(false);
+    expect(container.getExternalUrl()).toBe(undefined);
+    expect((await fetch(`${container.getEmulatorEndpoint()}/_internal/healthcheck`)).status).toBe(200);
+
+    await container.stop();
   });
 
   async function checkCloudStorage(cloudstorageEmulatorContainer: StartedCloudStorageEmulatorContainer) {
