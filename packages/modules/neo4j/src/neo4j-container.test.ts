@@ -45,7 +45,7 @@ describe("Neo4jContainer", () => {
     await container.stop();
   });
   // }
-  
+
   // setPassword {
   it("should connect with custom password", async () => {
     const container = await new Neo4jContainer().withPassword("xyz1234@!").start();
