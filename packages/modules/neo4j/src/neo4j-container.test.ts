@@ -26,7 +26,7 @@ describe("Neo4jContainer", () => {
   // }
 
   // v5DefaultPassword {
-  it("should connect with custom password", async () => {
+  it("should connect to neo4j:v5 with default password", async () => {
     const container = await new Neo4jContainer("neo4j:5.23.0").start();
     const driver = neo4j.driver(
       container.getBoltUri(),
