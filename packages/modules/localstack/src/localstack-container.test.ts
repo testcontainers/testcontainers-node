@@ -68,5 +68,39 @@ describe("LocalStackContainer", () => {
     expect(response).toContain(`http://localstack:${LOCALSTACK_PORT}`);
     await container.stop();
     await awsCliInDockerNetwork.stop();
+    await network.stop();
+  });
+
+  it("should not override LOCALSTACK_HOST assignment", async () => {
+    const container = await new LocalstackContainer()
+      .withEnvironment({ LOCALSTACK_HOST: "myhost" })
+      .withNetworkAliases("myalias")
+      .start();
+
+    const { output, exitCode } = await container.exec(["printenv", "LOCALSTACK_HOST"]);
+    expect(exitCode).toBe(0);
+    expect(output).toContain("myhost");
+
+    await container.stop();
+  });
+
+  it("should override LOCALSTACK_HOST with last network alias", async () => {
+    const container = await new LocalstackContainer().withNetworkAliases("other", "myalias").start();
+
+    const { output, exitCode } = await container.exec(["printenv", "LOCALSTACK_HOST"]);
+    expect(exitCode).toBe(0);
+    expect(output).toContain("myalias");
+
+    await container.stop();
+  });
+
+  it("should assign LOCALSTACK_HOST to localhost", async () => {
+    const container = await new LocalstackContainer().start();
+
+    const { output, exitCode } = await container.exec(["printenv", "LOCALSTACK_HOST"]);
+    expect(exitCode).toBe(0);
+    expect(output).toContain("localhost");
+
+    await container.stop();
   });
 });
