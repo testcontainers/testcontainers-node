@@ -5,7 +5,7 @@ const HTTP_PORT = 7474;
 const USERNAME = "neo4j";
 
 export class Neo4jContainer extends GenericContainer {
-  private password = "test";
+  private password = "pass123!@#WORD";
   private apoc = false;
   private ttl?: number;
 
