@@ -5,7 +5,6 @@ export const LOCALSTACK_PORT = 4566;
 export class LocalstackContainer extends GenericContainer {
   constructor(image = "localstack/localstack:2.2.0") {
     super(image);
-    this.resolveHostname();
     this.withExposedPorts(LOCALSTACK_PORT).withWaitStrategy(Wait.forLogMessage("Ready", 1)).withStartupTimeout(120_000);
   }
 
@@ -16,13 +15,18 @@ export class LocalstackContainer extends GenericContainer {
       // do nothing
       hostnameExternalReason = "explicitly as environment variable";
     } else if (this.networkAliases && this.networkAliases.length > 0) {
-      this.environment[envVar] = this.networkAliases.at(this.networkAliases.length - 1) || ""; // use the last network alias set
+      // use the last network alias set
+      this.withEnvironment({ [envVar]: this.networkAliases.at(this.networkAliases.length - 1) ?? "" });
       hostnameExternalReason = "to match last network alias on container with non-default network";
     } else {
-      this.withEnvironment({ LOCALSTACK_HOST: "localhost" });
+      this.withEnvironment({ [envVar]: "localhost" });
       hostnameExternalReason = "to match host-routable address for container";
     }
-    log.info(`${envVar} environment variable set to ${this.environment[envVar]} (${hostnameExternalReason})"`);
+    log.info(`${envVar} environment variable set to "${this.environment[envVar]}" (${hostnameExternalReason})`);
+  }
+
+  protected override async beforeContainerCreated(): Promise<void> {
+    this.resolveHostname();
   }
 
   public override async start(): Promise<StartedLocalStackContainer> {
