@@ -64,5 +64,23 @@ describe("Auths", () => {
       };
       expect(await locator.getAuthConfig("https://registry.example.com", containerRuntimeConfig)).toEqual(authConfig);
     });
+
+    it("should return credentials from encoded auth when the password contains a colon", async () => {
+      const containerRuntimeConfig: ContainerRuntimeConfig = {
+        auths: {
+          "https://registry.example.com": {
+            email: "user@example.com",
+            auth: "dXNlcjpwYXNzOjE=",
+          },
+        },
+      };
+      const authConfig: AuthConfig = {
+        username: "user",
+        password: "pass:1",
+        email: "user@example.com",
+        registryAddress: "https://registry.example.com",
+      };
+      expect(await locator.getAuthConfig("https://registry.example.com", containerRuntimeConfig)).toEqual(authConfig);
+    });
   });
 });
