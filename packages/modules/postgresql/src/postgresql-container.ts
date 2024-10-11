@@ -7,7 +7,7 @@ export class PostgreSqlContainer extends GenericContainer {
   private username = "test";
   private password = "test";
 
-  constructor(image = "postgres:13.3-alpine") {
+  constructor(image = "postgres:17.0-alpine") {
     super(image);
     this.withExposedPorts(POSTGRES_PORT)
       .withWaitStrategy(Wait.forLogMessage(/.*database system is ready to accept connections.*/, 2))
