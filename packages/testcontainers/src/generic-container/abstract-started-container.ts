@@ -1,6 +1,6 @@
-import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
-import { ContentToCopy, DirectoryToCopy, ExecOptions, ExecResult, FileToCopy, Labels } from "../types";
-import { Readable } from "stream";
+import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container.ts";
+import { ContentToCopy, DirectoryToCopy, ExecOptions, ExecResult, FileToCopy, Labels } from "../types.ts";
+import { Readable } from "node:stream";
 
 export class AbstractStartedContainer implements StartedTestContainer {
   constructor(protected readonly startedTestContainer: StartedTestContainer) {}

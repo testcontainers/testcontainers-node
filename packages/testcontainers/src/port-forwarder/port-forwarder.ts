@@ -1,11 +1,12 @@
 import { createSshConnection, SshConnection } from "ssh-remote-port-forward";
-import { GenericContainer } from "../generic-container/generic-container";
-import { log, withFileLock } from "../common";
-import { ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "../container-runtime";
-import { getReaper } from "../reaper/reaper";
-import { PortWithOptionalBinding } from "../utils/port";
+import { GenericContainer } from "../generic-container/generic-container.ts";
+import { log, withFileLock } from "../common/index.ts";
+import { ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "../container-runtime/index.ts";
+import { getReaper } from "../reaper/reaper.ts";
+import { PortWithOptionalBinding } from "../utils/port.ts";
 import Dockerode, { ContainerInfo } from "dockerode";
-import { LABEL_TESTCONTAINERS_SESSION_ID, LABEL_TESTCONTAINERS_SSHD } from "../utils/labels";
+import { LABEL_TESTCONTAINERS_SESSION_ID, LABEL_TESTCONTAINERS_SSHD } from "../utils/labels.ts";
+import process from "node:process";
 
 export const SSHD_IMAGE = process.env["SSHD_CONTAINER_IMAGE"]
   ? ImageName.fromString(process.env["SSHD_CONTAINER_IMAGE"]).string

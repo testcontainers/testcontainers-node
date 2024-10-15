@@ -1,16 +1,16 @@
 import { ContainerInfo } from "dockerode";
-import { StartedGenericContainer } from "../generic-container/started-generic-container";
-import { WaitStrategy } from "../wait-strategies/wait-strategy";
-import { Environment } from "../types";
-import { StartedDockerComposeEnvironment } from "./started-docker-compose-environment";
-import { Wait } from "../wait-strategies/wait";
-import { waitForContainer } from "../wait-strategies/wait-for-container";
-import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
-import { log, RandomUuid, Uuid, containerLog } from "../common";
-import { getContainerRuntimeClient, parseComposeContainerName } from "../container-runtime";
-import { getReaper } from "../reaper/reaper";
-import { BoundPorts } from "../utils/bound-ports";
-import { mapInspectResult } from "../utils/map-inspect-result";
+import { StartedGenericContainer } from "../generic-container/started-generic-container.ts";
+import { WaitStrategy } from "../wait-strategies/wait-strategy.ts";
+import { Environment } from "../types.ts";
+import { StartedDockerComposeEnvironment } from "./started-docker-compose-environment.ts";
+import { Wait } from "../wait-strategies/wait.ts";
+import { waitForContainer } from "../wait-strategies/wait-for-container.ts";
+import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy.ts";
+import { log, RandomUuid, Uuid, containerLog } from "../common/index.ts";
+import { getContainerRuntimeClient, parseComposeContainerName } from "../container-runtime/index.ts";
+import { getReaper } from "../reaper/reaper.ts";
+import { BoundPorts } from "../utils/bound-ports.ts";
+import { mapInspectResult } from "../utils/map-inspect-result.ts";
 
 export class DockerComposeEnvironment {
   private readonly composeFilePath: string;

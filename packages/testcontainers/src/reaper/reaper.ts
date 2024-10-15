@@ -1,10 +1,11 @@
 import { ContainerInfo } from "dockerode";
-import { GenericContainer } from "../generic-container/generic-container";
-import { Wait } from "../wait-strategies/wait";
-import { Socket } from "net";
-import { ContainerRuntimeClient, ImageName } from "../container-runtime";
-import { IntervalRetry, log, RandomUuid, withFileLock } from "../common";
-import { LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
+import { GenericContainer } from "../generic-container/generic-container.ts";
+import { Wait } from "../wait-strategies/wait.ts";
+import { Socket } from "node:net";
+import { ContainerRuntimeClient, ImageName } from "../container-runtime/index.ts";
+import { IntervalRetry, log, RandomUuid, withFileLock } from "../common/index.ts";
+import { LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels.ts";
+import process from "node:process";
 
 export const REAPER_IMAGE = process.env["RYUK_CONTAINER_IMAGE"]
   ? ImageName.fromString(process.env["RYUK_CONTAINER_IMAGE"]).string

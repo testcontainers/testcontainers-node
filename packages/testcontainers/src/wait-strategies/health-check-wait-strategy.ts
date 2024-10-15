@@ -1,7 +1,7 @@
 import Dockerode from "dockerode";
-import { AbstractWaitStrategy } from "./wait-strategy";
-import { log } from "../common";
-import { getContainerRuntimeClient } from "../container-runtime";
+import { AbstractWaitStrategy } from "./wait-strategy.ts";
+import { log } from "../common/index.ts";
+import { getContainerRuntimeClient } from "../container-runtime/index.ts";
 
 export class HealthCheckWaitStrategy extends AbstractWaitStrategy {
   public async waitUntilReady(container: Dockerode.Container): Promise<void> {

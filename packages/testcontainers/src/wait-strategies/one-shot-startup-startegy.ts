@@ -1,5 +1,5 @@
 import Dockerode, { ContainerInspectInfo } from "dockerode";
-import { StartupCheckStrategy, StartupStatus } from "./startup-check-strategy";
+import { StartupCheckStrategy, StartupStatus } from "./startup-check-strategy.ts";
 
 export class OneShotStartupCheckStrategy extends StartupCheckStrategy {
   DOCKER_TIMESTAMP_ZERO = "0001-01-01T00:00:00Z";

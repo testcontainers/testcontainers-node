@@ -1,5 +1,5 @@
 import { ImageBuildOptions } from "dockerode";
-import { ImageName } from "../../image-name";
+import { ImageName } from "../../image-name.ts";
 
 export interface ImageClient {
   build(context: string, opts: ImageBuildOptions): Promise<void>;

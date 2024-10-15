@@ -1,7 +1,7 @@
 import archiver from "archiver";
 import AsyncLock from "async-lock";
-import { StartedTestContainer, TestContainer } from "../test-container";
-import { WaitStrategy } from "../wait-strategies/wait-strategy";
+import { StartedTestContainer, TestContainer } from "../test-container.ts";
+import { WaitStrategy } from "../wait-strategies/wait-strategy.ts";
 import {
   BindMount,
   ContentToCopy,
@@ -15,23 +15,23 @@ import {
   ResourcesQuota,
   TmpFs,
   Ulimits,
-} from "../types";
-import { GenericContainerBuilder } from "./generic-container-builder";
-import { StartedGenericContainer } from "./started-generic-container";
-import { Wait } from "../wait-strategies/wait";
-import { Readable } from "stream";
+} from "../types.ts";
+import { GenericContainerBuilder } from "./generic-container-builder.ts";
+import { StartedGenericContainer } from "./started-generic-container.ts";
+import { Wait } from "../wait-strategies/wait.ts";
+import { Readable } from "node:stream";
 import { Container, ContainerCreateOptions, HostConfig } from "dockerode";
-import { waitForContainer } from "../wait-strategies/wait-for-container";
-import { ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "../container-runtime";
-import { getContainerPort, hasHostBinding, PortWithOptionalBinding } from "../utils/port";
-import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
-import { getReaper, REAPER_IMAGE } from "../reaper/reaper";
-import { PortForwarderInstance, SSHD_IMAGE } from "../port-forwarder/port-forwarder";
-import { createLabels, LABEL_TESTCONTAINERS_CONTAINER_HASH, LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
-import { containerLog, hash, log } from "../common";
-import { BoundPorts } from "../utils/bound-ports";
-import { StartedNetwork } from "../network/network";
-import { mapInspectResult } from "../utils/map-inspect-result";
+import { waitForContainer } from "../wait-strategies/wait-for-container.ts";
+import { ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "../container-runtime/index.ts";
+import { getContainerPort, hasHostBinding, PortWithOptionalBinding } from "../utils/port.ts";
+import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy.ts";
+import { getReaper, REAPER_IMAGE } from "../reaper/reaper.ts";
+import { PortForwarderInstance, SSHD_IMAGE } from "../port-forwarder/port-forwarder.ts";
+import { createLabels, LABEL_TESTCONTAINERS_CONTAINER_HASH, LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels.ts";
+import { containerLog, hash, log } from "../common/index.ts";
+import { BoundPorts } from "../utils/bound-ports.ts";
+import { StartedNetwork } from "../network/network.ts";
+import { mapInspectResult } from "../utils/map-inspect-result.ts";
 
 const reusableContainerCreationLock = new AsyncLock();
 

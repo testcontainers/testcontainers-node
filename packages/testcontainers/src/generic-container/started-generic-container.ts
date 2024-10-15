@@ -1,16 +1,16 @@
-import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
+import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container.ts";
 import Dockerode, { ContainerInspectInfo } from "dockerode";
-import { ContentToCopy, DirectoryToCopy, ExecOptions, ExecResult, FileToCopy, Labels } from "../types";
-import { Readable } from "stream";
-import { StoppedGenericContainer } from "./stopped-generic-container";
-import { WaitStrategy } from "../wait-strategies/wait-strategy";
+import { ContentToCopy, DirectoryToCopy, ExecOptions, ExecResult, FileToCopy, Labels } from "../types.ts";
+import { Readable } from "node:stream";
+import { StoppedGenericContainer } from "./stopped-generic-container.ts";
+import { WaitStrategy } from "../wait-strategies/wait-strategy.ts";
 import AsyncLock from "async-lock";
 import archiver from "archiver";
-import { waitForContainer } from "../wait-strategies/wait-for-container";
-import { BoundPorts } from "../utils/bound-ports";
-import { containerLog, log } from "../common";
-import { getContainerRuntimeClient } from "../container-runtime";
-import { mapInspectResult } from "../utils/map-inspect-result";
+import { waitForContainer } from "../wait-strategies/wait-for-container.ts";
+import { BoundPorts } from "../utils/bound-ports.ts";
+import { containerLog, log } from "../common/index.ts";
+import { getContainerRuntimeClient } from "../container-runtime/index.ts";
+import { mapInspectResult } from "../utils/map-inspect-result.ts";
 
 export class StartedGenericContainer implements StartedTestContainer {
   private stoppedContainer?: StoppedTestContainer;

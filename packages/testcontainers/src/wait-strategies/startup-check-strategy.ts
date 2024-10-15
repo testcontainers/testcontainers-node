@@ -1,7 +1,7 @@
-import { AbstractWaitStrategy } from "./wait-strategy";
+import { AbstractWaitStrategy } from "./wait-strategy.ts";
 import Dockerode from "dockerode";
-import { getContainerRuntimeClient } from "../container-runtime";
-import { IntervalRetry, log } from "../common";
+import { getContainerRuntimeClient } from "../container-runtime/index.ts";
+import { IntervalRetry, log } from "../common/index.ts";
 
 export type StartupStatus = "PENDING" | "SUCCESS" | "FAIL";
 

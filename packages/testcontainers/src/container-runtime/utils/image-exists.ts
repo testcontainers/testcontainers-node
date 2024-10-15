@@ -1,6 +1,6 @@
 import Dockerode from "dockerode";
 import AsyncLock from "async-lock";
-import { ImageName } from "../image-name";
+import { ImageName } from "../image-name.ts";
 
 const existingImages = new Set<string>();
 const imageCheckLock = new AsyncLock();

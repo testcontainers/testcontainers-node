@@ -1,7 +1,7 @@
-import { Readable } from "stream";
+import { Readable } from "node:stream";
 import Dockerode from "dockerode";
-import { demuxStream } from "./demux-stream";
-import { log } from "../../common";
+import { demuxStream } from "./demux-stream.ts";
+import { log } from "../../common/index.ts";
 
 export const attachContainer = async (dockerode: Dockerode, container: Dockerode.Container): Promise<Readable> => {
   try {

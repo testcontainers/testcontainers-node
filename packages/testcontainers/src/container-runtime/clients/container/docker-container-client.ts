@@ -7,12 +7,12 @@ import Dockerode, {
   ExecCreateOptions,
   Network,
 } from "dockerode";
-import { PassThrough, Readable } from "stream";
-import { IncomingMessage } from "http";
-import { ExecOptions, ExecResult } from "./types";
+import { PassThrough, Readable } from "node:stream";
+import { IncomingMessage } from "node:http";
+import { ExecOptions, ExecResult } from "./types.ts";
 import byline from "byline";
-import { ContainerClient } from "./container-client";
-import { execLog, log, streamToString } from "../../../common";
+import { ContainerClient } from "./container-client.ts";
+import { execLog, log, streamToString } from "../../../common/index.ts";
 
 export class DockerContainerClient implements ContainerClient {
   constructor(public readonly dockerode: Dockerode) {}

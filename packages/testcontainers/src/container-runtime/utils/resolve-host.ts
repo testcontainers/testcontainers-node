@@ -1,9 +1,10 @@
 import Dockerode, { NetworkInspectInfo } from "dockerode";
-import { URL } from "url";
-import { existsSync } from "fs";
-import { ContainerRuntimeClientStrategyResult } from "../strategies/types";
-import { runInContainer } from "./run-in-container";
-import { log } from "../../common";
+import { URL } from "node:url";
+import { existsSync } from "node:fs";
+import { ContainerRuntimeClientStrategyResult } from "../strategies/types.ts";
+import { runInContainer } from "./run-in-container.ts";
+import { log } from "../../common/index.ts";
+import process from "node:process";
 
 export const resolveHost = async (
   dockerode: Dockerode,

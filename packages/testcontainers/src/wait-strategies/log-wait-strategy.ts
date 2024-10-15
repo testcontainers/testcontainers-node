@@ -1,9 +1,9 @@
 import Dockerode from "dockerode";
 import byline from "byline";
-import { AbstractWaitStrategy } from "./wait-strategy";
-import { BoundPorts } from "../utils/bound-ports";
-import { log } from "../common";
-import { getContainerRuntimeClient } from "../container-runtime";
+import { AbstractWaitStrategy } from "./wait-strategy.ts";
+import { BoundPorts } from "../utils/bound-ports.ts";
+import { log } from "../common/index.ts";
+import { getContainerRuntimeClient } from "../container-runtime/index.ts";
 
 export type Log = string;
 

@@ -1,4 +1,4 @@
-import { StoppedTestContainer } from "../test-container";
+import { StoppedTestContainer } from "../test-container.ts";
 
 export class AbstractStoppedContainer implements StoppedTestContainer {
   constructor(protected readonly stoppedTestContainer: StoppedTestContainer) {}

@@ -1,6 +1,6 @@
-import { PortForwarderInstance } from "./port-forwarder/port-forwarder";
-import { getContainerRuntimeClient } from "./container-runtime";
-import { log } from "./common";
+import { PortForwarderInstance } from "./port-forwarder/port-forwarder.ts";
+import { getContainerRuntimeClient } from "./container-runtime/index.ts";
+import { log } from "./common/index.ts";
 
 export class TestContainers {
   public static async exposeHostPorts(...ports: number[]): Promise<void> {

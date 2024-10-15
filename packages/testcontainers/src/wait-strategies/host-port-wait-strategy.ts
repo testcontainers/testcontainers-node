@@ -1,9 +1,9 @@
 import Dockerode from "dockerode";
-import { AbstractWaitStrategy } from "./wait-strategy";
-import { HostPortCheck, InternalPortCheck, PortCheck } from "./utils/port-check";
-import { BoundPorts } from "../utils/bound-ports";
-import { getContainerRuntimeClient } from "../container-runtime";
-import { IntervalRetry, log } from "../common";
+import { AbstractWaitStrategy } from "./wait-strategy.ts";
+import { HostPortCheck, InternalPortCheck, PortCheck } from "./utils/port-check.ts";
+import { BoundPorts } from "../utils/bound-ports.ts";
+import { getContainerRuntimeClient } from "../container-runtime/index.ts";
+import { IntervalRetry, log } from "../common/index.ts";
 
 export class HostPortWaitStrategy extends AbstractWaitStrategy {
   public async waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void> {

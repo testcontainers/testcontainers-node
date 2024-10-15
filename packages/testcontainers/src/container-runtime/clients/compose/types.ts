@@ -1,4 +1,4 @@
-import { Logger } from "../../../common";
+import { Logger } from "../../../common/index.ts";
 
 export type ComposeOptions = {
   filePath: string;

@@ -1,13 +1,13 @@
-import { AuthConfig, BuildArgs, RegistryConfig } from "../types";
+import { AuthConfig, BuildArgs, RegistryConfig } from "../types.ts";
 import type { ImageBuildOptions } from "dockerode";
-import path from "path";
-import { GenericContainer } from "./generic-container";
-import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
-import { log, RandomUuid, Uuid } from "../common";
-import { getAuthConfig, getContainerRuntimeClient, ImageName } from "../container-runtime";
-import { getReaper } from "../reaper/reaper";
-import { getDockerfileImages } from "../utils/dockerfile-parser";
-import { createLabels, LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
+import path from "node:path";
+import { GenericContainer } from "./generic-container.ts";
+import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy.ts";
+import { log, RandomUuid, Uuid } from "../common/index.ts";
+import { getAuthConfig, getContainerRuntimeClient, ImageName } from "../container-runtime/index.ts";
+import { getReaper } from "../reaper/reaper.ts";
+import { getDockerfileImages } from "../utils/dockerfile-parser.ts";
+import { createLabels, LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels.ts";
 
 export type BuildOptions = {
   deleteOnExit: boolean;

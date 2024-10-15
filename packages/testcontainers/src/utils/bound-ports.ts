@@ -1,7 +1,7 @@
-import { getContainerPort, PortWithOptionalBinding } from "./port";
-import { HostIp } from "../container-runtime";
-import { HostPortBindings, InspectResult } from "../types";
-import net from "net";
+import { getContainerPort, PortWithOptionalBinding } from "./port.ts";
+import { HostIp } from "../container-runtime/index.ts";
+import { HostPortBindings, InspectResult } from "../types.ts";
+import net from "node:net";
 
 export class BoundPorts {
   private readonly ports = new Map<number, number>();

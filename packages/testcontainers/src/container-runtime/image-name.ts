@@ -1,4 +1,5 @@
-import { log } from "../common";
+import process from "node:process";
+import { log } from "../common/index.ts";
 
 export class ImageName {
   public readonly string: string;

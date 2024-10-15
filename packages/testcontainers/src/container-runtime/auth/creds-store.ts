@@ -1,5 +1,5 @@
-import { CredentialProvider } from "./credential-provider";
-import { ContainerRuntimeConfig } from "./types";
+import { CredentialProvider } from "./credential-provider.ts";
+import { ContainerRuntimeConfig } from "./types.ts";
 
 export class CredsStore extends CredentialProvider {
   public getName(): string {

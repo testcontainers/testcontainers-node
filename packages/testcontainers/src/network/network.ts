@@ -1,8 +1,8 @@
 import Dockerode from "dockerode";
-import { log, RandomUuid, Uuid } from "../common";
-import { ContainerRuntimeClient, getContainerRuntimeClient } from "../container-runtime";
-import { getReaper } from "../reaper/reaper";
-import { createLabels, LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
+import { log, RandomUuid, Uuid } from "../common/index.ts";
+import { ContainerRuntimeClient, getContainerRuntimeClient } from "../container-runtime/index.ts";
+import { getReaper } from "../reaper/reaper.ts";
+import { createLabels, LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels.ts";
 
 export class Network {
   constructor(private readonly uuid: Uuid = new RandomUuid()) {}

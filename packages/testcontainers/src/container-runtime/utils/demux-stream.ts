@@ -1,6 +1,6 @@
-import { PassThrough, Readable } from "stream";
+import { PassThrough, Readable } from "node:stream";
 import Dockerode from "dockerode";
-import { log } from "../../common";
+import { log } from "../../common/index.ts";
 
 export async function demuxStream(dockerode: Dockerode, stream: Readable): Promise<Readable> {
   try {

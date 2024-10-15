@@ -1,8 +1,8 @@
 import { Container, ExecCreateOptions } from "dockerode";
-import { ExecOptions, ExecResult } from "./types";
+import { ExecOptions, ExecResult } from "./types.ts";
 import byline from "byline";
-import { DockerContainerClient } from "./docker-container-client";
-import { execLog, log } from "../../../common";
+import { DockerContainerClient } from "./docker-container-client.ts";
+import { execLog, log } from "../../../common/index.ts";
 
 export class PodmanContainerClient extends DockerContainerClient {
   override async exec(container: Container, command: string[], opts?: Partial<ExecOptions>): Promise<ExecResult> {

@@ -1,4 +1,5 @@
-import { ContainerRuntimeClientStrategyResult } from "../strategies/types";
+import process from "node:process";
+import { ContainerRuntimeClientStrategyResult } from "../strategies/types.ts";
 
 export const getRemoteContainerRuntimeSocketPath = (
   containerRuntimeStrategyResult: ContainerRuntimeClientStrategyResult,

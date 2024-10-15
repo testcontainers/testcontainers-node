@@ -1,6 +1,7 @@
-import { Auth, AuthConfig, ContainerRuntimeConfig } from "./types";
-import { RegistryAuthLocator } from "./registry-auth-locator";
-import { registryMatches } from "./registry-matches";
+import { Auth, AuthConfig, ContainerRuntimeConfig } from "./types.ts";
+import { RegistryAuthLocator } from "./registry-auth-locator.ts";
+import { registryMatches } from "./registry-matches.ts";
+import { Buffer } from "node:buffer";
 
 export class Auths implements RegistryAuthLocator {
   public getName(): string {

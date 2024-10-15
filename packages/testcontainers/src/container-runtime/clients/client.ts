@@ -1,24 +1,25 @@
-import { ComposeClient, getComposeClient } from "./compose/compose-client";
-import { ContainerClient } from "./container/container-client";
-import { ImageClient } from "./image/image-client";
-import { NetworkClient } from "./network/network-client";
-import { ContainerRuntimeClientStrategy } from "../strategies/strategy";
-import { ConfigurationStrategy } from "../strategies/configuration-strategy";
-import { TestcontainersHostStrategy } from "../strategies/testcontainers-host-strategy";
-import { UnixSocketStrategy } from "../strategies/unix-socket-strategy";
-import { RootlessUnixSocketStrategy } from "../strategies/rootless-unix-socket-strategy";
-import { NpipeSocketStrategy } from "../strategies/npipe-socket-strategy";
-import { ComposeInfo, ContainerRuntimeInfo, Info, NodeInfo } from "./types";
+import { ComposeClient, getComposeClient } from "./compose/compose-client.ts";
+import { ContainerClient } from "./container/container-client.ts";
+import { ImageClient } from "./image/image-client.ts";
+import { NetworkClient } from "./network/network-client.ts";
+import { ContainerRuntimeClientStrategy } from "../strategies/strategy.ts";
+import { ConfigurationStrategy } from "../strategies/configuration-strategy.ts";
+import { TestcontainersHostStrategy } from "../strategies/testcontainers-host-strategy.ts";
+import { UnixSocketStrategy } from "../strategies/unix-socket-strategy.ts";
+import { RootlessUnixSocketStrategy } from "../strategies/rootless-unix-socket-strategy.ts";
+import { NpipeSocketStrategy } from "../strategies/npipe-socket-strategy.ts";
+import { ComposeInfo, ContainerRuntimeInfo, Info, NodeInfo } from "./types.ts";
 import Dockerode, { DockerOptions } from "dockerode";
-import { getRemoteContainerRuntimeSocketPath } from "../utils/remote-container-runtime-socket-path";
-import { resolveHost } from "../utils/resolve-host";
-import { PodmanContainerClient } from "./container/podman-container-client";
-import { DockerContainerClient } from "./container/docker-container-client";
-import { DockerImageClient } from "./image/docker-image-client";
-import { DockerNetworkClient } from "./network/docker-network-client";
-import { lookupHostIps } from "../utils/lookup-host-ips";
-import { isDefined, isEmptyString, log } from "../../common";
-import { LIB_VERSION } from "../../version";
+import { getRemoteContainerRuntimeSocketPath } from "../utils/remote-container-runtime-socket-path.ts";
+import { resolveHost } from "../utils/resolve-host.ts";
+import { PodmanContainerClient } from "./container/podman-container-client.ts";
+import { DockerContainerClient } from "./container/docker-container-client.ts";
+import { DockerImageClient } from "./image/docker-image-client.ts";
+import { DockerNetworkClient } from "./network/docker-network-client.ts";
+import { lookupHostIps } from "../utils/lookup-host-ips.ts";
+import { isDefined, isEmptyString, log } from "../../common/index.ts";
+import { LIB_VERSION } from "../../version.ts";
+import process from "node:process";
 
 export class ContainerRuntimeClient {
   constructor(
@@ -47,17 +48,17 @@ export async function getContainerRuntimeClient(): Promise<ContainerRuntimeClien
 
   for (const strategy of strategies) {
     try {
-      log.debug(`Checking container runtime strategy "${strategy.getName()}"...`);
+      console.log(`Checking container runtime strategy "${strategy.getName()}"...`);
       const client = await initStrategy(strategy);
       if (client) {
-        log.debug(`Container runtime strategy "${strategy.getName()}" works`);
+        console.log(`Container runtime strategy "${strategy.getName()}" works`);
         containerRuntimeClient = client;
         return client;
       }
     } catch (err) {
-      log.debug(`Container runtime strategy "${strategy.getName()}" does not work: "${err}"`);
+      console.log(`Container runtime strategy "${strategy.getName()}" does not work: "${err}"`);
       if (err !== null && typeof err === "object" && "stack" in err && typeof err.stack === "string") {
-        log.debug(err.stack);
+        console.log(err.stack);
       }
     }
   }
@@ -78,7 +79,7 @@ async function initStrategy(strategy: ContainerRuntimeClientStrategy): Promise<C
   };
   const dockerode = new Dockerode(dockerodeOptions);
 
-  log.trace("Fetching Docker info...");
+  console.log("Fetching Docker info...");
   const dockerodeInfo = await dockerode.info();
 
   const indexServerAddress =
@@ -86,7 +87,7 @@ async function initStrategy(strategy: ContainerRuntimeClientStrategy): Promise<C
       ? "https://index.docker.io/v1/"
       : dockerodeInfo.IndexServerAddress;
 
-  log.trace("Fetching remote container runtime socket path...");
+  console.log("Fetching remote container runtime socket path...");
   const remoteContainerRuntimeSocketPath = getRemoteContainerRuntimeSocketPath(result, dockerodeInfo.OperatingSystem);
 
   log.trace("Resolving host...");
@@ -101,9 +102,9 @@ async function initStrategy(strategy: ContainerRuntimeClientStrategy): Promise<C
     platform: process.platform,
   };
 
-  log.trace("Looking up host IPs...");
+  console.log("Looking up host IPs...");
   const hostIps = await lookupHostIps(host);
-
+  console.log(hostIps)
   log.trace("Initialising clients...");
   const containerClient = result.uri.includes("podman.sock")
     ? new PodmanContainerClient(dockerode)

@@ -1,10 +1,10 @@
-import { getContainerRuntimeConfig } from "./utils/config";
+import { getContainerRuntimeConfig } from "./utils/config.ts";
 import { DockerOptions } from "dockerode";
-import { URL } from "url";
-import fs from "fs/promises";
-import path from "path";
-import { ContainerRuntimeClientStrategyResult } from "./types";
-import { ContainerRuntimeClientStrategy } from "./strategy";
+import { URL } from "node:url";
+import fs from "node:fs/promises";
+import path from "node:path";
+import { ContainerRuntimeClientStrategyResult } from "./types.ts";
+import { ContainerRuntimeClientStrategy } from "./strategy.ts";
 
 export class ConfigurationStrategy implements ContainerRuntimeClientStrategy {
   private dockerHost!: string;

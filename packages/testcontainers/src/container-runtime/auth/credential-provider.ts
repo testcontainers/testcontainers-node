@@ -3,11 +3,11 @@ import {
   CredentialProviderListResponse,
   ContainerRuntimeConfig,
   AuthConfig,
-} from "./types";
-import { exec, spawn } from "child_process";
-import { RegistryAuthLocator } from "./registry-auth-locator";
-import { registryMatches } from "./registry-matches";
-import { log } from "../../common";
+} from "./types.ts";
+import { exec, spawn } from "node:child_process";
+import { RegistryAuthLocator } from "./registry-auth-locator.ts";
+import { registryMatches } from "./registry-matches.ts";
+import { log } from "../../common/index.ts";
 
 export abstract class CredentialProvider implements RegistryAuthLocator {
   abstract getName(): string;

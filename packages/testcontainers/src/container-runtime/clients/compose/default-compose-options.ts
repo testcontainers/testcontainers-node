@@ -1,7 +1,8 @@
 import { IDockerComposeOptions } from "docker-compose";
-import { EOL } from "os";
-import { ComposeOptions } from "./types";
-import { isNotEmptyString, composeLog } from "../../../common";
+import { EOL } from "node:os";
+import { ComposeOptions } from "./types.ts";
+import { isNotEmptyString, composeLog } from "../../../common/index.ts";
+import process from "node:process";
 
 export function defaultComposeOptions(
   environment: NodeJS.ProcessEnv,

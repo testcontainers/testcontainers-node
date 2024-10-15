@@ -1,9 +1,10 @@
-import path from "path";
-import { homedir } from "os";
-import { existsSync } from "fs";
-import { readFile } from "fs/promises";
+import path from "node:path";
+import { homedir } from "node:os";
+import { existsSync } from "node:fs";
+import { readFile } from "node:fs/promises";
 import propertiesReader from "properties-reader";
-import { log } from "../../../common";
+import { log } from "../../../common/index.ts";
+import process from "node:process";
 
 export type ContainerRuntimeConfig = {
   tcHost?: string;

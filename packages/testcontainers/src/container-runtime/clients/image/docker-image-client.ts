@@ -1,14 +1,15 @@
 import Dockerode, { ImageBuildOptions } from "dockerode";
 import byline from "byline";
-import tar from "tar-fs";
-import path from "path";
-import { existsSync, promises as fs } from "fs";
+import tar from "npm:tar-fs";
+import path from "node:path";
+import { existsSync, promises as fs } from "node:fs";
 import dockerIgnore from "@balena/dockerignore";
-import { getAuthConfig } from "../../auth/get-auth-config";
-import { ImageName } from "../../image-name";
-import { ImageClient } from "./image-client";
-import AsyncLock from "async-lock";
-import { log, buildLog, pullLog } from "../../../common";
+import { getAuthConfig } from "../../auth/get-auth-config.ts";
+import { ImageName } from "../../image-name.ts";
+import { ImageClient } from "./image-client.ts";
+// @ts-ignore missing types
+import AsyncLock from "npm:async-lock";
+import { log, buildLog, pullLog } from "../../../common/index.ts";
 
 export class DockerImageClient implements ImageClient {
   private readonly existingImages = new Set<string>();
@@ -21,7 +22,7 @@ export class DockerImageClient implements ImageClient {
       log.debug(`Building image "${opts.t}" with context "${context}"...`);
       const isDockerIgnored = await this.createIsDockerIgnoredFunction(context);
       const tarStream = tar.pack(context, {
-        ignore: (aPath) => {
+        ignore: (aPath: string) => {
           const relativePath = path.relative(context, aPath);
           if (relativePath === opts.dockerfile) {
             return false;
@@ -58,6 +59,7 @@ export class DockerImageClient implements ImageClient {
     }
 
     const dockerIgnorePatterns = await fs.readFile(dockerIgnoreFilePath, { encoding: "utf-8" });
+    // @ts-ignore ignorecase is not in the types
     const instance = dockerIgnore({ ignorecase: false });
     instance.add(dockerIgnorePatterns);
     const filter = instance.createFilter();

@@ -1,7 +1,7 @@
-import { promises as fs } from "fs";
-import { BuildArgs } from "../types";
-import { ImageName } from "../container-runtime";
-import { isNotEmptyString, log } from "../common";
+import { promises as fs } from "node:fs";
+import { BuildArgs } from "../types.ts";
+import { ImageName } from "../container-runtime/index.ts";
+import { isNotEmptyString, log } from "../common/index.ts";
 
 const buildArgRegex = /\${([^{]+)}/g;
 

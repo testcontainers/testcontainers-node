@@ -1,9 +1,10 @@
-import { existsSync } from "fs";
-import path from "path";
-import os from "os";
-import { ContainerRuntimeClientStrategy } from "./strategy";
-import { ContainerRuntimeClientStrategyResult } from "./types";
-import { isDefined } from "../../common";
+import { existsSync } from "node:fs";
+import path from "node:path";
+import os from "node:os";
+import { ContainerRuntimeClientStrategy } from "./strategy.ts";
+import { ContainerRuntimeClientStrategyResult } from "./types.ts";
+import { isDefined } from "../../common/index.ts";
+import process from "node:process";
 
 export class RootlessUnixSocketStrategy implements ContainerRuntimeClientStrategy {
   constructor(

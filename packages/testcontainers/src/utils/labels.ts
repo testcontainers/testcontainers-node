@@ -1,4 +1,4 @@
-import { LIB_VERSION } from "../version";
+import { LIB_VERSION } from "../version.ts";
 
 export const LABEL_TESTCONTAINERS = "org.testcontainers";
 export const LABEL_TESTCONTAINERS_LANG = "org.testcontainers.lang";

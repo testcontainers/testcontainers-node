@@ -1,8 +1,8 @@
 import { Container } from "dockerode";
-import { WaitStrategy } from "./wait-strategy";
-import { ContainerRuntimeClient } from "../container-runtime";
-import { BoundPorts } from "../utils/bound-ports";
-import { log } from "../common";
+import { WaitStrategy } from "./wait-strategy.ts";
+import { ContainerRuntimeClient } from "../container-runtime/index.ts";
+import { BoundPorts } from "../utils/bound-ports.ts";
+import { log } from "../common/index.ts";
 
 export const waitForContainer = async (
   client: ContainerRuntimeClient,

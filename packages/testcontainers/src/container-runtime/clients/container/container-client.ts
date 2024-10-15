@@ -6,8 +6,8 @@ import Dockerode, {
   ContainerLogsOptions,
   Network,
 } from "dockerode";
-import { Readable } from "stream";
-import { ExecOptions, ExecResult } from "./types";
+import { Readable } from "node:stream";
+import { ExecOptions, ExecResult } from "./types.ts";
 
 export interface ContainerClient {
   dockerode: Dockerode;

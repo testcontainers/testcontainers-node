@@ -1,6 +1,6 @@
-import net from "net";
-import dns from "dns";
-import { HostIp } from "../clients/types";
+import net from "node:net";
+import dns from "node:dns";
+import { HostIp } from "../clients/types.ts";
 
 export const lookupHostIps = async (host: string): Promise<HostIp[]> => {
   if (net.isIP(host) === 0) {

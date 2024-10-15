@@ -1,4 +1,4 @@
-import { Readable } from "stream";
+import { Readable } from "node:stream";
 import { Agent } from "undici";
 import { StartedDockerComposeEnvironment } from "../docker-compose-environment/started-docker-compose-environment";
 import { StartedTestContainer } from "../test-container";

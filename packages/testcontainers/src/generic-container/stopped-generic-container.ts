@@ -1,7 +1,7 @@
-import { StoppedTestContainer } from "../test-container";
+import { StoppedTestContainer } from "../test-container.ts";
 import Dockerode from "dockerode";
-import { log } from "../common";
-import { getContainerRuntimeClient } from "../container-runtime";
+import { log } from "../common/index.ts";
+import { getContainerRuntimeClient } from "../container-runtime/index.ts";
 
 export class StoppedGenericContainer implements StoppedTestContainer {
   constructor(private readonly container: Dockerode.Container) {}

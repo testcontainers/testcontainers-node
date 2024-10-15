@@ -1,4 +1,4 @@
-import { Clock, SystemClock, Time } from "./clock";
+import { Clock, SystemClock, Time } from "./clock.ts";
 
 export interface Retry<T, U> {
   retryUntil(

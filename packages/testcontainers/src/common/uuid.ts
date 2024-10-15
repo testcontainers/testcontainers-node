@@ -1,5 +1,5 @@
-import crypto from "crypto";
-import { hash } from "./hash";
+import crypto from "node:crypto";
+import { hash } from "./hash.ts";
 
 export interface Uuid {
   nextUuid(): string;

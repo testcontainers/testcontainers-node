@@ -1,8 +1,8 @@
-import { getContainerRuntimeConfig } from "./utils/config";
+import { getContainerRuntimeConfig } from "./utils/config.ts";
 import { DockerOptions } from "dockerode";
-import { URL } from "url";
-import { ContainerRuntimeClientStrategy } from "./strategy";
-import { ContainerRuntimeClientStrategyResult } from "./types";
+import { URL } from "node:url";
+import { ContainerRuntimeClientStrategy } from "./strategy.ts";
+import { ContainerRuntimeClientStrategyResult } from "./types.ts";
 
 export class TestcontainersHostStrategy implements ContainerRuntimeClientStrategy {
   getName(): string {

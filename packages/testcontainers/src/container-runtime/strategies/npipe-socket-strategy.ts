@@ -1,5 +1,6 @@
-import { ContainerRuntimeClientStrategy } from "./strategy";
-import { ContainerRuntimeClientStrategyResult } from "./types";
+import process from "node:process";
+import { ContainerRuntimeClientStrategy } from "./strategy.ts";
+import { ContainerRuntimeClientStrategyResult } from "./types.ts";
 
 export class NpipeSocketStrategy implements ContainerRuntimeClientStrategy {
   constructor(private readonly platform: NodeJS.Platform = process.platform) {}
