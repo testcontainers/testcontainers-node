@@ -207,8 +207,6 @@ const container = await new GenericContainer("alpine")
 
 A wait strategy will resolve the call to `.start()` only when a start condition is met. This allows you to ensure the container can perform its work before resolving.
 
-There are many built-in wait strategies, supporting varying conditions,  see [wait Strategies](../wait-strategies).
-
 A strategy can be a single condition or a composition of a few conditions. Here is an example of the latter:
 
 ```javascript
@@ -223,6 +221,8 @@ const container = await new GenericContainer("my-upstream-service")
   ]))
   .start();
 ```
+
+There are many built-in wait strategies, supporting varying conditions. For more info - see [wait Strategies](../wait-strategies).
 
 ### With default log driver
 
