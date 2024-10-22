@@ -202,6 +202,27 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+### With a wait strategy
+
+A wait strategy will resolve the call to `.start()` only when a start condition is met. This allows you to ensure the container can perform its work before resolving.
+
+There are many built-in wait strategies, supporting varying conditions,  [see here](../wait-strategies).
+
+A strategy can be a single condition or a composition of a few conditions. Here is an example of the latter:
+
+```javascript
+import { GenericContainer, Wait } from "testcontainers";
+
+const container = await new GenericContainer("my-upstream-service")
+  .withExposedPorts(3000)
+  .withWaitStrategy(Wait.forAll([
+    Wait.forListeningPorts(),
+    Wait.forLogMessage(/server started on port/),
+    Wait.forHealthCheck(),
+  ]))
+  .start();
+```
+
 ### With default log driver
 
 May be necessary when the driver of your docker host does not support reading logs, and you want to use the [log output wait strategy](../wait-strategies#log-output).
