@@ -1,5 +1,9 @@
 # Wait Strategies
 
+A wait strategy will resolve the call to `container.start()` only after a condition is met. This allows you to ensure the container can perform its work before resolving.
+
+There are many built-in wait strategies, supporting varying conditions, which are listed below.
+
 Note that the startup timeout of all wait strategies is configurable:
 
 ```javascript
