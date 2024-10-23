@@ -238,7 +238,7 @@ const w2 = Wait.forLogMessage("READY");
 const composite = Wait.forAll([w1, w2]).withDeadline(2000);
 ```
 
-## Other startup strategies
+## Custom Wait Strategies
 
 If these options do not meet your requirements, you can subclass `StartupCheckStrategy` and use `Dockerode`, which is the underlying Docker client used by Testcontainers:
 
