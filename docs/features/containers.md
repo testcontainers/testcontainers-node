@@ -5,7 +5,6 @@
 Create and start any container using a Generic Container:
 
 ```javascript
-
 const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("alpine").start();
