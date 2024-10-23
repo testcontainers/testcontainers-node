@@ -221,7 +221,7 @@ const container = await new GenericContainer("my-upstream-service")
   .start();
 ```
 
-There are many built-in wait strategies, supporting varying conditions. For more info - see [wait Strategies](../wait-strategies).
+There are many built-in wait strategies, supporting varying conditions, or you can write your own. For more info - see [wait Strategies](../wait-strategies).
 
 ### With default log driver
 
