@@ -9,7 +9,7 @@ import Dockerode, {
 } from "dockerode";
 import { PassThrough, Readable } from "stream";
 import { IncomingMessage } from "http";
-import { ExecOptions, ExecResult } from "./types";
+import { ContainerStatus, ExecOptions, ExecResult } from "./types";
 import byline from "byline";
 import { ContainerClient } from "./container-client";
 import { execLog, log, streamToString } from "../../../common";
@@ -29,15 +29,24 @@ export class DockerContainerClient implements ContainerClient {
     }
   }
 
-  async fetchByLabel(labelName: string, labelValue: string): Promise<Container | undefined> {
+  async fetchByLabel(
+    labelName: string,
+    labelValue: string,
+    opts: { status?: ContainerStatus[] } | undefined = undefined
+  ): Promise<Container | undefined> {
     try {
+      const filters: { [key: string]: string[] } = {
+        label: [`${labelName}=${labelValue}`],
+      };
+
+      if (opts?.status) {
+        filters.status = opts.status;
+      }
+
       log.debug(`Fetching container by label "${labelName}=${labelValue}"...`);
       const containers = await this.dockerode.listContainers({
         limit: 1,
-        filters: {
-          status: ["running"],
-          label: [`${labelName}=${labelValue}`],
-        },
+        filters,
       });
       if (containers.length === 0) {
         log.debug(`No container found with label "${labelName}=${labelValue}"`);

@@ -7,12 +7,16 @@ import Dockerode, {
   Network,
 } from "dockerode";
 import { Readable } from "stream";
-import { ExecOptions, ExecResult } from "./types";
+import { ContainerStatus, ExecOptions, ExecResult } from "./types";
 
 export interface ContainerClient {
   dockerode: Dockerode;
   getById(id: string): Container;
-  fetchByLabel(labelName: string, labelValue: string): Promise<Container | undefined>;
+  fetchByLabel(
+    labelName: string,
+    labelValue: string,
+    opts?: { status?: ContainerStatus[] }
+  ): Promise<Container | undefined>;
   fetchArchive(container: Container, path: string): Promise<NodeJS.ReadableStream>;
   putArchive(container: Dockerode.Container, stream: Readable, path: string): Promise<void>;
   list(): Promise<ContainerInfo[]>;

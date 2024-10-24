@@ -83,7 +83,7 @@ describe("GenericContainer reuse", () => {
     await container1.stop();
   });
 
-  it("should create a new container when an existing reusable container has stopped", async () => {
+  it("should create a new container when an existing reusable container has stopped and is removed", async () => {
     const container1 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withName("there_can_only_be_one")
       .withExposedPorts(8080)
@@ -99,6 +99,25 @@ describe("GenericContainer reuse", () => {
     await checkContainerIsHealthy(container2);
 
     expect(container1.getId()).not.toBe(container2.getId());
+    await container2.stop();
+  });
+
+  it("should reuse container when an existing reusable container has stopped but not removed", async () => {
+    const container1 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withName("there_can_only_be_one")
+      .withExposedPorts(8080)
+      .withReuse()
+      .start();
+    await container1.stop({ remove: false, timeout: 10000 });
+
+    const container2 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withName("there_can_only_be_one")
+      .withExposedPorts(8080)
+      .withReuse()
+      .start();
+    await checkContainerIsHealthy(container2);
+
+    expect(container1.getId()).toBe(container2.getId());
     await container2.stop();
   });
 
