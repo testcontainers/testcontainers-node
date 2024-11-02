@@ -1,0 +1,37 @@
+{
+  "name": "@testcontainers/cassandra",
+  "version": "10.13.2",
+  "license": "MIT",
+  "keywords": [
+    "mariadb",
+    "testing",
+    "docker",
+    "testcontainers"
+  ],
+  "description": "Cassandra module for Testcontainers",
+  "homepage": "https://github.com/testcontainers/testcontainers-node#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/testcontainers/testcontainers-node"
+  },
+  "bugs": {
+    "url": "https://github.com/testcontainers/testcontainers-node/issues"
+  },
+  "main": "build/index.js",
+  "files": [
+    "build"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "prepack": "shx cp ../../../README.md . && shx cp ../../../LICENSE .",
+    "build": "tsc --project tsconfig.build.json"
+  },
+  "dependencies": {
+    "testcontainers": "^10.13.2"
+  },
+  "devDependencies": {
+    "cassandra-driver": "^4.7.2"
+  }
+}
