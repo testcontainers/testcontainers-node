@@ -119,7 +119,9 @@ export class GenericContainer implements TestContainer {
 
     return reusableContainerCreationLock.acquire(containerHash, async () => {
       const container = await client.container.fetchByLabel(LABEL_TESTCONTAINERS_CONTAINER_HASH, containerHash, {
-        status: ContainerStatus.filter((status) => status !== "removing" && status !== "dead"),
+        status: ContainerStatus.filter(
+          (status) => status !== "removing" && status !== "dead" && status !== "restarting"
+        ),
       });
       if (container !== undefined) {
         log.debug(`Found container to reuse with hash "${containerHash}"`, { containerId: container.id });
