@@ -32,6 +32,7 @@ import { containerLog, hash, log } from "../common";
 import { BoundPorts } from "../utils/bound-ports";
 import { StartedNetwork } from "../network/network";
 import { mapInspectResult } from "../utils/map-inspect-result";
+import { CONTAINER_STATUSES } from "../container-runtime/clients/container/types";
 
 const reusableContainerCreationLock = new AsyncLock();
 
@@ -117,7 +118,11 @@ export class GenericContainer implements TestContainer {
     log.debug(`Container reuse has been enabled with hash "${containerHash}"`);
 
     return reusableContainerCreationLock.acquire(containerHash, async () => {
-      const container = await client.container.fetchByLabel(LABEL_TESTCONTAINERS_CONTAINER_HASH, containerHash);
+      const container = await client.container.fetchByLabel(LABEL_TESTCONTAINERS_CONTAINER_HASH, containerHash, {
+        status: CONTAINER_STATUSES.filter(
+          (status) => status !== "removing" && status !== "dead" && status !== "restarting"
+        ),
+      });
       if (container !== undefined) {
         log.debug(`Found container to reuse with hash "${containerHash}"`, { containerId: container.id });
         return this.reuseContainer(client, container);
@@ -128,7 +133,14 @@ export class GenericContainer implements TestContainer {
   }
 
   private async reuseContainer(client: ContainerRuntimeClient, container: Container) {
-    const inspectResult = await client.container.inspect(container);
+    let inspectResult = await client.container.inspect(container);
+    if (!inspectResult.State.Running) {
+      log.debug("Reused container is not running, attempting to start it");
+      await client.container.start(container);
+      // Refetch the inspect result to get the updated state
+      inspectResult = await client.container.inspect(container);
+    }
+
     const mappedInspectResult = mapInspectResult(inspectResult);
     const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, mappedInspectResult).filter(
       this.exposedPorts
