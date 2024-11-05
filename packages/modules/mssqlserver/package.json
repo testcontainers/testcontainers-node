@@ -32,9 +32,10 @@
   },
   "devDependencies": {
     "@types/mssql": "^8.1.2",
-    "mssql": "^10.0.4"
+    "mssql": "^11.0.1"
   },
   "dependencies": {
+    "lint-staged": "15.2.10",
     "testcontainers": "^10.13.2"
   }
 }
