@@ -34,7 +34,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: Install dependencies
-        run: npm ci --omit=optional
+        run: npm ci
       - name: Build workspaces
         run: npm run build -ws
       - name: Remove dev dependencies
