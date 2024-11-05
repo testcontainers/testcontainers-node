@@ -32,7 +32,7 @@ import { containerLog, hash, log } from "../common";
 import { BoundPorts } from "../utils/bound-ports";
 import { StartedNetwork } from "../network/network";
 import { mapInspectResult } from "../utils/map-inspect-result";
-import { ContainerStatus } from "../container-runtime/clients/container/types";
+import { CONTAINER_STATUSES } from "../container-runtime/clients/container/types";
 
 const reusableContainerCreationLock = new AsyncLock();
 
@@ -119,7 +119,7 @@ export class GenericContainer implements TestContainer {
 
     return reusableContainerCreationLock.acquire(containerHash, async () => {
       const container = await client.container.fetchByLabel(LABEL_TESTCONTAINERS_CONTAINER_HASH, containerHash, {
-        status: ContainerStatus.filter(
+        status: CONTAINER_STATUSES.filter(
           (status) => status !== "removing" && status !== "dead" && status !== "restarting"
         ),
       });
