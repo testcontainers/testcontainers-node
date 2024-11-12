@@ -50,6 +50,7 @@ nav:
       - Elasticsearch: modules/elasticsearch.md
       - GCloud: modules/gcloud.md
       - HiveMQ: modules/hivemq.md
+      - K3s: modules/k3s.md
       - Kafka: modules/kafka.md
       - Localstack: modules/localstack.md
       - MariaDB: modules/mariadb.md
