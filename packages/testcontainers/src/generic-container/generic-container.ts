@@ -264,6 +264,11 @@ export class GenericContainer implements TestContainer {
     reused: boolean
   ): Promise<void>;
 
+  public withHostname(hostname: string): this {
+    this.createOpts.Hostname = hostname;
+    return this;
+  }
+
   public withCommand(command: string[]): this {
     this.createOpts.Cmd = command;
     return this;
