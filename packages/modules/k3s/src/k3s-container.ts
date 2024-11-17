@@ -1,8 +1,8 @@
-import { AbstractStartedContainer, GenericContainer, Wait, type StartedTestContainer } from "testcontainers";
+import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 import tar from "tar-stream";
 import { basename } from "node:path";
 
-// TODO: Update @types/dockerode
+// TODO: Implement GenericContainer.withCgroupnsMode
 // https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/71160
 type CgroupnsModeConfig = { CgroupnsMode?: "private" | "host" };
 
@@ -10,22 +10,16 @@ const KUBE_CONFIG_PATH = "/etc/rancher/k3s/k3s.yaml";
 const KUBE_SECURE_PORT = 6443;
 const RANCHER_WEBHOOK_PORT = 8443;
 
-/** Path to the k3s manifests directory. These are applied automatically on startup. */
-export const K3S_SERVER_MANIFESTS = "/var/lib/rancher/k3s/server/manifests/";
-
 export class K3sContainer extends GenericContainer {
-  constructor(image = "rancher/k3s:v1.31.2-k3s1") {
+  constructor(image: string) {
     super(image);
     (this.hostConfig as CgroupnsModeConfig).CgroupnsMode = "host";
     this.withExposedPorts(KUBE_SECURE_PORT, RANCHER_WEBHOOK_PORT)
       .withPrivilegedMode()
-      // TODO: Determine if/when bind mount is needed
-      .withBindMounts([{ mode: "rw", source: "/sys/fs/cgroup", target: "/sys/fs/cgroup" }])
+      // Why do Java and .NET implementations bind cgroup but Golang does not?
+      .withBindMounts([{ source: "/sys/fs/cgroup", target: "/sys/fs/cgroup" }])
       .withTmpFs({ "/run": "rw" })
       .withTmpFs({ "/var/run": "rw" })
-      // TODO: If tls-san is desirable, determine how to obtain the host address
-      // .withCommand(["server", "--disable=traefik", `--tls-san=${this.getHost()}`])
-      .withCommand(["server", "--disable=traefik"])
       .withWaitStrategy(Wait.forLogMessage("Node controller sync successful"))
       .withStartupTimeout(120_000);
   }
@@ -33,19 +27,33 @@ export class K3sContainer extends GenericContainer {
   public override async start(): Promise<StartedK3sContainer> {
     const container = await super.start();
     const tarStream = await container.copyArchiveFromContainer(KUBE_CONFIG_PATH);
-    const kubeConfig = await extractFromTarStream(tarStream, basename(KUBE_CONFIG_PATH));
-    return new StartedK3sContainer(container, kubeConfig);
+    const rawKubeConfig = await extractFromTarStream(tarStream, basename(KUBE_CONFIG_PATH));
+    return new StartedK3sContainer(container, rawKubeConfig);
+  }
+
+  protected override async beforeContainerCreated() {
+    let command = this.createOpts.Cmd ?? ["server", "--disable=traefik"];
+    if (this.networkMode && this.networkAliases.length > 0) {
+      const aliases = this.networkAliases.join();
+      command = [...command, `--tls-san=${aliases}`];
+    }
+    this.withCommand(command);
   }
 }
 
 export class StartedK3sContainer extends AbstractStartedContainer {
-  constructor(startedTestContainer: StartedTestContainer, private readonly kubeConfig: string) {
+  constructor(startedTestContainer: StartedTestContainer, private readonly rawKubeConfig: string) {
     super(startedTestContainer);
   }
 
   public getKubeConfig(): string {
     const serverUrl = `https://${this.getHost()}:${this.getMappedPort(KUBE_SECURE_PORT)}`;
-    return kubeConfigWithServerUrl(this.kubeConfig, serverUrl);
+    return kubeConfigWithServerUrl(this.rawKubeConfig, serverUrl);
+  }
+
+  public getAliasedKubeConfig(networkAlias: string) {
+    const serverUrl = `https://${networkAlias}:${KUBE_SECURE_PORT}`;
+    return kubeConfigWithServerUrl(this.rawKubeConfig, serverUrl);
   }
 }
 
@@ -73,6 +81,6 @@ async function extractFromTarStream(tarStream: NodeJS.ReadableStream, entryName:
   return extracted;
 }
 
-export function kubeConfigWithServerUrl(kubeConfig: string, server: string): string {
+function kubeConfigWithServerUrl(kubeConfig: string, server: string): string {
   return kubeConfig.replace(/server:\s?[:/.\d\w]+/, `server: ${server}`);
 }
