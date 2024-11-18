@@ -47,6 +47,7 @@ describe("CloudStorageEmulatorContainer", () => {
     server.close();
   });
 
+  // cloud-storage {
   it("should work using default version", async () => {
     const cloudstorageEmulatorContainer = await new CloudStorageEmulatorContainer().start();
 
@@ -54,6 +55,7 @@ describe("CloudStorageEmulatorContainer", () => {
 
     await cloudstorageEmulatorContainer.stop();
   });
+  // }
 
   it("should use the provided external URL", async () => {
     const cloudstorageEmulatorContainer = await new CloudStorageEmulatorContainer()

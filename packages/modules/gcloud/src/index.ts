@@ -2,3 +2,4 @@ export { FirestoreEmulatorContainer, StartedFirestoreEmulatorContainer } from ".
 export { DatastoreEmulatorContainer, StartedDatastoreEmulatorContainer } from "./datastore-emulator-container";
 export { PubSubEmulatorContainer, StartedPubSubEmulatorContainer } from "./pubsub-emulator-container";
 export { CloudStorageEmulatorContainer, StartedCloudStorageEmulatorContainer } from "./cloudstorage-emulator-container";
+export { BigQueryEmulatorContainer, StartedBigQueryEmulatorContainer } from "./bigquery-emulator-container";
