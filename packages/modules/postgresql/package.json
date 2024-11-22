@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/postgresql",
-  "version": "10.14.0",
+  "version": "10.15.0",
   "license": "MIT",
   "keywords": [
     "postgres",
@@ -34,6 +34,6 @@
     "pg": "^8.12.0"
   },
   "dependencies": {
-    "testcontainers": "^10.14.0"
+    "testcontainers": "^10.15.0"
   }
 }
