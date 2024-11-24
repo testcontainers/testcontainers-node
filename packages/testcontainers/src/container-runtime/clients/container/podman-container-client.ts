@@ -93,7 +93,7 @@ export class PodmanContainerClient extends DockerContainerClient {
       // Podman may use the same demuxing approach as Docker
       this.dockerode.modem.demuxStream(stream, stdoutStream, stderrStream);
 
-      const processStream = (stream: Readable, chunks: string[], label: "stdout" | "stderr") => {
+      const processStream = (stream: Readable, chunks: string[]) => {
         stream.on("data", (chunk) => {
           chunks.push(chunk.toString());
           if (opts?.log && execLog.enabled()) {
@@ -102,8 +102,8 @@ export class PodmanContainerClient extends DockerContainerClient {
         });
       };
 
-      processStream(stdoutStream, stdoutChunks, "stdout");
-      processStream(stderrStream, stderrChunks, "stderr");
+      processStream(stdoutStream, stdoutChunks);
+      processStream(stderrStream, stderrChunks);
 
       await new Promise((res, rej) => {
         stream.on("end", res);
