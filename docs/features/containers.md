@@ -537,6 +537,26 @@ const { output, exitCode } = await container.exec(["echo", "hello", "world"], {
 	}
 });
 ```
+To handle cases where you need separate outputs for `stdout` and `stderr`, you can use the `execVerbose` method. 
+It functions similarly to `exec`, but provides detailed output including `stdout`, `stderr`, and `exitCode`.
+
+```javascript
+const container = await new GenericContainer("alpine")
+  .withCommand(["sleep", "infinity"])
+  .start();
+
+const { stdout, stderr, exitCode } = await container.execVerbose(["echo", "hello", "world"], {
+	workingDir: "/app/src/",
+	user: "1000:1000",
+	env: {
+		"VAR1": "enabled",
+		"VAR2": "/app/debug.log",
+	}
+});
+```
+Use `execVerbose` when you require more granular control over command outputs,
+while retaining similar options and functionality as `exec`.
+
 
 ## Streaming logs
 
