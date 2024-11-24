@@ -85,6 +85,8 @@ export type ExecOptions = { workingDir: string; user: string; env: Environment }
 
 export type ExecResult = { output: string; exitCode: number };
 
+export type ExecVerboseResult = { stdout: string; stderr: string; exitCode: number };
+
 export type HealthCheckStatus = "none" | "starting" | "unhealthy" | "healthy";
 
 export type NetworkSettings = {

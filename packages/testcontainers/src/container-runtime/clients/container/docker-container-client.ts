@@ -9,7 +9,7 @@ import Dockerode, {
 } from "dockerode";
 import { PassThrough, Readable } from "stream";
 import { IncomingMessage } from "http";
-import { ContainerStatus, ExecOptions, ExecResult } from "./types";
+import { ContainerStatus, ExecOptions, ExecResult, ExecVerboseResult } from "./types";
 import byline from "byline";
 import { ContainerClient } from "./container-client";
 import { execLog, log, streamToString } from "../../../common";
@@ -229,6 +229,75 @@ export class DockerContainerClient implements ContainerClient {
       return { output, exitCode };
     } catch (err) {
       log.error(`Failed to exec container with command "${command.join(" ")}": ${err}: ${chunks.join("")}`, {
+        containerId: container.id,
+      });
+      throw err;
+    }
+  }
+
+  async execVerbose(container: Container, command: string[], opts?: Partial<ExecOptions>): Promise<ExecVerboseResult> {
+    const execOptions: ExecCreateOptions = {
+      Cmd: command,
+      AttachStdout: true,
+      AttachStderr: true,
+    };
+
+    if (opts?.env !== undefined) {
+      execOptions.Env = Object.entries(opts.env).map(([key, value]) => `${key}=${value}`);
+    }
+    if (opts?.workingDir !== undefined) {
+      execOptions.WorkingDir = opts.workingDir;
+    }
+    if (opts?.user !== undefined) {
+      execOptions.User = opts.user;
+    }
+
+    const stdoutChunks: string[] = [];
+    const stderrChunks: string[] = [];
+
+    try {
+      if (opts?.log) {
+        log.debug(`Execing container with command "${command.join(" ")}"...`, { containerId: container.id });
+      }
+
+      const exec = await container.exec(execOptions);
+      const stream = await exec.start({ stdin: true, Detach: false, Tty: false });
+
+      const stdoutStream = new PassThrough();
+      const stderrStream = new PassThrough();
+
+      this.dockerode.modem.demuxStream(stream, stdoutStream, stderrStream);
+
+      const processStream = (stream: Readable, label: "stdout" | "stderr") => {
+        stream.on("data", (chunk) => {
+          if (label === "stdout") stdoutChunks.push(chunk);
+          if (label === "stderr") stderrChunks.push(chunk);
+
+          if (opts?.log && execLog.enabled()) {
+            execLog.trace(chunk.toString(), { containerId: container.id });
+          }
+        });
+      };
+
+      processStream(stdoutStream, "stdout");
+      processStream(stderrStream, "stderr");
+
+      await new Promise((res, rej) => {
+        stream.on("end", res);
+        stream.on("error", rej);
+      });
+      stream.destroy();
+
+      const inspectResult = await exec.inspect();
+      const exitCode = inspectResult.ExitCode ?? -1;
+      const stdout = stdoutChunks.join("");
+      const stderr = stderrChunks.join("");
+      if (opts?.log) {
+        log.debug(`Execed container with command "${command.join(" ")}"...`, { containerId: container.id });
+      }
+      return { stdout, stderr, exitCode };
+    } catch (err) {
+      log.error(`Failed to exec container with command "${command.join(" ")}": ${err}: ${stderrChunks.join("")}`, {
         containerId: container.id,
       });
       throw err;

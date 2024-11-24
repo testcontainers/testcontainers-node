@@ -84,6 +84,39 @@ describe("GenericContainer", () => {
     await container.stop();
   });
 
+  it("should execute a command on a running container with verbose output", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
+
+    const { stdout, exitCode } = await container.execVerbose(["echo", "hello", "world"]);
+
+    expect(exitCode).toBe(0);
+    expect(stdout).toEqual(expect.stringContaining("hello world"));
+
+    await container.stop();
+  });
+
+  it("should capture warnings from stderr with verbose output", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
+
+    const { stderr, exitCode } = await container.execVerbose(["sh", "-c", "echo 'Warning!' 1>&2"]);
+
+    expect(exitCode).toBe(0);
+    expect(stderr).toEqual(expect.stringContaining("Warning!"));
+
+    await container.stop();
+  });
+
+  it("should capture errors from stderr with verbose logging", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
+
+    const { stderr, exitCode } = await container.execVerbose(["sh", "-c", "exit 1"]);
+
+    expect(exitCode).toBe(1);
+    expect(stderr).toEqual(expect.stringContaining(""));
+
+    await container.stop();
+  });
+
   it("should set environment variables", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withEnvironment({ customKey: "customValue" })

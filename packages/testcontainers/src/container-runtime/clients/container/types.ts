@@ -4,6 +4,8 @@ export type ExecOptions = { workingDir: string; user: string; env: Environment; 
 
 export type ExecResult = { output: string; exitCode: number };
 
+export type ExecVerboseResult = { stdout: string; stderr: string; exitCode: number };
+
 export const CONTAINER_STATUSES = ["created", "restarting", "running", "removing", "paused", "exited", "dead"] as const;
 
 export type ContainerStatus = (typeof CONTAINER_STATUSES)[number];

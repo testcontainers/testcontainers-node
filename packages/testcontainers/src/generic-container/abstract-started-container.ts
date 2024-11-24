@@ -1,5 +1,13 @@
 import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
-import { ContentToCopy, DirectoryToCopy, ExecOptions, ExecResult, FileToCopy, Labels } from "../types";
+import {
+  ContentToCopy,
+  DirectoryToCopy,
+  ExecOptions,
+  ExecResult,
+  ExecVerboseResult,
+  FileToCopy,
+  Labels,
+} from "../types";
 import { Readable } from "stream";
 
 export class AbstractStartedContainer implements StartedTestContainer {
@@ -81,6 +89,10 @@ export class AbstractStartedContainer implements StartedTestContainer {
 
   public exec(command: string | string[], opts?: Partial<ExecOptions>): Promise<ExecResult> {
     return this.startedTestContainer.exec(command, opts);
+  }
+
+  public execVerbose(command: string | string[], opts?: Partial<ExecOptions>): Promise<ExecVerboseResult> {
+    return this.startedTestContainer.execVerbose(command, opts);
   }
 
   public logs(opts?: { since?: number; tail?: number }): Promise<Readable> {
