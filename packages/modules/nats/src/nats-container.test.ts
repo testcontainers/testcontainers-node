@@ -67,6 +67,44 @@ describe("NatsContainer", () => {
   });
   // }
 
+  // JetStream {
+  it("should start with JetStream ", async () => {
+    // set username and password like this
+    const container = await new NatsContainer().withJS().start();
+
+    const nc = await connect(container.getConnectionOptions());
+
+    // just take manager for check js
+    const jsm = await nc.jetstream().jetstreamManager()
+
+    // close the connection
+    await nc.close();
+    // check if the close was OK
+    const err = await nc.closed();
+    expect(err).toBe(undefined);
+
+    await container.stop();
+  });
+
+  it("should fail without JetStream ", async () => {
+    // set username and password like this
+    const container = await new NatsContainer().start();
+
+    const nc = await connect(container.getConnectionOptions());
+
+    // just take manager for check js
+    await expect(nc.jetstream().jetstreamManager()).rejects.toThrowError('503')
+
+    // close the connection
+    await nc.close();
+    // check if the close was OK
+    const err = await nc.closed();
+    expect(err).toBe(undefined);
+
+    await container.stop();
+  });
+  // }
+
   it("should immediately end when started with version argument ", async () => {
     // for the complete list of available arguments see:
     // See Command Line Options section inside [NATS docker image documentation](https://hub.docker.com/_/nats)

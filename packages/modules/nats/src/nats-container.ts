@@ -7,25 +7,14 @@ const HTTP_MANAGEMENT_PORT = 8222;
 const USER_ARGUMENT_KEY = "--user";
 const PASS_ARGUMENT_KEY = "--pass";
 
-function buildCmdsFromArgs(args: { [p: string]: string }): string[] {
-  const result: string[] = [];
-  result.push("nats-server");
-
-  for (const argsKey in args) {
-    result.push(argsKey);
-    result.push(args[argsKey]);
-  }
-  return result;
-}
-
 export class NatsContainer extends GenericContainer {
-  private args: { [name: string]: string } = {};
+  private args = new Set<string>()
+  private values = new Map<string, string>()
 
   constructor(image = "nats:2.8.4-alpine") {
     super(image);
-
-    this.args[USER_ARGUMENT_KEY] = "test";
-    this.args[PASS_ARGUMENT_KEY] = "test";
+    this.withUsername('test')
+    this.withPass('test')
 
     this.withExposedPorts(CLIENT_PORT, ROUTING_PORT_FOR_CLUSTERING, HTTP_MANAGEMENT_PORT)
       .withWaitStrategy(Wait.forLogMessage(/.*Server is ready.*/))
@@ -33,18 +22,33 @@ export class NatsContainer extends GenericContainer {
   }
 
   public withUsername(user: string): this {
-    this.args[USER_ARGUMENT_KEY] = user;
+    this.withArg(USER_ARGUMENT_KEY, user)
+    return this;
+  }
+
+  /**
+   * Enable JetStream
+   * @returns {this}
+   */
+  public withJS(): this {
+    this.withArg('-js')
     return this;
   }
 
   public withPass(pass: string): this {
-    this.args[PASS_ARGUMENT_KEY] = pass;
+    this.withArg(PASS_ARGUMENT_KEY, pass)
     return this;
   }
 
-  public withArg(name: string, value: string) {
+  public withArg(name: string, value: string): this
+  public withArg(name: string): this
+  public withArg(...args: [string, string] | [string]): this {
+    let [name, value] = args
     name = NatsContainer.ensureDashInFrontOfArgumentName(name);
-    this.args[name] = value;
+    this.args.add(name)
+    if (args.length === 2) {
+      this.values.set(name, value!)
+    }
     return this;
   }
 
@@ -61,16 +65,27 @@ export class NatsContainer extends GenericContainer {
   }
 
   public override async start(): Promise<StartedNatsContainer> {
-    this.withCommand(buildCmdsFromArgs(this.args));
+    this.withCommand(this.getNormalizedCommand());
     return new StartedNatsContainer(await super.start(), this.getUser(), this.getPass());
   }
 
   private getUser(): string {
-    return this.args[USER_ARGUMENT_KEY];
+    return this.values.get(USER_ARGUMENT_KEY)!;
   }
 
   private getPass(): string {
-    return this.args[PASS_ARGUMENT_KEY];
+    return this.values.get(PASS_ARGUMENT_KEY)!;
+  }
+
+  private getNormalizedCommand(): string[] {
+    const result: string[] = ['nats-server']
+    for (const arg of this.args) {
+      result.push(arg)
+      if (this.values.has(arg)) {
+        result.push(this.values.get(arg)!)
+      }
+    }
+    return result
   }
 }
 
