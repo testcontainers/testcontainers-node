@@ -69,13 +69,13 @@ describe("NatsContainer", () => {
 
   // JetStream {
   it("should start with JetStream ", async () => {
-    // set username and password like this
+    // enable JS
     const container = await new NatsContainer().withJS().start();
 
     const nc = await connect(container.getConnectionOptions());
 
     // just take manager for check js
-    const jsm = await nc.jetstream().jetstreamManager()
+    await nc.jetstream().jetstreamManager()
 
     // close the connection
     await nc.close();
@@ -87,7 +87,6 @@ describe("NatsContainer", () => {
   });
 
   it("should fail without JetStream ", async () => {
-    // set username and password like this
     const container = await new NatsContainer().start();
 
     const nc = await connect(container.getConnectionOptions());
