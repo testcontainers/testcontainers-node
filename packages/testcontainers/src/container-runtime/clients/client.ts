@@ -12,7 +12,6 @@ import { ComposeInfo, ContainerRuntimeInfo, Info, NodeInfo } from "./types";
 import Dockerode, { DockerOptions } from "dockerode";
 import { getRemoteContainerRuntimeSocketPath } from "../utils/remote-container-runtime-socket-path";
 import { resolveHost } from "../utils/resolve-host";
-import { PodmanContainerClient } from "./container/podman-container-client";
 import { DockerContainerClient } from "./container/docker-container-client";
 import { DockerImageClient } from "./image/docker-image-client";
 import { DockerNetworkClient } from "./network/docker-network-client";
@@ -105,9 +104,7 @@ async function initStrategy(strategy: ContainerRuntimeClientStrategy): Promise<C
   const hostIps = await lookupHostIps(host);
 
   log.trace("Initialising clients...");
-  const containerClient = result.uri.includes("podman.sock")
-    ? new PodmanContainerClient(dockerode)
-    : new DockerContainerClient(dockerode);
+  const containerClient = new DockerContainerClient(dockerode);
   const imageClient = new DockerImageClient(dockerode, indexServerAddress);
   const networkClient = new DockerNetworkClient(dockerode);
 

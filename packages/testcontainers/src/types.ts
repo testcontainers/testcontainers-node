@@ -83,7 +83,7 @@ export type BuildArgs = { [key in string]: string };
 
 export type ExecOptions = { workingDir: string; user: string; env: Environment };
 
-export type ExecResult = { output: string; exitCode: number };
+export type ExecResult = { output: string; stdout: string; stderr: string; exitCode: number };
 
 export type HealthCheckStatus = "none" | "starting" | "unhealthy" | "healthy";
 

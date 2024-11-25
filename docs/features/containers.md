@@ -503,15 +503,16 @@ const container = await new GenericContainer("alpine")
 
 ## Running commands
 
-To run a command inside an already started container use the `exec` method. The command will be run in the container's
-working directory, returning the command output and exit code:
+To run a command inside an already started container, use the exec method. 
+The command will be run in the container's working directory,
+returning the combined output (`output`), standard output (`stdout`), standard error (`stderr`), and exit code (`exitCode`).
 
 ```javascript
 const container = await new GenericContainer("alpine")
   .withCommand(["sleep", "infinity"])
   .start();
 
-const { output, exitCode } = await container.exec(["echo", "hello", "world"]);
+const { output, stdout, stderr, exitCode } = await container.exec(["echo", "hello", "world"]);
 ```
 
 The following options can be provided to modify the command execution:
@@ -528,7 +529,7 @@ const container = await new GenericContainer("alpine")
   .withCommand(["sleep", "infinity"])
   .start();
 
-const { output, exitCode } = await container.exec(["echo", "hello", "world"], {
+const { output, stdout, stderr, exitCode } = await container.exec(["echo", "hello", "world"], {
 	workingDir: "/app/src/",
 	user: "1000:1000",
 	env: {
@@ -537,6 +538,8 @@ const { output, exitCode } = await container.exec(["echo", "hello", "world"], {
 	}
 });
 ```
+
+
 
 ## Streaming logs
 

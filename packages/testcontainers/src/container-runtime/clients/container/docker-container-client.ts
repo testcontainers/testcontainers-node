@@ -10,7 +10,6 @@ import Dockerode, {
 import { PassThrough, Readable } from "stream";
 import { IncomingMessage } from "http";
 import { ContainerStatus, ExecOptions, ExecResult } from "./types";
-import byline from "byline";
 import { ContainerClient } from "./container-client";
 import { execLog, log, streamToString } from "../../../common";
 
@@ -201,20 +200,38 @@ export class DockerContainerClient implements ContainerClient {
       execOptions.User = opts.user;
     }
 
-    const chunks: string[] = [];
+    const outputChunks: string[] = [];
+    const stdoutChunks: string[] = [];
+    const stderrChunks: string[] = [];
+
     try {
       if (opts?.log) {
         log.debug(`Execing container with command "${command.join(" ")}"...`, { containerId: container.id });
       }
 
       const exec = await container.exec(execOptions);
-      const stream = await exec.start({ stdin: true, Detach: false, Tty: true });
-      if (opts?.log && execLog.enabled()) {
-        byline(stream).on("data", (line) => execLog.trace(line, { containerId: container.id }));
-      }
+      const stream = await exec.start({ stdin: true, Detach: false, Tty: false });
+
+      const stdoutStream = new PassThrough();
+      const stderrStream = new PassThrough();
+
+      this.dockerode.modem.demuxStream(stream, stdoutStream, stderrStream);
+
+      const processStream = (stream: Readable, chunks: string[]) => {
+        stream.on("data", (chunk) => {
+          chunks.push(chunk.toString());
+          outputChunks.push(chunk.toString());
+
+          if (opts?.log && execLog.enabled()) {
+            execLog.trace(chunk.toString(), { containerId: container.id });
+          }
+        });
+      };
+
+      processStream(stdoutStream, stdoutChunks);
+      processStream(stderrStream, stderrChunks);
 
       await new Promise((res, rej) => {
-        stream.on("data", (chunk) => chunks.push(chunk));
         stream.on("end", res);
         stream.on("error", rej);
       });
@@ -222,13 +239,16 @@ export class DockerContainerClient implements ContainerClient {
 
       const inspectResult = await exec.inspect();
       const exitCode = inspectResult.ExitCode ?? -1;
-      const output = chunks.join("");
+      const output = outputChunks.join("");
+      const stdout = stdoutChunks.join("");
+      const stderr = stderrChunks.join("");
+
       if (opts?.log) {
         log.debug(`Execed container with command "${command.join(" ")}"...`, { containerId: container.id });
       }
-      return { output, exitCode };
+      return { output, stdout, stderr, exitCode };
     } catch (err) {
-      log.error(`Failed to exec container with command "${command.join(" ")}": ${err}: ${chunks.join("")}`, {
+      log.error(`Failed to exec container with command "${command.join(" ")}": ${err}: ${outputChunks.join("")}`, {
         containerId: container.id,
       });
       throw err;

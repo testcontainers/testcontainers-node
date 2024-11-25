@@ -81,5 +81,6 @@ export interface StartedTestContainer {
 
 export interface StoppedTestContainer {
   getId(): string;
+
   copyArchiveFromContainer(path: string): Promise<NodeJS.ReadableStream>;
 }
