@@ -249,7 +249,7 @@ export class DockerContainerClient implements ContainerClient {
       }
       return { output, stdout, stderr, exitCode };
     } catch (err) {
-      log.error(`Failed to exec container with command "${command.join(" ")}": ${err}: ${stderrChunks.join("")}`, {
+      log.error(`Failed to exec container with command "${command.join(" ")}": ${err}: ${outputChunks.join("")}`, {
         containerId: container.id,
       });
       throw err;
