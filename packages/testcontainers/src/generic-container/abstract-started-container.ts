@@ -4,7 +4,6 @@ import {
   DirectoryToCopy,
   ExecOptions,
   ExecResult,
-  ExecVerboseResult,
   FileToCopy,
   Labels,
 } from "../types";
@@ -89,10 +88,6 @@ export class AbstractStartedContainer implements StartedTestContainer {
 
   public exec(command: string | string[], opts?: Partial<ExecOptions>): Promise<ExecResult> {
     return this.startedTestContainer.exec(command, opts);
-  }
-
-  public execVerbose(command: string | string[], opts?: Partial<ExecOptions>): Promise<ExecVerboseResult> {
-    return this.startedTestContainer.execVerbose(command, opts);
   }
 
   public logs(opts?: { since?: number; tail?: number }): Promise<Readable> {
