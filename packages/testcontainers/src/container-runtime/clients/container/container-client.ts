@@ -8,7 +8,6 @@ import Dockerode, {
 } from "dockerode";
 import { Readable } from "stream";
 import { ContainerStatus, ExecOptions, ExecResult } from "./types";
-import { ExecVerboseResult } from "../../../types";
 
 export interface ContainerClient {
   dockerode: Dockerode;
@@ -31,7 +30,6 @@ export interface ContainerClient {
   attach(container: Container): Promise<Readable>;
   logs(container: Container, opts?: ContainerLogsOptions): Promise<Readable>;
   exec(container: Container, command: string[], opts?: Partial<ExecOptions>): Promise<ExecResult>;
-  execVerbose(container: Container, command: string[], opts?: Partial<ExecOptions>): Promise<ExecVerboseResult>;
   restart(container: Container, opts?: { timeout: number }): Promise<void>;
   events(container: Container, eventNames: string[]): Promise<Readable>;
   remove(container: Container, opts?: { removeVolumes: boolean }): Promise<void>;

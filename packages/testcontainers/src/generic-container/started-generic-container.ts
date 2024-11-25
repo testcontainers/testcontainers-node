@@ -5,7 +5,6 @@ import {
   DirectoryToCopy,
   ExecOptions,
   ExecResult,
-  ExecVerboseResult,
   FileToCopy,
   Labels,
 } from "../types";
@@ -184,17 +183,6 @@ export class StartedGenericContainer implements StartedTestContainer {
     const client = await getContainerRuntimeClient();
     log.debug(`Executing command "${commandStr}"...`, { containerId: this.container.id });
     const output = await client.container.exec(this.container, commandArr, opts);
-    log.debug(`Executed command "${commandStr}"...`, { containerId: this.container.id });
-
-    return output;
-  }
-
-  public async execVerbose(command: string | string[], opts?: Partial<ExecOptions>): Promise<ExecVerboseResult> {
-    const commandArr = Array.isArray(command) ? command : command.split(" ");
-    const commandStr = commandArr.join(" ");
-    const client = await getContainerRuntimeClient();
-    log.debug(`Executing command "${commandStr}"...`, { containerId: this.container.id });
-    const output = await client.container.execVerbose(this.container, commandArr, opts);
     log.debug(`Executed command "${commandStr}"...`, { containerId: this.container.id });
 
     return output;

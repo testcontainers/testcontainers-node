@@ -42,10 +42,12 @@ describe("GenericContainer", () => {
   it("should execute a command on a running container", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
 
-    const { output, exitCode } = await container.exec(["echo", "hello", "world"]);
+    const { output, stdout, stderr, exitCode } = await container.exec(["echo", "hello", "world"]);
 
     expect(exitCode).toBe(0);
-    expect(output).toEqual(expect.stringContaining("hello world"));
+    expect(stdout).toEqual(expect.stringContaining("hello world"));
+    expect(stderr).toBe("");
+    expect(output).toEqual(stdout);
 
     await container.stop();
   });
@@ -53,10 +55,12 @@ describe("GenericContainer", () => {
   it("should execute a command in a different working directory", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
 
-    const { output, exitCode } = await container.exec(["pwd"], { workingDir: "/var/log" });
+    const { output, stdout, stderr, exitCode } = await container.exec(["pwd"], { workingDir: "/var/log" });
 
     expect(exitCode).toBe(0);
-    expect(output).toEqual(expect.stringContaining("/var/log"));
+    expect(stdout).toEqual(expect.stringContaining("/var/log"));
+    expect(stderr).toBe("");
+    expect(output).toEqual(stdout);
 
     await container.stop();
   });
@@ -64,10 +68,12 @@ describe("GenericContainer", () => {
   it("should execute a command with custom environment variables", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
 
-    const { output, exitCode } = await container.exec(["env"], { env: { TEST_ENV: "test" } });
+    const { output, stdout, stderr, exitCode } = await container.exec(["env"], { env: { TEST_ENV: "test" } });
 
     expect(exitCode).toBe(0);
-    expect(output).toEqual(expect.stringContaining("TEST_ENV=test"));
+    expect(stdout).toEqual(expect.stringContaining("TEST_ENV=test"));
+    expect(stderr).toBe("");
+    expect(output).toEqual(stdout);
 
     await container.stop();
   });
@@ -76,43 +82,43 @@ describe("GenericContainer", () => {
     // By default, node:alpine runs as root
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
 
-    const { output, exitCode } = await container.exec("whoami", { user: "node" });
+    const { output, stdout, stderr, exitCode } = await container.exec(["whoami"], { user: "node" });
 
     expect(exitCode).toBe(0);
-    expect(output).toEqual(expect.stringContaining("node"));
+    expect(stdout).toEqual(expect.stringContaining("node"));
+    expect(stderr).toBe("");
+    expect(output).toEqual(stdout);
 
     await container.stop();
   });
 
-  it("should execute a command on a running container with verbose output", async () => {
+  it("should capture stderr when a command fails", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
 
-    const { stdout, exitCode } = await container.execVerbose(["echo", "hello", "world"]);
+    const { output, stdout, stderr, exitCode } = await container.exec(["ls", "/nonexistent/path"]);
 
-    expect(exitCode).toBe(0);
-    expect(stdout).toEqual(expect.stringContaining("hello world"));
+    expect(exitCode).not.toBe(0);
+    expect(stdout).toBe("");
+    expect(stderr).toEqual(expect.stringContaining("No such file or directory"));
+    expect(output).toEqual(stderr);
 
     await container.stop();
   });
 
-  it("should capture warnings from stderr with verbose output", async () => {
+  it("should capture stdout and stderr in the correct order", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
 
-    const { stderr, exitCode } = await container.execVerbose(["sh", "-c", "echo 'Warning!' 1>&2"]);
+    // The command first writes to stdout and then tries to access a nonexistent file (stderr)
+    const { output, stdout, stderr, exitCode } = await container.exec([
+      "sh",
+      "-c",
+      "echo 'This is stdout'; ls /nonexistent/path",
+    ]);
 
-    expect(exitCode).toBe(0);
-    expect(stderr).toEqual(expect.stringContaining("Warning!"));
-
-    await container.stop();
-  });
-
-  it("should capture errors from stderr with verbose logging", async () => {
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
-
-    const { stderr, exitCode } = await container.execVerbose(["sh", "-c", "exit 1"]);
-
-    expect(exitCode).toBe(1);
-    expect(stderr).toEqual(expect.stringContaining(""));
+    expect(exitCode).not.toBe(0); // The command should fail due to the ls error
+    expect(stdout).toEqual(expect.stringContaining("This is stdout"));
+    expect(stderr).toEqual(expect.stringContaining("No such file or directory"));
+    expect(output).toMatch(/This is stdout[\s\S]*No such file or directory/);
 
     await container.stop();
   });

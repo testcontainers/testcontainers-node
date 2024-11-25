@@ -7,7 +7,6 @@ import {
   Environment,
   ExecOptions,
   ExecResult,
-  ExecVerboseResult,
   ExtraHost,
   FileToCopy,
   Labels,
@@ -77,7 +76,6 @@ export interface StartedTestContainer {
   copyFilesToContainer(filesToCopy: FileToCopy[]): Promise<void>;
   copyContentToContainer(contentsToCopy: ContentToCopy[]): Promise<void>;
   exec(command: string | string[], opts?: Partial<ExecOptions>): Promise<ExecResult>;
-  execVerbose(command: string | string[], opts?: Partial<ExecOptions>): Promise<ExecVerboseResult>;
   logs(opts?: { since?: number; tail?: number }): Promise<Readable>;
 }
 
