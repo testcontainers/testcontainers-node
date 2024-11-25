@@ -1,12 +1,5 @@
 import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
-import {
-  ContentToCopy,
-  DirectoryToCopy,
-  ExecOptions,
-  ExecResult,
-  FileToCopy,
-  Labels,
-} from "../types";
+import { ContentToCopy, DirectoryToCopy, ExecOptions, ExecResult, FileToCopy, Labels } from "../types";
 import { Readable } from "stream";
 
 export class AbstractStartedContainer implements StartedTestContainer {

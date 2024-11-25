@@ -10,7 +10,6 @@ import Dockerode, {
 import { PassThrough, Readable } from "stream";
 import { IncomingMessage } from "http";
 import { ContainerStatus, ExecOptions, ExecResult } from "./types";
-import byline from "byline";
 import { ContainerClient } from "./container-client";
 import { execLog, log, streamToString } from "../../../common";
 

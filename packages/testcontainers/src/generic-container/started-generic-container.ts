@@ -1,13 +1,6 @@
 import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
 import Dockerode, { ContainerInspectInfo } from "dockerode";
-import {
-  ContentToCopy,
-  DirectoryToCopy,
-  ExecOptions,
-  ExecResult,
-  FileToCopy,
-  Labels,
-} from "../types";
+import { ContentToCopy, DirectoryToCopy, ExecOptions, ExecResult, FileToCopy, Labels } from "../types";
 import { Readable } from "stream";
 import { StoppedGenericContainer } from "./stopped-generic-container";
 import { WaitStrategy } from "../wait-strategies/wait-strategy";
