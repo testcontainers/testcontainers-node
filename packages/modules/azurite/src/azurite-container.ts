@@ -21,9 +21,6 @@ export class AzuriteContainer extends GenericContainer {
       .withStartupTimeout(120_000);
   }
 
-  private blobPort: number = BLOB_PORT;
-  private queuePort: number = QUEUE_PORT;
-  private tablePort: number = TABLE_PORT;
   private accountName: string = DEFAULT_ACCOUNT_NAME;
   private accountKey: string = DEFAULT_ACCOUNT_KEY;
 
@@ -46,33 +43,6 @@ export class AzuriteContainer extends GenericContainer {
    */
   public withAccountKey(accountKey: string): this {
     this.accountKey = accountKey;
-    return this;
-  }
-
-  /**
-   * Sets the port to expose the Blob service on.
-   * @param port The port to expose the Blob service on. Default is 10000.
-   */
-  public withBlobPort(port: number): this {
-    this.blobPort = port;
-    return this;
-  }
-
-  /**
-   * Sets the port to expose the Queue service on.
-   * @param port The port to expose the Queue service on. Default is 10001.
-   */
-  public withQueuePort(port: number): this {
-    this.queuePort = port;
-    return this;
-  }
-
-  /**
-   * Sets the port to expose the Table service on.
-   * @param port The port to expose the Table service on. Default is 10002.
-   */
-  public withTablePort(port: number): this {
-    this.tablePort = port;
     return this;
   }
 
@@ -119,11 +89,7 @@ export class AzuriteContainer extends GenericContainer {
       command.push("--skipApiVersionCheck");
     }
 
-    this.withCommand(command).withExposedPorts(
-      { container: BLOB_PORT, host: this.blobPort },
-      { container: QUEUE_PORT, host: this.queuePort },
-      { container: TABLE_PORT, host: this.tablePort }
-    );
+    this.withCommand(command).withExposedPorts(BLOB_PORT, QUEUE_PORT, TABLE_PORT);
 
     if (this.accountName !== DEFAULT_ACCOUNT_NAME || this.accountKey !== DEFAULT_ACCOUNT_KEY) {
       this.withEnvironment({
@@ -137,9 +103,6 @@ export class AzuriteContainer extends GenericContainer {
       startedContainer,
       this.accountName,
       this.accountKey,
-      this.blobPort,
-      this.queuePort,
-      this.tablePort
     );
   }
 }
@@ -149,9 +112,6 @@ export class StartedAzuriteContainer extends AbstractStartedContainer {
     startedTestContainer: StartedTestContainer,
     private readonly accountName: string,
     private readonly accountKey: string,
-    private readonly blobPort: number,
-    private readonly queuePort: number,
-    private readonly tablePort: number
   ) {
     super(startedTestContainer);
   }
@@ -164,28 +124,28 @@ export class StartedAzuriteContainer extends AbstractStartedContainer {
     return this.accountKey;
   }
 
-  public getBlobPort(): number {
-    return this.blobPort;
+  public getMappedBlobPort(): number {
+    return this.getMappedPort(BLOB_PORT);
   }
 
-  public getQueuePort(): number {
-    return this.queuePort;
+  public getMappedQueuePort(): number {
+    return this.getMappedPort(QUEUE_PORT);
   }
 
-  public getTablePort(): number {
-    return this.tablePort;
+  public getMappedTablePort(): number {
+    return this.getMappedPort(TABLE_PORT);
   }
 
   public getBlobEndpoint(): string {
-    return this.getEndpoint(this.blobPort, this.accountName);
+    return this.getEndpoint(this.getMappedBlobPort(), this.accountName);
   }
 
   public getQueueEndpoint(): string {
-    return this.getEndpoint(this.queuePort, this.accountName);
+    return this.getEndpoint(this.getMappedQueuePort(), this.accountName);
   }
 
   public getTableEndpoint(): string {
-    return this.getEndpoint(this.tablePort, this.accountName);
+    return this.getEndpoint(this.getMappedTablePort(), this.accountName);
   }
 
   /**
