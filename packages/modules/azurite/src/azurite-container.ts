@@ -99,21 +99,24 @@ export class AzuriteContainer extends GenericContainer {
 
     const startedContainer = await super.start();
 
-    return new StartedAzuriteContainer(
-      startedContainer,
-      this.accountName,
-      this.accountKey,
-    );
+    return new StartedAzuriteContainer(startedContainer, this.accountName, this.accountKey);
   }
 }
 
 export class StartedAzuriteContainer extends AbstractStartedContainer {
+  private readonly blobPort: number;
+  private readonly queuePort: number;
+  private readonly tablePort: number;
+
   constructor(
     startedTestContainer: StartedTestContainer,
     private readonly accountName: string,
-    private readonly accountKey: string,
+    private readonly accountKey: string
   ) {
     super(startedTestContainer);
+    this.blobPort = this.getMappedPort(BLOB_PORT);
+    this.queuePort = this.getMappedPort(QUEUE_PORT);
+    this.tablePort = this.getMappedPort(TABLE_PORT);
   }
 
   public getAccountName(): string {
@@ -124,28 +127,28 @@ export class StartedAzuriteContainer extends AbstractStartedContainer {
     return this.accountKey;
   }
 
-  public getMappedBlobPort(): number {
-    return this.getMappedPort(BLOB_PORT);
+  public getBlobPort(): number {
+    return this.blobPort;
   }
 
-  public getMappedQueuePort(): number {
-    return this.getMappedPort(QUEUE_PORT);
+  public getQueuePort(): number {
+    return this.queuePort;
   }
 
-  public getMappedTablePort(): number {
-    return this.getMappedPort(TABLE_PORT);
+  public getTablePort(): number {
+    return this.tablePort;
   }
 
   public getBlobEndpoint(): string {
-    return this.getEndpoint(this.getMappedBlobPort(), this.accountName);
+    return this.getEndpoint(this.blobPort, this.accountName);
   }
 
   public getQueueEndpoint(): string {
-    return this.getEndpoint(this.getMappedQueuePort(), this.accountName);
+    return this.getEndpoint(this.queuePort, this.accountName);
   }
 
   public getTableEndpoint(): string {
-    return this.getEndpoint(this.getMappedTablePort(), this.accountName);
+    return this.getEndpoint(this.tablePort, this.accountName);
   }
 
   /**
