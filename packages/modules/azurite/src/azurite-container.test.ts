@@ -113,6 +113,34 @@ describe("Azurite", () => {
   });
   // }
 
+  // customPorts {
+  it("should be able to specify custom ports", async () => {
+    const blobPort = 13000;
+    const queuePort = 14000;
+    const tablePort = 15000;
+    const container = await new AzuriteContainer()
+      .withBlobPort(blobPort)
+      .withQueuePort(queuePort)
+      .withTablePort(tablePort)
+      .start();
+
+    expect(container.getBlobPort()).toBe(blobPort);
+    expect(container.getQueuePort()).toBe(queuePort);
+    expect(container.getTablePort()).toBe(tablePort);
+
+    const connectionString = container.getConnectionString();
+    expect(connectionString).toContain("13000");
+    expect(connectionString).toContain("14000");
+    expect(connectionString).toContain("15000");
+
+    const serviceClient = BlobServiceClient.fromConnectionString(connectionString);
+    const containerClient = serviceClient.getContainerClient("test");
+    await containerClient.createIfNotExists();
+
+    await container.stop();
+  });
+  // }
+
   // inMemoryPersistence {
   it("should be able to use in-memory persistence", async () => {
     const container = await new AzuriteContainer().withInMemoryPersistence().start();

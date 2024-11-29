@@ -1,4 +1,11 @@
-import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
+import {
+  AbstractStartedContainer,
+  GenericContainer,
+  hasHostBinding,
+  PortWithOptionalBinding,
+  StartedTestContainer,
+  Wait,
+} from "testcontainers";
 
 const AZURITE_IMAGE = "mcr.microsoft.com/azure-storage/azurite:3.33.0";
 const BLOB_PORT = 10000;
@@ -19,6 +26,25 @@ export class AzuriteContainer extends GenericContainer {
         ])
       )
       .withStartupTimeout(120_000);
+  }
+
+  private blobPort: PortWithOptionalBinding = BLOB_PORT;
+  private queuePort: PortWithOptionalBinding = QUEUE_PORT;
+  private tablePort: PortWithOptionalBinding = TABLE_PORT;
+
+  public withBlobPort(blobPort: PortWithOptionalBinding): AzuriteContainer {
+    this.blobPort = blobPort;
+    return this;
+  }
+
+  public withQueuePort(queuePort: PortWithOptionalBinding): AzuriteContainer {
+    this.queuePort = queuePort;
+    return this;
+  }
+
+  public withTablePort(tablePort: PortWithOptionalBinding): AzuriteContainer {
+    this.tablePort = tablePort;
+    return this;
   }
 
   private accountName: string = DEFAULT_ACCOUNT_NAME;
@@ -89,7 +115,7 @@ export class AzuriteContainer extends GenericContainer {
       command.push("--skipApiVersionCheck");
     }
 
-    this.withCommand(command).withExposedPorts(BLOB_PORT, QUEUE_PORT, TABLE_PORT);
+    this.withCommand(command).withExposedPorts(this.blobPort, this.queuePort, this.tablePort);
 
     if (this.accountName !== DEFAULT_ACCOUNT_NAME || this.accountKey !== DEFAULT_ACCOUNT_KEY) {
       this.withEnvironment({
@@ -99,24 +125,45 @@ export class AzuriteContainer extends GenericContainer {
 
     const startedContainer = await super.start();
 
-    return new StartedAzuriteContainer(startedContainer, this.accountName, this.accountKey);
+    return new StartedAzuriteContainer(
+      startedContainer,
+      this.accountName,
+      this.accountKey,
+      this.blobPort,
+      this.queuePort,
+      this.tablePort
+    );
   }
 }
 
 export class StartedAzuriteContainer extends AbstractStartedContainer {
-  private readonly blobPort: number;
-  private readonly queuePort: number;
-  private readonly tablePort: number;
-
+  private blobPort: number;
+  private queuePort: number;
+  private tablePort: number;
   constructor(
     startedTestContainer: StartedTestContainer,
     private readonly accountName: string,
-    private readonly accountKey: string
+    private readonly accountKey: string,
+    blobPort: PortWithOptionalBinding,
+    queuePort: PortWithOptionalBinding,
+    tablePort: PortWithOptionalBinding
   ) {
     super(startedTestContainer);
-    this.blobPort = this.getMappedPort(BLOB_PORT);
-    this.queuePort = this.getMappedPort(QUEUE_PORT);
-    this.tablePort = this.getMappedPort(TABLE_PORT);
+    if (hasHostBinding(blobPort)) {
+      this.blobPort = blobPort.host;
+    } else {
+      this.blobPort = this.getMappedPort(blobPort);
+    }
+    if (hasHostBinding(queuePort)) {
+      this.queuePort = queuePort.host;
+    } else {
+      this.queuePort = this.getMappedPort(queuePort);
+    }
+    if (hasHostBinding(tablePort)) {
+      this.tablePort = tablePort.host;
+    } else {
+      this.tablePort = this.getMappedPort(tablePort);
+    }
   }
 
   public getAccountName(): string {
