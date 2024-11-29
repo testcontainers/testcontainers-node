@@ -32,21 +32,6 @@ export class AzuriteContainer extends GenericContainer {
   private queuePort: PortWithOptionalBinding = QUEUE_PORT;
   private tablePort: PortWithOptionalBinding = TABLE_PORT;
 
-  public withBlobPort(blobPort: PortWithOptionalBinding): AzuriteContainer {
-    this.blobPort = blobPort;
-    return this;
-  }
-
-  public withQueuePort(queuePort: PortWithOptionalBinding): AzuriteContainer {
-    this.queuePort = queuePort;
-    return this;
-  }
-
-  public withTablePort(tablePort: PortWithOptionalBinding): AzuriteContainer {
-    this.tablePort = tablePort;
-    return this;
-  }
-
   private accountName: string = DEFAULT_ACCOUNT_NAME;
   private accountKey: string = DEFAULT_ACCOUNT_KEY;
 
@@ -69,6 +54,33 @@ export class AzuriteContainer extends GenericContainer {
    */
   public withAccountKey(accountKey: string): this {
     this.accountKey = accountKey;
+    return this;
+  }
+
+  /**
+   * Sets the port to expose the Blob service on.
+   * @param port The port to expose the Blob service on. Default is 10000.
+   */
+  public withBlobPort(blobPort: PortWithOptionalBinding): this {
+    this.blobPort = blobPort;
+    return this;
+  }
+
+  /**
+   * Sets the port to expose the Queue service on.
+   * @param port The port to expose the Queue service on. Default is 10001.
+   */
+  public withQueuePort(queuePort: PortWithOptionalBinding): this {
+    this.queuePort = queuePort;
+    return this;
+  }
+
+  /**
+   * Sets the port to expose the Table service on.
+   * @param port The port to expose the Table service on. Default is 10002.
+   */
+  public withTablePort(tablePort: PortWithOptionalBinding): this {
+    this.tablePort = tablePort;
     return this;
   }
 
