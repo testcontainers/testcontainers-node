@@ -149,9 +149,9 @@ export class AzuriteContainer extends GenericContainer {
 }
 
 export class StartedAzuriteContainer extends AbstractStartedContainer {
-  private blobPort: number;
-  private queuePort: number;
-  private tablePort: number;
+  private readonly blobPort: number;
+  private readonly queuePort: number;
+  private readonly tablePort: number;
   constructor(
     startedTestContainer: StartedTestContainer,
     private readonly accountName: string,
