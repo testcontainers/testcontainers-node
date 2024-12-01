@@ -119,9 +119,9 @@ describe("Azurite", () => {
     const queuePort = 14000;
     const tablePort = 15000;
     const container = await new AzuriteContainer()
-      .withBlobPort(blobPort)
-      .withQueuePort(queuePort)
-      .withTablePort(tablePort)
+      .withBlobPort({ container: 10001, host: blobPort })
+      .withQueuePort({ container: 10002, host: queuePort })
+      .withTablePort({ container: 10003, host: tablePort })
       .start();
 
     expect(container.getBlobPort()).toBe(blobPort);
@@ -160,8 +160,13 @@ describe("Azurite", () => {
     expect(blobExists).toBeTruthy();
 
     await container.restart();
+    const connectionString2 = container.getConnectionString();
+    expect(connectionString2).toBeTruthy();
+    const serviceClient2 = BlobServiceClient.fromConnectionString(connectionString);
+    const containerClient2 = serviceClient2.getContainerClient("test");
+    const blobClient2 = containerClient2.getBlockBlobClient(blobName);
 
-    const blobExistsAfterRestart = await blobClient.exists();
+    const blobExistsAfterRestart = await blobClient2.exists();
     expect(blobExistsAfterRestart).toBeFalsy();
   });
   // }
