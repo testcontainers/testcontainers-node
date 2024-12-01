@@ -149,33 +149,15 @@ export class AzuriteContainer extends GenericContainer {
 }
 
 export class StartedAzuriteContainer extends AbstractStartedContainer {
-  private readonly blobPort: number;
-  private readonly queuePort: number;
-  private readonly tablePort: number;
   constructor(
     startedTestContainer: StartedTestContainer,
     private readonly accountName: string,
     private readonly accountKey: string,
-    blobPort: PortWithOptionalBinding,
-    queuePort: PortWithOptionalBinding,
-    tablePort: PortWithOptionalBinding
+    private readonly blobPort: PortWithOptionalBinding,
+    private readonly queuePort: PortWithOptionalBinding,
+    private readonly tablePort: PortWithOptionalBinding
   ) {
     super(startedTestContainer);
-    if (hasHostBinding(blobPort)) {
-      this.blobPort = blobPort.host;
-    } else {
-      this.blobPort = this.getMappedPort(blobPort);
-    }
-    if (hasHostBinding(queuePort)) {
-      this.queuePort = queuePort.host;
-    } else {
-      this.queuePort = this.getMappedPort(queuePort);
-    }
-    if (hasHostBinding(tablePort)) {
-      this.tablePort = tablePort.host;
-    } else {
-      this.tablePort = this.getMappedPort(tablePort);
-    }
   }
 
   public getAccountName(): string {
@@ -187,27 +169,39 @@ export class StartedAzuriteContainer extends AbstractStartedContainer {
   }
 
   public getBlobPort(): number {
-    return this.blobPort;
+    if (hasHostBinding(this.blobPort)) {
+      return this.blobPort.host;
+    } else {
+      return this.getMappedPort(this.blobPort);
+    }
   }
 
   public getQueuePort(): number {
-    return this.queuePort;
+    if (hasHostBinding(this.queuePort)) {
+      return this.queuePort.host;
+    } else {
+      return this.getMappedPort(this.queuePort);
+    }
   }
 
   public getTablePort(): number {
-    return this.tablePort;
+    if (hasHostBinding(this.tablePort)) {
+      return this.tablePort.host;
+    } else {
+      return this.getMappedPort(this.tablePort);
+    }
   }
 
   public getBlobEndpoint(): string {
-    return this.getEndpoint(this.blobPort, this.accountName);
+    return this.getEndpoint(this.getBlobPort(), this.accountName);
   }
 
   public getQueueEndpoint(): string {
-    return this.getEndpoint(this.queuePort, this.accountName);
+    return this.getEndpoint(this.getQueuePort(), this.accountName);
   }
 
   public getTableEndpoint(): string {
-    return this.getEndpoint(this.tablePort, this.accountName);
+    return this.getEndpoint(this.getTablePort(), this.accountName);
   }
 
   /**

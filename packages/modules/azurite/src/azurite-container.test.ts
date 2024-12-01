@@ -144,30 +144,34 @@ describe("Azurite", () => {
   // inMemoryPersistence {
   it("should be able to use in-memory persistence", async () => {
     const container = await new AzuriteContainer().withInMemoryPersistence().start();
-
-    const connectionString = container.getConnectionString();
-    expect(connectionString).toBeTruthy();
-
-    const serviceClient = BlobServiceClient.fromConnectionString(connectionString);
-    const containerClient = serviceClient.getContainerClient("test");
-    await containerClient.createIfNotExists();
     const blobName = "hello.txt";
-    const content = "Hello world!";
-    await containerClient.uploadBlockBlob(blobName, content, Buffer.byteLength(content));
 
-    const blobClient = containerClient.getBlockBlobClient(blobName);
-    const blobExists = await blobClient.exists();
-    expect(blobExists).toBeTruthy();
+    {
+      const connectionString = container.getConnectionString();
+      expect(connectionString).toBeTruthy();
+
+      const serviceClient = BlobServiceClient.fromConnectionString(connectionString);
+      const containerClient = serviceClient.getContainerClient("test");
+      await containerClient.createIfNotExists();
+      const content = "Hello world!";
+      await containerClient.uploadBlockBlob(blobName, content, Buffer.byteLength(content));
+      const blobClient = containerClient.getBlockBlobClient(blobName);
+      const blobExists = await blobClient.exists();
+      expect(blobExists).toBeTruthy();
+    }
 
     await container.restart();
-    const connectionString2 = container.getConnectionString();
-    expect(connectionString2).toBeTruthy();
-    const serviceClient2 = BlobServiceClient.fromConnectionString(connectionString);
-    const containerClient2 = serviceClient2.getContainerClient("test");
-    const blobClient2 = containerClient2.getBlockBlobClient(blobName);
 
-    const blobExistsAfterRestart = await blobClient2.exists();
-    expect(blobExistsAfterRestart).toBeFalsy();
+    {
+      const connectionString = container.getConnectionString();
+      expect(connectionString).toBeTruthy();
+
+      const serviceClient = BlobServiceClient.fromConnectionString(connectionString);
+      const containerClient = serviceClient.getContainerClient("test");
+      const blobClient = containerClient.getBlockBlobClient(blobName);
+      const blobExistsAfterRestart = await blobClient.exists();
+      expect(blobExistsAfterRestart).toBeFalsy();
+    }
   });
   // }
 });
