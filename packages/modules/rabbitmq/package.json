@@ -33,6 +33,6 @@
   },
   "devDependencies": {
     "@types/amqplib": "^0.10.5",
-    "amqplib": "^0.10.4"
+    "amqplib": "^0.10.5"
   }
 }

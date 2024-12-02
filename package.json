@@ -17,7 +17,7 @@
     "validate-engine": "ls-engines"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.12",
+    "@types/jest": "^29.5.14",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
     "cross-env": "^7.0.3",
@@ -27,11 +27,11 @@
     "husky": "^8.0.3",
     "jest": "^29.7.0",
     "lint-staged": "^13.3.0",
-    "ls-engines": "^0.9.2",
+    "ls-engines": "^0.9.3",
     "npm-check-updates": "^16.14.20",
     "prettier": "^2.8.8",
     "shx": "^0.3.4",
-    "ts-jest": "^29.2.2",
+    "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
     "typescript": "^4.9.5"
   },
