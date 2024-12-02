@@ -1,4 +1,11 @@
-import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
+import {
+  AbstractStartedContainer,
+  GenericContainer,
+  hasHostBinding,
+  PortWithOptionalBinding,
+  StartedTestContainer,
+  Wait,
+} from "testcontainers";
 
 const AZURITE_IMAGE = "mcr.microsoft.com/azure-storage/azurite:3.33.0";
 const BLOB_PORT = 10000;
@@ -21,9 +28,10 @@ export class AzuriteContainer extends GenericContainer {
       .withStartupTimeout(120_000);
   }
 
-  private blobPort: number = BLOB_PORT;
-  private queuePort: number = QUEUE_PORT;
-  private tablePort: number = TABLE_PORT;
+  private blobPort: PortWithOptionalBinding = BLOB_PORT;
+  private queuePort: PortWithOptionalBinding = QUEUE_PORT;
+  private tablePort: PortWithOptionalBinding = TABLE_PORT;
+
   private accountName: string = DEFAULT_ACCOUNT_NAME;
   private accountKey: string = DEFAULT_ACCOUNT_KEY;
 
@@ -53,8 +61,8 @@ export class AzuriteContainer extends GenericContainer {
    * Sets the port to expose the Blob service on.
    * @param port The port to expose the Blob service on. Default is 10000.
    */
-  public withBlobPort(port: number): this {
-    this.blobPort = port;
+  public withBlobPort(blobPort: PortWithOptionalBinding): this {
+    this.blobPort = blobPort;
     return this;
   }
 
@@ -62,8 +70,8 @@ export class AzuriteContainer extends GenericContainer {
    * Sets the port to expose the Queue service on.
    * @param port The port to expose the Queue service on. Default is 10001.
    */
-  public withQueuePort(port: number): this {
-    this.queuePort = port;
+  public withQueuePort(queuePort: PortWithOptionalBinding): this {
+    this.queuePort = queuePort;
     return this;
   }
 
@@ -71,8 +79,8 @@ export class AzuriteContainer extends GenericContainer {
    * Sets the port to expose the Table service on.
    * @param port The port to expose the Table service on. Default is 10002.
    */
-  public withTablePort(port: number): this {
-    this.tablePort = port;
+  public withTablePort(tablePort: PortWithOptionalBinding): this {
+    this.tablePort = tablePort;
     return this;
   }
 
@@ -119,11 +127,7 @@ export class AzuriteContainer extends GenericContainer {
       command.push("--skipApiVersionCheck");
     }
 
-    this.withCommand(command).withExposedPorts(
-      { container: BLOB_PORT, host: this.blobPort },
-      { container: QUEUE_PORT, host: this.queuePort },
-      { container: TABLE_PORT, host: this.tablePort }
-    );
+    this.withCommand(command).withExposedPorts(this.blobPort, this.queuePort, this.tablePort);
 
     if (this.accountName !== DEFAULT_ACCOUNT_NAME || this.accountKey !== DEFAULT_ACCOUNT_KEY) {
       this.withEnvironment({
@@ -149,9 +153,9 @@ export class StartedAzuriteContainer extends AbstractStartedContainer {
     startedTestContainer: StartedTestContainer,
     private readonly accountName: string,
     private readonly accountKey: string,
-    private readonly blobPort: number,
-    private readonly queuePort: number,
-    private readonly tablePort: number
+    private readonly blobPort: PortWithOptionalBinding,
+    private readonly queuePort: PortWithOptionalBinding,
+    private readonly tablePort: PortWithOptionalBinding
   ) {
     super(startedTestContainer);
   }
@@ -165,27 +169,39 @@ export class StartedAzuriteContainer extends AbstractStartedContainer {
   }
 
   public getBlobPort(): number {
-    return this.blobPort;
+    if (hasHostBinding(this.blobPort)) {
+      return this.blobPort.host;
+    } else {
+      return this.getMappedPort(this.blobPort);
+    }
   }
 
   public getQueuePort(): number {
-    return this.queuePort;
+    if (hasHostBinding(this.queuePort)) {
+      return this.queuePort.host;
+    } else {
+      return this.getMappedPort(this.queuePort);
+    }
   }
 
   public getTablePort(): number {
-    return this.tablePort;
+    if (hasHostBinding(this.tablePort)) {
+      return this.tablePort.host;
+    } else {
+      return this.getMappedPort(this.tablePort);
+    }
   }
 
   public getBlobEndpoint(): string {
-    return this.getEndpoint(this.blobPort, this.accountName);
+    return this.getEndpoint(this.getBlobPort(), this.accountName);
   }
 
   public getQueueEndpoint(): string {
-    return this.getEndpoint(this.queuePort, this.accountName);
+    return this.getEndpoint(this.getQueuePort(), this.accountName);
   }
 
   public getTableEndpoint(): string {
-    return this.getEndpoint(this.tablePort, this.accountName);
+    return this.getEndpoint(this.getTablePort(), this.accountName);
   }
 
   /**
