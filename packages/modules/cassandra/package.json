@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/cassandra",
-  "version": "10.15.0",
+  "version": "10.16.0",
   "license": "MIT",
   "keywords": [
     "mariadb",
@@ -29,7 +29,7 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "dependencies": {
-    "testcontainers": "^10.15.0"
+    "testcontainers": "^10.16.0"
   },
   "devDependencies": {
     "cassandra-driver": "^4.7.2"
