@@ -1,6 +1,7 @@
 import { PortForwarderInstance } from "./port-forwarder/port-forwarder";
 import { getContainerRuntimeClient } from "./container-runtime";
 import { log } from "./common";
+import type { WrapOptions } from "retry";
 
 export class TestContainers {
   public static async exposeHostPorts(...ports: number[]): Promise<void> {
@@ -17,6 +18,10 @@ export class TestContainers {
         })
       )
     );
+  }
+
+  public static setLockFileRetryOptions(retryOptions: Omit<WrapOptions, "forever">): void {
+    retryOptions;
   }
 
   private static async isHostPortExposed(portForwarderContainerId: string, hostPort: number): Promise<boolean> {

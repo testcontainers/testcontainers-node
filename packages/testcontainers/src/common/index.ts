@@ -5,3 +5,4 @@ export { Uuid, RandomUuid } from "./uuid";
 export { streamToString } from "./streams";
 export { withFileLock } from "./file-lock";
 export { Retry, IntervalRetry } from "./retry";
+export { setRetryOptions, getRetryOptions } from "./preferences";

@@ -3,7 +3,7 @@ import { GenericContainer } from "../generic-container/generic-container";
 import { Wait } from "../wait-strategies/wait";
 import { Socket } from "net";
 import { ContainerRuntimeClient, ImageName } from "../container-runtime";
-import { IntervalRetry, log, RandomUuid, withFileLock } from "../common";
+import { getRetryOptions, IntervalRetry, log, RandomUuid, withFileLock } from "../common";
 import { LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
 
 export const REAPER_IMAGE = process.env["RYUK_CONTAINER_IMAGE"]
@@ -26,18 +26,22 @@ export async function getReaper(client: ContainerRuntimeClient): Promise<Reaper>
     return reaper;
   }
 
-  reaper = await withFileLock("testcontainers-node.lock", async () => {
-    const reaperContainer = await findReaperContainer(client);
-    sessionId = reaperContainer?.Labels["org.testcontainers.session-id"] ?? new RandomUuid().nextUuid();
+  reaper = await withFileLock(
+    "testcontainers-node.lock",
+    async () => {
+      const reaperContainer = await findReaperContainer(client);
+      sessionId = reaperContainer?.Labels["org.testcontainers.session-id"] ?? new RandomUuid().nextUuid();
 
-    if (process.env.TESTCONTAINERS_RYUK_DISABLED === "true") {
-      return new DisabledReaper(sessionId);
-    } else if (reaperContainer) {
-      return await useExistingReaper(reaperContainer, sessionId, client.info.containerRuntime.host);
-    } else {
-      return await createNewReaper(sessionId, client.info.containerRuntime.remoteSocketPath);
-    }
-  });
+      if (process.env.TESTCONTAINERS_RYUK_DISABLED === "true") {
+        return new DisabledReaper(sessionId);
+      } else if (reaperContainer) {
+        return await useExistingReaper(reaperContainer, sessionId, client.info.containerRuntime.host);
+      } else {
+        return await createNewReaper(sessionId, client.info.containerRuntime.remoteSocketPath);
+      }
+    },
+    { retryOptions: getRetryOptions() }
+  );
 
   reaper.addSession(sessionId);
   return reaper;

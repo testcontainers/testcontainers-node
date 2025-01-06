@@ -2,14 +2,19 @@ import path from "path";
 import { writeFile } from "fs/promises";
 import lockFile from "proper-lockfile";
 import { log } from "./logger";
+import type { WrapOptions } from "retry";
 
-export async function withFileLock<T>(fileName: string, fn: () => T): Promise<T> {
+export async function withFileLock<T>(
+  fileName: string,
+  fn: () => T,
+  options?: { retryOptions: Omit<WrapOptions, "forever"> }
+): Promise<T> {
   const file = await createEmptyTmpFile(fileName);
 
   let releaseLockFn;
   try {
     log.debug(`Acquiring lock file "${file}"...`);
-    releaseLockFn = await lockFile.lock(file, { retries: { forever: true } });
+    releaseLockFn = await lockFile.lock(file, { retries: { ...options?.retryOptions, forever: true } });
     log.debug(`Acquired lock file "${file}"`);
     return await fn();
   } finally {
