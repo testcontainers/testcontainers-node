@@ -475,4 +475,9 @@ export class GenericContainer implements TestContainer {
     this.logConsumer = logConsumer;
     return this;
   }
+
+  public withHostname(hostname: string): this {
+    this.createOpts.Hostname = hostname;
+    return this;
+  }
 }
