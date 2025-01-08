@@ -9,7 +9,9 @@ export async function withFileLock<T>(fileName: string, fn: () => T): Promise<T>
   let releaseLockFn;
   try {
     log.debug(`Acquiring lock file "${file}"...`);
-    releaseLockFn = await lockFile.lock(file, { retries: { forever: true } });
+    releaseLockFn = await lockFile.lock(file, {
+      retries: { forever: true, factor: 1, minTimeout: 500, maxTimeout: 3000, randomize: true },
+    });
     log.debug(`Acquired lock file "${file}"`);
     return await fn();
   } finally {
