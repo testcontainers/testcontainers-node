@@ -5,6 +5,7 @@ import { MockserverContainer } from "./mockserver-container";
 describe.only("MockserverContainer", () => {
   jest.setTimeout(240_000);
 
+  // startContainer {
   it("should start and accept mocks", async () => {
     const container = await new MockserverContainer().start();
     const client = mockServerClient(container.getHost(), container.getMockserverPort());
@@ -28,4 +29,5 @@ describe.only("MockserverContainer", () => {
     expect(response.statusCode).toBe(200);
     expect(response.text).toBe("bar");
   });
+  // }
 });

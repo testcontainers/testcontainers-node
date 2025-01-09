@@ -54,6 +54,7 @@ nav:
       - Kafka: modules/kafka.md
       - Localstack: modules/localstack.md
       - MariaDB: modules/mariadb.md
+      - Mockserver: modules/mockserver.md
       - MongoDB: modules/mongodb.md
       - MSSQLServer: modules/mssqlserver.md
       - MySQL: modules/mysql.md
