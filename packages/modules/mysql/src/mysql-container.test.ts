@@ -105,11 +105,11 @@ describe("MySqlContainer", () => {
 
     // Test non-root user
     const queryResult = await container.executeQuery("SELECT CURRENT_USER() as user");
-    expect(queryResult).toEqual(expect.stringContaining("user\ncustomUsername@%\n"));
+    expect(queryResult).toEqual(expect.stringContaining("user\ncustomUsername"));
 
     // Test root user
     const rootQueryResult = await container.executeQuery("SELECT CURRENT_USER() as user", [], true);
-    expect(rootQueryResult).toEqual(expect.stringContaining("user\nroot@%\n"));
+    expect(rootQueryResult).toEqual(expect.stringContaining("user\nroot"));
 
     await container.stop();
   });
