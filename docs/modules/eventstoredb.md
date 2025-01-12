@@ -15,5 +15,5 @@ npm install @testcontainers/eventstoredb --save-dev
 <!--/codeinclude-->
 
 <!--codeinclude-->
-[Start container:](../../packages/modules/eventstoredb/src/eventstoredb-container.test.ts) inside_block:usingStandardProjections
+[Subscribe to standard projection:](../../packages/modules/eventstoredb/src/eventstoredb-container.test.ts) inside_block:usingStandardProjections
 <!--/codeinclude-->
