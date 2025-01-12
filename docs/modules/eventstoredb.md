@@ -11,5 +11,9 @@ npm install @testcontainers/eventstoredb --save-dev
 ## Examples
 
 <!--codeinclude-->
-[Start container:](../../packages/modules/redis/src/redis-container.test.ts) inside_block:startContainer
+[Start container:](../../packages/modules/eventstoredb/src/eventstoredb-container.test.ts) inside_block:startContainer
+<!--/codeinclude-->
+
+<!--codeinclude-->
+[Start container:](../../packages/modules/eventstoredb/src/eventstoredb-container.test.ts) inside_block:usingStandardProjections
 <!--/codeinclude-->

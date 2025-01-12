@@ -44,6 +44,7 @@ describe("EventStoreDBContainer", () => {
   });
   // }
 
+  // usingStandardProjections {
   it("should use built-in projections", async () => {
     const container = await new EventStoreDBContainer().start();
     const client = EventStoreDBClient.connectionString(container.getConnectionString());
@@ -85,6 +86,7 @@ describe("EventStoreDBContainer", () => {
     await stream.unsubscribe();
     await container.stop();
   });
+  // }
 });
 
 async function consumeSteamingRead(read: StreamingRead<unknown>): Promise<unknown[]> {
