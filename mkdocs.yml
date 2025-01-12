@@ -48,6 +48,7 @@ nav:
       - ChromaDB: modules/chromadb.md
       - Couchbase: modules/couchbase.md
       - Elasticsearch: modules/elasticsearch.md
+      - EventStoreDB: modules/eventstoredb.md
       - GCloud: modules/gcloud.md
       - HiveMQ: modules/hivemq.md
       - K3s: modules/k3s.md
