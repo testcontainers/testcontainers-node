@@ -125,4 +125,23 @@ describe("MariaDb", () => {
     await container.stop();
   });
   // }
+
+  it("should work with restarted container", async () => {
+    const container = await new MariaDbContainer().start();
+    await container.restart();
+
+    const client = await mariadb.createConnection({
+      host: container.getHost(),
+      port: container.getPort(),
+      database: container.getDatabase(),
+      user: container.getUsername(),
+      password: container.getUserPassword(),
+    });
+
+    const rows = await client.query("SELECT 1 as res");
+    expect(rows).toEqual([{ res: 1 }]);
+
+    await client.end();
+    await container.stop();
+  });
 });
