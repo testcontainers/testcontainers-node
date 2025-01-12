@@ -1,4 +1,4 @@
-# Redis Module
+# EventStoreDB Module
 
 [EventStoreDB](https://eventstore.com) is an event sourcing database that stores data in streams of immutable events.
 
