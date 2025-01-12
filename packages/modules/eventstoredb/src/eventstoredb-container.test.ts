@@ -1,4 +1,4 @@
-import { EventStoreDBClient, StreamingRead } from "@eventstore/db-client";
+import { EventStoreDBClient, StreamingRead, StreamSubscription } from "@eventstore/db-client";
 import { EventStoreDBContainer } from "./eventstoredb-container";
 
 describe("EventStoreDBContainer", () => {
@@ -43,6 +43,48 @@ describe("EventStoreDBContainer", () => {
     await container.stop();
   });
   // }
+
+  it("should use built-in projections", async () => {
+    const container = await new EventStoreDBContainer().start();
+    const client = EventStoreDBClient.connectionString(container.getConnectionString());
+
+    await client.appendToStream("Todo-1", [
+      {
+        contentType: "application/json",
+        data: { title: "Do something" },
+        metadata: {},
+        id: "7eccc3a7-0664-4348-a621-029125741e22",
+        type: "TodoCreated",
+      },
+    ]);
+    const stream = client.subscribeToStream("$ce-Todo", { resolveLinkTos: true });
+
+    expect(await getStreamFirstEvent(stream)).toEqual(
+      expect.objectContaining({
+        event: expect.objectContaining({
+          data: { title: "Do something" },
+          id: "7eccc3a7-0664-4348-a621-029125741e22",
+          isJson: true,
+          metadata: {},
+          revision: 0n,
+          streamId: "Todo-1",
+          type: "TodoCreated",
+        }),
+        link: expect.objectContaining({
+          isJson: false,
+          metadata: expect.objectContaining({
+            $causedBy: "7eccc3a7-0664-4348-a621-029125741e22",
+            $o: "Todo-1",
+          }),
+          revision: 0n,
+          streamId: "$ce-Todo",
+          type: "$>",
+        }),
+      })
+    );
+    await stream.unsubscribe();
+    await container.stop();
+  });
 });
 
 async function consumeSteamingRead(read: StreamingRead<unknown>): Promise<unknown[]> {
@@ -53,4 +95,10 @@ async function consumeSteamingRead(read: StreamingRead<unknown>): Promise<unknow
   }
 
   return events;
+}
+
+async function getStreamFirstEvent(stream: StreamSubscription): Promise<unknown> {
+  for await (const event of stream) {
+    return event;
+  }
 }
