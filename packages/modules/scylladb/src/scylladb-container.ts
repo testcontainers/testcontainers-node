@@ -21,15 +21,12 @@ export class ScyllaContainer extends GenericContainer {
 }
 
 export class StartedScyllaContainer extends AbstractStartedContainer {
-  private readonly port: number;
-
   constructor(startedTestContainer: StartedTestContainer) {
     super(startedTestContainer);
-    this.port = startedTestContainer.getMappedPort(SCYLLA_PORT);
   }
 
   public getPort(): number {
-    return this.port;
+    return this.startedTestContainer.getMappedPort(SCYLLA_PORT);
   }
 
   public getDatacenter(): string {
