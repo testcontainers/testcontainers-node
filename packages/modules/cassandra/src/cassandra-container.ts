@@ -50,8 +50,6 @@ export class CassandraContainer extends GenericContainer {
 }
 
 export class StartedCassandraContainer extends AbstractStartedContainer {
-  private readonly port: number;
-
   constructor(
     startedTestContainer: StartedTestContainer,
     private readonly dc: string,
@@ -60,11 +58,10 @@ export class StartedCassandraContainer extends AbstractStartedContainer {
     private readonly password: string
   ) {
     super(startedTestContainer);
-    this.port = startedTestContainer.getMappedPort(CASSANDRA_PORT);
   }
 
   public getPort(): number {
-    return this.port;
+    return this.startedTestContainer.getMappedPort(CASSANDRA_PORT);
   }
 
   public getDatacenter(): string {
