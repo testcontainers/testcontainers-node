@@ -69,5 +69,6 @@ nav:
       - Redpanda: modules/redpanda.md
       - ScyllaDB: modules/scylladb.md
       - Selenium: modules/selenium.md
+      - ToxiProxy: modules/toxiproxy.md
       - Weaviate: modules/weaviate.md
   - Configuration: configuration.md
