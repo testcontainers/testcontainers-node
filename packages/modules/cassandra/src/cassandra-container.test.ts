@@ -109,4 +109,23 @@ describe("Cassandra", () => {
     await container.stop();
   });
   // }
+
+  it("should work with restarted container", async () => {
+    const container = await new CassandraContainer("cassandra:5.0.2").start();
+    await container.restart();
+
+    const client = new Client({
+      contactPoints: [container.getContactPoint()],
+      localDataCenter: container.getDatacenter(),
+      keyspace: "system",
+    });
+
+    await client.connect();
+
+    const result = await client.execute("SELECT release_version FROM system.local");
+    expect(result.rows[0].release_version).toBe("5.0.2");
+
+    await client.shutdown();
+    await container.stop();
+  });
 });

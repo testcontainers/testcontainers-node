@@ -51,8 +51,6 @@ export class MariaDbContainer extends GenericContainer {
 }
 
 export class StartedMariaDbContainer extends AbstractStartedContainer {
-  private readonly port: number;
-
   constructor(
     startedTestContainer: StartedTestContainer,
     private readonly database: string,
@@ -61,11 +59,10 @@ export class StartedMariaDbContainer extends AbstractStartedContainer {
     private readonly rootPassword: string
   ) {
     super(startedTestContainer);
-    this.port = startedTestContainer.getMappedPort(MARIADB_PORT);
   }
 
   public getPort(): number {
-    return this.port;
+    return this.startedTestContainer.getMappedPort(MARIADB_PORT);
   }
 
   public getDatabase(): string {
