@@ -56,6 +56,7 @@ nav:
       - Localstack: modules/localstack.md
       - MariaDB: modules/mariadb.md
       - Mockserver: modules/mockserver.md
+      - MinIO: modules/minio.md
       - MongoDB: modules/mongodb.md
       - MSSQLServer: modules/mssqlserver.md
       - MySQL: modules/mysql.md
@@ -69,5 +70,6 @@ nav:
       - Redpanda: modules/redpanda.md
       - ScyllaDB: modules/scylladb.md
       - Selenium: modules/selenium.md
+      - ToxiProxy: modules/toxiproxy.md
       - Weaviate: modules/weaviate.md
   - Configuration: configuration.md
