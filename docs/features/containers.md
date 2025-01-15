@@ -308,6 +308,18 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+### With custom hostname
+
+**Not recommended.**
+
+See this [Docker blog post on Testcontainers best practices](https://www.docker.com/blog/testcontainers-best-practices/#:~:text=Don't%20hardcode%20the%20container%20name&text=But%20giving%20a%20fixed%2Fhardcoded,running%20multiple%20pipelines%20in%20parallel.)
+
+```javascript
+const container = await new GenericContainer("alpine")
+  .withHostname("my-hostname")
+  .start();
+```
+
 ## Stopping a container
 
 Testcontainers by default will not wait until the container has stopped. It will simply issue the stop command and return immediately. This is to save time when running tests.
