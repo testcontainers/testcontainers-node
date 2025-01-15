@@ -22,14 +22,15 @@ export class ElasticsearchContainer extends GenericContainer {
 }
 
 export class StartedElasticsearchContainer extends AbstractStartedContainer {
-  private readonly httpPort: number;
-
   constructor(override readonly startedTestContainer: StartedTestContainer) {
     super(startedTestContainer);
-    this.httpPort = this.getMappedPort(ELASTIC_SEARCH_HTTP_PORT);
+  }
+
+  public getPort(): number {
+    return this.getMappedPort(ELASTIC_SEARCH_HTTP_PORT);
   }
 
   public getHttpUrl(): string {
-    return `http://${this.getHost()}:${this.httpPort}`;
+    return `http://${this.getHost()}:${this.getPort()}`;
   }
 }

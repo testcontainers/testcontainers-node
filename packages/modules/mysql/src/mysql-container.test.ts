@@ -114,4 +114,23 @@ describe("MySqlContainer", () => {
     await container.stop();
   });
   // }
+
+  it("should work with restarted container", async () => {
+    const container = await new MySqlContainer().start();
+    await container.restart();
+
+    const client = await createConnection({
+      host: container.getHost(),
+      port: container.getPort(),
+      database: container.getDatabase(),
+      user: container.getUsername(),
+      password: container.getUserPassword(),
+    });
+
+    const [rows] = await client.execute("SELECT 1 as res");
+    expect(rows).toEqual([{ res: 1 }]);
+
+    await client.end();
+    await container.stop();
+  });
 });

@@ -64,4 +64,23 @@ describe("ScyllaDB", () => {
     await container.stop();
   });
   // }
+
+  it("should work with restarted container", async () => {
+    const container = await new ScyllaContainer("scylladb/scylla:6.2.0").start();
+    await container.restart();
+
+    const client = new Client({
+      contactPoints: [container.getContactPoint()],
+      localDataCenter: container.getDatacenter(),
+      keyspace: "system",
+    });
+
+    await client.connect();
+
+    const result = await client.execute("SELECT cql_version FROM system.local");
+    expect(result.rows[0].cql_version).toBe("3.3.1");
+
+    await client.shutdown();
+    await container.stop();
+  });
 });

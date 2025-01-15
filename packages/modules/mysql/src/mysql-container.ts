@@ -51,8 +51,6 @@ export class MySqlContainer extends GenericContainer {
 }
 
 export class StartedMySqlContainer extends AbstractStartedContainer {
-  private readonly port: number;
-
   constructor(
     startedTestContainer: StartedTestContainer,
     private readonly database: string,
@@ -61,11 +59,10 @@ export class StartedMySqlContainer extends AbstractStartedContainer {
     private readonly rootPassword: string
   ) {
     super(startedTestContainer);
-    this.port = startedTestContainer.getMappedPort(3306);
   }
 
   public getPort(): number {
-    return this.port;
+    return this.startedTestContainer.getMappedPort(MYSQL_PORT);
   }
 
   public getDatabase(): string {
