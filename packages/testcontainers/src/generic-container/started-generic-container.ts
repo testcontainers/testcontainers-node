@@ -89,6 +89,10 @@ export class StartedGenericContainer implements StartedTestContainer {
     return this.host;
   }
 
+  public getHostname(): string {
+    return this.inspectResult.Config.Hostname;
+  }
+
   public getFirstMappedPort(): number {
     return this.boundPorts.getFirstBinding();
   }

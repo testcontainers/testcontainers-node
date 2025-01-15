@@ -47,6 +47,7 @@ export interface TestContainer {
   withResourcesQuota(resourcesQuota: ResourcesQuota): this;
   withSharedMemorySize(bytes: number): this;
   withLogConsumer(logConsumer: (stream: Readable) => unknown): this;
+  withHostname(hostname: string): this;
 }
 
 export interface RestartOptions {
@@ -63,6 +64,7 @@ export interface StartedTestContainer {
   stop(options?: Partial<StopOptions>): Promise<StoppedTestContainer>;
   restart(options?: Partial<RestartOptions>): Promise<void>;
   getHost(): string;
+  getHostname(): string;
   getFirstMappedPort(): number;
   getMappedPort(port: number): number;
   getName(): string;
