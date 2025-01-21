@@ -1,32 +1,37 @@
 {
   "name": "@testcontainers/eventstoredb",
   "version": "10.17.0",
-  "description": "EventStoreDB module for Testcontainers",
-  "main": "build/index.js",
-  "scripts": {
-    "prepack": "shx cp ../../../README.md . && shx cp ../../../LICENSE .",
-    "build": "tsc --project tsconfig.build.json"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/testcontainers/testcontainers-node.git"
-  },
+  "license": "MIT",
   "keywords": [
     "eventstoredb",
     "testing",
     "docker",
     "testcontainers"
   ],
-  "author": "",
-  "license": "MIT",
+  "description": "EventStoreDB module for Testcontainers",
+  "homepage": "https://github.com/testcontainers/testcontainers-node#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/testcontainers/testcontainers-node"
+  },
   "bugs": {
     "url": "https://github.com/testcontainers/testcontainers-node/issues"
   },
-  "homepage": "https://github.com/testcontainers/testcontainers-node#readme",
-  "dependencies": {
-    "testcontainers": "^10.17.0"
+  "main": "build/index.js",
+  "files": [
+    "build"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "prepack": "shx cp ../../../README.md . && shx cp ../../../LICENSE .",
+    "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
     "@eventstore/db-client": "^6.2.1"
+  },
+  "dependencies": {
+    "testcontainers": "^10.17.0"
   }
 }
