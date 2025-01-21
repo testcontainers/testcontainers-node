@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/eventstoredb",
-  "version": "10.16.0",
+  "version": "10.17.0",
   "description": "EventStoreDB module for Testcontainers",
   "main": "build/index.js",
   "scripts": {
@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/testcontainers/testcontainers-node#readme",
   "dependencies": {
-    "testcontainers": "^10.16.0"
+    "testcontainers": "^10.17.0"
   },
   "devDependencies": {
     "@eventstore/db-client": "^6.2.1"
