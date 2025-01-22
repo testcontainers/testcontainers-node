@@ -1,7 +1,7 @@
 import { EventStoreDBClient, StreamingRead, StreamSubscription } from "@eventstore/db-client";
 import { KurrentContainer } from "./kurrent-container";
 
-describe("EventStoreDBContainer", () => {
+describe("KurrentContainer", () => {
   jest.setTimeout(240_000);
 
   // startContainer {
