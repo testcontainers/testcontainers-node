@@ -1,6 +1,6 @@
 import { AbstractStartedContainer, GenericContainer, Wait } from "testcontainers";
 
-export class StartedEventStoreDBContainer extends AbstractStartedContainer {
+export class StartedKurrentContainer extends AbstractStartedContainer {
   getConnectionString(): string {
     return `esdb://${this.getHost()}:${this.getFirstMappedPort()}?tls=false`;
   }
@@ -8,7 +8,7 @@ export class StartedEventStoreDBContainer extends AbstractStartedContainer {
 
 const EVENT_STORE_DB_PORT = 2113;
 
-export class EventStoreDBContainer extends GenericContainer {
+export class KurrentContainer extends GenericContainer {
   constructor(image = "eventstore/eventstore:24.10") {
     super(image);
 
@@ -23,7 +23,7 @@ export class EventStoreDBContainer extends GenericContainer {
       .withWaitStrategy(Wait.forHealthCheck());
   }
 
-  public override async start(): Promise<StartedEventStoreDBContainer> {
-    return new StartedEventStoreDBContainer(await super.start());
+  public override async start(): Promise<StartedKurrentContainer> {
+    return new StartedKurrentContainer(await super.start());
   }
 }

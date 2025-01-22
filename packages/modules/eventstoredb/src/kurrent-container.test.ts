@@ -1,12 +1,12 @@
 import { EventStoreDBClient, StreamingRead, StreamSubscription } from "@eventstore/db-client";
-import { EventStoreDBContainer } from "./eventstoredb-container";
+import { KurrentContainer } from "./kurrent-container";
 
 describe("EventStoreDBContainer", () => {
   jest.setTimeout(240_000);
 
   // startContainer {
   it("should execute write and read", async () => {
-    const container = await new EventStoreDBContainer().start();
+    const container = await new KurrentContainer().start();
 
     const client = EventStoreDBClient.connectionString(container.getConnectionString());
 
@@ -46,7 +46,7 @@ describe("EventStoreDBContainer", () => {
 
   // usingStandardProjections {
   it("should use built-in projections", async () => {
-    const container = await new EventStoreDBContainer().start();
+    const container = await new KurrentContainer().start();
     const client = EventStoreDBClient.connectionString(container.getConnectionString());
 
     await client.appendToStream("Todo-1", [
