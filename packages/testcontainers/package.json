@@ -44,7 +44,7 @@
     "ssh-remote-port-forward": "^1.0.4",
     "tar-fs": "^3.0.6",
     "tmp": "^0.2.3",
-    "undici": "^5.28.4"
+    "undici": "^5.28.5"
   },
   "devDependencies": {
     "@types/archiver": "^6.0.2",
