@@ -45,7 +45,7 @@ export abstract class CredentialProvider implements RegistryAuthLocator {
       exec(`${providerName} list`, (err, stdout, stderr) => {
         if (err) {
           if (stderr === "list is unimplemented\n") {
-            return resolve([] as CredentialProviderListResponse);
+            return resolve({});
           }
 
           log.error(`An error occurred listing credentials: ${err}`);
