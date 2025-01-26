@@ -40,6 +40,7 @@ export interface TestContainer {
   withUser(user: string): this;
   withPullPolicy(pullPolicy: ImagePullPolicy): this;
   withReuse(): this;
+  withAutoRemove(autoRemove: boolean): this;
   withCopyFilesToContainer(filesToCopy: FileToCopy[]): this;
   withCopyDirectoriesToContainer(directoriesToCopy: DirectoryToCopy[]): this;
   withCopyContentToContainer(contentsToCopy: ContentToCopy[]): this;

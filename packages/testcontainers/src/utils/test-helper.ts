@@ -44,6 +44,16 @@ export const getRunningContainerNames = async (): Promise<string[]> => {
     .map((containerName) => containerName.replace("/", ""));
 };
 
+export const getStoppedContainerNames = async (): Promise<string[]> => {
+  const dockerode = (await getContainerRuntimeClient()).container.dockerode;
+  const containers = await dockerode.listContainers({ all: true });
+  return containers
+    .filter(container => container.State === "exited")
+    .map((container) => container.Names)
+    .reduce((result, containerNames) => [...result, ...containerNames], [])
+    .map((containerName) => containerName.replace("/", ""));
+};
+
 export const getContainerIds = async (): Promise<string[]> => {
   const dockerode = (await getContainerRuntimeClient()).container.dockerode;
   const containers = await dockerode.listContainers({ all: true });

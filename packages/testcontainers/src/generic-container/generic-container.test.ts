@@ -5,8 +5,8 @@ import { PullPolicy } from "../utils/pull-policy";
 import {
   checkContainerIsHealthy,
   getDockerEventStream,
-  getRunningContainerNames,
-  waitForDockerEvent,
+  getRunningContainerNames, getStoppedContainerNames,
+  waitForDockerEvent
 } from "../utils/test-helper";
 import { getContainerRuntimeClient } from "../container-runtime";
 import { RandomUuid } from "../common";
@@ -517,6 +517,18 @@ describe("GenericContainer", () => {
 
     await expect(stopContainerPromises).resolves.not.toThrow();
     expect(await getRunningContainerNames()).not.toContain(container.getName());
+  });
+
+  it.only("should stop but not remove the container", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withName(`container-${new RandomUuid().nextUuid()}`)
+      .withAutoRemove(false)
+      .start();
+
+    await container.stop();
+
+    expect(await getRunningContainerNames()).not.toContain(container.getName().replace("/", ""));
+    expect(await getStoppedContainerNames()).toContain(container.getName().replace("/", ""));
   });
 
   it("should build a target stage", async () => {
