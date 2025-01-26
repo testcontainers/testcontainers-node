@@ -520,7 +520,7 @@ describe("GenericContainer", () => {
     expect(await getRunningContainerNames()).not.toContain(container.getName());
   });
 
-  it.only("should stop but not remove the container", async () => {
+  it("should stop but not remove the container", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withName(`container-${new RandomUuid().nextUuid()}`)
       .withAutoRemove(false)
@@ -530,6 +530,18 @@ describe("GenericContainer", () => {
 
     expect(await getRunningContainerNames()).not.toContain(container.getName().replace("/", ""));
     expect(await getStoppedContainerNames()).toContain(container.getName().replace("/", ""));
+  });
+
+  it("should stop and override .withAutoRemove", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withName(`container-${new RandomUuid().nextUuid()}`)
+      .withAutoRemove(false)
+      .start();
+
+    await container.stop({ remove: true });
+
+    expect(await getRunningContainerNames()).not.toContain(container.getName().replace("/", ""));
+    expect(await getStoppedContainerNames()).not.toContain(container.getName().replace("/", ""));
   });
 
   it("should build a target stage", async () => {

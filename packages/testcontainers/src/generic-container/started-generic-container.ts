@@ -75,7 +75,6 @@ export class StartedGenericContainer implements StartedTestContainer {
     const resolvedOptions: StopOptions = { remove: this.autoRemove, timeout: 0, removeVolumes: true, ...options };
     await client.container.stop(this.container, { timeout: resolvedOptions.timeout });
     if (resolvedOptions.remove) {
-      log.info(`Removing container...`, { containerId: this.container.id });
       await client.container.remove(this.container, { removeVolumes: resolvedOptions.removeVolumes });
     }
     log.info(`Stopped container`, { containerId: this.container.id });
