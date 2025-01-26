@@ -1,14 +1,15 @@
 {
-  "name": "@testcontainers/eventstoredb",
+  "name": "@testcontainers/kurrent",
   "version": "10.17.1",
   "license": "MIT",
   "keywords": [
     "eventstoredb",
+    "kurrent",
     "testing",
     "docker",
     "testcontainers"
   ],
-  "description": "EventStoreDB module for Testcontainers",
+  "description": "Kurrent module for Testcontainers",
   "homepage": "https://github.com/testcontainers/testcontainers-node#readme",
   "repository": {
     "type": "git",

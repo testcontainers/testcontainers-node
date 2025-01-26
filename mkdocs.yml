@@ -48,11 +48,11 @@ nav:
       - ChromaDB: modules/chromadb.md
       - Couchbase: modules/couchbase.md
       - Elasticsearch: modules/elasticsearch.md
-      - EventStoreDB: modules/eventstoredb.md
       - GCloud: modules/gcloud.md
       - HiveMQ: modules/hivemq.md
       - K3s: modules/k3s.md
       - Kafka: modules/kafka.md
+      - Kurrent: modules/kurrent.md
       - Localstack: modules/localstack.md
       - MariaDB: modules/mariadb.md
       - Mockserver: modules/mockserver.md
