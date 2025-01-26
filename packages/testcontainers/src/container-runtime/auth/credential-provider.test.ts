@@ -104,6 +104,16 @@ describe("CredentialProvider", () => {
     );
   });
 
+  it("should not throw when list credentials command is not implemented", async () => {
+    mockExec.mockImplementationOnce((command, callback) => {
+      return callback(new Error(), null, "list is unimplemented\n");
+    });
+
+    const credentials = await credentialProvider.getAuthConfig("registry", containerRuntimeConfig);
+
+    expect(credentials).toBeUndefined();
+  });
+
   it("should throw when get credentials fails", async () => {
     mockExecReturns(JSON.stringify({ registry: "username" }));
     mockSpawnReturns(
