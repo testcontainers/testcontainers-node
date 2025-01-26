@@ -5,8 +5,9 @@ import { PullPolicy } from "../utils/pull-policy";
 import {
   checkContainerIsHealthy,
   getDockerEventStream,
-  getRunningContainerNames, getStoppedContainerNames,
-  waitForDockerEvent
+  getRunningContainerNames,
+  getStoppedContainerNames,
+  waitForDockerEvent,
 } from "../utils/test-helper";
 import { getContainerRuntimeClient } from "../container-runtime";
 import { RandomUuid } from "../common";
