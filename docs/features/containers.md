@@ -331,7 +331,7 @@ const container = await new GenericContainer("alpine").start();
 await container.stop({ remove: false });
 ```
 
-Alternatively, you can disable automatic removal configuring the container:
+Alternatively, you can disable automatic removal while configuring the container:
 
 ```javascript
 const container = await new GenericContainer("alpine")
@@ -339,6 +339,16 @@ const container = await new GenericContainer("alpine")
   .start();
 
 await container.stop()
+```
+
+The value specified to `.withAutoRemove()` can be overridden by `.stop()`:
+
+```javascript
+const container = await new GenericContainer("alpine")
+  .withAutoRemove(false)
+  .start();
+
+await container.stop({ remove: true }) // The container is stopped *AND* removed
 ```
 
 Volumes created by the container are removed when stopped. This is configurable:
