@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/eventstoredb",
-  "version": "10.17.1",
+  "version": "10.17.2",
   "license": "MIT",
   "keywords": [
     "eventstoredb",
@@ -32,6 +32,6 @@
     "@eventstore/db-client": "^6.2.1"
   },
   "dependencies": {
-    "testcontainers": "^10.17.1"
+    "testcontainers": "^10.17.2"
   }
 }
