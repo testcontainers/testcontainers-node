@@ -100,7 +100,7 @@ export class GenericContainer implements TestContainer {
 
     this.createOpts.Labels = { ...createLabels(), ...this.createOpts.Labels };
 
-    if (this.reuse) {
+    if (process.env.TESTCONTAINERS_REUSE_ENABLE !== "false" && this.reuse) {
       return this.reuseOrStartContainer(client);
     }
 

@@ -365,6 +365,9 @@ const container2 = await new GenericContainer("alpine")
 expect(container1.getId()).toBe(container2.getId());
 ```
 
+Container re-use can be enabled or disabled globally by setting the `TESTCONTAINERS_REUSE_ENABLE` environment variable to `true` or `false`.
+If this environment variable is not declared, the feature is enabled by default.
+
 ## Creating a custom container
 
 You can create your own Generic Container as follows:
