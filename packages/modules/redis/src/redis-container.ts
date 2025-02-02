@@ -32,6 +32,12 @@ export class RedisContainer extends GenericContainer {
     return this;
   }
 
+  protected override async containerStarted(container: StartedTestContainer): Promise<void> {
+    if (this.initialImportScriptFile) {
+      await this.importInitialData(container);
+    }
+  }
+
   public override async start(): Promise<StartedRedisContainer> {
     this.withCommand([
       "redis-server",
@@ -60,7 +66,7 @@ export class RedisContainer extends GenericContainer {
     return startedRedisContainer;
   }
 
-  private async importInitialData(container: StartedRedisContainer) {
+  private async importInitialData(container: StartedTestContainer) {
     const re = await container.exec(`/tmp/import.sh ${this.password}`);
     if (re.exitCode != 0 || re.output.includes("ERR"))
       throw Error(`Could not import initial data from ${this.initialImportScriptFile}: ${re.output}`);

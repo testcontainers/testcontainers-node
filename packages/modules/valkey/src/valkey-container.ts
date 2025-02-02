@@ -31,6 +31,12 @@ export class ValkeyContainer extends GenericContainer {
     return this;
   }
 
+  protected override async containerStarted(container: StartedTestContainer): Promise<void> {
+    if (this.initialImportScriptFile) {
+      await this.importInitialData(container);
+    }
+  }
+
   public override async start(): Promise<StartedValkeyContainer> {
     this.withCommand([
       "valkey-server",
@@ -54,12 +60,11 @@ export class ValkeyContainer extends GenericContainer {
         },
       ]);
     }
-    const startedContainer = new StartedValkeyContainer(await super.start(), this.password);
-    if (this.initialImportScriptFile) await this.importInitialData(startedContainer);
-    return startedContainer;
+
+    return new StartedValkeyContainer(await super.start(), this.password);
   }
 
-  private async importInitialData(container: StartedValkeyContainer) {
+  private async importInitialData(container: StartedTestContainer) {
     const re = await container.exec(`/tmp/import.sh ${this.password || ""}`);
     if (re.exitCode !== 0 || re.output.includes("ERR")) {
       throw Error(`Could not import initial data from ${this.initialImportScriptFile}: ${re.output}`);
