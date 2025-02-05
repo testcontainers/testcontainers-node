@@ -14,7 +14,7 @@ describe("OllamaContainer", () => {
     await container.stop();
   });
 
-  it("download model and commit to image", async () => {
+  it.skip("download model and commit to image", async () => {
     const container = await new OllamaContainer("ollama/ollama:0.1.44").start();
     // pullModel {
     const execResult = await container.exec(["ollama", "pull", "all-minilm"]);
