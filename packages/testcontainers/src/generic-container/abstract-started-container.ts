@@ -31,6 +31,10 @@ export class AbstractStartedContainer implements StartedTestContainer {
     return this.startedTestContainer.getHost();
   }
 
+  public getHostname(): string {
+    return this.startedTestContainer.getHostname();
+  }
+
   public getFirstMappedPort(): number {
     return this.startedTestContainer.getFirstMappedPort();
   }
