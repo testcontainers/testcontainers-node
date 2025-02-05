@@ -1,17 +1,17 @@
 import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 import path from "path";
 
-const REDIS_PORT = 6379;
+const VALKEY_PORT = 6379;
 
-export class RedisContainer extends GenericContainer {
-  private readonly importFilePath = "/tmp/import.redis";
+export class ValkeyContainer extends GenericContainer {
+  private readonly importFilePath = "/tmp/import.valkey";
   private password? = "";
   private persistenceVolume? = "";
   private initialImportScriptFile? = "";
 
-  constructor(image = "redis:7.2") {
+  constructor(image = "valkey/valkey:8.0") {
     super(image);
-    this.withExposedPorts(REDIS_PORT)
+    this.withExposedPorts(VALKEY_PORT)
       .withStartupTimeout(120_000)
       .withWaitStrategy(Wait.forLogMessage("Ready to accept connections"));
   }
@@ -26,7 +26,6 @@ export class RedisContainer extends GenericContainer {
     return this;
   }
 
-  /* Expect data to be in redis import script format, see https://developer.redis.com/explore/import/*/
   public withInitialData(importScriptFile: string): this {
     this.initialImportScriptFile = importScriptFile;
     return this;
@@ -38,9 +37,9 @@ export class RedisContainer extends GenericContainer {
     }
   }
 
-  public override async start(): Promise<StartedRedisContainer> {
+  public override async start(): Promise<StartedValkeyContainer> {
     this.withCommand([
-      "redis-server",
+      "valkey-server",
       ...(this.password ? [`--requirepass "${this.password}"`] : []),
       ...(this.persistenceVolume ? ["--save 1 1 ", "--appendonly yes"] : []),
     ]);
@@ -61,25 +60,25 @@ export class RedisContainer extends GenericContainer {
         },
       ]);
     }
-    const startedRedisContainer = new StartedRedisContainer(await super.start(), this.password);
-    if (this.initialImportScriptFile) await this.importInitialData(startedRedisContainer);
-    return startedRedisContainer;
+
+    return new StartedValkeyContainer(await super.start(), this.password);
   }
 
   private async importInitialData(container: StartedTestContainer) {
-    const re = await container.exec(`/tmp/import.sh ${this.password}`);
-    if (re.exitCode != 0 || re.output.includes("ERR"))
+    const re = await container.exec(`/tmp/import.sh ${this.password || ""}`);
+    if (re.exitCode !== 0 || re.output.includes("ERR")) {
       throw Error(`Could not import initial data from ${this.initialImportScriptFile}: ${re.output}`);
+    }
   }
 }
 
-export class StartedRedisContainer extends AbstractStartedContainer {
+export class StartedValkeyContainer extends AbstractStartedContainer {
   constructor(startedTestContainer: StartedTestContainer, private readonly password?: string) {
     super(startedTestContainer);
   }
 
   public getPort(): number {
-    return this.getMappedPort(REDIS_PORT);
+    return this.getMappedPort(VALKEY_PORT);
   }
 
   public getPassword(): string {
