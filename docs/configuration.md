@@ -43,3 +43,4 @@ Configuration of Testcontainers and its behaviours:
 | TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX  | mycompany.com/registry    | Set default image registry               |
 | RYUK_CONTAINER_IMAGE                  | testcontainers/ryuk:0.5.1 | Custom image for ryuk                    |
 | SSHD_CONTAINER_IMAGE                  | testcontainers/sshd:1.1.0 | Custom image for SSHd                    |
+| TESTCONTAINERS_REUSE_ENABLE           | true                      | Enable reusable containers               |

@@ -4,6 +4,10 @@ import { checkContainerIsHealthy } from "../utils/test-helper";
 describe("GenericContainer reuse", () => {
   jest.setTimeout(180_000);
 
+  afterEach(() => {
+    process.env.TESTCONTAINERS_REUSE_ENABLE = undefined;
+  });
+
   it("should not reuse the container by default", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withName("there_can_only_be_one")
@@ -63,25 +67,53 @@ describe("GenericContainer reuse", () => {
     }
   });
 
-  it("should reuse the container", async () => {
-    const container1 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+  it("should not reuse the container when TESTCONTAINERS_REUSE_ENABLE is set to false", async () => {
+    process.env.TESTCONTAINERS_REUSE_ENABLE = "false";
+
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withName("there_can_only_be_one")
       .withExposedPorts(8080)
       .withReuse()
       .start();
-    await checkContainerIsHealthy(container1);
+    await checkContainerIsHealthy(container);
 
-    const container2 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
-      .withName("there_can_only_be_one")
-      .withExposedPorts(8080)
-      .withReuse()
-      .start();
-    await checkContainerIsHealthy(container2);
-
-    expect(container1.getId()).toBe(container2.getId());
-
-    await container1.stop();
+    try {
+      await expect(() =>
+        new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+          .withName("there_can_only_be_one")
+          .withExposedPorts(8080)
+          .withReuse()
+          .start()
+      ).rejects.toThrowError();
+    } finally {
+      await container.stop();
+    }
   });
+
+  it.each(["true", undefined])(
+    "should reuse the container when TESTCONTAINERS_REUSE_ENABLE is set to %s",
+    async (reuseEnable: string | undefined) => {
+      process.env.TESTCONTAINERS_REUSE_ENABLE = reuseEnable;
+
+      const container1 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+        .withName("there_can_only_be_one")
+        .withExposedPorts(8080)
+        .withReuse()
+        .start();
+      await checkContainerIsHealthy(container1);
+
+      const container2 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+        .withName("there_can_only_be_one")
+        .withExposedPorts(8080)
+        .withReuse()
+        .start();
+      await checkContainerIsHealthy(container2);
+
+      expect(container1.getId()).toBe(container2.getId());
+
+      await container1.stop();
+    }
+  );
 
   it("should create a new container when an existing reusable container has stopped and is removed", async () => {
     const container1 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
