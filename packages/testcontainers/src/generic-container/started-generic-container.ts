@@ -22,7 +22,8 @@ export class StartedGenericContainer implements StartedTestContainer {
     private inspectResult: ContainerInspectInfo,
     private boundPorts: BoundPorts,
     private readonly name: string,
-    private readonly waitStrategy: WaitStrategy
+    private readonly waitStrategy: WaitStrategy,
+    private readonly autoRemove: boolean
   ) {}
 
   protected containerIsStopping?(): Promise<void>;
@@ -71,7 +72,7 @@ export class StartedGenericContainer implements StartedTestContainer {
       await this.containerIsStopping();
     }
 
-    const resolvedOptions: StopOptions = { remove: true, timeout: 0, removeVolumes: true, ...options };
+    const resolvedOptions: StopOptions = { remove: this.autoRemove, timeout: 0, removeVolumes: true, ...options };
     await client.container.stop(this.container, { timeout: resolvedOptions.timeout });
     if (resolvedOptions.remove) {
       await client.container.remove(this.container, { removeVolumes: resolvedOptions.removeVolumes });
