@@ -120,9 +120,7 @@ export class DockerContainerClient implements ContainerClient {
 
   async inspect(container: Dockerode.Container): Promise<ContainerInspectInfo> {
     try {
-      log.debug(`Inspecting container...`, { containerId: container.id });
       const inspectInfo = await container.inspect();
-      log.debug(`Inspected container`, { containerId: container.id });
       return inspectInfo;
     } catch (err) {
       log.error(`Failed to inspect container: ${err}`, { containerId: container.id });
