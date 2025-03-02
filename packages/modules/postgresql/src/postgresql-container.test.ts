@@ -1,6 +1,5 @@
 import { Client } from "pg";
 import { PostgreSqlContainer } from "./postgresql-container";
-import { Wait } from "testcontainers";
 
 describe("PostgreSqlContainer", () => {
   jest.setTimeout(180_000);
