@@ -35,8 +35,8 @@ export class PostgreSqlContainer extends GenericContainer {
     });
     this.withHealthCheck({
       test: ["CMD-SHELL", `PGPASSWORD=${this.password} psql -U ${this.username} -d ${this.database} -c 'SELECT 1;'`],
-      interval: 100,
-      timeout: 100,
+      interval: 250,
+      timeout: 1000,
       retries: 1000,
     });
     this.withWaitStrategy(Wait.forHealthCheck());
