@@ -8,8 +8,6 @@ describe("CockroachDbContainer", () => {
   it("should connect and return a query result", async () => {
     const container = await new CockroachDbContainer().start();
 
-    console.log(container.getDatabase(), container.getHost(), container.getPort());
-
     const client = new Client({
       host: container.getHost(),
       port: container.getPort(),
