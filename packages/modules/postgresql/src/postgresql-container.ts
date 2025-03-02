@@ -9,7 +9,9 @@ export class PostgreSqlContainer extends GenericContainer {
 
   constructor(image = "postgres:13.3-alpine") {
     super(image);
-    this.withExposedPorts(POSTGRES_PORT).withStartupTimeout(120_000);
+    this.withExposedPorts(POSTGRES_PORT);
+    this.withWaitStrategy(Wait.forHealthCheck());
+    this.withStartupTimeout(120_000);
   }
 
   public withDatabase(database: string): this {
@@ -33,13 +35,14 @@ export class PostgreSqlContainer extends GenericContainer {
       POSTGRES_USER: this.username,
       POSTGRES_PASSWORD: this.password,
     });
-    this.withHealthCheck({
-      test: ["CMD-SHELL", `PGPASSWORD=${this.password} psql -U ${this.username} -d ${this.database} -c 'SELECT 1;'`],
-      interval: 250,
-      timeout: 1000,
-      retries: 1000,
-    });
-    this.withWaitStrategy(Wait.forHealthCheck());
+    if (!this.healthCheck) {
+      this.withHealthCheck({
+        test: ["CMD-SHELL", `PGPASSWORD=${this.password} psql -U ${this.username} -d ${this.database} -c 'SELECT 1;'`],
+        interval: 250,
+        timeout: 1000,
+        retries: 1000,
+      });
+    }
     return new StartedPostgreSqlContainer(await super.start(), this.database, this.username, this.password);
   }
 }

@@ -1,5 +1,6 @@
 import { Client } from "pg";
 import { PostgreSqlContainer } from "./postgresql-container";
+import { Wait } from "testcontainers";
 
 describe("PostgreSqlContainer", () => {
   jest.setTimeout(180_000);
@@ -102,5 +103,16 @@ describe("PostgreSqlContainer", () => {
 
     await client.end();
     await container.stop();
+  });
+
+  it("should allow custom healthcheck", async () => {
+    const container = new PostgreSqlContainer().withHealthCheck({
+      test: ["CMD-SHELL", "exit 1"],
+      interval: 100,
+      retries: 0,
+      timeout: 0,
+    });
+
+    await expect(() => container.start()).rejects.toThrow();
   });
 });
