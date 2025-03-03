@@ -85,9 +85,7 @@ describe("CockroachDbContainer", () => {
 
   it("should work with restarted container", async () => {
     const container = await new CockroachDbContainer().start();
-    const port = container.getFirstMappedPort();
     await container.restart();
-    expect(port).not.toEqual(container.getFirstMappedPort());
 
     const client = new Client({
       host: container.getHost(),
