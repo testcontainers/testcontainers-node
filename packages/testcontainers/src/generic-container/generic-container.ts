@@ -57,6 +57,7 @@ export class GenericContainer implements TestContainer {
   protected filesToCopy: FileToCopy[] = [];
   protected directoriesToCopy: DirectoryToCopy[] = [];
   protected contentsToCopy: ContentToCopy[] = [];
+  protected healthCheck?: HealthCheck;
 
   constructor(image: string) {
     this.imageName = ImageName.fromString(image);
@@ -387,6 +388,7 @@ export class GenericContainer implements TestContainer {
   public withHealthCheck(healthCheck: HealthCheck): this {
     const toNanos = (duration: number): number => duration * 1e6;
 
+    this.healthCheck = healthCheck;
     this.createOpts.Healthcheck = {
       Test: healthCheck.test,
       Interval: healthCheck.interval ? toNanos(healthCheck.interval) : 0,
@@ -394,6 +396,7 @@ export class GenericContainer implements TestContainer {
       Retries: healthCheck.retries || 0,
       StartPeriod: healthCheck.startPeriod ? toNanos(healthCheck.startPeriod) : 0,
     };
+
     return this;
   }
 
