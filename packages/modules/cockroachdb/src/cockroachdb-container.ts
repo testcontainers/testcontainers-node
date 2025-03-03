@@ -9,11 +9,9 @@ export class CockroachDbContainer extends GenericContainer {
 
   constructor(image = "cockroachdb/cockroach:v24.3.5") {
     super(image);
-    this.withExposedPorts(COCKROACH_PORT, COCKROACH_HTTP_PORT).withCommand([
-      "start-single-node",
-      "--insecure",
-      `--http-addr=0.0.0.0:${COCKROACH_HTTP_PORT}`,
-    ]);
+    this.withExposedPorts(COCKROACH_PORT, COCKROACH_HTTP_PORT)
+      .withCommand(["start-single-node", "--insecure", `--http-addr=0.0.0.0:${COCKROACH_HTTP_PORT}`])
+      .withWaitStrategy(Wait.forHealthCheck());
   }
 
   public withDatabase(database: string): this {
@@ -31,13 +29,14 @@ export class CockroachDbContainer extends GenericContainer {
       COCKROACH_DATABASE: this.database,
       COCKROACH_USER: this.username,
     });
-    this.withHealthCheck({
-      test: ["CMD-SHELL", `cockroach sql --insecure -u ${this.username} -d ${this.database} -e "SELECT 1;"`],
-      interval: 250,
-      timeout: 1000,
-      retries: 1000,
-    });
-    this.withWaitStrategy(Wait.forHealthCheck());
+    if (!this.healthCheck) {
+      this.withHealthCheck({
+        test: ["CMD-SHELL", `cockroach sql --insecure -u ${this.username} -d ${this.database} -e "SELECT 1;"`],
+        interval: 250,
+        timeout: 1000,
+        retries: 1000,
+      });
+    }
     return new StartedCockroachDbContainer(await super.start(), this.database, this.username);
   }
 }
