@@ -9,9 +9,9 @@ export class PostgreSqlContainer extends GenericContainer {
 
   constructor(image = "postgres:13.3-alpine") {
     super(image);
-    this.withExposedPorts(POSTGRES_PORT)
-      .withWaitStrategy(Wait.forLogMessage(/.*database system is ready to accept connections.*/, 2))
-      .withStartupTimeout(120_000);
+    this.withExposedPorts(POSTGRES_PORT);
+    this.withWaitStrategy(Wait.forHealthCheck());
+    this.withStartupTimeout(120_000);
   }
 
   public withDatabase(database: string): this {
@@ -35,13 +35,19 @@ export class PostgreSqlContainer extends GenericContainer {
       POSTGRES_USER: this.username,
       POSTGRES_PASSWORD: this.password,
     });
+    if (!this.healthCheck) {
+      this.withHealthCheck({
+        test: ["CMD-SHELL", `PGPASSWORD=${this.password} psql -U ${this.username} -d ${this.database} -c 'SELECT 1;'`],
+        interval: 250,
+        timeout: 1000,
+        retries: 1000,
+      });
+    }
     return new StartedPostgreSqlContainer(await super.start(), this.database, this.username, this.password);
   }
 }
 
 export class StartedPostgreSqlContainer extends AbstractStartedContainer {
-  private readonly port: number;
-
   constructor(
     startedTestContainer: StartedTestContainer,
     private readonly database: string,
@@ -49,11 +55,10 @@ export class StartedPostgreSqlContainer extends AbstractStartedContainer {
     private readonly password: string
   ) {
     super(startedTestContainer);
-    this.port = startedTestContainer.getMappedPort(POSTGRES_PORT);
   }
 
   public getPort(): number {
-    return this.port;
+    return super.getMappedPort(POSTGRES_PORT);
   }
 
   public getDatabase(): string {
