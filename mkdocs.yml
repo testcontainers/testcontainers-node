@@ -47,6 +47,7 @@ nav:
       - Cassandra: modules/cassandra.md
       - ChromaDB: modules/chromadb.md
       - Couchbase: modules/couchbase.md
+      - CockroachDB: modules/cockroachdb.md
       - Elasticsearch: modules/elasticsearch.md
       - EventStoreDB: modules/eventstoredb.md
       - GCloud: modules/gcloud.md
