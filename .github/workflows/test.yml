@@ -29,10 +29,13 @@ jobs:
     steps:
       - name: Code checkout
         uses: actions/checkout@v4
-      - uses: ./.github/workflows/npm-ci.yml
+
+      # Uses a composite action for a consistent NPM install including cache
+      - uses: ./.github/actions/npm-setup
         with:
           runner: ${{ matrix.runner }}
           node-version: ${{ matrix.node-version }}
+
       - name: Build workspaces
         run: npm run build -ws
       - name: Remove dev dependencies

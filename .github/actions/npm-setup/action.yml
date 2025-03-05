@@ -1,21 +1,17 @@
-name: NPM Install
-run-name: "Runner (${{ inputs.runner }}) / Node (${{ inputs.node-version }})"
+name: 'NPM Setup'
+description: 'Sets up Node.js and installs NPM dependencies with caching'
 
-on:
-  workflow_call:
-    inputs:
-      runner:
-        required: true
-        type: string
-      node-version:
-        required: true
-        type: string
+inputs:
+  runner:
+    description: 'Runner to use'
+    required: true
+  node-version:
+    description: 'Node.js version to use'
+    required: true
 
-jobs:
-  npm-install:
-    name: "NPM Install (${{ inputs.runner }}) / Node (${{ inputs.node-version }})"
-    runs-on: ${{ inputs.runner }}
-    steps:
+runs:
+  using: "composite"
+  steps:
       - name: Install NodeJS ${{ inputs.node-version }}
         uses: actions/setup-node@v4
         with:
@@ -28,8 +24,9 @@ jobs:
         id: npm-cache # use this to check for `cache-hit` ==> if: steps.npm-cache.outputs.cache-hit != 'true'
         with:
           path: ${{ steps.npm-cache-dir.outputs.dir }}
-          key: ${{ inputs.runner }}-node-{{ inputs.node-version }}-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ inputs.runner }}-node-${{ inputs.node-version }}-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ inputs.runner }}-node-{{ inputs.node-version }}-
+            ${{ inputs.runner }}-node-${{ inputs.node-version }}-
       - name: Install dependencies
+        shell: bash
         run: npm ci --omit=optional
