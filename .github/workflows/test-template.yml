@@ -130,13 +130,11 @@ jobs:
       - name: Code checkout
         uses: actions/checkout@v4
 
-      - name: Install NodeJS ${{ inputs.node-version }}
-        uses: actions/setup-node@v4
+      - name: Install Node ${{ matrix.node-version }} and Dependencies
+        uses: ./.github/actions/npm-setup
         with:
-          node-version: ${{ inputs.node-version }}
-
-      - name: Install dependencies
-        run: npm ci --omit=optional
+          runner: ${{ matrix.runner }}
+          node-version: ${{ matrix.node-version }}
 
       - name: Run tests
         run: npm run test:ci -- ${{ inputs.workspace }}
