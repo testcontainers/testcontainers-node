@@ -49,7 +49,9 @@ describe("QdrantContainer", () => {
 
   // connectQdrantWithConfig {
   it("should work with config files - valid API key", async () => {
-    const container = await new QdrantContainer("qdrant/qdrant:v1.13.4").withConfigFile(path.resolve(__dirname, "test_config.yaml")).start();
+    const container = await new QdrantContainer("qdrant/qdrant:v1.13.4")
+      .withConfigFile(path.resolve(__dirname, "test_config.yaml"))
+      .start();
 
     const client = new QdrantClient({ url: `http://${container.getRestHostAddress()}`, apiKey: "SOME_TEST_KEY" });
 
@@ -60,7 +62,9 @@ describe("QdrantContainer", () => {
   // }
 
   it("should work with config files - invalid API key", async () => {
-    const container = await new QdrantContainer("qdrant/qdrant:v1.13.4").withConfigFile(path.resolve(__dirname, "test_config.yaml")).start();
+    const container = await new QdrantContainer("qdrant/qdrant:v1.13.4")
+      .withConfigFile(path.resolve(__dirname, "test_config.yaml"))
+      .start();
 
     const client = new QdrantClient({
       url: `http://${container.getRestHostAddress()}`,
