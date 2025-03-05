@@ -16,23 +16,21 @@ runs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.node-version }}
-      - name: Get npm cache directory
-        id: npm-cache-dir
-        shell: bash
-        run: echo "dir=$(npm config get cache)" >> ${GITHUB_OUTPUT}
       - uses: actions/cache/restore@v4
-        id: npm-cache # use this to check for `cache-hit` ==> if: steps.npm-cache.outputs.cache-hit != 'true'
+        id: npm-cache
         with:
-          path: ${{ steps.npm-cache-dir.outputs.dir }}
-          key: ${{ inputs.runner }}-node-${{ inputs.node-version }}-${{ hashFiles('**/package-lock.json') }}
+          path: node_modules
+          key: ${{ github.head_ref || 'main' }}-${{ inputs.runner }}-node-${{ inputs.node-version }}-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ inputs.runner }}-node-${{ inputs.node-version }}-
+            ${{ github.head_ref || 'main' }}-${{ inputs.runner }}-node-${{ inputs.node-version }}-
       - name: Install dependencies
+        if: steps.npm-cache.outputs.cache-hit != 'true'
         shell: bash
         run: npm ci --omit=optional
       - name: Cache npm
         id: cache-npm-save
+        if: steps.npm-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
-          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          path: node_modules
           key: ${{ steps.npm-cache.outputs.cache-primary-key }}
