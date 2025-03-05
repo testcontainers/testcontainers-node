@@ -8,7 +8,7 @@ describe("QdrantContainer", () => {
 
   // connectQdrantSimple {
   it("should connect to the client", async () => {
-    const container = await new QdrantContainer().start();
+    const container = await new QdrantContainer("qdrant/qdrant:latest").start();
 
     const client = new QdrantClient({ url: `http://${container.getRestHostAddress()}` });
 
@@ -22,7 +22,7 @@ describe("QdrantContainer", () => {
   it("should work with valid API keys", async () => {
     const apiKey = crypto.randomUUID();
 
-    const container = await new QdrantContainer().withApiKey(apiKey).start();
+    const container = await new QdrantContainer("qdrant/qdrant:latest").withApiKey(apiKey).start();
 
     const client = new QdrantClient({ url: `http://${container.getRestHostAddress()}`, apiKey });
 
@@ -35,7 +35,7 @@ describe("QdrantContainer", () => {
   it("should fail for invalid API keys", async () => {
     const apiKey = crypto.randomUUID();
 
-    const container = await new QdrantContainer().withApiKey(apiKey).start();
+    const container = await new QdrantContainer("qdrant/qdrant:latest").withApiKey(apiKey).start();
 
     const client = new QdrantClient({
       url: `http://${container.getRestHostAddress()}`,
@@ -49,7 +49,7 @@ describe("QdrantContainer", () => {
 
   // connectQdrantWithConfig {
   it("should work with config files - valid API key", async () => {
-    const container = await new QdrantContainer().withConfigFile(path.resolve(__dirname, "test_config.yaml")).start();
+    const container = await new QdrantContainer("qdrant/qdrant:latest").withConfigFile(path.resolve(__dirname, "test_config.yaml")).start();
 
     const client = new QdrantClient({ url: `http://${container.getRestHostAddress()}`, apiKey: "SOME_TEST_KEY" });
 
@@ -60,7 +60,7 @@ describe("QdrantContainer", () => {
   // }
 
   it("should work with config files - invalid API key", async () => {
-    const container = await new QdrantContainer().withConfigFile(path.resolve(__dirname, "test_config.yaml")).start();
+    const container = await new QdrantContainer("qdrant/qdrant:latest").withConfigFile(path.resolve(__dirname, "test_config.yaml")).start();
 
     const client = new QdrantClient({
       url: `http://${container.getRestHostAddress()}`,
