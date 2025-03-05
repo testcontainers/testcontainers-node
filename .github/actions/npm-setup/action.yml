@@ -8,6 +8,9 @@ inputs:
   node-version:
     description: 'Node.js version to use'
     required: true
+  workspace:
+    description: 'Key for the cache'
+    required: true
 
 runs:
   using: "composite"
@@ -20,9 +23,9 @@ runs:
         id: npm-cache
         with:
           path: node_modules
-          key: ${{ github.head_ref || 'main' }}-${{ inputs.runner }}-node-${{ inputs.node-version }}-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ github.head_ref || 'main' }}-${{ inputs.runner }}-node-${{ inputs.node-version }}-${{ inputs.workspace }}-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ github.head_ref || 'main' }}-${{ inputs.runner }}-node-${{ inputs.node-version }}-
+            ${{ github.head_ref || 'main' }}-${{ inputs.runner }}-node-${{ inputs.node-version }}-${{ inputs.workspace }}-
       - name: Install dependencies
         if: steps.npm-cache.outputs.cache-hit != 'true'
         shell: bash

@@ -135,6 +135,7 @@ jobs:
         with:
           runner: ${{ inputs.runner }}
           node-version: ${{ inputs.node-version }}
+          workspace: "${{ inputs.workspace }}"
 
       - name: Run tests
         run: npm run test:ci -- ${{ inputs.workspace }}

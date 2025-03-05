@@ -19,5 +19,6 @@ jobs:
       with:
         runner: ubuntu-22.04
         node-version: 22.x
+        workspace: "packages/testcontainers"
     - name: Code linting
       run: npm run lint:ci

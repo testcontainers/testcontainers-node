@@ -36,6 +36,7 @@ jobs:
         with:
           runner: ${{ matrix.runner }}
           node-version: ${{ matrix.node-version }}
+          workspace: "packages/testcontainers"
 
       - name: Build workspaces
         run: npm run build -ws
