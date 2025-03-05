@@ -130,11 +130,11 @@ jobs:
       - name: Code checkout
         uses: actions/checkout@v4
 
-      - name: Install Node ${{ matrix.node-version }} and Dependencies
+      - name: Install Node ${{ inputs.node-version }} and Dependencies
         uses: ./.github/actions/npm-setup
         with:
-          runner: ${{ matrix.runner }}
-          node-version: ${{ matrix.node-version }}
+          runner: ${{ inputs.runner }}
+          node-version: ${{ inputs.node-version }}
 
       - name: Run tests
         run: npm run test:ci -- ${{ inputs.workspace }}
