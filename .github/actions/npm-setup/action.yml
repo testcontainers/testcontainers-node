@@ -30,3 +30,9 @@ runs:
       - name: Install dependencies
         shell: bash
         run: npm ci --omit=optional
+      - name: Cache npm
+        id: cache-npm-save
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: ${{ steps.npm-cache.outputs.cache-primary-key }}
