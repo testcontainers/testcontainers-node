@@ -42,7 +42,7 @@ describe("QdrantContainer", () => {
       apiKey: "INVALID_KEY_" + crypto.randomUUID(),
     });
 
-    expect(client.getCollections()).rejects.toThrow("Forbidden");
+    expect(client.getCollections()).rejects.toThrow("Unauthorized");
 
     await container.stop();
   });
@@ -71,7 +71,7 @@ describe("QdrantContainer", () => {
       apiKey: "INVALID_KEY_" + crypto.randomUUID(),
     });
 
-    expect(client.getCollections()).rejects.toThrow("Forbidden");
+    expect(client.getCollections()).rejects.toThrow("Unauthorized");
 
     await container.stop();
   });
