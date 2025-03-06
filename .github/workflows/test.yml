@@ -64,13 +64,18 @@ jobs:
       with:
         node-version: 22.x
     - name: Install dependencies
+      working-directory: ${{ matrix.module }}
       run: npm ci --omit=optional
     - name: Code linting
-      run: npm run lint:ci -- ${{ matrix.module }}
+      working-directory: ${{ matrix.module }}
+      run: npm run lint:ci
 
   smoke-test:
     # only run if there are modules to lint
     if: ${{ needs.detect-modules.outputs.modules_count > 0  }}
+    needs:
+      - detect-modules
+      - lint
     name: Smoke test
     strategy:
       matrix:
