@@ -35,5 +35,7 @@ runs:
         if: steps.npm-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
-          path: node_modules
+          path: |
+            node_modules
+            ${{ inputs.workspace }}/node_modules
           key: ${{ steps.npm-cache.outputs.cache-primary-key }}
