@@ -34,13 +34,9 @@ set -euxo pipefail
 #   ALL_CHANGED_FILES=".github/scripts/changed-modules.sh" ./.github/scripts/changed-modules.sh
 #   Expected output: all modules, as the build script has been modified
 #
-# 8. This script is modified:
-#   ALL_CHANGED_FILES=".github/scripts/changed-modules.sh" ./.github/scripts/changed-modules.sh
-#   Expected output: all modules, as the build script has been modified
-#
-# 9. This script is modified:
-#   ALL_CHANGED_FILES=".github/scripts/changed-modules.sh" ./.github/scripts/changed-modules.sh
-#   Expected output: all modules, as the build script has been modified
+# 8. A .github file is modified:
+#   ALL_CHANGED_FILES=".github/release-drafter.yml" ./.github/scripts/changed-modules.sh
+#   Expected output: []
 #
 # There is room for improvement in this script. For example, it could detect if the changes applied to the docs or the .github dirs, and then do not include any module in the list.
 # But then we would need to verify the CI scripts to ensure that the job receives the correct modules to build.
@@ -66,21 +62,24 @@ readonly no_build_modules=("packages/modules/k6")
 modules=()
 
 # Find all package.json files in the repository, building a list of all the available modules.
-for modFile in $(find "${ROOT_DIR}" -name "package.json" -not -path "*/node_modules/*"); do
-    modules+=("\"$(basename "$(dirname "${modFile}")")\"")
+# The list of modules is stored in the modules array, but the testcontainers-node module is excluded
+# as it is not a module.
+for packageJSONFile in $(find "${ROOT_DIR}" -name "package.json" -not -path "*/node_modules/*"); do
+    name=$(basename "$(dirname "${packageJSONFile}")")
+    if [[ "${name}" != "testcontainers-node" ]]; then
+        if [[ "${name}" != "testcontainers" ]]; then
+            modules+=("\"packages/modules/${name}\"")
+        else
+            modules+=("\"packages/testcontainers\"")
+        fi
+    fi
 done
 # sort modules array
 IFS=$'\n' modules=($(sort <<<"${modules[*]}"))
 unset IFS
 
-# capture the root module
-readonly rootModule="\"packages/testcontainers\""
-
-# merge all modules into a single array
-allModules=(${rootModule} "${modules[@]}")
-
-# sort allModules array
-IFS=$'\n' allModules=($(sort <<<"${allModules[*]}"))
+# sort modules array
+IFS=$'\n' modules=($(sort <<<"${modules[*]}"))
 unset IFS
 
 # Get the list of modified files, retrieved from the environment variable ALL_CHANGED_FILES.
@@ -121,7 +120,7 @@ for file in $modified_files; do
             fi
         done
 
-        modified_modules=${allModules[@]}
+        modified_modules=${modules[@]}
         break
     fi
 done
