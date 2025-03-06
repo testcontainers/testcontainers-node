@@ -64,13 +64,17 @@ jobs:
       with:
         runner: ubuntu-22.04
         node-version: 22.x
-        workspace: "packages/testcontainers"
+        workspace: "${{ matrix.module }}"
     - name: Code linting
+      working-directory: ${{ matrix.module }}
       run: npm run lint:ci -- ${{ matrix.module }}
 
   smoke-test:
     # only run if there are modules to lint
     if: ${{ needs.detect-modules.outputs.modules_count > 0  }}
+    needs:
+      - detect-modules
+      - lint
     name: Smoke test
     strategy:
       matrix:
