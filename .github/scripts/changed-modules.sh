@@ -56,7 +56,7 @@ while IFS= read -r file; do
 done < <(find "${ROOT_DIR}" -maxdepth 1 -type f -not -name "package.json" -not -name "package-lock.json")
 
 # define an array of modules that won't be part of the build
-readonly no_build_modules=("packages/modules/k6")
+readonly no_build_modules=()
 
 # modules is an array that will store the paths of all the modules in the repository.
 modules=()
@@ -67,11 +67,7 @@ modules=()
 for packageJSONFile in $(find "${ROOT_DIR}" -name "package.json" -not -path "*/node_modules/*"); do
     name=$(basename "$(dirname "${packageJSONFile}")")
     if [[ "${name}" != "testcontainers-node" ]]; then
-        if [[ "${name}" != "testcontainers" ]]; then
-            modules+=("\"packages/modules/${name}\"")
-        else
-            modules+=("\"packages/testcontainers\"")
-        fi
+        modules+=("\"${name}\"")
     fi
 done
 # sort modules array
@@ -107,7 +103,7 @@ for file in $modified_files; do
     if [[ $file == packages/modules/* ]]; then
         module_name=$(echo $file | cut -d'/' -f3)
         if [[ ! " ${modified_modules[@]} " =~ " ${module_name} " ]]; then
-            modified_modules+=("\"packages/modules/$module_name\"")
+            modified_modules+=("\"$module_name\"")
         fi
     else
         # a file from the core module (packages/testcontainers) is modified, so include all modules in the list and stop the loop
