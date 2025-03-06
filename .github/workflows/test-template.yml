@@ -136,7 +136,9 @@ jobs:
           node-version: ${{ inputs.node-version }}
 
       - name: Install dependencies
+        working-directory: ${{ inputs.workspace }}
         run: npm ci --omit=optional
 
       - name: Run tests
-        run: npm run test:ci -- ${{ inputs.workspace }}
+        working-directory: ${{ inputs.workspace }}
+        run: npm run test:ci
