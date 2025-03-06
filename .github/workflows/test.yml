@@ -126,3 +126,19 @@ jobs:
       node-version: ${{ matrix.node-version }}
       container-runtime: ${{ matrix.container-runtime }}
       workspace: "${{ matrix.module }}"
+
+  # This job serves as confirmation that all test jobs finished
+  end:
+    if: ${{ needs.detect-modules.outputs.modules_count > 0 }}
+    needs:
+      - detect-modules
+      - lint
+      - smoke-test
+      - test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if any jobs failed
+        if: ${{ failure() || cancelled() }}
+        run: exit 1
+
+      - run: echo "All tests completed successfully!"
