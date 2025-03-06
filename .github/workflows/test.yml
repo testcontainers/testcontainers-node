@@ -19,13 +19,64 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  detect-modules:
+    runs-on: ubuntu-latest
+    outputs:
+      modules: ${{ steps.set-modified-modules.outputs.modules }}
+      modules_count: ${{ steps.set-modified-modules-count.outputs.modules_count }}
+    steps:
+      - name: Check out code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - id: changed-files
+        name: Get changed files
+        uses: tj-actions/changed-files@4edd678ac3f81e2dc578756871e4d00c19191daf # v45.0.4
+
+      - id: set-modified-modules
+        name: Set all modified modules
+        env:
+          ALL_CHANGED_FILES: "${{ steps.changed-files.outputs.all_changed_files }}"
+        run: echo "modules=$(./.github/scripts/changed-modules.sh)" >> $GITHUB_OUTPUT
+
+      - id: set-modified-modules-count
+        name: Set all modified modules count
+        run: echo "modules_count=$(echo ${{ toJSON(steps.set-modified-modules.outputs.modules) }} | jq '. | length')" >> $GITHUB_OUTPUT
+
+      - name: Print out the modules to be used
+        run: |
+          echo "${{ steps.set-modified-modules-count.outputs.modules_count }} modules in the build"
+          echo "${{ steps.set-modified-modules.outputs.modules }}"
+
+  lint:
+    # only run if there are modules to lint
+    if: ${{ needs.detect-modules.outputs.modules_count > 0  }}
+    needs:
+      - detect-modules
+    strategy:
+      matrix:
+        module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Code checkout
+      uses: actions/checkout@v4
+    - name: Install Node and Dependencies
+      uses: ./.github/actions/npm-setup
+      with:
+        runner: ubuntu-22.04
+        node-version: 22.x
+        workspace: "packages/testcontainers"
+    - name: Code linting
+      run: npm run lint:ci -- ${{ matrix.module }}
+
   smoke-test:
+    # only run if there are modules to lint
+    if: ${{ needs.detect-modules.outputs.modules_count > 0  }}
     name: Smoke test
-    runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
         runner: [ ubuntu-22.04 ]
         node-version: [ 18.x, 20.x, 22.x ]
+    runs-on: ${{ matrix.runner }}
     steps:
       - name: Code checkout
         uses: actions/checkout@v4
@@ -47,11 +98,17 @@ jobs:
       - name: Run ES module smoke test
         run: node packages/testcontainers/smoke-test.mjs
 
-  test-testcontainers:
-    name: Testcontainers
-    needs: smoke-test
+  test:
+    name: Run tests
+    # only run if there are modules to test
+    if: ${{ needs.detect-modules.outputs.modules_count > 0  }}
+    needs:
+      - detect-modules
+      - lint
+      - smoke-test
     strategy:
       matrix:
+        module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
         node-version: [ 18.x, 20.x, 22.x ]
         container-runtime: [ docker, podman ]
         include:
@@ -64,34 +121,4 @@ jobs:
       runner: ${{ matrix.runner }}
       node-version: ${{ matrix.node-version }}
       container-runtime: ${{ matrix.container-runtime }}
-      workspace: packages/testcontainers
-
-  list-modules:
-    name: List modules
-    runs-on: ubuntu-22.04
-    needs: test-testcontainers
-    outputs:
-      modules: ${{ steps.list_modules.outputs.modules }}
-    steps:
-      - uses: actions/checkout@v2
-      - id: list_modules
-        run: echo "modules=$(ls packages/modules | jq -cnR '[inputs | select(length>0) | select(. != "couchbase")]')" >> $GITHUB_OUTPUT
-  test-modules:
-    name: Module (${{ matrix.module }})
-    needs: [ test-testcontainers, list-modules ]
-    strategy:
-      matrix:
-        node-version: [ 18.x, 20.x, 22.x ]
-        container-runtime: [ docker, podman ]
-        include:
-          - container-runtime: docker
-            runner: ubuntu-22.04
-          - container-runtime: podman
-            runner: ubuntu-22.04
-        module: ${{ fromJson(needs.list-modules.outputs.modules) }}
-    uses: ./.github/workflows/test-template.yml
-    with:
-      runner: ${{ matrix.runner }}
-      node-version: ${{ matrix.node-version }}
-      container-runtime: ${{ matrix.container-runtime }}
-      workspace: packages/modules/${{ matrix.module }}
+      workspace: "${{ matrix.module }}"
