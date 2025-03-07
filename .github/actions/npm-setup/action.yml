@@ -27,6 +27,7 @@ runs:
           
       - name: Set cache configuration
         shell: bash
+        id: set-env
         run: |
           if [ "${{ inputs.workspace }}" = "testcontainers" ]; then
             echo "CACHE_PATHS<<EOF" >> $GITHUB_ENV
@@ -35,7 +36,7 @@ runs:
             echo "EOF" >> $GITHUB_ENV
             echo "HASH_PATHS=package-lock.json,packages/testcontainers/package-lock.json" >> $GITHUB_ENV
             echo "WORKSPACE_PATH=packages/testcontainers" >> $GITHUB_ENV
-            echo "workspace_path=packages/testcontainers" >> $GITHUB_OUTPUT
+            echo "workspace_path=packages/testcontainers" >> "$GITHUB_OUTPUT"
           else
             echo "CACHE_PATHS<<EOF" >> $GITHUB_ENV
             echo "node_modules" >> $GITHUB_ENV
@@ -44,7 +45,7 @@ runs:
             echo "EOF" >> $GITHUB_ENV
             echo "HASH_PATHS=package-lock.json,packages/testcontainers/package-lock.json,packages/modules/${{ inputs.workspace }}/package-lock.json" >> $GITHUB_ENV
             echo "WORKSPACE_PATH=packages/modules/${{ inputs.workspace }}" >> $GITHUB_ENV
-            echo "workspace_path=packages/modules/${{ inputs.workspace }}" >> $GITHUB_OUTPUT
+            echo "workspace_path=packages/modules/${{ inputs.workspace }}" >> "$GITHUB_OUTPUT"
           fi
           
       - uses: actions/cache/restore@v4
