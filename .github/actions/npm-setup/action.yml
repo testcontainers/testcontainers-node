@@ -19,24 +19,42 @@ runs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.node-version }}
+          
+      - name: Set cache configuration
+        shell: bash
+        run: |
+          if [ "${{ inputs.workspace }}" = "testcontainers" ]; then
+            echo CACHE_PATHS<<EOF >> $GITHUB_ENV
+            echo node_modules >> $GITHUB_ENV
+            echo packages/testcontainers/node_modules >> $GITHUB_ENV
+            echo EOF >> $GITHUB_ENV
+            echo HASH_PATHS="'package-lock.json','packages/testcontainers/package-lock.json'" >> $GITHUB_ENV
+          else
+            echo CACHE_PATHS<<EOF >> $GITHUB_ENV
+            echo node_modules >> $GITHUB_ENV
+            echo packages/testcontainers/node_modules >> $GITHUB_ENV
+            echo packages/modules/${{ inputs.workspace }}/node_modules >> $GITHUB_ENV
+            echo EOF >> $GITHUB_ENV
+            echo HASH_PATHS="'package-lock.json','packages/testcontainers/package-lock.json','packages/modules/${{ inputs.workspace }}/package-lock.json'" >> $GITHUB_ENV
+          fi
+          
       - uses: actions/cache/restore@v4
         id: npm-cache
         with:
-          path: node_modules
-          # the key is built using both package-lock.json files: the one in the root dir and the one for the module to be built
-          key: ${{ inputs.runner }}-node-${{ inputs.node-version }}-${{ inputs.workspace }}-${{ hashFiles(format('{0}-{1}/{2}', 'package-lock.json', inputs.workspace, 'package-lock.json')) }}
+          path: ${{ env.CACHE_PATHS }}
+          key: ${{ inputs.runner }}-node-${{ inputs.node-version }}-${{ inputs.workspace }}-${{ hashFiles(env.HASH_PATHS) }}
           restore-keys: |
             ${{ inputs.runner }}-node-${{ inputs.node-version }}-${{ inputs.workspace }}-
+            ${{ inputs.runner }}-node-${{ inputs.node-version }}-
+
       - name: Install dependencies
         if: steps.npm-cache.outputs.cache-hit != 'true'
         shell: bash
-        run: npm ci --omit=optional -- ${{ inputs.workspace }}
+        run: npm ci --workspace ${{ inputs.workspace }} --include-workspace-root
+
       - name: Cache npm
-        id: cache-npm-save
         if: steps.npm-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
-          path: |
-            node_modules
-            ${{ inputs.workspace }}/node_modules
+          path: ${{ env.CACHE_PATHS }}
           key: ${{ steps.npm-cache.outputs.cache-primary-key }}
