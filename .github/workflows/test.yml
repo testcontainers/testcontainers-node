@@ -68,7 +68,7 @@ jobs:
         node-version: 22.x
         workspace: "${{ matrix.module }}"
     - name: Code linting
-      run: npm run lint:ci --workspace ${{ steps.npm-install.outputs.workspace_path }} --include-workspace-root
+      run: npm run lint:ci --workspace ${{ steps.npm-install.outputs.workspace_path }}
 
   smoke-test:
     # only run if there are modules to lint
