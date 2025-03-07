@@ -23,13 +23,14 @@ runs:
         id: npm-cache
         with:
           path: node_modules
-          key: ${{ github.head_ref || 'main' }}-${{ inputs.runner }}-node-${{ inputs.node-version }}-${{ inputs.workspace }}-${{ hashFiles('**/package-lock.json') }}
+          # the key is built using both package-lock.json files: the one in the root dir and the one for the module to be built
+          key: ${{ inputs.runner }}-node-${{ inputs.node-version }}-${{ inputs.workspace }}-${{ hashFiles(format('{0}-{1}/{2}', 'package-lock.json', inputs.workspace, 'package-lock.json')) }}
           restore-keys: |
-            ${{ github.head_ref || 'main' }}-${{ inputs.runner }}-node-${{ inputs.node-version }}-${{ inputs.workspace }}-
+            ${{ inputs.runner }}-node-${{ inputs.node-version }}-${{ inputs.workspace }}-
       - name: Install dependencies
         if: steps.npm-cache.outputs.cache-hit != 'true'
         shell: bash
-        run: npm ci --omit=optional
+        run: npm ci --omit=optional -- ${{ inputs.workspace }}
       - name: Cache npm
         id: cache-npm-save
         if: steps.npm-cache.outputs.cache-hit != 'true'
