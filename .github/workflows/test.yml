@@ -61,13 +61,14 @@ jobs:
     - name: Code checkout
       uses: actions/checkout@v4
     - name: Install Node and Dependencies
+      id: npm-install
       uses: ./.github/actions/npm-setup
       with:
         runner: ubuntu-22.04
         node-version: 22.x
         workspace: "${{ matrix.module }}"
     - name: Code linting
-      run: npm run lint:ci -- ${{ matrix.module }}
+      run: npm run lint:ci -- ${{ steps.npm-install.outputs.workspace_path }}
 
   smoke-test:
     # only run if there are modules to lint

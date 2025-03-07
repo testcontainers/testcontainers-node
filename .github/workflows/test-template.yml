@@ -131,6 +131,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Node ${{ inputs.node-version }} and Dependencies
+        id: npm-install
         uses: ./.github/actions/npm-setup
         with:
           runner: ${{ inputs.runner }}
@@ -138,4 +139,4 @@ jobs:
           workspace: "${{ inputs.workspace }}"
 
       - name: Run tests
-        run: npm run test:ci -- ${{ inputs.workspace }}
+        run: npm run test:ci -- ${{ steps.npm-install.outputs.workspace_path }}
