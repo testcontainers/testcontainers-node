@@ -12,7 +12,7 @@
     "test:ci": "npm run test -- --runInBand --coverage",
     "format": "prettier --write package.json \"packages/**/*.ts\"",
     "lint": "eslint --fix package.json \"packages/**/*.ts\"",
-    "lint:ci": "eslint package.json \"packages/**/*.ts\" --max-warnings=0",
+    "lint:ci": "eslint package.json \"${WORKSPACE_PATH}/**/*.ts\" --max-warnings=0",
     "update-deps": "npm-check-updates --workspaces --root -u",
     "validate-engine": "ls-engines"
   },
