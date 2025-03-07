@@ -53,6 +53,7 @@ jobs:
     needs:
       - detect-modules
     strategy:
+      fail-fast: true
       matrix:
         module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
     runs-on: ubuntu-22.04
@@ -76,6 +77,7 @@ jobs:
       - lint
     name: Smoke test
     strategy:
+      fail-fast: true
       matrix:
         runner: [ ubuntu-22.04 ]
         node-version: [ 18.x, 20.x, 22.x ]
