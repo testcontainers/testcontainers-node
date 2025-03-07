@@ -115,6 +115,7 @@ jobs:
       - lint
       - smoke-test
     strategy:
+      fail-fast: false
       matrix:
         module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
         node-version: [ 18.x, 20.x, 22.x ]
