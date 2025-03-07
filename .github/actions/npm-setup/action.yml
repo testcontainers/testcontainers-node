@@ -28,14 +28,14 @@ runs:
             echo "node_modules" >> $GITHUB_ENV
             echo "packages/testcontainers/node_modules" >> $GITHUB_ENV
             echo "EOF" >> $GITHUB_ENV
-            echo "HASH_PATHS='package-lock.json','packages/testcontainers/package-lock.json'" >> $GITHUB_ENV
+            echo "HASH_PATHS=package-lock.json,packages/testcontainers/package-lock.json" >> $GITHUB_ENV
           else
             echo "CACHE_PATHS<<EOF" >> $GITHUB_ENV
             echo "node_modules" >> $GITHUB_ENV
             echo "packages/testcontainers/node_modules" >> $GITHUB_ENV
             echo "packages/modules/${{ inputs.workspace }}/node_modules" >> $GITHUB_ENV
             echo "EOF" >> $GITHUB_ENV
-            echo "HASH_PATHS='package-lock.json','packages/testcontainers/package-lock.json','packages/modules/${{ inputs.workspace }}/package-lock.json'" >> $GITHUB_ENV
+            echo "HASH_PATHS=package-lock.json,packages/testcontainers/package-lock.json,packages/modules/${{ inputs.workspace }}/package-lock.json" >> $GITHUB_ENV
           fi
           
       - uses: actions/cache/restore@v4
