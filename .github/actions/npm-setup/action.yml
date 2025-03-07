@@ -29,6 +29,7 @@ runs:
             echo "packages/testcontainers/node_modules" >> $GITHUB_ENV
             echo "EOF" >> $GITHUB_ENV
             echo "HASH_PATHS=package-lock.json,packages/testcontainers/package-lock.json" >> $GITHUB_ENV
+            echo "WORKSPACE_PATH=packages/testcontainers" >> $GITHUB_ENV
           else
             echo "CACHE_PATHS<<EOF" >> $GITHUB_ENV
             echo "node_modules" >> $GITHUB_ENV
@@ -36,6 +37,7 @@ runs:
             echo "packages/modules/${{ inputs.workspace }}/node_modules" >> $GITHUB_ENV
             echo "EOF" >> $GITHUB_ENV
             echo "HASH_PATHS=package-lock.json,packages/testcontainers/package-lock.json,packages/modules/${{ inputs.workspace }}/package-lock.json" >> $GITHUB_ENV
+            echo "WORKSPACE_PATH=packages/modules/${{ inputs.workspace }}" >> $GITHUB_ENV
           fi
           
       - uses: actions/cache/restore@v4
@@ -50,7 +52,7 @@ runs:
       - name: Install dependencies
         if: steps.npm-cache.outputs.cache-hit != 'true'
         shell: bash
-        run: npm ci --workspace ${{ inputs.workspace }} --include-workspace-root
+        run: npm ci --workspace ${{ env.WORKSPACE_PATH }} --include-workspace-root
 
       - name: Cache npm
         if: steps.npm-cache.outputs.cache-hit != 'true'
