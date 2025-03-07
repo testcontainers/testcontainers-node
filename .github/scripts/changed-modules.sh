@@ -38,6 +38,10 @@ set -euxo pipefail
 #   ALL_CHANGED_FILES=".github/release-drafter.yml" ./.github/scripts/changed-modules.sh
 #   Expected output: []
 #
+# 9. A excluded module is modified:
+#   ALL_CHANGED_FILES="packages/modules/couchbase/a.txt" ./.github/scripts/changed-modules.sh
+#   Expected output: []
+#
 # There is room for improvement in this script. For example, it could detect if the changes applied to the docs or the .github dirs, and then do not include any module in the list.
 # But then we would need to verify the CI scripts to ensure that the job receives the correct modules to build.
 
@@ -56,7 +60,7 @@ while IFS= read -r file; do
 done < <(find "${ROOT_DIR}" -maxdepth 1 -type f -not -name "package.json" -not -name "package-lock.json")
 
 # define an array of modules that won't be part of the build
-readonly no_build_modules=()
+readonly no_build_modules=("couchbase")
 
 # modules is an array that will store the paths of all the modules in the repository.
 modules=()
