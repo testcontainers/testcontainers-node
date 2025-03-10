@@ -74,9 +74,6 @@ for packageJSONFile in $(find "${ROOT_DIR}" -name "package.json" -not -path "*/n
         modules+=("\"${name}\"")
     fi
 done
-# sort modules array
-IFS=$'\n' modules=($(sort <<<"${modules[*]}"))
-unset IFS
 
 # sort modules array
 IFS=$'\n' modules=($(sort <<<"${modules[*]}"))
