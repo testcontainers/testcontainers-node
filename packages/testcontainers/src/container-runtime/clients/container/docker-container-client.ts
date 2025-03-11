@@ -7,11 +7,11 @@ import Dockerode, {
   ExecCreateOptions,
   Network,
 } from "dockerode";
-import { PassThrough, Readable } from "stream";
 import { IncomingMessage } from "http";
-import { ContainerStatus, ExecOptions, ExecResult } from "./types";
-import { ContainerClient } from "./container-client";
+import { PassThrough, Readable } from "stream";
 import { execLog, log, streamToString } from "../../../common";
+import { ContainerClient } from "./container-client";
+import { ContainerStatus, ExecOptions, ExecResult } from "./types";
 
 export class DockerContainerClient implements ContainerClient {
   constructor(public readonly dockerode: Dockerode) {}

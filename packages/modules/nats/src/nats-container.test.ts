@@ -1,9 +1,7 @@
 import { connect, StringCodec } from "nats";
 import { NatsContainer } from "./nats-container";
 
-describe("NatsContainer", () => {
-  jest.setTimeout(180_000);
-
+describe("NatsContainer", { timeout: 180_000 }, () => {
   // connect {
   it("should start, connect and close", async () => {
     const container = await new NatsContainer().start();

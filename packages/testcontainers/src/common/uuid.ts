@@ -10,3 +10,6 @@ export class RandomUuid implements Uuid {
     return hash(crypto.randomUUID()).substring(0, 12);
   }
 }
+
+const randomUuidGen = new RandomUuid();
+export const randomUuid = () => randomUuidGen.nextUuid();

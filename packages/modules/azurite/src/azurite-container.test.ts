@@ -1,11 +1,9 @@
+import { TableClient, TableEntity } from "@azure/data-tables";
 import { BlobServiceClient, StorageSharedKeyCredential } from "@azure/storage-blob";
 import { QueueServiceClient } from "@azure/storage-queue";
-import { TableClient, TableEntity } from "@azure/data-tables";
 import { AzuriteContainer } from "./azurite-container";
 
-describe("Azurite", () => {
-  jest.setTimeout(240_000);
-
+describe("Azurite", { timeout: 240_000 }, () => {
   // uploadAndDownloadBlob {
   it("should upload and download blob with default credentials", async () => {
     const container = await new AzuriteContainer().start();

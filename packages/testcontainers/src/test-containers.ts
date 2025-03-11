@@ -1,6 +1,6 @@
-import { PortForwarderInstance } from "./port-forwarder/port-forwarder";
-import { getContainerRuntimeClient } from "./container-runtime";
 import { log } from "./common";
+import { getContainerRuntimeClient } from "./container-runtime";
+import { PortForwarderInstance } from "./port-forwarder/port-forwarder";
 
 export class TestContainers {
   public static async exposeHostPorts(...ports: number[]): Promise<void> {

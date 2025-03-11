@@ -1,7 +1,7 @@
-import { AbstractWaitStrategy } from "./wait-strategy";
 import Dockerode from "dockerode";
-import { getContainerRuntimeClient } from "../container-runtime";
 import { IntervalRetry, log } from "../common";
+import { getContainerRuntimeClient } from "../container-runtime";
+import { AbstractWaitStrategy } from "./wait-strategy";
 
 export type StartupStatus = "PENDING" | "SUCCESS" | "FAIL";
 

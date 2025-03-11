@@ -1,9 +1,7 @@
 import { GenericContainer } from "../generic-container/generic-container";
 import { StartupCheckStrategy, StartupStatus } from "./startup-check-strategy";
 
-jest.setTimeout(180_000);
-
-describe("StartupCheckStrategy", () => {
+describe("StartupCheckStrategy", { timeout: 180_000 }, () => {
   it("should wait until ready", async () => {
     const waitStrategy = new (class extends StartupCheckStrategy {
       private count = 0;

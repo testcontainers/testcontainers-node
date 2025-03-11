@@ -1,9 +1,7 @@
 import { GenericContainer } from "../generic-container/generic-container";
 import { Wait } from "./wait";
 
-jest.setTimeout(180_000);
-
-describe("OneShotStartupCheckStrategy", () => {
+describe("OneShotStartupCheckStrategy", { timeout: 180_000 }, () => {
   it("should wait for container to finish", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withCommand(["/bin/sh", "-c", 'sleep 2; echo "Ready"'])

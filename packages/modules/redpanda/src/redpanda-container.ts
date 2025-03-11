@@ -1,16 +1,16 @@
 import fs from "fs";
-import path from "path";
 import { compile } from "handlebars";
+import path from "path";
 import {
   AbstractStartedContainer,
   BoundPorts,
   GenericContainer,
+  getContainerRuntimeClient,
   InspectResult,
   StartedTestContainer,
   Wait,
-  WaitStrategy,
-  getContainerRuntimeClient,
   waitForContainer,
+  WaitStrategy,
 } from "testcontainers";
 
 const REDPANDA_PORT = 9092;

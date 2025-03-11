@@ -1,12 +1,10 @@
-import { lookupHostIps } from "./lookup-host-ips";
 import { HostIp } from "../clients/types";
+import { lookupHostIps } from "./lookup-host-ips";
 
-const mockDnsLookup = jest.fn();
-jest.mock("dns", () => {
+const mockDnsLookup = vi.fn();
+vi.mock("dns/promises", () => {
   return {
-    promises: {
-      lookup: () => mockDnsLookup(),
-    },
+    lookup: () => mockDnsLookup(),
   };
 });
 

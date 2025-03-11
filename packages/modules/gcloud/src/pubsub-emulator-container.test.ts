@@ -1,9 +1,7 @@
-import { PubSubEmulatorContainer, StartedPubSubEmulatorContainer } from "./pubsub-emulator-container";
 import { PubSub } from "@google-cloud/pubsub";
+import { PubSubEmulatorContainer, StartedPubSubEmulatorContainer } from "./pubsub-emulator-container";
 
-describe("PubSubEmulatorContainer", () => {
-  jest.setTimeout(240_000);
-
+describe("PubSubEmulatorContainer", { timeout: 240_000 }, () => {
   it("should work using default version", async () => {
     const pubsubEmulatorContainer = await new PubSubEmulatorContainer().start();
 

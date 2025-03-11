@@ -2,12 +2,12 @@ import {
   AbstractStartedContainer,
   GenericContainer,
   getContainerRuntimeClient,
+  getReaper,
+  LABEL_TESTCONTAINERS_SESSION_ID,
   log,
   StartedTestContainer,
   Wait,
 } from "testcontainers";
-import { getReaper } from "testcontainers/src/reaper/reaper";
-import { LABEL_TESTCONTAINERS_SESSION_ID } from "testcontainers/src/utils/labels";
 
 export const LOCALSTACK_PORT = 4566;
 

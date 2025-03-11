@@ -1,6 +1,7 @@
-import path from "path";
 import getPort from "get-port";
-import { GenericContainer } from "./generic-container";
+import path from "path";
+import { RandomUuid } from "../common";
+import { getContainerRuntimeClient } from "../container-runtime";
 import { PullPolicy } from "../utils/pull-policy";
 import {
   checkContainerIsHealthy,
@@ -8,12 +9,9 @@ import {
   getRunningContainerNames,
   waitForDockerEvent,
 } from "../utils/test-helper";
-import { getContainerRuntimeClient } from "../container-runtime";
-import { RandomUuid } from "../common";
+import { GenericContainer } from "./generic-container";
 
-describe("GenericContainer", () => {
-  jest.setTimeout(180_000);
-
+describe("GenericContainer", { timeout: 180_000 }, () => {
   const fixtures = path.resolve(__dirname, "..", "..", "fixtures", "docker");
 
   it("should return first mapped port", async () => {
@@ -118,7 +116,8 @@ describe("GenericContainer", () => {
     expect(exitCode).not.toBe(0); // The command should fail due to the ls error
     expect(stdout).toEqual(expect.stringContaining("This is stdout"));
     expect(stderr).toEqual(expect.stringContaining("No such file or directory"));
-    expect(output).toMatch(/This is stdout[\s\S]*No such file or directory/);
+    expect(output).toEqual(expect.stringContaining("This is stdout"));
+    expect(output).toEqual(expect.stringContaining("No such file or directory"));
 
     await container.stop();
   });

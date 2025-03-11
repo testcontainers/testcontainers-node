@@ -1,9 +1,7 @@
 import { createConnection } from "mysql2/promise";
 import { MySqlContainer } from "./mysql-container";
 
-describe("MySqlContainer", () => {
-  jest.setTimeout(240_000);
-
+describe("MySqlContainer", { timeout: 240_000 }, () => {
   // connect {
   it("should connect and execute query", async () => {
     const container = await new MySqlContainer().start();

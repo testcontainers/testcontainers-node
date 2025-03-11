@@ -1,11 +1,11 @@
+import Dockerode, { ContainerInfo } from "dockerode";
 import { createSshConnection, SshConnection } from "ssh-remote-port-forward";
-import { GenericContainer } from "../generic-container/generic-container";
 import { log, withFileLock } from "../common";
 import { ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "../container-runtime";
+import { GenericContainer } from "../generic-container/generic-container";
 import { getReaper } from "../reaper/reaper";
-import { PortWithOptionalBinding } from "../utils/port";
-import Dockerode, { ContainerInfo } from "dockerode";
 import { LABEL_TESTCONTAINERS_SESSION_ID, LABEL_TESTCONTAINERS_SSHD } from "../utils/labels";
+import { PortWithOptionalBinding } from "../utils/port";
 
 export const SSHD_IMAGE = process.env["SSHD_CONTAINER_IMAGE"]
   ? ImageName.fromString(process.env["SSHD_CONTAINER_IMAGE"]).string

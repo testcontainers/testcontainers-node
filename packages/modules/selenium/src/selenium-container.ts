@@ -1,7 +1,6 @@
 import { copyFile } from "fs/promises";
-import tmp from "tmp";
-import tar from "tar-fs";
 import path from "path";
+import tar from "tar-fs";
 import {
   AbstractStartedContainer,
   AbstractStoppedContainer,
@@ -14,6 +13,7 @@ import {
   StoppedTestContainer,
   Wait,
 } from "testcontainers";
+import tmp from "tmp";
 
 const SELENIUM_PORT = 4444;
 const VNC_PORT = 5900;

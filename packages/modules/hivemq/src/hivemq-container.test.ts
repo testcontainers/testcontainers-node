@@ -1,9 +1,7 @@
-import { HiveMQContainer } from "./hivemq-container";
 import mqtt from "mqtt";
+import { HiveMQContainer } from "./hivemq-container";
 
-describe("HiveMQContainer", () => {
-  jest.setTimeout(240_000);
-
+describe("HiveMQContainer", { timeout: 240_000 }, () => {
   // connect {
   it("should connect to HiveMQ Community Edition via MQTT.js", (done) => {
     new HiveMQContainer().start().then((hiveMQContainer) => {

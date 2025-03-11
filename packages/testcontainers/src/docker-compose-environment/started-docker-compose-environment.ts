@@ -1,8 +1,8 @@
-import { StartedGenericContainer } from "../generic-container/started-generic-container";
-import { StoppedDockerComposeEnvironment } from "./stopped-docker-compose-environment";
-import { DownedDockerComposeEnvironment } from "./downed-docker-compose-environment";
-import { ComposeDownOptions, ComposeOptions, getContainerRuntimeClient } from "../container-runtime";
 import { log } from "../common";
+import { ComposeDownOptions, ComposeOptions, getContainerRuntimeClient } from "../container-runtime";
+import { StartedGenericContainer } from "../generic-container/started-generic-container";
+import { DownedDockerComposeEnvironment } from "./downed-docker-compose-environment";
+import { StoppedDockerComposeEnvironment } from "./stopped-docker-compose-environment";
 
 export class StartedDockerComposeEnvironment {
   constructor(

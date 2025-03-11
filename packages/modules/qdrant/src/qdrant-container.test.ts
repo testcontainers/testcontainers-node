@@ -1,11 +1,9 @@
-import { QdrantContainer } from "./qdrant-container";
 import { QdrantClient } from "@qdrant/js-client-rest";
 import crypto from "crypto";
 import path from "path";
+import { QdrantContainer } from "./qdrant-container";
 
-describe("QdrantContainer", () => {
-  jest.setTimeout(100_000);
-
+describe("QdrantContainer", { timeout: 100_000 }, () => {
   // connectQdrantSimple {
   it("should connect to the client", async () => {
     const container = await new QdrantContainer("qdrant/qdrant:v1.13.4").start();

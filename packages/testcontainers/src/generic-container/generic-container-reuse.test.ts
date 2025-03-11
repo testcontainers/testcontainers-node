@@ -1,26 +1,23 @@
-import { GenericContainer } from "./generic-container";
+import { randomUuid } from "../common/uuid";
 import { checkContainerIsHealthy } from "../utils/test-helper";
+import { GenericContainer } from "./generic-container";
 
-describe("GenericContainer reuse", () => {
-  jest.setTimeout(180_000);
-
+describe("GenericContainer reuse", { timeout: 180_000 }, () => {
   afterEach(() => {
     process.env.TESTCONTAINERS_REUSE_ENABLE = undefined;
   });
 
   it("should not reuse the container by default", async () => {
+    const name = `there_can_only_be_one_${randomUuid()}`;
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
-      .withName("there_can_only_be_one")
+      .withName(name)
       .withExposedPorts(8080)
       .start();
     await checkContainerIsHealthy(container);
 
     try {
       await expect(() =>
-        new GenericContainer("cristianrgreco/testcontainer:1.1.14")
-          .withName("there_can_only_be_one")
-          .withExposedPorts(8080)
-          .start()
+        new GenericContainer("cristianrgreco/testcontainer:1.1.14").withName(name).withExposedPorts(8080).start()
       ).rejects.toThrowError();
     } finally {
       await container.stop();
@@ -28,8 +25,9 @@ describe("GenericContainer reuse", () => {
   });
 
   it("should not reuse the container even when there is a candidate 1", async () => {
+    const name = `there_can_only_be_one_${randomUuid()}`;
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
-      .withName("there_can_only_be_one")
+      .withName(name)
       .withExposedPorts(8080)
       .withReuse()
       .start();
@@ -37,10 +35,7 @@ describe("GenericContainer reuse", () => {
 
     try {
       await expect(() =>
-        new GenericContainer("cristianrgreco/testcontainer:1.1.14")
-          .withName("there_can_only_be_one")
-          .withExposedPorts(8080)
-          .start()
+        new GenericContainer("cristianrgreco/testcontainer:1.1.14").withName(name).withExposedPorts(8080).start()
       ).rejects.toThrowError();
     } finally {
       await container.stop();
@@ -48,8 +43,9 @@ describe("GenericContainer reuse", () => {
   });
 
   it("should not reuse the container even when there is a candidate 2", async () => {
+    const name = `there_can_only_be_one_${randomUuid()}`;
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
-      .withName("there_can_only_be_one")
+      .withName(name)
       .withExposedPorts(8080)
       .start();
     await checkContainerIsHealthy(container);
@@ -57,7 +53,7 @@ describe("GenericContainer reuse", () => {
     try {
       await expect(() =>
         new GenericContainer("cristianrgreco/testcontainer:1.1.14")
-          .withName("there_can_only_be_one")
+          .withName(name)
           .withExposedPorts(8080)
           .withReuse()
           .start()
@@ -70,8 +66,9 @@ describe("GenericContainer reuse", () => {
   it("should not reuse the container when TESTCONTAINERS_REUSE_ENABLE is set to false", async () => {
     process.env.TESTCONTAINERS_REUSE_ENABLE = "false";
 
+    const name = `there_can_only_be_one_${randomUuid()}`;
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
-      .withName("there_can_only_be_one")
+      .withName(name)
       .withExposedPorts(8080)
       .withReuse()
       .start();
@@ -80,7 +77,7 @@ describe("GenericContainer reuse", () => {
     try {
       await expect(() =>
         new GenericContainer("cristianrgreco/testcontainer:1.1.14")
-          .withName("there_can_only_be_one")
+          .withName(name)
           .withExposedPorts(8080)
           .withReuse()
           .start()
@@ -95,15 +92,16 @@ describe("GenericContainer reuse", () => {
     async (reuseEnable: string | undefined) => {
       process.env.TESTCONTAINERS_REUSE_ENABLE = reuseEnable;
 
+      const name = `there_can_only_be_one_${randomUuid()}`;
       const container1 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
-        .withName("there_can_only_be_one")
+        .withName(name)
         .withExposedPorts(8080)
         .withReuse()
         .start();
       await checkContainerIsHealthy(container1);
 
       const container2 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
-        .withName("there_can_only_be_one")
+        .withName(name)
         .withExposedPorts(8080)
         .withReuse()
         .start();
@@ -116,15 +114,16 @@ describe("GenericContainer reuse", () => {
   );
 
   it("should create a new container when an existing reusable container has stopped and is removed", async () => {
+    const name = `there_can_only_be_one_${randomUuid()}`;
     const container1 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
-      .withName("there_can_only_be_one")
+      .withName(name)
       .withExposedPorts(8080)
       .withReuse()
       .start();
     await container1.stop();
 
     const container2 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
-      .withName("there_can_only_be_one")
+      .withName(name)
       .withExposedPorts(8080)
       .withReuse()
       .start();
@@ -135,15 +134,16 @@ describe("GenericContainer reuse", () => {
   });
 
   it("should reuse container when an existing reusable container has stopped but not removed", async () => {
+    const name = `there_can_only_be_one_${randomUuid()}`;
     const container1 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
-      .withName("there_can_only_be_one")
+      .withName(name)
       .withExposedPorts(8080)
       .withReuse()
       .start();
     await container1.stop({ remove: false, timeout: 10000 });
 
     const container2 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
-      .withName("there_can_only_be_one")
+      .withName(name)
       .withExposedPorts(8080)
       .withReuse()
       .start();
@@ -155,7 +155,7 @@ describe("GenericContainer reuse", () => {
 
   it("should keep the labels passed in when a new reusable container is created", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
-      .withName("there_can_only_be_one")
+      .withName(`there_can_only_be_one_${randomUuid()}`)
       .withExposedPorts(8080)
       .withLabels({ test: "foo", bar: "baz" })
       .withReuse()

@@ -1,12 +1,10 @@
-import { createClient } from "redis";
-import { ValkeyContainer, StartedValkeyContainer } from "./valkey-container";
+import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
-import * as fs from "fs";
+import { createClient } from "redis";
+import { StartedValkeyContainer, ValkeyContainer } from "./valkey-container";
 
-describe("ValkeyContainer", () => {
-  jest.setTimeout(240_000);
-
+describe("ValkeyContainer", { timeout: 240_000 }, () => {
   it("should connect and execute set-get", async () => {
     const container = await new ValkeyContainer().start();
 

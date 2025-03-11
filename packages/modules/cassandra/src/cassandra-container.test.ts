@@ -1,9 +1,7 @@
 import { Client } from "cassandra-driver";
 import { CassandraContainer } from "./cassandra-container";
 
-describe("Cassandra", () => {
-  jest.setTimeout(240_000);
-
+describe("Cassandra", { timeout: 240_000 }, () => {
   // connectWithDefaultCredentials {
   it("should connect and execute a query with default credentials", async () => {
     const container = await new CassandraContainer("cassandra:5.0.2").start();

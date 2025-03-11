@@ -1,8 +1,6 @@
 import { OllamaContainer } from "./ollama-container";
 
-describe("OllamaContainer", () => {
-  jest.setTimeout(180_000);
-
+describe("OllamaContainer", { timeout: 180_000 }, () => {
   it("should run ollama with default config", async () => {
     // container {
     const container = await new OllamaContainer("ollama/ollama:0.1.44").start();

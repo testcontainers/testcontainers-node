@@ -1,9 +1,7 @@
-import { ElasticsearchContainer } from "./elasticsearch-container";
 import { Client } from "@elastic/elasticsearch";
+import { ElasticsearchContainer } from "./elasticsearch-container";
 
-describe("ElasticsearchContainer", () => {
-  jest.setTimeout(180_000);
-
+describe("ElasticsearchContainer", { timeout: 180_000 }, () => {
   // createIndex {
   it("should create an index", async () => {
     const container = await new ElasticsearchContainer().start();

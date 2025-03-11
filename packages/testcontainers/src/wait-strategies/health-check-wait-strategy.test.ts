@@ -1,14 +1,12 @@
-import { GenericContainer } from "../generic-container/generic-container";
-import { Wait } from "./wait";
 import path from "path";
-import { checkContainerIsHealthy, getRunningContainerNames } from "../utils/test-helper";
 import { RandomUuid } from "../common";
-
-jest.setTimeout(180_000);
+import { GenericContainer } from "../generic-container/generic-container";
+import { checkContainerIsHealthy, getRunningContainerNames } from "../utils/test-helper";
+import { Wait } from "./wait";
 
 const fixtures = path.resolve(__dirname, "..", "..", "fixtures", "docker");
 
-describe("HealthCheckWaitStrategy", () => {
+describe("HealthCheckWaitStrategy", { timeout: 180_000 }, () => {
   it("should wait for health check", async () => {
     const context = path.resolve(fixtures, "docker-with-health-check");
     const customGenericContainer = await GenericContainer.fromDockerfile(context).build();

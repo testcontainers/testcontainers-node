@@ -1,9 +1,9 @@
 import { existsSync } from "fs";
-import path from "path";
 import os from "os";
+import path from "path";
+import { isDefined } from "../../common";
 import { ContainerRuntimeClientStrategy } from "./strategy";
 import { ContainerRuntimeClientStrategyResult } from "./types";
-import { isDefined } from "../../common";
 
 export class RootlessUnixSocketStrategy implements ContainerRuntimeClientStrategy {
   constructor(

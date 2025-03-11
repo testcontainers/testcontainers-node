@@ -1,6 +1,5 @@
 import { CreateBucketCommand, HeadBucketCommand, S3Client } from "@aws-sdk/client-s3";
-import { GenericContainer, log, Network, StartedTestContainer } from "testcontainers";
-import { LABEL_TESTCONTAINERS_SESSION_ID } from "testcontainers/src/utils/labels";
+import { GenericContainer, LABEL_TESTCONTAINERS_SESSION_ID, log, Network, StartedTestContainer } from "testcontainers";
 import { LocalstackContainer, LOCALSTACK_PORT } from "./localstack-container";
 
 const runAwsCliAgainstDockerNetworkContainer = async (
@@ -14,9 +13,7 @@ const runAwsCliAgainstDockerNetworkContainer = async (
   return execResult.output;
 };
 
-describe("LocalStackContainer", () => {
-  jest.setTimeout(180_000);
-
+describe("LocalStackContainer", { timeout: 180_000 }, () => {
   // createS3Bucket {
   it("should create a S3 bucket", async () => {
     const container = await new LocalstackContainer().start();

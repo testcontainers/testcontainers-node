@@ -1,10 +1,8 @@
-import { GenericContainer } from "./generic-container";
 import { getContainerRuntimeClient } from "../container-runtime";
 import { Network } from "../network/network";
+import { GenericContainer } from "./generic-container";
 
-describe("GenericContainer network", () => {
-  jest.setTimeout(180_000);
-
+describe("GenericContainer network", { timeout: 180_000 }, () => {
   it("should set network mode", async () => {
     const client = await getContainerRuntimeClient();
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withNetworkMode("host").start();

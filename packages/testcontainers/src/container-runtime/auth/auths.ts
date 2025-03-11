@@ -1,6 +1,6 @@
-import { Auth, AuthConfig, ContainerRuntimeConfig } from "./types";
 import { RegistryAuthLocator } from "./registry-auth-locator";
 import { registryMatches } from "./registry-matches";
+import { Auth, AuthConfig, ContainerRuntimeConfig } from "./types";
 
 export class Auths implements RegistryAuthLocator {
   public getName(): string {

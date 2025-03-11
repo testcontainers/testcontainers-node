@@ -1,12 +1,12 @@
-import { CredentialProvider } from "./credential-provider";
 import { ChildProcess } from "child_process";
-import { Readable, Writable } from "stream";
 import EventEmitter from "events";
+import { Readable, Writable } from "stream";
+import { CredentialProvider } from "./credential-provider";
 import { ContainerRuntimeConfig } from "./types";
 
-const mockExec = jest.fn();
-const mockSpawn = jest.fn();
-jest.mock("child_process", () => ({
+const mockExec = vi.fn();
+const mockSpawn = vi.fn();
+vi.mock("child_process", () => ({
   exec: (...args: unknown[]) => mockExec(...args),
   spawn: (...args: unknown[]) => mockSpawn(...args),
 }));

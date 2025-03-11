@@ -1,1 +1,1 @@
-export { NatsContainer, StartedNatsContainer, NatsConnectionOptions, NatsTlsOptions } from "./nats-container";
+export { NatsConnectionOptions, NatsContainer, NatsTlsOptions, StartedNatsContainer } from "./nats-container";

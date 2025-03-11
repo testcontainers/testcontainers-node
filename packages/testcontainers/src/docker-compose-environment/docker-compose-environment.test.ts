@@ -1,7 +1,6 @@
 import path from "path";
-import { DockerComposeEnvironment } from "./docker-compose-environment";
 import { RandomUuid } from "../common";
-import { Wait } from "../wait-strategies/wait";
+import { randomUuid } from "../common/uuid";
 import { PullPolicy } from "../utils/pull-policy";
 import {
   checkEnvironmentContainerIsHealthy,
@@ -11,10 +10,10 @@ import {
   getVolumeNames,
   waitForDockerEvent,
 } from "../utils/test-helper";
+import { Wait } from "../wait-strategies/wait";
+import { DockerComposeEnvironment } from "./docker-compose-environment";
 
-describe("DockerComposeEnvironment", () => {
-  jest.setTimeout(180_000);
-
+describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
   const fixtures = path.resolve(__dirname, "..", "..", "fixtures", "docker-compose");
 
   it("should throw error when compose file is malformed", async () => {
@@ -34,9 +33,12 @@ describe("DockerComposeEnvironment", () => {
   });
 
   it("should start container with a given name", async () => {
-    const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-name.yml").up();
+    const name = `custom_container_name_${randomUuid()}`;
+    const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-name.yml")
+      .withEnvironment({ CONTAINER_NAME: name })
+      .up();
 
-    await checkEnvironmentContainerIsHealthy(startedEnvironment, "custom_container_name");
+    await checkEnvironmentContainerIsHealthy(startedEnvironment, name);
 
     await startedEnvironment.down();
   });
@@ -103,14 +105,16 @@ describe("DockerComposeEnvironment", () => {
   });
 
   it("should stop the container when the log message wait strategy times out", async () => {
+    const name = `custom_container_name_${randomUuid()}`;
     await expect(
       new DockerComposeEnvironment(fixtures, "docker-compose-with-name.yml")
-        .withWaitStrategy("custom_container_name", Wait.forLogMessage("unexpected"))
+        .withEnvironment({ CONTAINER_NAME: name })
+        .withWaitStrategy(name, Wait.forLogMessage("unexpected"))
         .withStartupTimeout(0)
         .up()
     ).rejects.toThrow(`Log message "unexpected" not received after 0ms`);
 
-    expect(await getRunningContainerNames()).not.toContain("custom_container_name");
+    expect(await getRunningContainerNames()).not.toContain(name);
   });
 
   it("should support health check wait strategy", async () => {
@@ -212,9 +216,11 @@ describe("DockerComposeEnvironment", () => {
 
   it("should not recreate the containers when no recreate option is set", async () => {
     const startedEnvironment1 = await new DockerComposeEnvironment(fixtures, "docker-compose-with-name.yml")
+      .withEnvironment({ CONTAINER_NAME: `custom_container_name_${randomUuid()}` })
       .withNoRecreate()
       .up();
     const startedEnvironment2 = await new DockerComposeEnvironment(fixtures, "docker-compose-with-name.yml")
+      .withEnvironment({ CONTAINER_NAME: `custom_container_name_${randomUuid()}` })
       .withNoRecreate()
       .up();
 
