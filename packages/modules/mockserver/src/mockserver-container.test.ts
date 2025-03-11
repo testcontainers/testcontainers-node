@@ -2,7 +2,7 @@ import { mockServerClient } from "mockserver-client";
 import superagent from "superagent";
 import { MockserverContainer } from "./mockserver-container";
 
-describe.only("MockserverContainer", { timeout: 240_000 }, () => {
+describe("MockserverContainer", { timeout: 240_000 }, () => {
   // startContainer {
   it("should start and accept mocks", async () => {
     const container = await new MockserverContainer().start();
