@@ -1,6 +1,7 @@
-import { LOCALSTACK_PORT, LocalstackContainer } from "./localstack-container";
-import { HeadBucketCommand, S3Client, CreateBucketCommand } from "@aws-sdk/client-s3";
+import { CreateBucketCommand, HeadBucketCommand, S3Client } from "@aws-sdk/client-s3";
 import { GenericContainer, log, Network, StartedTestContainer } from "testcontainers";
+import { LABEL_TESTCONTAINERS_SESSION_ID } from "testcontainers/src/utils/labels";
+import { LocalstackContainer, LOCALSTACK_PORT } from "./localstack-container";
 
 const runAwsCliAgainstDockerNetworkContainer = async (
   command: string,
@@ -102,5 +103,14 @@ describe("LocalStackContainer", () => {
     expect(output).toContain("localhost");
 
     await container.stop();
+  });
+
+  it("should add LAMBDA_DOCKER_FLAGS with sessionId label", async () => {
+    const container = await new LocalstackContainer().start();
+    const sessionId = container.getLabels()[LABEL_TESTCONTAINERS_SESSION_ID];
+
+    const { output, exitCode } = await container.exec(["printenv", "LAMBDA_DOCKER_FLAGS"]);
+    expect(exitCode).toBe(0);
+    expect(output).toContain(`${LABEL_TESTCONTAINERS_SESSION_ID}=${sessionId}`);
   });
 });
