@@ -1,14 +1,16 @@
+import { Mock } from "vitest";
+
 describe("get auth config", () => {
-  let mockExistsSync: vi.mock;
-  let mockReadFile: vi.mock;
+  let mockExistsSync: Mock;
+  let mockReadFile: Mock;
 
   beforeEach(async () => {
     vi.mock("fs");
     const { existsSync } = await import("fs");
-    mockExistsSync = existsSync as vi.mock;
+    mockExistsSync = existsSync as Mock;
     vi.mock("fs/promises");
     const { readFile } = await import("fs/promises");
-    mockReadFile = readFile as vi.mock;
+    mockReadFile = readFile as Mock;
   });
 
   afterEach(() => {
