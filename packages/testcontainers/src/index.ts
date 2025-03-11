@@ -9,6 +9,7 @@ export { AbstractStoppedContainer } from "./generic-container/abstract-stopped-c
 export { GenericContainer } from "./generic-container/generic-container";
 export { BuildOptions, GenericContainerBuilder } from "./generic-container/generic-container-builder";
 export { Network, StartedNetwork, StoppedNetwork } from "./network/network";
+export { getReaper } from "./reaper/reaper";
 export {
   RestartOptions,
   StartedTestContainer,
@@ -19,6 +20,7 @@ export {
 export { TestContainers } from "./test-containers";
 export { Content, ExecOptions, ExecResult, InspectResult } from "./types";
 export { BoundPorts } from "./utils/bound-ports";
+export { LABEL_TESTCONTAINERS_SESSION_ID } from "./utils/labels";
 export { getContainerPort, hasHostBinding, PortWithBinding, PortWithOptionalBinding } from "./utils/port";
 export { ImagePullPolicy, PullPolicy } from "./utils/pull-policy";
 export { HttpWaitStrategyOptions } from "./wait-strategies/http-wait-strategy";
