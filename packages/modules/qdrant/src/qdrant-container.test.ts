@@ -1,7 +1,7 @@
-import { QdrantContainer } from "./qdrant-container";
 import { QdrantClient } from "@qdrant/js-client-rest";
 import crypto from "crypto";
 import path from "path";
+import { QdrantContainer } from "./qdrant-container";
 
 describe("QdrantContainer", { timeout: 100_000 }, () => {
   // connectQdrantSimple {

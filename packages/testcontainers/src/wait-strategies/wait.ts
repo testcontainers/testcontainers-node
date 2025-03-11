@@ -1,11 +1,11 @@
-import { WaitStrategy } from "./wait-strategy";
-import { HttpWaitStrategy, HttpWaitStrategyOptions } from "./http-wait-strategy";
-import { HealthCheckWaitStrategy } from "./health-check-wait-strategy";
-import { Log, LogWaitStrategy } from "./log-wait-strategy";
-import { ShellWaitStrategy } from "./shell-wait-strategy";
-import { HostPortWaitStrategy } from "./host-port-wait-strategy";
 import { CompositeWaitStrategy } from "./composite-wait-strategy";
+import { HealthCheckWaitStrategy } from "./health-check-wait-strategy";
+import { HostPortWaitStrategy } from "./host-port-wait-strategy";
+import { HttpWaitStrategy, HttpWaitStrategyOptions } from "./http-wait-strategy";
+import { Log, LogWaitStrategy } from "./log-wait-strategy";
 import { OneShotStartupCheckStrategy } from "./one-shot-startup-startegy";
+import { ShellWaitStrategy } from "./shell-wait-strategy";
+import { WaitStrategy } from "./wait-strategy";
 
 export class Wait {
   public static forAll(waitStrategies: WaitStrategy[]): CompositeWaitStrategy {

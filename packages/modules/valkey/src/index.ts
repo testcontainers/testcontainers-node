@@ -1,1 +1,1 @@
-export { ValkeyContainer, StartedValkeyContainer } from "./valkey-container";
+export { StartedValkeyContainer, ValkeyContainer } from "./valkey-container";

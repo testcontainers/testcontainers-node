@@ -1,8 +1,8 @@
-import { Kafka, KafkaConfig, logLevel } from "kafkajs";
-import { KAFKA_IMAGE, KafkaContainer } from "./kafka-container";
 import * as fs from "fs";
+import { Kafka, KafkaConfig, logLevel } from "kafkajs";
 import * as path from "path";
 import { GenericContainer, Network, StartedTestContainer } from "testcontainers";
+import { KafkaContainer, KAFKA_IMAGE } from "./kafka-container";
 
 describe("KafkaContainer", { timeout: 240_000 }, () => {
   // connectBuiltInZK {

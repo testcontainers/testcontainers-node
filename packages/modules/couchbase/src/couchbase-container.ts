@@ -1,18 +1,18 @@
 import {
   AbstractStartedContainer,
+  BoundPorts,
+  ContainerRuntimeClient,
   GenericContainer,
+  getContainerRuntimeClient,
   InspectResult,
+  IntervalRetry,
   log,
   StartedTestContainer,
   Wait,
-  ContainerRuntimeClient,
-  getContainerRuntimeClient,
-  BoundPorts,
   WaitStrategy,
-  IntervalRetry,
 } from "testcontainers";
-import { CouchbaseService } from "./couchbase-service";
 import { BucketDefinition } from "./bucket-definition";
+import { CouchbaseService } from "./couchbase-service";
 import PORTS from "./ports";
 
 export class CouchbaseContainer extends GenericContainer {

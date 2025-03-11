@@ -1,7 +1,6 @@
 import path from "path";
-import { DockerComposeEnvironment } from "./docker-compose-environment";
 import { RandomUuid } from "../common";
-import { Wait } from "../wait-strategies/wait";
+import { randomUuid } from "../common/uuid";
 import { PullPolicy } from "../utils/pull-policy";
 import {
   checkEnvironmentContainerIsHealthy,
@@ -11,7 +10,8 @@ import {
   getVolumeNames,
   waitForDockerEvent,
 } from "../utils/test-helper";
-import { randomUuid } from "../common/uuid";
+import { Wait } from "../wait-strategies/wait";
+import { DockerComposeEnvironment } from "./docker-compose-environment";
 
 describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
   const fixtures = path.resolve(__dirname, "..", "..", "fixtures", "docker-compose");

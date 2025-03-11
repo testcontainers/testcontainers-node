@@ -1,6 +1,6 @@
+import { TableClient, TableEntity } from "@azure/data-tables";
 import { BlobServiceClient, StorageSharedKeyCredential } from "@azure/storage-blob";
 import { QueueServiceClient } from "@azure/storage-queue";
-import { TableClient, TableEntity } from "@azure/data-tables";
 import { AzuriteContainer } from "./azurite-container";
 
 describe("Azurite", { timeout: 240_000 }, () => {

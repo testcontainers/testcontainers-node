@@ -1,5 +1,5 @@
-import { MongoDBContainer } from "./mongodb-container";
 import mongoose from "mongoose";
+import { MongoDBContainer } from "./mongodb-container";
 
 describe("MongodbContainer", { timeout: 240_000 }, () => {
   // connect4 {

@@ -1,7 +1,7 @@
 import { existsSync } from "fs";
-import { RootlessUnixSocketStrategy } from "./rootless-unix-socket-strategy";
 import os from "os";
 import path from "path";
+import { RootlessUnixSocketStrategy } from "./rootless-unix-socket-strategy";
 
 vi.mock("fs", () => ({ existsSync: vi.fn() }));
 

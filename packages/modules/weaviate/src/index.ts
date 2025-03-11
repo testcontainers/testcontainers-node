@@ -1,1 +1,1 @@
-export { WeaviateContainer, StartedWeaviateContainer } from "./weaviate-container";
+export { StartedWeaviateContainer, WeaviateContainer } from "./weaviate-container";

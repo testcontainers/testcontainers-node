@@ -1,7 +1,7 @@
 import { Container } from "dockerode";
-import { InternalPortCheck } from "./port-check";
 import { log } from "../../common";
 import { ContainerRuntimeClient } from "../../container-runtime";
+import { InternalPortCheck } from "./port-check";
 
 vi.mock("../../common");
 const mockLogger = vi.mocked(log);

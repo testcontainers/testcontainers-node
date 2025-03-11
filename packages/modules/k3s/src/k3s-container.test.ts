@@ -1,7 +1,7 @@
-import { K3sContainer } from "./k3s-container";
 import * as k8s from "@kubernetes/client-node";
 import { setTimeout } from "node:timers/promises";
 import { GenericContainer, Network, Wait } from "testcontainers";
+import { K3sContainer } from "./k3s-container";
 
 describe("K3s", { timeout: 120_000 }, () => {
   it("should construct", () => {

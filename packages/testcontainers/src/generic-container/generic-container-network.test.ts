@@ -1,6 +1,6 @@
-import { GenericContainer } from "./generic-container";
 import { getContainerRuntimeClient } from "../container-runtime";
 import { Network } from "../network/network";
+import { GenericContainer } from "./generic-container";
 
 describe("GenericContainer network", { timeout: 180_000 }, () => {
   it("should set network mode", async () => {

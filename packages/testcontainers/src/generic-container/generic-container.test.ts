@@ -1,6 +1,7 @@
-import path from "path";
 import getPort from "get-port";
-import { GenericContainer } from "./generic-container";
+import path from "path";
+import { RandomUuid } from "../common";
+import { getContainerRuntimeClient } from "../container-runtime";
 import { PullPolicy } from "../utils/pull-policy";
 import {
   checkContainerIsHealthy,
@@ -8,8 +9,7 @@ import {
   getRunningContainerNames,
   waitForDockerEvent,
 } from "../utils/test-helper";
-import { getContainerRuntimeClient } from "../container-runtime";
-import { RandomUuid } from "../common";
+import { GenericContainer } from "./generic-container";
 
 describe("GenericContainer", { timeout: 180_000 }, () => {
   const fixtures = path.resolve(__dirname, "..", "..", "fixtures", "docker");

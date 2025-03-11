@@ -1,7 +1,14 @@
 import archiver from "archiver";
 import AsyncLock from "async-lock";
+import { Container, ContainerCreateOptions, HostConfig } from "dockerode";
+import { Readable } from "stream";
+import { containerLog, hash, log } from "../common";
+import { ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "../container-runtime";
+import { CONTAINER_STATUSES } from "../container-runtime/clients/container/types";
+import { StartedNetwork } from "../network/network";
+import { PortForwarderInstance, SSHD_IMAGE } from "../port-forwarder/port-forwarder";
+import { getReaper, REAPER_IMAGE } from "../reaper/reaper";
 import { StartedTestContainer, TestContainer } from "../test-container";
-import { WaitStrategy } from "../wait-strategies/wait-strategy";
 import {
   BindMount,
   ContentToCopy,
@@ -16,23 +23,16 @@ import {
   TmpFs,
   Ulimits,
 } from "../types";
-import { GenericContainerBuilder } from "./generic-container-builder";
-import { StartedGenericContainer } from "./started-generic-container";
-import { Wait } from "../wait-strategies/wait";
-import { Readable } from "stream";
-import { Container, ContainerCreateOptions, HostConfig } from "dockerode";
-import { waitForContainer } from "../wait-strategies/wait-for-container";
-import { ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "../container-runtime";
+import { BoundPorts } from "../utils/bound-ports";
+import { createLabels, LABEL_TESTCONTAINERS_CONTAINER_HASH, LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
+import { mapInspectResult } from "../utils/map-inspect-result";
 import { getContainerPort, hasHostBinding, PortWithOptionalBinding } from "../utils/port";
 import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
-import { getReaper, REAPER_IMAGE } from "../reaper/reaper";
-import { PortForwarderInstance, SSHD_IMAGE } from "../port-forwarder/port-forwarder";
-import { createLabels, LABEL_TESTCONTAINERS_CONTAINER_HASH, LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
-import { containerLog, hash, log } from "../common";
-import { BoundPorts } from "../utils/bound-ports";
-import { StartedNetwork } from "../network/network";
-import { mapInspectResult } from "../utils/map-inspect-result";
-import { CONTAINER_STATUSES } from "../container-runtime/clients/container/types";
+import { Wait } from "../wait-strategies/wait";
+import { waitForContainer } from "../wait-strategies/wait-for-container";
+import { WaitStrategy } from "../wait-strategies/wait-strategy";
+import { GenericContainerBuilder } from "./generic-container-builder";
+import { StartedGenericContainer } from "./started-generic-container";
 
 const reusableContainerCreationLock = new AsyncLock();
 

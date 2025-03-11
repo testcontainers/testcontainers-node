@@ -1,5 +1,5 @@
-import { DatastoreEmulatorContainer, StartedDatastoreEmulatorContainer } from "./datastore-emulator-container";
 import { Datastore } from "@google-cloud/datastore";
+import { DatastoreEmulatorContainer, StartedDatastoreEmulatorContainer } from "./datastore-emulator-container";
 
 describe("DatastoreEmulatorContainer", { timeout: 240_000 }, () => {
   // datastore4 {

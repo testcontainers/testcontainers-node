@@ -1,8 +1,8 @@
-import { GenericContainer } from "../generic-container/generic-container";
-import { Wait } from "./wait";
 import path from "path";
-import { checkContainerIsHealthy, getRunningContainerNames } from "../utils/test-helper";
 import { RandomUuid } from "../common";
+import { GenericContainer } from "../generic-container/generic-container";
+import { checkContainerIsHealthy, getRunningContainerNames } from "../utils/test-helper";
+import { Wait } from "./wait";
 
 const fixtures = path.resolve(__dirname, "..", "..", "fixtures", "docker");
 

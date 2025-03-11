@@ -1,5 +1,5 @@
-import { WaitStrategy } from "./wait-strategies/wait-strategy";
 import { Readable } from "stream";
+import { StartedNetwork } from "./network/network";
 import {
   BindMount,
   ContentToCopy,
@@ -14,9 +14,9 @@ import {
   TmpFs,
   Ulimits,
 } from "./types";
-import { StartedNetwork } from "./network/network";
 import { PortWithOptionalBinding } from "./utils/port";
 import { ImagePullPolicy } from "./utils/pull-policy";
+import { WaitStrategy } from "./wait-strategies/wait-strategy";
 
 export interface TestContainer {
   start(): Promise<StartedTestContainer>;

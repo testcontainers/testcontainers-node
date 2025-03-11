@@ -1,8 +1,8 @@
-import { createClient } from "redis";
-import { RedisContainer, StartedRedisContainer } from "./redis-container";
+import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
-import * as fs from "fs";
+import { createClient } from "redis";
+import { RedisContainer, StartedRedisContainer } from "./redis-container";
 
 describe("RedisContainer", { timeout: 240_000 }, () => {
   // startContainer {

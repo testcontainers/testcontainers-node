@@ -1,5 +1,5 @@
-import { HiveMQContainer } from "./hivemq-container";
 import mqtt from "mqtt";
+import { HiveMQContainer } from "./hivemq-container";
 
 describe("HiveMQContainer", { timeout: 240_000 }, () => {
   // connect {

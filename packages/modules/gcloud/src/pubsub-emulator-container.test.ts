@@ -1,5 +1,5 @@
-import { PubSubEmulatorContainer, StartedPubSubEmulatorContainer } from "./pubsub-emulator-container";
 import { PubSub } from "@google-cloud/pubsub";
+import { PubSubEmulatorContainer, StartedPubSubEmulatorContainer } from "./pubsub-emulator-container";
 
 describe("PubSubEmulatorContainer", { timeout: 240_000 }, () => {
   it("should work using default version", async () => {

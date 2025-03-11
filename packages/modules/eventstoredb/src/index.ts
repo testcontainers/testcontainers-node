@@ -1,1 +1,1 @@
-export { StartedEventStoreDBContainer, EventStoreDBContainer } from "./eventstoredb-container";
+export { EventStoreDBContainer, StartedEventStoreDBContainer } from "./eventstoredb-container";

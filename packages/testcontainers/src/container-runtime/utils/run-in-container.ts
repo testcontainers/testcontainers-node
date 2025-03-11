@@ -1,9 +1,9 @@
 import Dockerode from "dockerode";
-import { pullImage } from "./pull-image";
+import { log, streamToString } from "../../common";
 import { ImageName } from "../image-name";
 import { attachContainer } from "./attach-container";
+import { pullImage } from "./pull-image";
 import { startContainer } from "./start-container";
-import { log, streamToString } from "../../common";
 
 export const runInContainer = async (
   dockerode: Dockerode,

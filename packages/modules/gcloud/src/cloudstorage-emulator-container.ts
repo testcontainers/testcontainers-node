@@ -1,5 +1,5 @@
-import { AbstractStartedContainer, GenericContainer, Wait } from "testcontainers";
 import type { StartedTestContainer } from "testcontainers";
+import { AbstractStartedContainer, GenericContainer, Wait } from "testcontainers";
 
 const PORT = 4443;
 const DEFAULT_IMAGE = "fsouza/fake-gcs-server";

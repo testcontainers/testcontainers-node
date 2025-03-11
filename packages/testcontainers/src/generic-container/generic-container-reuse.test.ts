@@ -1,6 +1,6 @@
-import { GenericContainer } from "./generic-container";
-import { checkContainerIsHealthy } from "../utils/test-helper";
 import { randomUuid } from "../common/uuid";
+import { checkContainerIsHealthy } from "../utils/test-helper";
+import { GenericContainer } from "./generic-container";
 
 describe("GenericContainer reuse", { timeout: 180_000 }, () => {
   afterEach(() => {

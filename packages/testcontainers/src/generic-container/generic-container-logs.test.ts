@@ -1,6 +1,6 @@
-import { GenericContainer } from "./generic-container";
 import { containerLog } from "../common";
 import { Wait } from "../wait-strategies/wait";
+import { GenericContainer } from "./generic-container";
 
 describe("GenericContainer logs", { timeout: 180_000 }, () => {
   it("should stream logs from a container before start", async () => {

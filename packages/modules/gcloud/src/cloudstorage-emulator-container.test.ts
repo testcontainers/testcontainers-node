@@ -1,7 +1,7 @@
-import { CloudStorageEmulatorContainer, StartedCloudStorageEmulatorContainer } from "./cloudstorage-emulator-container";
 import { Storage } from "@google-cloud/storage";
-import { ReadableStream } from "node:stream/web";
 import { setupServer } from "msw/node";
+import { ReadableStream } from "node:stream/web";
+import { CloudStorageEmulatorContainer, StartedCloudStorageEmulatorContainer } from "./cloudstorage-emulator-container";
 
 async function getRequestBodyFromReadableStream(stream: ReadableStream<Uint8Array>): Promise<string> {
   const decoder = new TextDecoder();

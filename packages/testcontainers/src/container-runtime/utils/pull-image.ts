@@ -1,9 +1,9 @@
-import { imageExists } from "./image-exists";
-import Dockerode from "dockerode";
 import byline from "byline";
+import Dockerode from "dockerode";
+import { log, pullLog } from "../../common";
 import { getAuthConfig } from "../auth/get-auth-config";
 import { ImageName } from "../image-name";
-import { log, pullLog } from "../../common";
+import { imageExists } from "./image-exists";
 
 export type PullImageOptions = {
   imageName: ImageName;

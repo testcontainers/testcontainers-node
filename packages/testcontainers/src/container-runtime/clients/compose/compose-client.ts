@@ -1,9 +1,8 @@
-import { ComposeDownOptions, ComposeOptions } from "./types";
-import v1 from "docker-compose";
-import dockerComposeV1, { v2 as dockerComposeV2, v2 } from "docker-compose";
-import { defaultComposeOptions } from "./default-compose-options";
-import { ComposeInfo } from "../types";
+import { default as dockerComposeV1, default as v1, v2 as dockerComposeV2, v2 } from "docker-compose";
 import { log, pullLog } from "../../../common";
+import { ComposeInfo } from "../types";
+import { defaultComposeOptions } from "./default-compose-options";
+import { ComposeDownOptions, ComposeOptions } from "./types";
 
 export interface ComposeClient {
   info: ComposeInfo;

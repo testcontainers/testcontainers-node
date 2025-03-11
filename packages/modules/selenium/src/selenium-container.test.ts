@@ -1,8 +1,8 @@
-import { SELENIUM_VIDEO_IMAGE, SeleniumContainer } from "./selenium-container";
-import { Browser, Builder } from "selenium-webdriver";
-import tmp from "tmp";
 import path from "path";
+import { Browser, Builder } from "selenium-webdriver";
 import { GenericContainer, StartedTestContainer } from "testcontainers";
+import tmp from "tmp";
+import { SeleniumContainer, SELENIUM_VIDEO_IMAGE } from "./selenium-container";
 
 describe("SeleniumContainer", { timeout: 180_000 }, () => {
   let ffmpegContainer: StartedTestContainer;

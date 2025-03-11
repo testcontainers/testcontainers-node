@@ -1,6 +1,6 @@
-import { ToxiProxyContainer, TPClient } from "./toxiproxy-container";
-import { GenericContainer, Network } from "testcontainers";
 import { createClient } from "redis";
+import { GenericContainer, Network } from "testcontainers";
+import { ToxiProxyContainer, TPClient } from "./toxiproxy-container";
 
 describe("ToxiProxyContainer", { timeout: 240_000 }, () => {
   // Helper to connect to redis

@@ -1,5 +1,5 @@
-import net from "net";
 import { lookup as dnsLookup } from "dns/promises";
+import net from "net";
 import { HostIp } from "../clients/types";
 
 export const lookupHostIps = async (host: string): Promise<HostIp[]> => {

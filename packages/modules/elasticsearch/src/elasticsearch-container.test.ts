@@ -1,5 +1,5 @@
-import { ElasticsearchContainer } from "./elasticsearch-container";
 import { Client } from "@elastic/elasticsearch";
+import { ElasticsearchContainer } from "./elasticsearch-container";
 
 describe("ElasticsearchContainer", { timeout: 180_000 }, () => {
   // createIndex {

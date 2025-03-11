@@ -1,7 +1,7 @@
-import { CredentialProvider } from "./credential-provider";
 import { ChildProcess } from "child_process";
-import { Readable, Writable } from "stream";
 import EventEmitter from "events";
+import { Readable, Writable } from "stream";
+import { CredentialProvider } from "./credential-provider";
 import { ContainerRuntimeConfig } from "./types";
 
 const mockExec = vi.fn();

@@ -1,6 +1,6 @@
 import path from "path";
-import { getDockerfileImages } from "./dockerfile-parser";
 import { ImageName } from "../container-runtime";
+import { getDockerfileImages } from "./dockerfile-parser";
 
 const dockerfileParserFixtures = path.resolve(__dirname, "..", "..", "fixtures", "docker", "dockerfile-parser");
 

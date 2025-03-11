@@ -1,5 +1,5 @@
-import { AbstractStartedContainer, GenericContainer, Wait } from "testcontainers";
 import type { StartedTestContainer } from "testcontainers";
+import { AbstractStartedContainer, GenericContainer, Wait } from "testcontainers";
 
 const EMULATOR_PORT = 8085;
 const CMD = "gcloud beta emulators pubsub start --host-port 0.0.0.0:8085";

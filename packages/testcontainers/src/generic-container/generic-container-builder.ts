@@ -1,13 +1,13 @@
-import { AuthConfig, BuildArgs, RegistryConfig } from "../types";
 import type { ImageBuildOptions } from "dockerode";
 import path from "path";
-import { GenericContainer } from "./generic-container";
-import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
 import { log, RandomUuid, Uuid } from "../common";
 import { getAuthConfig, getContainerRuntimeClient, ImageName } from "../container-runtime";
 import { getReaper } from "../reaper/reaper";
+import { AuthConfig, BuildArgs, RegistryConfig } from "../types";
 import { getDockerfileImages } from "../utils/dockerfile-parser";
 import { createLabels, LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
+import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
+import { GenericContainer } from "./generic-container";
 
 export type BuildOptions = {
   deleteOnExit: boolean;

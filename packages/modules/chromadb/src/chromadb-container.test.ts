@@ -1,4 +1,4 @@
-import { ChromaClient, AdminClient } from "chromadb";
+import { AdminClient, ChromaClient } from "chromadb";
 import { ChromaDBContainer } from "./chromadb-container";
 
 describe("ChromaDB", { timeout: 360_000 }, () => {

@@ -1,6 +1,6 @@
 import Dockerode from "dockerode";
-import { ImageName } from "../image-name";
 import { afterEach } from "vitest";
+import { ImageName } from "../image-name";
 
 const mockImageInspect = vi.fn();
 vi.mock("dockerode", () => {

@@ -1,6 +1,6 @@
 import { Environment } from "testcontainers/src/types";
-import { WeaviateContainer } from "./weaviate-container";
 import weaviate from "weaviate-ts-client";
+import { WeaviateContainer } from "./weaviate-container";
 
 describe("WeaviateContainer", { timeout: 100_000 }, () => {
   // connectWeaviate {

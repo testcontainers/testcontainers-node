@@ -1,6 +1,6 @@
+import { RandomUuid } from "../common";
 import { GenericContainer } from "../generic-container/generic-container";
 import { checkContainerIsHealthy, getRunningContainerNames } from "../utils/test-helper";
-import { RandomUuid } from "../common";
 
 describe("HostPortWaitStrategy", { timeout: 180_000 }, () => {
   it("should wait for port", async () => {

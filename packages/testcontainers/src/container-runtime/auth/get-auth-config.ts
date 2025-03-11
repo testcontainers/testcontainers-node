@@ -1,13 +1,13 @@
-import path from "path";
-import os from "os";
-import { AuthConfig, ContainerRuntimeConfig } from "./types";
 import { existsSync } from "fs";
 import { readFile } from "fs/promises";
+import os from "os";
+import path from "path";
+import { log } from "../../common";
+import { Auths } from "./auths";
 import { CredHelpers } from "./cred-helpers";
 import { CredsStore } from "./creds-store";
-import { Auths } from "./auths";
 import { RegistryAuthLocator } from "./registry-auth-locator";
-import { log } from "../../common";
+import { AuthConfig, ContainerRuntimeConfig } from "./types";
 
 const dockerConfigLocation = process.env.DOCKER_CONFIG || `${os.homedir()}/.docker`;
 

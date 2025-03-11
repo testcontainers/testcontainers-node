@@ -1,5 +1,5 @@
-import { FirestoreEmulatorContainer, StartedFirestoreEmulatorContainer } from "./firestore-emulator-container";
 import * as admin from "firebase-admin";
+import { FirestoreEmulatorContainer, StartedFirestoreEmulatorContainer } from "./firestore-emulator-container";
 
 describe("FirestoreEmulatorContainer", { timeout: 240_000 }, () => {
   afterEach(async () => {

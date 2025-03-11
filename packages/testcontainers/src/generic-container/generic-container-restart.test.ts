@@ -1,6 +1,6 @@
-import { GenericContainer } from "./generic-container";
 import { RandomUuid } from "../common";
 import { checkContainerIsHealthy } from "../utils/test-helper";
+import { GenericContainer } from "./generic-container";
 
 describe("GenericContainer restart", { timeout: 180_000 }, () => {
   it("should restart", async () => {

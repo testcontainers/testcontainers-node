@@ -1,6 +1,6 @@
+import { readFile } from "fs/promises";
 import { ConfigurationStrategy } from "./configuration-strategy";
 import { getContainerRuntimeConfig } from "./utils/config";
-import { readFile } from "fs/promises";
 
 vi.mock("./utils/config");
 vi.mock("fs/promises");
