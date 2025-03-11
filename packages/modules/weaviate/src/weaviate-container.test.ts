@@ -23,16 +23,8 @@ describe("WeaviateContainer", { timeout: 100_000 }, () => {
       host: container.getHttpHostAddress(),
     });
 
-    client.misc
-      .metaGetter()
-      .do()
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .then((res: any) => {
-        expect(res.version).toBeDefined();
-      })
-      .catch((e: string) => {
-        throw new Error(e);
-      });
+    const res = await client.misc.metaGetter().do();
+    expect(res.version).toBeDefined();
 
     await container.stop();
   });
@@ -58,20 +50,12 @@ describe("WeaviateContainer", { timeout: 100_000 }, () => {
       host: container.getHttpHostAddress(),
     });
 
-    client.misc
-      .metaGetter()
-      .do()
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .then((res: any) => {
-        expect(res.version).toBeDefined();
-        expect(res.modules).toBeDefined();
-        enableModules.forEach((module) => {
-          expect(res.modules[module]).toBeDefined();
-        });
-      })
-      .catch((e: string) => {
-        throw new Error(e);
-      });
+    const res = await client.misc.metaGetter().do();
+    expect(res.version).toBeDefined();
+    expect(res.modules).toBeDefined();
+    enableModules.forEach((module) => {
+      expect(res.modules[module]).toBeDefined();
+    });
 
     await container.stop();
   });
