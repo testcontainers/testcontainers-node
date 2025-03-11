@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/weaviate",
-  "version": "10.18.0",
+  "version": "10.19.0",
   "license": "MIT",
   "keywords": [
     "weaviate",
@@ -32,6 +32,6 @@
     "weaviate-ts-client": "^2.2.0"
   },
   "dependencies": {
-    "testcontainers": "^10.18.0"
+    "testcontainers": "^10.19.0"
   }
 }

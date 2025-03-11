@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/chromadb",
-  "version": "10.18.0",
+  "version": "10.19.0",
   "license": "MIT",
   "keywords": [
     "chromadb",
@@ -32,6 +32,6 @@
     "chromadb": "^1.8.1"
   },
   "dependencies": {
-    "testcontainers": "^10.18.0"
+    "testcontainers": "^10.19.0"
   }
 }
