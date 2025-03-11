@@ -4,9 +4,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { GenericContainer, Network, StartedTestContainer } from "testcontainers";
 
-describe("KafkaContainer", () => {
-  jest.setTimeout(240_000);
-
+describe("KafkaContainer", { timeout: 240_000 }, () => {
   // connectBuiltInZK {
   it("should connect using in-built zoo-keeper", async () => {
     const kafkaContainer = await new KafkaContainer().withExposedPorts(9093).start();

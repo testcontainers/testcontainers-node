@@ -1,7 +1,7 @@
 import { TestcontainersHostStrategy } from "./testcontainers-host-strategy";
 
-const mockGetContainerRuntimeConfig = jest.fn();
-jest.mock("./utils/config", () => ({
+const mockGetContainerRuntimeConfig = vi.fn();
+vi.mock("./utils/config", () => ({
   getContainerRuntimeConfig: () => mockGetContainerRuntimeConfig(),
 }));
 

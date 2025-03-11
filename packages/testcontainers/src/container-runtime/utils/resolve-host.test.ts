@@ -2,30 +2,28 @@ import { resolveHost } from "./resolve-host";
 import Dockerode from "dockerode";
 import { ContainerRuntimeClientStrategyResult } from "../strategies/types";
 
-const mockExistsSync = jest.fn();
-jest.mock("fs", () => ({
+const mockExistsSync = vi.fn();
+vi.mock("fs", () => ({
   existsSync: () => mockExistsSync(),
 }));
 
-const mockInspectNetwork = jest.fn();
-const mockGetNetwork = jest.fn();
-jest.mock(
-  "dockerode",
-  () =>
-    function () {
-      return {
-        getNetwork: (...args: unknown[]) => {
-          mockGetNetwork.mockImplementation(() => ({
-            inspect: mockInspectNetwork,
-          }));
-          return mockGetNetwork(...args);
-        },
-      };
-    }
-);
+const mockInspectNetwork = vi.fn();
+const mockGetNetwork = vi.fn();
+vi.mock("dockerode", () => {
+  return {
+    default: vi.fn(() => ({
+      getNetwork: (...args: unknown[]) => {
+        mockGetNetwork.mockImplementation(() => ({
+          inspect: mockInspectNetwork,
+        }));
+        return mockGetNetwork(...args);
+      },
+    })),
+  };
+});
 
-const runInContainerMock = jest.fn();
-jest.mock("./run-in-container", () => ({
+const runInContainerMock = vi.fn();
+vi.mock("./run-in-container", () => ({
   runInContainer: () => runInContainerMock(),
 }));
 

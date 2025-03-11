@@ -1,9 +1,9 @@
 import { GetContainerRuntimeConfig } from "./config";
 
-const mockExistsSync = jest.fn();
-jest.mock("fs", () => ({ existsSync: mockExistsSync }));
-const mockReadFile = jest.fn();
-jest.mock("fs/promises", () => ({ readFile: mockReadFile }));
+const mockExistsSync = vi.fn();
+vi.mock("fs", () => ({ existsSync: mockExistsSync }));
+const mockReadFile = vi.fn();
+vi.mock("fs/promises", () => ({ readFile: mockReadFile }));
 
 let getContainerRuntimeConfig: GetContainerRuntimeConfig;
 
@@ -12,7 +12,7 @@ beforeEach(async () => {
 });
 
 afterEach(() => {
-  jest.resetModules();
+  vi.resetModules();
 });
 
 test("should not set anything", async () => {

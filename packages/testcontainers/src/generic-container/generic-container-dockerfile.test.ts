@@ -14,9 +14,7 @@ import {
   waitForDockerEvent,
 } from "../utils/test-helper";
 
-describe("GenericContainer Dockerfile", () => {
-  jest.setTimeout(180_000);
-
+describe("GenericContainer Dockerfile", { timeout: 180_000 }, () => {
   const uuidGen = new RandomUuid();
   const fixtures = path.resolve(__dirname, "..", "..", "fixtures", "docker");
 

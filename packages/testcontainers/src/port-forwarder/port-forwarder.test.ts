@@ -4,9 +4,7 @@ import { TestContainers } from "../test-containers";
 import { GenericContainer } from "../generic-container/generic-container";
 import { Network } from "../network/network";
 
-describe("PortForwarder", () => {
-  jest.setTimeout(180_000);
-
+describe("PortForwarder", { timeout: 180_000 }, () => {
   let randomPort: number;
   let server: Server;
 
@@ -63,7 +61,7 @@ describe("PortForwarder", () => {
 
   describe("Reuse", () => {
     afterEach(() => {
-      jest.resetModules();
+      vi.resetModules();
     });
 
     describe("Different host ports", () => {

@@ -7,7 +7,9 @@
       "testcontainers": ["../../testcontainers/src"]
     }
   },
-  "exclude": ["build", "jest.config.ts"],
+  "exclude": [
+    "build"
+  ],
   "references": [
     {
       "path": "../../testcontainers"

@@ -1,9 +1,7 @@
 import { Kafka, KafkaConfig, logLevel } from "kafkajs";
 import { RedpandaContainer, StartedRedpandaContainer } from "./redpanda-container";
 
-describe("RedpandaContainer", () => {
-  jest.setTimeout(240_000);
-
+describe("RedpandaContainer", { timeout: 240_000 }, () => {
   // connectToKafka {
   it("should connect", async () => {
     const redpandaContainer = await new RedpandaContainer().start();

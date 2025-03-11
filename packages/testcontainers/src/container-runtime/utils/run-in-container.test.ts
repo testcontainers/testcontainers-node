@@ -2,9 +2,7 @@ import { runInContainer } from "./run-in-container";
 import Dockerode from "dockerode";
 import { getContainerRuntimeClient } from "../clients/client";
 
-describe("runInContainer", () => {
-  jest.setTimeout(180_000);
-
+describe("runInContainer", { timeout: 180_000 }, () => {
   let dockerode: Dockerode;
 
   beforeAll(async () => {

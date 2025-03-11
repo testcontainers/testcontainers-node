@@ -1,9 +1,7 @@
 import { Client } from "pg";
 import { CockroachDbContainer } from "./cockroachdb-container";
 
-describe("CockroachDbContainer", () => {
-  jest.setTimeout(180_000);
-
+describe("CockroachDbContainer", { timeout: 180_000 }, () => {
   // connect {
   it("should connect and return a query result", async () => {
     const container = await new CockroachDbContainer().start();

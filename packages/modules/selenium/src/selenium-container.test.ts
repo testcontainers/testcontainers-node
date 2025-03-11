@@ -4,9 +4,7 @@ import tmp from "tmp";
 import path from "path";
 import { GenericContainer, StartedTestContainer } from "testcontainers";
 
-describe("SeleniumContainer", () => {
-  jest.setTimeout(180_000);
-
+describe("SeleniumContainer", { timeout: 180_000 }, () => {
   let ffmpegContainer: StartedTestContainer;
 
   beforeAll(async () => {

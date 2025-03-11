@@ -4,9 +4,7 @@ import * as os from "os";
 import * as path from "path";
 import * as fs from "fs";
 
-describe("RedisContainer", () => {
-  jest.setTimeout(240_000);
-
+describe("RedisContainer", { timeout: 240_000 }, () => {
   // startContainer {
   it("should connect and execute set-get", async () => {
     const container = await new RedisContainer().start();

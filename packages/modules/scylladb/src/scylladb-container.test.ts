@@ -1,9 +1,7 @@
 import { Client } from "cassandra-driver"; // Scylla uses Cassandra's driver in Node.js
 import { ScyllaContainer } from "./scylladb-container";
 
-describe("ScyllaDB", () => {
-  jest.setTimeout(240_000);
-
+describe("ScyllaDB", { timeout: 240_000 }, () => {
   // connectWithDefaultCredentials {
   it("should connect and execute a query", async () => {
     const container = await new ScyllaContainer("scylladb/scylla:6.2.0").start();

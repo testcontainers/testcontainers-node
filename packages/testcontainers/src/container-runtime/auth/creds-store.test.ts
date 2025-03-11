@@ -15,7 +15,7 @@ describe("CredsStore", () => {
       expect(await locator.getAuthConfig("registry-name", containerRuntimeConfig)).toBe(undefined);
     });
 
-    xit("should work", async () => {
+    it.skip("should work", async () => {
       const containerRuntimeConfig: ContainerRuntimeConfig = { credsStore: "desktop" };
       const authConfig: AuthConfig = {
         username: expect.stringMatching(/.+/),

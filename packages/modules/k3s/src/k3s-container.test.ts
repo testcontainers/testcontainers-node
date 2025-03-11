@@ -3,9 +3,7 @@ import * as k8s from "@kubernetes/client-node";
 import { setTimeout } from "node:timers/promises";
 import { GenericContainer, Network, Wait } from "testcontainers";
 
-describe("K3s", () => {
-  jest.setTimeout(120_000);
-
+describe("K3s", { timeout: 120_000 }, () => {
   it("should construct", () => {
     new K3sContainer("rancher/k3s:v1.31.2-k3s1");
   });

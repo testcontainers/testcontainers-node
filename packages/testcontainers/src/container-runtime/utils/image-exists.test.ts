@@ -1,21 +1,20 @@
 import Dockerode from "dockerode";
 import { ImageName } from "../image-name";
+import { afterEach } from "vitest";
 
-const mockImageInspect = jest.fn();
-jest.mock(
-  "dockerode",
-  () =>
-    function () {
-      return {
-        getImage: () => ({
-          inspect: mockImageInspect,
-        }),
-      };
-    }
-);
+const mockImageInspect = vi.fn();
+vi.mock("dockerode", () => {
+  return {
+    default: vi.fn(() => ({
+      getImage: () => ({
+        inspect: mockImageInspect,
+      }),
+    })),
+  };
+});
 
 afterEach(() => {
-  jest.resetModules();
+  vi.resetModules();
 });
 
 test("returns true when image exists", async () => {

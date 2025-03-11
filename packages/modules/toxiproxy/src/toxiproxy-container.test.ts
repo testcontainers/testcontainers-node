@@ -2,9 +2,7 @@ import { ToxiProxyContainer, TPClient } from "./toxiproxy-container";
 import { GenericContainer, Network } from "testcontainers";
 import { createClient } from "redis";
 
-describe("ToxiProxyContainer", () => {
-  jest.setTimeout(240_000);
-
+describe("ToxiProxyContainer", { timeout: 240_000 }, () => {
   // Helper to connect to redis
   async function connectTo(url: string) {
     const client = createClient({

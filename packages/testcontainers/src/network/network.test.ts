@@ -2,9 +2,7 @@ import { GenericContainer } from "../generic-container/generic-container";
 import { Network } from "./network";
 import { ContainerRuntimeClient, getContainerRuntimeClient } from "../container-runtime";
 
-describe("Network", () => {
-  jest.setTimeout(180_000);
-
+describe("Network", { timeout: 180_000 }, () => {
   let client: ContainerRuntimeClient;
 
   beforeAll(async () => {

@@ -2,7 +2,6 @@
   "extends": "./tsconfig.json",
   "exclude": [
     "build",
-    "jest.config.ts",
     "src/**/*.test.ts",
     "src/dummy-file.txt"
   ],

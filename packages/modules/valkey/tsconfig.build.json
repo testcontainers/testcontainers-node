@@ -1,6 +1,9 @@
 {
   "extends": "./tsconfig.json",
-  "exclude": ["build", "jest.config.ts", "src/**/*.test.ts"],
+  "exclude": [
+    "build", 
+    "src/**/*.test.ts"
+  ],
   "references": [
     {
       "path": "../../testcontainers"

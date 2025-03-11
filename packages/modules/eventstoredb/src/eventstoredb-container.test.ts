@@ -1,9 +1,7 @@
 import { EventStoreDBClient, StreamingRead, StreamSubscription } from "@eventstore/db-client";
 import { EventStoreDBContainer } from "./eventstoredb-container";
 
-describe("EventStoreDBContainer", () => {
-  jest.setTimeout(240_000);
-
+describe("EventStoreDBContainer", { timeout: 240_000 }, () => {
   // startContainer {
   it("should execute write and read", async () => {
     const container = await new EventStoreDBContainer().start();

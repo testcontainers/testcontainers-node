@@ -1,19 +1,19 @@
 describe("get auth config", () => {
-  let mockExistsSync: jest.Mock;
-  let mockReadFile: jest.Mock;
+  let mockExistsSync: vi.mock;
+  let mockReadFile: vi.mock;
 
   beforeEach(async () => {
-    jest.mock("fs");
+    vi.mock("fs");
     const { existsSync } = await import("fs");
-    mockExistsSync = existsSync as jest.Mock;
-    jest.mock("fs/promises");
+    mockExistsSync = existsSync as vi.mock;
+    vi.mock("fs/promises");
     const { readFile } = await import("fs/promises");
-    mockReadFile = readFile as jest.Mock;
+    mockReadFile = readFile as vi.mock;
   });
 
   afterEach(() => {
     delete process.env.DOCKER_AUTH_CONFIG;
-    jest.resetModules();
+    vi.resetModules();
   });
 
   it("should use DOCKER_AUTH_CONFIG environment variable as Docker config", async () => {

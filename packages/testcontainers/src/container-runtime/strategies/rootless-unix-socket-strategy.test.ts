@@ -3,10 +3,10 @@ import { RootlessUnixSocketStrategy } from "./rootless-unix-socket-strategy";
 import os from "os";
 import path from "path";
 
-jest.mock("fs", () => ({ existsSync: jest.fn() }));
+vi.mock("fs", () => ({ existsSync: vi.fn() }));
 
 describe("RootlessUnixSocketStrategy", () => {
-  const mockExistsSync = jest.mocked(existsSync);
+  const mockExistsSync = vi.mocked(existsSync);
 
   it("should return undefined for non-linux and non-darwin platforms", async () => {
     mockExistsSync.mockReturnValue(true);

@@ -13,9 +13,7 @@ const runAwsCliAgainstDockerNetworkContainer = async (
   return execResult.output;
 };
 
-describe("LocalStackContainer", () => {
-  jest.setTimeout(180_000);
-
+describe("LocalStackContainer", { timeout: 180_000 }, () => {
   // createS3Bucket {
   it("should create a S3 bucket", async () => {
     const container = await new LocalstackContainer().start();

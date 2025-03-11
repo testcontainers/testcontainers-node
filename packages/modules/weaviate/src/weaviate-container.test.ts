@@ -2,9 +2,7 @@ import { Environment } from "testcontainers/src/types";
 import { WeaviateContainer } from "./weaviate-container";
 import weaviate from "weaviate-ts-client";
 
-describe("WeaviateContainer", () => {
-  jest.setTimeout(100_000);
-
+describe("WeaviateContainer", { timeout: 100_000 }, () => {
   // connectWeaviate {
   it("should expose ports", async () => {
     const container = await new WeaviateContainer().start();

@@ -5,6 +5,9 @@
       "ES2022"
     ],
     "target": "es2022",
+    "types": [
+      "vitest/globals"
+    ],
     "module": "commonjs",
     "declaration": true,
     "sourceMap": true,

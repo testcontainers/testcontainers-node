@@ -3,11 +3,11 @@ import { InternalPortCheck } from "./port-check";
 import { log } from "../../common";
 import { ContainerRuntimeClient } from "../../container-runtime";
 
-jest.mock("../../common");
-const mockLogger = jest.mocked(log);
+vi.mock("../../common");
+const mockLogger = vi.mocked(log);
 
-const mockContainerExec = jest.fn();
-jest.mock("../../container-runtime", () => {
+const mockContainerExec = vi.fn();
+vi.mock("../../container-runtime", () => {
   return {
     ContainerRuntimeClient: function () {
       return {

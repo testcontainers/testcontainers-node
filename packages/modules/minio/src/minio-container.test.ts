@@ -1,9 +1,7 @@
 import * as Minio from "minio";
 import { MinioContainer } from "./minio-container";
 
-describe("MinIO", () => {
-  jest.setTimeout(240_000);
-
+describe("MinIO", { timeout: 240_000 }, () => {
   // connectWithDefaultCredentials {
   it("should connect and upload a file", async () => {
     const container = await new MinioContainer().start();

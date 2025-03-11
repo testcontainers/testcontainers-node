@@ -28,9 +28,7 @@ async function getRequestBodyFromReadableStream(stream: ReadableStream<Uint8Arra
   return fullString;
 }
 
-describe("CloudStorageEmulatorContainer", () => {
-  jest.setTimeout(240_000);
-
+describe("CloudStorageEmulatorContainer", { timeout: 240_000 }, () => {
   const server = setupServer();
 
   beforeAll(() => {

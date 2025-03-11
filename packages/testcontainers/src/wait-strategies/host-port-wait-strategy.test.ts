@@ -2,9 +2,7 @@ import { GenericContainer } from "../generic-container/generic-container";
 import { checkContainerIsHealthy, getRunningContainerNames } from "../utils/test-helper";
 import { RandomUuid } from "../common";
 
-jest.setTimeout(180_000);
-
-describe("HostPortWaitStrategy", () => {
+describe("HostPortWaitStrategy", { timeout: 180_000 }, () => {
   it("should wait for port", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
 

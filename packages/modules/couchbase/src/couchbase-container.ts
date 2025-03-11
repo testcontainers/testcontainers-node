@@ -5,14 +5,15 @@ import {
   log,
   StartedTestContainer,
   Wait,
+  ContainerRuntimeClient,
+  getContainerRuntimeClient,
+  BoundPorts,
+  WaitStrategy,
+  IntervalRetry,
 } from "testcontainers";
-import { WaitStrategy } from "testcontainers/src/wait-strategies/wait-strategy";
-import { BoundPorts } from "testcontainers/src/utils/bound-ports";
-import { ContainerRuntimeClient, getContainerRuntimeClient } from "testcontainers/src/container-runtime";
 import { CouchbaseService } from "./couchbase-service";
 import { BucketDefinition } from "./bucket-definition";
 import PORTS from "./ports";
-import { IntervalRetry } from "testcontainers/src/common";
 
 export class CouchbaseContainer extends GenericContainer {
   private static readonly DEFAULT_IMAGE_NAME = "couchbase/server";

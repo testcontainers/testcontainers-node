@@ -1,9 +1,7 @@
 import { Client } from "pg";
 import { PostgreSqlContainer } from "./postgresql-container";
 
-describe("PostgreSqlContainer", () => {
-  jest.setTimeout(180_000);
-
+describe("PostgreSqlContainer", { timeout: 180_000 }, () => {
   // connect {
   it("should connect and return a query result", async () => {
     const container = await new PostgreSqlContainer().start();

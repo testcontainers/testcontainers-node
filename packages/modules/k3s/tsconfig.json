@@ -10,8 +10,7 @@
     }
   },
   "exclude": [
-    "build",
-    "jest.config.ts"
+    "build"
   ],
   "references": [
     {
