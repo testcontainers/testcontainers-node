@@ -9,7 +9,7 @@
     "pre-commit": "lint-staged",
     "docs:serve": "docker-compose up",
     "test": "cross-env NODE_ENV=test DEBUG=testcontainers* vitest run",
-    "test:ci": "npm run test -- --coverage --poolOptions.threads.singleThread",
+    "test:ci": "npm run test -- --coverage",
     "format": "prettier --write package.json \"packages/**/*.ts\"",
     "lint": "eslint --fix package.json \"packages/**/*.ts\"",
     "lint:ci": "eslint package.json \"${WORKSPACE_PATH}/**/*.ts\" --max-warnings=0",
