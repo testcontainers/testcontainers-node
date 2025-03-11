@@ -1,18 +1,18 @@
-name: Test
+name: Checks
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths-ignore:
-      - 'mkdocs.yml'
-      - 'docs/**'
-      - 'README.md'
+      - "mkdocs.yml"
+      - "docs/**"
+      - "README.md"
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths-ignore:
-      - 'mkdocs.yml'
-      - 'docs/**'
-      - 'README.md'
+      - "mkdocs.yml"
+      - "docs/**"
+      - "README.md"
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.head_ref || github.sha }}"
@@ -20,7 +20,8 @@ concurrency:
 
 jobs:
   detect-modules:
-    runs-on: ubuntu-latest
+    name: Detect packages to check
+    runs-on: ubuntu-22.04
     outputs:
       modules: ${{ steps.set-modified-modules.outputs.modules }}
       modules_count: ${{ steps.set-modified-modules-count.outputs.modules_count }}
@@ -48,8 +49,8 @@ jobs:
           echo "${{ steps.set-modified-modules.outputs.modules }}"
 
   lint:
-    # only run if there are modules to lint
-    if: ${{ needs.detect-modules.outputs.modules_count > 0  }}
+    if: ${{ needs.detect-modules.outputs.modules_count > 0 }}
+    name: "Lint"
     needs:
       - detect-modules
     strategy:
@@ -58,38 +59,36 @@ jobs:
         module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
     runs-on: ubuntu-22.04
     steps:
-    - name: Code checkout
-      uses: actions/checkout@v4
-    - name: Install Node and Dependencies
-      id: npm-install
-      uses: ./.github/actions/npm-setup
-      with:
-        runner: ubuntu-22.04
-        node-version: 22.x
-        workspace: "${{ matrix.module }}"
-    - name: Code linting
-      env:
-        WORKSPACE_PATH: ${{ steps.npm-install.outputs.workspace_path }}
-      run: npm run lint:ci
+      - name: Code checkout
+        uses: actions/checkout@v4
+      - name: Install Node and Dependencies
+        id: npm-install
+        uses: ./.github/actions/npm-setup
+        with:
+          runner: ubuntu-22.04
+          node-version: 22.x
+          workspace: "${{ matrix.module }}"
+      - name: Code linting
+        env:
+          WORKSPACE_PATH: ${{ steps.npm-install.outputs.workspace_path }}
+        run: npm run lint:ci
 
   smoke-test:
-    # only run if there are modules to lint
-    if: ${{ needs.detect-modules.outputs.modules_count > 0  }}
+    if: ${{ needs.detect-modules.outputs.modules_count > 0 }}
     needs:
       - detect-modules
       - lint
-    name: Smoke test
+    name: Smoke tests
     strategy:
       fail-fast: true
       matrix:
-        runner: [ ubuntu-22.04 ]
-        node-version: [ 18.x, 20.x, 22.x ]
+        runner: [ubuntu-22.04]
+        node-version: [18.x, 20.x, 22.x]
     runs-on: ${{ matrix.runner }}
     steps:
       - name: Code checkout
         uses: actions/checkout@v4
 
-      # Uses a composite action for a consistent NPM install including cache
       - name: Install Node ${{ matrix.node-version }} and Dependencies
         uses: ./.github/actions/npm-setup
         with:
@@ -107,9 +106,8 @@ jobs:
         run: node packages/testcontainers/smoke-test.mjs
 
   test:
-    name: Run tests
-    # only run if there are modules to test
-    if: ${{ needs.detect-modules.outputs.modules_count > 0  }}
+    if: ${{ needs.detect-modules.outputs.modules_count > 0 }}
+    name: Docker tests
     needs:
       - detect-modules
       - lint
@@ -118,7 +116,7 @@ jobs:
       fail-fast: false
       matrix:
         module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
-        node-version: [ 18.x, 20.x, 22.x ]
+        node-version: [18.x, 20.x, 22.x]
     uses: ./.github/workflows/test-template.yml
     with:
       runner: ubuntu-22.04
@@ -127,9 +125,8 @@ jobs:
       workspace: "${{ matrix.module }}"
 
   test-podman:
-    name: Run tests
-    # only run if there are modules to test
-    if: ${{ needs.detect-modules.outputs.modules_count > 0  }}
+    if: ${{ needs.detect-modules.outputs.modules_count > 0 }}
+    name: Podman tests
     needs:
       - detect-modules
       - lint
@@ -139,7 +136,7 @@ jobs:
       fail-fast: false
       matrix:
         module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
-        node-version: [ 18.x, 20.x, 22.x ]
+        node-version: [18.x, 20.x, 22.x]
     uses: ./.github/workflows/test-template.yml
     with:
       runner: ubuntu-22.04
@@ -147,16 +144,16 @@ jobs:
       container-runtime: podman
       workspace: "${{ matrix.module }}"
 
-  # This job serves as confirmation that all test jobs finished
   end:
     if: ${{ needs.detect-modules.outputs.modules_count > 0 }}
+    name: Checks complete
     needs:
       - detect-modules
       - lint
       - smoke-test
       - test
       - test-podman
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Check if any jobs failed
         if: ${{ failure() || cancelled() }}
