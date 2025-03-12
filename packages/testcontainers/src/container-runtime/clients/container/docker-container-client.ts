@@ -12,7 +12,6 @@ import { PassThrough, Readable } from "stream";
 import { execLog, log, streamToString } from "../../../common";
 import { ContainerClient } from "./container-client";
 import { CommitOptions, ContainerStatus, ExecOptions, ExecResult } from "./types";
-import { createLabels, LABEL_TESTCONTAINERS_SESSION_ID } from "../../../utils/labels";
 
 export class DockerContainerClient implements ContainerClient {
   constructor(public readonly dockerode: Dockerode) {}

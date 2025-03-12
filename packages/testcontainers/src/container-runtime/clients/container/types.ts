@@ -10,7 +10,7 @@ export type CommitOptions = {
   comment?: string;
   author?: string;
   pause?: boolean;
-  labels?: { [key: string]: string };
+  changes?: string;
 };
 
 export const CONTAINER_STATUSES = ["created", "restarting", "running", "removing", "paused", "exited", "dead"] as const;

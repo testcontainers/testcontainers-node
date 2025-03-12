@@ -1,4 +1,4 @@
-import path from "path";
+import { expect } from "vitest";
 import { RandomUuid } from "../common";
 import { LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
 import { deleteImageByName, getImageInfo } from "../utils/test-helper";
@@ -7,8 +7,6 @@ import { GenericContainer } from "./generic-container";
 describe("GenericContainer commit", { timeout: 180_000 }, () => {
   const imageName = "cristianrgreco/testcontainer";
   const imageVersion = "1.1.14";
-
-  const fixtures = path.resolve(__dirname, "..", "..", "fixtures", "docker");
 
   it("should commit container changes to a new image", async () => {
     const testContent = "test content";
@@ -66,25 +64,24 @@ describe("GenericContainer commit", { timeout: 180_000 }, () => {
 
   it("should not add session ID label when deleteOnExit is false", async () => {
     const newImageTag = `test-commit-${new RandomUuid().nextUuid()}`;
-    const context = path.resolve(fixtures, "docker");
-    const container = await GenericContainer.fromDockerfile(context).build(`${imageName}:no-delete-on-exit`, {
-      deleteOnExit: false,
-    });
-
-    const startedContainer = await container.start();
+    const container = await new GenericContainer(`${imageName}:${imageVersion}`).withExposedPorts(8080).start();
 
     // Commit with deleteOnExit false
-    const imageId = await startedContainer.commit({
+    const imageId = await container.commit({
       repo: imageName,
       tag: newImageTag,
+      changes: ["LABEL test=test", "ENV test=test"],
       deleteOnExit: false,
     });
 
-    // Verify session ID label is not present
     const imageInfo = await getImageInfo(imageId);
-    expect(imageInfo.Config.Labels[LABEL_TESTCONTAINERS_SESSION_ID]).toBeUndefined();
+    // Verify session ID label is not present
+    expect(imageInfo.Config.Labels[LABEL_TESTCONTAINERS_SESSION_ID]).toBeFalsy();
+    // Verify other changes are present
+    expect(imageInfo.Config.Labels.test).toBe("test");
+    expect(imageInfo.Config.Env).toContain("test=test");
 
-    await startedContainer.stop();
+    await container.stop();
     await deleteImageByName(imageId);
   });
 });

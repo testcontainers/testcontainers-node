@@ -3,7 +3,7 @@ import AsyncLock from "async-lock";
 import Dockerode, { ContainerInspectInfo } from "dockerode";
 import { Readable } from "stream";
 import { containerLog, log } from "../common";
-import { getContainerRuntimeClient, ImageName } from "../container-runtime";
+import { ContainerRuntimeClient, getContainerRuntimeClient } from "../container-runtime";
 import { getReaper } from "../reaper/reaper";
 import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
 import {
@@ -47,18 +47,36 @@ export class StartedGenericContainer implements StartedTestContainer {
     });
   }
 
+  /**
+   * Construct the command(s) to apply changes to the container before committing it to an image.
+   */
+  private async getContainerCommitChangeCommands(options: {
+    deleteOnExit: boolean;
+    changes?: string[];
+    client: ContainerRuntimeClient;
+  }): Promise<string> {
+    const { deleteOnExit, client } = options;
+    const changes = options.changes || [];
+    if (deleteOnExit) {
+      let sessionId = this.getLabels()[LABEL_TESTCONTAINERS_SESSION_ID];
+      if (!sessionId) {
+        sessionId = await getReaper(client).then((reaper) => reaper.sessionId);
+      }
+      changes.push(`LABEL ${LABEL_TESTCONTAINERS_SESSION_ID}=${sessionId}`);
+    } else if (!deleteOnExit && this.getLabels()[LABEL_TESTCONTAINERS_SESSION_ID]) {
+      // By default, commit will save the existing labels (including the session ID) to the new image.  If
+      // deleteOnExit is false, we need to remove the session ID label.
+      changes.push(`LABEL ${LABEL_TESTCONTAINERS_SESSION_ID}=`);
+    }
+    return changes.filter(Boolean).join("\n");
+  }
+
   public async commit(options: ContainerCommitOptions): Promise<string> {
     log.info(`Committing container image...`, { containerId: this.container.id });
     const client = await getContainerRuntimeClient();
-    const { deleteOnExit = true, ...commitOpts } = options;
-    const image = await client.image.inspect(ImageName.fromString(this.inspectResult.Config.Image));
-    const labels = { ...image.Config.Labels, ...commitOpts.labels };
-    if (deleteOnExit && !labels[LABEL_TESTCONTAINERS_SESSION_ID]) {
-      const reaper = await getReaper(client);
-      labels[LABEL_TESTCONTAINERS_SESSION_ID] = reaper.sessionId;
-    }
-    const commitOptions = { ...commitOpts, labels };
-    const imageId = await client.container.commit(this.container, commitOptions);
+    const { deleteOnExit = true, changes, ...commitOpts } = options;
+    const changeCommands = await this.getContainerCommitChangeCommands({ deleteOnExit, changes, client });
+    const imageId = await client.container.commit(this.container, { ...commitOpts, changes: changeCommands });
     log.info(`Committed container image (Image ID: ${imageId}`, { containerId: this.container.id });
     return imageId;
   }

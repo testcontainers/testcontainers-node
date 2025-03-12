@@ -86,7 +86,12 @@ export type ExecOptions = { workingDir: string; user: string; env: Environment }
 
 export type ExecResult = { output: string; stdout: string; stderr: string; exitCode: number };
 
-export type ContainerCommitOptions = CommitOptions & { deleteOnExit?: boolean };
+/**
+ * Options for committing a container to an image; see https://docs.docker.com/engine/reference/commandline/commit/
+ * @param deleteOnExit If true, the image will be cleaned up by reaper on exit
+ * @param changes Additional changes to apply to the container before committing it to an image (e.g. ["ENV TEST=true"])
+ */
+export type ContainerCommitOptions = Omit<CommitOptions, "changes"> & { deleteOnExit?: boolean; changes?: string[] };
 
 export type HealthCheckStatus = "none" | "starting" | "unhealthy" | "healthy";
 
