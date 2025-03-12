@@ -10,6 +10,14 @@ describe("PubSubEmulatorContainer", { timeout: 240_000 }, () => {
     await pubsubEmulatorContainer.stop();
   });
 
+  it("should have default host-port flag", async () => {
+    const pubsubEmulatorContainer = new PubSubEmulatorContainer();
+
+    const flags = pubsubEmulatorContainer.expandFlags();
+
+    expect(flags.trim()).toEqual("--host-port=0.0.0.0:8085");
+  });
+
   async function checkPubSub(pubsubEmulatorContainer: StartedPubSubEmulatorContainer) {
     expect(pubsubEmulatorContainer).toBeDefined();
 

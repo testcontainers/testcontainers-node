@@ -2,7 +2,8 @@ import * as admin from "firebase-admin";
 import { FirestoreEmulatorContainer, StartedFirestoreEmulatorContainer } from "./firestore-emulator-container";
 
 describe("FirestoreEmulatorContainer", { timeout: 240_000 }, () => {
-  afterEach(async () => {
+  afterEach(async (ctx) => {
+    if (ctx.task.name === "should have default host-port flag") return;
     await admin.app().delete();
   });
 
@@ -28,6 +29,14 @@ describe("FirestoreEmulatorContainer", { timeout: 240_000 }, () => {
   });
 
   // }
+
+  it("should have default host-port flag", async (ctx) => {
+    const firestoreEmulatorContainer = new FirestoreEmulatorContainer();
+
+    const flags = firestoreEmulatorContainer.expandFlags();
+
+    expect(flags.trim()).toEqual("--host-port=0.0.0.0:8080");
+  });
 
   async function checkFirestore(firestoreEmulatorContainer: StartedFirestoreEmulatorContainer) {
     expect(firestoreEmulatorContainer).toBeDefined();

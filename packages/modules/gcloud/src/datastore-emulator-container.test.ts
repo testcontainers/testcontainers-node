@@ -25,6 +25,14 @@ describe("DatastoreEmulatorContainer", { timeout: 240_000 }, () => {
 
   // }
 
+  it("should have default host-port flag and database-mode flag", async (ctx) => {
+    const datastoreEmulatorContainer = new DatastoreEmulatorContainer();
+
+    const flags = datastoreEmulatorContainer.expandFlags();
+
+    expect(flags.trim()).toEqual("--host-port=0.0.0.0:8080 --database-mode=datastore-mode");
+  });
+
   async function checkDatastore(datastoreEmulatorContainer: StartedDatastoreEmulatorContainer) {
     expect(datastoreEmulatorContainer).toBeDefined();
     const testProjectId = "test-project";

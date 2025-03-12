@@ -1,14 +1,17 @@
-import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
+import { AbstractStartedContainer, StartedTestContainer, Wait } from "testcontainers";
+import { GenericGCloudEmulatorContainer } from "./generic-emulator-container";
 
 const EMULATOR_PORT = 8080;
-const CMD = `gcloud beta emulators firestore start --host-port 0.0.0.0:${EMULATOR_PORT} --database-mode=datastore-mode`;
+const CMD = `gcloud beta emulators firestore start`;
 const DEFAULT_IMAGE = "gcr.io/google.com/cloudsdktool/cloud-sdk";
 
-export class DatastoreEmulatorContainer extends GenericContainer {
+export class DatastoreEmulatorContainer extends GenericGCloudEmulatorContainer {
   constructor(image = DEFAULT_IMAGE) {
     super(image);
     this.withExposedPorts(EMULATOR_PORT)
-      .withCommand(["/bin/sh", "-c", CMD])
+      .withFlag("host-port", `0.0.0.0:${EMULATOR_PORT}`)
+      .withFlag("database-mode", `datastore-mode`)
+      .withCommand(["/bin/sh", "-c", `${CMD} ${this.expandFlags()}`])
       .withWaitStrategy(Wait.forLogMessage(RegExp(".*running.*"), 1))
       .withStartupTimeout(120_000);
   }
