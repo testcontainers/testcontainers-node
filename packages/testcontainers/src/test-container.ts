@@ -1,8 +1,8 @@
 import { Readable } from "stream";
-import { CommitOptions } from "./container-runtime";
 import { StartedNetwork } from "./network/network";
 import {
   BindMount,
+  ContainerCommitOptions,
   ContentToCopy,
   DirectoryToCopy,
   Environment,
@@ -65,7 +65,7 @@ export interface StopOptions {
 export interface StartedTestContainer {
   stop(options?: Partial<StopOptions>): Promise<StoppedTestContainer>;
   restart(options?: Partial<RestartOptions>): Promise<void>;
-  commit(options?: Partial<CommitOptions>): Promise<string>;
+  commit(options: ContainerCommitOptions): Promise<string>;
   getHost(): string;
   getHostname(): string;
   getFirstMappedPort(): number;

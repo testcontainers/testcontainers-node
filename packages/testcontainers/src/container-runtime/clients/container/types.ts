@@ -4,7 +4,14 @@ export type ExecOptions = { workingDir: string; user: string; env: Environment; 
 
 export type ExecResult = { output: string; stdout: string; stderr: string; exitCode: number };
 
-export type CommitOptions = { repo: string; tag: string; comment?: string; author?: string; pause?: boolean };
+export type CommitOptions = {
+  repo: string;
+  tag: string;
+  comment?: string;
+  author?: string;
+  pause?: boolean;
+  labels?: { [key: string]: string };
+};
 
 export const CONTAINER_STATUSES = ["created", "restarting", "running", "removing", "paused", "exited", "dead"] as const;
 

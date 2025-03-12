@@ -1,10 +1,14 @@
+import path from "path";
 import { RandomUuid } from "../common";
+import { LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
 import { deleteImageByName, getImageInfo } from "../utils/test-helper";
 import { GenericContainer } from "./generic-container";
 
 describe("GenericContainer commit", { timeout: 180_000 }, () => {
   const imageName = "cristianrgreco/testcontainer";
   const imageVersion = "1.1.14";
+
+  const fixtures = path.resolve(__dirname, "..", "..", "fixtures", "docker");
 
   it("should commit container changes to a new image", async () => {
     const testContent = "test content";
@@ -26,7 +30,7 @@ describe("GenericContainer commit", { timeout: 180_000 }, () => {
       comment: testComment,
     });
 
-    // Verify image author and comment are set
+    // Verify image metadata is set
     const imageInfo = await getImageInfo(imageId);
     expect(imageInfo.Author).toBe(testAuthor);
     expect(imageInfo.Comment).toBe(testComment);
@@ -41,6 +45,46 @@ describe("GenericContainer commit", { timeout: 180_000 }, () => {
     // Cleanup
     await container.stop();
     await newContainer.stop();
-    await deleteImageByName(`${imageName}:${newImageTag}`);
+  });
+
+  it("should add session ID label when deleteOnExit is true", async () => {
+    const newImageTag = `test-commit-${new RandomUuid().nextUuid()}`;
+    const container = await new GenericContainer(`${imageName}:${imageVersion}`).withExposedPorts(8080).start();
+
+    // Commit with deleteOnExit true (default)
+    const imageId = await container.commit({
+      repo: imageName,
+      tag: newImageTag,
+    });
+
+    // Verify session ID label is present
+    const imageInfo = await getImageInfo(imageId);
+    expect(imageInfo.Config.Labels[LABEL_TESTCONTAINERS_SESSION_ID]).toBeDefined();
+
+    await container.stop();
+  });
+
+  it("should not add session ID label when deleteOnExit is false", async () => {
+    const newImageTag = `test-commit-${new RandomUuid().nextUuid()}`;
+    const context = path.resolve(fixtures, "docker");
+    const container = await GenericContainer.fromDockerfile(context).build(`${imageName}:no-delete-on-exit`, {
+      deleteOnExit: false,
+    });
+
+    const startedContainer = await container.start();
+
+    // Commit with deleteOnExit false
+    const imageId = await startedContainer.commit({
+      repo: imageName,
+      tag: newImageTag,
+      deleteOnExit: false,
+    });
+
+    // Verify session ID label is not present
+    const imageInfo = await getImageInfo(imageId);
+    expect(imageInfo.Config.Labels[LABEL_TESTCONTAINERS_SESSION_ID]).toBeUndefined();
+
+    await startedContainer.stop();
+    await deleteImageByName(imageId);
   });
 });

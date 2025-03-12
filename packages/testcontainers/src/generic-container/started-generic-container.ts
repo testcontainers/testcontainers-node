@@ -3,11 +3,20 @@ import AsyncLock from "async-lock";
 import Dockerode, { ContainerInspectInfo } from "dockerode";
 import { Readable } from "stream";
 import { containerLog, log } from "../common";
-import { getContainerRuntimeClient } from "../container-runtime";
-import { CommitOptions } from "../container-runtime/clients/container/types";
+import { getContainerRuntimeClient, ImageName } from "../container-runtime";
+import { getReaper } from "../reaper/reaper";
 import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
-import { ContentToCopy, DirectoryToCopy, ExecOptions, ExecResult, FileToCopy, Labels } from "../types";
+import {
+  ContainerCommitOptions,
+  ContentToCopy,
+  DirectoryToCopy,
+  ExecOptions,
+  ExecResult,
+  FileToCopy,
+  Labels,
+} from "../types";
 import { BoundPorts } from "../utils/bound-ports";
+import { LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
 import { mapInspectResult } from "../utils/map-inspect-result";
 import { waitForContainer } from "../wait-strategies/wait-for-container";
 import { WaitStrategy } from "../wait-strategies/wait-strategy";
@@ -38,10 +47,18 @@ export class StartedGenericContainer implements StartedTestContainer {
     });
   }
 
-  public async commit(options?: CommitOptions): Promise<string> {
+  public async commit(options: ContainerCommitOptions): Promise<string> {
     log.info(`Committing container image...`, { containerId: this.container.id });
     const client = await getContainerRuntimeClient();
-    const imageId = await client.container.commit(this.container, options);
+    const { deleteOnExit = true, ...commitOpts } = options;
+    const image = await client.image.inspect(ImageName.fromString(this.inspectResult.Config.Image));
+    const labels = { ...image.Config.Labels, ...commitOpts.labels };
+    if (deleteOnExit && !labels[LABEL_TESTCONTAINERS_SESSION_ID]) {
+      const reaper = await getReaper(client);
+      labels[LABEL_TESTCONTAINERS_SESSION_ID] = reaper.sessionId;
+    }
+    const commitOptions = { ...commitOpts, labels };
+    const imageId = await client.container.commit(this.container, commitOptions);
     log.info(`Committed container image (Image ID: ${imageId}`, { containerId: this.container.id });
     return imageId;
   }

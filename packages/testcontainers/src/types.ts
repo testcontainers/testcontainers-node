@@ -1,4 +1,5 @@
 import { Readable } from "stream";
+import { CommitOptions } from "./container-runtime";
 
 export type InspectResult = {
   name: string;
@@ -84,6 +85,8 @@ export type BuildArgs = { [key in string]: string };
 export type ExecOptions = { workingDir: string; user: string; env: Environment };
 
 export type ExecResult = { output: string; stdout: string; stderr: string; exitCode: number };
+
+export type ContainerCommitOptions = CommitOptions & { deleteOnExit?: boolean };
 
 export type HealthCheckStatus = "none" | "starting" | "unhealthy" | "healthy";
 

@@ -12,6 +12,7 @@ import { PassThrough, Readable } from "stream";
 import { execLog, log, streamToString } from "../../../common";
 import { ContainerClient } from "./container-client";
 import { CommitOptions, ContainerStatus, ExecOptions, ExecResult } from "./types";
+import { createLabels, LABEL_TESTCONTAINERS_SESSION_ID } from "../../../utils/labels";
 
 export class DockerContainerClient implements ContainerClient {
   constructor(public readonly dockerode: Dockerode) {}
@@ -264,7 +265,7 @@ export class DockerContainerClient implements ContainerClient {
     }
   }
 
-  async commit(container: Container, opts?: CommitOptions): Promise<string> {
+  async commit(container: Container, opts: CommitOptions): Promise<string> {
     try {
       log.debug(`Committing container...`, { containerId: container.id });
       const { Id: imageId } = await container.commit(opts);
