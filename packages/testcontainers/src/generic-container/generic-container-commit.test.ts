@@ -1,5 +1,5 @@
 import { RandomUuid } from "../common";
-import { deleteImageByName, getImageInfo, getImageLabelsByName } from "../utils/test-helper";
+import { deleteImageByName, getImageInfo } from "../utils/test-helper";
 import { GenericContainer } from "./generic-container";
 
 describe("GenericContainer commit", { timeout: 180_000 }, () => {

@@ -4,6 +4,7 @@ import Dockerode, { ContainerInspectInfo } from "dockerode";
 import { Readable } from "stream";
 import { containerLog, log } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
+import { CommitOptions } from "../container-runtime/clients/container/types";
 import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
 import { ContentToCopy, DirectoryToCopy, ExecOptions, ExecResult, FileToCopy, Labels } from "../types";
 import { BoundPorts } from "../utils/bound-ports";
@@ -11,7 +12,6 @@ import { mapInspectResult } from "../utils/map-inspect-result";
 import { waitForContainer } from "../wait-strategies/wait-for-container";
 import { WaitStrategy } from "../wait-strategies/wait-strategy";
 import { StoppedGenericContainer } from "./stopped-generic-container";
-import { CommitOptions } from "../container-runtime/clients/container/types";
 
 export class StartedGenericContainer implements StartedTestContainer {
   private stoppedContainer?: StoppedTestContainer;

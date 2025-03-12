@@ -55,7 +55,7 @@ export const getImageInfo = async (imageName: string): Promise<ImageInspectInfo>
   const image = dockerode.getImage(imageName);
   const imageInfo = await image.inspect();
   return imageInfo;
-}
+};
 
 export const checkImageExists = async (imageName: string): Promise<boolean> => {
   const dockerode = (await getContainerRuntimeClient()).container.dockerode;
