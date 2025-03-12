@@ -364,7 +364,7 @@ const container = await new GenericContainer("alpine").start();
 // Do something with the container
 await container.exec(["sh", "-c", `echo 'hello world' > /hello-world.txt`]);
 // Commit the container to an image
-const newImage = await container.commit({ repository: "my-repo", tag: "my-tag" });
+const newImageId = await container.commit({ repo: "my-repo", tag: "my-tag" });
 ```
 
 ## Reusing a container

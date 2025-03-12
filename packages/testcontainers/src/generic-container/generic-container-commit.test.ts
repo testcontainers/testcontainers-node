@@ -13,16 +13,13 @@ describe("GenericContainer commit", { timeout: 180_000 }, () => {
     const testComment = "test-comment";
 
     // Start original container and make a change
-    const container = await new GenericContainer(`${imageName}:${imageVersion}`)
-      .withName(`container-${new RandomUuid().nextUuid()}`)
-      .withExposedPorts(8080)
-      .start();
+    const container = await new GenericContainer(`${imageName}:${imageVersion}`).withExposedPorts(8080).start();
 
     // Make a change to the container
     await container.exec(["sh", "-c", `echo '${testContent}' > /test-file.txt`]);
 
     // Commit the changes to a new image
-    await container.commit({
+    const imageId = await container.commit({
       repo: imageName,
       tag: newImageTag,
       author: testAuthor,
@@ -30,15 +27,12 @@ describe("GenericContainer commit", { timeout: 180_000 }, () => {
     });
 
     // Verify image author and comment are set
-    const imageInfo = await getImageInfo(`${imageName}:${newImageTag}`);
+    const imageInfo = await getImageInfo(imageId);
     expect(imageInfo.Author).toBe(testAuthor);
     expect(imageInfo.Comment).toBe(testComment);
 
     // Start a new container from the committed image
-    const newContainer = await new GenericContainer(`${imageName}:${newImageTag}`)
-      .withName(`container-${new RandomUuid().nextUuid()}`)
-      .withExposedPorts(8080)
-      .start();
+    const newContainer = await new GenericContainer(imageId).withExposedPorts(8080).start();
 
     // Verify the changes exist in the new container
     const result = await newContainer.exec(["cat", "/test-file.txt"]);

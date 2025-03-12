@@ -38,11 +38,12 @@ export class StartedGenericContainer implements StartedTestContainer {
     });
   }
 
-  public async commit(options?: Partial<CommitOptions>): Promise<void> {
+  public async commit(options?: CommitOptions): Promise<string> {
     log.info(`Committing container image...`, { containerId: this.container.id });
     const client = await getContainerRuntimeClient();
-    await client.container.commit(this.container, options);
-    log.info(`Committed container image`, { containerId: this.container.id });
+    const imageId = await client.container.commit(this.container, options);
+    log.info(`Committed container image (Image ID: ${imageId}`, { containerId: this.container.id });
+    return imageId;
   }
 
   protected containerIsStopped?(): Promise<void>;

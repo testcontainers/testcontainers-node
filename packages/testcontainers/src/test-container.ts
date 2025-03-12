@@ -1,4 +1,5 @@
 import { Readable } from "stream";
+import { CommitOptions } from "./container-runtime";
 import { StartedNetwork } from "./network/network";
 import {
   BindMount,
@@ -61,18 +62,10 @@ export interface StopOptions {
   removeVolumes: boolean;
 }
 
-export interface CommitOptions {
-  repo?: string;
-  tag?: string;
-  comment?: string;
-  author?: string;
-  pause?: boolean;
-}
-
 export interface StartedTestContainer {
   stop(options?: Partial<StopOptions>): Promise<StoppedTestContainer>;
   restart(options?: Partial<RestartOptions>): Promise<void>;
-  commit(options?: Partial<CommitOptions>): Promise<void>;
+  commit(options?: Partial<CommitOptions>): Promise<string>;
   getHost(): string;
   getHostname(): string;
   getFirstMappedPort(): number;

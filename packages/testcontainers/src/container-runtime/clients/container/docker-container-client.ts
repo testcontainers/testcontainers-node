@@ -264,11 +264,12 @@ export class DockerContainerClient implements ContainerClient {
     }
   }
 
-  async commit(container: Container, opts?: CommitOptions): Promise<void> {
+  async commit(container: Container, opts?: CommitOptions): Promise<string> {
     try {
       log.debug(`Committing container...`, { containerId: container.id });
-      await container.commit(opts);
-      log.debug(`Committed container image`, { containerId: container.id });
+      const { Id: imageId } = await container.commit(opts);
+      log.debug(`Committed container to image (Image ID: ${imageId})`, { containerId: container.id });
+      return imageId;
     } catch (err) {
       log.error(`Failed to commit container: ${err}`, { containerId: container.id });
       throw err;
