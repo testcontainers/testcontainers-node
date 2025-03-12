@@ -1,5 +1,11 @@
 import { Readable } from "stream";
-import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
+import {
+  CommitOptions,
+  RestartOptions,
+  StartedTestContainer,
+  StopOptions,
+  StoppedTestContainer,
+} from "../test-container";
 import { ContentToCopy, DirectoryToCopy, ExecOptions, ExecResult, FileToCopy, Labels } from "../types";
 
 export class AbstractStartedContainer implements StartedTestContainer {
@@ -25,6 +31,10 @@ export class AbstractStartedContainer implements StartedTestContainer {
 
   public async restart(options?: Partial<RestartOptions>): Promise<void> {
     return this.startedTestContainer.restart(options);
+  }
+
+  public async commit(options?: Partial<CommitOptions>): Promise<void> {
+    return this.startedTestContainer.commit(options);
   }
 
   public getHost(): string {

@@ -11,6 +11,7 @@ import { mapInspectResult } from "../utils/map-inspect-result";
 import { waitForContainer } from "../wait-strategies/wait-for-container";
 import { WaitStrategy } from "../wait-strategies/wait-strategy";
 import { StoppedGenericContainer } from "./stopped-generic-container";
+import { CommitOptions } from "../container-runtime/clients/container/types";
 
 export class StartedGenericContainer implements StartedTestContainer {
   private stoppedContainer?: StoppedTestContainer;
@@ -35,6 +36,13 @@ export class StartedGenericContainer implements StartedTestContainer {
       this.stoppedContainer = await this.stopContainer(options);
       return this.stoppedContainer;
     });
+  }
+
+  public async commit(options?: Partial<CommitOptions>): Promise<void> {
+    log.info(`Committing container image...`, { containerId: this.container.id });
+    const client = await getContainerRuntimeClient();
+    await client.container.commit(this.container, options);
+    log.info(`Committed container image`, { containerId: this.container.id });
   }
 
   protected containerIsStopped?(): Promise<void>;

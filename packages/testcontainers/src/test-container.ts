@@ -43,6 +43,7 @@ export interface TestContainer {
   withCopyFilesToContainer(filesToCopy: FileToCopy[]): this;
   withCopyDirectoriesToContainer(directoriesToCopy: DirectoryToCopy[]): this;
   withCopyContentToContainer(contentsToCopy: ContentToCopy[]): this;
+
   withWorkingDir(workingDir: string): this;
   withResourcesQuota(resourcesQuota: ResourcesQuota): this;
   withSharedMemorySize(bytes: number): this;
@@ -60,9 +61,18 @@ export interface StopOptions {
   removeVolumes: boolean;
 }
 
+export interface CommitOptions {
+  repo?: string;
+  tag?: string;
+  comment?: string;
+  author?: string;
+  pause?: boolean;
+}
+
 export interface StartedTestContainer {
   stop(options?: Partial<StopOptions>): Promise<StoppedTestContainer>;
   restart(options?: Partial<RestartOptions>): Promise<void>;
+  commit(options?: Partial<CommitOptions>): Promise<void>;
   getHost(): string;
   getHostname(): string;
   getFirstMappedPort(): number;

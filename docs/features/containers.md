@@ -357,6 +357,16 @@ const container = await new GenericContainer("alpine").start();
 await container.restart();
 ```
 
+## Committing a container to an image
+
+```javascript
+const container = await new GenericContainer("alpine").start();
+// Do something with the container
+await container.exec(["sh", "-c", `echo 'hello world' > /hello-world.txt`]);
+// Commit the container to an image
+const newImage = await container.commit({ repository: "my-repo", tag: "my-tag" });
+```
+
 ## Reusing a container
 
 Enabling container re-use means that Testcontainers will not start a new container if a Testcontainers managed container with the same configuration is already running.
