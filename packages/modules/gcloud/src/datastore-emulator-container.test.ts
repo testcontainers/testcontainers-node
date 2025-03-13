@@ -1,4 +1,5 @@
 import { Datastore } from "@google-cloud/datastore";
+import { Wait } from "testcontainers";
 import { DatastoreEmulatorContainer, StartedDatastoreEmulatorContainer } from "./datastore-emulator-container";
 
 describe("DatastoreEmulatorContainer", { timeout: 240_000 }, () => {
@@ -25,12 +26,33 @@ describe("DatastoreEmulatorContainer", { timeout: 240_000 }, () => {
 
   // }
 
-  it("should have default host-port flag and database-mode flag", async (ctx) => {
+  it("should have default host-port flag and database-mode flag", async () => {
     const datastoreEmulatorContainer = new DatastoreEmulatorContainer();
 
-    const flags = datastoreEmulatorContainer.expandFlags();
+    const flags = datastoreEmulatorContainer["flagsManager"].expandFlags();
 
     expect(flags.trim()).toEqual("--host-port=0.0.0.0:8080 --database-mode=datastore-mode");
+  });
+
+  it("should be able to add flags after creating container", async () => {
+    const datastoreEmulatorContainer = new DatastoreEmulatorContainer();
+    // clear all default flags
+    datastoreEmulatorContainer["flagsManager"].clearFlags();
+
+    // add some new flags
+    const flags = datastoreEmulatorContainer
+      .withFlag("host-port", "0.0.0.0:8080")
+      .withFlag("database-mode", "datastore-mode")
+      ["flagsManager"].expandFlags();
+
+    // check new added flags exists
+    expect(flags.trim()).toEqual("--host-port=0.0.0.0:8080 --database-mode=datastore-mode");
+
+    // check that container start command uses latest flags string
+    const startedContainer = await datastoreEmulatorContainer
+      .withWaitStrategy(Wait.forLogMessage(/.* start --host=0.0.0.0 --port=8080 --database-mode=datastore-mode/, 1))
+      .start();
+    await startedContainer.stop();
   });
 
   async function checkDatastore(datastoreEmulatorContainer: StartedDatastoreEmulatorContainer) {
