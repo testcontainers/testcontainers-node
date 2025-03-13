@@ -2,7 +2,7 @@ import { Readable } from "stream";
 import { StartedNetwork } from "./network/network";
 import {
   BindMount,
-  ContainerCommitOptions,
+  CommitOptions,
   ContentToCopy,
   DirectoryToCopy,
   Environment,
@@ -65,7 +65,7 @@ export interface StopOptions {
 export interface StartedTestContainer {
   stop(options?: Partial<StopOptions>): Promise<StoppedTestContainer>;
   restart(options?: Partial<RestartOptions>): Promise<void>;
-  commit(options: ContainerCommitOptions): Promise<string>;
+  commit(options: CommitOptions): Promise<string>;
   getHost(): string;
   getHostname(): string;
   getFirstMappedPort(): number;

@@ -6,15 +6,7 @@ import { containerLog, log } from "../common";
 import { ContainerRuntimeClient, getContainerRuntimeClient } from "../container-runtime";
 import { getReaper } from "../reaper/reaper";
 import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
-import {
-  ContainerCommitOptions,
-  ContentToCopy,
-  DirectoryToCopy,
-  ExecOptions,
-  ExecResult,
-  FileToCopy,
-  Labels,
-} from "../types";
+import { CommitOptions, ContentToCopy, DirectoryToCopy, ExecOptions, ExecResult, FileToCopy, Labels } from "../types";
 import { BoundPorts } from "../utils/bound-ports";
 import { LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
 import { mapInspectResult } from "../utils/map-inspect-result";
@@ -68,16 +60,14 @@ export class StartedGenericContainer implements StartedTestContainer {
       // deleteOnExit is false, we need to remove the session ID label.
       changes.push(`LABEL ${LABEL_TESTCONTAINERS_SESSION_ID}=`);
     }
-    return changes.filter(Boolean).join("\n");
+    return changes.join("\n");
   }
 
-  public async commit(options: ContainerCommitOptions): Promise<string> {
-    log.info(`Committing container image...`, { containerId: this.container.id });
+  public async commit(options: CommitOptions): Promise<string> {
     const client = await getContainerRuntimeClient();
     const { deleteOnExit = true, changes, ...commitOpts } = options;
     const changeCommands = await this.getContainerCommitChangeCommands({ deleteOnExit, changes, client });
     const imageId = await client.container.commit(this.container, { ...commitOpts, changes: changeCommands });
-    log.info(`Committed container image (Image ID: ${imageId}`, { containerId: this.container.id });
     return imageId;
   }
 

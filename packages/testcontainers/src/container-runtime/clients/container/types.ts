@@ -4,7 +4,7 @@ export type ExecOptions = { workingDir: string; user: string; env: Environment; 
 
 export type ExecResult = { output: string; stdout: string; stderr: string; exitCode: number };
 
-export type CommitOptions = {
+export type ContainerCommitOptions = {
   repo: string;
   tag: string;
   comment?: string;

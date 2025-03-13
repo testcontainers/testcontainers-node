@@ -67,9 +67,9 @@ export class DockerImageClient implements ImageClient {
 
   async inspect(imageName: ImageName): Promise<ImageInspectInfo> {
     try {
-      log.debug(`Inspecting image "${imageName.string}"...`);
+      log.debug(`Inspecting image: "${imageName.string}"...`);
       const imageInfo = await this.dockerode.getImage(imageName.string).inspect();
-      log.debug(`Retrieved image info "${imageName.string}"`);
+      log.debug(`Inspected image: "${imageName.string}"`);
       return imageInfo;
     } catch (err) {
       log.debug(`Failed to inspect image "${imageName.string}"`);

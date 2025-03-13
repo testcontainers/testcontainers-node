@@ -1,5 +1,7 @@
 import { expect } from "vitest";
 import { RandomUuid } from "../common";
+import { getContainerRuntimeClient } from "../container-runtime";
+import { getReaper } from "../reaper/reaper";
 import { LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
 import { deleteImageByName, getImageInfo } from "../utils/test-helper";
 import { GenericContainer } from "./generic-container";
@@ -57,7 +59,9 @@ describe("GenericContainer commit", { timeout: 180_000 }, () => {
 
     // Verify session ID label is present
     const imageInfo = await getImageInfo(imageId);
-    expect(imageInfo.Config.Labels[LABEL_TESTCONTAINERS_SESSION_ID]).toBeDefined();
+    const client = await getContainerRuntimeClient();
+    const reaper = await getReaper(client);
+    expect(imageInfo.Config.Labels[LABEL_TESTCONTAINERS_SESSION_ID]).toBe(reaper.sessionId);
 
     await container.stop();
   });

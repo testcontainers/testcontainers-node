@@ -1,5 +1,5 @@
 import { Readable } from "stream";
-import { CommitOptions } from "./container-runtime";
+import { ContainerCommitOptions } from "./container-runtime";
 
 export type InspectResult = {
   name: string;
@@ -91,7 +91,7 @@ export type ExecResult = { output: string; stdout: string; stderr: string; exitC
  * @param deleteOnExit If true, the image will be cleaned up by reaper on exit
  * @param changes Additional changes to apply to the container before committing it to an image (e.g. ["ENV TEST=true"])
  */
-export type ContainerCommitOptions = Omit<CommitOptions, "changes"> & { deleteOnExit?: boolean; changes?: string[] };
+export type CommitOptions = Omit<ContainerCommitOptions, "changes"> & { deleteOnExit?: boolean; changes?: string[] };
 
 export type HealthCheckStatus = "none" | "starting" | "unhealthy" | "healthy";
 
