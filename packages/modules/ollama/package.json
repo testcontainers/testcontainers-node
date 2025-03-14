@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/ollama",
-  "version": "10.19.0",
+  "version": "10.20.0",
   "license": "MIT",
   "keywords": [
     "ollama",
@@ -29,6 +29,6 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "dependencies": {
-    "testcontainers": "^10.19.0"
+    "testcontainers": "^10.20.0"
   }
 }
