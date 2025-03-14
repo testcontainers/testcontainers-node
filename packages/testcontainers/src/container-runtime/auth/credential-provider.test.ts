@@ -82,7 +82,6 @@ describe("CredentialProvider", () => {
   });
 
   it("should return undefined when provider name not provided", async () => {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const credentialProvider = new TestCredentialProvider("name", undefined!);
 
     expect(await credentialProvider.getAuthConfig("registry", containerRuntimeConfig)).toBeUndefined();
@@ -172,7 +171,10 @@ function mockSpawnReturns(exitCode: number, stdout: string) {
 }
 
 class TestCredentialProvider extends CredentialProvider {
-  constructor(private readonly name: string, private readonly credentialProviderName: string) {
+  constructor(
+    private readonly name: string,
+    private readonly credentialProviderName: string
+  ) {
     super();
   }
 

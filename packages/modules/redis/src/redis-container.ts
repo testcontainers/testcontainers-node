@@ -74,7 +74,10 @@ export class RedisContainer extends GenericContainer {
 }
 
 export class StartedRedisContainer extends AbstractStartedContainer {
-  constructor(startedTestContainer: StartedTestContainer, private readonly password?: string) {
+  constructor(
+    startedTestContainer: StartedTestContainer,
+    private readonly password?: string
+  ) {
     super(startedTestContainer);
   }
 

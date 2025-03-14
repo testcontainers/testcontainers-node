@@ -58,7 +58,10 @@ export class StartedNeo4jContainer extends AbstractStartedContainer {
   private readonly boltPort: number;
   private readonly httpPort: number;
 
-  constructor(startedTestContainer: StartedTestContainer, private readonly password: string) {
+  constructor(
+    startedTestContainer: StartedTestContainer,
+    private readonly password: string
+  ) {
     super(startedTestContainer);
     this.boltPort = this.startedTestContainer.getMappedPort(BOLT_PORT);
     this.httpPort = this.startedTestContainer.getMappedPort(HTTP_PORT);

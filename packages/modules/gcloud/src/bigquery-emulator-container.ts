@@ -26,7 +26,10 @@ export class BigQueryEmulatorContainer extends GenericContainer {
 }
 
 export class StartedBigQueryEmulatorContainer extends AbstractStartedContainer {
-  constructor(startedTestContainer: StartedTestContainer, private readonly projectId: string) {
+  constructor(
+    startedTestContainer: StartedTestContainer,
+    private readonly projectId: string
+  ) {
     super(startedTestContainer);
   }
 

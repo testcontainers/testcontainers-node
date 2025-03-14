@@ -8,7 +8,10 @@ import { AbstractWaitStrategy } from "./wait-strategy";
 export type Log = string;
 
 export class LogWaitStrategy extends AbstractWaitStrategy {
-  constructor(private readonly message: Log | RegExp, private readonly times: number) {
+  constructor(
+    private readonly message: Log | RegExp,
+    private readonly times: number
+  ) {
     super();
   }
 

@@ -44,7 +44,10 @@ async function getComposeInfo(): Promise<ComposeInfo | undefined> {
 }
 
 class ComposeV1Client implements ComposeClient {
-  constructor(public readonly info: ComposeInfo, private readonly environment: NodeJS.ProcessEnv) {}
+  constructor(
+    public readonly info: ComposeInfo,
+    private readonly environment: NodeJS.ProcessEnv
+  ) {}
 
   async up(options: ComposeOptions, services: Array<string> | undefined): Promise<void> {
     try {
@@ -114,7 +117,10 @@ class ComposeV1Client implements ComposeClient {
 }
 
 class ComposeV2Client implements ComposeClient {
-  constructor(public readonly info: ComposeInfo, private readonly environment: NodeJS.ProcessEnv) {}
+  constructor(
+    public readonly info: ComposeInfo,
+    private readonly environment: NodeJS.ProcessEnv
+  ) {}
 
   async up(options: ComposeOptions, services: Array<string> | undefined): Promise<void> {
     try {

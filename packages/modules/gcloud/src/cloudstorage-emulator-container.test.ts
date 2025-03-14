@@ -9,7 +9,6 @@ async function getRequestBodyFromReadableStream(stream: ReadableStream<Uint8Arra
   let fullString = "";
 
   try {
-    // eslint-disable-next-line no-constant-condition
     while (true) {
       const { value, done } = await reader.read();
 
