@@ -65,6 +65,7 @@ describe("HealthCheckWaitStrategy", { timeout: 180_000 }, () => {
         .withName(containerName)
         .withExposedPorts(8080)
         .withWaitStrategy(Wait.forHealthCheck())
+        .withHealthCheck({ test: ["CMD-SHELL", "sleep 10"], timeout: 10_000 })
         .withStartupTimeout(0)
         .start()
     ).rejects.toThrowError("Health check not healthy after 0ms");
