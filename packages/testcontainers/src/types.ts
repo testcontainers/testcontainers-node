@@ -1,5 +1,5 @@
 import { Readable } from "stream";
-import { ContainerCommitOptions } from "./container-runtime";
+import { ContainerCommitOptions } from "./container-runtime/clients/container/types";
 
 export type InspectResult = {
   name: string;
