@@ -1,6 +1,6 @@
 import { Readable } from "stream";
 import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
-import { ContentToCopy, DirectoryToCopy, ExecOptions, ExecResult, FileToCopy, Labels } from "../types";
+import { CommitOptions, ContentToCopy, DirectoryToCopy, ExecOptions, ExecResult, FileToCopy, Labels } from "../types";
 
 export class AbstractStartedContainer implements StartedTestContainer {
   constructor(protected readonly startedTestContainer: StartedTestContainer) {}
@@ -25,6 +25,10 @@ export class AbstractStartedContainer implements StartedTestContainer {
 
   public async restart(options?: Partial<RestartOptions>): Promise<void> {
     return this.startedTestContainer.restart(options);
+  }
+
+  public async commit(options: CommitOptions): Promise<string> {
+    return this.startedTestContainer.commit(options);
   }
 
   public getHost(): string {

@@ -18,7 +18,7 @@ export {
   TestContainer,
 } from "./test-container";
 export { TestContainers } from "./test-containers";
-export { Content, ExecOptions, ExecResult, InspectResult } from "./types";
+export { CommitOptions, Content, ExecOptions, ExecResult, InspectResult } from "./types";
 export { BoundPorts } from "./utils/bound-ports";
 export { LABEL_TESTCONTAINERS_SESSION_ID } from "./utils/labels";
 export { getContainerPort, hasHostBinding, PortWithBinding, PortWithOptionalBinding } from "./utils/port";

@@ -3,10 +3,12 @@ import AsyncLock from "async-lock";
 import Dockerode, { ContainerInspectInfo } from "dockerode";
 import { Readable } from "stream";
 import { containerLog, log } from "../common";
-import { getContainerRuntimeClient } from "../container-runtime";
+import { ContainerRuntimeClient, getContainerRuntimeClient } from "../container-runtime";
+import { getReaper } from "../reaper/reaper";
 import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
-import { ContentToCopy, DirectoryToCopy, ExecOptions, ExecResult, FileToCopy, Labels } from "../types";
+import { CommitOptions, ContentToCopy, DirectoryToCopy, ExecOptions, ExecResult, FileToCopy, Labels } from "../types";
 import { BoundPorts } from "../utils/bound-ports";
+import { LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
 import { mapInspectResult } from "../utils/map-inspect-result";
 import { waitForContainer } from "../wait-strategies/wait-for-container";
 import { WaitStrategy } from "../wait-strategies/wait-strategy";
@@ -35,6 +37,38 @@ export class StartedGenericContainer implements StartedTestContainer {
       this.stoppedContainer = await this.stopContainer(options);
       return this.stoppedContainer;
     });
+  }
+
+  /**
+   * Construct the command(s) to apply changes to the container before committing it to an image.
+   */
+  private async getContainerCommitChangeCommands(options: {
+    deleteOnExit: boolean;
+    changes?: string[];
+    client: ContainerRuntimeClient;
+  }): Promise<string> {
+    const { deleteOnExit, client } = options;
+    const changes = options.changes || [];
+    if (deleteOnExit) {
+      let sessionId = this.getLabels()[LABEL_TESTCONTAINERS_SESSION_ID];
+      if (!sessionId) {
+        sessionId = await getReaper(client).then((reaper) => reaper.sessionId);
+      }
+      changes.push(`LABEL ${LABEL_TESTCONTAINERS_SESSION_ID}=${sessionId}`);
+    } else if (!deleteOnExit && this.getLabels()[LABEL_TESTCONTAINERS_SESSION_ID]) {
+      // By default, commit will save the existing labels (including the session ID) to the new image.  If
+      // deleteOnExit is false, we need to remove the session ID label.
+      changes.push(`LABEL ${LABEL_TESTCONTAINERS_SESSION_ID}=`);
+    }
+    return changes.join("\n");
+  }
+
+  public async commit(options: CommitOptions): Promise<string> {
+    const client = await getContainerRuntimeClient();
+    const { deleteOnExit = true, changes, ...commitOpts } = options;
+    const changeCommands = await this.getContainerCommitChangeCommands({ deleteOnExit, changes, client });
+    const imageId = await client.container.commit(this.container, { ...commitOpts, changes: changeCommands });
+    return imageId;
   }
 
   protected containerIsStopped?(): Promise<void>;

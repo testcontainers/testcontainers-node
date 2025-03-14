@@ -2,6 +2,7 @@ import { Readable } from "stream";
 import { StartedNetwork } from "./network/network";
 import {
   BindMount,
+  CommitOptions,
   ContentToCopy,
   DirectoryToCopy,
   Environment,
@@ -43,6 +44,7 @@ export interface TestContainer {
   withCopyFilesToContainer(filesToCopy: FileToCopy[]): this;
   withCopyDirectoriesToContainer(directoriesToCopy: DirectoryToCopy[]): this;
   withCopyContentToContainer(contentsToCopy: ContentToCopy[]): this;
+
   withWorkingDir(workingDir: string): this;
   withResourcesQuota(resourcesQuota: ResourcesQuota): this;
   withSharedMemorySize(bytes: number): this;
@@ -63,6 +65,7 @@ export interface StopOptions {
 export interface StartedTestContainer {
   stop(options?: Partial<StopOptions>): Promise<StoppedTestContainer>;
   restart(options?: Partial<RestartOptions>): Promise<void>;
+  commit(options: CommitOptions): Promise<string>;
   getHost(): string;
   getHostname(): string;
   getFirstMappedPort(): number;

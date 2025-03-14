@@ -357,6 +357,29 @@ const container = await new GenericContainer("alpine").start();
 await container.restart();
 ```
 
+## Committing a container to an image
+
+```javascript
+const container = await new GenericContainer("alpine").start();
+// Do something with the container
+await container.exec(["sh", "-c", `echo 'hello world' > /hello-world.txt`]);
+// Commit the container to an image
+const newImageId = await container.commit({ repo: "my-repo", tag: "my-tag" });
+// Use this image in a new container
+const containerFromCommit = await new GenericContainer(newImageId).start();
+```
+
+By default, the image inherits the behavior of being marked for cleanup on exit. You can override this behavior using
+the `deleteOnExit` option:
+
+```javascript
+const container = await new GenericContainer("alpine").start();
+// Do something with the container
+await container.exec(["sh", "-c", `echo 'hello world' > /hello-world.txt`]);
+// Commit the container to an image; committed image will not be cleaned up on exit
+const newImageId = await container.commit({ repo: "my-repo", tag: "my-tag", deleteOnExit: false });
+```
+
 ## Reusing a container
 
 Enabling container re-use means that Testcontainers will not start a new container if a Testcontainers managed container with the same configuration is already running.
