@@ -1,6 +1,7 @@
 import { Readable } from "stream";
 import { StartedNetwork } from "./network/network";
 import {
+  ArchiveToCopy,
   BindMount,
   CommitOptions,
   ContentToCopy,
@@ -44,6 +45,7 @@ export interface TestContainer {
   withCopyFilesToContainer(filesToCopy: FileToCopy[]): this;
   withCopyDirectoriesToContainer(directoriesToCopy: DirectoryToCopy[]): this;
   withCopyContentToContainer(contentsToCopy: ContentToCopy[]): this;
+  withCopyArchivesToContainer(archivesToCopy: ArchiveToCopy[]): this;
 
   withWorkingDir(workingDir: string): this;
   withResourcesQuota(resourcesQuota: ResourcesQuota): this;
@@ -77,6 +79,7 @@ export interface StartedTestContainer {
   getNetworkId(networkName: string): string;
   getIpAddress(networkName: string): string;
   copyArchiveFromContainer(path: string): Promise<NodeJS.ReadableStream>;
+  copyArchiveToContainer(tar: Readable, target?: string): Promise<void>;
   copyDirectoriesToContainer(directoriesToCopy: DirectoryToCopy[]): Promise<void>;
   copyFilesToContainer(filesToCopy: FileToCopy[]): Promise<void>;
   copyContentToContainer(contentsToCopy: ContentToCopy[]): Promise<void>;
