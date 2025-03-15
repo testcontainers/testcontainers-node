@@ -75,7 +75,7 @@ async function createNewReaper(sessionId: string, remoteSocketPath: string): Pro
     )
     .withBindMounts([{ source: remoteSocketPath, target: "/var/run/docker.sock" }])
     .withLabels({ [LABEL_TESTCONTAINERS_SESSION_ID]: sessionId })
-    .withWaitStrategy(Wait.forLogMessage(/.+ Started!/));
+    .withWaitStrategy(Wait.forLogMessage(/.*Started.*/));
 
   if (process.env.TESTCONTAINERS_RYUK_PRIVILEGED === "true") {
     container.withPrivilegedMode();
