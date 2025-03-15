@@ -42,7 +42,10 @@ export class K3sContainer extends GenericContainer {
 }
 
 export class StartedK3sContainer extends AbstractStartedContainer {
-  constructor(startedTestContainer: StartedTestContainer, private readonly rawKubeConfig: string) {
+  constructor(
+    startedTestContainer: StartedTestContainer,
+    private readonly rawKubeConfig: string
+  ) {
     super(startedTestContainer);
   }
 

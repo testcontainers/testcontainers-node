@@ -133,7 +133,10 @@ async function connectToReaperSocket(host: string, port: number, containerId: st
 }
 
 class RyukReaper implements Reaper {
-  constructor(public readonly sessionId: string, private readonly socket: Socket) {}
+  constructor(
+    public readonly sessionId: string,
+    private readonly socket: Socket
+  ) {}
 
   addComposeProject(projectName: string): void {
     this.socket.write(`label=com.docker.compose.project=${projectName}\r\n`);

@@ -32,7 +32,10 @@ export class PubSubEmulatorContainer extends GenericContainer {
 }
 
 export class StartedPubSubEmulatorContainer extends AbstractStartedContainer {
-  constructor(startedTestContainer: StartedTestContainer, private readonly projectId: string) {
+  constructor(
+    startedTestContainer: StartedTestContainer,
+    private readonly projectId: string
+  ) {
     super(startedTestContainer);
   }
 

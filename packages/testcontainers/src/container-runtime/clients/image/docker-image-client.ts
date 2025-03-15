@@ -14,7 +14,10 @@ export class DockerImageClient implements ImageClient {
   private readonly existingImages = new Set<string>();
   private readonly imageExistsLock = new AsyncLock();
 
-  constructor(protected readonly dockerode: Dockerode, protected readonly indexServerAddress: string) {}
+  constructor(
+    protected readonly dockerode: Dockerode,
+    protected readonly indexServerAddress: string
+  ) {}
 
   async build(context: string, opts: ImageBuildOptions): Promise<void> {
     try {

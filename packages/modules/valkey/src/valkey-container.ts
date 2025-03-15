@@ -73,7 +73,10 @@ export class ValkeyContainer extends GenericContainer {
 }
 
 export class StartedValkeyContainer extends AbstractStartedContainer {
-  constructor(startedTestContainer: StartedTestContainer, private readonly password?: string) {
+  constructor(
+    startedTestContainer: StartedTestContainer,
+    private readonly password?: string
+  ) {
     super(startedTestContainer);
   }
 
