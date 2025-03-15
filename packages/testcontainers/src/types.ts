@@ -39,6 +39,11 @@ export type ContentToCopy = {
   mode?: number;
 };
 
+export type ArchiveToCopy = {
+  tar: Readable;
+  target: string;
+};
+
 export type TmpFs = { [dir in string]: string };
 
 export type Ulimits = { [name: string]: { hard: number | undefined; soft: number | undefined } };

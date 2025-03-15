@@ -200,6 +200,13 @@ export class StartedGenericContainer implements StartedTestContainer {
     log.debug(`Copied content to container`, { containerId: this.container.id });
   }
 
+  public async copyArchiveToContainer(tar: Readable, target = "/"): Promise<void> {
+    log.debug(`Copying archive to container...`, { containerId: this.container.id });
+    const client = await getContainerRuntimeClient();
+    await client.container.putArchive(this.container, tar, target);
+    log.debug(`Copied archive to container`, { containerId: this.container.id });
+  }
+
   public async copyArchiveFromContainer(path: string): Promise<NodeJS.ReadableStream> {
     log.debug(`Copying archive "${path}" from container...`, { containerId: this.container.id });
     const client = await getContainerRuntimeClient();
