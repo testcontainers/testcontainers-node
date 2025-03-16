@@ -47,7 +47,7 @@ export class AzureCosmosDbEmulatorContainer extends GenericContainer {
   }
 
   /**
-   * The mapped port has to be passed to CosmosDB as an environment variable for HTTPS to work.
+   * The mapped port has to be passed to CosmosDB as an environment variable.
    * Since the mapped port would only be known after container creation, we need to find an available port ourselves
    * before starting the container.
    * @private
