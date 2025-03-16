@@ -30,7 +30,9 @@
     "prepack": "shx cp ../../../README.md . && shx cp ../../../LICENSE .",
     "build": "tsc --project tsconfig.build.json"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@azure/cosmos": "^4.2.0"
+  },
   "dependencies": {
     "testcontainers": "^10.20.0"
   }
