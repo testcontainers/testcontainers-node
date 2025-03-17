@@ -133,6 +133,10 @@ const container = await new GenericContainer("alpine")
     content: "hello world",
     target: "/remote/file2.txt"
   }])
+  .withCopyArchivesToContainer([{
+    tar: nodeReadable,
+    target: "/some/nested/remotedir"
+  }])
   .start();
 ```
 
@@ -153,6 +157,7 @@ container.copyContentToContainer([{
   content: "hello world",
   target: "/remote/file2.txt"
 }])
+container.copyArchiveToContainer(nodeReadable, "/some/nested/remotedir");
 ```
 
 An optional `mode` can be specified in octal for setting file permissions:

@@ -83,6 +83,10 @@ export class AbstractStartedContainer implements StartedTestContainer {
     return this.startedTestContainer.copyContentToContainer(contentsToCopy);
   }
 
+  public copyArchiveToContainer(tar: Readable, target = "/"): Promise<void> {
+    return this.startedTestContainer.copyArchiveToContainer(tar, target);
+  }
+
   public copyArchiveFromContainer(path: string): Promise<NodeJS.ReadableStream> {
     return this.startedTestContainer.copyArchiveFromContainer(path);
   }

@@ -10,6 +10,7 @@ import { PortForwarderInstance, SSHD_IMAGE } from "../port-forwarder/port-forwar
 import { getReaper, REAPER_IMAGE } from "../reaper/reaper";
 import { StartedTestContainer, TestContainer } from "../test-container";
 import {
+  ArchiveToCopy,
   BindMount,
   ContentToCopy,
   DirectoryToCopy,
@@ -57,6 +58,7 @@ export class GenericContainer implements TestContainer {
   protected filesToCopy: FileToCopy[] = [];
   protected directoriesToCopy: DirectoryToCopy[] = [];
   protected contentsToCopy: ContentToCopy[] = [];
+  protected archivesToCopy: ArchiveToCopy[] = [];
   protected healthCheck?: HealthCheck;
 
   constructor(image: string) {
@@ -178,6 +180,10 @@ export class GenericContainer implements TestContainer {
       const archive = this.createArchiveToCopyToContainer();
       archive.finalize();
       await client.container.putArchive(container, archive, "/");
+    }
+
+    for (const archive of this.archivesToCopy) {
+      await client.container.putArchive(container, archive.tar, archive.target);
     }
 
     log.info(`Starting container for image "${this.createOpts.Image}"...`, { containerId: container.id });
@@ -455,6 +461,11 @@ export class GenericContainer implements TestContainer {
 
   public withCopyContentToContainer(contentsToCopy: ContentToCopy[]): this {
     this.contentsToCopy = [...this.contentsToCopy, ...contentsToCopy];
+    return this;
+  }
+
+  public withCopyArchivesToContainer(archivesToCopy: ArchiveToCopy[]): this {
+    this.archivesToCopy = [...this.archivesToCopy, ...archivesToCopy];
     return this;
   }
 
