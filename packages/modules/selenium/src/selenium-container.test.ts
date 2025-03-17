@@ -1,22 +1,10 @@
-import { SELENIUM_VIDEO_IMAGE, SeleniumContainer } from "./selenium-container";
-import { Browser, Builder } from "selenium-webdriver";
-import tmp from "tmp";
 import path from "path";
-import { GenericContainer, StartedTestContainer } from "testcontainers";
+import { Browser, Builder } from "selenium-webdriver";
+import { GenericContainer } from "testcontainers";
+import tmp from "tmp";
+import { SeleniumContainer, SELENIUM_VIDEO_IMAGE } from "./selenium-container";
 
-describe("SeleniumContainer", () => {
-  jest.setTimeout(180_000);
-
-  let ffmpegContainer: StartedTestContainer;
-
-  beforeAll(async () => {
-    ffmpegContainer = await new GenericContainer(SELENIUM_VIDEO_IMAGE).withCommand(["sleep", "infinity"]).start();
-  });
-
-  afterAll(async () => {
-    await ffmpegContainer.stop();
-  });
-
+describe("SeleniumContainer", { timeout: 180_000 }, () => {
   const browsers = [
     ["CHROME", process.arch === "arm64" ? `seleniarm/standalone-chromium:112.0` : `selenium/standalone-chrome:112.0`],
     ["FIREFOX", process.arch === "arm64" ? `seleniarm/standalone-firefox:112.0` : `selenium/standalone-firefox:112.0`],
@@ -45,9 +33,13 @@ describe("SeleniumContainer", () => {
       const videoFileName = path.basename(videoFilePath);
       await stoppedContainer.saveRecording(videoFilePath);
 
+      const ffmpegContainer = await new GenericContainer(SELENIUM_VIDEO_IMAGE)
+        .withCommand(["sleep", "infinity"])
+        .start();
       await ffmpegContainer.copyFilesToContainer([{ source: videoFilePath, target: `/tmp/${videoFileName}` }]);
       const { exitCode } = await ffmpegContainer.exec(["ffprobe", `/tmp/${videoFileName}`]);
       expect(exitCode).toBe(0);
+      await ffmpegContainer.stop();
     });
   });
 });

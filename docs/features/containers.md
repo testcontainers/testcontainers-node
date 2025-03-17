@@ -133,6 +133,10 @@ const container = await new GenericContainer("alpine")
     content: "hello world",
     target: "/remote/file2.txt"
   }])
+  .withCopyArchivesToContainer([{
+    tar: nodeReadable,
+    target: "/some/nested/remotedir"
+  }])
   .start();
 ```
 
@@ -153,6 +157,7 @@ container.copyContentToContainer([{
   content: "hello world",
   target: "/remote/file2.txt"
 }])
+container.copyArchiveToContainer(nodeReadable, "/some/nested/remotedir");
 ```
 
 An optional `mode` can be specified in octal for setting file permissions:
@@ -308,6 +313,18 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+### With custom hostname
+
+**Not recommended.**
+
+See this [Docker blog post on Testcontainers best practices](https://www.docker.com/blog/testcontainers-best-practices/#:~:text=Don't%20hardcode%20the%20hostname)
+
+```javascript
+const container = await new GenericContainer("alpine")
+  .withHostname("my-hostname")
+  .start();
+```
+
 ## Stopping a container
 
 Testcontainers by default will not wait until the container has stopped. It will simply issue the stop command and return immediately. This is to save time when running tests.
@@ -365,6 +382,29 @@ const container = await new GenericContainer("alpine").start();
 await container.restart();
 ```
 
+## Committing a container to an image
+
+```javascript
+const container = await new GenericContainer("alpine").start();
+// Do something with the container
+await container.exec(["sh", "-c", `echo 'hello world' > /hello-world.txt`]);
+// Commit the container to an image
+const newImageId = await container.commit({ repo: "my-repo", tag: "my-tag" });
+// Use this image in a new container
+const containerFromCommit = await new GenericContainer(newImageId).start();
+```
+
+By default, the image inherits the behavior of being marked for cleanup on exit. You can override this behavior using
+the `deleteOnExit` option:
+
+```javascript
+const container = await new GenericContainer("alpine").start();
+// Do something with the container
+await container.exec(["sh", "-c", `echo 'hello world' > /hello-world.txt`]);
+// Commit the container to an image; committed image will not be cleaned up on exit
+const newImageId = await container.commit({ repo: "my-repo", tag: "my-tag", deleteOnExit: false });
+```
+
 ## Reusing a container
 
 Enabling container re-use means that Testcontainers will not start a new container if a Testcontainers managed container with the same configuration is already running.
@@ -384,6 +424,9 @@ const container2 = await new GenericContainer("alpine")
 
 expect(container1.getId()).toBe(container2.getId());
 ```
+
+Container re-use can be enabled or disabled globally by setting the `TESTCONTAINERS_REUSE_ENABLE` environment variable to `true` or `false`.
+If this environment variable is not declared, the feature is enabled by default.
 
 ## Creating a custom container
 

@@ -3,7 +3,7 @@ import { IntervalRetry } from "./retry";
 describe("Retry", () => {
   describe("IntervalRetry", () => {
     it("should not retry when predicate succeeds", async () => {
-      const fnMock = jest.fn().mockResolvedValue(true);
+      const fnMock = vi.fn().mockResolvedValue(true);
 
       const result = await new IntervalRetry<boolean, Error>(1).retryUntil(
         () => fnMock(),
@@ -17,7 +17,7 @@ describe("Retry", () => {
     });
 
     it("should retry when predicate fails", async () => {
-      const fnMock = jest.fn().mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+      const fnMock = vi.fn().mockResolvedValueOnce(false).mockResolvedValueOnce(true);
 
       const result = await new IntervalRetry<boolean, Error>(1).retryUntil(
         () => fnMock(),
@@ -31,8 +31,8 @@ describe("Retry", () => {
     });
 
     it("should invoke timeout handler on timeout", async () => {
-      const fnMock = jest.fn().mockResolvedValue(false);
-      const timeoutMock = jest.fn().mockReturnValue(new Error());
+      const fnMock = vi.fn().mockResolvedValue(false);
+      const timeoutMock = vi.fn().mockReturnValue(new Error());
 
       const result = await new IntervalRetry<boolean, Error>(1).retryUntil(
         () => fnMock(),

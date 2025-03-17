@@ -1,12 +1,10 @@
-import { Kafka, KafkaConfig, logLevel } from "kafkajs";
-import { KAFKA_IMAGE, KafkaContainer } from "./kafka-container";
 import * as fs from "fs";
+import { Kafka, KafkaConfig, logLevel } from "kafkajs";
 import * as path from "path";
 import { GenericContainer, Network, StartedTestContainer } from "testcontainers";
+import { KafkaContainer, KAFKA_IMAGE } from "./kafka-container";
 
-describe("KafkaContainer", () => {
-  jest.setTimeout(240_000);
-
+describe("KafkaContainer", { timeout: 240_000 }, () => {
   // connectBuiltInZK {
   it("should connect using in-built zoo-keeper", async () => {
     const kafkaContainer = await new KafkaContainer().withExposedPorts(9093).start();

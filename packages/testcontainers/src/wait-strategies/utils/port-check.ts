@@ -1,7 +1,7 @@
-import { Socket } from "net";
 import Dockerode from "dockerode";
-import { ContainerRuntimeClient } from "../../container-runtime";
+import { Socket } from "net";
 import { log } from "../../common";
+import { ContainerRuntimeClient } from "../../container-runtime";
 
 export interface PortCheck {
   isBound(port: number): Promise<boolean>;
@@ -35,7 +35,10 @@ export class InternalPortCheck implements PortCheck {
   private isDistroless = false;
   private commandOutputs = new Set<string>();
 
-  constructor(private readonly client: ContainerRuntimeClient, private readonly container: Dockerode.Container) {}
+  constructor(
+    private readonly client: ContainerRuntimeClient,
+    private readonly container: Dockerode.Container
+  ) {}
 
   public async isBound(port: number): Promise<boolean> {
     const portHex = port.toString(16).padStart(4, "0");

@@ -1,9 +1,7 @@
 import neo4j from "neo4j-driver";
 import { Neo4jContainer } from "./neo4j-container";
 
-describe("Neo4jContainer", () => {
-  jest.setTimeout(180_000);
-
+describe("Neo4jContainer", { timeout: 180_000 }, () => {
   // createNode {
   it("should create a person node", async () => {
     const container = await new Neo4jContainer().start();

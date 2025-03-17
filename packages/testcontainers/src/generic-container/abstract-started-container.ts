@@ -1,6 +1,6 @@
-import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
-import { ContentToCopy, DirectoryToCopy, ExecOptions, ExecResult, FileToCopy, Labels } from "../types";
 import { Readable } from "stream";
+import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
+import { CommitOptions, ContentToCopy, DirectoryToCopy, ExecOptions, ExecResult, FileToCopy, Labels } from "../types";
 
 export class AbstractStartedContainer implements StartedTestContainer {
   constructor(protected readonly startedTestContainer: StartedTestContainer) {}
@@ -27,8 +27,16 @@ export class AbstractStartedContainer implements StartedTestContainer {
     return this.startedTestContainer.restart(options);
   }
 
+  public async commit(options: CommitOptions): Promise<string> {
+    return this.startedTestContainer.commit(options);
+  }
+
   public getHost(): string {
     return this.startedTestContainer.getHost();
+  }
+
+  public getHostname(): string {
+    return this.startedTestContainer.getHostname();
   }
 
   public getFirstMappedPort(): number {
@@ -73,6 +81,10 @@ export class AbstractStartedContainer implements StartedTestContainer {
 
   public async copyContentToContainer(contentsToCopy: ContentToCopy[]): Promise<void> {
     return this.startedTestContainer.copyContentToContainer(contentsToCopy);
+  }
+
+  public copyArchiveToContainer(tar: Readable, target = "/"): Promise<void> {
+    return this.startedTestContainer.copyArchiveToContainer(tar, target);
   }
 
   public copyArchiveFromContainer(path: string): Promise<NodeJS.ReadableStream> {

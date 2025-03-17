@@ -1,10 +1,8 @@
-import { GenericContainer } from "./generic-container";
 import { containerLog } from "../common";
 import { Wait } from "../wait-strategies/wait";
+import { GenericContainer } from "./generic-container";
 
-describe("GenericContainer logs", () => {
-  jest.setTimeout(180_000);
-
+describe("GenericContainer logs", { timeout: 180_000 }, () => {
   it("should stream logs from a container before start", async () => {
     const line = await new Promise((resolve) => {
       return new GenericContainer("cristianrgreco/testcontainer:1.1.14")
@@ -54,7 +52,7 @@ describe("GenericContainer logs", () => {
   });
 
   it("should stream logs from a running container after restart", async () => {
-    const containerLogTraceSpy = jest.spyOn(containerLog, "trace");
+    const containerLogTraceSpy = vi.spyOn(containerLog, "trace");
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
 
     await container.restart();

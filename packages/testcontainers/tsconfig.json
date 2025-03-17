@@ -5,7 +5,6 @@
     "outDir": "build"
   },
   "exclude": [
-    "build",
-    "jest.config.ts"
+    "build"
   ]
 }

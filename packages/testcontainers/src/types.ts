@@ -1,4 +1,5 @@
 import { Readable } from "stream";
+import { ContainerCommitOptions } from "./container-runtime/clients/container/types";
 
 export type InspectResult = {
   name: string;
@@ -36,6 +37,11 @@ export type ContentToCopy = {
   content: Content;
   target: string;
   mode?: number;
+};
+
+export type ArchiveToCopy = {
+  tar: Readable;
+  target: string;
 };
 
 export type TmpFs = { [dir in string]: string };
@@ -84,6 +90,13 @@ export type BuildArgs = { [key in string]: string };
 export type ExecOptions = { workingDir: string; user: string; env: Environment };
 
 export type ExecResult = { output: string; stdout: string; stderr: string; exitCode: number };
+
+/**
+ * Options for committing a container to an image; see https://docs.docker.com/engine/reference/commandline/commit/
+ * @param deleteOnExit If true, the image will be cleaned up by reaper on exit
+ * @param changes Additional changes to apply to the container before committing it to an image (e.g. ["ENV TEST=true"])
+ */
+export type CommitOptions = Omit<ContainerCommitOptions, "changes"> & { deleteOnExit?: boolean; changes?: string[] };
 
 export type HealthCheckStatus = "none" | "starting" | "unhealthy" | "healthy";
 

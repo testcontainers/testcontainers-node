@@ -1,10 +1,10 @@
 import { ContainerInfo } from "dockerode";
-import { GenericContainer } from "../generic-container/generic-container";
-import { Wait } from "../wait-strategies/wait";
 import { Socket } from "net";
-import { ContainerRuntimeClient, ImageName } from "../container-runtime";
 import { IntervalRetry, log, RandomUuid, withFileLock } from "../common";
+import { ContainerRuntimeClient, ImageName } from "../container-runtime";
+import { GenericContainer } from "../generic-container/generic-container";
 import { LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
+import { Wait } from "../wait-strategies/wait";
 
 export const REAPER_IMAGE = process.env["RYUK_CONTAINER_IMAGE"]
   ? ImageName.fromString(process.env["RYUK_CONTAINER_IMAGE"]).string
@@ -133,7 +133,10 @@ async function connectToReaperSocket(host: string, port: number, containerId: st
 }
 
 class RyukReaper implements Reaper {
-  constructor(public readonly sessionId: string, private readonly socket: Socket) {}
+  constructor(
+    public readonly sessionId: string,
+    private readonly socket: Socket
+  ) {}
 
   addComposeProject(projectName: string): void {
     this.socket.write(`label=com.docker.compose.project=${projectName}\r\n`);

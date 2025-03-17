@@ -1,11 +1,9 @@
 import path from "path";
-import { GenericContainer } from "./generic-container";
-import { Wait } from "../wait-strategies/wait";
-import { PullPolicy } from "../utils/pull-policy";
 import { RandomUuid } from "../common";
-import { ImageName, getContainerRuntimeClient } from "../container-runtime";
+import { getContainerRuntimeClient, ImageName } from "../container-runtime";
 import { getReaper } from "../reaper/reaper";
 import { LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
+import { PullPolicy } from "../utils/pull-policy";
 import {
   checkContainerIsHealthy,
   deleteImageByName,
@@ -13,10 +11,10 @@ import {
   getImageLabelsByName,
   waitForDockerEvent,
 } from "../utils/test-helper";
+import { Wait } from "../wait-strategies/wait";
+import { GenericContainer } from "./generic-container";
 
-describe("GenericContainer Dockerfile", () => {
-  jest.setTimeout(180_000);
-
+describe("GenericContainer Dockerfile", { timeout: 180_000 }, () => {
   const uuidGen = new RandomUuid();
   const fixtures = path.resolve(__dirname, "..", "..", "fixtures", "docker");
 

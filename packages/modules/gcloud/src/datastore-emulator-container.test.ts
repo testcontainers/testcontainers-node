@@ -1,9 +1,7 @@
-import { DatastoreEmulatorContainer, StartedDatastoreEmulatorContainer } from "./datastore-emulator-container";
 import { Datastore } from "@google-cloud/datastore";
+import { DatastoreEmulatorContainer, StartedDatastoreEmulatorContainer } from "./datastore-emulator-container";
 
-describe("DatastoreEmulatorContainer", () => {
-  jest.setTimeout(240_000);
-
+describe("DatastoreEmulatorContainer", { timeout: 240_000 }, () => {
   // datastore4 {
   it("should work using default version", async () => {
     const datastoreEmulatorContainer = await new DatastoreEmulatorContainer().start();

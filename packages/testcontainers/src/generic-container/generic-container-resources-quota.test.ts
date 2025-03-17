@@ -1,9 +1,7 @@
-import { GenericContainer } from "./generic-container";
 import { ContainerRuntimeClient, getContainerRuntimeClient } from "../container-runtime";
+import { GenericContainer } from "./generic-container";
 
-describe("GenericContainer resources quota", () => {
-  jest.setTimeout(180_000);
-
+describe("GenericContainer resources quota", { timeout: 180_000 }, () => {
   let client: ContainerRuntimeClient;
 
   beforeAll(async () => {

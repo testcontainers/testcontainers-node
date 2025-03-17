@@ -1,13 +1,13 @@
-import {
-  CredentialProviderGetResponse,
-  CredentialProviderListResponse,
-  ContainerRuntimeConfig,
-  AuthConfig,
-} from "./types";
 import { exec, spawn } from "child_process";
+import { log } from "../../common";
 import { RegistryAuthLocator } from "./registry-auth-locator";
 import { registryMatches } from "./registry-matches";
-import { log } from "../../common";
+import {
+  AuthConfig,
+  ContainerRuntimeConfig,
+  CredentialProviderGetResponse,
+  CredentialProviderListResponse,
+} from "./types";
 
 export abstract class CredentialProvider implements RegistryAuthLocator {
   abstract getName(): string;

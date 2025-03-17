@@ -7,11 +7,11 @@ import Dockerode, {
   ExecCreateOptions,
   Network,
 } from "dockerode";
-import { PassThrough, Readable } from "stream";
 import { IncomingMessage } from "http";
-import { ContainerStatus, ExecOptions, ExecResult } from "./types";
-import { ContainerClient } from "./container-client";
+import { PassThrough, Readable } from "stream";
 import { execLog, log, streamToString } from "../../../common";
+import { ContainerClient } from "./container-client";
+import { ContainerCommitOptions, ContainerStatus, ExecOptions, ExecResult } from "./types";
 
 export class DockerContainerClient implements ContainerClient {
   constructor(public readonly dockerode: Dockerode) {}
@@ -120,9 +120,7 @@ export class DockerContainerClient implements ContainerClient {
 
   async inspect(container: Dockerode.Container): Promise<ContainerInspectInfo> {
     try {
-      log.debug(`Inspecting container...`, { containerId: container.id });
       const inspectInfo = await container.inspect();
-      log.debug(`Inspected container`, { containerId: container.id });
       return inspectInfo;
     } catch (err) {
       log.error(`Failed to inspect container: ${err}`, { containerId: container.id });
@@ -262,6 +260,18 @@ export class DockerContainerClient implements ContainerClient {
       log.debug(`Restarted container`, { containerId: container.id });
     } catch (err) {
       log.error(`Failed to restart container: ${err}`, { containerId: container.id });
+      throw err;
+    }
+  }
+
+  async commit(container: Container, opts: ContainerCommitOptions): Promise<string> {
+    try {
+      log.debug(`Committing container...`, { containerId: container.id });
+      const { Id: imageId } = await container.commit(opts);
+      log.debug(`Committed container to image "${imageId}"`, { containerId: container.id });
+      return imageId;
+    } catch (err) {
+      log.error(`Failed to commit container: ${err}`, { containerId: container.id });
       throw err;
     }
   }

@@ -1,10 +1,20 @@
-import { AbstractStartedContainer, GenericContainer, log, StartedTestContainer, Wait } from "testcontainers";
+import {
+  AbstractStartedContainer,
+  GenericContainer,
+  getContainerRuntimeClient,
+  getReaper,
+  LABEL_TESTCONTAINERS_SESSION_ID,
+  log,
+  StartedTestContainer,
+  Wait,
+} from "testcontainers";
 
 export const LOCALSTACK_PORT = 4566;
 
 export class LocalstackContainer extends GenericContainer {
   constructor(image = "localstack/localstack:2.2.0") {
     super(image);
+
     this.withExposedPorts(LOCALSTACK_PORT).withWaitStrategy(Wait.forLogMessage("Ready", 1)).withStartupTimeout(120_000);
   }
 
@@ -25,8 +35,22 @@ export class LocalstackContainer extends GenericContainer {
     log.info(`${envVar} environment variable set to "${this.environment[envVar]}" (${hostnameExternalReason})`);
   }
 
+  /**
+   * Configure the LocalStack container to add sessionId when starting lambda container.
+   * This allows the lambda container to be identified by the {@link Reaper} and cleaned up on exit.
+   */
+  private async flagLambdaSessionId(): Promise<void> {
+    const client = await getContainerRuntimeClient();
+    const reaper = await getReaper(client);
+
+    this.withEnvironment({
+      LAMBDA_DOCKER_FLAGS: `${this.environment["LAMBDA_DOCKER_FLAGS"] ?? ""} -l ${LABEL_TESTCONTAINERS_SESSION_ID}=${reaper.sessionId}`,
+    });
+  }
+
   protected override async beforeContainerCreated(): Promise<void> {
     this.resolveHostname();
+    await this.flagLambdaSessionId();
   }
 
   public override async start(): Promise<StartedLocalStackContainer> {

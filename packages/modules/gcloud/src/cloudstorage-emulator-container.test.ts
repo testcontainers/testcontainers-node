@@ -1,7 +1,7 @@
-import { CloudStorageEmulatorContainer, StartedCloudStorageEmulatorContainer } from "./cloudstorage-emulator-container";
 import { Storage } from "@google-cloud/storage";
-import { ReadableStream } from "node:stream/web";
 import { setupServer } from "msw/node";
+import { ReadableStream } from "node:stream/web";
+import { CloudStorageEmulatorContainer, StartedCloudStorageEmulatorContainer } from "./cloudstorage-emulator-container";
 
 async function getRequestBodyFromReadableStream(stream: ReadableStream<Uint8Array>): Promise<string> {
   const decoder = new TextDecoder();
@@ -9,7 +9,6 @@ async function getRequestBodyFromReadableStream(stream: ReadableStream<Uint8Arra
   let fullString = "";
 
   try {
-    // eslint-disable-next-line no-constant-condition
     while (true) {
       const { value, done } = await reader.read();
 
@@ -28,9 +27,7 @@ async function getRequestBodyFromReadableStream(stream: ReadableStream<Uint8Arra
   return fullString;
 }
 
-describe("CloudStorageEmulatorContainer", () => {
-  jest.setTimeout(240_000);
-
+describe("CloudStorageEmulatorContainer", { timeout: 240_000 }, () => {
   const server = setupServer();
 
   beforeAll(() => {

@@ -1,5 +1,5 @@
-import { AbstractStartedContainer, GenericContainer, Wait } from "testcontainers";
 import type { StartedTestContainer } from "testcontainers";
+import { AbstractStartedContainer, GenericContainer, Wait } from "testcontainers";
 
 const EMULATOR_PORT = 8085;
 const CMD = "gcloud beta emulators pubsub start --host-port 0.0.0.0:8085";
@@ -32,7 +32,10 @@ export class PubSubEmulatorContainer extends GenericContainer {
 }
 
 export class StartedPubSubEmulatorContainer extends AbstractStartedContainer {
-  constructor(startedTestContainer: StartedTestContainer, private readonly projectId: string) {
+  constructor(
+    startedTestContainer: StartedTestContainer,
+    private readonly projectId: string
+  ) {
     super(startedTestContainer);
   }
 

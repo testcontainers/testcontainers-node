@@ -1,9 +1,9 @@
 import Dockerode from "dockerode";
 import { Agent } from "undici";
-import { AbstractWaitStrategy } from "./wait-strategy";
-import { BoundPorts } from "../utils/bound-ports";
 import { IntervalRetry, log } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
+import { BoundPorts } from "../utils/bound-ports";
+import { AbstractWaitStrategy } from "./wait-strategy";
 
 export interface HttpWaitStrategyOptions {
   abortOnContainerExit?: boolean;

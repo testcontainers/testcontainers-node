@@ -46,7 +46,9 @@ nav:
       - Azurite: modules/azurite.md
       - Cassandra: modules/cassandra.md
       - ChromaDB: modules/chromadb.md
+      - CosmosDB: modules/cosmosdb.md
       - Couchbase: modules/couchbase.md
+      - CockroachDB: modules/cockroachdb.md
       - Elasticsearch: modules/elasticsearch.md
       - EventStoreDB: modules/eventstoredb.md
       - GCloud: modules/gcloud.md
@@ -71,5 +73,6 @@ nav:
       - ScyllaDB: modules/scylladb.md
       - Selenium: modules/selenium.md
       - ToxiProxy: modules/toxiproxy.md
+      - Valkey: modules/valkey.md
       - Weaviate: modules/weaviate.md
   - Configuration: configuration.md

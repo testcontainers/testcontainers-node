@@ -4,7 +4,10 @@ const ARANGODB_PORT = 8529;
 const USERNAME = "root";
 
 export class ArangoDBContainer extends GenericContainer {
-  constructor(image = "arangodb:3.10.0", private password = "test") {
+  constructor(
+    image = "arangodb:3.10.0",
+    private password = "test"
+  ) {
     super(image);
     this.withExposedPorts(ARANGODB_PORT).withWaitStrategy(Wait.forLogMessage("Have fun!")).withStartupTimeout(120_000);
   }
@@ -24,7 +27,10 @@ export class StartedArangoContainer extends AbstractStartedContainer {
   private readonly host: string;
   private readonly port: number;
 
-  constructor(startedTestContainer: StartedTestContainer, private readonly password: string) {
+  constructor(
+    startedTestContainer: StartedTestContainer,
+    private readonly password: string
+  ) {
     super(startedTestContainer);
     this.host = this.startedTestContainer.getHost();
     this.port = this.startedTestContainer.getMappedPort(ARANGODB_PORT);
