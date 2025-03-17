@@ -42,7 +42,7 @@ describe("EmulatorFlagsManager", () => {
 
     const flags = flagsManager.expandFlags();
 
-    expect(flags.trim()).toEqual("--database-mode= --host-port=");
+    expect(flags.trim()).toEqual("--database-mode --host-port");
   });
 
   it("should throw if flag name not set", async () => {

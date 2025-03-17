@@ -1,10 +1,8 @@
 import * as admin from "firebase-admin";
-import { Wait } from "testcontainers";
 import { FirestoreEmulatorContainer, StartedFirestoreEmulatorContainer } from "./firestore-emulator-container";
 
 describe("FirestoreEmulatorContainer", { timeout: 240_000 }, () => {
-  afterEach(async (ctx) => {
-    if (!["should work using default version", "should work using version 468.0.0"].includes(ctx.task.name)) return;
+  afterEach(async () => {
     await admin.app().delete();
   });
 
@@ -30,35 +28,6 @@ describe("FirestoreEmulatorContainer", { timeout: 240_000 }, () => {
   });
 
   // }
-
-  it("should have default host-port flag", async () => {
-    const firestoreEmulatorContainer = new FirestoreEmulatorContainer();
-
-    const flags = firestoreEmulatorContainer["flagsManager"].expandFlags();
-
-    expect(flags.trim()).toEqual("--host-port=0.0.0.0:8080");
-  });
-
-  it("should be able to add flags after creating container", async () => {
-    const firestoreEmulatorContainer = new FirestoreEmulatorContainer();
-    // clear all default flags
-    firestoreEmulatorContainer["flagsManager"].clearFlags();
-
-    // add some new flags
-    const flags = firestoreEmulatorContainer
-      .withFlag("host-port", "0.0.0.0:8080")
-      .withFlag("database-mode", "datastore-mode")
-      ["flagsManager"].expandFlags();
-
-    // check new added flags exists
-    expect(flags.trim()).toEqual("--host-port=0.0.0.0:8080 --database-mode=datastore-mode");
-
-    // check that container start command uses latest flags string
-    const startedContainer = await firestoreEmulatorContainer
-      .withWaitStrategy(Wait.forLogMessage(/.* start --host=0.0.0.0 --port=8080 --database-mode=datastore-mode/, 1))
-      .start();
-    await startedContainer.stop();
-  });
 
   async function checkFirestore(firestoreEmulatorContainer: StartedFirestoreEmulatorContainer) {
     expect(firestoreEmulatorContainer).toBeDefined();

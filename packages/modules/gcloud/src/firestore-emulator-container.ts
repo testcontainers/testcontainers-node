@@ -12,10 +12,7 @@ export class FirestoreEmulatorContainer extends GenericContainer {
     this._flagsManager = new EmulatorFlagsManager();
     this.withExposedPorts(EMULATOR_PORT)
       .withFlag("host-port", `0.0.0.0:${EMULATOR_PORT}`)
-      // explicitly call withCommand() fn here
-      // it will be called implicitly inside prev withFlag() call
-      .withCommand(["/bin/sh", "-c", this.getCmd()])
-      .withWaitStrategy(Wait.forLogMessage(RegExp(".*running.*"), 1))
+      .withWaitStrategy(Wait.forLogMessage(/.*running.*/, 1))
       .withStartupTimeout(120_000);
   }
 
@@ -36,12 +33,12 @@ export class FirestoreEmulatorContainer extends GenericContainer {
    */
   public withFlag(name: string, value: string) {
     this.flagsManager.withFlag(name, value);
-    // we need to 'refresh' command as we add new flag
-    this.withCommand(["/bin/sh", "-c", this.getCmd()]);
     return this;
   }
 
   public override async start(): Promise<StartedFirestoreEmulatorContainer> {
+    // expand all flags and get final command
+    this.withCommand(["/bin/sh", "-c", this.getCmd()]);
     return new StartedFirestoreEmulatorContainer(await super.start());
   }
 }

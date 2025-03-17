@@ -35,8 +35,6 @@ export class PubSubEmulatorContainer extends GenericContainer {
    */
   public withFlag(name: string, value: string) {
     this.flagsManager.withFlag(name, value);
-    // we need to 'refresh' command as we add new flag
-    this.withCommand(["/bin/sh", "-c", this.getCmd()]);
     return this;
   }
 
@@ -49,8 +47,7 @@ export class PubSubEmulatorContainer extends GenericContainer {
     // Determine the valid command-line prompt when starting the Pub/Sub emulator
     const selectedProjectId = this._projectId ?? "test-project";
     this.withFlag("project", selectedProjectId)
-      // explicitly call withCommand() fn here
-      // it will be called implicitly inside prev withFlag() call
+      // expand all flags and get final command
       .withCommand(["/bin/sh", "-c", this.getCmd()]);
 
     return new StartedPubSubEmulatorContainer(await super.start(), selectedProjectId);

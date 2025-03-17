@@ -13,10 +13,7 @@ export class DatastoreEmulatorContainer extends GenericContainer {
     this.withExposedPorts(EMULATOR_PORT)
       .withFlag("host-port", `0.0.0.0:${EMULATOR_PORT}`)
       .withFlag("database-mode", `datastore-mode`)
-      // explicitly call withCommand() fn here
-      // it will be called implicitly inside prev withFlag() call
-      .withCommand(["/bin/sh", "-c", this.getCmd()])
-      .withWaitStrategy(Wait.forLogMessage(RegExp(".*running.*"), 1))
+      .withWaitStrategy(Wait.forLogMessage(/.*running.*/, 1))
       .withStartupTimeout(120_000);
   }
 
@@ -37,12 +34,12 @@ export class DatastoreEmulatorContainer extends GenericContainer {
    */
   public withFlag(name: string, value: string) {
     this.flagsManager.withFlag(name, value);
-    // we need to 'refresh' command as we add new flag
-    this.withCommand(["/bin/sh", "-c", this.getCmd()]);
     return this;
   }
 
   public override async start(): Promise<StartedDatastoreEmulatorContainer> {
+    // expand all flags and get final command
+    this.withCommand(["/bin/sh", "-c", this.getCmd()]);
     return new StartedDatastoreEmulatorContainer(await super.start());
   }
 }
