@@ -1,5 +1,12 @@
 import * as net from "node:net";
-import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
+import {
+  AbstractStartedContainer,
+  GenericContainer,
+  PortGenerator,
+  RandomUniquePortGenerator,
+  StartedTestContainer,
+  Wait,
+} from "testcontainers";
 
 type Protocol = "http" | "https";
 const DEFAULT_KEY = "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw=="; // default key for Cosmos DB Emulator
@@ -14,9 +21,11 @@ export class AzureCosmosDbEmulatorContainer extends GenericContainer {
   private protocol: Protocol = DEFAULT_PROTOCOL;
   private telemetryEnabled = DEFAULT_TELEMETRY_ENABLED;
   private explorerEnabled = DEFAULT_EXPLORER_ENABLED;
+  private portGenerator: PortGenerator;
 
   constructor(image = "mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-preview") {
     super(image);
+    this.portGenerator = new RandomUniquePortGenerator();
     this.withWaitStrategy(Wait.forLogMessage(COSMOS_READY_LOG_MESSAGE));
   }
 
@@ -31,7 +40,7 @@ export class AzureCosmosDbEmulatorContainer extends GenericContainer {
   }
 
   public override async start(): Promise<StartedAzureCosmosDbEmulatorContainer> {
-    const port = await this.getFreePort();
+    const port = await this.portGenerator.generatePort();
     this.withExposedPorts({
       host: port,
       container: port,
