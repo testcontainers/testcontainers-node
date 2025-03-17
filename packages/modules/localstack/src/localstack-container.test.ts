@@ -110,4 +110,19 @@ describe("LocalStackContainer", { timeout: 180_000 }, () => {
     expect(exitCode).toBe(0);
     expect(output).toContain(`${LABEL_TESTCONTAINERS_SESSION_ID}=${sessionId}`);
   });
+
+  it("should concatenate sessionId label to LAMBDA_DOCKER_FLAGS", async () => {
+    const container = await new LocalstackContainer()
+      .withEnvironment({
+        LAMBDA_DOCKER_FLAGS: `-l mylabel=myvalue`,
+      })
+      .start();
+    const sessionId = container.getLabels()[LABEL_TESTCONTAINERS_SESSION_ID];
+
+    const { output, exitCode } = await container.exec(["printenv", "LAMBDA_DOCKER_FLAGS"]);
+
+    expect(exitCode).toBe(0);
+    expect(output).toContain(`${LABEL_TESTCONTAINERS_SESSION_ID}=${sessionId}`);
+    expect(output).toContain(`mylabel=myvalue`);
+  });
 });
