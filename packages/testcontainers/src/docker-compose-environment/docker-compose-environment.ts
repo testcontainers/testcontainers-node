@@ -169,6 +169,7 @@ export class DockerComposeEnvironment {
             boundPorts,
             containerName,
             waitStrategy
+            // not sure how to control 'remove' option for the whole compose stack, will use default value here (true)
           );
         })
       )

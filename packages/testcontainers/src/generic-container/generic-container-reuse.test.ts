@@ -153,6 +153,27 @@ describe("GenericContainer reuse", { timeout: 180_000 }, () => {
     await container2.stop();
   });
 
+  it("should reuse container when an existing reusable container created using withRemove(false) has stopped", async () => {
+    const name = `there_can_only_be_one_${randomUuid()}`;
+    const container1 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withName(name)
+      .withExposedPorts(8080)
+      .withReuse()
+      .withRemove(false)
+      .start();
+    await container1.stop({ timeout: 10000 });
+
+    const container2 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withName(name)
+      .withExposedPorts(8080)
+      .withReuse()
+      .start();
+    await checkContainerIsHealthy(container2);
+
+    expect(container1.getId()).toBe(container2.getId());
+    await container2.stop();
+  });
+
   it("should keep the labels passed in when a new reusable container is created", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withName(`there_can_only_be_one_${randomUuid()}`)

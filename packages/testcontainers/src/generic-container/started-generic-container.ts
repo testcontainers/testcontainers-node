@@ -16,7 +16,7 @@ import { StoppedGenericContainer } from "./stopped-generic-container";
 
 export class StartedGenericContainer implements StartedTestContainer {
   private stoppedContainer?: StoppedTestContainer;
-  private stopContainerLock = new AsyncLock();
+  private readonly stopContainerLock = new AsyncLock();
 
   constructor(
     private readonly container: Dockerode.Container,
@@ -24,7 +24,8 @@ export class StartedGenericContainer implements StartedTestContainer {
     private inspectResult: ContainerInspectInfo,
     private boundPorts: BoundPorts,
     private readonly name: string,
-    private readonly waitStrategy: WaitStrategy
+    private readonly waitStrategy: WaitStrategy,
+    private readonly removeOnStop: boolean = true
   ) {}
 
   protected containerIsStopping?(): Promise<void>;
@@ -105,9 +106,12 @@ export class StartedGenericContainer implements StartedTestContainer {
       await this.containerIsStopping();
     }
 
-    const resolvedOptions: StopOptions = { remove: true, timeout: 0, removeVolumes: true, ...options };
+    // use this.removeOnStop value here (true by default)
+    // but allow to override it explicitly from options argument
+    const resolvedOptions: StopOptions = { remove: this.removeOnStop, timeout: 0, removeVolumes: true, ...options };
     await client.container.stop(this.container, { timeout: resolvedOptions.timeout });
     if (resolvedOptions.remove) {
+      log.info("StopOptions.remove=true, removing container.");
       await client.container.remove(this.container, { removeVolumes: resolvedOptions.removeVolumes });
     }
     log.info(`Stopped container`, { containerId: this.container.id });

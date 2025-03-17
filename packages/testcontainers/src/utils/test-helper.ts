@@ -36,8 +36,16 @@ export const getDockerEventStream = async (opts: GetEventsOptions = {}): Promise
 };
 
 export const getRunningContainerNames = async (): Promise<string[]> => {
+  return getContainerNames(false);
+};
+
+export const getStoppedContainerNames = async (): Promise<string[]> => {
+  return getContainerNames(true, { status: ["paused", "exited"] });
+};
+
+const getContainerNames = async (all: boolean, filters?: string | { [key: string]: string[] }): Promise<string[]> => {
   const dockerode = (await getContainerRuntimeClient()).container.dockerode;
-  const containers = await dockerode.listContainers();
+  const containers = await dockerode.listContainers({ all, filters });
   return containers
     .map((container) => container.Names)
     .reduce((result, containerNames) => [...result, ...containerNames], [])

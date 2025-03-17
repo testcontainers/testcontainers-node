@@ -7,6 +7,7 @@ import {
   checkContainerIsHealthy,
   getDockerEventStream,
   getRunningContainerNames,
+  getStoppedContainerNames,
   waitForDockerEvent,
 } from "../utils/test-helper";
 import { GenericContainer } from "./generic-container";
@@ -501,6 +502,45 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await container.stop();
 
     expect(await getRunningContainerNames()).not.toContain(container.getName());
+  });
+
+  it("should stop the container and NOT remove it if withRemove(false) set", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withName(`container-${new RandomUuid().nextUuid()}`)
+      .withRemove(false)
+      .start();
+
+    await container.stop();
+
+    const containerName = container.getName()?.slice(1); // remove first '/'
+    expect(await getStoppedContainerNames()).toContain(containerName);
+
+    // ryuk will clean up this container after test anyway
+    // unless env var TESTCONTAINERS_RYUK_DISABLED=true is set
+  });
+
+  it("should stop the container and remove it if withRemove(true) set", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withName(`container-${new RandomUuid().nextUuid()}`)
+      .withRemove(true)
+      .start();
+
+    await container.stop();
+
+    const containerName = container.getName()?.slice(1); // remove first '/'
+    expect(await getStoppedContainerNames()).not.toContain(containerName);
+  });
+
+  it("should stop the container and remove it when explicitly overriding withRemove(false)", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withName(`container-${new RandomUuid().nextUuid()}`)
+      .withRemove(false)
+      .start();
+
+    await container.stop({ remove: true }); // remove: true here should override withRemove(false)
+
+    const containerName = container.getName()?.slice(1); // remove first '/'
+    expect(await getStoppedContainerNames()).not.toContain(containerName);
   });
 
   it("should stop the container idempotently", async () => {

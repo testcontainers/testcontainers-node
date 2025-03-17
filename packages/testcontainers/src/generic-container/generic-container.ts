@@ -50,6 +50,7 @@ export class GenericContainer implements TestContainer {
   protected environment: Record<string, string> = {};
   protected exposedPorts: PortWithOptionalBinding[] = [];
   protected reuse = false;
+  protected remove = true;
   protected networkMode?: string;
   protected networkAliases: string[] = [];
   protected pullPolicy: ImagePullPolicy = PullPolicy.defaultPolicy();
@@ -158,7 +159,8 @@ export class GenericContainer implements TestContainer {
       inspectResult,
       boundPorts,
       inspectResult.Name,
-      this.waitStrategy
+      this.waitStrategy,
+      this.remove
     );
   }
 
@@ -222,7 +224,8 @@ export class GenericContainer implements TestContainer {
       inspectResult,
       boundPorts,
       inspectResult.Name,
-      this.waitStrategy
+      this.waitStrategy,
+      this.remove
     );
 
     if (this.containerStarted) {
@@ -430,6 +433,11 @@ export class GenericContainer implements TestContainer {
 
   public withReuse(): this {
     this.reuse = true;
+    return this;
+  }
+
+  public withRemove(remove: boolean): this {
+    this.remove = remove;
     return this;
   }
 
