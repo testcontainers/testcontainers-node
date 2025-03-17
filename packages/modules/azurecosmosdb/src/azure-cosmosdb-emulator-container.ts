@@ -1,4 +1,3 @@
-import * as net from "node:net";
 import {
   AbstractStartedContainer,
   GenericContainer,
@@ -23,7 +22,7 @@ export class AzureCosmosDbEmulatorContainer extends GenericContainer {
   private explorerEnabled = DEFAULT_EXPLORER_ENABLED;
   private portGenerator: PortGenerator;
 
-  constructor(image = "mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-preview") {
+  constructor(image = "mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-EN20250228") {
     super(image);
     this.portGenerator = new RandomUniquePortGenerator();
     this.withWaitStrategy(Wait.forLogMessage(COSMOS_READY_LOG_MESSAGE));
@@ -53,27 +52,6 @@ export class AzureCosmosDbEmulatorContainer extends GenericContainer {
     });
 
     return new StartedAzureCosmosDbEmulatorContainer(await super.start(), this.key, port, this.protocol);
-  }
-
-  /**
-   * The mapped port has to be passed to CosmosDB as an environment variable.
-   * Since the mapped port would only be known after container creation, we need to find an available port ourselves
-   * before starting the container.
-   * @private
-   */
-  private async getFreePort(): Promise<number> {
-    return new Promise((resolve, reject) => {
-      const server = net.createServer();
-      server.listen(0, () => {
-        const address = server.address();
-        if (typeof address !== "string" && address?.port) {
-          server.close(() => resolve(address.port));
-        } else {
-          server.close(() => reject(new Error("Failed to get available port from host")));
-        }
-      });
-      server.on("error", reject);
-    });
   }
 }
 
