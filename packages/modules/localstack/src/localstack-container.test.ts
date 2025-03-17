@@ -114,7 +114,7 @@ describe("LocalStackContainer", { timeout: 180_000 }, () => {
   it("should concatenate sessionId label to LAMBDA_DOCKER_FLAGS", async () => {
     const container = await new LocalstackContainer()
       .withEnvironment({
-        LAMBDA_DOCKER_FLAGS: `-l mylabel=myvalue -l ${LABEL_TESTCONTAINERS_SESSION_ID}=sessionId`,
+        LAMBDA_DOCKER_FLAGS: `-l mylabel=myvalue`,
       })
       .start();
     const sessionId = container.getLabels()[LABEL_TESTCONTAINERS_SESSION_ID];

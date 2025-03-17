@@ -43,14 +43,9 @@ export class LocalstackContainer extends GenericContainer {
     const client = await getContainerRuntimeClient();
     const reaper = await getReaper(client);
 
-    const lambdaDockerFlags = [
-      this.environment["LAMBDA_DOCKER_FLAGS"],
-      `-l ${LABEL_TESTCONTAINERS_SESSION_ID}=${reaper.sessionId}`,
-    ]
-      .filter((flag) => flag !== undefined)
-      .join(" ");
-
-    this.withEnvironment({ LAMBDA_DOCKER_FLAGS: lambdaDockerFlags });
+    this.withEnvironment({
+      LAMBDA_DOCKER_FLAGS: `${this.environment["LAMBDA_DOCKER_FLAGS"] ?? ""} -l ${LABEL_TESTCONTAINERS_SESSION_ID}=${reaper.sessionId}`,
+    });
   }
 
   protected override async beforeContainerCreated(): Promise<void> {
