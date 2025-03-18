@@ -80,8 +80,7 @@ export const getVolumeNames = async (): Promise<string[]> => {
 };
 
 export const composeContainerName = async (serviceName: string, index = 1): Promise<string> => {
-  const client = await getContainerRuntimeClient();
-  return client.info.compose?.version.startsWith("1.") ? `${serviceName}_${index}` : `${serviceName}-${index}`;
+  return `${serviceName}-${index}`;
 };
 
 export const waitForDockerEvent = async (eventStream: Readable, eventName: string, times = 1) => {
