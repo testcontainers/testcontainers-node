@@ -83,7 +83,7 @@ jobs:
       fail-fast: true
       matrix:
         runner: [ubuntu-22.04]
-        node-version: [18.x, 20.x, 22.x]
+        node-version: [20.x, 22.x]
     runs-on: ${{ matrix.runner }}
     steps:
       - name: Code checkout
@@ -116,7 +116,7 @@ jobs:
       fail-fast: false
       matrix:
         module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
-        node-version: [18.x, 20.x, 22.x]
+        node-version: [20.x, 22.x]
     uses: ./.github/workflows/test-template.yml
     with:
       runner: ubuntu-22.04
@@ -136,7 +136,7 @@ jobs:
       fail-fast: false
       matrix:
         module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
-        node-version: [18.x, 20.x, 22.x]
+        node-version: [20.x, 22.x]
     uses: ./.github/workflows/test-template.yml
     with:
       runner: ubuntu-22.04

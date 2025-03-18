@@ -22,7 +22,7 @@ See [LICENSE](https://raw.githubusercontent.com/testcontainers/testcontainers-no
 
 ## Copyright
 
-Copyright (c) 2018 - 2023 Cristian Greco and other authors.
+Copyright (c) 2018 - 2025 Cristian Greco and other authors.
 
 See [contributors](https://github.com/testcontainers/testcontainers-node/graphs/contributors/) for contributors.
 

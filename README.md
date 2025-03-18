@@ -16,7 +16,7 @@ See [LICENSE](https://github.com/testcontainers/testcontainers-node/blob/main/LI
 
 ## Copyright
 
-Copyright (c) 2018 - 2023 Cristian Greco and other authors.
+Copyright (c) 2015 - 2023 Cristian Greco and other authors.
 
 ## Contributing
 
