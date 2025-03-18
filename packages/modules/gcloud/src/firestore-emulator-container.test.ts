@@ -1,6 +1,8 @@
 import * as admin from "firebase-admin";
 import { FirestoreEmulatorContainer, StartedFirestoreEmulatorContainer } from "./firestore-emulator-container";
 
+const IMAGE = "gcr.io/google.com/cloudsdktool/cloud-sdk";
+
 describe("FirestoreEmulatorContainer", { timeout: 240_000 }, () => {
   afterEach(async () => {
     await admin.app().delete();
@@ -8,7 +10,7 @@ describe("FirestoreEmulatorContainer", { timeout: 240_000 }, () => {
 
   // firestore4 {
   it("should work using default version", async () => {
-    const firestoreEmulatorContainer = await new FirestoreEmulatorContainer().start();
+    const firestoreEmulatorContainer = await new FirestoreEmulatorContainer(IMAGE).start();
 
     await checkFirestore(firestoreEmulatorContainer);
 

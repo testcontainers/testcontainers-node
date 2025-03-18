@@ -1,10 +1,12 @@
 import { AdminClient, ChromaClient } from "chromadb";
 import { ChromaDBContainer } from "./chromadb-container";
 
+const IMAGE = "chromadb/chroma:0.4.24";
+
 describe("ChromaDB", { timeout: 360_000 }, () => {
   // docs {
   it("should connect and return a query result", async () => {
-    const container = await new ChromaDBContainer().start();
+    const container = await new ChromaDBContainer(IMAGE).start();
     const tenant = "test-tenant";
     const key = "test-key";
     const database = "test-db";

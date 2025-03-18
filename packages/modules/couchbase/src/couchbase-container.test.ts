@@ -4,6 +4,8 @@ import { BucketDefinition } from "./bucket-definition";
 import { CouchbaseContainer, StartedCouchbaseContainer } from "./couchbase-container";
 import { CouchbaseService } from "./couchbase-service";
 
+const IMAGE = "couchbase/server:6.5.1";
+
 describe("CouchbaseContainer", { timeout: 180_000 }, () => {
   // upsertAndGet {
   const upsertAndGet = async (

@@ -9,7 +9,7 @@ export class Neo4jContainer extends GenericContainer {
   private apoc = false;
   private ttl?: number;
 
-  constructor(image = "neo4j:4.4.12") {
+  constructor(image: string) {
     super(image);
     this.withExposedPorts(BOLT_PORT, HTTP_PORT)
       .withWaitStrategy(Wait.forLogMessage("Started."))

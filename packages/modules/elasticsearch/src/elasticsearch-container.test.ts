@@ -1,10 +1,12 @@
 import { Client } from "@elastic/elasticsearch";
 import { ElasticsearchContainer } from "./elasticsearch-container";
 
+const IMAGE = "elasticsearch:7.17.7";
+
 describe("ElasticsearchContainer", { timeout: 180_000 }, () => {
   // createIndex {
   it("should create an index", async () => {
-    const container = await new ElasticsearchContainer().start();
+    const container = await new ElasticsearchContainer(IMAGE).start();
     const client = new Client({ node: container.getHttpUrl() });
 
     await client.indices.create({ index: "people" });
@@ -16,7 +18,7 @@ describe("ElasticsearchContainer", { timeout: 180_000 }, () => {
 
   // indexDocument {
   it("should index a document", async () => {
-    const container = await new ElasticsearchContainer().start();
+    const container = await new ElasticsearchContainer(IMAGE).start();
     const client = new Client({ node: container.getHttpUrl() });
 
     const document = {
@@ -35,7 +37,7 @@ describe("ElasticsearchContainer", { timeout: 180_000 }, () => {
   // }
 
   it("should work with restarted container", async () => {
-    const container = await new ElasticsearchContainer().start();
+    const container = await new ElasticsearchContainer(IMAGE).start();
     await container.restart();
 
     const client = new Client({ node: container.getHttpUrl() });
