@@ -73,7 +73,7 @@ export class GenericContainer implements TestContainer {
 
   private isReaper() {
     return this.imageName.string === REAPER_IMAGE;
-  }
+  }h
 
   protected beforeContainerCreated?(): Promise<void>;
 
