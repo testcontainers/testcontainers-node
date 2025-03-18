@@ -4,6 +4,7 @@ import { defaultComposeOptions } from "./default-compose-options";
 import { ComposeDownOptions, ComposeOptions } from "./types";
 
 export interface ComposeClient {
+  version: string;
   up(options: ComposeOptions, services?: Array<string>): Promise<void>;
   pull(options: ComposeOptions, services?: Array<string>): Promise<void>;
   stop(options: ComposeOptions): Promise<void>;
@@ -12,15 +13,18 @@ export interface ComposeClient {
 
 export async function getComposeClient(environment: NodeJS.ProcessEnv): Promise<ComposeClient> {
   try {
-    await compose.version();
-    return new DockerComposeClient(environment);
+    const version = (await compose.version()).data.version;
+    return new DockerComposeClient(version, environment);
   } catch (err) {
-    return new MissingComposeClient();
+    return new MissingComposeClient("N/A");
   }
 }
 
 class DockerComposeClient implements ComposeClient {
-  constructor(private readonly environment: NodeJS.ProcessEnv) {}
+  constructor(
+    public readonly version: string,
+    private readonly environment: NodeJS.ProcessEnv
+  ) {}
 
   async up(options: ComposeOptions, services: Array<string> | undefined): Promise<void> {
     try {
@@ -90,7 +94,7 @@ class DockerComposeClient implements ComposeClient {
 }
 
 class MissingComposeClient implements ComposeClient {
-  public readonly info = undefined;
+  constructor(public readonly version: string) {}
 
   up(): Promise<void> {
     throw new Error("Compose is not installed");
