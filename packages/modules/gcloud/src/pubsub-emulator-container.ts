@@ -28,7 +28,7 @@ export class PubSubEmulatorContainer extends AbstractGcloudEmulator {
 export class StartedPubSubEmulatorContainer extends AbstractStartedContainer {
   constructor(
     startedTestContainer: StartedTestContainer,
-    private readonly projectId: string,
+    private readonly projectId: string
   ) {
     super(startedTestContainer);
   }

@@ -11,7 +11,7 @@ import { IncomingMessage } from "http";
 import { PassThrough, Readable } from "stream";
 import { execLog, log, streamToString } from "../../../common";
 import { ContainerClient } from "./container-client";
-import { ContainerStatus, ExecOptions, ExecResult } from "./types";
+import { ContainerCommitOptions, ContainerStatus, ExecOptions, ExecResult } from "./types";
 
 export class DockerContainerClient implements ContainerClient {
   constructor(public readonly dockerode: Dockerode) {}
@@ -260,6 +260,18 @@ export class DockerContainerClient implements ContainerClient {
       log.debug(`Restarted container`, { containerId: container.id });
     } catch (err) {
       log.error(`Failed to restart container: ${err}`, { containerId: container.id });
+      throw err;
+    }
+  }
+
+  async commit(container: Container, opts: ContainerCommitOptions): Promise<string> {
+    try {
+      log.debug(`Committing container...`, { containerId: container.id });
+      const { Id: imageId } = await container.commit(opts);
+      log.debug(`Committed container to image "${imageId}"`, { containerId: container.id });
+      return imageId;
+    } catch (err) {
+      log.error(`Failed to commit container: ${err}`, { containerId: container.id });
       throw err;
     }
   }

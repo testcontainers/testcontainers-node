@@ -1,5 +1,8 @@
 export class CouchbaseService {
-  constructor(private identifier: string, private minimumQuotaMb: number) {}
+  constructor(
+    private identifier: string,
+    private minimumQuotaMb: number
+  ) {}
 
   static readonly KV = new CouchbaseService("kv", 256);
   static readonly QUERY = new CouchbaseService("n1ql", 0);

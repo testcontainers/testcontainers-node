@@ -133,6 +133,10 @@ const container = await new GenericContainer("alpine")
     content: "hello world",
     target: "/remote/file2.txt"
   }])
+  .withCopyArchivesToContainer([{
+    tar: nodeReadable,
+    target: "/some/nested/remotedir"
+  }])
   .start();
 ```
 
@@ -153,6 +157,7 @@ container.copyContentToContainer([{
   content: "hello world",
   target: "/remote/file2.txt"
 }])
+container.copyArchiveToContainer(nodeReadable, "/some/nested/remotedir");
 ```
 
 An optional `mode` can be specified in octal for setting file permissions:
@@ -355,6 +360,29 @@ await container.stop({ removeVolumes: false });
 ```javascript
 const container = await new GenericContainer("alpine").start();
 await container.restart();
+```
+
+## Committing a container to an image
+
+```javascript
+const container = await new GenericContainer("alpine").start();
+// Do something with the container
+await container.exec(["sh", "-c", `echo 'hello world' > /hello-world.txt`]);
+// Commit the container to an image
+const newImageId = await container.commit({ repo: "my-repo", tag: "my-tag" });
+// Use this image in a new container
+const containerFromCommit = await new GenericContainer(newImageId).start();
+```
+
+By default, the image inherits the behavior of being marked for cleanup on exit. You can override this behavior using
+the `deleteOnExit` option:
+
+```javascript
+const container = await new GenericContainer("alpine").start();
+// Do something with the container
+await container.exec(["sh", "-c", `echo 'hello world' > /hello-world.txt`]);
+// Commit the container to an image; committed image will not be cleaned up on exit
+const newImageId = await container.commit({ repo: "my-repo", tag: "my-tag", deleteOnExit: false });
 ```
 
 ## Reusing a container

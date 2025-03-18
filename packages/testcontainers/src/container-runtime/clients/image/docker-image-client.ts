@@ -1,7 +1,7 @@
 import dockerIgnore from "@balena/dockerignore";
 import AsyncLock from "async-lock";
 import byline from "byline";
-import Dockerode, { ImageBuildOptions } from "dockerode";
+import Dockerode, { ImageBuildOptions, ImageInspectInfo } from "dockerode";
 import { existsSync, promises as fs } from "fs";
 import path from "path";
 import tar from "tar-fs";
@@ -14,7 +14,10 @@ export class DockerImageClient implements ImageClient {
   private readonly existingImages = new Set<string>();
   private readonly imageExistsLock = new AsyncLock();
 
-  constructor(protected readonly dockerode: Dockerode, protected readonly indexServerAddress: string) {}
+  constructor(
+    protected readonly dockerode: Dockerode,
+    protected readonly indexServerAddress: string
+  ) {}
 
   async build(context: string, opts: ImageBuildOptions): Promise<void> {
     try {
@@ -63,6 +66,18 @@ export class DockerImageClient implements ImageClient {
     const filter = instance.createFilter();
 
     return (aPath: string) => !filter(aPath);
+  }
+
+  async inspect(imageName: ImageName): Promise<ImageInspectInfo> {
+    try {
+      log.debug(`Inspecting image: "${imageName.string}"...`);
+      const imageInfo = await this.dockerode.getImage(imageName.string).inspect();
+      log.debug(`Inspected image: "${imageName.string}"`);
+      return imageInfo;
+    } catch (err) {
+      log.debug(`Failed to inspect image "${imageName.string}"`);
+      throw err;
+    }
   }
 
   async exists(imageName: ImageName): Promise<boolean> {

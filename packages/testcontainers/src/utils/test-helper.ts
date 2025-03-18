@@ -1,4 +1,4 @@
-import { GetEventsOptions } from "dockerode";
+import { GetEventsOptions, ImageInspectInfo } from "dockerode";
 import { Readable } from "stream";
 import { Agent } from "undici";
 import { IntervalRetry } from "../common";
@@ -48,6 +48,13 @@ export const getContainerIds = async (): Promise<string[]> => {
   const dockerode = (await getContainerRuntimeClient()).container.dockerode;
   const containers = await dockerode.listContainers({ all: true });
   return containers.map((container) => container.Id);
+};
+
+export const getImageInfo = async (imageName: string): Promise<ImageInspectInfo> => {
+  const dockerode = (await getContainerRuntimeClient()).container.dockerode;
+  const image = dockerode.getImage(imageName);
+  const imageInfo = await image.inspect();
+  return imageInfo;
 };
 
 export const checkImageExists = async (imageName: string): Promise<boolean> => {

@@ -46,8 +46,8 @@ describe("GenericContainer lifecycle", { timeout: 180_000 }, () => {
     expect(container1.getId()).toEqual(container2.getId());
     expect(beforeContainerCreated).toHaveBeenCalled();
     expect(containerCreated).not.toHaveBeenCalled();
-    expect(containerStarting).not.toHaveBeenCalled;
-    expect(containerStarted).not.toHaveBeenCalled;
+    expect(containerStarting).not.toHaveBeenCalled();
+    expect(containerStarted).not.toHaveBeenCalled();
 
     await container1.stop();
   });

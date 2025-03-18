@@ -135,18 +135,16 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
     ).rejects.toThrow(`Health check failed: unhealthy`);
   });
 
-  if (!process.env.CI_PODMAN) {
-    it("should stop the container when the health check wait strategy times out", async () => {
-      await expect(
-        new DockerComposeEnvironment(fixtures, "docker-compose-with-healthcheck-with-start-period.yml")
-          .withWaitStrategy(await composeContainerName("container"), Wait.forHealthCheck())
-          .withStartupTimeout(0)
-          .up()
-      ).rejects.toThrow(`Health check not healthy after 0ms`);
+  it("should stop the container when the health check wait strategy times out", async () => {
+    await expect(
+      new DockerComposeEnvironment(fixtures, "docker-compose-with-healthcheck-with-start-period.yml")
+        .withWaitStrategy(await composeContainerName("container"), Wait.forHealthCheck())
+        .withStartupTimeout(0)
+        .up()
+    ).rejects.toThrow(`Health check not healthy after 0ms`);
 
-      expect(await getRunningContainerNames()).not.toContain("container_1");
-    });
-  }
+    expect(await getRunningContainerNames()).not.toContain("container_1");
+  });
 
   it("should remove volumes when downing an environment", async () => {
     const environment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-volume.yml").up();

@@ -102,7 +102,6 @@ export class StartedCloudStorageEmulatorContainer extends AbstractStartedContain
     });
 
     if (!response.ok) {
-      // eslint-disable-next-line
       console.warn(`error updating fake-gcs-server with external url, response status code: ${response.status}`);
     }
   }

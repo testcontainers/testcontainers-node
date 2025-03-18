@@ -7,7 +7,7 @@ export class AbstractGcloudEmulator extends GenericContainer {
   constructor(
     image: string,
     port: number,
-    private readonly cmd: string,
+    private readonly cmd: string
   ) {
     super(image);
     this.flagsManager = new EmulatorFlagsManager();
