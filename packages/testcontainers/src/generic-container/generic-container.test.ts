@@ -525,10 +525,11 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
       .withAutoRemove(false)
       .start();
 
-    await container.stop();
-
-    expect(await getRunningContainerNames()).not.toContain(container.getName().replace("/", ""));
-    expect(await getStoppedContainerNames()).toContain(container.getName().replace("/", ""));
+    const stopped = await container.stop();
+    const dockerode = (await getContainerRuntimeClient()).container.dockerode;
+    expect(stopped.getId()).toBeTruthy();
+    const lowerLevelContainer = dockerode.getContainer(stopped.getId());
+    expect((await lowerLevelContainer.inspect()).State.Status).toEqual("exited");
   });
 
   it("should stop and override .withAutoRemove", async () => {
@@ -539,8 +540,11 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
 
     await container.stop({ remove: true });
 
-    expect(await getRunningContainerNames()).not.toContain(container.getName().replace("/", ""));
-    expect(await getStoppedContainerNames()).not.toContain(container.getName().replace("/", ""));
+    const stopped = await container.stop();
+    const dockerode = (await getContainerRuntimeClient()).container.dockerode;
+    expect(stopped.getId()).toBeTruthy();
+    const lowerLevelContainer = dockerode.getContainer(stopped.getId());
+    await expect(lowerLevelContainer.inspect()).rejects.toThrow(/404/) // Error: (HTTP code 404) no such container
   });
 
   it("should build a target stage", async () => {
