@@ -5,7 +5,7 @@ const EMULATOR_PORT = 8085;
 const DEFAULT_IMAGE = "gcr.io/google.com/cloudsdktool/google-cloud-cli";
 
 export class PubSubEmulatorContainer extends AbstractGcloudEmulator {
-  private _projectId?: string;
+  private projectId?: string;
 
   constructor(image = DEFAULT_IMAGE) {
     super(image, EMULATOR_PORT, "gcloud beta emulators pubsub start");
@@ -13,12 +13,12 @@ export class PubSubEmulatorContainer extends AbstractGcloudEmulator {
   }
 
   public withProjectId(projectId: string): this {
-    this._projectId = projectId;
+    this.projectId = projectId;
     return this;
   }
 
   public override async start(): Promise<StartedPubSubEmulatorContainer> {
-    const selectedProjectId = this._projectId ?? "test-project";
+    const selectedProjectId = this.projectId ?? "test-project";
     this.withFlag("project", selectedProjectId);
 
     return new StartedPubSubEmulatorContainer(await super.start(), selectedProjectId);
