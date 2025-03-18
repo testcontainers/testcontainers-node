@@ -1,41 +1,15 @@
-import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
-import { EmulatorFlagsManager } from "./emulator-flags-manager";
+import { AbstractStartedContainer, StartedTestContainer, Wait } from "testcontainers";
+import { AbstractGcloudEmulator } from "./abstract-gcloud-emulator";
 
 const EMULATOR_PORT = 8085;
-const CMD = "gcloud beta emulators pubsub start";
 const DEFAULT_IMAGE = "gcr.io/google.com/cloudsdktool/google-cloud-cli";
 
-export class PubSubEmulatorContainer extends GenericContainer {
-  private readonly _flagsManager: EmulatorFlagsManager;
+export class PubSubEmulatorContainer extends AbstractGcloudEmulator {
   private _projectId?: string;
 
   constructor(image = DEFAULT_IMAGE) {
-    super(image);
-    this._flagsManager = new EmulatorFlagsManager();
-    this.withExposedPorts(EMULATOR_PORT)
-      .withFlag("host-port", `0.0.0.0:${EMULATOR_PORT}`)
-      .withWaitStrategy(Wait.forLogMessage(/Server started/g, 1))
-      .withStartupTimeout(120_000);
-  }
-
-  private getCmd(): string {
-    return `${CMD} ${this.flagsManager.expandFlags()}`;
-  }
-
-  private get flagsManager() {
-    return this._flagsManager;
-  }
-
-  /**
-   * Adds flag as argument to emulator start command.
-   * Adding same flag name twice replaces existing flag value.
-   * @param name flag name. Must be set to non-empty string. May optionally contain -- prefix.
-   * @param value flag value. May be empty string.
-   * @returns this instance for chaining.
-   */
-  public withFlag(name: string, value: string) {
-    this.flagsManager.withFlag(name, value);
-    return this;
+    super(image, EMULATOR_PORT, "gcloud beta emulators pubsub start");
+    this.withWaitStrategy(Wait.forLogMessage(/Server started/g));
   }
 
   public withProjectId(projectId: string): this {
@@ -44,18 +18,18 @@ export class PubSubEmulatorContainer extends GenericContainer {
   }
 
   public override async start(): Promise<StartedPubSubEmulatorContainer> {
-    // Determine the valid command-line prompt when starting the Pub/Sub emulator
     const selectedProjectId = this._projectId ?? "test-project";
-    this.withFlag("project", selectedProjectId)
-      // expand all flags and get final command
-      .withCommand(["/bin/sh", "-c", this.getCmd()]);
+    this.withFlag("project", selectedProjectId);
 
     return new StartedPubSubEmulatorContainer(await super.start(), selectedProjectId);
   }
 }
 
 export class StartedPubSubEmulatorContainer extends AbstractStartedContainer {
-  constructor(startedTestContainer: StartedTestContainer, private readonly projectId: string) {
+  constructor(
+    startedTestContainer: StartedTestContainer,
+    private readonly projectId: string,
+  ) {
     super(startedTestContainer);
   }
 
