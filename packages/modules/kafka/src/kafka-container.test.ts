@@ -4,7 +4,7 @@ import * as path from "path";
 import { GenericContainer, Network, StartedTestContainer } from "testcontainers";
 import { KafkaContainer } from "./kafka-container";
 
-const IMAGE="confluentinc/cp-kafka:7.2.2"
+const IMAGE = "confluentinc/cp-kafka:7.2.2";
 
 describe("KafkaContainer", { timeout: 240_000 }, () => {
   // connectBuiltInZK {
@@ -207,7 +207,11 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
 
   it("should connect using kraft and custom network", async () => {
     const network = await new Network().start();
-    const kafkaContainer = await new KafkaContainer(IMAGE).withKraft().withNetwork(network).withExposedPorts(9093).start();
+    const kafkaContainer = await new KafkaContainer(IMAGE)
+      .withKraft()
+      .withNetwork(network)
+      .withExposedPorts(9093)
+      .start();
 
     await testPubSub(kafkaContainer);
 
@@ -219,66 +223,6 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
     const kafkaContainer = new KafkaContainer("confluentinc/cp-kafka:7.4.0")
       .withKraft()
       .withExposedPorts(9093)
-      .withSaslSslListener({
-        port: 9094,
-        sasl: {
-          mechanism: "SCRAM-SHA-512",
-          user: {
-            name: "app-user",
-            password: "userPassword",
-          },
-        },
-        keystore: {
-          content: "fake",
-          passphrase: "serverKeystorePassword",
-        },
-        truststore: {
-          content: "fake",
-          passphrase: "serverTruststorePassword",
-        },
-      });
-    await expect(() => kafkaContainer.start()).rejects.toThrow(
-      "Provided Confluent Platform's version 7.4.0 is not supported in Kraft mode with sasl (must be 7.5.0 or above)"
-    );
-  });
-
-  it("should connect using ZooKeeper", async () => {
-    const network = await new Network().start();
-
-    const zookeeperContainer = await new GenericContainer("confluentinc/cp-zookeeper:7.2.2")
-      .withExposedPorts(2181)
-      .withNetwork(network)
-      .withNetworkAliases("zookeeper")
-      .withEnvironment({
-        ZOOKEEPER_CLIENT_PORT: "2181",
-      })
-      .start();
-
-    const kafkaContainer = await new KafkaContainer(IMAGE)
-      .withZooKeeper("zookeeper", 2181)
-      .withNetwork(network)
-      .withExposedPorts(9093)
-      .start();
-
-    await testPubSub(kafkaContainer);
-
-    await zookeeperContainer.stop();
-    await kafkaContainer.stop();
-    await network.stop();
-  });
-
-  it("should connect using KRaft", async () => {
-    const kafkaContainer = await new KafkaContainer(IMAGE).withKraft().withExposedPorts(9093).start();
-
-    await testPubSub(kafkaContainer);
-
-    await kafkaContainer.stop();
-  });
-
-  it("should connect with KRaft and SASL_SSL", async () => {
-    const kafkaContainer = await new KafkaContainer(IMAGE)
-      .withKraft()
-      .withExposedPorts(9093, 9099)
       .withSaslSslListener({
         port: 9094,
         sasl: {

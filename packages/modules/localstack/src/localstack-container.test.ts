@@ -85,9 +85,7 @@ describe("LocalStackContainer", { timeout: 180_000 }, () => {
   });
 
   it("should override LOCALSTACK_HOST with last network alias", async () => {
-    const container = await new LocalstackContainer(IMAGE)
-      .withNetworkAliases("other", "myalias")
-      .start();
+    const container = await new LocalstackContainer(IMAGE).withNetworkAliases("other", "myalias").start();
 
     const { output, exitCode } = await container.exec(["printenv", "LOCALSTACK_HOST"]);
     expect(exitCode).toBe(0);
