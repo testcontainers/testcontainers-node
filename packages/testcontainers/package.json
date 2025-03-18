@@ -38,7 +38,7 @@
     "debug": "^4.3.5",
     "docker-compose": "^0.24.8",
     "dockerode": "^3.3.5",
-    "get-port": "^5.1.1",
+    "get-port": "^7.1.0",
     "proper-lockfile": "^4.1.2",
     "properties-reader": "^2.3.0",
     "ssh-remote-port-forward": "^1.0.4",

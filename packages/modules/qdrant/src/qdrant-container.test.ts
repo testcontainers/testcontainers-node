@@ -40,7 +40,7 @@ describe("QdrantContainer", { timeout: 100_000 }, () => {
       apiKey: "INVALID_KEY_" + crypto.randomUUID(),
     });
 
-    expect(client.getCollections()).rejects.toThrow("Unauthorized");
+    await expect(client.getCollections()).rejects.toThrow("Unauthorized");
 
     await container.stop();
   });
@@ -69,7 +69,7 @@ describe("QdrantContainer", { timeout: 100_000 }, () => {
       apiKey: "INVALID_KEY_" + crypto.randomUUID(),
     });
 
-    expect(client.getCollections()).rejects.toThrow("Unauthorized");
+    await expect(client.getCollections()).rejects.toThrow("Unauthorized");
 
     await container.stop();
   });
