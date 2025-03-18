@@ -1,16 +1,12 @@
-import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
+import { AbstractStartedContainer, StartedTestContainer } from "testcontainers";
+import { AbstractGcloudEmulator } from "./abstract-gcloud-emulator";
 
 const EMULATOR_PORT = 8080;
-const CMD = `gcloud beta emulators firestore start --host-port 0.0.0.0:${EMULATOR_PORT}`;
 const DEFAULT_IMAGE = "gcr.io/google.com/cloudsdktool/cloud-sdk";
 
-export class FirestoreEmulatorContainer extends GenericContainer {
+export class FirestoreEmulatorContainer extends AbstractGcloudEmulator {
   constructor(image = DEFAULT_IMAGE) {
-    super(image);
-    this.withExposedPorts(EMULATOR_PORT)
-      .withCommand(["/bin/sh", "-c", CMD])
-      .withWaitStrategy(Wait.forLogMessage(RegExp(".*running.*"), 1))
-      .withStartupTimeout(120_000);
+    super(image, EMULATOR_PORT, "gcloud beta emulators firestore start");
   }
 
   public override async start(): Promise<StartedFirestoreEmulatorContainer> {
