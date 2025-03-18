@@ -7,7 +7,6 @@ import {
   checkContainerIsHealthy,
   getDockerEventStream,
   getRunningContainerNames,
-  getStoppedContainerNames,
   waitForDockerEvent,
 } from "../utils/test-helper";
 import { GenericContainer } from "./generic-container";
@@ -544,7 +543,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     const dockerode = (await getContainerRuntimeClient()).container.dockerode;
     expect(stopped.getId()).toBeTruthy();
     const lowerLevelContainer = dockerode.getContainer(stopped.getId());
-    await expect(lowerLevelContainer.inspect()).rejects.toThrow(/404/) // Error: (HTTP code 404) no such container
+    await expect(lowerLevelContainer.inspect()).rejects.toThrow(/404/); // Error: (HTTP code 404) no such container
   });
 
   it("should build a target stage", async () => {
