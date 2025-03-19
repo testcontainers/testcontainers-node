@@ -1,11 +1,20 @@
-import { AbstractStartedContainer, GenericContainer, log, StartedTestContainer, Wait } from "testcontainers";
+import {
+  AbstractStartedContainer,
+  GenericContainer,
+  getContainerRuntimeClient,
+  getReaper,
+  LABEL_TESTCONTAINERS_SESSION_ID,
+  log,
+  StartedTestContainer,
+  Wait,
+} from "testcontainers";
 
 export const LOCALSTACK_PORT = 4566;
 
 export class LocalstackContainer extends GenericContainer {
   constructor(image = "localstack/localstack:2.2.0") {
     super(image);
-    this.resolveHostname();
+
     this.withExposedPorts(LOCALSTACK_PORT).withWaitStrategy(Wait.forLogMessage("Ready", 1)).withStartupTimeout(120_000);
   }
 
@@ -16,13 +25,32 @@ export class LocalstackContainer extends GenericContainer {
       // do nothing
       hostnameExternalReason = "explicitly as environment variable";
     } else if (this.networkAliases && this.networkAliases.length > 0) {
-      this.environment[envVar] = this.networkAliases.at(this.networkAliases.length - 1) || ""; // use the last network alias set
+      // use the last network alias set
+      this.withEnvironment({ [envVar]: this.networkAliases.at(this.networkAliases.length - 1) ?? "" });
       hostnameExternalReason = "to match last network alias on container with non-default network";
     } else {
-      this.withEnvironment({ LOCALSTACK_HOST: "localhost" });
+      this.withEnvironment({ [envVar]: "localhost" });
       hostnameExternalReason = "to match host-routable address for container";
     }
-    log.info(`${envVar} environment variable set to ${this.environment[envVar]} (${hostnameExternalReason})"`);
+    log.info(`${envVar} environment variable set to "${this.environment[envVar]}" (${hostnameExternalReason})`);
+  }
+
+  /**
+   * Configure the LocalStack container to add sessionId when starting lambda container.
+   * This allows the lambda container to be identified by the {@link Reaper} and cleaned up on exit.
+   */
+  private async flagLambdaSessionId(): Promise<void> {
+    const client = await getContainerRuntimeClient();
+    const reaper = await getReaper(client);
+
+    this.withEnvironment({
+      LAMBDA_DOCKER_FLAGS: `${this.environment["LAMBDA_DOCKER_FLAGS"] ?? ""} -l ${LABEL_TESTCONTAINERS_SESSION_ID}=${reaper.sessionId}`,
+    });
+  }
+
+  protected override async beforeContainerCreated(): Promise<void> {
+    this.resolveHostname();
+    await this.flagLambdaSessionId();
   }
 
   public override async start(): Promise<StartedLocalStackContainer> {

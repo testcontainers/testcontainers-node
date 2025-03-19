@@ -1,8 +1,16 @@
 import archiver from "archiver";
 import AsyncLock from "async-lock";
+import { Container, ContainerCreateOptions, HostConfig } from "dockerode";
+import { Readable } from "stream";
+import { containerLog, hash, log } from "../common";
+import { ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "../container-runtime";
+import { CONTAINER_STATUSES } from "../container-runtime/clients/container/types";
+import { StartedNetwork } from "../network/network";
+import { PortForwarderInstance, SSHD_IMAGE } from "../port-forwarder/port-forwarder";
+import { getReaper, REAPER_IMAGE } from "../reaper/reaper";
 import { StartedTestContainer, TestContainer } from "../test-container";
-import { WaitStrategy } from "../wait-strategies/wait-strategy";
 import {
+  ArchiveToCopy,
   BindMount,
   ContentToCopy,
   DirectoryToCopy,
@@ -16,22 +24,16 @@ import {
   TmpFs,
   Ulimits,
 } from "../types";
-import { GenericContainerBuilder } from "./generic-container-builder";
-import { StartedGenericContainer } from "./started-generic-container";
-import { Wait } from "../wait-strategies/wait";
-import { Readable } from "stream";
-import { Container, ContainerCreateOptions, HostConfig } from "dockerode";
-import { waitForContainer } from "../wait-strategies/wait-for-container";
-import { ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "../container-runtime";
+import { BoundPorts } from "../utils/bound-ports";
+import { createLabels, LABEL_TESTCONTAINERS_CONTAINER_HASH, LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
+import { mapInspectResult } from "../utils/map-inspect-result";
 import { getContainerPort, hasHostBinding, PortWithOptionalBinding } from "../utils/port";
 import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
-import { getReaper, REAPER_IMAGE } from "../reaper/reaper";
-import { PortForwarderInstance, SSHD_IMAGE } from "../port-forwarder/port-forwarder";
-import { createLabels, LABEL_TESTCONTAINERS_CONTAINER_HASH, LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
-import { containerLog, hash, log } from "../common";
-import { BoundPorts } from "../utils/bound-ports";
-import { StartedNetwork } from "../network/network";
-import { mapInspectResult } from "../utils/map-inspect-result";
+import { Wait } from "../wait-strategies/wait";
+import { waitForContainer } from "../wait-strategies/wait-for-container";
+import { WaitStrategy } from "../wait-strategies/wait-strategy";
+import { GenericContainerBuilder } from "./generic-container-builder";
+import { StartedGenericContainer } from "./started-generic-container";
 
 const reusableContainerCreationLock = new AsyncLock();
 
@@ -56,6 +58,8 @@ export class GenericContainer implements TestContainer {
   protected filesToCopy: FileToCopy[] = [];
   protected directoriesToCopy: DirectoryToCopy[] = [];
   protected contentsToCopy: ContentToCopy[] = [];
+  protected archivesToCopy: ArchiveToCopy[] = [];
+  protected healthCheck?: HealthCheck;
 
   constructor(image: string) {
     this.imageName = ImageName.fromString(image);
@@ -79,7 +83,10 @@ export class GenericContainer implements TestContainer {
 
   public async start(): Promise<StartedTestContainer> {
     const client = await getContainerRuntimeClient();
-    await client.image.pull(this.imageName, { force: this.pullPolicy.shouldPull() });
+    await client.image.pull(this.imageName, {
+      force: this.pullPolicy.shouldPull(),
+      platform: this.createOpts.platform,
+    });
 
     if (this.beforeContainerCreated) {
       await this.beforeContainerCreated();
@@ -96,7 +103,7 @@ export class GenericContainer implements TestContainer {
 
     this.createOpts.Labels = { ...createLabels(), ...this.createOpts.Labels };
 
-    if (this.reuse) {
+    if (process.env.TESTCONTAINERS_REUSE_ENABLE !== "false" && this.reuse) {
       return this.reuseOrStartContainer(client);
     }
 
@@ -114,7 +121,11 @@ export class GenericContainer implements TestContainer {
     log.debug(`Container reuse has been enabled with hash "${containerHash}"`);
 
     return reusableContainerCreationLock.acquire(containerHash, async () => {
-      const container = await client.container.fetchByLabel(LABEL_TESTCONTAINERS_CONTAINER_HASH, containerHash);
+      const container = await client.container.fetchByLabel(LABEL_TESTCONTAINERS_CONTAINER_HASH, containerHash, {
+        status: CONTAINER_STATUSES.filter(
+          (status) => status !== "removing" && status !== "dead" && status !== "restarting"
+        ),
+      });
       if (container !== undefined) {
         log.debug(`Found container to reuse with hash "${containerHash}"`, { containerId: container.id });
         return this.reuseContainer(client, container);
@@ -125,7 +136,14 @@ export class GenericContainer implements TestContainer {
   }
 
   private async reuseContainer(client: ContainerRuntimeClient, container: Container) {
-    const inspectResult = await client.container.inspect(container);
+    let inspectResult = await client.container.inspect(container);
+    if (!inspectResult.State.Running) {
+      log.debug("Reused container is not running, attempting to start it");
+      await client.container.start(container);
+      // Refetch the inspect result to get the updated state
+      inspectResult = await client.container.inspect(container);
+    }
+
     const mappedInspectResult = mapInspectResult(inspectResult);
     const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, mappedInspectResult).filter(
       this.exposedPorts
@@ -162,6 +180,10 @@ export class GenericContainer implements TestContainer {
       const archive = this.createArchiveToCopyToContainer();
       archive.finalize();
       await client.container.putArchive(container, archive, "/");
+    }
+
+    for (const archive of this.archivesToCopy) {
+      await client.container.putArchive(container, archive.tar, archive.target);
     }
 
     log.info(`Starting container for image "${this.createOpts.Image}"...`, { containerId: container.id });
@@ -278,6 +300,11 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
+  public withPlatform(platform: string): this {
+    this.createOpts.platform = platform;
+    return this;
+  }
+
   public withTmpFs(tmpFs: TmpFs): this {
     this.hostConfig.Tmpfs = { ...this.hostConfig.Tmpfs, ...tmpFs };
     return this;
@@ -367,6 +394,7 @@ export class GenericContainer implements TestContainer {
   public withHealthCheck(healthCheck: HealthCheck): this {
     const toNanos = (duration: number): number => duration * 1e6;
 
+    this.healthCheck = healthCheck;
     this.createOpts.Healthcheck = {
       Test: healthCheck.test,
       Interval: healthCheck.interval ? toNanos(healthCheck.interval) : 0,
@@ -374,6 +402,7 @@ export class GenericContainer implements TestContainer {
       Retries: healthCheck.retries || 0,
       StartPeriod: healthCheck.startPeriod ? toNanos(healthCheck.startPeriod) : 0,
     };
+
     return this;
   }
 
@@ -435,6 +464,11 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
+  public withCopyArchivesToContainer(archivesToCopy: ArchiveToCopy[]): this {
+    this.archivesToCopy = [...this.archivesToCopy, ...archivesToCopy];
+    return this;
+  }
+
   public withWorkingDir(workingDir: string): this {
     this.createOpts.WorkingDir = workingDir;
     return this;
@@ -453,6 +487,11 @@ export class GenericContainer implements TestContainer {
 
   public withLogConsumer(logConsumer: (stream: Readable) => unknown): this {
     this.logConsumer = logConsumer;
+    return this;
+  }
+
+  public withHostname(hostname: string): this {
+    this.createOpts.Hostname = hostname;
     return this;
   }
 }

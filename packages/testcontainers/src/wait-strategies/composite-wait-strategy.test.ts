@@ -1,9 +1,7 @@
 import { GenericContainer } from "../generic-container/generic-container";
 import { Wait } from "./wait";
 
-describe("CompositeWaitStrategy", () => {
-  jest.setTimeout(180_000);
-
+describe("CompositeWaitStrategy", { timeout: 180_000 }, () => {
   it("should work with individual timeouts", async () => {
     const container = new GenericContainer("cristianrgreco/testcontainer:1.1.14").withWaitStrategy(
       Wait.forAll([

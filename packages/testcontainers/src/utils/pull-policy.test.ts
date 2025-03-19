@@ -1,4 +1,4 @@
-import { PullPolicy, ImagePullPolicy } from "./pull-policy";
+import { ImagePullPolicy, PullPolicy } from "./pull-policy";
 
 test("default pull policy should return false", () => {
   expect(PullPolicy.defaultPolicy().shouldPull()).toBe(false);

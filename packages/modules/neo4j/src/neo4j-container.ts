@@ -5,7 +5,7 @@ const HTTP_PORT = 7474;
 const USERNAME = "neo4j";
 
 export class Neo4jContainer extends GenericContainer {
-  private password = "test";
+  private password = "pass123!@#WORD";
   private apoc = false;
   private ttl?: number;
 
@@ -58,7 +58,10 @@ export class StartedNeo4jContainer extends AbstractStartedContainer {
   private readonly boltPort: number;
   private readonly httpPort: number;
 
-  constructor(startedTestContainer: StartedTestContainer, private readonly password: string) {
+  constructor(
+    startedTestContainer: StartedTestContainer,
+    private readonly password: string
+  ) {
     super(startedTestContainer);
     this.boltPort = this.startedTestContainer.getMappedPort(BOLT_PORT);
     this.httpPort = this.startedTestContainer.getMappedPort(HTTP_PORT);

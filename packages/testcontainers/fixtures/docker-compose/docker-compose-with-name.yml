@@ -2,7 +2,7 @@ version: "3.5"
 
 services:
   db:
-    container_name: custom_container_name
+    container_name: ${CONTAINER_NAME:-custom_container_name}
     image: cristianrgreco/testcontainer:1.1.14
     ports:
       - 8080

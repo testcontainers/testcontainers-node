@@ -1,6 +1,6 @@
-import { Auth, AuthConfig, ContainerRuntimeConfig } from "./types";
 import { RegistryAuthLocator } from "./registry-auth-locator";
 import { registryMatches } from "./registry-matches";
+import { Auth, AuthConfig, ContainerRuntimeConfig } from "./types";
 
 export class Auths implements RegistryAuthLocator {
   public getName(): string {
@@ -21,7 +21,9 @@ export class Auths implements RegistryAuthLocator {
 
     if (auth.auth) {
       const decodedAuth = Buffer.from(auth.auth, "base64").toString();
-      const [username, password] = decodedAuth.split(":");
+      const [username, ...passwordParts] = decodedAuth.split(":");
+      const password = passwordParts.join(":");
+
       authConfig.username = username;
       authConfig.password = password;
     } else {

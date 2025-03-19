@@ -7,12 +7,11 @@ import Dockerode, {
   ExecCreateOptions,
   Network,
 } from "dockerode";
-import { PassThrough, Readable } from "stream";
 import { IncomingMessage } from "http";
-import { ExecOptions, ExecResult } from "./types";
-import byline from "byline";
-import { ContainerClient } from "./container-client";
+import { PassThrough, Readable } from "stream";
 import { execLog, log, streamToString } from "../../../common";
+import { ContainerClient } from "./container-client";
+import { ContainerCommitOptions, ContainerStatus, ExecOptions, ExecResult } from "./types";
 
 export class DockerContainerClient implements ContainerClient {
   constructor(public readonly dockerode: Dockerode) {}
@@ -29,15 +28,24 @@ export class DockerContainerClient implements ContainerClient {
     }
   }
 
-  async fetchByLabel(labelName: string, labelValue: string): Promise<Container | undefined> {
+  async fetchByLabel(
+    labelName: string,
+    labelValue: string,
+    opts: { status?: ContainerStatus[] } | undefined = undefined
+  ): Promise<Container | undefined> {
     try {
+      const filters: { [key: string]: string[] } = {
+        label: [`${labelName}=${labelValue}`],
+      };
+
+      if (opts?.status) {
+        filters.status = opts.status;
+      }
+
       log.debug(`Fetching container by label "${labelName}=${labelValue}"...`);
       const containers = await this.dockerode.listContainers({
         limit: 1,
-        filters: {
-          status: ["running"],
-          label: [`${labelName}=${labelValue}`],
-        },
+        filters,
       });
       if (containers.length === 0) {
         log.debug(`No container found with label "${labelName}=${labelValue}"`);
@@ -112,9 +120,7 @@ export class DockerContainerClient implements ContainerClient {
 
   async inspect(container: Dockerode.Container): Promise<ContainerInspectInfo> {
     try {
-      log.debug(`Inspecting container...`, { containerId: container.id });
       const inspectInfo = await container.inspect();
-      log.debug(`Inspected container`, { containerId: container.id });
       return inspectInfo;
     } catch (err) {
       log.error(`Failed to inspect container: ${err}`, { containerId: container.id });
@@ -192,20 +198,38 @@ export class DockerContainerClient implements ContainerClient {
       execOptions.User = opts.user;
     }
 
-    const chunks: string[] = [];
+    const outputChunks: string[] = [];
+    const stdoutChunks: string[] = [];
+    const stderrChunks: string[] = [];
+
     try {
       if (opts?.log) {
         log.debug(`Execing container with command "${command.join(" ")}"...`, { containerId: container.id });
       }
 
       const exec = await container.exec(execOptions);
-      const stream = await exec.start({ stdin: true, Detach: false, Tty: true });
-      if (opts?.log && execLog.enabled()) {
-        byline(stream).on("data", (line) => execLog.trace(line, { containerId: container.id }));
-      }
+      const stream = await exec.start({ stdin: true, Detach: false, Tty: false });
+
+      const stdoutStream = new PassThrough();
+      const stderrStream = new PassThrough();
+
+      this.dockerode.modem.demuxStream(stream, stdoutStream, stderrStream);
+
+      const processStream = (stream: Readable, chunks: string[]) => {
+        stream.on("data", (chunk) => {
+          chunks.push(chunk.toString());
+          outputChunks.push(chunk.toString());
+
+          if (opts?.log && execLog.enabled()) {
+            execLog.trace(chunk.toString(), { containerId: container.id });
+          }
+        });
+      };
+
+      processStream(stdoutStream, stdoutChunks);
+      processStream(stderrStream, stderrChunks);
 
       await new Promise((res, rej) => {
-        stream.on("data", (chunk) => chunks.push(chunk));
         stream.on("end", res);
         stream.on("error", rej);
       });
@@ -213,13 +237,16 @@ export class DockerContainerClient implements ContainerClient {
 
       const inspectResult = await exec.inspect();
       const exitCode = inspectResult.ExitCode ?? -1;
-      const output = chunks.join("");
+      const output = outputChunks.join("");
+      const stdout = stdoutChunks.join("");
+      const stderr = stderrChunks.join("");
+
       if (opts?.log) {
         log.debug(`Execed container with command "${command.join(" ")}"...`, { containerId: container.id });
       }
-      return { output, exitCode };
+      return { output, stdout, stderr, exitCode };
     } catch (err) {
-      log.error(`Failed to exec container with command "${command.join(" ")}": ${err}: ${chunks.join("")}`, {
+      log.error(`Failed to exec container with command "${command.join(" ")}": ${err}: ${outputChunks.join("")}`, {
         containerId: container.id,
       });
       throw err;
@@ -233,6 +260,18 @@ export class DockerContainerClient implements ContainerClient {
       log.debug(`Restarted container`, { containerId: container.id });
     } catch (err) {
       log.error(`Failed to restart container: ${err}`, { containerId: container.id });
+      throw err;
+    }
+  }
+
+  async commit(container: Container, opts: ContainerCommitOptions): Promise<string> {
+    try {
+      log.debug(`Committing container...`, { containerId: container.id });
+      const { Id: imageId } = await container.commit(opts);
+      log.debug(`Committed container to image "${imageId}"`, { containerId: container.id });
+      return imageId;
+    } catch (err) {
+      log.error(`Failed to commit container: ${err}`, { containerId: container.id });
       throw err;
     }
   }

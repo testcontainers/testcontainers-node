@@ -1,13 +1,11 @@
-import { ChromaClient, AdminClient, OllamaEmbeddingFunction } from "chromadb";
-import { ChromaDBContainer, StartedChromaDBContainer } from "./chromadb-container";
-import * as path from "node:path";
+import { AdminClient, ChromaClient, OllamaEmbeddingFunction } from "chromadb";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { GenericContainer } from "testcontainers";
-import * as os from "node:os";
-import * as fs from "node:fs";
-// run tests with NODE_OPTIONS=--experimental-vm-modules jest packages/modules/chromadb/src/chromadb-container.test.ts
-describe("ChromaDB", () => {
-  jest.setTimeout(360_000);
+import { ChromaDBContainer, StartedChromaDBContainer } from "./chromadb-container";
 
+describe("ChromaDB", { timeout: 360_000 }, () => {
   // startContainer {
   it("should connect", async () => {
     const container = await new ChromaDBContainer().start();
@@ -36,17 +34,13 @@ describe("ChromaDB", () => {
     const collection = await client.createCollection({ name: "test", metadata: { "hnsw:space": "cosine" } });
     expect(collection.name).toBe("test");
     expect(collection.metadata).toBeDefined();
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    expect(collection.metadata["hnsw:space"]).toBe("cosine");
+    expect(collection.metadata?.["hnsw:space"]).toBe("cosine");
     await collection.add({ ids: ["1"], embeddings: [[1, 2, 3]], documents: ["my doc"], metadatas: [{ key: "value" }] });
     const getResults = await collection.get({ ids: ["1"] });
     expect(getResults.ids[0]).toBe("1");
     expect(getResults.documents[0]).toStrictEqual("my doc");
     expect(getResults.metadatas).toBeDefined();
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    expect(getResults.metadatas[0].key).toStrictEqual("value");
+    expect(getResults.metadatas?.[0]?.key).toStrictEqual("value");
     await container.stop();
   });
   // }
@@ -91,9 +85,7 @@ describe("ChromaDB", () => {
     const collection = await client.createCollection({ name: "test", metadata: { "hnsw:space": "cosine" } });
     expect(collection.name).toBe("test");
     expect(collection.metadata).toBeDefined();
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    expect(collection.metadata["hnsw:space"]).toBe("cosine");
+    expect(collection.metadata?.["hnsw:space"]).toBe("cosine");
     await collection.add({ ids: ["1"], embeddings: [[1, 2, 3]], documents: ["my doc"] });
     const getResults = await collection.get({ ids: ["1"] });
     expect(getResults.ids[0]).toBe("1");
@@ -103,7 +95,7 @@ describe("ChromaDB", () => {
     try {
       fs.rmSync(sourcePath, { force: true, recursive: true });
     } catch (e) {
-      //Ignore clean up, when have no access on fs.
+      // Ignore clean up, when have no access on fs.
       console.log(e);
     }
   });

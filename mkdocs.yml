@@ -43,13 +43,22 @@ nav:
       - Advanced: features/advanced.md
   - Modules:
       - ArangoDB: modules/arangodb.md
+      - Azurite: modules/azurite.md
+      - Cassandra: modules/cassandra.md
       - ChromaDB: modules/chromadb.md
+      - CosmosDB: modules/cosmosdb.md
       - Couchbase: modules/couchbase.md
+      - CockroachDB: modules/cockroachdb.md
       - Elasticsearch: modules/elasticsearch.md
+      - EventStoreDB: modules/eventstoredb.md
       - GCloud: modules/gcloud.md
       - HiveMQ: modules/hivemq.md
+      - K3s: modules/k3s.md
       - Kafka: modules/kafka.md
       - Localstack: modules/localstack.md
+      - MariaDB: modules/mariadb.md
+      - Mockserver: modules/mockserver.md
+      - MinIO: modules/minio.md
       - MongoDB: modules/mongodb.md
       - MSSQLServer: modules/mssqlserver.md
       - MySQL: modules/mysql.md
@@ -61,6 +70,9 @@ nav:
       - RabbitMQ: modules/rabbitmq.md
       - Redis: modules/redis.md
       - Redpanda: modules/redpanda.md
+      - ScyllaDB: modules/scylladb.md
       - Selenium: modules/selenium.md
+      - ToxiProxy: modules/toxiproxy.md
+      - Valkey: modules/valkey.md
       - Weaviate: modules/weaviate.md
   - Configuration: configuration.md

@@ -1,0 +1,39 @@
+{
+  "name": "@testcontainers/cockroachdb",
+  "version": "10.21.0",
+  "license": "MIT",
+  "keywords": [
+    "cockroachdb",
+    "crdb",
+    "testing",
+    "docker",
+    "testcontainers"
+  ],
+  "description": "CockroachDB module for Testcontainers",
+  "homepage": "https://github.com/testcontainers/testcontainers-node#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/testcontainers/testcontainers-node"
+  },
+  "bugs": {
+    "url": "https://github.com/testcontainers/testcontainers-node/issues"
+  },
+  "main": "build/index.js",
+  "files": [
+    "build"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "prepack": "shx cp ../../../README.md . && shx cp ../../../LICENSE .",
+    "build": "tsc --project tsconfig.build.json"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.11.6",
+    "pg": "^8.12.0"
+  },
+  "dependencies": {
+    "testcontainers": "^10.21.0"
+  }
+}

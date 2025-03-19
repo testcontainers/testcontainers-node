@@ -1,6 +1,7 @@
-import path from "path";
 import getPort from "get-port";
-import { GenericContainer } from "./generic-container";
+import path from "path";
+import { RandomUuid } from "../common";
+import { getContainerRuntimeClient } from "../container-runtime";
 import { PullPolicy } from "../utils/pull-policy";
 import {
   checkContainerIsHealthy,
@@ -8,12 +9,9 @@ import {
   getRunningContainerNames,
   waitForDockerEvent,
 } from "../utils/test-helper";
-import { getContainerRuntimeClient } from "../container-runtime";
-import { RandomUuid } from "../common";
+import { GenericContainer } from "./generic-container";
 
-describe("GenericContainer", () => {
-  jest.setTimeout(180_000);
-
+describe("GenericContainer", { timeout: 180_000 }, () => {
   const fixtures = path.resolve(__dirname, "..", "..", "fixtures", "docker");
 
   it("should return first mapped port", async () => {
@@ -42,10 +40,12 @@ describe("GenericContainer", () => {
   it("should execute a command on a running container", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
 
-    const { output, exitCode } = await container.exec(["echo", "hello", "world"]);
+    const { output, stdout, stderr, exitCode } = await container.exec(["echo", "hello", "world"]);
 
     expect(exitCode).toBe(0);
-    expect(output).toEqual(expect.stringContaining("hello world"));
+    expect(stdout).toEqual(expect.stringContaining("hello world"));
+    expect(stderr).toBe("");
+    expect(output).toEqual(stdout);
 
     await container.stop();
   });
@@ -53,10 +53,12 @@ describe("GenericContainer", () => {
   it("should execute a command in a different working directory", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
 
-    const { output, exitCode } = await container.exec(["pwd"], { workingDir: "/var/log" });
+    const { output, stdout, stderr, exitCode } = await container.exec(["pwd"], { workingDir: "/var/log" });
 
     expect(exitCode).toBe(0);
-    expect(output).toEqual(expect.stringContaining("/var/log"));
+    expect(stdout).toEqual(expect.stringContaining("/var/log"));
+    expect(stderr).toBe("");
+    expect(output).toEqual(stdout);
 
     await container.stop();
   });
@@ -64,10 +66,12 @@ describe("GenericContainer", () => {
   it("should execute a command with custom environment variables", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
 
-    const { output, exitCode } = await container.exec(["env"], { env: { TEST_ENV: "test" } });
+    const { output, stdout, stderr, exitCode } = await container.exec(["env"], { env: { TEST_ENV: "test" } });
 
     expect(exitCode).toBe(0);
-    expect(output).toEqual(expect.stringContaining("TEST_ENV=test"));
+    expect(stdout).toEqual(expect.stringContaining("TEST_ENV=test"));
+    expect(stderr).toBe("");
+    expect(output).toEqual(stdout);
 
     await container.stop();
   });
@@ -76,10 +80,44 @@ describe("GenericContainer", () => {
     // By default, node:alpine runs as root
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
 
-    const { output, exitCode } = await container.exec("whoami", { user: "node" });
+    const { output, stdout, stderr, exitCode } = await container.exec(["whoami"], { user: "node" });
 
     expect(exitCode).toBe(0);
-    expect(output).toEqual(expect.stringContaining("node"));
+    expect(stdout).toEqual(expect.stringContaining("node"));
+    expect(stderr).toBe("");
+    expect(output).toEqual(stdout);
+
+    await container.stop();
+  });
+
+  it("should capture stderr when a command fails", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
+
+    const { output, stdout, stderr, exitCode } = await container.exec(["ls", "/nonexistent/path"]);
+
+    expect(exitCode).not.toBe(0);
+    expect(stdout).toBe("");
+    expect(stderr).toEqual(expect.stringContaining("No such file or directory"));
+    expect(output).toEqual(stderr);
+
+    await container.stop();
+  });
+
+  it("should capture stdout and stderr in the correct order", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
+
+    // The command first writes to stdout and then tries to access a nonexistent file (stderr)
+    const { output, stdout, stderr, exitCode } = await container.exec([
+      "sh",
+      "-c",
+      "echo 'This is stdout'; ls /nonexistent/path",
+    ]);
+
+    expect(exitCode).not.toBe(0); // The command should fail due to the ls error
+    expect(stdout).toEqual(expect.stringContaining("This is stdout"));
+    expect(stderr).toEqual(expect.stringContaining("No such file or directory"));
+    expect(output).toEqual(expect.stringContaining("This is stdout"));
+    expect(output).toEqual(expect.stringContaining("No such file or directory"));
 
     await container.stop();
   });
@@ -121,6 +159,18 @@ describe("GenericContainer", () => {
 
     const { output } = await container.exec(["pwd"]);
     expect(output).toEqual(expect.stringContaining("/tmp"));
+  });
+
+  it("should set platform", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withPullPolicy(PullPolicy.alwaysPull())
+      .withCommand(["node", "../index.js"])
+      .withPlatform("linux/amd64")
+      .withExposedPorts(8080)
+      .start();
+
+    const { output } = await container.exec(["arch"]);
+    expect(output).toEqual(expect.stringContaining("x86_64"));
   });
 
   it("should set entrypoint", async () => {
@@ -481,6 +531,16 @@ describe("GenericContainer", () => {
 
     await firstStartedContainer.stop();
     await secondStartedContainer.stop();
+  });
+
+  it("should set the hostname", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withHostname("hostname")
+      .start();
+
+    expect(container.getHostname()).toEqual("hostname");
+
+    await container.stop();
   });
 
   // failing to build an image hangs within the DockerImageClient.build method,

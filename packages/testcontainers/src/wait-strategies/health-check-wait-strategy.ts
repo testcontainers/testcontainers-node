@@ -1,47 +1,31 @@
 import Dockerode from "dockerode";
-import { AbstractWaitStrategy } from "./wait-strategy";
-import { log } from "../common";
+import { IntervalRetry, log } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
+import { AbstractWaitStrategy } from "./wait-strategy";
 
 export class HealthCheckWaitStrategy extends AbstractWaitStrategy {
   public async waitUntilReady(container: Dockerode.Container): Promise<void> {
     log.debug(`Waiting for health check...`, { containerId: container.id });
-
     const client = await getContainerRuntimeClient();
-    const containerEvents = await client.container.events(container, ["health_status"]);
 
-    return new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        const message = `Health check not healthy after ${this.startupTimeout}ms`;
+    const status = await new IntervalRetry<string | undefined, Error>(100).retryUntil(
+      async () => (await client.container.inspect(container)).State.Health?.Status,
+      (healthCheckStatus) => healthCheckStatus === "healthy" || healthCheckStatus === "unhealthy",
+      () => {
+        const timeout = this.startupTimeout;
+        const message = `Health check not healthy after ${timeout}ms`;
         log.error(message, { containerId: container.id });
-        containerEvents.destroy();
-        reject(new Error(message));
-      }, this.startupTimeout);
+        throw new Error(message);
+      },
+      this.startupTimeout
+    );
 
-      const onTerminalState = () => {
-        clearTimeout(timeout);
-        containerEvents.destroy();
-        log.debug(`Health check wait strategy complete`, { containerId: container.id });
-      };
+    if (status !== "healthy") {
+      const message = `Health check failed: ${status}`;
+      log.error(message, { containerId: container.id });
+      throw new Error(message);
+    }
 
-      containerEvents.on("data", (data) => {
-        const parsedData = JSON.parse(data);
-
-        const status =
-          parsedData.status.split(":").length === 2
-            ? parsedData.status.split(":")[1].trim() // Docker
-            : parsedData.HealthStatus; // Podman
-
-        if (status === "healthy") {
-          resolve();
-          onTerminalState();
-        } else if (status === "unhealthy") {
-          const message = `Health check failed: ${status}`;
-          log.error(message, { containerId: container.id });
-          reject(new Error(message));
-          onTerminalState();
-        }
-      });
-    });
+    log.debug(`Health check wait strategy complete`, { containerId: container.id });
   }
 }

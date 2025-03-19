@@ -1,10 +1,8 @@
 import { Environment } from "testcontainers/src/types";
-import { WeaviateContainer } from "./weaviate-container";
 import weaviate from "weaviate-ts-client";
+import { WeaviateContainer } from "./weaviate-container";
 
-describe("WeaviateContainer", () => {
-  jest.setTimeout(100_000);
-
+describe("WeaviateContainer", { timeout: 100_000 }, () => {
   // connectWeaviate {
   it("should expose ports", async () => {
     const container = await new WeaviateContainer().start();
@@ -25,16 +23,8 @@ describe("WeaviateContainer", () => {
       host: container.getHttpHostAddress(),
     });
 
-    client.misc
-      .metaGetter()
-      .do()
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .then((res: any) => {
-        expect(res.version).toBeDefined();
-      })
-      .catch((e: string) => {
-        throw new Error(e);
-      });
+    const res = await client.misc.metaGetter().do();
+    expect(res.version).toBeDefined();
 
     await container.stop();
   });
@@ -60,20 +50,12 @@ describe("WeaviateContainer", () => {
       host: container.getHttpHostAddress(),
     });
 
-    client.misc
-      .metaGetter()
-      .do()
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .then((res: any) => {
-        expect(res.version).toBeDefined();
-        expect(res.modules).toBeDefined();
-        enableModules.forEach((module) => {
-          expect(res.modules[module]).toBeDefined();
-        });
-      })
-      .catch((e: string) => {
-        throw new Error(e);
-      });
+    const res = await client.misc.metaGetter().do();
+    expect(res.version).toBeDefined();
+    expect(res.modules).toBeDefined();
+    enableModules.forEach((module) => {
+      expect(res.modules[module]).toBeDefined();
+    });
 
     await container.stop();
   });

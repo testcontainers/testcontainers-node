@@ -51,8 +51,6 @@ export class MySqlContainer extends GenericContainer {
 }
 
 export class StartedMySqlContainer extends AbstractStartedContainer {
-  private readonly port: number;
-
   constructor(
     startedTestContainer: StartedTestContainer,
     private readonly database: string,
@@ -61,11 +59,10 @@ export class StartedMySqlContainer extends AbstractStartedContainer {
     private readonly rootPassword: string
   ) {
     super(startedTestContainer);
-    this.port = startedTestContainer.getMappedPort(3306);
   }
 
   public getPort(): number {
-    return this.port;
+    return this.startedTestContainer.getMappedPort(MYSQL_PORT);
   }
 
   public getDatabase(): string {
@@ -94,14 +91,14 @@ export class StartedMySqlContainer extends AbstractStartedContainer {
     return url.toString();
   }
 
-  public async executeQuery(query: string, additionalFlags: string[] = []): Promise<string> {
+  public async executeQuery(query: string, additionalFlags: string[] = [], isRoot = false): Promise<string> {
     const result = await this.startedTestContainer.exec([
       "mysql",
       "-h",
       "127.0.0.1",
       "-u",
-      this.username,
-      `-p${this.userPassword}`,
+      isRoot ? "root" : this.username,
+      `-p${isRoot ? this.getRootPassword() : this.getUserPassword()}`,
       "-e",
       `${query};`,
       ...additionalFlags,

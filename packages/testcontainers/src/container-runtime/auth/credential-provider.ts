@@ -1,13 +1,13 @@
-import {
-  CredentialProviderGetResponse,
-  CredentialProviderListResponse,
-  ContainerRuntimeConfig,
-  AuthConfig,
-} from "./types";
 import { exec, spawn } from "child_process";
+import { log } from "../../common";
 import { RegistryAuthLocator } from "./registry-auth-locator";
 import { registryMatches } from "./registry-matches";
-import { log } from "../../common";
+import {
+  AuthConfig,
+  ContainerRuntimeConfig,
+  CredentialProviderGetResponse,
+  CredentialProviderListResponse,
+} from "./types";
 
 export abstract class CredentialProvider implements RegistryAuthLocator {
   abstract getName(): string;
@@ -42,8 +42,12 @@ export abstract class CredentialProvider implements RegistryAuthLocator {
 
   private listCredentials(providerName: string): Promise<CredentialProviderListResponse> {
     return new Promise((resolve, reject) => {
-      exec(`${providerName} list`, (err, stdout) => {
+      exec(`${providerName} list`, (err, stdout, stderr) => {
         if (err) {
+          if (stderr === "list is unimplemented\n") {
+            return resolve({});
+          }
+
           log.error(`An error occurred listing credentials: ${err}`);
           return reject(new Error("An error occurred listing credentials"));
         }

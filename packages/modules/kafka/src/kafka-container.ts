@@ -3,14 +3,14 @@ import {
   BoundPorts,
   Content,
   GenericContainer,
+  getContainerRuntimeClient,
   InspectResult,
   RandomUuid,
   StartedTestContainer,
   Uuid,
   Wait,
-  WaitStrategy,
-  getContainerRuntimeClient,
   waitForContainer,
+  WaitStrategy,
 } from "testcontainers";
 
 const KAFKA_PORT = 9093;

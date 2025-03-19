@@ -1,6 +1,6 @@
 {
   "name": "testcontainers",
-  "version": "10.11.0",
+  "version": "10.21.0",
   "author": "Cristian Greco",
   "license": "MIT",
   "keywords": [
@@ -44,7 +44,7 @@
     "ssh-remote-port-forward": "^1.0.4",
     "tar-fs": "^3.0.6",
     "tmp": "^0.2.3",
-    "undici": "^5.28.4"
+    "undici": "^5.28.5"
   },
   "devDependencies": {
     "@types/archiver": "^6.0.2",

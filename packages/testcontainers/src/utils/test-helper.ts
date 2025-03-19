@@ -1,11 +1,11 @@
+import { GetEventsOptions, ImageInspectInfo } from "dockerode";
 import { Readable } from "stream";
 import { Agent } from "undici";
-import { StartedDockerComposeEnvironment } from "../docker-compose-environment/started-docker-compose-environment";
-import { StartedTestContainer } from "../test-container";
-import { GetEventsOptions } from "dockerode";
-import { getContainerRuntimeClient } from "../container-runtime";
-import { GenericContainer } from "../generic-container/generic-container";
 import { IntervalRetry } from "../common";
+import { getContainerRuntimeClient } from "../container-runtime";
+import { StartedDockerComposeEnvironment } from "../docker-compose-environment/started-docker-compose-environment";
+import { GenericContainer } from "../generic-container/generic-container";
+import { StartedTestContainer } from "../test-container";
 
 export const checkContainerIsHealthy = async (container: StartedTestContainer): Promise<void> => {
   const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
@@ -48,6 +48,13 @@ export const getContainerIds = async (): Promise<string[]> => {
   const dockerode = (await getContainerRuntimeClient()).container.dockerode;
   const containers = await dockerode.listContainers({ all: true });
   return containers.map((container) => container.Id);
+};
+
+export const getImageInfo = async (imageName: string): Promise<ImageInspectInfo> => {
+  const dockerode = (await getContainerRuntimeClient()).container.dockerode;
+  const image = dockerode.getImage(imageName);
+  const imageInfo = await image.inspect();
+  return imageInfo;
 };
 
 export const checkImageExists = async (imageName: string): Promise<boolean> => {

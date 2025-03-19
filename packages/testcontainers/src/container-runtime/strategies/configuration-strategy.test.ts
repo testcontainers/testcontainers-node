@@ -1,12 +1,12 @@
+import { readFile } from "fs/promises";
 import { ConfigurationStrategy } from "./configuration-strategy";
 import { getContainerRuntimeConfig } from "./utils/config";
-import { readFile } from "fs/promises";
 
-jest.mock("./utils/config");
-jest.mock("fs/promises");
+vi.mock("./utils/config");
+vi.mock("fs/promises");
 
-const mockGetContainerRuntimeConfig = jest.mocked(getContainerRuntimeConfig);
-const mockReadFile = jest.mocked(readFile);
+const mockGetContainerRuntimeConfig = vi.mocked(getContainerRuntimeConfig);
+const mockReadFile = vi.mocked(readFile);
 
 describe("ConfigurationStrategy", () => {
   it("should return undefined if no docker host is set", async () => {

@@ -1,9 +1,8 @@
-import { ComposeDownOptions, ComposeOptions } from "./types";
-import v1 from "docker-compose";
-import dockerComposeV1, { v2 as dockerComposeV2, v2 } from "docker-compose";
-import { defaultComposeOptions } from "./default-compose-options";
-import { ComposeInfo } from "../types";
+import { default as dockerComposeV1, default as v1, v2 as dockerComposeV2, v2 } from "docker-compose";
 import { log, pullLog } from "../../../common";
+import { ComposeInfo } from "../types";
+import { defaultComposeOptions } from "./default-compose-options";
+import { ComposeDownOptions, ComposeOptions } from "./types";
 
 export interface ComposeClient {
   info: ComposeInfo;
@@ -45,7 +44,10 @@ async function getComposeInfo(): Promise<ComposeInfo | undefined> {
 }
 
 class ComposeV1Client implements ComposeClient {
-  constructor(public readonly info: ComposeInfo, private readonly environment: NodeJS.ProcessEnv) {}
+  constructor(
+    public readonly info: ComposeInfo,
+    private readonly environment: NodeJS.ProcessEnv
+  ) {}
 
   async up(options: ComposeOptions, services: Array<string> | undefined): Promise<void> {
     try {
@@ -115,7 +117,10 @@ class ComposeV1Client implements ComposeClient {
 }
 
 class ComposeV2Client implements ComposeClient {
-  constructor(public readonly info: ComposeInfo, private readonly environment: NodeJS.ProcessEnv) {}
+  constructor(
+    public readonly info: ComposeInfo,
+    private readonly environment: NodeJS.ProcessEnv
+  ) {}
 
   async up(options: ComposeOptions, services: Array<string> | undefined): Promise<void> {
     try {

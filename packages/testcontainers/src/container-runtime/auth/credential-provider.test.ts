@@ -1,12 +1,12 @@
-import { CredentialProvider } from "./credential-provider";
 import { ChildProcess } from "child_process";
-import { Readable, Writable } from "stream";
 import EventEmitter from "events";
+import { Readable, Writable } from "stream";
+import { CredentialProvider } from "./credential-provider";
 import { ContainerRuntimeConfig } from "./types";
 
-const mockExec = jest.fn();
-const mockSpawn = jest.fn();
-jest.mock("child_process", () => ({
+const mockExec = vi.fn();
+const mockSpawn = vi.fn();
+vi.mock("child_process", () => ({
   exec: (...args: unknown[]) => mockExec(...args),
   spawn: (...args: unknown[]) => mockSpawn(...args),
 }));
@@ -82,7 +82,6 @@ describe("CredentialProvider", () => {
   });
 
   it("should return undefined when provider name not provided", async () => {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const credentialProvider = new TestCredentialProvider("name", undefined!);
 
     expect(await credentialProvider.getAuthConfig("registry", containerRuntimeConfig)).toBeUndefined();
@@ -102,6 +101,16 @@ describe("CredentialProvider", () => {
     await expect(() => credentialProvider.getAuthConfig("registry", containerRuntimeConfig)).rejects.toThrow(
       "Unexpected response from Docker credential provider LIST command"
     );
+  });
+
+  it("should not throw when list credentials command is not implemented", async () => {
+    mockExec.mockImplementationOnce((command, callback) => {
+      return callback(new Error(), null, "list is unimplemented\n");
+    });
+
+    const credentials = await credentialProvider.getAuthConfig("registry", containerRuntimeConfig);
+
+    expect(credentials).toBeUndefined();
   });
 
   it("should throw when get credentials fails", async () => {
@@ -162,7 +171,10 @@ function mockSpawnReturns(exitCode: number, stdout: string) {
 }
 
 class TestCredentialProvider extends CredentialProvider {
-  constructor(private readonly name: string, private readonly credentialProviderName: string) {
+  constructor(
+    private readonly name: string,
+    private readonly credentialProviderName: string
+  ) {
     super();
   }
 

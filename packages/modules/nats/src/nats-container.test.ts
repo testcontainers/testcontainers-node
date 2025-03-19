@@ -1,9 +1,7 @@
 import { connect, StringCodec } from "nats";
 import { NatsContainer } from "./nats-container";
 
-describe("NatsContainer", () => {
-  jest.setTimeout(180_000);
-
+describe("NatsContainer", { timeout: 180_000 }, () => {
   // connect {
   it("should start, connect and close", async () => {
     const container = await new NatsContainer().start();
@@ -67,6 +65,43 @@ describe("NatsContainer", () => {
   });
   // }
 
+  // jetstream {
+  it("should start with JetStream ", async () => {
+    // enable JetStream
+    const container = await new NatsContainer().withJetStream().start();
+
+    const nc = await connect(container.getConnectionOptions());
+
+    // ensure JetStream is enabled, otherwise this will throw an error
+    await nc.jetstream().jetstreamManager();
+
+    // close the connection
+    await nc.close();
+    // check if the close was OK
+    const err = await nc.closed();
+    expect(err).toBe(undefined);
+
+    await container.stop();
+  });
+
+  it("should fail without JetStream ", async () => {
+    const container = await new NatsContainer().start();
+
+    const nc = await connect(container.getConnectionOptions());
+
+    // ensure JetStream is not enabled, as this will throw an error
+    await expect(nc.jetstream().jetstreamManager()).rejects.toThrow("503");
+
+    // close the connection
+    await nc.close();
+    // check if the close was OK
+    const err = await nc.closed();
+    expect(err).toBe(undefined);
+
+    await container.stop();
+  });
+  // }
+
   it("should immediately end when started with version argument ", async () => {
     // for the complete list of available arguments see:
     // See Command Line Options section inside [NATS docker image documentation](https://hub.docker.com/_/nats)
@@ -75,6 +110,6 @@ describe("NatsContainer", () => {
       await connect(container.getConnectionOptions());
     }
 
-    await expect(outputVersionAndExit()).rejects.toThrowError();
+    await expect(outputVersionAndExit()).rejects.toThrow();
   });
 });

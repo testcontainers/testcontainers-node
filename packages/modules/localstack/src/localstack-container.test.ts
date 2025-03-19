@@ -1,6 +1,6 @@
-import { LOCALSTACK_PORT, LocalstackContainer } from "./localstack-container";
-import { HeadBucketCommand, S3Client, CreateBucketCommand } from "@aws-sdk/client-s3";
-import { GenericContainer, log, Network, StartedTestContainer } from "testcontainers";
+import { CreateBucketCommand, HeadBucketCommand, S3Client } from "@aws-sdk/client-s3";
+import { GenericContainer, LABEL_TESTCONTAINERS_SESSION_ID, log, Network, StartedTestContainer } from "testcontainers";
+import { LocalstackContainer, LOCALSTACK_PORT } from "./localstack-container";
 
 const runAwsCliAgainstDockerNetworkContainer = async (
   command: string,
@@ -13,9 +13,7 @@ const runAwsCliAgainstDockerNetworkContainer = async (
   return execResult.output;
 };
 
-describe("LocalStackContainer", () => {
-  jest.setTimeout(180_000);
-
+describe("LocalStackContainer", { timeout: 180_000 }, () => {
   // createS3Bucket {
   it("should create a S3 bucket", async () => {
     const container = await new LocalstackContainer().start();
@@ -68,5 +66,63 @@ describe("LocalStackContainer", () => {
     expect(response).toContain(`http://localstack:${LOCALSTACK_PORT}`);
     await container.stop();
     await awsCliInDockerNetwork.stop();
+    await network.stop();
+  });
+
+  it("should not override LOCALSTACK_HOST assignment", async () => {
+    const container = await new LocalstackContainer()
+      .withEnvironment({ LOCALSTACK_HOST: "myhost" })
+      .withNetworkAliases("myalias")
+      .start();
+
+    const { output, exitCode } = await container.exec(["printenv", "LOCALSTACK_HOST"]);
+    expect(exitCode).toBe(0);
+    expect(output).toContain("myhost");
+
+    await container.stop();
+  });
+
+  it("should override LOCALSTACK_HOST with last network alias", async () => {
+    const container = await new LocalstackContainer().withNetworkAliases("other", "myalias").start();
+
+    const { output, exitCode } = await container.exec(["printenv", "LOCALSTACK_HOST"]);
+    expect(exitCode).toBe(0);
+    expect(output).toContain("myalias");
+
+    await container.stop();
+  });
+
+  it("should assign LOCALSTACK_HOST to localhost", async () => {
+    const container = await new LocalstackContainer().start();
+
+    const { output, exitCode } = await container.exec(["printenv", "LOCALSTACK_HOST"]);
+    expect(exitCode).toBe(0);
+    expect(output).toContain("localhost");
+
+    await container.stop();
+  });
+
+  it("should add LAMBDA_DOCKER_FLAGS with sessionId label", async () => {
+    const container = await new LocalstackContainer().start();
+    const sessionId = container.getLabels()[LABEL_TESTCONTAINERS_SESSION_ID];
+
+    const { output, exitCode } = await container.exec(["printenv", "LAMBDA_DOCKER_FLAGS"]);
+    expect(exitCode).toBe(0);
+    expect(output).toContain(`${LABEL_TESTCONTAINERS_SESSION_ID}=${sessionId}`);
+  });
+
+  it("should concatenate sessionId label to LAMBDA_DOCKER_FLAGS", async () => {
+    const container = await new LocalstackContainer()
+      .withEnvironment({
+        LAMBDA_DOCKER_FLAGS: `-l mylabel=myvalue`,
+      })
+      .start();
+    const sessionId = container.getLabels()[LABEL_TESTCONTAINERS_SESSION_ID];
+
+    const { output, exitCode } = await container.exec(["printenv", "LAMBDA_DOCKER_FLAGS"]);
+
+    expect(exitCode).toBe(0);
+    expect(output).toContain(`${LABEL_TESTCONTAINERS_SESSION_ID}=${sessionId}`);
+    expect(output).toContain(`mylabel=myvalue`);
   });
 });

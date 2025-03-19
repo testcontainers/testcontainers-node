@@ -68,6 +68,14 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+### With a platform
+
+```javascript
+const container = await new GenericContainer("alpine")
+  .withPlatform("linux/arm64") // similar to `--platform linux/arm64`
+  .start();
+```
+
 ### With bind mounts
 
 **Not recommended.**
@@ -76,9 +84,9 @@ Bind mounts are not portable. They do not work with Docker in Docker or in cases
 
 ```javascript
 const container = await new GenericContainer("alpine")
-  .withBindMounts([{ 
-    source: "/local/file.txt", 
-    target:"/remote/file.txt" 
+  .withBindMounts([{
+    source: "/local/file.txt",
+    target:"/remote/file.txt"
   }, {
     source: "/local/dir",
     target:"/remote/dir",
@@ -97,7 +105,7 @@ const container = await new GenericContainer("alpine")
 
 ### With a name
 
-**Not recommended.** 
+**Not recommended.**
 
 If a container with the same name already exists, Docker will raise a conflict. If you are specifying a name to enable container to container communication, look into creating a network and using [network aliases](../networking#network-aliases).
 
@@ -113,17 +121,21 @@ Copy files/directories or content to a container before it starts:
 
 ```javascript
 const container = await new GenericContainer("alpine")
-  .withCopyFilesToContainer([{ 
-    source: "/local/file.txt", 
+  .withCopyFilesToContainer([{
+    source: "/local/file.txt",
     target: "/remote/file1.txt"
   }])
   .withCopyDirectoriesToContainer([{
     source: "/localdir",
     target: "/some/nested/remotedir"
   }])
-  .withCopyContentToContainer([{ 
+  .withCopyContentToContainer([{
     content: "hello world",
     target: "/remote/file2.txt"
+  }])
+  .withCopyArchivesToContainer([{
+    tar: nodeReadable,
+    target: "/some/nested/remotedir"
   }])
   .start();
 ```
@@ -133,26 +145,27 @@ Or after it starts:
 ```javascript
 const container = await new GenericContainer("alpine").start();
 
-container.copyFilesToContainer([{ 
-  source: "/local/file.txt", 
+container.copyFilesToContainer([{
+  source: "/local/file.txt",
   target: "/remote/file1.txt"
 }])
 container.copyDirectoriesToContainer([{
   source: "/localdir",
   target: "/some/nested/remotedir"
 }])
-container.copyContentToContainer([{ 
+container.copyContentToContainer([{
   content: "hello world",
   target: "/remote/file2.txt"
 }])
+container.copyArchiveToContainer(nodeReadable, "/some/nested/remotedir");
 ```
 
 An optional `mode` can be specified in octal for setting file permissions:
 
 ```javascript
 const container = await new GenericContainer("alpine")
-  .withCopyFilesToContainer([{ 
-    source: "/local/file.txt", 
+  .withCopyFilesToContainer([{
+    source: "/local/file.txt",
     target: "/remote/file1.txt",
     mode: parseInt("0644", 8)
   }])
@@ -161,7 +174,7 @@ const container = await new GenericContainer("alpine")
     target: "/some/nested/remotedir",
     mode: parseInt("0644", 8)
   }])
-  .withCopyContentToContainer([{ 
+  .withCopyContentToContainer([{
     content: "hello world",
     target: "/remote/file2.txt",
     mode: parseInt("0644", 8)
@@ -258,10 +271,10 @@ const container = await new GenericContainer("alpine")
 
 ```javascript
 const container = await new GenericContainer("aline")
-  .withUlimits({ 
-    memlock: { 
-      hard: -1, 
-      soft: -1 
+  .withUlimits({
+    memlock: {
+      hard: -1,
+      soft: -1
     }
   })
   .start();
@@ -297,6 +310,18 @@ const container = await new GenericContainer("alpine")
 ```javascript
 const container = await new GenericContainer("alpine")
   .withSharedMemorySize(512 * 1024 * 1024)
+  .start();
+```
+
+### With custom hostname
+
+**Not recommended.**
+
+See this [Docker blog post on Testcontainers best practices](https://www.docker.com/blog/testcontainers-best-practices/#:~:text=Don't%20hardcode%20the%20hostname)
+
+```javascript
+const container = await new GenericContainer("alpine")
+  .withHostname("my-hostname")
   .start();
 ```
 
@@ -337,9 +362,32 @@ const container = await new GenericContainer("alpine").start();
 await container.restart();
 ```
 
+## Committing a container to an image
+
+```javascript
+const container = await new GenericContainer("alpine").start();
+// Do something with the container
+await container.exec(["sh", "-c", `echo 'hello world' > /hello-world.txt`]);
+// Commit the container to an image
+const newImageId = await container.commit({ repo: "my-repo", tag: "my-tag" });
+// Use this image in a new container
+const containerFromCommit = await new GenericContainer(newImageId).start();
+```
+
+By default, the image inherits the behavior of being marked for cleanup on exit. You can override this behavior using
+the `deleteOnExit` option:
+
+```javascript
+const container = await new GenericContainer("alpine").start();
+// Do something with the container
+await container.exec(["sh", "-c", `echo 'hello world' > /hello-world.txt`]);
+// Commit the container to an image; committed image will not be cleaned up on exit
+const newImageId = await container.commit({ repo: "my-repo", tag: "my-tag", deleteOnExit: false });
+```
+
 ## Reusing a container
 
-Enabling container re-use means that Testcontainers will not start a new container if a Testcontainers managed container with the same configuration is already running. 
+Enabling container re-use means that Testcontainers will not start a new container if a Testcontainers managed container with the same configuration is already running.
 
 This is useful for example if you want to share a container across tests without global set up.
 
@@ -356,6 +404,9 @@ const container2 = await new GenericContainer("alpine")
 
 expect(container1.getId()).toBe(container2.getId());
 ```
+
+Container re-use can be enabled or disabled globally by setting the `TESTCONTAINERS_REUSE_ENABLE` environment variable to `true` or `false`.
+If this environment variable is not declared, the feature is enabled by default.
 
 ## Creating a custom container
 
@@ -403,29 +454,29 @@ const startedCustomContainer: StartedTestContainer = await customContainer.start
 Define your own lifecycle callbacks for better control over your custom containers:
 
 ```typescript
-import { 
-  GenericContainer, 
-  AbstractStartedContainer, 
-  StartedTestContainer, 
-  InspectResult 
+import {
+  GenericContainer,
+  AbstractStartedContainer,
+  StartedTestContainer,
+  InspectResult
 } from "testcontainers";
 
 class CustomContainer extends GenericContainer {
   protected override async beforeContainerCreated(): Promise<void> {
     // ...
   }
-  
+
   protected override async containerCreated(containerId: string): Promise<void> {
     // ...
   }
-  
+
   protected override async containerStarting(
     inspectResult: InspectResult,
     reused: boolean
   ): Promise<void> {
     // ...
   }
-  
+
   protected override async containerStarted(
     container: StartedTestContainer,
     inspectResult: InspectResult,
@@ -443,7 +494,7 @@ class CustomStartedContainer extends AbstractStartedContainer {
   protected override async containerStopping(): Promise<void> {
     // ...
   }
-  
+
   protected override async containerStopped(): Promise<void> {
     // ...
   }
@@ -495,15 +546,16 @@ const container = await new GenericContainer("alpine")
 
 ## Running commands
 
-To run a command inside an already started container use the `exec` method. The command will be run in the container's 
-working directory, returning the command output and exit code:
+To run a command inside an already started container, use the exec method. 
+The command will be run in the container's working directory,
+returning the combined output (`output`), standard output (`stdout`), standard error (`stderr`), and exit code (`exitCode`).
 
 ```javascript
 const container = await new GenericContainer("alpine")
   .withCommand(["sleep", "infinity"])
   .start();
 
-const { output, exitCode } = await container.exec(["echo", "hello", "world"]);
+const { output, stdout, stderr, exitCode } = await container.exec(["echo", "hello", "world"]);
 ```
 
 The following options can be provided to modify the command execution:
@@ -520,7 +572,7 @@ const container = await new GenericContainer("alpine")
   .withCommand(["sleep", "infinity"])
   .start();
 
-const { output, exitCode } = await container.exec(["echo", "hello", "world"], {
+const { output, stdout, stderr, exitCode } = await container.exec(["echo", "hello", "world"], {
 	workingDir: "/app/src/",
 	user: "1000:1000",
 	env: {
@@ -529,6 +581,8 @@ const { output, exitCode } = await container.exec(["echo", "hello", "world"], {
 	}
 });
 ```
+
+
 
 ## Streaming logs
 
@@ -555,7 +609,7 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
-You can specify a point in time as a UNIX timestamp from which you want the logs to start: 
+You can specify a point in time as a UNIX timestamp from which you want the logs to start:
 
 ```javascript
 const msInSec = 1000;

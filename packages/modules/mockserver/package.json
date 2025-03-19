@@ -1,0 +1,39 @@
+{
+  "name": "@testcontainers/mockserver",
+  "version": "10.21.0",
+  "description": "Mockserver module for Testcontainers",
+  "main": "build/index.js",
+  "devDependencies": {
+    "@types/superagent": "^8.1.9",
+    "mockserver-client": "^5.15.0",
+    "superagent": "^10.1.1"
+  },
+  "scripts": {
+    "prepack": "shx cp ../../../README.md . && shx cp ../../../LICENSE .",
+    "build": "tsc --project tsconfig.build.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/testcontainers/testcontainers-node.git"
+  },
+  "files": [
+    "build"
+  ],
+  "keywords": [
+    "mockserver",
+    "testing",
+    "docker",
+    "testcontainers"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/testcontainers/testcontainers-node/issues"
+  },
+  "homepage": "https://github.com/testcontainers/testcontainers-node#readme",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "testcontainers": "^10.21.0"
+  }
+}
