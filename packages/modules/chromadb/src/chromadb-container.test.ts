@@ -110,7 +110,7 @@ describe("ChromaDB", { timeout: 360_000 }, () => {
       .withEnvironment({
         CHROMA_SERVER_AUTHN_CREDENTIALS: key,
         CHROMA_SERVER_AUTHN_PROVIDER: "chromadb.auth.token_authn.TokenAuthenticationServerProvider",
-        CHROMA_AUTH_TOKEN_TRANSPORT_HEADER: "X_CHROMA_TOKEN",
+        CHROMA_AUTH_TOKEN_TRANSPORT_HEADER: "X-Chroma-Token",
       })
       .start();
 
