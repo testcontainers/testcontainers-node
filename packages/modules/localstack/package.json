@@ -13,7 +13,7 @@
   "homepage": "https://github.com/testcontainers/testcontainers-node#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/testcontainers/testcontainers-node"
+    "url": "git+https://github.com/testcontainers/testcontainers-node.git"
   },
   "bugs": {
     "url": "https://github.com/testcontainers/testcontainers-node/issues"
