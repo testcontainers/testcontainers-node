@@ -1,6 +1,6 @@
 import { CreateBucketCommand, HeadBucketCommand, S3Client } from "@aws-sdk/client-s3";
 import { GenericContainer, LABEL_TESTCONTAINERS_SESSION_ID, log, Network, StartedTestContainer } from "testcontainers";
-import { LocalstackContainer, LOCALSTACK_PORT } from "./localstack-container";
+import { LOCALSTACK_PORT, LocalstackContainer } from "./localstack-container";
 
 const runAwsCliAgainstDockerNetworkContainer = async (
   command: string,

@@ -1,4 +1,4 @@
-import { default as dockerComposeV1, default as v1, v2 as dockerComposeV2, v2 } from "docker-compose";
+import { default as dockerComposeV1, v2 as dockerComposeV2, default as v1, v2 } from "docker-compose";
 import { log, pullLog } from "../../../common";
 import { ComposeInfo } from "../types";
 import { defaultComposeOptions } from "./default-compose-options";
