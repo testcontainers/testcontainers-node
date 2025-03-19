@@ -1,5 +1,5 @@
-export { IntervalRetry, RandomUuid, Retry, Uuid, log } from "./common";
-export { ContainerRuntimeClient, ImageName, getContainerRuntimeClient } from "./container-runtime";
+export { IntervalRetry, log, RandomUuid, Retry, Uuid } from "./common";
+export { ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "./container-runtime";
 export { DockerComposeEnvironment } from "./docker-compose-environment/docker-compose-environment";
 export { DownedDockerComposeEnvironment } from "./docker-compose-environment/downed-docker-compose-environment";
 export { StartedDockerComposeEnvironment } from "./docker-compose-environment/started-docker-compose-environment";
@@ -21,7 +21,7 @@ export { TestContainers } from "./test-containers";
 export { CommitOptions, Content, ExecOptions, ExecResult, InspectResult } from "./types";
 export { BoundPorts } from "./utils/bound-ports";
 export { LABEL_TESTCONTAINERS_SESSION_ID } from "./utils/labels";
-export { PortWithBinding, PortWithOptionalBinding, getContainerPort, hasHostBinding } from "./utils/port";
+export { getContainerPort, hasHostBinding, PortWithBinding, PortWithOptionalBinding } from "./utils/port";
 export { PortGenerator, RandomUniquePortGenerator } from "./utils/port-generator";
 export { ImagePullPolicy, PullPolicy } from "./utils/pull-policy";
 export { HttpWaitStrategyOptions } from "./wait-strategies/http-wait-strategy";
