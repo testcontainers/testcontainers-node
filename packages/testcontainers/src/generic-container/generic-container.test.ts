@@ -518,6 +518,34 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     expect(await getRunningContainerNames()).not.toContain(container.getName());
   });
 
+  it("should stop but not remove the container", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withName(`container-${new RandomUuid().nextUuid()}`)
+      .withAutoRemove(false)
+      .start();
+
+    const stopped = await container.stop();
+    const dockerode = (await getContainerRuntimeClient()).container.dockerode;
+    expect(stopped.getId()).toBeTruthy();
+    const lowerLevelContainer = dockerode.getContainer(stopped.getId());
+    expect((await lowerLevelContainer.inspect()).State.Status).toEqual("exited");
+  });
+
+  it("should stop and override .withAutoRemove", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withName(`container-${new RandomUuid().nextUuid()}`)
+      .withAutoRemove(false)
+      .start();
+
+    await container.stop({ remove: true });
+
+    const stopped = await container.stop();
+    const dockerode = (await getContainerRuntimeClient()).container.dockerode;
+    expect(stopped.getId()).toBeTruthy();
+    const lowerLevelContainer = dockerode.getContainer(stopped.getId());
+    await expect(lowerLevelContainer.inspect()).rejects.toThrow(/404/); // Error: (HTTP code 404) no such container
+  });
+
   it("should build a target stage", async () => {
     const context = path.resolve(fixtures, "docker-multi-stage");
     const firstContainer = await GenericContainer.fromDockerfile(context).withTarget("first").build();
