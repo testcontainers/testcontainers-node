@@ -6,7 +6,7 @@ export class ChromaDBContainer extends GenericContainer {
   constructor(image: string) {
     super(image);
     this.withExposedPorts(CHROMADB_PORT)
-      .withWaitStrategy(Wait.forHttp("/api/v1/heartbeat", CHROMADB_PORT))
+      .withWaitStrategy(Wait.forHttp("/api/v2/heartbeat", CHROMADB_PORT))
       .withStartupTimeout(120_000);
   }
 
