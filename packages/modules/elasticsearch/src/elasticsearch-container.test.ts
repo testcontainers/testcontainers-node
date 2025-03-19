@@ -11,7 +11,7 @@ describe("ElasticsearchContainer", { timeout: 180_000 }, () => {
 
     await client.indices.create({ index: "people" });
 
-    expect((await client.indices.exists({ index: "people" })).statusCode).toBe(200);
+    expect(await client.indices.exists({ index: "people" })).toBe(true);
     await container.stop();
   });
   // }
@@ -31,7 +31,7 @@ describe("ElasticsearchContainer", { timeout: 180_000 }, () => {
       id: document.id,
     });
 
-    expect((await client.get({ index: "people", id: document.id })).body._source).toStrictEqual(document);
+    expect((await client.get({ index: "people", id: document.id }))._source).toStrictEqual(document);
     await container.stop();
   });
   // }
@@ -44,7 +44,7 @@ describe("ElasticsearchContainer", { timeout: 180_000 }, () => {
 
     await client.indices.create({ index: "people" });
 
-    expect((await client.indices.exists({ index: "people" })).statusCode).toBe(200);
+    expect(await client.indices.exists({ index: "people" })).toBe(true);
     await container.stop();
   });
 });
