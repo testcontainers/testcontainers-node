@@ -17,19 +17,26 @@ export interface Reaper {
 
   addComposeProject(projectName: string): void;
 
-  get reaperContainerId(): string;
+  get containerId(): string;
 }
+
+// see reaper.test.ts for context of this export usage.
+export type FindReaperContainerFn = (client: ContainerRuntimeClient) => Promise<ContainerInfo | undefined>;
 
 let reaper: Reaper;
 let sessionId: string;
 
-export async function getReaper(client: ContainerRuntimeClient): Promise<Reaper> {
+export async function getReaper(
+  client: ContainerRuntimeClient,
+  findReaperContainerFn?: FindReaperContainerFn
+): Promise<Reaper> {
   if (reaper) {
     return reaper;
   }
 
   reaper = await withFileLock("testcontainers-node.lock", async () => {
-    const reaperContainer = await findReaperContainer(client);
+    const findReaperFn = findReaperContainerFn ?? findReaperContainerDefault;
+    const reaperContainer = await findReaperFn(client);
     sessionId = reaperContainer?.Labels[LABEL_TESTCONTAINERS_SESSION_ID] ?? new RandomUuid().nextUuid();
 
     if (process.env.TESTCONTAINERS_RYUK_DISABLED === "true") {
@@ -45,7 +52,7 @@ export async function getReaper(client: ContainerRuntimeClient): Promise<Reaper>
   return reaper;
 }
 
-async function findReaperContainer(client: ContainerRuntimeClient): Promise<ContainerInfo | undefined> {
+async function findReaperContainerDefault(client: ContainerRuntimeClient): Promise<ContainerInfo | undefined> {
   const containers = await client.container.list();
   return containers.find(
     (container) => container.State === "running" && container.Labels[LABEL_TESTCONTAINERS_RYUK] === "true"
@@ -140,11 +147,11 @@ class RyukReaper implements Reaper {
   constructor(
     public readonly sessionId: string,
     private readonly socket: Socket,
-    private readonly containerId: string
+    private readonly id: string
   ) {}
 
-  get reaperContainerId() {
-    return this.containerId;
+  get containerId() {
+    return this.id;
   }
 
   addComposeProject(projectName: string): void {
@@ -163,7 +170,7 @@ class DisabledReaper implements Reaper {
 
   addSession(): void {}
 
-  get reaperContainerId() {
+  get containerId() {
     return "";
   }
 }
