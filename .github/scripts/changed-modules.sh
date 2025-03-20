@@ -60,7 +60,7 @@ while IFS= read -r file; do
 done < <(find "${ROOT_DIR}" -maxdepth 1 -type f -not -name "package.json" -not -name "package-lock.json")
 
 # define an array of modules that won't be part of the build
-readonly no_build_modules=("couchbase")
+readonly no_build_modules=()
 
 # modules is an array that will store the paths of all the modules in the repository.
 modules=()

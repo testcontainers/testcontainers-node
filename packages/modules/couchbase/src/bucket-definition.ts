@@ -4,7 +4,7 @@ export class BucketDefinition {
   private quota = 100;
   private numOfReplicas = 0;
 
-  constructor(private name: string) {}
+  constructor(private readonly name: string) {}
 
   withReplicas(numOfReplicas: number) {
     const minThreshold = 0;
