@@ -1,12 +1,19 @@
 import { ContainerRuntimeClient, getContainerRuntimeClient } from "../container-runtime";
-import { FindReaperContainerFn, Reaper } from "./reaper";
+import { Reaper } from "./reaper";
 
-// FindReaperContainerFn is used in each test to intentionally 'fail' to find reaper container.
-// Failing this check will trigger re-creation of new reaper container, which is needed for testing.
-// Otherwise `getReaperFn` will always get a reference to already running reaper container,
-// which is not desired in the context of unit testing.
+let getReaperFn: (client: ContainerRuntimeClient) => Promise<Reaper>;
 
-let getReaperFn: (client: ContainerRuntimeClient, findReaperContainerFn?: FindReaperContainerFn) => Promise<Reaper>;
+async function mockGetContainerRuntimeClient(realClient: ContainerRuntimeClient) {
+  const ContainerRuntimeClient = vi.fn();
+  ContainerRuntimeClient.prototype.info = vi.fn();
+  vi.spyOn(ContainerRuntimeClient.prototype, "info", "get").mockReturnValue(realClient.info);
+  ContainerRuntimeClient.prototype.container = vi.fn();
+  ContainerRuntimeClient.prototype.container.list = vi.fn().mockReturnValue([]);
+  const getContainerRuntimeClientMock = vi
+    .fn(getContainerRuntimeClient)
+    .mockImplementation(async () => new ContainerRuntimeClient());
+  return getContainerRuntimeClientMock;
+}
 
 describe("Reaper", { timeout: 120_000 }, () => {
   beforeEach(async () => {
@@ -22,7 +29,8 @@ describe("Reaper", { timeout: 120_000 }, () => {
 
   it("should create Reaper container without RYUK_VERBOSE env var by default", async () => {
     const client = await getContainerRuntimeClient();
-    const reaper = await getReaperFn(client, async () => undefined);
+    const mockGetClientFn = await mockGetContainerRuntimeClient(client);
+    const reaper = await getReaperFn(await mockGetClientFn());
     expect(reaper.containerId).toBeTruthy(); // will fail if TESTCONTAINERS_RYUK_DISABLED=true
     const reaperContainer = client.container.getById(reaper.containerId);
     const reaperContainerEnv = (await reaperContainer.inspect()).Config.Env;
@@ -34,7 +42,8 @@ describe("Reaper", { timeout: 120_000 }, () => {
     vitest.stubEnv("TESTCONTAINERS_RYUK_VERBOSE", "true");
     try {
       const client = await getContainerRuntimeClient();
-      const reaper = await getReaperFn(client, async () => undefined);
+      const mockGetClientFn = await mockGetContainerRuntimeClient(client);
+      const reaper = await getReaperFn(await mockGetClientFn());
       expect(reaper.containerId).toBeTruthy(); // will fail if TESTCONTAINERS_RYUK_DISABLED=true
       const reaperContainer = client.container.getById(reaper.containerId);
       expect((await reaperContainer.inspect()).Config.Env).toContain("RYUK_VERBOSE=true");

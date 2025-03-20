@@ -13,34 +13,27 @@ export const REAPER_IMAGE = process.env["RYUK_CONTAINER_IMAGE"]
 export interface Reaper {
   sessionId: string;
 
+  containerId: string;
+
   addSession(sessionId: string): void;
 
   addComposeProject(projectName: string): void;
-
-  get containerId(): string;
 }
-
-// see reaper.test.ts for context of this export usage.
-export type FindReaperContainerFn = (client: ContainerRuntimeClient) => Promise<ContainerInfo | undefined>;
 
 let reaper: Reaper;
 let sessionId: string;
 
-export async function getReaper(
-  client: ContainerRuntimeClient,
-  findReaperContainerFn?: FindReaperContainerFn
-): Promise<Reaper> {
+export async function getReaper(client: ContainerRuntimeClient): Promise<Reaper> {
   if (reaper) {
     return reaper;
   }
 
   reaper = await withFileLock("testcontainers-node.lock", async () => {
-    const findReaperFn = findReaperContainerFn ?? findReaperContainerDefault;
-    const reaperContainer = await findReaperFn(client);
+    const reaperContainer = await findReaperContainer(client);
     sessionId = reaperContainer?.Labels[LABEL_TESTCONTAINERS_SESSION_ID] ?? new RandomUuid().nextUuid();
 
     if (process.env.TESTCONTAINERS_RYUK_DISABLED === "true") {
-      return new DisabledReaper(sessionId);
+      return new DisabledReaper(sessionId, "");
     } else if (reaperContainer) {
       return await useExistingReaper(reaperContainer, sessionId, client.info.containerRuntime.host);
     } else {
@@ -52,7 +45,7 @@ export async function getReaper(
   return reaper;
 }
 
-async function findReaperContainerDefault(client: ContainerRuntimeClient): Promise<ContainerInfo | undefined> {
+async function findReaperContainer(client: ContainerRuntimeClient): Promise<ContainerInfo | undefined> {
   const containers = await client.container.list();
   return containers.find(
     (container) => container.State === "running" && container.Labels[LABEL_TESTCONTAINERS_RYUK] === "true"
@@ -69,7 +62,7 @@ async function useExistingReaper(reaperContainer: ContainerInfo, sessionId: stri
 
   const socket = await connectToReaperSocket(host, reaperPort, reaperContainer.Id);
 
-  return new RyukReaper(sessionId, socket, reaperContainer.Id);
+  return new RyukReaper(sessionId, reaperContainer.Id, socket);
 }
 
 async function createNewReaper(sessionId: string, remoteSocketPath: string): Promise<Reaper> {
@@ -100,7 +93,7 @@ async function createNewReaper(sessionId: string, remoteSocketPath: string): Pro
     startedContainer.getId()
   );
 
-  return new RyukReaper(sessionId, socket, startedContainer.getId());
+  return new RyukReaper(sessionId, startedContainer.getId(), socket);
 }
 
 async function connectToReaperSocket(host: string, port: number, containerId: string): Promise<Socket> {
@@ -146,13 +139,9 @@ async function connectToReaperSocket(host: string, port: number, containerId: st
 class RyukReaper implements Reaper {
   constructor(
     public readonly sessionId: string,
-    private readonly socket: Socket,
-    private readonly id: string
+    public readonly containerId: string,
+    private readonly socket: Socket
   ) {}
-
-  get containerId() {
-    return this.id;
-  }
 
   addComposeProject(projectName: string): void {
     this.socket.write(`label=com.docker.compose.project=${projectName}\r\n`);
@@ -164,13 +153,12 @@ class RyukReaper implements Reaper {
 }
 
 class DisabledReaper implements Reaper {
-  constructor(public readonly sessionId: string) {}
+  constructor(
+    public readonly sessionId: string,
+    public readonly containerId: string
+  ) {}
 
   addComposeProject(): void {}
 
   addSession(): void {}
-
-  get containerId() {
-    return "";
-  }
 }
