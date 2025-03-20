@@ -1,8 +1,6 @@
 import { ContainerRuntimeClient, getContainerRuntimeClient } from "../container-runtime";
-import { Reaper } from "./reaper";
 
 describe("Reaper", { timeout: 120_000 }, () => {
-  let reaper: Reaper;
   let client: ContainerRuntimeClient;
 
   const getReaper = async () => await (await import("./reaper")).getReaper(client);
@@ -16,7 +14,7 @@ describe("Reaper", { timeout: 120_000 }, () => {
 
   it("should create Reaper container without RYUK_VERBOSE env var by default", async () => {
     vi.spyOn(client.container, "list").mockResolvedValue([]);
-    reaper = await getReaper();
+    const reaper = await getReaper();
 
     const reaperContainer = client.container.getById(reaper.containerId);
     const reaperContainerEnv = (await reaperContainer.inspect()).Config.Env;
@@ -28,7 +26,7 @@ describe("Reaper", { timeout: 120_000 }, () => {
     vitest.stubEnv("TESTCONTAINERS_RYUK_VERBOSE", "true");
 
     vi.spyOn(client.container, "list").mockResolvedValue([]);
-    reaper = await getReaper();
+    const reaper = await getReaper();
 
     const reaperContainer = client.container.getById(reaper.containerId);
     expect((await reaperContainer.inspect()).Config.Env).toContain("RYUK_VERBOSE=true");
