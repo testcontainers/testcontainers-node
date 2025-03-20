@@ -1,16 +1,11 @@
-import getRandomPort from "get-port";
-
 export interface PortGenerator {
   generatePort(): Promise<number>;
 }
 
 class RandomPortGenerator {
-  public generatePort(): Promise<number> {
-    return getRandomPort({ port: this.randomBetweenInclusive(10000, 65535) });
-  }
-
-  private randomBetweenInclusive(min: number, max: number) {
-    return Math.floor(Math.random() * (max - min + 1) + min);
+  public async generatePort(): Promise<number> {
+    const { default: getPort, portNumbers } = await import("get-port");
+    return getPort({ port: portNumbers(10000, 65535) });
   }
 }
 
