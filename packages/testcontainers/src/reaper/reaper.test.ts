@@ -26,6 +26,16 @@ describe("Reaper", { timeout: 120_000 }, () => {
     expect(() => reaper.addComposeProject("test-project")).not.toThrow();
   });
 
+  it("should reuse existing reaper container if one is already running", async () => {
+    const reaper = await getReaper();
+    const reaperContainerInfo = (await client.container.list()).filter((c) => c.Id === reaper.containerId)[0];
+    vi.spyOn(client.container, "list").mockResolvedValue([reaperContainerInfo]);
+
+    const reaper2 = await getReaper();
+
+    expect(reaper2.containerId).toBe(reaper.containerId);
+  });
+
   it("should use custom port when TESTCONTAINERS_RYUK_PORT is set", async () => {
     const customPort = (await new RandomUniquePortGenerator().generatePort()).toString();
     vi.stubEnv("TESTCONTAINERS_RYUK_PORT", customPort);
@@ -36,16 +46,6 @@ describe("Reaper", { timeout: 120_000 }, () => {
     const reaperContainer = client.container.getById(reaper.containerId);
     const ports = (await reaperContainer.inspect()).HostConfig.PortBindings;
     expect(ports["8080"][0].HostPort).toBe(customPort);
-  });
-
-  it("should reuse existing reaper container if one is already running", async () => {
-    const reaper = await getReaper();
-    const reaperContainerInfo = (await client.container.list()).filter((c) => c.Id === reaper.containerId)[0];
-    vi.spyOn(client.container, "list").mockResolvedValue([reaperContainerInfo]);
-
-    const reaper2 = await getReaper();
-
-    expect(reaper2.containerId).toBe(reaper.containerId);
   });
 
   it("should create Reaper container without RYUK_VERBOSE env var by default", async () => {
