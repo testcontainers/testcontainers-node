@@ -60,7 +60,8 @@ describe("Reaper", { timeout: 120_000 }, () => {
 
     const reaperContainer = client.container.getById(reaper.containerId);
     const ports = (await reaperContainer.inspect()).HostConfig.PortBindings;
-    expect(ports["8080"][0].HostPort).toBe(customPort);
+    const port = ports["8080"] || ports["8080/tcp"];
+    expect(port[0].HostPort).toBe(customPort);
   });
 
   it("should create Reaper container without RYUK_VERBOSE env var by default", async () => {
