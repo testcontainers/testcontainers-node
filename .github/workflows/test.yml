@@ -96,7 +96,7 @@ jobs:
           workspace: "${{ matrix.module }}"
       - name: Compile
         run: |
-          npm run build --workspace packages/testcontainers -- --project tsconfig.json --noEmit
+          npm run build --workspace packages/testcontainers -- --project tsconfig.json
           if [ "${{ matrix.module }}" != "testcontainers" ]; then
             npm run build --workspace ${{ steps.npm-install.outputs.workspace_path }} -- --project tsconfig.json --noEmit
           fi
