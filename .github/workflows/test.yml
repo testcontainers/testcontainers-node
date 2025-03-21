@@ -95,7 +95,12 @@ jobs:
           node-version: 22.x
           workspace: "${{ matrix.module }}"
       - name: Compile
-        run: npm run build -w ${{ steps.npm-install.outputs.workspace_path }} -- --noEmit
+        run: |
+          if [ "${{ matrix.module }}" = "testcontainers" ]; then
+            npm run build --workspace packages/testcontainers -- --project tsconfig.json --noEmit
+          else
+            npm run build --workspace ${{ steps.npm-install.outputs.workspace_path }} -- --project tsconfig.json --noEmit
+          fi
 
   smoke-test:
     if: ${{ needs.detect-modules.outputs.modules_count > 0 }}
