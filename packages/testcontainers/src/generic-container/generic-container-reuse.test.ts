@@ -129,6 +129,27 @@ describe("GenericContainer reuse", { timeout: 180_000 }, () => {
     await container2.stop();
   });
 
+  it("should reuse stopped container, if configured withAutoRemove(false)", async () => {
+    const name = `will_stop_and_reuse_again_${randomUuid()}`;
+    const container1 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withName(name)
+      .withExposedPorts(8080)
+      .withReuse()
+      .withAutoRemove(false)
+      .start();
+    await container1.stop({ timeout: 10000 });
+
+    const container2 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withName(name)
+      .withExposedPorts(8080)
+      .withReuse()
+      .start();
+    await checkContainerIsHealthy(container2);
+
+    expect(container1.getId()).toBe(container2.getId());
+    await container2.stop({ remove: true });
+  });
+
   it("should reuse container when an existing reusable container has stopped but not removed", async () => {
     const name = `there_can_only_be_one_${randomUuid()}`;
     const container1 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")

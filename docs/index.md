@@ -8,8 +8,12 @@
     <a class="card-grid-item"><img src="/site/language-logos/nodejs.svg"/>Node.js</a>
     <a href="https://testcontainers-python.readthedocs.io/en/latest/" class="card-grid-item"><img src="/site/language-logos/python.svg"/>Python</a>
     <a href="https://docs.rs/testcontainers/latest/testcontainers/" class="card-grid-item"><img src="/site/language-logos/rust.svg"/>Rust</a>
-    <a class="card-grid-item" href="https://github.com/testcontainers/testcontainers-hs/"><img src="/site/language-logos/haskell.svg"/>Haskell</a>
+    <a href="https://github.com/testcontainers/testcontainers-hs/" class="card-grid-item"><img src="/site/language-logos/haskell.svg"/>Haskell</a>
     <a href="https://github.com/testcontainers/testcontainers-ruby/" class="card-grid-item" ><img src="/site/language-logos/ruby.svg"/>Ruby</a>
+    <a href="https://cljdoc.org/d/clj-test-containers/clj-test-containers/0.7.4/doc/readme/" class="card-grid-item" >Clojure</a>
+    <a href="https://github.com/testcontainers/testcontainers-elixir/" class="card-grid-item" >Elixir</a>
+    <a href="https://github.com/testcontainers/testcontainers-php/" class="card-grid-item" >PHP</a>
+    <a href="https://github.com/testcontainers/testcontainers-scala/" class="card-grid-item" >Scala</a>
 </div>
 
 ## About
@@ -22,7 +26,7 @@ See [LICENSE](https://raw.githubusercontent.com/testcontainers/testcontainers-no
 
 ## Copyright
 
-Copyright (c) 2018 - 2023 Cristian Greco and other authors.
+Copyright (c) 2018 - 2025 Cristian Greco and other authors.
 
 See [contributors](https://github.com/testcontainers/testcontainers-node/graphs/contributors/) for contributors.
 

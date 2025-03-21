@@ -91,6 +91,15 @@ const container = await GenericContainer
   .build();
 ```
 
+### With platform
+
+```javascript
+const container = await GenericContainer
+  .fromDockerfile("/path/to/build-context")
+  .withPlatform("linux/amd64")
+  .build();
+```
+
 ## Image name substitution
 
 Testcontainers supports automatic substitution of Docker image names.
