@@ -94,10 +94,10 @@ jobs:
           runner: ubuntu-22.04
           node-version: 22.x
           workspace: "${{ matrix.module }}"
-      - name: Code linting
+      - name: Compile
         env:
           WORKSPACE_PATH: ${{ steps.npm-install.outputs.workspace_path }}
-        run: npm run build --noEmit
+        run: npm run build -w ${{ matrix.module }} -- --noEmit
 
   smoke-test:
     if: ${{ needs.detect-modules.outputs.modules_count > 0 }}
