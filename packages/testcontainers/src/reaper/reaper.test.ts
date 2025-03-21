@@ -14,21 +14,36 @@ describe("Reaper", { timeout: 120_000 }, () => {
 
   it("should create disabled reaper when TESTCONTAINERS_RYUK_DISABLED=true", async () => {
     vi.stubEnv("TESTCONTAINERS_RYUK_DISABLED", "true");
-
     vi.spyOn(client.container, "list").mockResolvedValue([]);
+
     const reaper = await getReaper();
 
-    // DisabledReaper has an empty containerId
-    expect(reaper.containerId).toBe("");
-
-    // Should not throw exceptions when methods are called
     expect(() => reaper.addSession("test-session")).not.toThrow();
     expect(() => reaper.addComposeProject("test-project")).not.toThrow();
   });
 
+  it("should return cached reaper instance", async () => {
+    const reaper = await getReaper();
+    const reaper2 = await getReaper();
+
+    expect(reaper2.containerId).toBe(reaper.containerId);
+  });
+
+  it("should create new reaper container if one is not running", async () => {
+    const reaper = await getReaper();
+    vi.resetModules();
+    vi.spyOn(client.container, "list").mockResolvedValue([]);
+
+    const reaper2 = await getReaper();
+
+    expect(reaper2.containerId).not.toBe(reaper.containerId);
+  });
+
   it("should reuse existing reaper container if one is already running", async () => {
     const reaper = await getReaper();
+    vi.resetModules();
     const reaperContainerInfo = (await client.container.list()).filter((c) => c.Id === reaper.containerId)[0];
+    reaperContainerInfo.Labels["TESTCONTAINERS_RYUK_TEST_LABEL"] = "false";
     vi.spyOn(client.container, "list").mockResolvedValue([reaperContainerInfo]);
 
     const reaper2 = await getReaper();
@@ -39,8 +54,8 @@ describe("Reaper", { timeout: 120_000 }, () => {
   it("should use custom port when TESTCONTAINERS_RYUK_PORT is set", async () => {
     const customPort = (await new RandomUniquePortGenerator().generatePort()).toString();
     vi.stubEnv("TESTCONTAINERS_RYUK_PORT", customPort);
-
     vi.spyOn(client.container, "list").mockResolvedValue([]);
+
     const reaper = await getReaper();
 
     const reaperContainer = client.container.getById(reaper.containerId);
@@ -50,6 +65,7 @@ describe("Reaper", { timeout: 120_000 }, () => {
 
   it("should create Reaper container without RYUK_VERBOSE env var by default", async () => {
     vi.spyOn(client.container, "list").mockResolvedValue([]);
+
     const reaper = await getReaper();
 
     const reaperContainer = client.container.getById(reaper.containerId);
@@ -60,8 +76,8 @@ describe("Reaper", { timeout: 120_000 }, () => {
 
   it("should propagate TESTCONTAINERS_RYUK_VERBOSE into Reaper container", async () => {
     vi.stubEnv("TESTCONTAINERS_RYUK_VERBOSE", "true");
-
     vi.spyOn(client.container, "list").mockResolvedValue([]);
+
     const reaper = await getReaper();
 
     const reaperContainer = client.container.getById(reaper.containerId);
