@@ -368,7 +368,7 @@ const container = await new GenericContainer("alpine")
 await container.stop({ remove: true }); // The container is stopped *AND* removed
 ```
 
-Keep in mind that disabling ryuk (set `TESTCONTAINERS_RYUK_DISABLED` to `true`) **and** disabling automatic removal of containers will make containers persist after you done working with them.
+Keep in mind that disabling ryuk (set `TESTCONTAINERS_RYUK_DISABLED` to `true`) **and** disabling automatic removal of containers will make containers persist after you're done working with them.
 
 
 Volumes created by the container are removed when stopped. This is configurable:
