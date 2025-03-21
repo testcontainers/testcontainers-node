@@ -10,10 +10,6 @@ describe("ContainerImage", () => {
     expect(imageName.equals(new ImageName("anotherRegistry", "image", "tag"))).toBe(false);
   });
 
-  afterEach(() => {
-    vi.unstubAllEnvs();
-  });
-
   describe("string", () => {
     it("should work with registry", () => {
       const imageName = new ImageName("registry", "image", "tag");

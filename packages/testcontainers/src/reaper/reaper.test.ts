@@ -8,8 +8,6 @@ describe("Reaper", { timeout: 120_000 }, () => {
 
   beforeEach(async () => {
     vi.resetModules();
-    vi.unstubAllEnvs();
-
     client = await getContainerRuntimeClient();
   });
 

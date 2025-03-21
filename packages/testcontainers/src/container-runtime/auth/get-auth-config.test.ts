@@ -14,7 +14,6 @@ describe("get auth config", () => {
   });
 
   afterEach(() => {
-    vi.unstubAllEnvs();
     vi.resetModules();
   });
 
