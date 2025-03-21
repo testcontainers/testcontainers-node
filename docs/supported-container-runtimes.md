@@ -36,7 +36,9 @@ export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock
 2. Export the `DOCKER_HOST`:
 
    ```bash
+   {% raw %}
    export DOCKER_HOST="unix://$(podman info --format '{{.Host.RemoteSocket.Path}}')"
+   {% endraw %}
    ```
 
 ### Known issues
