@@ -57,7 +57,7 @@ export class CouchbaseContainer extends GenericContainer {
 
   withServiceQuota(service: CouchbaseService, quotaMb: number) {
     if (!service.hasQuota()) {
-      throw new Error(`The provided service (${service}) has no quota to configure`);
+      throw new Error(`The provided service (${service.getIdentifier()}) has no quota to configure`);
     }
 
     if (quotaMb < service.getMinimumQuotaMb()) {
@@ -250,14 +250,14 @@ export class CouchbaseContainer extends GenericContainer {
   }
 
   private async setMemoryQuotas(container: StartedTestContainer) {
-    log.debug(`Custom service memory quotas: ${this.customServiceQuotas}`);
     for (const service of this.enabledServices) {
       if (!service.hasQuota()) {
         continue;
       }
 
       const body = new URLSearchParams();
-      const quota = this.customServiceQuotas.get(service) || service.getMinimumQuotaMb();
+      const quota = this.customServiceQuotas.get(service) ?? service.getMinimumQuotaMb();
+      log.debug(`Custom service memory quotas: ${service.getIdentifier()} - ${quota} Mb.`);
 
       if (service.getIdentifier() === CouchbaseService.KV.getIdentifier()) {
         body.set("memoryQuota", quota.toString());

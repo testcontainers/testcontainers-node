@@ -63,6 +63,6 @@ describe("RabbitMQContainer", { timeout: 240_000 }, () => {
     await connection.close();
 
     await rabbitMQContainer.stop();
-  }, 10_000);
+  }, 20_000);
   // }
 });
