@@ -8,6 +8,7 @@ describe("Reaper", { timeout: 120_000 }, () => {
 
   beforeEach(async () => {
     vi.resetModules();
+    vi.stubEnv("TESTCONTAINERS_RYUK_TEST_LABEL", "true");
     client = await getContainerRuntimeClient();
   });
 
