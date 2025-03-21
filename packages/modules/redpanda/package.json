@@ -26,7 +26,8 @@
   },
   "scripts": {
     "prepack": "shx cp ../../../README.md . && shx cp ../../../LICENSE .",
-    "build": "tsc --project tsconfig.build.json && shx cp -r src/assets build/"
+    "build": "tsc --project tsconfig.build.json",
+    "postpack": "shx cp -r src/assets build/"
   },
   "dependencies": {
     "handlebars": "^4.7.8",

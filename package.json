@@ -15,7 +15,8 @@
     "lint": "eslint --fix package.json \"packages/**/*.ts\"",
     "lint:ci": "eslint package.json \"${WORKSPACE_PATH}/**/*.ts\" --max-warnings=0",
     "update-deps": "npm-check-updates --workspaces --root -u",
-    "validate-engine": "ls-engines"
+    "validate-engine": "ls-engines",
+    "check-compiles": "npm run build -ws -- --project tsconfig.json --noEmit"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",

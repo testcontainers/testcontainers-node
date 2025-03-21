@@ -73,11 +73,38 @@ jobs:
           WORKSPACE_PATH: ${{ steps.npm-install.outputs.workspace_path }}
         run: npm run lint:ci
 
+  compile:
+    if: ${{ needs.detect-modules.outputs.modules_count > 0 }}
+    name: Compile
+    needs:
+      - detect-modules
+      - lint
+    strategy:
+      fail-fast: false
+      matrix:
+        module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Code checkout
+        uses: actions/checkout@v4
+      - name: Install Node and Dependencies
+        id: npm-install
+        uses: ./.github/actions/npm-setup
+        with:
+          runner: ubuntu-22.04
+          node-version: 22.x
+          workspace: "${{ matrix.module }}"
+      - name: Code linting
+        env:
+          WORKSPACE_PATH: ${{ steps.npm-install.outputs.workspace_path }}
+        run: npm run build --noEmit
+
   smoke-test:
     if: ${{ needs.detect-modules.outputs.modules_count > 0 }}
     needs:
       - detect-modules
       - lint
+      - compile
     name: Smoke tests
     strategy:
       fail-fast: true
@@ -111,6 +138,7 @@ jobs:
     needs:
       - detect-modules
       - lint
+      - compile
       - smoke-test
     strategy:
       fail-fast: false
@@ -130,6 +158,7 @@ jobs:
     needs:
       - detect-modules
       - lint
+      - compile
       - smoke-test
       - test
     strategy:
@@ -150,6 +179,7 @@ jobs:
     needs:
       - detect-modules
       - lint
+      - compile
       - smoke-test
       - test
       - test-podman
