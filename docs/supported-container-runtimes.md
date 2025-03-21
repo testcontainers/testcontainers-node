@@ -21,17 +21,17 @@ export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock
 
 1. Ensure the Podman socket is exposed:
 
-   Rootless:
-
-   ```bash
-   systemctl --user status podman.socket
-   ```
-
-   Rootful:
-
-   ```bash
-   sudo systemctl enable --now podman.socket
-   ```
+    Rootless:
+ 
+    ```bash
+    systemctl --user status podman.socket
+    ```
+ 
+    Rootful:
+ 
+    ```bash
+    sudo systemctl enable --now podman.socket
+    ```
 
 2. Export the `DOCKER_HOST`:
 
