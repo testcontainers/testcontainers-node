@@ -10,6 +10,10 @@ describe("ContainerImage", () => {
     expect(imageName.equals(new ImageName("anotherRegistry", "image", "tag"))).toBe(false);
   });
 
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   describe("string", () => {
     it("should work with registry", () => {
       const imageName = new ImageName("registry", "image", "tag");
@@ -57,21 +61,12 @@ describe("ContainerImage", () => {
     it.each(["custom.com/registry", "custom.com/registry/"])(
       "should substitute no registry with the one provided via TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX when provided registry is %s",
       (customRegistry: string) => {
-        const oldEnvValue = process.env.TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX;
-        try {
-          process.env.TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX = customRegistry;
-          const imageName = new ImageName(undefined, "image", "tag");
-          expect(imageName.registry).toBe("custom.com");
-          expect(imageName.image).toBe("registry/image");
-          expect(imageName.tag).toBe("tag");
-          expect(imageName.string).toBe("custom.com/registry/image:tag");
-        } finally {
-          if (oldEnvValue === undefined) {
-            delete process.env.TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX;
-          } else {
-            process.env.TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX = oldEnvValue;
-          }
-        }
+        vi.stubEnv("TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX", customRegistry);
+        const imageName = new ImageName(undefined, "image", "tag");
+        expect(imageName.registry).toBe("custom.com");
+        expect(imageName.image).toBe("registry/image");
+        expect(imageName.tag).toBe("tag");
+        expect(imageName.string).toBe("custom.com/registry/image:tag");
       }
     );
   });
@@ -176,18 +171,8 @@ describe("ContainerImage", () => {
   ])(
     "fromString with TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX set to $customRegistry",
     ({ customRegistry, expectedRegistry, expectedImagePrefix }) => {
-      let oldEnvValue: string | undefined;
       beforeEach(() => {
-        oldEnvValue = process.env.TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX;
-        process.env.TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX = customRegistry;
-      });
-
-      afterEach(() => {
-        if (oldEnvValue === undefined) {
-          delete process.env.TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX;
-        } else {
-          process.env.TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX = oldEnvValue;
-        }
+        vi.stubEnv("TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX", customRegistry);
       });
 
       it("should work", () => {

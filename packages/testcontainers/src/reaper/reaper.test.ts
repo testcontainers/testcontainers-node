@@ -8,13 +8,13 @@ describe("Reaper", { timeout: 120_000 }, () => {
 
   beforeEach(async () => {
     vi.resetModules();
-    vitest.unstubAllEnvs();
+    vi.unstubAllEnvs();
 
     client = await getContainerRuntimeClient();
   });
 
   it("should create disabled reaper when TESTCONTAINERS_RYUK_DISABLED=true", async () => {
-    vitest.stubEnv("TESTCONTAINERS_RYUK_DISABLED", "true");
+    vi.stubEnv("TESTCONTAINERS_RYUK_DISABLED", "true");
 
     vi.spyOn(client.container, "list").mockResolvedValue([]);
     const reaper = await getReaper();
@@ -29,7 +29,7 @@ describe("Reaper", { timeout: 120_000 }, () => {
 
   it("should use custom port when TESTCONTAINERS_RYUK_PORT is set", async () => {
     const customPort = (await new RandomUniquePortGenerator().generatePort()).toString();
-    vitest.stubEnv("TESTCONTAINERS_RYUK_PORT", customPort);
+    vi.stubEnv("TESTCONTAINERS_RYUK_PORT", customPort);
 
     vi.spyOn(client.container, "list").mockResolvedValue([]);
     const reaper = await getReaper();
@@ -60,7 +60,7 @@ describe("Reaper", { timeout: 120_000 }, () => {
   });
 
   it("should propagate TESTCONTAINERS_RYUK_VERBOSE into Reaper container", async () => {
-    vitest.stubEnv("TESTCONTAINERS_RYUK_VERBOSE", "true");
+    vi.stubEnv("TESTCONTAINERS_RYUK_VERBOSE", "true");
 
     vi.spyOn(client.container, "list").mockResolvedValue([]);
     const reaper = await getReaper();

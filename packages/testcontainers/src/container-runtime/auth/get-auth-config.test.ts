@@ -14,20 +14,23 @@ describe("get auth config", () => {
   });
 
   afterEach(() => {
-    delete process.env.DOCKER_AUTH_CONFIG;
+    vi.unstubAllEnvs();
     vi.resetModules();
   });
 
   it("should use DOCKER_AUTH_CONFIG environment variable as Docker config", async () => {
-    process.env.DOCKER_AUTH_CONFIG = JSON.stringify({
-      auths: {
-        "https://registry.example.com": {
-          email: "user@example.com",
-          username: "user",
-          password: "pass",
+    vi.stubEnv(
+      "DOCKER_AUTH_CONFIG",
+      JSON.stringify({
+        auths: {
+          "https://registry.example.com": {
+            email: "user@example.com",
+            username: "user",
+            password: "pass",
+          },
         },
-      },
-    });
+      })
+    );
     const { getAuthConfig } = await import("./get-auth-config");
     expect(await getAuthConfig("https://registry.example.com")).toEqual({
       username: "user",
