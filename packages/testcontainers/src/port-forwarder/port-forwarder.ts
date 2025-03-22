@@ -96,7 +96,13 @@ export class PortForwarderInstance {
     }
 
     log.debug(`Connecting to Port Forwarder on "${host}:${port}"...`);
-    const connection = await createSshConnection({ host, port, username: "root", password: "root" });
+    const connection = await createSshConnection({
+      host,
+      port,
+      username: "root",
+      password: "root",
+      readyTimeout: 100_000,
+    });
     log.debug(`Connected to Port Forwarder on "${host}:${port}"`);
     connection.unref();
 
