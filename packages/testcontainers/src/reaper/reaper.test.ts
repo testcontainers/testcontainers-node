@@ -7,8 +7,6 @@ describe("Reaper", { timeout: 120_000 }, () => {
 
   beforeEach(async () => {
     vi.resetModules();
-    vitest.unstubAllEnvs();
-
     client = await getContainerRuntimeClient();
   });
 
@@ -23,7 +21,7 @@ describe("Reaper", { timeout: 120_000 }, () => {
   });
 
   it("should propagate TESTCONTAINERS_RYUK_VERBOSE into Reaper container", async () => {
-    vitest.stubEnv("TESTCONTAINERS_RYUK_VERBOSE", "true");
+    vi.stubEnv("TESTCONTAINERS_RYUK_VERBOSE", "true");
 
     vi.spyOn(client.container, "list").mockResolvedValue([]);
     const reaper = await getReaper();

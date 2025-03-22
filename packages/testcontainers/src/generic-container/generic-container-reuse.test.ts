@@ -3,10 +3,6 @@ import { checkContainerIsHealthy } from "../utils/test-helper";
 import { GenericContainer } from "./generic-container";
 
 describe("GenericContainer reuse", { timeout: 180_000 }, () => {
-  afterEach(() => {
-    process.env.TESTCONTAINERS_REUSE_ENABLE = undefined;
-  });
-
   it("should not reuse the container by default", async () => {
     const name = `there_can_only_be_one_${randomUuid()}`;
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
@@ -64,7 +60,7 @@ describe("GenericContainer reuse", { timeout: 180_000 }, () => {
   });
 
   it("should not reuse the container when TESTCONTAINERS_REUSE_ENABLE is set to false", async () => {
-    process.env.TESTCONTAINERS_REUSE_ENABLE = "false";
+    vi.stubEnv("TESTCONTAINERS_REUSE_ENABLE", "false");
 
     const name = `there_can_only_be_one_${randomUuid()}`;
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
@@ -90,7 +86,7 @@ describe("GenericContainer reuse", { timeout: 180_000 }, () => {
   it.each(["true", undefined])(
     "should reuse the container when TESTCONTAINERS_REUSE_ENABLE is set to %s",
     async (reuseEnable: string | undefined) => {
-      process.env.TESTCONTAINERS_REUSE_ENABLE = reuseEnable;
+      vi.stubEnv("TESTCONTAINERS_REUSE_ENABLE", reuseEnable);
 
       const name = `there_can_only_be_one_${randomUuid()}`;
       const container1 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")

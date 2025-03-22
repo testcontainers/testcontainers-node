@@ -1,4 +1,5 @@
 import { GetEventsOptions, ImageInspectInfo } from "dockerode";
+import { createServer, Server } from "http";
 import { Readable } from "stream";
 import { Agent, request } from "undici";
 import { IntervalRetry } from "../common";
@@ -141,4 +142,13 @@ export async function stopStartingContainer(container: GenericContainer, name: s
 
   await client.container.getById(name).stop();
   await containerStartPromise;
+}
+
+export async function createTestServer(port: number): Promise<Server> {
+  const server = createServer((req, res) => {
+    res.writeHead(200);
+    res.end("hello world");
+  });
+  await new Promise<void>((resolve) => server.listen(port, resolve));
+  return server;
 }

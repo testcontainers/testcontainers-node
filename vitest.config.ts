@@ -7,6 +7,7 @@ export default defineConfig({
     silent: "passed-only",
     mockReset: true,
     restoreMocks: true,
+    unstubEnvs: true,
     alias: {
       testcontainers: path.resolve(__dirname, "packages/testcontainers/src"),
     },
