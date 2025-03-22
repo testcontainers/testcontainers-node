@@ -29,7 +29,7 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "@elastic/elasticsearch": "^7.17.14"
+    "@elastic/elasticsearch": "^8.17.1"
   },
   "dependencies": {
     "testcontainers": "^10.21.0"

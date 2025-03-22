@@ -22,7 +22,7 @@ export class AzureCosmosDbEmulatorContainer extends GenericContainer {
   private explorerEnabled = DEFAULT_EXPLORER_ENABLED;
   private portGenerator: PortGenerator;
 
-  constructor(image = "mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-EN20250228") {
+  constructor(image: string) {
     super(image);
     this.portGenerator = new RandomUniquePortGenerator();
     this.withWaitStrategy(Wait.forLogMessage(COSMOS_READY_LOG_MESSAGE));

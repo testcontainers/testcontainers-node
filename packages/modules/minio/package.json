@@ -32,6 +32,6 @@
     "testcontainers": "^10.21.0"
   },
   "devDependencies": {
-    "minio": "^8.0.3"
+    "minio": "^8.0.5"
   }
 }

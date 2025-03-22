@@ -3,7 +3,7 @@ import { AbstractStartedContainer, ExecResult, GenericContainer, StartedTestCont
 const MONGODB_PORT = 27017;
 
 export class MongoDBContainer extends GenericContainer {
-  constructor(image = "mongo:4.0.1") {
+  constructor(image: string) {
     super(image);
     this.withExposedPorts(MONGODB_PORT)
       .withCommand(["--replSet", "rs0"])
