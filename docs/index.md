@@ -13,7 +13,7 @@
     <a href="https://github.com/testcontainers/testcontainers-ruby/" class="card-grid-item" ><img src="/site/language-logos/ruby.svg"/>Ruby</a>
     <a href="https://docs.rs/testcontainers/latest/testcontainers/" class="card-grid-item"><img src="/site/language-logos/rust.svg"/>Rust</a>
     <a href="https://github.com/testcontainers/testcontainers-php/" class="card-grid-item" ><img src="/site/language-logos/php.svg"/>PHP</a>
-    <a href="https://github.com/testcontainers/testcontainers-scala/" class="card-grid-item" >Scala</a>
+    <a href="https://github.com/testcontainers/testcontainers-scala/" class="card-grid-item" ><img style="width:30px; height:30px" src="/site/language-logos/scala.svg"/>Scala</a>
 </div>
 
 ## About
