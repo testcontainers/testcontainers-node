@@ -8,7 +8,8 @@ Works out of the box.
 
 ### Usage
 
-MacOS:
+#### MacOS:
+
 ```bash
 {% raw %}
 export DOCKER_HOST=unix://$(podman machine inspect --format '{{.ConnectionInfo.PodmanSocket.Path}}')
@@ -16,10 +17,29 @@ export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock
 {% endraw %}
 ```
 
-Linux:
-```bash
-export DOCKER_HOST=unix://${XDG_RUNTIME_DIR}/podman/podman.sock
-```
+#### Linux:
+
+1. Ensure the Podman socket is exposed:
+
+    Rootless:
+ 
+    ```bash
+    systemctl --user status podman.socket
+    ```
+ 
+    Rootful:
+ 
+    ```bash
+    sudo systemctl enable --now podman.socket
+    ```
+
+2. Export the `DOCKER_HOST`:
+
+    ```bash
+    {% raw %}
+    export DOCKER_HOST="unix://$(podman info --format '{{.Host.RemoteSocket.Path}}')"
+    {% endraw %}
+    ```
 
 ### Known issues
 
@@ -71,10 +91,7 @@ You can use a composite wait strategy to additionally wait for a port to be boun
 const { GenericContainer, Wait } = require("testcontainers");
 
 const container = await new GenericContainer("redis")
-  .withWaitStrategy(Wait.forAll([
-    Wait.forListeningPorts(),
-    Wait.forLogMessage("Ready to accept connections")
-  ]))
+  .withWaitStrategy(Wait.forAll([Wait.forListeningPorts(), Wait.forLogMessage("Ready to accept connections")]))
   .start();
 ```
 

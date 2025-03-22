@@ -48,7 +48,10 @@ export async function getReaper(client: ContainerRuntimeClient): Promise<Reaper>
 async function findReaperContainer(client: ContainerRuntimeClient): Promise<ContainerInfo | undefined> {
   const containers = await client.container.list();
   return containers.find(
-    (container) => container.State === "running" && container.Labels[LABEL_TESTCONTAINERS_RYUK] === "true"
+    (container) =>
+      container.State === "running" &&
+      container.Labels[LABEL_TESTCONTAINERS_RYUK] === "true" &&
+      container.Labels["TESTCONTAINERS_RYUK_TEST_LABEL"] !== "true"
   );
 }
 
@@ -78,11 +81,14 @@ async function createNewReaper(sessionId: string, remoteSocketPath: string): Pro
     .withBindMounts([{ source: remoteSocketPath, target: "/var/run/docker.sock" }])
     .withLabels({ [LABEL_TESTCONTAINERS_SESSION_ID]: sessionId })
     .withWaitStrategy(Wait.forLogMessage(/.*Started.*/));
-  if (process.env["TESTCONTAINERS_RYUK_VERBOSE"])
+  if (process.env["TESTCONTAINERS_RYUK_VERBOSE"]) {
     container.withEnvironment({ RYUK_VERBOSE: process.env["TESTCONTAINERS_RYUK_VERBOSE"] });
-
-  if (process.env.TESTCONTAINERS_RYUK_PRIVILEGED === "true") {
+  }
+  if (process.env["TESTCONTAINERS_RYUK_PRIVILEGED"] === "true") {
     container.withPrivilegedMode();
+  }
+  if (process.env["TESTCONTAINERS_RYUK_TEST_LABEL"] === "true") {
+    container.withLabels({ TESTCONTAINERS_RYUK_TEST_LABEL: "true" });
   }
 
   const startedContainer = await container.start();
