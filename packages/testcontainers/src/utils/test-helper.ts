@@ -1,5 +1,5 @@
 import { GetEventsOptions, ImageInspectInfo } from "dockerode";
-import { Server, createServer } from "http";
+import { createServer, Server } from "http";
 import { Readable } from "stream";
 import { Agent } from "undici";
 import { IntervalRetry } from "../common";
