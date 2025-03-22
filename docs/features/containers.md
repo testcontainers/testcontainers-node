@@ -355,7 +355,7 @@ const container = await new GenericContainer("alpine")
   .withAutoRemove(false)
   .start();
 
-await container.stop()
+await container.stop();
 ```
 
 The value specified to `.withAutoRemove()` can be overridden by `.stop()`:
@@ -365,8 +365,11 @@ const container = await new GenericContainer("alpine")
   .withAutoRemove(false)
   .start();
 
-await container.stop({ remove: true }) // The container is stopped *AND* removed
+await container.stop({ remove: true }); // The container is stopped *AND* removed
 ```
+
+Keep in mind that disabling ryuk (set `TESTCONTAINERS_RYUK_DISABLED` to `true`) **and** disabling automatic removal of containers will make containers persist after you're done working with them.
+
 
 Volumes created by the container are removed when stopped. This is configurable:
 
@@ -419,6 +422,22 @@ const container1 = await new GenericContainer("alpine")
 
 const container2 = await new GenericContainer("alpine")
   .withCommand(["sleep", "infinity"])
+  .withReuse()
+  .start();
+
+expect(container1.getId()).toBe(container2.getId());
+```
+
+You can also re-use stopped but not removed containers.
+
+```javascript
+const container1 = await new GenericContainer("alpine")
+  .withReuse()
+  .withAutoRemove(false)
+  .start();
+await container1.stop();
+
+const container2 = await new GenericContainer("alpine")
   .withReuse()
   .start();
 
