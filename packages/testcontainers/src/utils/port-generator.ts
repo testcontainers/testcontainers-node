@@ -4,8 +4,8 @@ export interface PortGenerator {
 
 class RandomPortGenerator {
   public async generatePort(): Promise<number> {
-    const { default: getPort, portNumbers } = await import("get-port");
-    return getPort({ port: portNumbers(10000, 65535) });
+    const { default: getPort } = await import("get-port");
+    return getPort();
   }
 }
 
