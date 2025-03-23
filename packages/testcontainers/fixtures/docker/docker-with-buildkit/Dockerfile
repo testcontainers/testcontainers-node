@@ -4,6 +4,10 @@ MAINTAINER Cristian Greco
 
 EXPOSE 8080
 
+RUN --mount=type=tmpfs,target=/buildkit-test \
+    echo "BuildKit tmpfs mount is working" > /buildkit-test/success.txt && \
+    cat /buildkit-test/success.txt
+
 RUN apk add --no-cache curl dumb-init libcap openssl
 
 RUN openssl req -x509 -nodes -days 36500 \
@@ -12,8 +16,7 @@ RUN openssl req -x509 -nodes -days 36500 \
     -out /etc/ssl/certs/cert.crt \
     && chmod 666 /etc/ssl/private/cert.key
 
-RUN --mount=type=cache,target=/root/.npm \
-    npm init -y && \
+RUN npm init -y && \
     npm install express@4.16.4
 
 COPY index.js .
