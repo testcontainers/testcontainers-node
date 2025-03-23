@@ -1,5 +1,4 @@
-import * as couchbase from "couchbase";
-import { Bucket, Cluster } from "couchbase";
+import couchbase, { Bucket, Cluster } from "couchbase";
 import { BucketDefinition } from "./bucket-definition";
 import { CouchbaseContainer, StartedCouchbaseContainer } from "./couchbase-container";
 import { CouchbaseService } from "./couchbase-service";

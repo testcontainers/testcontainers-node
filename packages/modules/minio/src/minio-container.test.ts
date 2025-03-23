@@ -1,4 +1,4 @@
-import * as Minio from "minio";
+import minio from "minio";
 import { MinioContainer } from "./minio-container";
 
 describe("MinIO", { timeout: 240_000 }, () => {
@@ -6,7 +6,7 @@ describe("MinIO", { timeout: 240_000 }, () => {
   it("should connect and upload a file", async () => {
     const container = await new MinioContainer().start();
 
-    const minioClient = new Minio.Client({
+    const minioClient = new minio.Client({
       endPoint: container.getHost(),
       port: container.getPort(),
       useSSL: false,
@@ -36,7 +36,7 @@ describe("MinIO", { timeout: 240_000 }, () => {
   it("should work with custom credentials", async () => {
     const container = await new MinioContainer().withUsername("AzureDiamond").withPassword("hunter2!").start();
 
-    const minioClient = new Minio.Client({
+    const minioClient = new minio.Client({
       endPoint: container.getHost(),
       port: container.getPort(),
       useSSL: false,
