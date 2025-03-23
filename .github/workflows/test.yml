@@ -8,8 +8,7 @@ on:
       - "docs/**"
       - "README.md"
   pull_request:
-    branches:
-      - "**"
+    branches: [main]
     paths-ignore:
       - "mkdocs.yml"
       - "docs/**"
