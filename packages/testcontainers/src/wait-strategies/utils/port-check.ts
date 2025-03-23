@@ -33,7 +33,7 @@ export class HostPortCheck implements PortCheck {
 
 export class InternalPortCheck implements PortCheck {
   private isDistroless = false;
-  private commandOutputs = new Set<string>();
+  private readonly commandOutputs = new Set<string>();
 
   constructor(
     private readonly client: ContainerRuntimeClient,
@@ -53,28 +53,26 @@ export class InternalPortCheck implements PortCheck {
     );
     const isBound = commandResults.some((result) => result.exitCode === 0);
 
+    const shellExists = commandResults.some((result) => result.exitCode !== 126);
+    if (!isBound && !shellExists && !this.isDistroless) {
+      this.isDistroless = true;
+      log.error(`The HostPortWaitStrategy will not work on a distroless image, use an alternate wait strategy`, {
+        containerId: this.container.id,
+      });
+    }
+
     if (!isBound && log.enabled()) {
-      const shellExists = commandResults.some((result) => result.exitCode !== 126);
-      if (!shellExists) {
-        if (!this.isDistroless) {
-          this.isDistroless = true;
-          log.error(`The HostPortWaitStrategy will not work on a distroless image, use an alternate wait strategy`, {
-            containerId: this.container.id,
-          });
-        }
-      } else {
-        commandResults
-          .map((result) => ({ ...result, output: result.output.trim() }))
-          .filter((result) => result.exitCode !== 126 && result.output.length > 0)
-          .forEach((result) => {
-            if (!this.commandOutputs.has(this.commandOutputsKey(result.output))) {
-              log.trace(`Port check result exit code ${result.exitCode}: ${result.output}`, {
-                containerId: this.container.id,
-              });
-              this.commandOutputs.add(this.commandOutputsKey(result.output));
-            }
-          });
-      }
+      commandResults
+        .map((result) => ({ ...result, output: result.output.trim() }))
+        .filter((result) => result.exitCode !== 126 && result.output.length > 0)
+        .forEach((result) => {
+          if (!this.commandOutputs.has(this.commandOutputsKey(result.output))) {
+            log.trace(`Port check result exit code ${result.exitCode}: ${result.output}`, {
+              containerId: this.container.id,
+            });
+            this.commandOutputs.add(this.commandOutputsKey(result.output));
+          }
+        });
     }
 
     return isBound;

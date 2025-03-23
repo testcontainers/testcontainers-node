@@ -140,5 +140,28 @@ describe("PortCheck", () => {
         ],
       ]);
     });
+
+    it("should error log the distroless image once, regardless of logs enabled or not", async () => {
+      // Make sure logging is disabled explicitly here
+      mockLogger.enabled.mockImplementation(() => false);
+
+      mockContainerExec
+        .mockReturnValueOnce(Promise.resolve({ output: "ERROR 1", exitCode: 126 }))
+        .mockReturnValueOnce(Promise.resolve({ output: "ERROR 2", exitCode: 126 }))
+        .mockReturnValueOnce(Promise.resolve({ output: "ERROR 2", exitCode: 126 }))
+        .mockReturnValueOnce(Promise.resolve({ output: "ERROR 1", exitCode: 126 }))
+        .mockReturnValueOnce(Promise.resolve({ output: "ERROR 2", exitCode: 126 }))
+        .mockReturnValueOnce(Promise.resolve({ output: "ERROR 2", exitCode: 126 }));
+
+      await portCheck.isBound(8080);
+      await portCheck.isBound(8080);
+
+      expect(mockLogger.error.mock.calls).toEqual([
+        [
+          "The HostPortWaitStrategy will not work on a distroless image, use an alternate wait strategy",
+          { containerId: "containerId" },
+        ],
+      ]);
+    });
   });
 });
