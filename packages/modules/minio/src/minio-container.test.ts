@@ -1,4 +1,4 @@
-import minio from "minio";
+import * as minio from "minio";
 import { MinioContainer } from "./minio-container";
 
 describe("MinIO", { timeout: 240_000 }, () => {

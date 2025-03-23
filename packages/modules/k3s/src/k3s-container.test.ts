@@ -1,4 +1,4 @@
-import k8s from "@kubernetes/client-node";
+import * as k8s from "@kubernetes/client-node";
 import { setTimeout } from "node:timers/promises";
 import { GenericContainer, Network, Wait } from "testcontainers";
 import { K3sContainer } from "./k3s-container";
