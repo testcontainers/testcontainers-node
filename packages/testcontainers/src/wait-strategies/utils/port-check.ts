@@ -53,7 +53,10 @@ export class InternalPortCheck implements PortCheck {
     );
     const isBound = commandResults.some((result) => result.exitCode === 0);
 
-    const shellExists = commandResults.some((result) => result.exitCode !== 126);
+    // https://www.gnu.org/software/bash/manual/html_node/Exit-Status.html
+    // If a command is not found, the child process created to execute it returns a status of 127.
+    // If a command is found but is not executable, the return status is 126.
+    const shellExists = commandResults.some((result) => result.exitCode !== 126 && result.exitCode !== 127);
     if (!isBound && !shellExists && !this.isDistroless) {
       this.isDistroless = true;
       log.error(`The HostPortWaitStrategy will not work on a distroless image, use an alternate wait strategy`, {

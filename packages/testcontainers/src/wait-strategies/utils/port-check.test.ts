@@ -163,5 +163,20 @@ describe("PortCheck", () => {
         ],
       ]);
     });
+
+    it.for([126, 127])("should error log the distroless image when exit code is %i", async (code) => {
+      mockContainerExec.mockReturnValueOnce(Promise.resolve({ output: "ERROR 1", exitCode: code }));
+      mockContainerExec.mockReturnValueOnce(Promise.resolve({ output: "ERROR 2", exitCode: code }));
+      mockContainerExec.mockReturnValueOnce(Promise.resolve({ output: "ERROR 3", exitCode: code }));
+
+      await portCheck.isBound(8080);
+
+      expect(mockLogger.error.mock.calls).toEqual([
+        [
+          "The HostPortWaitStrategy will not work on a distroless image, use an alternate wait strategy",
+          { containerId: "containerId" },
+        ],
+      ]);
+    });
   });
 });
