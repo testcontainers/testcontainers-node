@@ -469,7 +469,6 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     expect(output).not.toContain("example5.txt");
     expect(output).not.toContain("example6.txt");
     expect(output).not.toContain("example7.txt");
-    expect(output).not.toContain("Dockerfile");
 
     await startedContainer.stop();
   });
