@@ -1,4 +1,3 @@
-import { expect } from "vitest";
 import { RandomUuid } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
 import { getReaper } from "../reaper/reaper";

@@ -1,5 +1,4 @@
 import mqtt from "mqtt";
-import { expect } from "vitest";
 import { HiveMQContainer } from "./hivemq-container";
 
 const IMAGE = "hivemq/hivemq-ce:2023.5";
