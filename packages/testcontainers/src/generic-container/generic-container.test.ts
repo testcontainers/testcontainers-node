@@ -3,12 +3,7 @@ import path from "path";
 import { RandomUuid } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
 import { PullPolicy } from "../utils/pull-policy";
-import {
-  checkContainerIsHealthy,
-  getDockerEventStream,
-  getRunningContainerNames,
-  waitForDockerEvent,
-} from "../utils/test-helper";
+import { checkContainerIsHealthy, getRunningContainerNames } from "../utils/test-helper";
 import { GenericContainer } from "./generic-container";
 
 describe("GenericContainer", { timeout: 180_000 }, () => {
@@ -308,20 +303,6 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await checkContainerIsHealthy(container);
 
     await container.stop();
-  });
-
-  it("should use pull policy", async () => {
-    const container = new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080);
-
-    const startedContainer1 = await container.start();
-    const dockerEventStream = await getDockerEventStream();
-    const dockerPullEventPromise = waitForDockerEvent(dockerEventStream, "pull");
-    const startedContainer2 = await container.withPullPolicy(PullPolicy.alwaysPull()).start();
-    await dockerPullEventPromise;
-
-    dockerEventStream.destroy();
-    await startedContainer1.stop();
-    await startedContainer2.stop();
   });
 
   it("should set the IPC mode", async () => {

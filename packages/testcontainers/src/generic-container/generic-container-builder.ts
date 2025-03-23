@@ -79,6 +79,7 @@ export class GenericContainerBuilder {
       labels,
       target: this.target,
       platform: this.platform,
+      version: "2",
     };
 
     if (this.pullPolicy.shouldPull()) {

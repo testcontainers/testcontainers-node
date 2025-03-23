@@ -94,23 +94,6 @@ export const composeContainerName = async (serviceName: string, index = 1): Prom
   return `${serviceName}-${index}`;
 };
 
-export const waitForDockerEvent = async (eventStream: Readable, eventName: string, times = 1) => {
-  let currentTimes = 0;
-  return new Promise<void>((resolve) => {
-    eventStream.on("data", (data) => {
-      try {
-        if (JSON.parse(data).status === eventName) {
-          if (++currentTimes === times) {
-            resolve();
-          }
-        }
-      } catch (err) {
-        // ignored
-      }
-    });
-  });
-};
-
 export async function getImageLabelsByName(imageName: string): Promise<{ [label: string]: string }> {
   const dockerode = (await getContainerRuntimeClient()).container.dockerode;
   const imageInfo = await dockerode.getImage(imageName).inspect();

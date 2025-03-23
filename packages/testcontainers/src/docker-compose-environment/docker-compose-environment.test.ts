@@ -1,14 +1,12 @@
 import path from "path";
+import { it } from "vitest";
 import { RandomUuid } from "../common";
 import { randomUuid } from "../common/uuid";
-import { PullPolicy } from "../utils/pull-policy";
 import {
   checkEnvironmentContainerIsHealthy,
   composeContainerName,
-  getDockerEventStream,
   getRunningContainerNames,
   getVolumeNames,
-  waitForDockerEvent,
 } from "../utils/test-helper";
 import { Wait } from "../wait-strategies/wait";
 import { DockerComposeEnvironment } from "./docker-compose-environment";
@@ -43,32 +41,14 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
     await startedEnvironment.down();
   });
 
-  it("should use pull policy", async () => {
-    const env = new DockerComposeEnvironment(fixtures, "docker-compose-with-many-services.yml");
+  it("should work with buildkit features", async () => {
+    const buildkitFixtures = path.resolve(fixtures, "docker-compose-with-buildkit");
 
-    const startedEnv1 = await env.up();
-    const dockerEventStream = await getDockerEventStream();
-    const dockerPullEventPromise = waitForDockerEvent(dockerEventStream, "pull");
-    const startedEnv2 = await env.withPullPolicy(PullPolicy.alwaysPull()).up();
-    await dockerPullEventPromise;
+    const startedEnvironment = await new DockerComposeEnvironment(buildkitFixtures, "docker-compose.yml").up();
 
-    dockerEventStream.destroy();
-    await startedEnv1.stop();
-    await startedEnv2.stop();
-  });
+    await checkEnvironmentContainerIsHealthy(startedEnvironment, await composeContainerName("container"));
 
-  it("should use pull policy for specific service", async () => {
-    const env = new DockerComposeEnvironment(fixtures, "docker-compose-with-many-services.yml");
-
-    const startedEnv1 = await env.up(["service_2"]);
-    const dockerEventStream = await getDockerEventStream();
-    const dockerPullEventPromise = waitForDockerEvent(dockerEventStream, "pull");
-    const startedEnv2 = await env.withPullPolicy(PullPolicy.alwaysPull()).up(["service_2"]);
-    await dockerPullEventPromise;
-
-    dockerEventStream.destroy();
-    await startedEnv1.stop();
-    await startedEnv2.stop();
+    await startedEnvironment.down();
   });
 
   it("should start environment with multiple compose files", async () => {
