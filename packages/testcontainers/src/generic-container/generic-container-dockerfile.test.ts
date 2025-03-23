@@ -28,15 +28,17 @@ describe("GenericContainer Dockerfile", { timeout: 180_000 }, () => {
     await startedContainer.stop();
   });
 
-  it("should build with buildkit", async () => {
-    const context = path.resolve(fixtures, "docker-with-buildkit");
-    const container = await GenericContainer.fromDockerfile(context).withBuildkit().build();
-    const startedContainer = await container.withExposedPorts(8080).start();
+  if (!process.env.CI_PODMAN) {
+    it("should build with buildkit", async () => {
+      const context = path.resolve(fixtures, "docker-with-buildkit");
+      const container = await GenericContainer.fromDockerfile(context).withBuildkit().build();
+      const startedContainer = await container.withExposedPorts(8080).start();
 
-    await checkContainerIsHealthy(startedContainer);
+      await checkContainerIsHealthy(startedContainer);
 
-    await startedContainer.stop();
-  });
+      await startedContainer.stop();
+    });
+  }
 
   it("should have a session ID label to be cleaned up by the Reaper", async () => {
     const context = path.resolve(fixtures, "docker");
