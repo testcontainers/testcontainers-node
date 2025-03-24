@@ -334,11 +334,11 @@ const container = await new GenericContainer("alpine").start();
 await container.stop();
 ```
 
-If you need to wait for the container to be stopped, you can provide a timeout:
+If you need to wait for the container to be stopped, you can provide a timeout. The unit of timeout option here is **second**:
 
 ```javascript
 const container = await new GenericContainer("alpine").start();
-await container.stop({ timeout: 10000 }); // ms
+await container.stop({ timeout: 10 }); // 10 seconds
 ```
 
 You can disable automatic removal of the container, which is useful for debugging, or if for example you want to copy content from the container once it has stopped:
