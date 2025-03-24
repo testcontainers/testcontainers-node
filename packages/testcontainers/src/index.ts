@@ -22,7 +22,7 @@ export { CommitOptions, Content, ExecOptions, ExecResult, InspectResult } from "
 export { BoundPorts } from "./utils/bound-ports";
 export { LABEL_TESTCONTAINERS_SESSION_ID } from "./utils/labels";
 export { PortWithBinding, PortWithOptionalBinding, getContainerPort, hasHostBinding } from "./utils/port";
-export { PortGenerator, RandomUniquePortGenerator } from "./utils/port-generator";
+export { PortGenerator, RandomPortGenerator } from "./utils/port-generator";
 export { ImagePullPolicy, PullPolicy } from "./utils/pull-policy";
 export { HttpWaitStrategyOptions } from "./wait-strategies/http-wait-strategy";
 export { StartupCheckStrategy, StartupStatus } from "./wait-strategies/startup-check-strategy";
