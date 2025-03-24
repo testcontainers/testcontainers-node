@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/mockserver",
-  "version": "10.21.0",
+  "version": "10.22.0",
   "description": "Mockserver module for Testcontainers",
   "main": "build/index.js",
   "devDependencies": {
@@ -34,6 +34,6 @@
     "access": "public"
   },
   "dependencies": {
-    "testcontainers": "^10.21.0"
+    "testcontainers": "^10.22.0"
   }
 }
