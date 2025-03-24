@@ -33,7 +33,11 @@ markdown_extensions:
 
 nav:
   - Home: index.md
-  - Quickstart: quickstart.md
+  - Quickstart:
+      - Install: quickstart/install.md
+      - Usage: quickstart/usage.md
+      - Logging: quickstart/logging.md
+      - Global setup: quickstart/global-setup.md
   - Supported container runtimes: supported-container-runtimes.md
   - Features:
       - Containers: features/containers.md
