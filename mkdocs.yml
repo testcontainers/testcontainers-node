@@ -36,8 +36,8 @@ nav:
   - Quickstart:
       - Install: quickstart/install.md
       - Usage: quickstart/usage.md
-      - Logging: quickstart/logging.md
       - Global setup: quickstart/global-setup.md
+      - Logging: quickstart/logging.md
   - Supported container runtimes: supported-container-runtimes.md
   - Features:
       - Containers: features/containers.md

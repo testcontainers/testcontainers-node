@@ -1,6 +1,6 @@
 # Logging
 
-It would be nice to see what Testcontainers is doing while the test is running. You can enable all debug logging by setting the `DEBUG` environment variable. For example:
+It would be nice to see what Testcontainers is doing while the test is running. You can enable all logs by setting the `DEBUG` environment variable. For example:
 
 ```bash
 DEBUG=testcontainers* npm test
@@ -17,6 +17,42 @@ If we run the test again, we'll see a lot of debug output:
 [TRACE] Looking up host IPs...
 [TRACE] Initialising clients...
 [TRACE] Container runtime info:
+{
+  "node": {
+    "version": "v22.14.0",
+    "architecture": "x64",
+    "platform": "linux"
+  },
+  "containerRuntime": {
+    "host": "localhost",
+    "hostIps": [
+      {
+        "address": "127.0.0.1",
+        "family": 4
+      }
+    ],
+    "remoteSocketPath": "/var/run/docker.sock",
+    "indexServerAddress": "https://index.docker.io/v1/",
+    "serverVersion": "28.0.1",
+    "operatingSystem": "Docker Desktop",
+    "operatingSystemType": "linux",
+    "architecture": "x86_64",
+    "cpus": 32,
+    "memory": 33524871168,
+    "runtimes": [
+      "io.containerd.runc.v2",
+      "nvidia",
+      "runc"
+    ],
+    "labels": [
+      "com.docker.desktop.address=unix:///var/run/docker-cli.sock"
+    ]
+  },
+  "compose": {
+    "version": "2.33.1-desktop.1",
+    "compatability": "v2"
+  }
+}
 [DEBUG] Container runtime strategy "UnixSocketStrategy" works
 [DEBUG] Checking if image exists "redis:latest"...
 [DEBUG] Checked if image exists "redis:latest"

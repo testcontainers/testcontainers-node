@@ -1,6 +1,6 @@
 # Global setup
 
-If you have a lot of tests that require a Redis container, you might not want to spin up 100s of Redis containers.
+If you have a lot of tests that require the same container, you might not want to spin up one per test.
 
 In this case a common pattern is to set the container up globally, and reuse it in your tests. Here's an example using Vitest:
 
@@ -27,8 +27,6 @@ export async function teardown() {
   await globalThis.redisContainer.stop();
 }
 ```
-
-The Vite configuration:
 
 ```ts
 // vite.config.js
