@@ -1,6 +1,5 @@
 import { CosmosClient, PartitionKeyKind } from "@azure/cosmos";
-import * as https from "node:https";
-import { expect } from "vitest";
+import https from "node:https";
 import { AzureCosmosDbEmulatorContainer } from "./azure-cosmosdb-emulator-container";
 
 const IMAGE = "mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-EN20250228";

@@ -43,6 +43,15 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
     await startedEnvironment.down();
   });
 
+  if (!process.env.CI_PODMAN) {
+    it("should work with buildkit", async () => {
+      const buildkitFixtures = path.resolve(fixtures, "docker-compose-with-buildkit");
+      const startedEnvironment = await new DockerComposeEnvironment(buildkitFixtures, "docker-compose.yml").up();
+      await checkEnvironmentContainerIsHealthy(startedEnvironment, await composeContainerName("container"));
+      await startedEnvironment.down();
+    });
+  }
+
   it("should use pull policy", async () => {
     const env = new DockerComposeEnvironment(fixtures, "docker-compose-with-many-services.yml");
 

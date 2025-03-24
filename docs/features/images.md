@@ -24,6 +24,17 @@ const container = await GenericContainer
   .build("my-custom-image", { deleteOnExit: false });
 ```
 
+### With buildkit
+
+```javascript
+const { GenericContainer } = require("testcontainers");
+
+const container = await GenericContainer
+  .fromDockerfile("/path/to/build-context")
+  .withBuildkit()
+  .build();
+```
+
 ### With a pull policy
 
 Testcontainers will automatically pull an image if it doesn't exist. This is configurable:
@@ -88,6 +99,15 @@ const container = await GenericContainer
 const container = await GenericContainer
   .fromDockerfile("/path/to/build-context")
   .withCache(false)
+  .build();
+```
+
+### With platform
+
+```javascript
+const container = await GenericContainer
+  .fromDockerfile("/path/to/build-context")
+  .withPlatform("linux/amd64")
   .build();
 ```
 

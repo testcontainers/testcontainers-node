@@ -1,6 +1,6 @@
-import * as fs from "fs";
+import fs from "fs";
 import { Kafka, KafkaConfig, logLevel } from "kafkajs";
-import * as path from "path";
+import path from "path";
 import { GenericContainer, Network, StartedTestContainer } from "testcontainers";
 import { KafkaContainer } from "./kafka-container";
 
