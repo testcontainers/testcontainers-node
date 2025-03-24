@@ -1,6 +1,5 @@
 import { CosmosClient, PartitionKeyKind } from "@azure/cosmos";
-import * as https from "node:https";
-import { expect } from "vitest";
+import https from "node:https";
 import { AzureCosmosDbEmulatorContainer } from "./azure-cosmosdb-emulator-container";
 
 describe("AzureCosmosDbEmulatorContainer", { timeout: 180_000 }, async () => {
