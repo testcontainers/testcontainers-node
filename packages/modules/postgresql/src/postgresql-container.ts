@@ -87,6 +87,13 @@ export class StartedPostgreSqlContainer extends AbstractStartedContainer {
     return url.toString();
   }
 
+  /**
+   * Sets the name to be used for database snapshots.
+   * This name will be used as the default for snapshot() and restore() methods.
+   *
+   * @param snapshotName The name to use for snapshots (default is "migrated_template" if this method is not called)
+   * @returns this (for method chaining)
+   */
   public withSnapshotName(snapshotName: string): this {
     this.snapshotName = snapshotName;
     return this;
@@ -94,12 +101,11 @@ export class StartedPostgreSqlContainer extends AbstractStartedContainer {
 
   /**
    * Takes a snapshot of the current state of the database as a template, which can then be restored using
-   * the restore method. By default, the snapshot will be created under a database called migrated_template.
+   * the restore method.
    *
-   * If a snapshot already exists under the given/default name, it will be overwritten with the new snapshot.
-   *
-   * @param snapshotName Optional name for the snapshot, defaults to this.snapshotName
+   * @param snapshotName Name for the snapshot, defaults to the value set by withSnapshotName() or "migrated_template" if not specified
    * @returns Promise resolving when snapshot is complete
+   * @throws Error if attempting to snapshot the postgres system database or if using the same name as the database
    */
   public async snapshot(snapshotName = this.snapshotName): Promise<void> {
     this.snapshotSanityCheck(snapshotName);
@@ -118,11 +124,11 @@ export class StartedPostgreSqlContainer extends AbstractStartedContainer {
   }
 
   /**
-   * Restores the database to a specific snapshot. By default, it will restore the last snapshot taken on the
-   * database by the snapshot method. If a snapshot name is provided, it will instead try to restore the snapshot by name.
+   * Restores the database to a specific snapshot.
    *
-   * @param opts Optional snapshot configuration options
+   * @param snapshotName Name of the snapshot to restore from, defaults to the value set by withSnapshotName() or "migrated_template" if not specified
    * @returns Promise resolving when restore is complete
+   * @throws Error if attempting to restore the postgres system database or if using the same name as the database
    */
   public async restore(snapshotName = this.snapshotName): Promise<void> {
     this.snapshotSanityCheck(snapshotName);
@@ -138,7 +144,9 @@ export class StartedPostgreSqlContainer extends AbstractStartedContainer {
 
   /**
    * Executes a series of SQL commands against the Postgres database
-   * @param commands SQL commands to execute
+   * 
+   * @param commands Array of SQL commands to execute in sequence
+   * @throws Error if any command fails to execute with details of the failure
    */
   private async execCommandsSQL(commands: string[]): Promise<void> {
     for (const command of commands) {
