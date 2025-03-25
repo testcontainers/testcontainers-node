@@ -144,7 +144,7 @@ export class StartedPostgreSqlContainer extends AbstractStartedContainer {
 
   /**
    * Executes a series of SQL commands against the Postgres database
-   * 
+   *
    * @param commands Array of SQL commands to execute in sequence
    * @throws Error if any command fails to execute with details of the failure
    */
