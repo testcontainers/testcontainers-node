@@ -98,24 +98,22 @@ export class StartedPostgreSqlContainer extends AbstractStartedContainer {
    *
    * If a snapshot already exists under the given/default name, it will be overwritten with the new snapshot.
    *
-   * @param opts Optional snapshot configuration options
+   * @param snapshotName Optional name for the snapshot, defaults to this.snapshotName
    * @returns Promise resolving when snapshot is complete
    */
-  public async snapshot(snapshotName?: string): Promise<void> {
-    const name = snapshotName ?? this.snapshotName;
-
-    this.snapshotSanityCheck(name);
+  public async snapshot(snapshotName = this.snapshotName): Promise<void> {
+    this.snapshotSanityCheck(snapshotName);
 
     // Execute the commands to create the snapshot, in order
     await this.execCommandsSQL([
       // Update pg_database to remove the template flag, then drop the database if it exists.
       // This is needed because dropping a template database will fail.
-      `UPDATE pg_database SET datistemplate = FALSE WHERE datname = '${name}'`,
-      `DROP DATABASE IF EXISTS "${name}"`,
+      `UPDATE pg_database SET datistemplate = FALSE WHERE datname = '${snapshotName}'`,
+      `DROP DATABASE IF EXISTS "${snapshotName}"`,
       // Create a copy of the database to another database to use as a template now that it was fully migrated
-      `CREATE DATABASE "${name}" WITH TEMPLATE "${this.getDatabase()}" OWNER "${this.getUsername()}"`,
+      `CREATE DATABASE "${snapshotName}" WITH TEMPLATE "${this.getDatabase()}" OWNER "${this.getUsername()}"`,
       // Snapshot the template database so we can restore it onto our original database going forward
-      `ALTER DATABASE "${name}" WITH is_template = TRUE`,
+      `ALTER DATABASE "${snapshotName}" WITH is_template = TRUE`,
     ]);
   }
 
@@ -126,17 +124,15 @@ export class StartedPostgreSqlContainer extends AbstractStartedContainer {
    * @param opts Optional snapshot configuration options
    * @returns Promise resolving when restore is complete
    */
-  public async restore(snapshotName?: string): Promise<void> {
-    const name = snapshotName ?? this.snapshotName;
-
-    this.snapshotSanityCheck(name);
+  public async restore(snapshotName = this.snapshotName): Promise<void> {
+    this.snapshotSanityCheck(snapshotName);
 
     // Execute the commands to restore the snapshot, in order
     await this.execCommandsSQL([
       // Drop the entire database by connecting to the postgres global database
       `DROP DATABASE "${this.getDatabase()}" WITH (FORCE)`,
       // Then restore the previous snapshot
-      `CREATE DATABASE "${this.getDatabase()}" WITH TEMPLATE "${name}" OWNER "${this.getUsername()}"`,
+      `CREATE DATABASE "${this.getDatabase()}" WITH TEMPLATE "${snapshotName}" OWNER "${this.getUsername()}"`,
     ]);
   }
 
