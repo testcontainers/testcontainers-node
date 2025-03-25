@@ -32,7 +32,7 @@ export interface TestContainer {
   withExposedPorts(...ports: PortWithOptionalBinding[]): this;
   withBindMounts(bindMounts: BindMount[]): this;
   withWaitStrategy(waitStrategy: WaitStrategy): this;
-  withStartupTimeout(startupTimeoutMs: number): this;
+  withStartupTimeout(ms: number): this;
   withNetwork(network: StartedNetwork): this;
   withNetworkMode(networkMode: string): this;
   withExtraHosts(extraHosts: ExtraHost[]): this;

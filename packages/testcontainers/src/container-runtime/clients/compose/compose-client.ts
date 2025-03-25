@@ -1,5 +1,5 @@
 import { default as dockerComposeV1, default as v1, v2 as dockerComposeV2, v2 } from "docker-compose";
-import { log, pullLog } from "../../../common";
+import { log, Ms, pullLog } from "../../../common";
 import { ComposeInfo } from "../types";
 import { defaultComposeOptions } from "./default-compose-options";
 import { ComposeDownOptions, ComposeOptions } from "./types";
@@ -53,10 +53,10 @@ class ComposeV1Client implements ComposeClient {
     try {
       if (services) {
         log.info(`Upping Compose environment services ${services.join(", ")}...`);
-        await v1.upMany(services, await defaultComposeOptions(this.environment, options));
+        await v1.upMany(services, defaultComposeOptions(this.environment, options));
       } else {
         log.info(`Upping Compose environment...`);
-        await v1.upAll(await defaultComposeOptions(this.environment, options));
+        await v1.upAll(defaultComposeOptions(this.environment, options));
       }
       log.info(`Upped Compose environment`);
     } catch (err) {
@@ -75,10 +75,10 @@ class ComposeV1Client implements ComposeClient {
     try {
       if (services) {
         log.info(`Pulling Compose environment images "${services.join('", "')}"...`);
-        await v1.pullMany(services, await defaultComposeOptions(this.environment, { ...options, logger: pullLog }));
+        await v1.pullMany(services, defaultComposeOptions(this.environment, { ...options, logger: pullLog }));
       } else {
         log.info(`Pulling Compose environment images...`);
-        await v1.pullAll(await defaultComposeOptions(this.environment, { ...options, logger: pullLog }));
+        await v1.pullAll(defaultComposeOptions(this.environment, { ...options, logger: pullLog }));
       }
       log.info(`Pulled Compose environment`);
     } catch (err) {
@@ -91,7 +91,7 @@ class ComposeV1Client implements ComposeClient {
   async stop(options: ComposeOptions): Promise<void> {
     try {
       log.info(`Stopping Compose environment...`);
-      await v1.stop(await defaultComposeOptions(this.environment, options));
+      await v1.stop(defaultComposeOptions(this.environment, options));
       log.info(`Stopped Compose environment`);
     } catch (err) {
       await handleAndRethrow(err, async (error: Error) =>
@@ -104,7 +104,7 @@ class ComposeV1Client implements ComposeClient {
     try {
       log.info(`Downing Compose environment...`);
       await v1.down({
-        ...(await defaultComposeOptions(this.environment, options)),
+        ...defaultComposeOptions(this.environment, options),
         commandOptions: composeDownCommandOptions(downOptions),
       });
       log.info(`Downed Compose environment`);
@@ -126,10 +126,10 @@ class ComposeV2Client implements ComposeClient {
     try {
       if (services) {
         log.info(`Upping Compose environment services ${services.join(", ")}...`);
-        await v2.upMany(services, await defaultComposeOptions(this.environment, options));
+        await v2.upMany(services, defaultComposeOptions(this.environment, options));
       } else {
         log.info(`Upping Compose environment...`);
-        await v2.upAll(await defaultComposeOptions(this.environment, options));
+        await v2.upAll(defaultComposeOptions(this.environment, options));
       }
       log.info(`Upped Compose environment`);
     } catch (err) {
@@ -148,10 +148,10 @@ class ComposeV2Client implements ComposeClient {
     try {
       if (services) {
         log.info(`Pulling Compose environment images "${services.join('", "')}"...`);
-        await v2.pullMany(services, await defaultComposeOptions(this.environment, { ...options, logger: pullLog }));
+        await v2.pullMany(services, defaultComposeOptions(this.environment, { ...options, logger: pullLog }));
       } else {
         log.info(`Pulling Compose environment images...`);
-        await v2.pullAll(await defaultComposeOptions(this.environment, { ...options, logger: pullLog }));
+        await v2.pullAll(defaultComposeOptions(this.environment, { ...options, logger: pullLog }));
       }
       log.info(`Pulled Compose environment`);
     } catch (err) {
@@ -164,7 +164,7 @@ class ComposeV2Client implements ComposeClient {
   async stop(options: ComposeOptions): Promise<void> {
     try {
       log.info(`Stopping Compose environment...`);
-      await v2.stop(await defaultComposeOptions(this.environment, options));
+      await v2.stop(defaultComposeOptions(this.environment, options));
       log.info(`Stopped Compose environment`);
     } catch (err) {
       await handleAndRethrow(err, async (error: Error) =>
@@ -177,7 +177,7 @@ class ComposeV2Client implements ComposeClient {
     try {
       log.info(`Downing Compose environment...`);
       await v2.down({
-        ...(await defaultComposeOptions(this.environment, options)),
+        ...defaultComposeOptions(this.environment, options),
         commandOptions: composeDownCommandOptions(downOptions),
       });
       log.info(`Downed Compose environment`);
@@ -222,7 +222,7 @@ function composeDownCommandOptions(options: ComposeDownOptions): string[] {
     result.push("-v");
   }
   if (options.timeout) {
-    result.push("-t", `${options.timeout / 1000}`);
+    result.push("-t", `${new Ms(options.timeout).seconds()}`);
   }
   return result;
 }

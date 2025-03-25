@@ -13,9 +13,9 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
   private protocol = "http";
   private method = "GET";
   private headers: { [key: string]: string } = {};
-  private predicates: Array<(response: Response) => Promise<boolean>> = [];
+  private readonly predicates: Array<(response: Response) => Promise<boolean>> = [];
   private _allowInsecure = false;
-  private readTimeout = 1000;
+  private readTimeoutMs = 1000;
 
   constructor(
     private readonly path: string,
@@ -25,48 +25,48 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
     super();
   }
 
-  public forStatusCode(statusCode: number): HttpWaitStrategy {
+  public forStatusCode(statusCode: number): this {
     this.predicates.push(async (response: Response) => response.status === statusCode);
     return this;
   }
 
-  public forStatusCodeMatching(predicate: (statusCode: number) => boolean): HttpWaitStrategy {
+  public forStatusCodeMatching(predicate: (statusCode: number) => boolean): this {
     this.predicates.push(async (response: Response) => predicate(response.status));
     return this;
   }
 
-  public forResponsePredicate(predicate: (response: string) => boolean): HttpWaitStrategy {
+  public forResponsePredicate(predicate: (response: string) => boolean): this {
     this.predicates.push(async (response: Response) => predicate(await response.text()));
     return this;
   }
 
-  public withMethod(method: string): HttpWaitStrategy {
+  public withMethod(method: string): this {
     this.method = method;
     return this;
   }
 
-  public withHeaders(headers: { [key: string]: string }): HttpWaitStrategy {
+  public withHeaders(headers: { [key: string]: string }): this {
     this.headers = { ...this.headers, ...headers };
     return this;
   }
 
-  public withBasicCredentials(username: string, password: string): HttpWaitStrategy {
+  public withBasicCredentials(username: string, password: string): this {
     const base64Encoded = Buffer.from(`${username}:${password}`).toString("base64");
     this.headers = { ...this.headers, Authorization: `Basic ${base64Encoded}` };
     return this;
   }
 
-  public withReadTimeout(readTimeout: number): HttpWaitStrategy {
-    this.readTimeout = readTimeout;
+  public withReadTimeout(ms: number): this {
+    this.readTimeoutMs = ms;
     return this;
   }
 
-  public usingTls(): HttpWaitStrategy {
+  public usingTls(): this {
     this.protocol = "https";
     return this;
   }
 
-  public allowInsecure(): HttpWaitStrategy {
+  public allowInsecure(): this {
     this._allowInsecure = true;
     return this;
   }
@@ -79,7 +79,7 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
     const client = await getContainerRuntimeClient();
     const { abortOnContainerExit } = this.options;
 
-    await new IntervalRetry<Response | undefined, Error>(this.readTimeout).retryUntil(
+    await new IntervalRetry<Response | undefined, Error>(this.readTimeoutMs).retryUntil(
       async () => {
         try {
           const url = `${this.protocol}://${client.info.containerRuntime.host}:${boundPorts.getBinding(this.port)}${
@@ -98,7 +98,7 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
 
           return await fetch(url, {
             method: this.method,
-            signal: AbortSignal.timeout(this.readTimeout),
+            signal: AbortSignal.timeout(this.readTimeoutMs),
             headers: this.headers,
             dispatcher: this.getAgent(),
           });
@@ -126,11 +126,11 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
         }
       },
       () => {
-        const message = `URL ${this.path} not accessible after ${this.startupTimeout}ms`;
+        const message = `URL ${this.path} not accessible after ${this.startupTimeoutMs}ms`;
         log.error(message, { containerId: container.id });
         throw new Error(message);
       },
-      this.startupTimeout
+      this.startupTimeoutMs
     );
 
     if (abortOnContainerExit && containerExited) {

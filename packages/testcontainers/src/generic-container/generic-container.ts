@@ -2,7 +2,7 @@ import archiver from "archiver";
 import AsyncLock from "async-lock";
 import { Container, ContainerCreateOptions, HostConfig } from "dockerode";
 import { Readable } from "stream";
-import { containerLog, hash, log } from "../common";
+import { containerLog, hash, log, Ms } from "../common";
 import { ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "../container-runtime";
 import { CONTAINER_STATUSES } from "../container-runtime/clients/container/types";
 import { StartedNetwork } from "../network/network";
@@ -46,7 +46,7 @@ export class GenericContainer implements TestContainer {
   protected hostConfig: HostConfig;
 
   protected imageName: ImageName;
-  protected startupTimeout?: number;
+  protected startupTimeoutMs?: number;
   protected waitStrategy: WaitStrategy = Wait.forListeningPorts();
   protected environment: Record<string, string> = {};
   protected exposedPorts: PortWithOptionalBinding[] = [];
@@ -149,8 +149,8 @@ export class GenericContainer implements TestContainer {
     const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, mappedInspectResult).filter(
       this.exposedPorts
     );
-    if (this.startupTimeout !== undefined) {
-      this.waitStrategy.withStartupTimeout(this.startupTimeout);
+    if (this.startupTimeoutMs !== undefined) {
+      this.waitStrategy.withStartupTimeout(this.startupTimeoutMs);
     }
 
     await waitForContainer(client, container, this.waitStrategy, boundPorts);
@@ -202,8 +202,8 @@ export class GenericContainer implements TestContainer {
       this.exposedPorts
     );
 
-    if (this.startupTimeout !== undefined) {
-      this.waitStrategy.withStartupTimeout(this.startupTimeout);
+    if (this.startupTimeoutMs !== undefined) {
+      this.waitStrategy.withStartupTimeout(this.startupTimeoutMs);
     }
 
     if (containerLog.enabled() || this.logConsumer !== undefined) {
@@ -395,22 +395,20 @@ export class GenericContainer implements TestContainer {
   }
 
   public withHealthCheck(healthCheck: HealthCheck): this {
-    const toNanos = (duration: number): number => duration * 1e6;
-
     this.healthCheck = healthCheck;
     this.createOpts.Healthcheck = {
       Test: healthCheck.test,
-      Interval: healthCheck.interval ? toNanos(healthCheck.interval) : 0,
-      Timeout: healthCheck.timeout ? toNanos(healthCheck.timeout) : 0,
-      Retries: healthCheck.retries || 0,
-      StartPeriod: healthCheck.startPeriod ? toNanos(healthCheck.startPeriod) : 0,
+      Interval: healthCheck.interval ? new Ms(healthCheck.interval).nanos() : 0,
+      Timeout: healthCheck.timeout ? new Ms(healthCheck.timeout).nanos() : 0,
+      Retries: healthCheck.retries ?? 0,
+      StartPeriod: healthCheck.startPeriod ? new Ms(healthCheck.startPeriod).nanos() : 0,
     };
 
     return this;
   }
 
-  public withStartupTimeout(startupTimeoutMs: number): this {
-    this.startupTimeout = startupTimeoutMs;
+  public withStartupTimeout(ms: number): this {
+    this.startupTimeoutMs = ms;
     return this;
   }
 
