@@ -309,11 +309,11 @@ describe("PostgreSqlContainer snapshot and restore", { timeout: 180_000 }, () =>
     const container = await new PostgreSqlContainer().withDatabase("postgres").start();
 
     await expect(container.snapshot()).rejects.toThrow(
-      "cannot restore the postgres system database as it cannot be dropped to be restored"
+      "Cannot restore the postgres system database as it cannot be dropped to be restored"
     );
 
     await expect(container.restore()).rejects.toThrow(
-      "cannot restore the postgres system database as it cannot be dropped to be restored"
+      "Cannot restore the postgres system database as it cannot be dropped to be restored"
     );
 
     await container.stop();

@@ -102,7 +102,7 @@ export class StartedPostgreSqlContainer extends AbstractStartedContainer {
    * @returns Promise resolving when snapshot is complete
    */
   public async snapshot(snapshotName?: string): Promise<void> {
-    const name = snapshotName || this.snapshotName;
+    const name = snapshotName ?? this.snapshotName;
 
     this.snapshotSanityCheck(name);
 
@@ -127,7 +127,7 @@ export class StartedPostgreSqlContainer extends AbstractStartedContainer {
    * @returns Promise resolving when restore is complete
    */
   public async restore(snapshotName?: string): Promise<void> {
-    const name = snapshotName || this.snapshotName;
+    const name = snapshotName ?? this.snapshotName;
 
     this.snapshotSanityCheck(name);
 
@@ -175,11 +175,11 @@ export class StartedPostgreSqlContainer extends AbstractStartedContainer {
    */
   private snapshotSanityCheck(snapshotName: string): void {
     if (this.getDatabase() === "postgres") {
-      throw new Error("cannot restore the postgres system database as it cannot be dropped to be restored");
+      throw new Error("Cannot restore the postgres system database as it cannot be dropped to be restored");
     }
 
     if (this.getDatabase() === snapshotName) {
-      throw new Error("cannot restore the database to itself");
+      throw new Error("Cannot restore the database to itself");
     }
   }
 }
