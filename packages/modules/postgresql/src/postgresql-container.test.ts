@@ -154,7 +154,7 @@ describe("PostgreSqlContainer snapshot and restore", { timeout: 180_000 }, () =>
     await client.end();
 
     // Restore to the snapshot
-    await container.restore();
+    await container.restoreSnapshot();
 
     // Reconnect to database
     client = new Client({
@@ -205,7 +205,7 @@ describe("PostgreSqlContainer snapshot and restore", { timeout: 180_000 }, () =>
     await client.end();
 
     // Restore using the custom snapshot name
-    await container.restore(customSnapshotName);
+    await container.restoreSnapshot(customSnapshotName);
 
     // Reconnect to database
     client = new Client({
@@ -272,7 +272,7 @@ describe("PostgreSqlContainer snapshot and restore", { timeout: 180_000 }, () =>
     await client.end();
 
     // Restore to first snapshot (empty table)
-    await container.restore("snapshot1");
+    await container.restoreSnapshot("snapshot1");
 
     // Reconnect to database
     client = new Client({
@@ -288,7 +288,7 @@ describe("PostgreSqlContainer snapshot and restore", { timeout: 180_000 }, () =>
     await client.end();
 
     // Restore to second snapshot (one record)
-    await container.restore("snapshot2");
+    await container.restoreSnapshot("snapshot2");
 
     // Reconnect to database
     client = new Client({
@@ -309,11 +309,11 @@ describe("PostgreSqlContainer snapshot and restore", { timeout: 180_000 }, () =>
     const container = await new PostgreSqlContainer().withDatabase("postgres").start();
 
     await expect(container.snapshot()).rejects.toThrow(
-      "Cannot restore the postgres system database as it cannot be dropped to be restored"
+      "Snapshot feature is not supported when using the postgres system database"
     );
 
-    await expect(container.restore()).rejects.toThrow(
-      "Cannot restore the postgres system database as it cannot be dropped to be restored"
+    await expect(container.restoreSnapshot()).rejects.toThrow(
+      "Snapshot feature is not supported when using the postgres system database"
     );
 
     await container.stop();

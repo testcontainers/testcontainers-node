@@ -130,7 +130,7 @@ export class StartedPostgreSqlContainer extends AbstractStartedContainer {
    * @returns Promise resolving when restore is complete
    * @throws Error if attempting to restore the postgres system database or if using the same name as the database
    */
-  public async restore(snapshotName = this.snapshotName): Promise<void> {
+  public async restoreSnapshot(snapshotName = this.snapshotName): Promise<void> {
     this.snapshotSanityCheck(snapshotName);
 
     // Execute the commands to restore the snapshot, in order
@@ -179,11 +179,11 @@ export class StartedPostgreSqlContainer extends AbstractStartedContainer {
    */
   private snapshotSanityCheck(snapshotName: string): void {
     if (this.getDatabase() === "postgres") {
-      throw new Error("Cannot restore the postgres system database as it cannot be dropped to be restored");
+      throw new Error("Snapshot feature is not supported when using the postgres system database");
     }
 
     if (this.getDatabase() === snapshotName) {
-      throw new Error("Cannot restore the database to itself");
+      throw new Error("Snapshot name cannot be the same as the database name");
     }
   }
 }
