@@ -2,9 +2,7 @@
  * Represents time interval in milliseconds.
  */
 export class Ms {
-  constructor(private readonly milliseconds: number) {
-    if (milliseconds < 0) throw new Error("Negative interval is not supported in this context.");
-  }
+  constructor(private readonly milliseconds: number) {}
   public seconds(): number {
     return Math.trunc(this.milliseconds * 1e-3);
   }

@@ -140,11 +140,11 @@ const environment = await new DockerComposeEnvironment(composeFilePath, composeF
 await environment.down();
 ```
 
-If you need to wait for the environment to be downed, you can provide a timeout. The unit of timeout here is **second**:
+If you need to wait for the environment to be downed, you can provide a timeout:
 
 ```javascript
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile).up();
-await environment.down({ timeout: 10 }); // timeout after 10 seconds
+await environment.down({ timeout: 10_000 }); // 10 seconds
 ```
 
 Volumes created by the environment are removed when stopped. This is configurable:
