@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/k3s",
-  "version": "10.22.0",
+  "version": "10.23.0",
   "license": "MIT",
   "keywords": [
     "k3s",
@@ -29,7 +29,7 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "dependencies": {
-    "testcontainers": "^10.22.0"
+    "testcontainers": "^10.23.0"
   },
   "devDependencies": {
     "@kubernetes/client-node": "^1.0.0-rc7"
