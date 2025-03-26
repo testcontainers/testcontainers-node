@@ -2,10 +2,12 @@ import { mockServerClient } from "mockserver-client";
 import superagent from "superagent";
 import { MockserverContainer } from "./mockserver-container";
 
+const IMAGE = "mockserver/mockserver:5.15.0";
+
 describe("MockserverContainer", { timeout: 240_000 }, () => {
   // startContainer {
   it("should start and accept mocks", async () => {
-    const container = await new MockserverContainer().start();
+    const container = await new MockserverContainer(IMAGE).start();
     const client = mockServerClient(container.getHost(), container.getMockserverPort());
     const url = container.getUrl();
 

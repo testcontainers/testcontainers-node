@@ -1,10 +1,12 @@
 import { Kafka, KafkaConfig, logLevel } from "kafkajs";
 import { RedpandaContainer, StartedRedpandaContainer } from "./redpanda-container";
 
+const IMAGE = "docker.redpanda.com/redpandadata/redpanda:v23.3.10";
+
 describe("RedpandaContainer", { timeout: 240_000 }, () => {
   // connectToKafka {
   it("should connect", async () => {
-    const redpandaContainer = await new RedpandaContainer().start();
+    const redpandaContainer = await new RedpandaContainer(IMAGE).start();
     await testPubSub(redpandaContainer);
     await redpandaContainer.stop();
   });
@@ -12,7 +14,7 @@ describe("RedpandaContainer", { timeout: 240_000 }, () => {
 
   // connectToSchemaRegistry {
   it("should connect to schema registry", async () => {
-    const redpandaContainer = await new RedpandaContainer().start();
+    const redpandaContainer = await new RedpandaContainer(IMAGE).start();
     const schemaRegistryUrl = redpandaContainer.getSchemaRegistryAddress();
 
     const response = await fetch(`${schemaRegistryUrl}/subjects`, {
@@ -30,7 +32,7 @@ describe("RedpandaContainer", { timeout: 240_000 }, () => {
 
   // connectToAdmin {
   it("should connect to admin", async () => {
-    const redpandaContainer = await new RedpandaContainer().start();
+    const redpandaContainer = await new RedpandaContainer(IMAGE).start();
     const adminUrl = `${redpandaContainer.getAdminAddress()}/v1`;
 
     const response = await fetch(adminUrl);
@@ -43,7 +45,7 @@ describe("RedpandaContainer", { timeout: 240_000 }, () => {
 
   // connectToRestProxy {
   it("should connect to rest proxy", async () => {
-    const redpandaContainer = await new RedpandaContainer().start();
+    const redpandaContainer = await new RedpandaContainer(IMAGE).start();
     const restProxyUrl = `${redpandaContainer.getRestProxyAddress()}/topics`;
 
     const response = await fetch(restProxyUrl);

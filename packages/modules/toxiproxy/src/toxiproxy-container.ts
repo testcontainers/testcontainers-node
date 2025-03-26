@@ -17,7 +17,7 @@ export interface CreatedProxy {
 export { TPClient };
 
 export class ToxiProxyContainer extends GenericContainer {
-  constructor(image = "ghcr.io/shopify/toxiproxy:2.11.0") {
+  constructor(image: string) {
     super(image);
 
     this.withExposedPorts(CONTROL_PORT, ...PORT_ARRAY)

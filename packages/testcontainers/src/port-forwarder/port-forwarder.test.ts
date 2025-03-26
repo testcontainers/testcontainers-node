@@ -2,7 +2,7 @@ import { Server } from "http";
 import { GenericContainer } from "../generic-container/generic-container";
 import { Network } from "../network/network";
 import { TestContainers } from "../test-containers";
-import { RandomUniquePortGenerator } from "../utils/port-generator";
+import { RandomPortGenerator } from "../utils/port-generator";
 import { createTestServer } from "../utils/test-helper";
 
 describe("PortForwarder", { timeout: 180_000 }, () => {
@@ -10,7 +10,7 @@ describe("PortForwarder", { timeout: 180_000 }, () => {
   let server: Server;
 
   beforeEach(async () => {
-    randomPort = await new RandomUniquePortGenerator().generatePort();
+    randomPort = await new RandomPortGenerator().generatePort();
     server = await createTestServer(randomPort);
   });
 

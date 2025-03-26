@@ -8,7 +8,7 @@ const RABBITMQ_DEFAULT_USER = "guest";
 const RABBITMQ_DEFAULT_PASS = "guest";
 
 export class RabbitMQContainer extends GenericContainer {
-  constructor(image = "rabbitmq:3.12.11-management-alpine") {
+  constructor(image: string) {
     super(image);
     this.withExposedPorts(AMQP_PORT, AMQPS_PORT, HTTPS_PORT, HTTP_PORT)
       .withEnvironment({

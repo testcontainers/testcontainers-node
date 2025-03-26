@@ -22,7 +22,7 @@ const SELENIUM_NETWORK_ALIAS = "selenium";
 export const SELENIUM_VIDEO_IMAGE = "selenium/video:ffmpeg-4.3.1-20230508";
 
 export class SeleniumContainer extends GenericContainer {
-  constructor(image = "selenium/standalone-chrome:112.0") {
+  constructor(image: string) {
     super(image);
     this.withExposedPorts(SELENIUM_PORT, VNC_PORT)
       .withSharedMemorySize(2 * 1024 * 1024 * 1024)
