@@ -12,12 +12,12 @@ export class HealthCheckWaitStrategy extends AbstractWaitStrategy {
       async () => (await client.container.inspect(container)).State.Health?.Status,
       (healthCheckStatus) => healthCheckStatus === "healthy" || healthCheckStatus === "unhealthy",
       () => {
-        const timeout = this.startupTimeout;
+        const timeout = this.startupTimeoutMs;
         const message = `Health check not healthy after ${timeout}ms`;
         log.error(message, { containerId: container.id });
         throw new Error(message);
       },
-      this.startupTimeout
+      this.startupTimeoutMs
     );
 
     if (status !== "healthy") {

@@ -24,7 +24,7 @@ export class DockerComposeEnvironment {
   private environment: Environment = {};
   private pullPolicy: ImagePullPolicy = PullPolicy.defaultPolicy();
   private waitStrategy: { [containerName: string]: WaitStrategy } = {};
-  private startupTimeout?: number;
+  private startupTimeoutMs?: number;
 
   constructor(composeFilePath: string, composeFiles: string | string[], uuid: Uuid = new RandomUuid()) {
     this.composeFilePath = composeFilePath;
@@ -68,8 +68,8 @@ export class DockerComposeEnvironment {
     return this;
   }
 
-  public withStartupTimeout(startupTimeout: number): this {
-    this.startupTimeout = startupTimeout;
+  public withStartupTimeout(ms: number): this {
+    this.startupTimeoutMs = ms;
     return this;
   }
 
@@ -141,8 +141,8 @@ export class DockerComposeEnvironment {
           const waitStrategy = this.waitStrategy[containerName]
             ? this.waitStrategy[containerName]
             : Wait.forListeningPorts();
-          if (this.startupTimeout !== undefined) {
-            waitStrategy.withStartupTimeout(this.startupTimeout);
+          if (this.startupTimeoutMs !== undefined) {
+            waitStrategy.withStartupTimeout(this.startupTimeoutMs);
           }
 
           if (containerLog.enabled()) {
