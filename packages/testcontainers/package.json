@@ -42,7 +42,7 @@
     "proper-lockfile": "^4.1.2",
     "properties-reader": "^2.3.0",
     "ssh-remote-port-forward": "^1.0.4",
-    "tar-fs": "^3.0.6",
+    "tar-fs": "^3.0.7",
     "tmp": "^0.2.3",
     "undici": "^5.28.5"
   },
