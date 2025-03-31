@@ -26,4 +26,26 @@ describe("Socat", { timeout: 120_000 }, () => {
     await helloworld.stop();
     await network.stop();
   });
+  it("should forward requests to helloworld container in a different port", async () => {
+    const network = await new Network().start();
+
+    const helloworld = await new GenericContainer("testcontainers/helloworld:1.2.0")
+      .withExposedPorts(8080)
+      .withNetwork(network)
+      .withNetworkAliases("helloworld")
+      .start();
+
+    const socat = await new SocatContainer().withNetwork(network).withTarget(8081, "helloworld", 8080).start();
+
+    const socatUrl = `http://${socat.getHost()}:${socat.getMappedPort(8081)}`;
+
+    const response = await fetch(`${socatUrl}/ping`);
+
+    expect(response.status).toBe(200);
+    expect(await response.text()).toBe("PONG");
+
+    await socat.stop();
+    await helloworld.stop();
+    await network.stop();
+  });
 });
