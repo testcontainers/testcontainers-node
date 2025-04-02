@@ -590,15 +590,23 @@ const container = await new GenericContainer("alpine")
 ```javascript
 const network = await new Network().start();
 
-const helloworld = await new GenericContainer("testcontainers/helloworld:1.2.0")
-    .withExposedPorts(8080)
-    .withNetwork(network)
-    .withNetworkAliases("helloworld")
-    .start();
+const container = await new GenericContainer("testcontainers/helloworld:1.2.0")
+  .withExposedPorts(8080)
+  .withNetwork(network)
+  .withNetworkAliases("helloworld")
+  .start();
 
-const socat = await new SocatContainer().withNetwork(network).withTarget(8081, "helloworld", 8080).start();
+const socat = await new SocatContainer()
+  .withNetwork(network)
+  .withTarget(8081, "helloworld", 8080)
+  .start();
 
 const socatUrl = `http://${socat.getHost()}:${socat.getMappedPort(8081)}`;
+
+const response = await fetch(`${socatUrl}/ping`);
+
+expect(response.status).toBe(200);
+expect(await response.text()).toBe("PONG");
 ```
 
 The example above starts a `testcontainers/helloworld` container and a `socat` container. 
@@ -626,7 +634,6 @@ The following options can be provided to modify the command execution:
 
 3. **`env`:** A map of environment variables to set inside the container.
 
-
 ```javascript
 const container = await new GenericContainer("alpine")
   .withCommand(["sleep", "infinity"])
@@ -641,8 +648,6 @@ const { output, stdout, stderr, exitCode } = await container.exec(["echo", "hell
 	}
 });
 ```
-
-
 
 ## Streaming logs
 

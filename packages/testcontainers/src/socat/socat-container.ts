@@ -4,7 +4,7 @@ import { GenericContainer } from "../generic-container/generic-container";
 import { StartedTestContainer } from "../test-container";
 
 export class SocatContainer extends GenericContainer {
-  private targets: { [key in number]: string } = {};
+  private targets: { [exposePort: number]: string } = {};
 
   constructor(image = "alpine/socat:1.7.4.3-r0") {
     super(image);
@@ -12,13 +12,8 @@ export class SocatContainer extends GenericContainer {
     this.withName(`testcontainers-socat-${new RandomUuid().nextUuid()}`);
   }
 
-  public withTarget(exposePort: number, host: string): this;
-  public withTarget(exposePort: number, host: string, internalPort: number): this;
-  public withTarget(exposePort: number, host: string, internalPort?: number): this {
+  public withTarget(exposePort: number, host: string, internalPort = exposePort): this {
     this.withExposedPorts(exposePort);
-    if (internalPort == null) {
-      internalPort = exposePort;
-    }
     this.targets[exposePort] = `${host}:${internalPort}`;
     return this;
   }
