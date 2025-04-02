@@ -104,3 +104,5 @@ export type NetworkSettings = {
   networkId: string;
   ipAddress: string;
 };
+
+export { SocatContainer, StartedSocatContainer } from "./socat/socat-container";

@@ -583,6 +583,27 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+## SocatContainer as a TCP proxy
+
+`SocatContainer` enables any TCP port of another container to be exposed publicly.
+
+```javascript
+const network = await new Network().start();
+
+const helloworld = await new GenericContainer("testcontainers/helloworld:1.2.0")
+    .withExposedPorts(8080)
+    .withNetwork(network)
+    .withNetworkAliases("helloworld")
+    .start();
+
+const socat = await new SocatContainer().withNetwork(network).withTarget(8081, "helloworld", 8080).start();
+
+const socatUrl = `http://${socat.getHost()}:${socat.getMappedPort(8081)}`;
+```
+
+The example above starts a `testcontainers/helloworld` container and a `socat` container. 
+The `socat` container is configured to forward traffic from port `8081` to the `testcontainers/helloworld` container on port `8080`.
+
 ## Running commands
 
 To run a command inside an already started container, use the exec method. 
