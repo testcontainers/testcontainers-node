@@ -48,6 +48,7 @@ export class GenericContainer implements TestContainer {
   protected imageName: ImageName;
   protected startupTimeout?: number;
   protected waitStrategy: WaitStrategy = Wait.forListeningPorts();
+  protected restartWaitStrategy?: WaitStrategy;
   protected environment: Record<string, string> = {};
   protected exposedPorts: PortWithOptionalBinding[] = [];
   protected reuse = false;
@@ -161,7 +162,7 @@ export class GenericContainer implements TestContainer {
       inspectResult,
       boundPorts,
       inspectResult.Name,
-      this.waitStrategy,
+      this.restartWaitStrategy ?? this.waitStrategy,
       this.autoRemove
     );
   }
@@ -230,7 +231,7 @@ export class GenericContainer implements TestContainer {
       inspectResult,
       boundPorts,
       inspectResult.Name,
-      this.waitStrategy,
+      this.restartWaitStrategy ?? this.waitStrategy,
       this.autoRemove
     );
 
@@ -402,7 +403,7 @@ export class GenericContainer implements TestContainer {
       Test: healthCheck.test,
       Interval: healthCheck.interval ? toNanos(healthCheck.interval) : 0,
       Timeout: healthCheck.timeout ? toNanos(healthCheck.timeout) : 0,
-      Retries: healthCheck.retries || 0,
+      Retries: healthCheck.retries ?? 0,
       StartPeriod: healthCheck.startPeriod ? toNanos(healthCheck.startPeriod) : 0,
     };
 
@@ -416,6 +417,11 @@ export class GenericContainer implements TestContainer {
 
   public withWaitStrategy(waitStrategy: WaitStrategy): this {
     this.waitStrategy = waitStrategy;
+    return this;
+  }
+
+  public withRestartWaitStrategy(waitStrategy: WaitStrategy): this {
+    this.restartWaitStrategy = waitStrategy;
     return this;
   }
 

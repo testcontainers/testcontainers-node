@@ -32,6 +32,7 @@ export interface TestContainer {
   withExposedPorts(...ports: PortWithOptionalBinding[]): this;
   withBindMounts(bindMounts: BindMount[]): this;
   withWaitStrategy(waitStrategy: WaitStrategy): this;
+  withRestartWaitStrategy(waitStrategy: WaitStrategy): this;
   withStartupTimeout(startupTimeoutMs: number): this;
   withNetwork(network: StartedNetwork): this;
   withNetworkMode(networkMode: string): this;
@@ -47,7 +48,6 @@ export interface TestContainer {
   withCopyDirectoriesToContainer(directoriesToCopy: DirectoryToCopy[]): this;
   withCopyContentToContainer(contentsToCopy: ContentToCopy[]): this;
   withCopyArchivesToContainer(archivesToCopy: ArchiveToCopy[]): this;
-
   withWorkingDir(workingDir: string): this;
   withResourcesQuota(resourcesQuota: ResourcesQuota): this;
   withSharedMemorySize(bytes: number): this;

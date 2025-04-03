@@ -16,7 +16,7 @@ import { StoppedGenericContainer } from "./stopped-generic-container";
 
 export class StartedGenericContainer implements StartedTestContainer {
   private stoppedContainer?: StoppedTestContainer;
-  private stopContainerLock = new AsyncLock();
+  private readonly stopContainerLock = new AsyncLock();
 
   constructor(
     private readonly container: Dockerode.Container,
@@ -24,7 +24,7 @@ export class StartedGenericContainer implements StartedTestContainer {
     private inspectResult: ContainerInspectInfo,
     private boundPorts: BoundPorts,
     private readonly name: string,
-    private readonly waitStrategy: WaitStrategy,
+    private readonly restartWaitStrategy: WaitStrategy,
     private readonly autoRemove: boolean
   ) {}
 
@@ -94,7 +94,7 @@ export class StartedGenericContainer implements StartedTestContainer {
       Array.from(this.boundPorts.iterator()).map((port) => port[0])
     );
 
-    await waitForContainer(client, this.container, this.waitStrategy, this.boundPorts, startTime);
+    await waitForContainer(client, this.container, this.restartWaitStrategy, this.boundPorts, startTime);
     log.info(`Restarted container`, { containerId: this.container.id });
   }
 
