@@ -256,3 +256,14 @@ const container = await new GenericContainer("alpine")
   .withWaitStrategy(new ReadyAfterDelayWaitStrategy())
   .start();
 ```
+
+## Restart wait strategies
+
+The default wait strategy used when a container restarts is the same as the one used when it starts. However sometimes a container behaves differently between its first start and subsequent starts. Postgres is one such example. For this reason you can specify a wait strategy specifically used for restarts:
+
+```javascript
+const container = await new GenericContainer("postgres")
+  .withWaitStrategy(Wait.forLogMessage(/.*database system is ready to accept connections.*/, 2))
+  .withRestartWaitStrategy(Wait.forLogMessage(/.*database system is ready to accept connections.*/, 1))
+  .start();
+```

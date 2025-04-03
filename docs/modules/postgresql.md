@@ -38,5 +38,5 @@ tests very modular, since they always run on a brand-new database.
     not work if the database for the container is set to `"postgres"`.
 
 <!--codeinclude-->
-[Test with a reusable Postgres container](../../packages/modules/postgresql/src/postgresql-container.test.ts) inside_block:createAndRestoreFromSnapshot
+[Test with a reusable Postgres container](../../packages/modules/postgresql/src/postgresql-container-snapshot.test.ts) inside_block:createAndRestoreFromSnapshot
 <!--/codeinclude-->
