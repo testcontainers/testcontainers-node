@@ -24,7 +24,7 @@ export class StartedGenericContainer implements StartedTestContainer {
     private inspectResult: ContainerInspectInfo,
     private boundPorts: BoundPorts,
     private readonly name: string,
-    private readonly restartWaitStrategy: WaitStrategy,
+    private readonly waitStrategy: WaitStrategy,
     private readonly autoRemove: boolean
   ) {}
 
@@ -94,7 +94,7 @@ export class StartedGenericContainer implements StartedTestContainer {
       Array.from(this.boundPorts.iterator()).map((port) => port[0])
     );
 
-    await waitForContainer(client, this.container, this.restartWaitStrategy, this.boundPorts, startTime);
+    await waitForContainer(client, this.container, this.waitStrategy, this.boundPorts, startTime);
     log.info(`Restarted container`, { containerId: this.container.id });
   }
 

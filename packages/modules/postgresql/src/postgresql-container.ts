@@ -10,12 +10,7 @@ export class PostgreSqlContainer extends GenericContainer {
   constructor(image = "postgres:13.3-alpine") {
     super(image);
     this.withExposedPorts(POSTGRES_PORT);
-    this.withWaitStrategy(
-      Wait.forAll([Wait.forHealthCheck(), Wait.forLogMessage(/.*database system is ready to accept connections.*/, 2)])
-    );
-    this.withRestartWaitStrategy(
-      Wait.forAll([Wait.forHealthCheck(), Wait.forLogMessage(/.*database system is ready to accept connections.*/, 1)])
-    );
+    this.withWaitStrategy(Wait.forHealthCheck());
     this.withStartupTimeout(120_000);
   }
 
@@ -42,7 +37,10 @@ export class PostgreSqlContainer extends GenericContainer {
     });
     if (!this.healthCheck) {
       this.withHealthCheck({
-        test: ["CMD-SHELL", `PGPASSWORD=${this.password} psql -U ${this.username} -d ${this.database} -c 'SELECT 1;'`],
+        test: [
+          "CMD-SHELL",
+          `PGPASSWORD=${this.password} pg_isready --host localhost --username ${this.username} --dbname ${this.database}`,
+        ],
         interval: 250,
         timeout: 1000,
         retries: 1000,
