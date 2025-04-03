@@ -21,10 +21,10 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
     const stream = await client.container.logs(container, { since: startTime ? startTime.getTime() / 1000 : 0 });
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
-        const message = `Log message "${this.message}" not received after ${this.startupTimeout}ms`;
+        const message = `Log message "${this.message}" not received after ${this.startupTimeoutMs}ms`;
         log.error(message, { containerId: container.id });
         reject(new Error(message));
-      }, this.startupTimeout);
+      }, this.startupTimeoutMs);
 
       const comparisonFn: (line: string) => boolean = (line: string) => {
         if (this.message instanceof RegExp) {
