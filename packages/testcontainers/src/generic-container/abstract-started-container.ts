@@ -1,7 +1,6 @@
 import { Readable } from "stream";
 import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
 import { CommitOptions, ContentToCopy, DirectoryToCopy, ExecOptions, ExecResult, FileToCopy, Labels } from "../types";
-import { WaitStrategy } from "../wait-strategies/wait-strategy";
 
 export class AbstractStartedContainer implements StartedTestContainer {
   constructor(protected readonly startedTestContainer: StartedTestContainer) {}
@@ -23,10 +22,6 @@ export class AbstractStartedContainer implements StartedTestContainer {
   }
 
   protected containerStopped?(): Promise<void>;
-
-  public setWaitStrategy(waitStrategy: WaitStrategy): void {
-    this.startedTestContainer.setWaitStrategy(waitStrategy);
-  }
 
   public async restart(options?: Partial<RestartOptions>): Promise<void> {
     return this.startedTestContainer.restart(options);
