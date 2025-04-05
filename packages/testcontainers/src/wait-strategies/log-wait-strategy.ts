@@ -31,6 +31,7 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
 
     let matches = 0;
     for await (const chunk of stream) {
+      console.log(chunk)
       if (this.matches(chunk)) {
         if (++matches === this.times) {
           return log.debug(`Log wait strategy complete`, { containerId: container.id });
