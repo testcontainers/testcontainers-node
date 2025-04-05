@@ -155,14 +155,14 @@ const container = await new GenericContainer("redis")
 
 ```javascript
 .withWaitStrategy(Wait.forHttp("/health", 8443)
-  .useTls())
+  .usingTls())
 ```
 
 #### Insecure TLS
 
 ```javascript
 .withWaitStrategy(Wait.forHttp("/health", 8443)
-  .useTls()
+  .usingTls()
   .insecureTls())
 ```
 
