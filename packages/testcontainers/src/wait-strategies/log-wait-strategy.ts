@@ -4,6 +4,7 @@ import { log } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
 import { BoundPorts } from "../utils/bound-ports";
 import { AbstractWaitStrategy } from "./wait-strategy";
+import byline from "byline";
 
 export type Log = string;
 
@@ -30,8 +31,8 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
     const stream = await client.container.logs(container, { since: startTime ? startTime.getTime() / 1000 : 0 });
 
     let matches = 0;
-    for await (const chunk of stream) {
-      if (this.matches(chunk)) {
+    for await (const line of byline(stream)) {
+      if (this.matches(line)) {
         if (++matches === this.times) {
           return log.debug(`Log wait strategy complete`, { containerId: container.id });
         }
