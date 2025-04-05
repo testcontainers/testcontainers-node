@@ -55,7 +55,6 @@ describe("LogWaitStrategy", { timeout: 180_000 }, () => {
     expect(await getRunningContainerNames()).not.toContain(containerName);
   });
 
-
   it("should throw an error if the message is never received", async () => {
     const containerName = `container-${new RandomUuid().nextUuid()}`;
 
@@ -72,7 +71,11 @@ describe("LogWaitStrategy", { timeout: 180_000 }, () => {
 
   it("does not matter if container does not send all content in a single line", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
-      .withCommand(["node", "-e", "process.stdout.write('Hello '); setTimeout(() => process.stdout.write('World\\n'), 2000)"])
+      .withCommand([
+        "node",
+        "-e",
+        "process.stdout.write('Hello '); setTimeout(() => process.stdout.write('World\\n'), 2000)",
+      ])
       .withWaitStrategy(Wait.forLogMessage("Hello World"))
       .start();
 

@@ -10,7 +10,7 @@ export type Log = string;
 export class LogWaitStrategy extends AbstractWaitStrategy {
   constructor(
     private readonly message: Log | RegExp,
-    private readonly times: number,
+    private readonly times: number
   ) {
     super();
   }
