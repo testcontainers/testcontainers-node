@@ -3,7 +3,7 @@ import { GenericContainer } from "../generic-container/generic-container";
 import { checkContainerIsHealthy, getRunningContainerNames } from "../utils/test-helper";
 import { Wait } from "./wait";
 
-describe("LogWaitStrategy", { timeout: 180_000 }, () => {
+describe("LogWaitStrategy", { timeout: 5_000 }, () => {
   it("should wait for log", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
@@ -51,6 +51,21 @@ describe("LogWaitStrategy", { timeout: 180_000 }, () => {
         .withStartupTimeout(0)
         .start()
     ).rejects.toThrowError(`Log message "unexpected" not received after 0ms`);
+
+    expect(await getRunningContainerNames()).not.toContain(containerName);
+  });
+
+
+  it("should throw an error if the message is never received", async () => {
+    const containerName = `container-${new RandomUuid().nextUuid()}`;
+
+    await expect(
+      new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+        .withName(containerName)
+        .withCommand("/bin/sh", "-c", 'echo "Ready"')
+        .withWaitStrategy(Wait.forLogMessage("unexpected"))
+        .start()
+    ).rejects.toThrowError(`Log stream ended and message "unexpected" was not received`);
 
     expect(await getRunningContainerNames()).not.toContain(containerName);
   });

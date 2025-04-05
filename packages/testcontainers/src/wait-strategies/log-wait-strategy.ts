@@ -10,7 +10,7 @@ export type Log = string;
 export class LogWaitStrategy extends AbstractWaitStrategy {
   constructor(
     private readonly message: Log | RegExp,
-    private readonly times: number
+    private readonly times: number,
   ) {
     super();
   }
@@ -21,9 +21,7 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
 
   async handleTimeout(containerId: string): Promise<void> {
     await setTimeout(this.startupTimeout);
-    const message = `Log message "${this.message}" not received after ${this.startupTimeout}ms`;
-    log.error(message, { containerId });
-    throw new Error(message);
+    this.throwError(containerId, `Log message "${this.message}" not received after ${this.startupTimeout}ms`);
   }
 
   async handleLogs(container: Dockerode.Container, startTime?: Date): Promise<void> {
@@ -40,10 +38,15 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
       }
     }
 
-    throw new Error("Log message not found");
+    this.throwError(container.id, `Log stream ended and message "${this.message}" was not received`);
   }
 
   matches(chunk: string): boolean {
     return this.message instanceof RegExp ? this.message.test(chunk) : chunk.includes(this.message);
+  }
+
+  throwError(containerId: string, message: string): void {
+    log.error(message, { containerId });
+    throw new Error(message);
   }
 }
