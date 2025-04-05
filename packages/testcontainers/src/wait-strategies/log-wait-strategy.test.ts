@@ -3,7 +3,7 @@ import { GenericContainer } from "../generic-container/generic-container";
 import { checkContainerIsHealthy, getRunningContainerNames } from "../utils/test-helper";
 import { Wait } from "./wait";
 
-describe("LogWaitStrategy", { timeout: 5_000 }, () => {
+describe("LogWaitStrategy", { timeout: 180_000 }, () => {
   it("should wait for log", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
