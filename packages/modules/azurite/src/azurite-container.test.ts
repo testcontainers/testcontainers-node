@@ -3,7 +3,7 @@ import { BlobServiceClient, StorageSharedKeyCredential } from "@azure/storage-bl
 import { QueueServiceClient } from "@azure/storage-queue";
 import { AzuriteContainer } from "./azurite-container";
 
-const IMAGE = "mcr.microsoft.com/azure-storage/azurite:3.33.0";
+const IMAGE = "mcr.microsoft.com/azure-storage/azurite:3.34.0";
 
 describe("Azurite", { timeout: 240_000 }, () => {
   // uploadAndDownloadBlob {
