@@ -42,8 +42,8 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
     this.throwError(container.id, `Log stream ended and message "${this.message}" was not received`);
   }
 
-  matches(chunk: string): boolean {
-    return this.message instanceof RegExp ? this.message.test(chunk) : chunk.includes(this.message);
+  matches(line: string): boolean {
+    return this.message instanceof RegExp ? this.message.test(line) : line.includes(this.message);
   }
 
   throwError(containerId: string, message: string): void {
