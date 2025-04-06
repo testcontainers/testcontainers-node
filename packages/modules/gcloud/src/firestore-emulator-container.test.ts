@@ -1,7 +1,7 @@
 import admin from "firebase-admin";
 import { FirestoreEmulatorContainer, StartedFirestoreEmulatorContainer } from "./firestore-emulator-container";
 
-const IMAGE = "gcr.io/google.com/cloudsdktool/cloud-sdk";
+const IMAGE = "gcr.io/google.com/cloudsdktool/cloud-sdk:517.0.0-emulators";
 
 describe("FirestoreEmulatorContainer", { timeout: 240_000 }, () => {
   afterEach(async () => {

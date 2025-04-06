@@ -1,7 +1,7 @@
 import { PubSub } from "@google-cloud/pubsub";
 import { PubSubEmulatorContainer, StartedPubSubEmulatorContainer } from "./pubsub-emulator-container";
 
-const IMAGE = "gcr.io/google.com/cloudsdktool/google-cloud-cli";
+const IMAGE = "gcr.io/google.com/cloudsdktool/google-cloud-cli:517.0.0-emulators";
 
 describe("PubSubEmulatorContainer", { timeout: 240_000 }, () => {
   it("should work using default version", async () => {

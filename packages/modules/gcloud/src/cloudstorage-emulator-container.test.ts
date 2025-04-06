@@ -3,7 +3,7 @@ import { setupServer } from "msw/node";
 import { ReadableStream } from "node:stream/web";
 import { CloudStorageEmulatorContainer, StartedCloudStorageEmulatorContainer } from "./cloudstorage-emulator-container";
 
-const IMAGE = "fsouza/fake-gcs-server";
+const IMAGE = "fsouza/fake-gcs-server:1.52.2";
 
 async function getRequestBodyFromReadableStream(stream: ReadableStream<Uint8Array>): Promise<string> {
   const decoder = new TextDecoder();
