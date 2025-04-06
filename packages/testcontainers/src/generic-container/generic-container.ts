@@ -402,7 +402,7 @@ export class GenericContainer implements TestContainer {
       Test: healthCheck.test,
       Interval: healthCheck.interval ? toNanos(healthCheck.interval) : 0,
       Timeout: healthCheck.timeout ? toNanos(healthCheck.timeout) : 0,
-      Retries: healthCheck.retries || 0,
+      Retries: healthCheck.retries ?? 0,
       StartPeriod: healthCheck.startPeriod ? toNanos(healthCheck.startPeriod) : 0,
     };
 

@@ -10,6 +10,7 @@ export { GenericContainer } from "./generic-container/generic-container";
 export { BuildOptions, GenericContainerBuilder } from "./generic-container/generic-container-builder";
 export { Network, StartedNetwork, StoppedNetwork } from "./network/network";
 export { getReaper } from "./reaper/reaper";
+export { SocatContainer, StartedSocatContainer } from "./socat/socat-container";
 export {
   RestartOptions,
   StartedTestContainer,
