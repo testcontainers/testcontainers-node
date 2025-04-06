@@ -1,10 +1,10 @@
+import byline from "byline";
 import Dockerode from "dockerode";
 import { setTimeout } from "timers/promises";
 import { log } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
 import { BoundPorts } from "../utils/bound-ports";
 import { AbstractWaitStrategy } from "./wait-strategy";
-import byline from "byline";
 
 export type Log = string;
 
