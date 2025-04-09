@@ -11,7 +11,9 @@ export class ClickHouseContainer extends GenericContainer {
   constructor(image = "clickhouse/clickhouse-server:24") {
     super(image);
     this.withExposedPorts(CLICKHOUSE_PORT, CLICKHOUSE_HTTP_PORT);
-    this.withWaitStrategy(Wait.forHealthCheck());
+    this.withWaitStrategy(
+      Wait.forHttp("/", CLICKHOUSE_HTTP_PORT).forResponsePredicate((response) => response === "Ok.\n")
+    );
     this.withStartupTimeout(120_000);
     this.withDatabase("test");
     this.withUlimits({
@@ -44,15 +46,6 @@ export class ClickHouseContainer extends GenericContainer {
       CLICKHOUSE_DB: this.database,
       CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: "1",
     });
-
-    if (!this.healthCheck) {
-      this.withHealthCheck({
-        test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:8123/ping || exit 1"],
-        interval: 250,
-        timeout: 1000,
-        retries: 1000,
-      });
-    }
 
     return new StartedClickHouseContainer(await super.start(), this.database, this.username, this.password);
   }
