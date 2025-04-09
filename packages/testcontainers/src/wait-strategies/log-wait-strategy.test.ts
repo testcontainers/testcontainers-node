@@ -61,7 +61,7 @@ describe("LogWaitStrategy", { timeout: 180_000 }, () => {
     await expect(
       new GenericContainer("cristianrgreco/testcontainer:1.1.14")
         .withName(containerName)
-        .withCommand("/bin/sh", "-c", 'echo "Ready"')
+        .withCommand(["/bin/sh", "-c", 'echo "Ready"'])
         .withWaitStrategy(Wait.forLogMessage("unexpected"))
         .start()
     ).rejects.toThrowError(`Log stream ended and message "unexpected" was not received`);

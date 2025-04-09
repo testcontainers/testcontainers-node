@@ -123,7 +123,7 @@ async function initStrategy(strategy: ContainerRuntimeClientStrategy): Promise<C
     labels: dockerodeInfo.Labels ? dockerodeInfo.Labels : [],
   };
 
-  const composeInfo: ComposeInfo = composeClient.info;
+  const composeInfo: ComposeInfo = composeClient.version;
 
   const info: Info = { node: nodeInfo, containerRuntime: containerRuntimeInfo, compose: composeInfo };
 

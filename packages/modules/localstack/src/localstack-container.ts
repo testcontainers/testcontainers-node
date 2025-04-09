@@ -12,7 +12,7 @@ import {
 export const LOCALSTACK_PORT = 4566;
 
 export class LocalstackContainer extends GenericContainer {
-  constructor(image = "localstack/localstack:2.2.0") {
+  constructor(image: string) {
     super(image);
 
     this.withExposedPorts(LOCALSTACK_PORT).withWaitStrategy(Wait.forLogMessage("Ready", 1)).withStartupTimeout(120_000);

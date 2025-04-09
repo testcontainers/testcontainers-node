@@ -13,7 +13,7 @@ export class StartedMockserverContainer extends AbstractStartedContainer {
 const MOCKSERVER_PORT = 1080;
 
 export class MockserverContainer extends GenericContainer {
-  constructor(image = "mockserver/mockserver:5.15.0") {
+  constructor(image: string) {
     super(image);
 
     this.withWaitStrategy(Wait.forAll([Wait.forLogMessage(/started on port: 1080/)])).withStartupTimeout(120_000);
