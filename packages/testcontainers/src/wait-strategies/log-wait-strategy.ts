@@ -1,5 +1,6 @@
 import byline from "byline";
 import Dockerode from "dockerode";
+import { setTimeout } from "timers/promises";
 import { log } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
 import { BoundPorts } from "../utils/bound-ports";
@@ -16,46 +17,37 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
   }
 
   public async waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts, startTime?: Date): Promise<void> {
+    await Promise.race([this.handleTimeout(container.id), this.handleLogs(container, startTime)]);
+  }
+
+  async handleTimeout(containerId: string): Promise<void> {
+    await setTimeout(this.startupTimeout);
+    this.throwError(containerId, `Log message "${this.message}" not received after ${this.startupTimeout}ms`);
+  }
+
+  async handleLogs(container: Dockerode.Container, startTime?: Date): Promise<void> {
     log.debug(`Waiting for log message "${this.message}"...`, { containerId: container.id });
     const client = await getContainerRuntimeClient();
     const stream = await client.container.logs(container, { since: startTime ? startTime.getTime() / 1000 : 0 });
-    return new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        const message = `Log message "${this.message}" not received after ${this.startupTimeout}ms`;
-        log.error(message, { containerId: container.id });
-        reject(new Error(message));
-      }, this.startupTimeout);
 
-      const comparisonFn: (line: string) => boolean = (line: string) => {
-        if (this.message instanceof RegExp) {
-          return this.message.test(line);
-        } else {
-          return line.includes(this.message);
+    let matches = 0;
+    for await (const line of byline(stream)) {
+      if (this.matches(line)) {
+        if (++matches === this.times) {
+          return log.debug(`Log wait strategy complete`, { containerId: container.id });
         }
-      };
+      }
+    }
 
-      let count = 0;
-      const lineProcessor = (line: string) => {
-        if (comparisonFn(line)) {
-          if (++count === this.times) {
-            stream.destroy();
-            clearTimeout(timeout);
-            log.debug(`Log wait strategy complete`, { containerId: container.id });
-            resolve();
-          }
-        }
-      };
+    this.throwError(container.id, `Log stream ended and message "${this.message}" was not received`);
+  }
 
-      byline(stream)
-        .on("data", lineProcessor)
-        .on("err", lineProcessor)
-        .on("end", () => {
-          stream.destroy();
-          clearTimeout(timeout);
-          const message = `Log stream ended and message "${this.message}" was not received`;
-          log.error(message, { containerId: container.id });
-          reject(new Error(message));
-        });
-    });
+  matches(line: string): boolean {
+    return this.message instanceof RegExp ? this.message.test(line) : line.includes(this.message);
+  }
+
+  throwError(containerId: string, message: string): void {
+    log.error(message, { containerId });
+    throw new Error(message);
   }
 }
