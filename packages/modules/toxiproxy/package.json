@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/toxiproxy",
-  "version": "10.24.1",
+  "version": "10.24.2",
   "license": "MIT",
   "keywords": [
     "toxiproxy",
@@ -29,7 +29,7 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "dependencies": {
-    "testcontainers": "^10.24.1",
+    "testcontainers": "^10.24.2",
     "toxiproxy-node-client": "^4.0.0"
   },
   "devDependencies": {
