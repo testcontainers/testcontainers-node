@@ -9,6 +9,8 @@ import { AbstractWaitStrategy } from "./wait-strategy";
 export type Log = string;
 
 export class LogWaitStrategy extends AbstractWaitStrategy {
+  private abortController!: AbortController;
+
   constructor(
     private readonly message: Log | RegExp,
     private readonly times: number
@@ -17,12 +19,20 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
   }
 
   public async waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts, startTime?: Date): Promise<void> {
+    this.abortController = new AbortController();
     await Promise.race([this.handleTimeout(container.id), this.handleLogs(container, startTime)]);
   }
 
   async handleTimeout(containerId: string): Promise<void> {
-    await setTimeout(this.startupTimeout);
+    try {
+      await setTimeout(this.startupTimeout, undefined, { signal: this.abortController.signal });
+    } catch (err) {
+      if (!(err instanceof Error && err.name === "AbortError")) {
+        throw err;
+      }
+    }
     this.throwError(containerId, `Log message "${this.message}" not received after ${this.startupTimeout}ms`);
+    this.abortController.abort();
   }
 
   async handleLogs(container: Dockerode.Container, startTime?: Date): Promise<void> {
@@ -32,9 +42,14 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
 
     let matches = 0;
     for await (const line of byline(stream)) {
+      if (this.abortController.signal.aborted) {
+        break;
+      }
       if (this.matches(line)) {
         if (++matches === this.times) {
-          return log.debug(`Log wait strategy complete`, { containerId: container.id });
+          log.debug(`Log wait strategy complete`, { containerId: container.id });
+          this.abortController.abort();
+          return;
         }
       }
     }
@@ -42,11 +57,11 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
     this.throwError(container.id, `Log stream ended and message "${this.message}" was not received`);
   }
 
-  matches(line: string): boolean {
+  private matches(line: string): boolean {
     return this.message instanceof RegExp ? this.message.test(line) : line.includes(this.message);
   }
 
-  throwError(containerId: string, message: string): void {
+  private throwError(containerId: string, message: string): void {
     log.error(message, { containerId });
     throw new Error(message);
   }

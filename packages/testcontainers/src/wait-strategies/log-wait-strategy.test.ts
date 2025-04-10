@@ -55,19 +55,22 @@ describe("LogWaitStrategy", { timeout: 180_000 }, () => {
     expect(await getRunningContainerNames()).not.toContain(containerName);
   });
 
-  it("should throw an error if the message is never received", async () => {
+  it("should throw an error if the log stream ends and the message is not received", async () => {
     const containerName = `container-${new RandomUuid().nextUuid()}`;
 
     await expect(
       new GenericContainer("cristianrgreco/testcontainer:1.1.14")
         .withName(containerName)
-        .withCommand("/bin/sh", "-c", 'echo "Ready"')
+        .withCommand(["/bin/sh", "-c", 'echo "Ready"'])
         .withWaitStrategy(Wait.forLogMessage("unexpected"))
         .start()
     ).rejects.toThrowError(`Log stream ended and message "unexpected" was not received`);
 
     expect(await getRunningContainerNames()).not.toContain(containerName);
   });
+
+  // TODO
+  it.skip("should throw an error if the log stream is open and the strategy times out", async () => {});
 
   it("does not matter if container does not send all content in a single line", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
