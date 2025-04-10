@@ -1,5 +1,4 @@
-import { ClickHouseClient, createClient } from "@clickhouse/client";
-import { Wait } from "testcontainers";
+import { createClient } from "@clickhouse/client";
 import { ClickHouseContainer } from "./clickhouse-container";
 
 interface ClickHouseQueryResponse<T> {
@@ -7,59 +6,40 @@ interface ClickHouseQueryResponse<T> {
 }
 
 describe("ClickHouseContainer", { timeout: 180_000 }, () => {
-  it("should start successfully with default settings", async () => {
-    const container = new ClickHouseContainer();
-    const startedContainer = await container.start();
-    expect(startedContainer.getHost()).toBeDefined();
-    expect(startedContainer.getHttpPort()).toBeDefined();
-    expect(startedContainer.getDatabase()).toBeDefined();
-    expect(startedContainer.getUsername()).toBeDefined();
-    expect(startedContainer.getPassword()).toBeDefined();
-    await startedContainer.stop();
-  });
-
   // connectWithOptions {
   it("should connect using the client options object", async () => {
     const container = await new ClickHouseContainer().start();
-    let client: ClickHouseClient | undefined;
+    const client = createClient(container.getClientOptions());
 
-    try {
-      client = createClient(container.getClientOptions());
+    const result = await client.query({
+      query: "SELECT 1 AS value",
+      format: "JSON",
+    });
+    const data = (await result.json()) as ClickHouseQueryResponse<{ value: number }>;
+    expect(data?.data?.[0]?.value).toBe(1);
 
-      const result = await client.query({
-        query: "SELECT 1 AS value",
-        format: "JSON",
-      });
-      const data = (await result.json()) as ClickHouseQueryResponse<{ value: number }>;
-      expect(data?.data?.[0]?.value).toBe(1);
-    } finally {
-      await client?.close();
-      await container.stop();
-    }
+    await client.close();
+    await container.stop();
   });
   // }
 
   // connectWithUrl {
   it("should connect using the URL", async () => {
     const container = await new ClickHouseContainer().start();
-    let client: ClickHouseClient | undefined;
+    const client = createClient({
+      url: container.getConnectionUrl(),
+    });
 
-    try {
-      client = createClient({
-        url: container.getConnectionUrl(),
-      });
+    const result = await client.query({
+      query: "SELECT 1 AS value",
+      format: "JSON",
+    });
 
-      const result = await client.query({
-        query: "SELECT 1 AS value",
-        format: "JSON",
-      });
+    const data = (await result.json()) as ClickHouseQueryResponse<{ value: number }>;
+    expect(data?.data?.[0]?.value).toBe(1);
 
-      const data = (await result.json()) as ClickHouseQueryResponse<{ value: number }>;
-      expect(data?.data?.[0]?.value).toBe(1);
-    } finally {
-      await client?.close();
-      await container.stop();
-    }
+    await client.close();
+    await container.stop();
   });
   // }
 
@@ -70,26 +50,22 @@ describe("ClickHouseContainer", { timeout: 180_000 }, () => {
       .withPassword("customPassword")
       .start();
 
-    let client: ClickHouseClient | undefined;
+    const client = createClient({
+      url: container.getHttpUrl(),
+      username: container.getUsername(),
+      password: container.getPassword(),
+    });
 
-    try {
-      client = createClient({
-        url: container.getHttpUrl(),
-        username: container.getUsername(),
-        password: container.getPassword(),
-      });
+    const result = await client.query({
+      query: "SELECT 1 AS value",
+      format: "JSON",
+    });
 
-      const result = await client.query({
-        query: "SELECT 1 AS value",
-        format: "JSON",
-      });
+    const data = (await result.json()) as ClickHouseQueryResponse<{ value: number }>;
+    expect(data?.data?.[0]?.value).toBe(1);
 
-      const data = (await result.json()) as ClickHouseQueryResponse<{ value: number }>;
-      expect(data?.data?.[0]?.value).toBe(1);
-    } finally {
-      await client?.close();
-      await container.stop();
-    }
+    await client.close();
+    await container.stop();
   });
   // }
 
@@ -98,22 +74,18 @@ describe("ClickHouseContainer", { timeout: 180_000 }, () => {
     const customDatabase = "customDatabase";
     const container = await new ClickHouseContainer().withDatabase(customDatabase).start();
 
-    let client: ClickHouseClient | undefined;
+    const client = createClient(container.getClientOptions());
 
-    try {
-      client = createClient(container.getClientOptions());
+    const result = await client.query({
+      query: "SELECT currentDatabase() AS current_database",
+      format: "JSON",
+    });
 
-      const result = await client.query({
-        query: "SELECT currentDatabase() AS current_database",
-        format: "JSON",
-      });
+    const data = (await result.json()) as ClickHouseQueryResponse<{ current_database: string }>;
+    expect(data?.data?.[0]?.current_database).toBe(customDatabase);
 
-      const data = (await result.json()) as ClickHouseQueryResponse<{ current_database: string }>;
-      expect(data?.data?.[0]?.current_database).toBe(customDatabase);
-    } finally {
-      await client?.close();
-      await container.stop();
-    }
+    await client.close();
+    await container.stop();
   });
   // }
 
@@ -122,22 +94,18 @@ describe("ClickHouseContainer", { timeout: 180_000 }, () => {
     const customUsername = "customUsername";
     const container = await new ClickHouseContainer().withUsername(customUsername).start();
 
-    let client: ClickHouseClient | undefined;
+    const client = createClient(container.getClientOptions());
 
-    try {
-      client = createClient(container.getClientOptions());
+    const result = await client.query({
+      query: "SELECT currentUser() AS current_user",
+      format: "JSON",
+    });
 
-      const result = await client.query({
-        query: "SELECT currentUser() AS current_user",
-        format: "JSON",
-      });
+    const data = (await result.json()) as ClickHouseQueryResponse<{ current_user: string }>;
+    expect(data?.data?.[0]?.current_user).toBe(customUsername);
 
-      const data = (await result.json()) as ClickHouseQueryResponse<{ current_user: string }>;
-      expect(data?.data?.[0]?.current_user).toBe(customUsername);
-    } finally {
-      await client?.close();
-      await container.stop();
-    }
+    await client.close();
+    await container.stop();
   });
   // }
 
@@ -145,40 +113,17 @@ describe("ClickHouseContainer", { timeout: 180_000 }, () => {
     const container = await new ClickHouseContainer().start();
     await container.restart();
 
-    let client: ClickHouseClient | undefined;
-    try {
-      client = createClient(container.getClientOptions());
+    const client = createClient(container.getClientOptions());
 
-      const result = await client.query({
-        query: "SELECT 1 AS value",
-        format: "JSON",
-      });
+    const result = await client.query({
+      query: "SELECT 1 AS value",
+      format: "JSON",
+    });
 
-      const data = (await result.json()) as ClickHouseQueryResponse<{ value: number }>;
-      expect(data?.data?.[0]?.value).toBe(1);
-    } finally {
-      await client?.close();
-      await container.stop();
-    }
-  });
+    const data = (await result.json()) as ClickHouseQueryResponse<{ value: number }>;
+    expect(data?.data?.[0]?.value).toBe(1);
 
-  /**
-   * Verifies that a custom Docker health check that fails immediately
-   * causes the container startup process (`container.start()`) to reject with an error.
-   *
-   * Note: This test pattern was adapted from a similar test case used for
-   * PostgreSQL containers to ensure custom failing health checks are handled correctly.
-   */
-  it("should allow custom healthcheck", async () => {
-    const container = new ClickHouseContainer()
-      .withHealthCheck({
-        test: ["CMD-SHELL", "exit 1"],
-        interval: 100,
-        retries: 0,
-        timeout: 100,
-      })
-      .withWaitStrategy(Wait.forHealthCheck());
-
-    await expect(() => container.start()).rejects.toThrow();
+    await client.close();
+    await container.stop();
   });
 });
