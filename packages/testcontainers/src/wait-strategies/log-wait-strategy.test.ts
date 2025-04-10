@@ -69,9 +69,6 @@ describe("LogWaitStrategy", { timeout: 180_000 }, () => {
     expect(await getRunningContainerNames()).not.toContain(containerName);
   });
 
-  // TODO
-  it.skip("should throw an error if the log stream is open and the strategy times out", async () => {});
-
   it("does not matter if container does not send all content in a single line", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withCommand([
