@@ -12,13 +12,19 @@ npm install @testcontainers/clickhouse --save-dev
 
 <!--codeinclude-->
 
-[Connect and execute query:](../../packages/modules/clickhouse/src/clickhouse-container.test.ts) inside_block:connect
+[Connect and execute query:](../../packages/modules/clickhouse/src/clickhouse-container.test.ts) inside_block:connectWithOptions
 
 <!--/codeinclude-->
 
 <!--codeinclude-->
 
-[Connect and execute query using HTTP interface:](../../packages/modules/clickhouse/src/clickhouse-container.test.ts) inside_block:httpConnect
+[Connect using URL and execute query:](../../packages/modules/clickhouse/src/clickhouse-container.test.ts) inside_block:connectWithUrl
+
+<!--/codeinclude-->
+
+<!--codeinclude-->
+
+[Connect with username and password and execute query:](../../packages/modules/clickhouse/src/clickhouse-container.test.ts) inside_block:connectWithUsernameAndPassword
 
 <!--/codeinclude-->
 

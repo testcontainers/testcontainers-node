@@ -15,7 +15,9 @@ export class ClickHouseContainer extends GenericContainer {
       Wait.forHttp("/", CLICKHOUSE_HTTP_PORT).forResponsePredicate((response) => response === "Ok.\n")
     );
     this.withStartupTimeout(120_000);
-    this.withDatabase("test");
+
+    // Setting this high ulimits value proactively prevents the "Too many open files" error,
+    //  especially under potentially heavy load during testing.
     this.withUlimits({
       nofile: {
         hard: 262144,
@@ -44,7 +46,6 @@ export class ClickHouseContainer extends GenericContainer {
       CLICKHOUSE_USER: this.username,
       CLICKHOUSE_PASSWORD: this.password,
       CLICKHOUSE_DB: this.database,
-      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: "1",
     });
 
     return new StartedClickHouseContainer(await super.start(), this.database, this.username, this.password);
@@ -69,10 +70,6 @@ export class StartedClickHouseContainer extends AbstractStartedContainer {
     return super.getMappedPort(CLICKHOUSE_HTTP_PORT);
   }
 
-  public getDatabase(): string {
-    return this.database;
-  }
-
   public getUsername(): string {
     return this.username;
   }
@@ -81,19 +78,53 @@ export class StartedClickHouseContainer extends AbstractStartedContainer {
     return this.password;
   }
 
-  public getConnectionUri(): string {
+  public getDatabase(): string {
+    return this.database;
+  }
+
+  /**
+   * Gets the base HTTP URL (protocol, host and mapped port) for the ClickHouse container's HTTP interface.
+   * Example: `http://localhost:32768`
+   */
+  public getHttpUrl(): string {
     const protocol = "http";
     const host = this.getHost();
     const port = this.getHttpPort();
-
     return `${protocol}://${host}:${port}`;
   }
 
-  // /**
-  //  * @returns A connection URI for HTTP interface in the form of `http://[username[:password]@][host[:port]]`
-  //  */
-  // public getHttpConnectionUri(): string {
-  //   const url = new URL(`http://127.0.0.1:${this.getHttpPort()}`);
-  //   return url.toString();
-  // }
+  /**
+   * Gets configuration options suitable for passing directly to `createClient({...})`
+   * from `@clickhouse/client`. Uses the HTTP interface.
+   */
+  public getClientOptions(): {
+    url?: string;
+    username: string;
+    password: string;
+    database: string;
+  } {
+    return {
+      url: this.getHttpUrl(),
+      username: this.getUsername(),
+      password: this.getPassword(),
+      database: this.getDatabase(),
+    };
+  }
+
+  /**
+   * Gets a ClickHouse connection URL for the HTTP interface with format:
+   * http://username:password@hostname:port/database
+   * @returns The ClickHouse HTTP URL string.
+   */
+  public getConnectionUrl(): string {
+    const url = new URL(this.getHttpUrl());
+
+    url.username = this.getUsername();
+    url.password = this.getPassword();
+
+    const dbName = this.getDatabase();
+    url.pathname = dbName.startsWith("/") ? dbName : `/${dbName}`;
+
+    return url.toString();
+  }
 }
