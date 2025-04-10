@@ -40,15 +40,30 @@ npm install @testcontainers/clickhouse --save-dev
 
 <!--/codeinclude-->
 
-### Connection URIs
+### Connection Methods
 
-The module provides two methods to get connection URIs:
+The module provides several methods to connect to the ClickHouse container:
 
-1. `getConnectionUri()` - Returns a URI in the form of `clickhouse://[username[:password]@][host[:port],]/database`
-2. `getHttpConnectionUri()` - Returns a URI in the form of `http://[username[:password]@][host[:port]]`
+1. `getClientOptions()` - Returns a configuration object suitable for `@clickhouse/client`:
 
-These URIs can be used with the `@clickhouse/client` package or any other ClickHouse client that supports connection URIs.
+   ```typescript
+   {
+     url: string; // HTTP URL with host and port
+     username: string; // Container username
+     password: string; // Container password
+     database: string; // Container database
+   }
+   ```
 
-!!!tip
-The HTTP interface (port 8123) is often easier to use for simple queries and is more widely supported by various clients.
-The native interface (port 9000) offers better performance for high-throughput scenarios.
+2. `getConnectionUrl()` - Returns a complete HTTP URL including credentials and database:
+
+   ```
+   http://[username[:password]@][host[:port]]/database
+   ```
+
+3. `getHttpUrl()` - Returns the base HTTP URL without credentials:
+   ```
+   http://[host[:port]]
+   ```
+
+These methods can be used with the `@clickhouse/client` package or any other ClickHouse client that supports HTTP connections.
