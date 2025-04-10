@@ -9,8 +9,6 @@ import { AbstractWaitStrategy } from "./wait-strategy";
 export type Log = string;
 
 export class LogWaitStrategy extends AbstractWaitStrategy {
-  private abortController!: AbortController;
-
   constructor(
     private readonly message: Log | RegExp,
     private readonly times: number
@@ -18,37 +16,45 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
     super();
   }
 
-  public async waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts, startTime?: Date): Promise<void> {
-    this.abortController = new AbortController();
-    await Promise.race([this.handleTimeout(container.id), this.handleLogs(container, startTime)]);
+  async waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts, startTime?: Date): Promise<void> {
+    const abortController = new AbortController();
+
+    await Promise.race([
+      this.handleTimeout(container.id, abortController),
+      this.handleLogs(container, startTime ? startTime.getTime() / 1000 : 0, abortController),
+    ]);
   }
 
-  async handleTimeout(containerId: string): Promise<void> {
+  private async handleTimeout(containerId: string, abortController: AbortController): Promise<void> {
     try {
-      await setTimeout(this.startupTimeout, undefined, { signal: this.abortController.signal });
+      await setTimeout(this.startupTimeout, undefined, { signal: abortController.signal });
     } catch (err) {
       if (!(err instanceof Error && err.name === "AbortError")) {
         throw err;
       }
     }
     this.throwError(containerId, `Log message "${this.message}" not received after ${this.startupTimeout}ms`);
-    this.abortController.abort();
+    abortController.abort();
   }
 
-  async handleLogs(container: Dockerode.Container, startTime?: Date): Promise<void> {
+  private async handleLogs(
+    container: Dockerode.Container,
+    startTime: number,
+    abortController: AbortController
+  ): Promise<void> {
     log.debug(`Waiting for log message "${this.message}"...`, { containerId: container.id });
     const client = await getContainerRuntimeClient();
-    const stream = await client.container.logs(container, { since: startTime ? startTime.getTime() / 1000 : 0 });
+    const stream = await client.container.logs(container, { since: startTime });
 
     let matches = 0;
     for await (const line of byline(stream)) {
-      if (this.abortController.signal.aborted) {
+      if (abortController.signal.aborted) {
         break;
       }
       if (this.matches(line)) {
         if (++matches === this.times) {
           log.debug(`Log wait strategy complete`, { containerId: container.id });
-          this.abortController.abort();
+          abortController.abort();
           return;
         }
       }
