@@ -41,6 +41,17 @@ const environment = await new DockerComposeEnvironment(composeFilePath, composeF
   .up();
 ```
 
+### With a default wait strategy
+
+By default Testcontainers uses the "listening ports" wait strategy for all containers. If you'd like to override
+the default wait strategy for all services, you can do so:
+
+```javascript
+const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
+  .withDefaultWaitStrategy(Wait.forHealthCheck())
+  .up();
+```
+
 ### With a pull policy
 
 Testcontainers will automatically pull an image if it doesn't exist. This is configurable:
