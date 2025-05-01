@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/cockroachdb",
-  "version": "10.24.2",
+  "version": "10.25.0",
   "license": "MIT",
   "keywords": [
     "cockroachdb",
@@ -34,6 +34,6 @@
     "pg": "^8.12.0"
   },
   "dependencies": {
-    "testcontainers": "^10.24.2"
+    "testcontainers": "^10.25.0"
   }
 }
