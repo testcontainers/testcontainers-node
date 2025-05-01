@@ -4,10 +4,28 @@ const BOLT_PORT = 7687;
 const HTTP_PORT = 7474;
 const USERNAME = "neo4j";
 
+export enum Neo4jPlugin {
+  APOC = "apoc",
+  APOC_EXTENDED = "apoc-extended",
+  BLOOM = "bloom",
+  GEN_AI = "genai",
+  GRAPHQL = "graphql",
+  GRAPH_ALGORITHMS = "graph-algorithms",
+  GRAPH_DATA_SCIENCE = "graph-data-science",
+  NEO_SEMANTICS = "n10s",
+}
+
+const pluginWhitelists: Partial<Record<Neo4jPlugin, string>> = {
+  [Neo4jPlugin.APOC]: "apoc.*",
+  [Neo4jPlugin.APOC_EXTENDED]: "apoc.*",
+  [Neo4jPlugin.BLOOM]: "bloom.*",
+  [Neo4jPlugin.GRAPH_DATA_SCIENCE]: "gds.*",
+};
+
 export class Neo4jContainer extends GenericContainer {
   private password = "pass123!@#WORD";
-  private apoc = false;
   private ttl?: number;
+  private plugins: Neo4jPlugin[] = [];
 
   constructor(image = "neo4j:4.4.12") {
     super(image);
@@ -23,11 +41,12 @@ export class Neo4jContainer extends GenericContainer {
   }
 
   public withApoc(): this {
-    this.apoc = true;
-    this.withEnvironment({
-      NEO4JLABS_PLUGINS: '["apoc"]',
-      NEO4J_dbms_security_procedures_unrestricted: "apoc.*",
-    });
+    this.plugins.push(Neo4jPlugin.APOC);
+    return this;
+  }
+
+  public withPlugins(plugins: Neo4jPlugin[]): this {
+    this.plugins = plugins;
     return this;
   }
 
@@ -44,10 +63,18 @@ export class Neo4jContainer extends GenericContainer {
         NEO4J_apoc_ttl_schedule: this.ttl.toString(),
       });
     }
-    if (this.apoc) {
+
+    if (this.plugins.length > 0) {
+      const whitelists: string = this.plugins
+        .map((plugin) => (plugin in pluginWhitelists ? pluginWhitelists[plugin] : null))
+        .filter((whitelisted) => whitelisted !== null)
+        .join(",");
+
       this.withEnvironment({
-        NEO4JLABS_PLUGINS: '["apoc"]',
-        NEO4J_dbms_security_procedures_unrestricted: "apoc.*",
+        NEO4JLABS_PLUGINS: JSON.stringify(this.plugins), // Older variant for older images.
+        NEO4J_PLUGINS: JSON.stringify(this.plugins),
+        NEO4J_dbms_security_procedures_unrestricted: whitelists,
+        NEO4J_dbms_security_procedures_whitelist: whitelists,
       });
     }
     return new StartedNeo4jContainer(await super.start(), this.password);
