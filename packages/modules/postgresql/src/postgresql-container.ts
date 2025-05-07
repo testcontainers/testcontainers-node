@@ -10,7 +10,7 @@ export class PostgreSqlContainer extends GenericContainer {
   constructor(image = "postgres:13.3-alpine") {
     super(image);
     this.withExposedPorts(POSTGRES_PORT);
-    this.withWaitStrategy(Wait.forHealthCheck());
+    this.withWaitStrategy(Wait.forAll([Wait.forHealthCheck(), Wait.forListeningPorts()]));
     this.withStartupTimeout(120_000);
   }
 
