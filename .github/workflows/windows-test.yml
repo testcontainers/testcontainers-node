@@ -31,10 +31,10 @@ jobs:
           repository: ${{ github.event.client_payload.pull_request.head.repo.full_name }}
           ref: ${{ github.event.client_payload.pull_request.head.ref }}
 
-      - name: Install NodeJS 22.x
+      - name: Install NodeJS
         uses: actions/setup-node@v4
         with:
-          node-version: 22.x
+          node-version: 24.x
 
       - name: Install dependencies
         run: npm ci --omit=optional
