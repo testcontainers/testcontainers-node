@@ -51,6 +51,7 @@ nav:
       - Azurite: modules/azurite.md
       - Cassandra: modules/cassandra.md
       - ChromaDB: modules/chromadb.md
+      - ClickHouse: modules/clickhouse.md
       - CosmosDB: modules/cosmosdb.md
       - Couchbase: modules/couchbase.md
       - CockroachDB: modules/cockroachdb.md

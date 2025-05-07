@@ -98,6 +98,16 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
     await startedEnvironment.down();
   });
 
+  it("should support default wait strategy", async () => {
+    const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-healthcheck.yml")
+      .withDefaultWaitStrategy(Wait.forHealthCheck())
+      .up();
+
+    await checkEnvironmentContainerIsHealthy(startedEnvironment, await composeContainerName("container"));
+
+    await startedEnvironment.down();
+  });
+
   it("should support log message wait strategy", async () => {
     const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml")
       .withWaitStrategy(await composeContainerName("container"), Wait.forLogMessage("Listening on port 8080"))
