@@ -32,7 +32,7 @@
     "testcontainers": "^10.25.0"
   },
   "devDependencies": {
-    "@types/couchbase": "^2.4.9",
+    "@types/couchbase": "^3.0.6",
     "couchbase": "4.4.5"
   }
 }

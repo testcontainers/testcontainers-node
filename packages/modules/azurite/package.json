@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@azure/data-tables": "^13.3.0",
-    "@azure/storage-blob": "^12.26.0",
-    "@azure/storage-queue": "^12.25.0"
+    "@azure/storage-blob": "^12.27.0",
+    "@azure/storage-queue": "^12.26.0"
   }
 }
