@@ -27,9 +27,31 @@ describe("ElasticsearchContainer", { timeout: 180_000 }, () => {
     };
     await client.index({
       index: "people",
-      body: document,
       id: document.id,
+      document,
     });
+
+    /*
+    body?: string | ({
+        [key: string]: any;
+    } & {
+        id?: never;
+        index?: never;
+        if_primary_term?: never;
+        if_seq_no?: never;
+        include_source_on_error?: never;
+        op_type?: never;
+        pipeline?: never;
+        refresh?: never;
+        routing?: never;
+        timeout?: never;
+        version?: never;
+        version_type?: never;
+        wait_for_active_shards?: never;
+        require_alias?: never;
+        document?: never;
+    })
+     */
 
     expect((await client.get({ index: "people", id: document.id }))._source).toStrictEqual(document);
     await container.stop();
