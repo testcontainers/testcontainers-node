@@ -1,11 +1,25 @@
-import { FixedPortGenerator, RandomUniquePortGenerator } from "./port-generator";
+import { FixedPortGenerator, RandomPortGenerator } from "./port-generator";
 
 describe("PortGenerator", () => {
-  describe("RandomUniquePortGenerator", () => {
-    it("should generate a random and unique port across all instances", async () => {
-      const fixedPortGenerator = new FixedPortGenerator([1000, 1000, 1001]);
-      expect(await new RandomUniquePortGenerator(fixedPortGenerator).generatePort()).toBe(1000);
-      expect(await new RandomUniquePortGenerator(fixedPortGenerator).generatePort()).toBe(1001);
+  describe("FixedPortGenerator", () => {
+    it("should return pre-determined ports", async () => {
+      const fixedPortGenerator = new FixedPortGenerator([1000, 1001]);
+
+      await expect(fixedPortGenerator.generatePort()).resolves.toBe(1000);
+      await expect(fixedPortGenerator.generatePort()).resolves.toBe(1001);
+    });
+  });
+
+  describe("RandomPortGenerator", () => {
+    it("should generate a random available port", async () => {
+      const randomPortGenerator = new RandomPortGenerator();
+
+      const port1 = await randomPortGenerator.generatePort();
+      const port2 = await randomPortGenerator.generatePort();
+
+      expect(port1).toBeDefined();
+      expect(port2).toBeDefined();
+      expect(port1).not.toBe(port2);
     });
   });
 });

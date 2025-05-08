@@ -9,7 +9,7 @@ export class RedisContainer extends GenericContainer {
   private persistenceVolume? = "";
   private initialImportScriptFile? = "";
 
-  constructor(image = "redis:7.2") {
+  constructor(image: string) {
     super(image);
     this.withExposedPorts(REDIS_PORT)
       .withStartupTimeout(120_000)

@@ -1,10 +1,12 @@
 import amqp from "amqplib";
 import { RabbitMQContainer } from "./rabbitmq-container";
 
+const IMAGE = "rabbitmq:3.12.11-management-alpine";
+
 describe("RabbitMQContainer", { timeout: 240_000 }, () => {
   // start {
   it("should start, connect and close", async () => {
-    const rabbitMQContainer = await new RabbitMQContainer().start();
+    const rabbitMQContainer = await new RabbitMQContainer(IMAGE).start();
 
     const connection = await amqp.connect(rabbitMQContainer.getAmqpUrl());
     await connection.close();
@@ -18,7 +20,7 @@ describe("RabbitMQContainer", { timeout: 240_000 }, () => {
     const USER = "user";
     const PASSWORD = "password";
 
-    const rabbitMQContainer = await new RabbitMQContainer()
+    const rabbitMQContainer = await new RabbitMQContainer(IMAGE)
       .withEnvironment({
         RABBITMQ_DEFAULT_USER: USER,
         RABBITMQ_DEFAULT_PASS: PASSWORD,
@@ -42,7 +44,7 @@ describe("RabbitMQContainer", { timeout: 240_000 }, () => {
     const QUEUE = "test";
     const PAYLOAD = "Hello World";
 
-    const rabbitMQContainer = await new RabbitMQContainer().start();
+    const rabbitMQContainer = await new RabbitMQContainer(IMAGE).start();
     const connection = await amqp.connect(rabbitMQContainer.getAmqpUrl());
 
     const channel = await connection.createChannel();

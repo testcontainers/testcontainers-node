@@ -5,7 +5,7 @@ const USERNAME = "root";
 
 export class ArangoDBContainer extends GenericContainer {
   constructor(
-    image = "arangodb:3.10.0",
+    image: string,
     private password = "test"
   ) {
     super(image);

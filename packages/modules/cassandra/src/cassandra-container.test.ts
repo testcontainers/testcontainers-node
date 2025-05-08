@@ -1,10 +1,12 @@
 import { Client } from "cassandra-driver";
 import { CassandraContainer } from "./cassandra-container";
 
+const IMAGE = "cassandra:5.0.2";
+
 describe("Cassandra", { timeout: 240_000 }, () => {
   // connectWithDefaultCredentials {
   it("should connect and execute a query with default credentials", async () => {
-    const container = await new CassandraContainer("cassandra:5.0.2").start();
+    const container = await new CassandraContainer(IMAGE).start();
 
     const client = new Client({
       contactPoints: [container.getContactPoint()],
@@ -27,7 +29,7 @@ describe("Cassandra", { timeout: 240_000 }, () => {
     const username = "testUser";
     const password = "testPassword";
 
-    const container = await new CassandraContainer().withUsername(username).withPassword(password).start();
+    const container = await new CassandraContainer(IMAGE).withUsername(username).withPassword(password).start();
 
     const client = new Client({
       contactPoints: [container.getContactPoint()],
@@ -50,7 +52,7 @@ describe("Cassandra", { timeout: 240_000 }, () => {
   it("should set datacenter and rack", async () => {
     const customDataCenter = "customDC";
     const customRack = "customRack";
-    const container = await new CassandraContainer().withDatacenter(customDataCenter).withRack(customRack).start();
+    const container = await new CassandraContainer(IMAGE).withDatacenter(customDataCenter).withRack(customRack).start();
 
     const client = new Client({
       contactPoints: [container.getContactPoint()],
@@ -69,7 +71,7 @@ describe("Cassandra", { timeout: 240_000 }, () => {
 
   // createAndFetchData {
   it("should create keyspace, a table, insert data, and retrieve it", async () => {
-    const container = await new CassandraContainer().start();
+    const container = await new CassandraContainer(IMAGE).start();
 
     const client = new Client({
       contactPoints: [container.getContactPoint()],
@@ -109,7 +111,7 @@ describe("Cassandra", { timeout: 240_000 }, () => {
   // }
 
   it("should work with restarted container", async () => {
-    const container = await new CassandraContainer("cassandra:5.0.2").start();
+    const container = await new CassandraContainer(IMAGE).start();
     await container.restart();
 
     const client = new Client({

@@ -4,9 +4,11 @@ import path from "path";
 import { createClient } from "redis";
 import { StartedValkeyContainer, ValkeyContainer } from "./valkey-container";
 
+const IMAGE = "valkey/valkey:8.0";
+
 describe("ValkeyContainer", { timeout: 240_000 }, () => {
   it("should connect and execute set-get", async () => {
-    const container = await new ValkeyContainer().start();
+    const container = await new ValkeyContainer(IMAGE).start();
 
     const client = await connectTo(container);
 
@@ -18,7 +20,7 @@ describe("ValkeyContainer", { timeout: 240_000 }, () => {
   });
 
   it("should connect with password and execute set-get", async () => {
-    const container = await new ValkeyContainer().withPassword("test").start();
+    const container = await new ValkeyContainer(IMAGE).withPassword("test").start();
 
     const client = await connectTo(container);
 
@@ -31,7 +33,7 @@ describe("ValkeyContainer", { timeout: 240_000 }, () => {
 
   it("should reconnect with volume and persistence data", async () => {
     const sourcePath = fs.mkdtempSync(path.join(os.tmpdir(), "valkey-"));
-    const container = await new ValkeyContainer().withPassword("test").withPersistence(sourcePath).start();
+    const container = await new ValkeyContainer(IMAGE).withPassword("test").withPersistence(sourcePath).start();
     let client = await connectTo(container);
 
     await client.set("key", "val");
@@ -51,7 +53,7 @@ describe("ValkeyContainer", { timeout: 240_000 }, () => {
   });
 
   it("should load initial data and can read it", async () => {
-    const container = await new ValkeyContainer()
+    const container = await new ValkeyContainer(IMAGE)
       .withPassword("test")
       .withInitialData(path.join(__dirname, "initData.valkey"))
       .start();
@@ -70,7 +72,7 @@ describe("ValkeyContainer", { timeout: 240_000 }, () => {
   it("should start with credentials and login", async () => {
     const password = "testPassword";
 
-    const container = await new ValkeyContainer().withPassword(password).start();
+    const container = await new ValkeyContainer(IMAGE).withPassword(password).start();
     expect(container.getConnectionUrl()).toEqual(`redis://:${password}@${container.getHost()}:${container.getPort()}`);
 
     const client = await connectTo(container);
@@ -83,7 +85,7 @@ describe("ValkeyContainer", { timeout: 240_000 }, () => {
   });
 
   it("should execute container cmd and return the result", async () => {
-    const container = await new ValkeyContainer().start();
+    const container = await new ValkeyContainer(IMAGE).start();
 
     const queryResult = await container.executeCliCmd("info", ["clients"]);
     expect(queryResult).toEqual(expect.stringContaining("connected_clients:1"));
