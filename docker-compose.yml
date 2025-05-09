@@ -1,5 +1,3 @@
-version: "3.7"
-
 services:
   docs:
     image: python:3.8
