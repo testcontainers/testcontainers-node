@@ -36,10 +36,9 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get -y install podman
-          systemctl enable --now --user podman podman.socket
+          sudo systemctl enable --now podman.socket
           podman info
           echo "DOCKER_HOST=unix://${XDG_RUNTIME_DIR}/podman/podman.sock" >> $GITHUB_ENV
-          echo "CI_ROOTLESS=true" >> $GITHUB_ENV
           echo "CI_PODMAN=true" >> $GITHUB_ENV
 
       - name: Colima constraints
