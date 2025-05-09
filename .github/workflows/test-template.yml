@@ -38,7 +38,7 @@ jobs:
           sudo apt-get -y install podman
           sudo systemctl enable --now podman.socket
           podman info
-          echo "DOCKER_HOST=unix://$(podman info --format '{{.Host.RemoteSocket.Path}}') >> $GITHUB_ENV
+          echo "DOCKER_HOST=unix://$(podman info --format '{{.Host.RemoteSocket.Path}}')" >> $GITHUB_ENV
           echo "CI_PODMAN=true" >> $GITHUB_ENV
 
       - name: Colima constraints
