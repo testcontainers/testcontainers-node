@@ -25,11 +25,6 @@ export type ContainerRuntimeInfo = {
   labels: string[];
 };
 
-export type ComposeInfo =
-  | {
-      version: string;
-      compatability: "v1" | "v2";
-    }
-  | undefined;
+export type ComposeInfo = string;
 
 export type HostIp = { address: string; family: number };

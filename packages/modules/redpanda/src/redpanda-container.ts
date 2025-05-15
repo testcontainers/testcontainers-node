@@ -23,7 +23,7 @@ const WAIT_FOR_SCRIPT_MESSAGE = "Waiting for script...";
 export class RedpandaContainer extends GenericContainer {
   private originalWaitinStrategy: WaitStrategy;
 
-  constructor(image = "docker.redpanda.com/redpandadata/redpanda:v23.3.10") {
+  constructor(image: string) {
     super(image);
     this.withExposedPorts(REDPANDA_PORT, REDPANDA_ADMIN_PORT, SCHEMA_REGISTRY_PORT, REST_PROXY_PORT)
       .withUser("root:root")

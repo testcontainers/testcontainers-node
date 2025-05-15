@@ -1,10 +1,12 @@
 import { Datastore } from "@google-cloud/datastore";
 import { DatastoreEmulatorContainer, StartedDatastoreEmulatorContainer } from "./datastore-emulator-container";
 
+const IMAGE = "gcr.io/google.com/cloudsdktool/cloud-sdk:517.0.0-emulators";
+
 describe("DatastoreEmulatorContainer", { timeout: 240_000 }, () => {
   // datastore4 {
   it("should work using default version", async () => {
-    const datastoreEmulatorContainer = await new DatastoreEmulatorContainer().start();
+    const datastoreEmulatorContainer = await new DatastoreEmulatorContainer(IMAGE).start();
 
     await checkDatastore(datastoreEmulatorContainer);
 

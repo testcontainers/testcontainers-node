@@ -66,24 +66,53 @@ jobs:
         uses: ./.github/actions/npm-setup
         with:
           runner: ubuntu-22.04
-          node-version: 22.x
+          node-version: 24.x
           workspace: "${{ matrix.module }}"
       - name: Code linting
         env:
           WORKSPACE_PATH: ${{ steps.npm-install.outputs.workspace_path }}
         run: npm run lint:ci
 
+  compile:
+    if: ${{ needs.detect-modules.outputs.modules_count > 0 }}
+    name: Compile
+    needs:
+      - detect-modules
+      - lint
+    strategy:
+      fail-fast: false
+      matrix:
+        module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Code checkout
+        uses: actions/checkout@v4
+      - name: Install Node and Dependencies
+        id: npm-install
+        uses: ./.github/actions/npm-setup
+        with:
+          runner: ubuntu-22.04
+          node-version: 24.x
+          workspace: "${{ matrix.module }}"
+      - name: Compile
+        run: |
+          npm run build --ignore-scripts --workspace packages/testcontainers -- --project tsconfig.json
+          if [ "${{ matrix.module }}" != "testcontainers" ]; then
+            npm run build --ignore-scripts --workspace ${{ steps.npm-install.outputs.workspace_path }} -- --project tsconfig.json --noEmit
+          fi
+
   smoke-test:
     if: ${{ needs.detect-modules.outputs.modules_count > 0 }}
     needs:
       - detect-modules
       - lint
+      - compile
     name: Smoke tests
     strategy:
       fail-fast: true
       matrix:
         runner: [ubuntu-22.04]
-        node-version: [18.x, 20.x, 22.x]
+        node-version: [20.x, 22.x, 24.x]
     runs-on: ${{ matrix.runner }}
     steps:
       - name: Code checkout
@@ -111,12 +140,13 @@ jobs:
     needs:
       - detect-modules
       - lint
+      - compile
       - smoke-test
     strategy:
       fail-fast: false
       matrix:
         module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
-        node-version: [18.x, 20.x, 22.x]
+        node-version: [20.x, 22.x, 24.x]
     uses: ./.github/workflows/test-template.yml
     with:
       runner: ubuntu-22.04
@@ -130,13 +160,14 @@ jobs:
     needs:
       - detect-modules
       - lint
+      - compile
       - smoke-test
       - test
     strategy:
       fail-fast: false
       matrix:
         module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
-        node-version: [18.x, 20.x, 22.x]
+        node-version: [20.x, 22.x, 24.x]
     uses: ./.github/workflows/test-template.yml
     with:
       runner: ubuntu-22.04
@@ -150,6 +181,7 @@ jobs:
     needs:
       - detect-modules
       - lint
+      - compile
       - smoke-test
       - test
       - test-podman

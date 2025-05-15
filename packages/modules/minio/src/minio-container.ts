@@ -7,7 +7,7 @@ export class MinioContainer extends GenericContainer {
   private username = "minioadmin";
   private password = "minioadmin";
 
-  constructor(image = "minio/minio:RELEASE.2024-12-13T22-19-12Z") {
+  constructor(image: string) {
     super(image);
     this.withExposedPorts(MINIO_PORT, MINIO_UI_PORT);
     this.withWaitStrategy(Wait.forAll([Wait.forHttp("/minio/health/live", MINIO_PORT)]));
