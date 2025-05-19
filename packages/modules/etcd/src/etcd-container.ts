@@ -6,23 +6,24 @@ const ETCD_PEER_PORT = 2380;
 export class EtcdContainer extends GenericContainer {
   constructor(image = "quay.io/coreos/etcd:v3.6.0", nodeName = "etcd-test") {
     super(image);
-    this.withExposedPorts(ETCD_CLIENT_PORT, ETCD_PEER_PORT).withCommand([
-      "etcd",
-      "--name",
-      nodeName,
-      "--initial-advertise-peer-urls",
-      `http://0.0.0.0:${ETCD_PEER_PORT}`,
-      "--advertise-client-urls",
-      `http://0.0.0.0:${ETCD_CLIENT_PORT}`,
-      "--listen-peer-urls",
-      `http://0.0.0.0:${ETCD_PEER_PORT}`,
-      "--listen-client-urls",
-      `http://0.0.0.0:${ETCD_CLIENT_PORT}`,
-    ]);
+    this.withExposedPorts(ETCD_CLIENT_PORT, ETCD_PEER_PORT)
+      .withCommand([
+        "etcd",
+        "--name",
+        nodeName,
+        "--initial-advertise-peer-urls",
+        `http://0.0.0.0:${ETCD_PEER_PORT}`,
+        "--advertise-client-urls",
+        `http://0.0.0.0:${ETCD_CLIENT_PORT}`,
+        "--listen-peer-urls",
+        `http://0.0.0.0:${ETCD_PEER_PORT}`,
+        "--listen-client-urls",
+        `http://0.0.0.0:${ETCD_CLIENT_PORT}`,
+      ])
+      .withWaitStrategy(Wait.forLogMessage(/"status":"SERVING"/));
   }
 
   public override async start(): Promise<StartedEtcdContainer> {
-    this.withWaitStrategy(Wait.forLogMessage(/"status":"SERVING"/));
     return new StartedEtcdContainer(await super.start());
   }
 }
