@@ -104,7 +104,9 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
 
   // startWithRedisStack {
   it("should start with redis-stack-server and json module", async () => {
-    const container = await new RedisContainer("redis/redis-stack-server:latest").withPassword("testPassword").start();
+    const container = await new RedisContainer("redis/redis-stack-server:7.4.0-v4")
+      .withPassword("testPassword")
+      .start();
     const client = await connectTo(container);
 
     await client.json.set("key", "$", { name: "test" });
