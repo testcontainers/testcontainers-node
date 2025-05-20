@@ -102,6 +102,7 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
   });
   // }
 
+  // startWithRedisStack {
   it("should start with redis-stack-server and json module", async () => {
     const container = await new RedisContainer("redis/redis-stack-server:latest").withPassword("testPassword").start();
     const client = await connectTo(container);
@@ -113,6 +114,7 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
     await client.disconnect();
     await container.stop();
   });
+  // }
 
   // simpleConnect {
   async function connectTo(container: StartedRedisContainer) {
