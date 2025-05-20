@@ -38,11 +38,10 @@ export class RedisContainer extends GenericContainer {
     }
   }
 
-  public override async start(options?: string[]): Promise<StartedRedisContainer> {
+  public override async start(): Promise<StartedRedisContainer> {
     const redisArgs = [
       ...(this.password ? [`--requirepass ${this.password}`] : []),
       ...(this.persistenceVolume ? ["--save 1 1 ", "--appendonly yes"] : []),
-      ...(options ?? []),
     ];
     if (this.imageName.image.includes("redis-stack")) {
       this.withEnvironment({
