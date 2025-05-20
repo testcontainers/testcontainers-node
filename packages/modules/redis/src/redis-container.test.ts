@@ -1,7 +1,7 @@
 import fs from "fs";
 import os from "os";
 import path from "path";
-import { createClient, RedisClientOptions } from "redis";
+import { createClient } from "redis";
 import { RedisContainer, StartedRedisContainer } from "./redis-container";
 
 describe("RedisContainer", { timeout: 240_000 }, () => {
@@ -103,11 +103,8 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
   // }
 
   it("should start with redis-stack-server and json module", async () => {
-    const password = "testPassword";
-    const container = await new RedisContainer("redis/redis-stack-server:latest").withPassword(password).start();
-    const client = await connectTo(container, {
-      password,
-    });
+    const container = await new RedisContainer("redis/redis-stack-server:latest").withPassword("testPassword").start();
+    const client = await connectTo(container);
 
     await client.json.set("key", "$", JSON.stringify({ name: "test" }));
     const result = await client.json.get("key");
@@ -118,10 +115,9 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
   });
 
   // simpleConnect {
-  async function connectTo(container: StartedRedisContainer, options?: Partial<RedisClientOptions>) {
+  async function connectTo(container: StartedRedisContainer) {
     const client = createClient({
       url: container.getConnectionUrl(),
-      ...options,
     });
     await client.connect();
     expect(client.isOpen).toBeTruthy();

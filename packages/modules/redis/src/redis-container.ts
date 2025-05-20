@@ -38,12 +38,19 @@ export class RedisContainer extends GenericContainer {
     }
   }
 
-  public override async start(): Promise<StartedRedisContainer> {
-    this.withCommand([
-      "redis-server",
-      ...(this.password ? [`--requirepass "${this.password}"`] : []),
+  public override async start(options?: string[]): Promise<StartedRedisContainer> {
+    const redisArgs = [
+      ...(this.password ? [`--requirepass ${this.password}`] : []),
       ...(this.persistenceVolume ? ["--save 1 1 ", "--appendonly yes"] : []),
-    ]);
+      ...(options ?? []),
+    ];
+    if (this.imageName.image.includes("redis-stack")) {
+      this.withEnvironment({
+        REDIS_ARGS: redisArgs.join(" "),
+      }).withEntrypoint(["/entrypoint.sh"]);
+    } else {
+      this.withCommand(["redis-server", ...redisArgs]);
+    }
     if (this.persistenceVolume) {
       this.withBindMounts([{ mode: "rw", source: this.persistenceVolume, target: "/data" }]);
     }
