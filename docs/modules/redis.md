@@ -36,7 +36,7 @@ npm install @testcontainers/redis --save-dev
 
 <!--codeinclude-->
 
-[Define volume for persistent/predefined data:](../../packages/modules/redis/src/redis-container.test.ts) inside_block:startWithRedisStack
+[Start container with redis/redis-stack-server image:](../../packages/modules/redis/src/redis-container.test.ts) inside_block:startWithRedisStack
 
 <!--/codeinclude-->
 
