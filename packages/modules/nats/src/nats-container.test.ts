@@ -19,6 +19,20 @@ describe("NatsContainer", { timeout: 180_000 }, () => {
   });
   // }
 
+  it("should start, connect and close using scratch image", async () => {
+    const container = await new NatsContainer("nats:2.11").start();
+
+    // establish connection
+    const nc = await connect(container.getConnectionOptions());
+    // close the connection
+    await nc.close();
+    // check if the close was OK
+    const err = await nc.closed();
+    expect(err).toBe(undefined);
+
+    await container.stop();
+  });
+
   // pubsub {
   it("should subscribe and receive one published message", async () => {
     const SUBJECT = "HELLO";
@@ -26,18 +40,20 @@ describe("NatsContainer", { timeout: 180_000 }, () => {
 
     const container = await new NatsContainer().start();
     const nc = await connect(container.getConnectionOptions());
+    const TE = new TextEncoder();
+    const TD = new TextDecoder();
 
     //----------------
     const sub = nc.subscribe(SUBJECT);
     (async () => {
       for await (const m of sub) {
-        const actual: string = m.string();
+        const actual = TD.decode(m.data);
         expect(actual).toEqual(PAYLOAD);
       }
     })().then();
 
     //----------------
-    nc.publish(SUBJECT, PAYLOAD);
+    nc.publish(SUBJECT, TE.encode(PAYLOAD));
 
     //----------------
     await nc.drain();
