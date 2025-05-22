@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/valkey",
-  "version": "10.26.0",
+  "version": "10.27.0",
   "license": "MIT",
   "keywords": [
     "valkey",
@@ -33,6 +33,6 @@
     "redis": "^5.0.1"
   },
   "dependencies": {
-    "testcontainers": "^10.26.0"
+    "testcontainers": "^10.27.0"
   }
 }

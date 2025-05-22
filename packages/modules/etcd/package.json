@@ -1,19 +1,19 @@
 {
-  "name": "@testcontainers/postgresql",
+  "name": "@testcontainers/etcd",
   "version": "10.27.0",
   "license": "MIT",
   "keywords": [
-    "postgres",
-    "postgresql",
+    "etcd",
+    "etcd3",
     "testing",
     "docker",
     "testcontainers"
   ],
-  "description": "PostgreSQL module for Testcontainers",
+  "description": "Etcd module for Testcontainers",
   "homepage": "https://github.com/testcontainers/testcontainers-node#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/testcontainers/testcontainers-node.git"
+    "url": "https://github.com/testcontainers/testcontainers-node"
   },
   "bugs": {
     "url": "https://github.com/testcontainers/testcontainers-node/issues"
@@ -30,8 +30,7 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "@types/pg": "^8.15.0",
-    "pg": "^8.15.6"
+    "etcd3": "^1.1.2"
   },
   "dependencies": {
     "testcontainers": "^10.27.0"
