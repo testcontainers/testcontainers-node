@@ -2,7 +2,7 @@ import { AbstractStartedContainer, StartedTestContainer } from "testcontainers";
 import { AbstractGcloudEmulator } from "./abstract-gcloud-emulator";
 
 const EMULATOR_PORT = 8080;
-const DEFAULT_IMAGE = "gcr.io/google.com/cloudsdktool/cloud-sdk";
+const DEFAULT_IMAGE = "gcr.io/google.com/cloudsdktool/cloud-sdk:517.0.0-emulators";
 
 export class DatastoreEmulatorContainer extends AbstractGcloudEmulator {
   constructor(image = DEFAULT_IMAGE) {
