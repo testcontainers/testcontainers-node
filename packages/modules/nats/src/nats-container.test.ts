@@ -1,4 +1,5 @@
-import { connect, StringCodec } from "nats";
+import { jetstreamManager } from "@nats-io/jetstream";
+import { connect } from "@nats-io/transport-node";
 import { NatsContainer } from "./nats-container";
 
 describe("NatsContainer", { timeout: 180_000 }, () => {
@@ -25,19 +26,18 @@ describe("NatsContainer", { timeout: 180_000 }, () => {
 
     const container = await new NatsContainer().start();
     const nc = await connect(container.getConnectionOptions());
-    const sc = StringCodec();
 
     //----------------
     const sub = nc.subscribe(SUBJECT);
     (async () => {
       for await (const m of sub) {
-        const actual: string = sc.decode(m.data);
+        const actual: string = m.string();
         expect(actual).toEqual(PAYLOAD);
       }
     })().then();
 
     //----------------
-    nc.publish(SUBJECT, sc.encode(PAYLOAD));
+    nc.publish(SUBJECT, PAYLOAD);
 
     //----------------
     await nc.drain();
@@ -73,7 +73,7 @@ describe("NatsContainer", { timeout: 180_000 }, () => {
     const nc = await connect(container.getConnectionOptions());
 
     // ensure JetStream is enabled, otherwise this will throw an error
-    await nc.jetstream().jetstreamManager();
+    await jetstreamManager(nc);
 
     // close the connection
     await nc.close();
@@ -90,7 +90,7 @@ describe("NatsContainer", { timeout: 180_000 }, () => {
     const nc = await connect(container.getConnectionOptions());
 
     // ensure JetStream is not enabled, as this will throw an error
-    await expect(nc.jetstream().jetstreamManager()).rejects.toThrow("503");
+    await expect(jetstreamManager(nc)).rejects.toThrow("jetstream is not enabled");
 
     // close the connection
     await nc.close();
