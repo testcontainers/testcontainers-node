@@ -16,7 +16,7 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
     await client.set("key", "val");
     expect(await client.get("key")).toBe("val");
 
-    await client.disconnect();
+    client.destroy();
     await container.stop();
   });
   // }
@@ -29,7 +29,7 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
     await client.set("key", "val");
     expect(await client.get("key")).toBe("val");
 
-    await client.disconnect();
+    client.destroy();
     await container.stop();
   });
 
@@ -40,12 +40,12 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
     let client = await connectTo(container);
 
     await client.set("key", "val");
-    await client.disconnect();
+    client.destroy();
     await container.restart();
     client = await connectTo(container);
     expect(await client.get("key")).toBe("val");
 
-    await client.disconnect();
+    client.destroy();
     await container.stop();
     try {
       fs.rmSync(sourcePath, { force: true, recursive: true });
@@ -70,7 +70,7 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
     };
     expect(await client.get("user:002")).toBe(JSON.stringify(user));
 
-    await client.disconnect();
+    client.destroy();
     await container.stop();
   });
   // }
@@ -88,7 +88,7 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
     await client.set("key", "val");
     expect(await client.get("key")).toBe("val");
 
-    await client.disconnect();
+    client.destroy();
     await container.stop();
   });
   // }
@@ -113,9 +113,9 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
 
     await client.json.set("key", "$", { name: "test" });
     const result = await client.json.get("key");
-    expect(result).toEqual({ name: "test" });
+    expect(result).toEqual(JSON.stringify({ name: "test" }));
 
-    await client.disconnect();
+    client.destroy();
     await container.stop();
   });
   // }
