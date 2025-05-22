@@ -28,10 +28,9 @@
     "prepack": "shx cp ../../../README.md . && shx cp ../../../LICENSE .",
     "build": "tsc --project tsconfig.build.json"
   },
-  "devDependencies": {
-    "nats": "^2.28.0"
-  },
   "dependencies": {
+    "@nats-io/jetstream": "^3.0.2",
+    "@nats-io/transport-node": "^3.0.2",
     "testcontainers": "^10.27.0"
   }
 }
