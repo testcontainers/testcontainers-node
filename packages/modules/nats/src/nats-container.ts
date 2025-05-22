@@ -11,7 +11,7 @@ export class NatsContainer extends GenericContainer {
   private args = new Set<string>();
   private values = new Map<string, string | undefined>();
 
-  constructor(image = "nats:2.11.3-alpine") {
+  constructor(image = "nats:2.8.4-alpine") {
     super(image);
 
     this.withUsername("test");
