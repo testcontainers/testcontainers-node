@@ -68,8 +68,8 @@ export class DockerComposeEnvironment {
     return this;
   }
 
-  public withStartupTimeout(ms: number): this {
-    this.startupTimeoutMs = ms;
+  public withStartupTimeout(startupTimeoutMs: number): this {
+    this.startupTimeoutMs = startupTimeoutMs;
     return this;
   }
 

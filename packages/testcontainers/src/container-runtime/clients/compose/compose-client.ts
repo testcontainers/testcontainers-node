@@ -1,5 +1,6 @@
 import { default as dockerComposeV1, default as v1, v2 as dockerComposeV2, v2 } from "docker-compose";
-import { log, Ms, pullLog } from "../../../common";
+import { log, pullLog } from "../../../common";
+import { toSeconds } from "../../../common/time";
 import { ComposeInfo } from "../types";
 import { defaultComposeOptions } from "./default-compose-options";
 import { ComposeDownOptions, ComposeOptions } from "./types";
@@ -222,7 +223,7 @@ function composeDownCommandOptions(options: ComposeDownOptions): string[] {
     result.push("-v");
   }
   if (options.timeout) {
-    result.push("-t", `${new Ms(options.timeout).seconds()}`);
+    result.push("-t", `${toSeconds(options.timeout)}`);
   }
   return result;
 }

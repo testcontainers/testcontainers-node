@@ -2,7 +2,7 @@ import archiver from "archiver";
 import AsyncLock from "async-lock";
 import { Container, ContainerCreateOptions, HostConfig } from "dockerode";
 import { Readable } from "stream";
-import { containerLog, hash, log, Ms } from "../common";
+import { containerLog, hash, log, toNanos } from "../common";
 import { ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "../container-runtime";
 import { CONTAINER_STATUSES } from "../container-runtime/clients/container/types";
 import { StartedNetwork } from "../network/network";
@@ -398,17 +398,17 @@ export class GenericContainer implements TestContainer {
     this.healthCheck = healthCheck;
     this.createOpts.Healthcheck = {
       Test: healthCheck.test,
-      Interval: healthCheck.interval ? new Ms(healthCheck.interval).nanos() : 0,
-      Timeout: healthCheck.timeout ? new Ms(healthCheck.timeout).nanos() : 0,
+      Interval: healthCheck.interval ? toNanos(healthCheck.interval) : 0,
+      Timeout: healthCheck.timeout ? toNanos(healthCheck.timeout) : 0,
       Retries: healthCheck.retries ?? 0,
-      StartPeriod: healthCheck.startPeriod ? new Ms(healthCheck.startPeriod).nanos() : 0,
+      StartPeriod: healthCheck.startPeriod ? toNanos(healthCheck.startPeriod) : 0,
     };
 
     return this;
   }
 
-  public withStartupTimeout(ms: number): this {
-    this.startupTimeoutMs = ms;
+  public withStartupTimeout(startupTimeoutMs: number): this {
+    this.startupTimeoutMs = startupTimeoutMs;
     return this;
   }
 

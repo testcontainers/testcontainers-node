@@ -56,8 +56,8 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
     return this;
   }
 
-  public withReadTimeout(ms: number): this {
-    this.readTimeoutMs = ms;
+  public withReadTimeout(startupTimeoutMs: number): this {
+    this.readTimeoutMs = startupTimeoutMs;
     return this;
   }
 
