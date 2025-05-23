@@ -8,7 +8,7 @@ export class MySqlContainer extends GenericContainer {
   private userPassword = "test";
   private rootPassword = "test";
 
-  constructor(image = "mysql:8.0.31") {
+  constructor(image: string) {
     super(image);
     this.withExposedPorts(MYSQL_PORT).withStartupTimeout(120_000);
   }

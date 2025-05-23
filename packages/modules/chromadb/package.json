@@ -29,8 +29,8 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "chromadb": "^1.9.1",
-    "ollama": "^0.5.14"
+    "chromadb": "^2.4.3",
+    "ollama": "^0.5.15"
   },
   "dependencies": {
     "testcontainers": "^10.28.0"

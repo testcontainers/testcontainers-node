@@ -4,7 +4,7 @@ const ETCD_CLIENT_PORT = 2379;
 const ETCD_PEER_PORT = 2380;
 
 export class EtcdContainer extends GenericContainer {
-  constructor(image = "quay.io/coreos/etcd:v3.6.0", nodeName = "etcd-test") {
+  constructor(image: string, nodeName = "etcd-test") {
     super(image);
     this.withExposedPorts(ETCD_CLIENT_PORT, ETCD_PEER_PORT)
       .withCommand([

@@ -2,10 +2,12 @@ import { Environment } from "testcontainers/src/types";
 import weaviate from "weaviate-ts-client";
 import { WeaviateContainer } from "./weaviate-container";
 
+const IMAGE = "semitechnologies/weaviate:1.24.5";
+
 describe("WeaviateContainer", { timeout: 100_000 }, () => {
   // connectWeaviate {
   it("should expose ports", async () => {
-    const container = await new WeaviateContainer().start();
+    const container = await new WeaviateContainer(IMAGE).start();
 
     expect(container.getHttpHostAddress()).toBeDefined();
     expect(container.getGrpcHostAddress()).toBeDefined();
@@ -16,7 +18,7 @@ describe("WeaviateContainer", { timeout: 100_000 }, () => {
 
   // connectWeaviateWithClient {
   it("should connect to Weaviate", async () => {
-    const container = await new WeaviateContainer().start();
+    const container = await new WeaviateContainer(IMAGE).start();
 
     const client = weaviate.client({
       scheme: "http",
@@ -43,7 +45,7 @@ describe("WeaviateContainer", { timeout: 100_000 }, () => {
       ENABLE_MODULES: enableModules.join(","),
       BACKUP_FILESYSTEM_PATH: "/tmp/backups",
     };
-    const container = await new WeaviateContainer().withEnvironment(environment).start();
+    const container = await new WeaviateContainer(IMAGE).withEnvironment(environment).start();
 
     const client = weaviate.client({
       scheme: "http",

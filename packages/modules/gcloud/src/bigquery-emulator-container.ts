@@ -1,12 +1,11 @@
 import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 
 const EMULATOR_PORT = 9050;
-const DEFAULT_IMAGE = "ghcr.io/goccy/bigquery-emulator";
 
 export class BigQueryEmulatorContainer extends GenericContainer {
   private _projectId?: string;
 
-  constructor(image = DEFAULT_IMAGE) {
+  constructor(image: string) {
     super(image);
     this.withExposedPorts(EMULATOR_PORT).withWaitStrategy(Wait.forListeningPorts()).withStartupTimeout(120_000);
   }

@@ -2,12 +2,11 @@ import { AbstractStartedContainer, StartedTestContainer, Wait } from "testcontai
 import { AbstractGcloudEmulator } from "./abstract-gcloud-emulator";
 
 const EMULATOR_PORT = 8085;
-const DEFAULT_IMAGE = "gcr.io/google.com/cloudsdktool/google-cloud-cli";
 
 export class PubSubEmulatorContainer extends AbstractGcloudEmulator {
   private projectId?: string;
 
-  constructor(image = DEFAULT_IMAGE) {
+  constructor(image: string) {
     super(image, EMULATOR_PORT, "gcloud beta emulators pubsub start");
     this.withWaitStrategy(Wait.forLogMessage(/Server started/g));
   }

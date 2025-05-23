@@ -1,10 +1,8 @@
 {
   "compilerOptions": {
     "incremental": true,
-    "lib": [
-      "ES2022"
-    ],
-    "target": "es2022",
+    "lib": ["ES2023"],
+    "target": "ES2023",
     "types": [
       "vitest/globals"
     ],
