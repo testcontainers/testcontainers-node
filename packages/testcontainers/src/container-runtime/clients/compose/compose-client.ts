@@ -1,6 +1,5 @@
 import { default as dockerComposeV1, default as v1, v2 as dockerComposeV2, v2 } from "docker-compose";
-import { log, pullLog } from "../../../common";
-import { toSeconds } from "../../../common/time";
+import { log, pullLog, toSeconds } from "../../../common";
 import { ComposeInfo } from "../types";
 import { defaultComposeOptions } from "./default-compose-options";
 import { ComposeDownOptions, ComposeOptions } from "./types";
