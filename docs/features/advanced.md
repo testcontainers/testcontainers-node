@@ -39,4 +39,4 @@ const environment = await containerRuntimeClient.compose.up({ ... })
 
 ```js
 const network = await containerRuntimeClient.network.create({ ... })
-```**
+```
