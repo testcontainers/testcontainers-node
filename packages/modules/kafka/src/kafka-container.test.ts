@@ -148,7 +148,7 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
 
       const kafkaCliContainer = await new GenericContainer(KAFKA_IMAGE)
         .withNetwork(network)
-        .withCommand(["bash", "-c", "echo 'START'; sleep infinity"])
+        .withCommand(["bash", "-c", "sleep infinity"])
         .withCopyFilesToContainer([
           {
             source: path.resolve(certificatesDir, "kafka.client.truststore.pem"),

@@ -132,4 +132,4 @@ If we run the test again, we'll see a lot of debug output:
 [INFO] [936d82e9964e] Stopped container
 ```
 
-These logs are very useful for debugging when a container isn't working as expected. You can see there are logs from the Testcontainers library, as well as logs emitted from all Testcontainers-managed containers.
+These logs are useful for debugging when a container isn't working as expected. You can see there are logs from the Testcontainers library, as well as logs emitted from all Testcontainers-managed containers.

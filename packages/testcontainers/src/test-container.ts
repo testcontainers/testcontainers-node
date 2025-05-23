@@ -47,7 +47,6 @@ export interface TestContainer {
   withCopyDirectoriesToContainer(directoriesToCopy: DirectoryToCopy[]): this;
   withCopyContentToContainer(contentsToCopy: ContentToCopy[]): this;
   withCopyArchivesToContainer(archivesToCopy: ArchiveToCopy[]): this;
-
   withWorkingDir(workingDir: string): this;
   withResourcesQuota(resourcesQuota: ResourcesQuota): this;
   withSharedMemorySize(bytes: number): this;

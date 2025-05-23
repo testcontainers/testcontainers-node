@@ -160,24 +160,35 @@ export class DockerContainerClient implements ContainerClient {
     }
   }
 
-  async logs(container: Container, opts?: ContainerLogsOptions): Promise<Readable> {
-    try {
-      log.debug(`Fetching container logs...`, { containerId: container.id });
-      const stream = (await container.logs({
+  logs(container: Container, opts?: ContainerLogsOptions): Promise<Readable> {
+    log.debug(`Fetching container logs...`, { containerId: container.id });
+
+    const proxyStream = new PassThrough();
+    proxyStream.setEncoding("utf8");
+
+    container
+      .logs({
         follow: true,
         stdout: true,
         stderr: true,
         tail: opts?.tail ?? -1,
         since: opts?.since ?? 0,
-      })) as IncomingMessage;
-      stream.socket.unref();
-      const demuxedStream = this.demuxStream(container.id, stream);
-      log.debug(`Fetched container logs`, { containerId: container.id });
-      return demuxedStream;
-    } catch (err) {
-      log.error(`Failed to fetch container logs: ${err}`, { containerId: container.id });
-      throw err;
-    }
+      })
+      .then(async (stream) => {
+        const actualLogStream = stream as IncomingMessage;
+        actualLogStream.socket?.unref();
+
+        const demuxedStream = await this.demuxStream(container.id, actualLogStream);
+        demuxedStream.pipe(proxyStream);
+        demuxedStream.on("error", (err) => proxyStream.emit("error", err));
+        demuxedStream.on("end", () => proxyStream.end());
+      })
+      .catch((err) => {
+        log.error(`Failed to fetch container logs: ${err}`, { containerId: container.id });
+        proxyStream.end();
+      });
+
+    return Promise.resolve(proxyStream);
   }
 
   async exec(container: Container, command: string[], opts?: Partial<ExecOptions>): Promise<ExecResult> {

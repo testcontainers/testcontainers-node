@@ -16,7 +16,7 @@ import { StoppedGenericContainer } from "./stopped-generic-container";
 
 export class StartedGenericContainer implements StartedTestContainer {
   private stoppedContainer?: StoppedTestContainer;
-  private stopContainerLock = new AsyncLock();
+  private readonly stopContainerLock = new AsyncLock();
 
   constructor(
     private readonly container: Dockerode.Container,

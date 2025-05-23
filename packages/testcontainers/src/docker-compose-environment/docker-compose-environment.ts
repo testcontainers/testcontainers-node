@@ -23,6 +23,7 @@ export class DockerComposeEnvironment {
   private profiles: string[] = [];
   private environment: Environment = {};
   private pullPolicy: ImagePullPolicy = PullPolicy.defaultPolicy();
+  private defaultWaitStrategy: WaitStrategy = Wait.forListeningPorts();
   private waitStrategy: { [containerName: string]: WaitStrategy } = {};
   private startupTimeoutMs?: number;
 
@@ -60,6 +61,11 @@ export class DockerComposeEnvironment {
 
   public withPullPolicy(pullPolicy: ImagePullPolicy): this {
     this.pullPolicy = pullPolicy;
+    return this;
+  }
+
+  public withDefaultWaitStrategy(waitStrategy: WaitStrategy): this {
+    this.defaultWaitStrategy = waitStrategy;
     return this;
   }
 
@@ -140,7 +146,7 @@ export class DockerComposeEnvironment {
           const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, mappedInspectResult);
           const waitStrategy = this.waitStrategy[containerName]
             ? this.waitStrategy[containerName]
-            : Wait.forListeningPorts();
+            : this.defaultWaitStrategy;
           if (this.startupTimeoutMs !== undefined) {
             waitStrategy.withStartupTimeout(this.startupTimeoutMs);
           }

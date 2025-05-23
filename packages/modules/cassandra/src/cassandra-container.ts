@@ -10,7 +10,9 @@ export class CassandraContainer extends GenericContainer {
 
   constructor(image = "cassandra:5.0.2") {
     super(image);
-    this.withExposedPorts(CASSANDRA_PORT).withWaitStrategy(Wait.forHealthCheck()).withStartupTimeout(120_000);
+    this.withExposedPorts(CASSANDRA_PORT)
+      .withWaitStrategy(Wait.forAll([Wait.forHealthCheck(), Wait.forListeningPorts()]))
+      .withStartupTimeout(120_000);
   }
 
   public withDatacenter(dc: string): this {

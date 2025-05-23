@@ -19,7 +19,7 @@ export async function setup() {
     url: `redis://${redisContainer.getHost()}:${redisContainer.getMappedPort(6379)}` 
   });
   
-  await redisClient.connect();
+  await globalThis.redisClient.connect();
 }
 
 export async function teardown() {
