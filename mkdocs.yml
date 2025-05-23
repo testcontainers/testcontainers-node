@@ -61,7 +61,7 @@ nav:
       - HiveMQ: modules/hivemq.md
       - K3s: modules/k3s.md
       - Kafka: modules/kafka.md
-      - Kurrent: modules/kurrent.md
+      - KurrentDB: modules/kurrentdb.md
       - Localstack: modules/localstack.md
       - MariaDB: modules/mariadb.md
       - Mockserver: modules/mockserver.md
