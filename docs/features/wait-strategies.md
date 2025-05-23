@@ -1,12 +1,12 @@
 # Wait Strategies
 
-Note that the startup timeout of all wait strategies is configurable. The unit of timeout of wait strategies is **millisecond**:
+Note that the startup timeout of all wait strategies is configurable:
 
 ```javascript
 const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
-  .withStartupTimeout(120000) // wait 120 seconds
+  .withStartupTimeout(120_000) // 120 seconds
   .start();
 ```
 
@@ -73,7 +73,7 @@ const { GenericContainer, Wait } = require("testcontainers");
 const container = await new GenericContainer("alpine").withWaitStrategy(Wait.forHealthCheck()).start();
 ```
 
-Define your own health check. The unit of timeouts and intervals here is **millisecond**:
+Define your own health check:
 
 ```javascript
 const { GenericContainer, Wait } = require("testcontainers");
@@ -81,10 +81,10 @@ const { GenericContainer, Wait } = require("testcontainers");
 const container = await new GenericContainer("alpine")
   .withHealthCheck({
     test: ["CMD-SHELL", "curl -f http://localhost || exit 1"],
-    interval: 1000,
-    timeout: 3000,
+    interval: 1000, // 1 second
+    timeout: 3000, // 3 seconds
     retries: 5,
-    startPeriod: 1000,
+    startPeriod: 1000, // 1 second
   })
   .withWaitStrategy(Wait.forHealthCheck())
   .start();
@@ -148,7 +148,7 @@ const container = await new GenericContainer("redis")
   .withMethod("POST")
   .withHeaders({ X_CUSTOM_VALUE: "custom" })
   .withBasicCredentials("username", "password")
-  .withReadTimeout(10000)) // timeout after 10 seconds
+  .withReadTimeout(10_000)) // 10 seconds
 ```
 
 ### Use TLS
@@ -186,7 +186,7 @@ This strategy is intended for use with containers that only run briefly and exit
 const { GenericContainer, Wait } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
-  .withWaitStrategy(Wait.forOneShotStartup()))
+  .withWaitStrategy(Wait.forOneShotStartup())
   .start();
 ```
 
@@ -202,11 +202,11 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
-The composite wait strategy by default will respect each individual wait strategy's startup timeout. The unit of timeouts here is **millisecond**. For example:
+The composite wait strategy by default will respect each individual wait strategy's startup timeout. For example:
 
 ```javascript
-const w1 = Wait.forListeningPorts().withStartupTimeout(1000); // wait 1 second
-const w2 = Wait.forLogMessage("READY").withStartupTimeout(2000); // wait 2 seconds
+const w1 = Wait.forListeningPorts().withStartupTimeout(1000); // 1 second
+const w2 = Wait.forLogMessage("READY").withStartupTimeout(2000); // 2 seconds
 
 const composite = Wait.forAll([w1, w2]);
 
@@ -217,21 +217,21 @@ expect(w2.getStartupTimeout()).toBe(2000);
 The startup timeout of inner wait strategies that have not defined their own startup timeout can be set by setting the startup timeout on the composite:
 
 ```javascript
-const w1 = Wait.forListeningPorts().withStartupTimeout(1000); // wait 1 second
+const w1 = Wait.forListeningPorts().withStartupTimeout(1000); // 1 second
 const w2 = Wait.forLogMessage("READY");
 
-const composite = Wait.forAll([w1, w2]).withStartupTimeout(2000); // wait 2 seconds
+const composite = Wait.forAll([w1, w2]).withStartupTimeout(2000); // 2 seconds
 
 expect(w1.getStartupTimeout()).toBe(1000);
 expect(w2.getStartupTimeout()).toBe(2000);
 ```
 
-The startup timeout of all wait strategies can be controlled by setting a deadline on the composite. In this case, the composite will throw unless all inner wait strategies have resolved before the deadline. The unit of deadline timeout is **millisecond**.
+The startup timeout of all wait strategies can be controlled by setting a deadline on the composite. In this case, the composite will throw unless all inner wait strategies have resolved before the deadline.
 
 ```javascript
 const w1 = Wait.forListeningPorts();
 const w2 = Wait.forLogMessage("READY");
-const composite = Wait.forAll([w1, w2]).withDeadline(2000); // wait 2 seconds
+const composite = Wait.forAll([w1, w2]).withDeadline(2000); // 2 seconds
 ```
 
 ## Other startup strategies

@@ -39,10 +39,10 @@ export class CompositeWaitStrategy extends AbstractWaitStrategy {
     });
   }
 
-  public override withStartupTimeout(startupTimeout: number): this {
+  public override withStartupTimeout(startupTimeoutMs: number): this {
     this.waitStrategies
       .filter((waitStrategy) => !waitStrategy.isStartupTimeoutSet())
-      .forEach((waitStrategy) => waitStrategy.withStartupTimeout(startupTimeout));
+      .forEach((waitStrategy) => waitStrategy.withStartupTimeout(startupTimeoutMs));
     return this;
   }
 

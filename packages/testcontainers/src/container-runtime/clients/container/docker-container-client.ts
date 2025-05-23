@@ -9,7 +9,7 @@ import Dockerode, {
 } from "dockerode";
 import { IncomingMessage } from "http";
 import { PassThrough, Readable } from "stream";
-import { execLog, log, streamToString } from "../../../common";
+import { execLog, log, streamToString, toSeconds } from "../../../common";
 import { ContainerClient } from "./container-client";
 import { ContainerCommitOptions, ContainerStatus, ExecOptions, ExecResult } from "./types";
 
@@ -120,8 +120,7 @@ export class DockerContainerClient implements ContainerClient {
 
   async inspect(container: Dockerode.Container): Promise<ContainerInspectInfo> {
     try {
-      const inspectInfo = await container.inspect();
-      return inspectInfo;
+      return await container.inspect();
     } catch (err) {
       log.error(`Failed to inspect container: ${err}`, { containerId: container.id });
       throw err;
@@ -131,7 +130,7 @@ export class DockerContainerClient implements ContainerClient {
   async stop(container: Container, opts?: { timeout: number }): Promise<void> {
     try {
       log.debug(`Stopping container...`, { containerId: container.id });
-      await container.stop({ t: opts?.timeout });
+      await container.stop({ t: toSeconds(opts?.timeout ?? 0) });
       log.debug(`Stopped container`, { containerId: container.id });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
@@ -267,7 +266,7 @@ export class DockerContainerClient implements ContainerClient {
   async restart(container: Container, opts?: { timeout: number }): Promise<void> {
     try {
       log.debug(`Restarting container...`, { containerId: container.id });
-      await container.restart({ t: opts?.timeout });
+      await container.restart({ t: toSeconds(opts?.timeout ?? 0) });
       log.debug(`Restarted container`, { containerId: container.id });
     } catch (err) {
       log.error(`Failed to restart container: ${err}`, { containerId: container.id });
