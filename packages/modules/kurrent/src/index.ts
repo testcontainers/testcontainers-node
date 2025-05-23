@@ -1,1 +1,1 @@
-export { StartedKurrentContainer, KurrentContainer } from "./kurrent-container";
+export { KurrentContainer, StartedKurrentContainer } from "./kurrent-container";
