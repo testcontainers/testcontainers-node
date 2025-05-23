@@ -6,18 +6,16 @@ export class StartedKurrentContainer extends AbstractStartedContainer {
   }
 }
 
-const EVENT_STORE_DB_PORT = 2113;
-
 export class KurrentContainer extends GenericContainer {
-  constructor(image = "eventstore/eventstore:24.10") {
+  constructor(image = "kurrentplatform/kurrentdb:25.0") {
     super(image);
 
-    this.withExposedPorts(EVENT_STORE_DB_PORT)
+    this.withExposedPorts(2113)
       .withEnvironment({
-        EVENTSTORE_CLUSTER_SIZE: "1",
-        EVENTSTORE_RUN_PROJECTIONS: "All",
-        EVENTSTORE_START_STANDARD_PROJECTIONS: "true",
-        EVENTSTORE_INSECURE: "true",
+        KURRENTDB_CLUSTER_SIZE: "1",
+        KURRENTDB_RUN_PROJECTIONS: "All",
+        KURRENTDB_START_STANDARD_PROJECTIONS: "true",
+        KURRENTDB_INSECURE: "true",
       })
       .withStartupTimeout(120_000)
       .withWaitStrategy(Wait.forHealthCheck());

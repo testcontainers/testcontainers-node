@@ -3,7 +3,6 @@
   "version": "10.28.0",
   "license": "MIT",
   "keywords": [
-    "eventstoredb",
     "kurrent",
     "testing",
     "docker",
@@ -30,7 +29,7 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "@eventstore/db-client": "^6.2.1"
+    "@kurrent/kurrentdb-client": "^1.0.1"
   },
   "dependencies": {
     "testcontainers": "^10.28.0"
