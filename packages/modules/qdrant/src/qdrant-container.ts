@@ -8,7 +8,7 @@ export class QdrantContainer extends GenericContainer {
   private apiKey: string | undefined;
   private configFilePath: string | undefined;
 
-  constructor(image = "qdrant/qdrant:v1.8.1") {
+  constructor(image = "qdrant/qdrant:v1.13.4") {
     super(image);
     this.withExposedPorts(QDRANT_REST_PORT, QDRANT_GRPC_PORT);
     this.withWaitStrategy(

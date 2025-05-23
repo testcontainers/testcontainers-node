@@ -1,22 +1,21 @@
+import { Mock } from "vitest";
 import { AbstractStartedContainer, GenericContainer, InspectResult, StartedTestContainer } from "../index";
 
-describe("GenericContainer lifecycle", () => {
-  jest.setTimeout(180_000);
-
-  let beforeContainerCreated: jest.Func;
-  let containerCreated: jest.Func;
-  let containerStarting: jest.Func;
-  let containerStarted: jest.Func;
-  let containerStopping: jest.Func;
-  let containerStopped: jest.Func;
+describe("GenericContainer lifecycle", { timeout: 180_000 }, () => {
+  let beforeContainerCreated: Mock;
+  let containerCreated: Mock;
+  let containerStarting: Mock;
+  let containerStarted: Mock;
+  let containerStopping: Mock;
+  let containerStopped: Mock;
 
   beforeEach(() => {
-    beforeContainerCreated = jest.fn();
-    containerCreated = jest.fn();
-    containerStarting = jest.fn();
-    containerStarted = jest.fn();
-    containerStopping = jest.fn();
-    containerStopped = jest.fn();
+    beforeContainerCreated = vi.fn();
+    containerCreated = vi.fn();
+    containerStarting = vi.fn();
+    containerStarted = vi.fn();
+    containerStopping = vi.fn();
+    containerStopped = vi.fn();
   });
 
   it("should call lifecycle callbacks for a non-reused, generic container", async () => {
@@ -47,8 +46,8 @@ describe("GenericContainer lifecycle", () => {
     expect(container1.getId()).toEqual(container2.getId());
     expect(beforeContainerCreated).toHaveBeenCalled();
     expect(containerCreated).not.toHaveBeenCalled();
-    expect(containerStarting).not.toHaveBeenCalled;
-    expect(containerStarted).not.toHaveBeenCalled;
+    expect(containerStarting).not.toHaveBeenCalled();
+    expect(containerStarted).not.toHaveBeenCalled();
 
     await container1.stop();
   });

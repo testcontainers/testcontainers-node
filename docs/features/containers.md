@@ -133,6 +133,10 @@ const container = await new GenericContainer("alpine")
     content: "hello world",
     target: "/remote/file2.txt"
   }])
+  .withCopyArchivesToContainer([{
+    tar: nodeReadable,
+    target: "/some/nested/remotedir"
+  }])
   .start();
 ```
 
@@ -153,6 +157,7 @@ container.copyContentToContainer([{
   content: "hello world",
   target: "/remote/file2.txt"
 }])
+container.copyArchiveToContainer(nodeReadable, "/some/nested/remotedir");
 ```
 
 An optional `mode` can be specified in octal for setting file permissions:
@@ -308,6 +313,18 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+### With custom hostname
+
+**Not recommended.**
+
+See this [Docker blog post on Testcontainers best practices](https://www.docker.com/blog/testcontainers-best-practices/#:~:text=Don't%20hardcode%20the%20hostname)
+
+```javascript
+const container = await new GenericContainer("alpine")
+  .withHostname("my-hostname")
+  .start();
+```
+
 ## Stopping a container
 
 Testcontainers by default will not wait until the container has stopped. It will simply issue the stop command and return immediately. This is to save time when running tests.
@@ -317,11 +334,11 @@ const container = await new GenericContainer("alpine").start();
 await container.stop();
 ```
 
-If you need to wait for the container to be stopped, you can provide a timeout:
+If you need to wait for the container to be stopped, you can provide a timeout. The unit of timeout option here is **second**:
 
 ```javascript
 const container = await new GenericContainer("alpine").start();
-await container.stop({ timeout: 10000 }); // ms
+await container.stop({ timeout: 10 }); // 10 seconds
 ```
 
 You can disable automatic removal of the container, which is useful for debugging, or if for example you want to copy content from the container once it has stopped:
@@ -330,6 +347,29 @@ You can disable automatic removal of the container, which is useful for debuggin
 const container = await new GenericContainer("alpine").start();
 await container.stop({ remove: false });
 ```
+
+Alternatively, you can disable automatic removal while configuring the container:
+
+```javascript
+const container = await new GenericContainer("alpine")
+  .withAutoRemove(false)
+  .start();
+
+await container.stop();
+```
+
+The value specified to `.withAutoRemove()` can be overridden by `.stop()`:
+
+```javascript
+const container = await new GenericContainer("alpine")
+  .withAutoRemove(false)
+  .start();
+
+await container.stop({ remove: true }); // The container is stopped *AND* removed
+```
+
+Keep in mind that disabling ryuk (set `TESTCONTAINERS_RYUK_DISABLED` to `true`) **and** disabling automatic removal of containers will make containers persist after you're done working with them.
+
 
 Volumes created by the container are removed when stopped. This is configurable:
 
@@ -343,6 +383,29 @@ await container.stop({ removeVolumes: false });
 ```javascript
 const container = await new GenericContainer("alpine").start();
 await container.restart();
+```
+
+## Committing a container to an image
+
+```javascript
+const container = await new GenericContainer("alpine").start();
+// Do something with the container
+await container.exec(["sh", "-c", `echo 'hello world' > /hello-world.txt`]);
+// Commit the container to an image
+const newImageId = await container.commit({ repo: "my-repo", tag: "my-tag" });
+// Use this image in a new container
+const containerFromCommit = await new GenericContainer(newImageId).start();
+```
+
+By default, the image inherits the behavior of being marked for cleanup on exit. You can override this behavior using
+the `deleteOnExit` option:
+
+```javascript
+const container = await new GenericContainer("alpine").start();
+// Do something with the container
+await container.exec(["sh", "-c", `echo 'hello world' > /hello-world.txt`]);
+// Commit the container to an image; committed image will not be cleaned up on exit
+const newImageId = await container.commit({ repo: "my-repo", tag: "my-tag", deleteOnExit: false });
 ```
 
 ## Reusing a container
@@ -364,6 +427,25 @@ const container2 = await new GenericContainer("alpine")
 
 expect(container1.getId()).toBe(container2.getId());
 ```
+
+You can also re-use stopped but not removed containers.
+
+```javascript
+const container1 = await new GenericContainer("alpine")
+  .withReuse()
+  .withAutoRemove(false)
+  .start();
+await container1.stop();
+
+const container2 = await new GenericContainer("alpine")
+  .withReuse()
+  .start();
+
+expect(container1.getId()).toBe(container2.getId());
+```
+
+Container re-use can be enabled or disabled globally by setting the `TESTCONTAINERS_REUSE_ENABLE` environment variable to `true` or `false`.
+If this environment variable is not declared, the feature is enabled by default.
 
 ## Creating a custom container
 
@@ -501,6 +583,35 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+## SocatContainer as a TCP proxy
+
+`SocatContainer` enables any TCP port of another container to be exposed publicly.
+
+```javascript
+const network = await new Network().start();
+
+const container = await new GenericContainer("testcontainers/helloworld:1.2.0")
+  .withExposedPorts(8080)
+  .withNetwork(network)
+  .withNetworkAliases("helloworld")
+  .start();
+
+const socat = await new SocatContainer()
+  .withNetwork(network)
+  .withTarget(8081, "helloworld", 8080)
+  .start();
+
+const socatUrl = `http://${socat.getHost()}:${socat.getMappedPort(8081)}`;
+
+const response = await fetch(`${socatUrl}/ping`);
+
+expect(response.status).toBe(200);
+expect(await response.text()).toBe("PONG");
+```
+
+The example above starts a `testcontainers/helloworld` container and a `socat` container. 
+The `socat` container is configured to forward traffic from port `8081` to the `testcontainers/helloworld` container on port `8080`.
+
 ## Running commands
 
 To run a command inside an already started container, use the exec method. 
@@ -523,7 +634,6 @@ The following options can be provided to modify the command execution:
 
 3. **`env`:** A map of environment variables to set inside the container.
 
-
 ```javascript
 const container = await new GenericContainer("alpine")
   .withCommand(["sleep", "infinity"])
@@ -538,8 +648,6 @@ const { output, stdout, stderr, exitCode } = await container.exec(["echo", "hell
 	}
 });
 ```
-
-
 
 ## Streaming logs
 

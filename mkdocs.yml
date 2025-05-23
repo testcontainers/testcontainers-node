@@ -1,23 +1,23 @@
 site_name: Testcontainers for NodeJS
 site_url: https://node.testcontainers.org
-repo_name: 'testcontainers-node'
-repo_url: 'https://github.com/testcontainers/testcontainers-node'
+repo_name: "testcontainers-node"
+repo_url: "https://github.com/testcontainers/testcontainers-node"
 edit_uri: edit/main/docs/
 
 theme:
-  name: 'material'
-  custom_dir: 'docs/site/theme'
+  name: "material"
+  custom_dir: "docs/site/theme"
   palette:
     scheme: testcontainers
   font:
     text: Roboto
     code: Roboto Mono
-  logo: 'site/logo.svg'
-  favicon: 'site/favicon.ico'
+  logo: "site/logo.svg"
+  favicon: "site/favicon.ico"
 
 extra_css:
-  - 'site/css/extra.css'
-  - 'site/css/tc-header.css'
+  - "site/css/extra.css"
+  - "site/css/tc-header.css"
 
 plugins:
   - search
@@ -28,11 +28,16 @@ markdown_extensions:
   - admonition
   - pymdownx.details
   - pymdownx.superfences
-  - pymdownx.tabbed
+  - pymdownx.tabbed:
+      alternate_style: true
 
 nav:
   - Home: index.md
-  - Quickstart: quickstart.md
+  - Quickstart:
+      - Install: quickstart/install.md
+      - Usage: quickstart/usage.md
+      - Global setup: quickstart/global-setup.md
+      - Logging: quickstart/logging.md
   - Supported container runtimes: supported-container-runtimes.md
   - Features:
       - Containers: features/containers.md
@@ -46,8 +51,12 @@ nav:
       - Azurite: modules/azurite.md
       - Cassandra: modules/cassandra.md
       - ChromaDB: modules/chromadb.md
+      - ClickHouse: modules/clickhouse.md
+      - CosmosDB: modules/cosmosdb.md
       - Couchbase: modules/couchbase.md
+      - CockroachDB: modules/cockroachdb.md
       - Elasticsearch: modules/elasticsearch.md
+      - Etcd: modules/etcd.md
       - GCloud: modules/gcloud.md
       - HiveMQ: modules/hivemq.md
       - K3s: modules/k3s.md
@@ -71,5 +80,6 @@ nav:
       - ScyllaDB: modules/scylladb.md
       - Selenium: modules/selenium.md
       - ToxiProxy: modules/toxiproxy.md
+      - Valkey: modules/valkey.md
       - Weaviate: modules/weaviate.md
   - Configuration: configuration.md

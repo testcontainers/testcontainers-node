@@ -21,3 +21,7 @@ npm install @testcontainers/neo4j --save-dev
 <!--codeinclude-->
 [Configure APOC:](../../packages/modules/neo4j/src/neo4j-container.test.ts) inside_block:apoc
 <!--/codeinclude-->
+
+<!--codeinclude-->
+[Configure other supported plugins:](../../packages/modules/neo4j/src/neo4j-container.test.ts) inside_block:pluginsList
+<!--/codeinclude-->

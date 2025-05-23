@@ -1,6 +1,6 @@
 {
   "name": "testcontainers",
-  "version": "10.17.1",
+  "version": "10.28.0",
   "author": "Cristian Greco",
   "license": "MIT",
   "keywords": [
@@ -12,7 +12,7 @@
   "homepage": "https://github.com/testcontainers/testcontainers-node#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/testcontainers/testcontainers-node"
+    "url": "git+https://github.com/testcontainers/testcontainers-node.git"
   },
   "bugs": {
     "url": "https://github.com/testcontainers/testcontainers-node/issues"
@@ -31,20 +31,20 @@
   },
   "dependencies": {
     "@balena/dockerignore": "^1.0.2",
-    "@types/dockerode": "^3.3.29",
+    "@types/dockerode": "^3.3.35",
     "archiver": "^7.0.1",
     "async-lock": "^1.4.1",
     "byline": "^5.0.0",
     "debug": "^4.3.5",
     "docker-compose": "^0.24.8",
-    "dockerode": "^3.3.5",
-    "get-port": "^5.1.1",
+    "dockerode": "^4.0.5",
+    "get-port": "^7.1.0",
     "proper-lockfile": "^4.1.2",
     "properties-reader": "^2.3.0",
     "ssh-remote-port-forward": "^1.0.4",
-    "tar-fs": "^3.0.6",
+    "tar-fs": "^3.0.7",
     "tmp": "^0.2.3",
-    "undici": "^5.28.5"
+    "undici": "^5.29.0"
   },
   "devDependencies": {
     "@types/archiver": "^6.0.2",

@@ -1,13 +1,13 @@
 import { Container } from "dockerode";
-import { InternalPortCheck } from "./port-check";
 import { log } from "../../common";
 import { ContainerRuntimeClient } from "../../container-runtime";
+import { InternalPortCheck } from "./port-check";
 
-jest.mock("../../common");
-const mockLogger = jest.mocked(log);
+vi.mock("../../common");
+const mockLogger = vi.mocked(log);
 
-const mockContainerExec = jest.fn();
-jest.mock("../../container-runtime", () => {
+const mockContainerExec = vi.fn();
+vi.mock("../../container-runtime", () => {
   return {
     ContainerRuntimeClient: function () {
       return {
@@ -131,6 +131,44 @@ describe("PortCheck", () => {
         .mockReturnValueOnce(Promise.resolve({ output: "ERROR 2", exitCode: 126 }));
 
       await portCheck.isBound(8080);
+      await portCheck.isBound(8080);
+
+      expect(mockLogger.error.mock.calls).toEqual([
+        [
+          "The HostPortWaitStrategy will not work on a distroless image, use an alternate wait strategy",
+          { containerId: "containerId" },
+        ],
+      ]);
+    });
+
+    it("should error log the distroless image once, regardless of logs enabled or not", async () => {
+      // Make sure logging is disabled explicitly here
+      mockLogger.enabled.mockImplementation(() => false);
+
+      mockContainerExec
+        .mockReturnValueOnce(Promise.resolve({ output: "ERROR 1", exitCode: 126 }))
+        .mockReturnValueOnce(Promise.resolve({ output: "ERROR 2", exitCode: 126 }))
+        .mockReturnValueOnce(Promise.resolve({ output: "ERROR 2", exitCode: 126 }))
+        .mockReturnValueOnce(Promise.resolve({ output: "ERROR 1", exitCode: 126 }))
+        .mockReturnValueOnce(Promise.resolve({ output: "ERROR 2", exitCode: 126 }))
+        .mockReturnValueOnce(Promise.resolve({ output: "ERROR 2", exitCode: 126 }));
+
+      await portCheck.isBound(8080);
+      await portCheck.isBound(8080);
+
+      expect(mockLogger.error.mock.calls).toEqual([
+        [
+          "The HostPortWaitStrategy will not work on a distroless image, use an alternate wait strategy",
+          { containerId: "containerId" },
+        ],
+      ]);
+    });
+
+    it.for([126, 127])("should error log the distroless image when exit code is %i", async (code) => {
+      mockContainerExec.mockReturnValueOnce(Promise.resolve({ output: "ERROR 1", exitCode: code }));
+      mockContainerExec.mockReturnValueOnce(Promise.resolve({ output: "ERROR 2", exitCode: code }));
+      mockContainerExec.mockReturnValueOnce(Promise.resolve({ output: "ERROR 3", exitCode: code }));
+
       await portCheck.isBound(8080);
 
       expect(mockLogger.error.mock.calls).toEqual([

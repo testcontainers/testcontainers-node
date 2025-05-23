@@ -1,12 +1,10 @@
+import fs from "fs";
 import { Kafka, KafkaConfig, logLevel } from "kafkajs";
-import { KAFKA_IMAGE, KafkaContainer } from "./kafka-container";
-import * as fs from "fs";
-import * as path from "path";
+import path from "path";
 import { GenericContainer, Network, StartedTestContainer } from "testcontainers";
+import { KafkaContainer, KAFKA_IMAGE } from "./kafka-container";
 
-describe("KafkaContainer", () => {
-  jest.setTimeout(240_000);
-
+describe("KafkaContainer", { timeout: 240_000 }, () => {
   // connectBuiltInZK {
   it("should connect using in-built zoo-keeper", async () => {
     const kafkaContainer = await new KafkaContainer().withExposedPorts(9093).start();
@@ -150,7 +148,7 @@ describe("KafkaContainer", () => {
 
       const kafkaCliContainer = await new GenericContainer(KAFKA_IMAGE)
         .withNetwork(network)
-        .withCommand(["bash", "-c", "echo 'START'; sleep infinity"])
+        .withCommand(["bash", "-c", "sleep infinity"])
         .withCopyFilesToContainer([
           {
             source: path.resolve(certificatesDir, "kafka.client.truststore.pem"),

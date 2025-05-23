@@ -1,4 +1,4 @@
-import { AbstractStartedContainer, GenericContainer, type StartedTestContainer } from "testcontainers";
+import { AbstractStartedContainer, GenericContainer, Wait, type StartedTestContainer } from "testcontainers";
 
 const CASSANDRA_PORT = 9042;
 
@@ -10,7 +10,9 @@ export class CassandraContainer extends GenericContainer {
 
   constructor(image = "cassandra:5.0.2") {
     super(image);
-    this.withExposedPorts(CASSANDRA_PORT).withStartupTimeout(120_000);
+    this.withExposedPorts(CASSANDRA_PORT)
+      .withWaitStrategy(Wait.forAll([Wait.forHealthCheck(), Wait.forListeningPorts()]))
+      .withStartupTimeout(120_000);
   }
 
   public withDatacenter(dc: string): this {
@@ -44,7 +46,20 @@ export class CassandraContainer extends GenericContainer {
       CASSANDRA_PASSWORD: this.password,
       CASSANDRA_SNITCH: "GossipingPropertyFileSnitch",
       CASSANDRA_ENDPOINT_SNITCH: "GossipingPropertyFileSnitch",
+      CASSANDRA_NUM_TOKENS: "1",
+      JVM_EXTRA_OPTS: "-Dcassandra.skip_wait_for_gossip_to_settle=0 -Dcassandra.initial_token=0",
     });
+    if (!this.healthCheck) {
+      this.withHealthCheck({
+        test: [
+          "CMD-SHELL",
+          `cqlsh -u ${this.username} -p ${this.password} -e "SELECT release_version FROM system.local;"`,
+        ],
+        interval: 250,
+        timeout: 1000,
+        retries: 1000,
+      });
+    }
     return new StartedCassandraContainer(await super.start(), this.dc, this.rack, this.username, this.password);
   }
 }

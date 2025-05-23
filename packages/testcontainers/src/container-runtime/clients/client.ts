@@ -1,23 +1,23 @@
-import { ComposeClient, getComposeClient } from "./compose/compose-client";
-import { ContainerClient } from "./container/container-client";
-import { ImageClient } from "./image/image-client";
-import { NetworkClient } from "./network/network-client";
-import { ContainerRuntimeClientStrategy } from "../strategies/strategy";
-import { ConfigurationStrategy } from "../strategies/configuration-strategy";
-import { TestcontainersHostStrategy } from "../strategies/testcontainers-host-strategy";
-import { UnixSocketStrategy } from "../strategies/unix-socket-strategy";
-import { RootlessUnixSocketStrategy } from "../strategies/rootless-unix-socket-strategy";
-import { NpipeSocketStrategy } from "../strategies/npipe-socket-strategy";
-import { ComposeInfo, ContainerRuntimeInfo, Info, NodeInfo } from "./types";
 import Dockerode, { DockerOptions } from "dockerode";
-import { getRemoteContainerRuntimeSocketPath } from "../utils/remote-container-runtime-socket-path";
-import { resolveHost } from "../utils/resolve-host";
-import { DockerContainerClient } from "./container/docker-container-client";
-import { DockerImageClient } from "./image/docker-image-client";
-import { DockerNetworkClient } from "./network/docker-network-client";
-import { lookupHostIps } from "../utils/lookup-host-ips";
 import { isDefined, isEmptyString, log } from "../../common";
 import { LIB_VERSION } from "../../version";
+import { ConfigurationStrategy } from "../strategies/configuration-strategy";
+import { NpipeSocketStrategy } from "../strategies/npipe-socket-strategy";
+import { RootlessUnixSocketStrategy } from "../strategies/rootless-unix-socket-strategy";
+import { ContainerRuntimeClientStrategy } from "../strategies/strategy";
+import { TestcontainersHostStrategy } from "../strategies/testcontainers-host-strategy";
+import { UnixSocketStrategy } from "../strategies/unix-socket-strategy";
+import { lookupHostIps } from "../utils/lookup-host-ips";
+import { getRemoteContainerRuntimeSocketPath } from "../utils/remote-container-runtime-socket-path";
+import { resolveHost } from "../utils/resolve-host";
+import { ComposeClient, getComposeClient } from "./compose/compose-client";
+import { ContainerClient } from "./container/container-client";
+import { DockerContainerClient } from "./container/docker-container-client";
+import { DockerImageClient } from "./image/docker-image-client";
+import { ImageClient } from "./image/image-client";
+import { DockerNetworkClient } from "./network/docker-network-client";
+import { NetworkClient } from "./network/network-client";
+import { ComposeInfo, ContainerRuntimeInfo, Info, NodeInfo } from "./types";
 
 export class ContainerRuntimeClient {
   constructor(

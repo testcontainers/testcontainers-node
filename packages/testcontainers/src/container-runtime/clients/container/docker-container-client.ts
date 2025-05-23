@@ -7,11 +7,11 @@ import Dockerode, {
   ExecCreateOptions,
   Network,
 } from "dockerode";
-import { PassThrough, Readable } from "stream";
 import { IncomingMessage } from "http";
-import { ContainerStatus, ExecOptions, ExecResult } from "./types";
-import { ContainerClient } from "./container-client";
+import { PassThrough, Readable } from "stream";
 import { execLog, log, streamToString } from "../../../common";
+import { ContainerClient } from "./container-client";
+import { ContainerCommitOptions, ContainerStatus, ExecOptions, ExecResult } from "./types";
 
 export class DockerContainerClient implements ContainerClient {
   constructor(public readonly dockerode: Dockerode) {}
@@ -120,9 +120,7 @@ export class DockerContainerClient implements ContainerClient {
 
   async inspect(container: Dockerode.Container): Promise<ContainerInspectInfo> {
     try {
-      log.debug(`Inspecting container...`, { containerId: container.id });
       const inspectInfo = await container.inspect();
-      log.debug(`Inspected container`, { containerId: container.id });
       return inspectInfo;
     } catch (err) {
       log.error(`Failed to inspect container: ${err}`, { containerId: container.id });
@@ -163,24 +161,35 @@ export class DockerContainerClient implements ContainerClient {
     }
   }
 
-  async logs(container: Container, opts?: ContainerLogsOptions): Promise<Readable> {
-    try {
-      log.debug(`Fetching container logs...`, { containerId: container.id });
-      const stream = (await container.logs({
+  logs(container: Container, opts?: ContainerLogsOptions): Promise<Readable> {
+    log.debug(`Fetching container logs...`, { containerId: container.id });
+
+    const proxyStream = new PassThrough();
+    proxyStream.setEncoding("utf8");
+
+    container
+      .logs({
         follow: true,
         stdout: true,
         stderr: true,
         tail: opts?.tail ?? -1,
         since: opts?.since ?? 0,
-      })) as IncomingMessage;
-      stream.socket.unref();
-      const demuxedStream = this.demuxStream(container.id, stream);
-      log.debug(`Fetched container logs`, { containerId: container.id });
-      return demuxedStream;
-    } catch (err) {
-      log.error(`Failed to fetch container logs: ${err}`, { containerId: container.id });
-      throw err;
-    }
+      })
+      .then(async (stream) => {
+        const actualLogStream = stream as IncomingMessage;
+        actualLogStream.socket?.unref();
+
+        const demuxedStream = await this.demuxStream(container.id, actualLogStream);
+        demuxedStream.pipe(proxyStream);
+        demuxedStream.on("error", (err) => proxyStream.emit("error", err));
+        demuxedStream.on("end", () => proxyStream.end());
+      })
+      .catch((err) => {
+        log.error(`Failed to fetch container logs: ${err}`, { containerId: container.id });
+        proxyStream.end();
+      });
+
+    return Promise.resolve(proxyStream);
   }
 
   async exec(container: Container, command: string[], opts?: Partial<ExecOptions>): Promise<ExecResult> {
@@ -262,6 +271,18 @@ export class DockerContainerClient implements ContainerClient {
       log.debug(`Restarted container`, { containerId: container.id });
     } catch (err) {
       log.error(`Failed to restart container: ${err}`, { containerId: container.id });
+      throw err;
+    }
+  }
+
+  async commit(container: Container, opts: ContainerCommitOptions): Promise<string> {
+    try {
+      log.debug(`Committing container...`, { containerId: container.id });
+      const { Id: imageId } = await container.commit(opts);
+      log.debug(`Committed container to image "${imageId}"`, { containerId: container.id });
+      return imageId;
+    } catch (err) {
+      log.error(`Failed to commit container: ${err}`, { containerId: container.id });
       throw err;
     }
   }

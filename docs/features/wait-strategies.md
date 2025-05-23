@@ -1,12 +1,12 @@
 # Wait Strategies
 
-Note that the startup timeout of all wait strategies is configurable:
+Note that the startup timeout of all wait strategies is configurable. The unit of timeout of wait strategies is **millisecond**:
 
 ```javascript
 const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
-  .withStartupTimeout(120000) // wait 120s
+  .withStartupTimeout(120000) // wait 120 seconds
   .start();
 ```
 
@@ -73,7 +73,7 @@ const { GenericContainer, Wait } = require("testcontainers");
 const container = await new GenericContainer("alpine").withWaitStrategy(Wait.forHealthCheck()).start();
 ```
 
-Define your own health check:
+Define your own health check. The unit of timeouts and intervals here is **millisecond**:
 
 ```javascript
 const { GenericContainer, Wait } = require("testcontainers");
@@ -148,21 +148,21 @@ const container = await new GenericContainer("redis")
   .withMethod("POST")
   .withHeaders({ X_CUSTOM_VALUE: "custom" })
   .withBasicCredentials("username", "password")
-  .withReadTimeout(10000))
+  .withReadTimeout(10000)) // timeout after 10 seconds
 ```
 
 ### Use TLS
 
 ```javascript
 .withWaitStrategy(Wait.forHttp("/health", 8443)
-  .useTls())
+  .usingTls())
 ```
 
 #### Insecure TLS
 
 ```javascript
 .withWaitStrategy(Wait.forHttp("/health", 8443)
-  .useTls()
+  .usingTls()
   .insecureTls())
 ```
 
@@ -202,11 +202,11 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
-The composite wait strategy by default will respect each individual wait strategy's startup timeout. For example:
+The composite wait strategy by default will respect each individual wait strategy's startup timeout. The unit of timeouts here is **millisecond**. For example:
 
 ```javascript
-const w1 = Wait.forListeningPorts().withStartupTimeout(1000);
-const w2 = Wait.forLogMessage("READY").withStartupTimeout(2000);
+const w1 = Wait.forListeningPorts().withStartupTimeout(1000); // wait 1 second
+const w2 = Wait.forLogMessage("READY").withStartupTimeout(2000); // wait 2 seconds
 
 const composite = Wait.forAll([w1, w2]);
 
@@ -217,21 +217,21 @@ expect(w2.getStartupTimeout()).toBe(2000);
 The startup timeout of inner wait strategies that have not defined their own startup timeout can be set by setting the startup timeout on the composite:
 
 ```javascript
-const w1 = Wait.forListeningPorts().withStartupTimeout(1000);
+const w1 = Wait.forListeningPorts().withStartupTimeout(1000); // wait 1 second
 const w2 = Wait.forLogMessage("READY");
 
-const composite = Wait.forAll([w1, w2]).withStartupTimeout(2000);
+const composite = Wait.forAll([w1, w2]).withStartupTimeout(2000); // wait 2 seconds
 
 expect(w1.getStartupTimeout()).toBe(1000);
 expect(w2.getStartupTimeout()).toBe(2000);
 ```
 
-The startup timeout of all wait strategies can be controlled by setting a deadline on the composite. In this case, the composite will throw unless all inner wait strategies have resolved before the deadline.
+The startup timeout of all wait strategies can be controlled by setting a deadline on the composite. In this case, the composite will throw unless all inner wait strategies have resolved before the deadline. The unit of deadline timeout is **millisecond**.
 
 ```javascript
 const w1 = Wait.forListeningPorts();
 const w2 = Wait.forLogMessage("READY");
-const composite = Wait.forAll([w1, w2]).withDeadline(2000);
+const composite = Wait.forAll([w1, w2]).withDeadline(2000); // wait 2 seconds
 ```
 
 ## Other startup strategies
@@ -248,7 +248,7 @@ const {
 
 class ReadyAfterDelayWaitStrategy extends StartupCheckStrategy {
   public checkStartupState(dockerClient: Dockerode, containerId: string): Promise<StartupStatus> {
-    return new Promise((resolve) => setTimeout(() => resolve("SUCCESS"), 3000));
+    return new Promise((resolve) => setTimeout(() => resolve("SUCCESS"), 3000)); // after 3 seconds
   }
 }
 

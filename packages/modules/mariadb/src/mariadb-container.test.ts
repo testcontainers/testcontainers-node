@@ -1,9 +1,7 @@
 import mariadb from "mariadb";
 import { MariaDbContainer } from "./mariadb-container";
 
-describe("MariaDb", () => {
-  jest.setTimeout(240_000);
-
+describe("MariaDb", { timeout: 240_000 }, () => {
   // connect {
   it("should connect and execute query", async () => {
     const container = await new MariaDbContainer().start();

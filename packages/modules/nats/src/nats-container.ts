@@ -81,7 +81,7 @@ export class NatsContainer extends GenericContainer {
   }
 
   private getNormalizedCommand(): string[] {
-    const result: string[] = ["nats-server"];
+    const result: string[] = [];
     for (const arg of this.args) {
       result.push(arg);
       if (this.values.has(arg)) {

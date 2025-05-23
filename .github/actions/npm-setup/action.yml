@@ -1,0 +1,68 @@
+name: 'NPM Setup'
+description: 'Sets up Node.js and installs NPM dependencies with caching'
+
+inputs:
+  runner:
+    description: 'Runner to use'
+    required: true
+  node-version:
+    description: 'Node.js version to use'
+    required: true
+  workspace:
+    description: 'Key for the cache'
+    required: true
+
+outputs:
+  workspace_path:
+    description: "Full path to the workspace directory"
+    value: ${{ steps.set-env.outputs.workspace_path }}
+    
+runs:
+  using: "composite"
+  steps:
+      - name: Install NodeJS ${{ inputs.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          
+      - name: Set cache configuration
+        shell: bash
+        id: set-env
+        run: |
+          if [ "${{ inputs.workspace }}" = "testcontainers" ]; then
+            echo "CACHE_PATHS<<EOF" >> $GITHUB_ENV
+            echo "node_modules" >> $GITHUB_ENV
+            echo "packages/testcontainers/node_modules" >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
+            echo "WORKSPACE_PATH=packages/testcontainers" >> $GITHUB_ENV
+            echo "workspace_path=packages/testcontainers" >> "$GITHUB_OUTPUT"
+          else
+            echo "CACHE_PATHS<<EOF" >> $GITHUB_ENV
+            echo "node_modules" >> $GITHUB_ENV
+            echo "packages/testcontainers/node_modules" >> $GITHUB_ENV
+            echo "packages/modules/${{ inputs.workspace }}/node_modules" >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
+            echo "WORKSPACE_PATH=packages/modules/${{ inputs.workspace }}" >> $GITHUB_ENV
+            echo "workspace_path=packages/modules/${{ inputs.workspace }}" >> "$GITHUB_OUTPUT"
+          fi
+          
+      - uses: actions/cache/restore@v4
+        id: npm-cache
+        with:
+          path: ${{ env.CACHE_PATHS }}
+          key: ${{ inputs.runner }}-node-${{ inputs.node-version }}-${{ inputs.workspace }}-${{ hashFiles('package-lock.json', 'packages/testcontainers/package-lock.json', format('packages/modules/{0}/package-lock.json', inputs.workspace)) }}
+          restore-keys: |
+            ${{ inputs.runner }}-node-${{ inputs.node-version }}-${{ inputs.workspace }}-
+            ${{ inputs.runner }}-node-${{ inputs.node-version }}-
+
+      - name: Install dependencies
+        if: steps.npm-cache.outputs.cache-hit != 'true'
+        shell: bash
+        run: npm ci --workspace ${{ env.WORKSPACE_PATH }} --include-workspace-root
+
+      - name: Cache npm
+        if: steps.npm-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.CACHE_PATHS }}
+          key: ${{ steps.npm-cache.outputs.cache-primary-key }}

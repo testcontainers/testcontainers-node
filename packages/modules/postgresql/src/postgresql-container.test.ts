@@ -1,9 +1,7 @@
 import { Client } from "pg";
 import { PostgreSqlContainer } from "./postgresql-container";
 
-describe("PostgreSqlContainer", () => {
-  jest.setTimeout(180_000);
-
+describe("PostgreSqlContainer", { timeout: 180_000 }, () => {
   // connect {
   it("should connect and return a query result", async () => {
     const container = await new PostgreSqlContainer().start();
@@ -83,4 +81,35 @@ describe("PostgreSqlContainer", () => {
     await container.stop();
   });
   // }
+
+  it("should work with restarted container", async () => {
+    const container = await new PostgreSqlContainer().start();
+    await container.restart();
+
+    const client = new Client({
+      host: container.getHost(),
+      port: container.getPort(),
+      database: container.getDatabase(),
+      user: container.getUsername(),
+      password: container.getPassword(),
+    });
+    await client.connect();
+
+    const result = await client.query("SELECT 1");
+    expect(result.rows[0]).toEqual({ "?column?": 1 });
+
+    await client.end();
+    await container.stop();
+  });
+
+  it("should allow custom healthcheck", async () => {
+    const container = new PostgreSqlContainer().withHealthCheck({
+      test: ["CMD-SHELL", "exit 1"],
+      interval: 100,
+      retries: 0,
+      timeout: 0,
+    });
+
+    await expect(() => container.start()).rejects.toThrow();
+  });
 });

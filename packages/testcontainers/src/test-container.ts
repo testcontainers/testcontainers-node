@@ -1,7 +1,9 @@
-import { WaitStrategy } from "./wait-strategies/wait-strategy";
 import { Readable } from "stream";
+import { StartedNetwork } from "./network/network";
 import {
+  ArchiveToCopy,
   BindMount,
+  CommitOptions,
   ContentToCopy,
   DirectoryToCopy,
   Environment,
@@ -14,9 +16,9 @@ import {
   TmpFs,
   Ulimits,
 } from "./types";
-import { StartedNetwork } from "./network/network";
 import { PortWithOptionalBinding } from "./utils/port";
 import { ImagePullPolicy } from "./utils/pull-policy";
+import { WaitStrategy } from "./wait-strategies/wait-strategy";
 
 export interface TestContainer {
   start(): Promise<StartedTestContainer>;
@@ -40,13 +42,16 @@ export interface TestContainer {
   withUser(user: string): this;
   withPullPolicy(pullPolicy: ImagePullPolicy): this;
   withReuse(): this;
+  withAutoRemove(autoRemove: boolean): this;
   withCopyFilesToContainer(filesToCopy: FileToCopy[]): this;
   withCopyDirectoriesToContainer(directoriesToCopy: DirectoryToCopy[]): this;
   withCopyContentToContainer(contentsToCopy: ContentToCopy[]): this;
+  withCopyArchivesToContainer(archivesToCopy: ArchiveToCopy[]): this;
   withWorkingDir(workingDir: string): this;
   withResourcesQuota(resourcesQuota: ResourcesQuota): this;
   withSharedMemorySize(bytes: number): this;
   withLogConsumer(logConsumer: (stream: Readable) => unknown): this;
+  withHostname(hostname: string): this;
 }
 
 export interface RestartOptions {
@@ -62,7 +67,9 @@ export interface StopOptions {
 export interface StartedTestContainer {
   stop(options?: Partial<StopOptions>): Promise<StoppedTestContainer>;
   restart(options?: Partial<RestartOptions>): Promise<void>;
+  commit(options: CommitOptions): Promise<string>;
   getHost(): string;
+  getHostname(): string;
   getFirstMappedPort(): number;
   getMappedPort(port: number): number;
   getName(): string;
@@ -72,6 +79,7 @@ export interface StartedTestContainer {
   getNetworkId(networkName: string): string;
   getIpAddress(networkName: string): string;
   copyArchiveFromContainer(path: string): Promise<NodeJS.ReadableStream>;
+  copyArchiveToContainer(tar: Readable, target?: string): Promise<void>;
   copyDirectoriesToContainer(directoriesToCopy: DirectoryToCopy[]): Promise<void>;
   copyFilesToContainer(filesToCopy: FileToCopy[]): Promise<void>;
   copyContentToContainer(contentsToCopy: ContentToCopy[]): Promise<void>;

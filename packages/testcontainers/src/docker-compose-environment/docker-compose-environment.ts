@@ -1,16 +1,16 @@
 import { ContainerInfo } from "dockerode";
-import { StartedGenericContainer } from "../generic-container/started-generic-container";
-import { WaitStrategy } from "../wait-strategies/wait-strategy";
-import { Environment } from "../types";
-import { StartedDockerComposeEnvironment } from "./started-docker-compose-environment";
-import { Wait } from "../wait-strategies/wait";
-import { waitForContainer } from "../wait-strategies/wait-for-container";
-import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
-import { log, RandomUuid, Uuid, containerLog } from "../common";
+import { containerLog, log, RandomUuid, Uuid } from "../common";
 import { getContainerRuntimeClient, parseComposeContainerName } from "../container-runtime";
+import { StartedGenericContainer } from "../generic-container/started-generic-container";
 import { getReaper } from "../reaper/reaper";
+import { Environment } from "../types";
 import { BoundPorts } from "../utils/bound-ports";
 import { mapInspectResult } from "../utils/map-inspect-result";
+import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
+import { Wait } from "../wait-strategies/wait";
+import { waitForContainer } from "../wait-strategies/wait-for-container";
+import { WaitStrategy } from "../wait-strategies/wait-strategy";
+import { StartedDockerComposeEnvironment } from "./started-docker-compose-environment";
 
 export class DockerComposeEnvironment {
   private readonly composeFilePath: string;
@@ -23,6 +23,7 @@ export class DockerComposeEnvironment {
   private profiles: string[] = [];
   private environment: Environment = {};
   private pullPolicy: ImagePullPolicy = PullPolicy.defaultPolicy();
+  private defaultWaitStrategy: WaitStrategy = Wait.forListeningPorts();
   private waitStrategy: { [containerName: string]: WaitStrategy } = {};
   private startupTimeout?: number;
 
@@ -60,6 +61,11 @@ export class DockerComposeEnvironment {
 
   public withPullPolicy(pullPolicy: ImagePullPolicy): this {
     this.pullPolicy = pullPolicy;
+    return this;
+  }
+
+  public withDefaultWaitStrategy(waitStrategy: WaitStrategy): this {
+    this.defaultWaitStrategy = waitStrategy;
     return this;
   }
 
@@ -140,7 +146,7 @@ export class DockerComposeEnvironment {
           const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, mappedInspectResult);
           const waitStrategy = this.waitStrategy[containerName]
             ? this.waitStrategy[containerName]
-            : Wait.forListeningPorts();
+            : this.defaultWaitStrategy;
           if (this.startupTimeout !== undefined) {
             waitStrategy.withStartupTimeout(this.startupTimeout);
           }
@@ -168,7 +174,8 @@ export class DockerComposeEnvironment {
             inspectResult,
             boundPorts,
             containerName,
-            waitStrategy
+            waitStrategy,
+            true
           );
         })
       )

@@ -1,10 +1,9 @@
+import { RandomUuid } from "../common";
 import { GenericContainer } from "../generic-container/generic-container";
-import { Wait } from "./wait";
 import { checkContainerIsHealthy, checkContainerIsHealthyTls, stopStartingContainer } from "../utils/test-helper";
+import { Wait } from "./wait";
 
-jest.setTimeout(180_000);
-
-describe("HttpWaitStrategy", () => {
+describe("HttpWaitStrategy", { timeout: 180_000 }, () => {
   it("should wait for 200", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
@@ -87,7 +86,7 @@ describe("HttpWaitStrategy", () => {
 
   describe("when options.abortOnContainerExit is true", () => {
     it("should fail if container exited before waiting pass", async () => {
-      const name = "container-name";
+      const name = `container-name-${new RandomUuid().nextUuid()}`;
       const data = [1, 2, 3];
       const tail = 50;
       const echoCmd = data.map((i) => `echo ${i}`).join(" && ");
@@ -105,7 +104,7 @@ describe("HttpWaitStrategy", () => {
     });
 
     it("should log only $tail logs if container exited before waiting pass", async () => {
-      const name = "container-name";
+      const name = `container-name-${new RandomUuid().nextUuid()}`;
       const tail = 50;
       const data = [...Array(tail + 5).keys()];
       const echoCmd = data.map((i) => `echo ${i}`).join(" && ");

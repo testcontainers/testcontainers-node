@@ -1,9 +1,7 @@
 import sql, { config } from "mssql";
 import { MSSQLServerContainer } from "./mssqlserver-container";
 
-describe("MSSqlServerContainer", () => {
-  jest.setTimeout(180_000);
-
+describe("MSSqlServerContainer", { timeout: 180_000 }, () => {
   // connect {
   it("should connect and return a query result", async () => {
     const container = await new MSSQLServerContainer().acceptLicense().start();

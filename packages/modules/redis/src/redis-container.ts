@@ -1,5 +1,5 @@
-import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 import path from "path";
+import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 
 const REDIS_PORT = 6379;
 
@@ -32,12 +32,24 @@ export class RedisContainer extends GenericContainer {
     return this;
   }
 
+  protected override async containerStarted(container: StartedTestContainer): Promise<void> {
+    if (this.initialImportScriptFile) {
+      await this.importInitialData(container);
+    }
+  }
+
   public override async start(): Promise<StartedRedisContainer> {
-    this.withCommand([
-      "redis-server",
-      ...(this.password ? [`--requirepass "${this.password}"`] : []),
+    const redisArgs = [
+      ...(this.password ? [`--requirepass ${this.password}`] : []),
       ...(this.persistenceVolume ? ["--save 1 1 ", "--appendonly yes"] : []),
-    ]);
+    ];
+    if (this.imageName.image.includes("redis-stack")) {
+      this.withEnvironment({
+        REDIS_ARGS: redisArgs.join(" "),
+      }).withEntrypoint(["/entrypoint.sh"]);
+    } else {
+      this.withCommand(["redis-server", ...redisArgs]);
+    }
     if (this.persistenceVolume) {
       this.withBindMounts([{ mode: "rw", source: this.persistenceVolume, target: "/data" }]);
     }
@@ -60,7 +72,7 @@ export class RedisContainer extends GenericContainer {
     return startedRedisContainer;
   }
 
-  private async importInitialData(container: StartedRedisContainer) {
+  private async importInitialData(container: StartedTestContainer) {
     const re = await container.exec(`/tmp/import.sh ${this.password}`);
     if (re.exitCode != 0 || re.output.includes("ERR"))
       throw Error(`Could not import initial data from ${this.initialImportScriptFile}: ${re.output}`);
@@ -68,7 +80,10 @@ export class RedisContainer extends GenericContainer {
 }
 
 export class StartedRedisContainer extends AbstractStartedContainer {
-  constructor(startedTestContainer: StartedTestContainer, private readonly password?: string) {
+  constructor(
+    startedTestContainer: StartedTestContainer,
+    private readonly password?: string
+  ) {
     super(startedTestContainer);
   }
 

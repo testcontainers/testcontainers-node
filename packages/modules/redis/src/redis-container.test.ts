@@ -1,12 +1,10 @@
+import fs from "fs";
+import os from "os";
+import path from "path";
 import { createClient } from "redis";
 import { RedisContainer, StartedRedisContainer } from "./redis-container";
-import * as os from "os";
-import * as path from "path";
-import * as fs from "fs";
 
-describe("RedisContainer", () => {
-  jest.setTimeout(240_000);
-
+describe("RedisContainer", { timeout: 240_000 }, () => {
   // startContainer {
   it("should connect and execute set-get", async () => {
     const container = await new RedisContainer().start();
@@ -100,6 +98,22 @@ describe("RedisContainer", () => {
     const queryResult = await container.executeCliCmd("info", ["clients"]);
     expect(queryResult).toEqual(expect.stringContaining("connected_clients:1"));
 
+    await container.stop();
+  });
+  // }
+
+  // startWithRedisStack {
+  it("should start with redis-stack-server and json module", async () => {
+    const container = await new RedisContainer("redis/redis-stack-server:7.4.0-v4")
+      .withPassword("testPassword")
+      .start();
+    const client = await connectTo(container);
+
+    await client.json.set("key", "$", { name: "test" });
+    const result = await client.json.get("key");
+    expect(result).toEqual({ name: "test" });
+
+    await client.disconnect();
     await container.stop();
   });
   // }

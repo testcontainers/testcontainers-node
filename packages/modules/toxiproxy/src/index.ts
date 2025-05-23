@@ -1,1 +1,1 @@
-export { ToxiProxyContainer, StartedToxiProxyContainer, CreatedProxy } from "./toxiproxy-container";
+export { CreatedProxy, StartedToxiProxyContainer, ToxiProxyContainer } from "./toxiproxy-container";

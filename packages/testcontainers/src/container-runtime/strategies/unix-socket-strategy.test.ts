@@ -1,8 +1,8 @@
 import { existsSync } from "fs";
 import { UnixSocketStrategy } from "./unix-socket-strategy";
 
-jest.mock("fs");
-const mockExistsSync = jest.mocked(existsSync);
+vi.mock("fs");
+const mockExistsSync = vi.mocked(existsSync);
 
 describe("UnixSocketStrategy", () => {
   beforeEach(() => {

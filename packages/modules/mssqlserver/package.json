@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/mssqlserver",
-  "version": "10.17.1",
+  "version": "10.28.0",
   "license": "MIT",
   "keywords": [
     "mssqlserver",
@@ -14,7 +14,7 @@
   "homepage": "https://github.com/testcontainers/testcontainers-node#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/testcontainers/testcontainers-node"
+    "url": "git+https://github.com/testcontainers/testcontainers-node.git"
   },
   "bugs": {
     "url": "https://github.com/testcontainers/testcontainers-node/issues"
@@ -35,6 +35,6 @@
     "mssql": "^10.0.4"
   },
   "dependencies": {
-    "testcontainers": "^10.17.1"
+    "testcontainers": "^10.28.0"
   }
 }

@@ -1,6 +1,6 @@
-import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
-import tar from "tar-stream";
 import { basename } from "node:path";
+import tar from "tar-stream";
+import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 
 // TODO: Implement GenericContainer.withCgroupnsMode
 // https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/71160
@@ -42,7 +42,10 @@ export class K3sContainer extends GenericContainer {
 }
 
 export class StartedK3sContainer extends AbstractStartedContainer {
-  constructor(startedTestContainer: StartedTestContainer, private readonly rawKubeConfig: string) {
+  constructor(
+    startedTestContainer: StartedTestContainer,
+    private readonly rawKubeConfig: string
+  ) {
     super(startedTestContainer);
   }
 

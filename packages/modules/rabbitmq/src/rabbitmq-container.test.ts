@@ -1,9 +1,7 @@
 import amqp from "amqplib";
 import { RabbitMQContainer } from "./rabbitmq-container";
 
-describe("RabbitMQContainer", () => {
-  jest.setTimeout(240_000);
-
+describe("RabbitMQContainer", { timeout: 240_000 }, () => {
   // start {
   it("should start, connect and close", async () => {
     const rabbitMQContainer = await new RabbitMQContainer().start();
@@ -63,6 +61,6 @@ describe("RabbitMQContainer", () => {
     await connection.close();
 
     await rabbitMQContainer.stop();
-  }, 10_000);
+  }, 20_000);
   // }
 });

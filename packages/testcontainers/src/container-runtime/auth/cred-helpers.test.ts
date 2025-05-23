@@ -10,7 +10,7 @@ describe("CredHelpers", () => {
       expect(await locator.getAuthConfig("registry-name", containerRuntimeConfig)).toBe(undefined);
     });
 
-    xit("should work", async () => {
+    it.skip("should work", async () => {
       const containerRuntimeConfig: ContainerRuntimeConfig = { credHelpers: { "index.docker.io": "desktop" } };
       const authConfig: AuthConfig = {
         username: expect.stringMatching(/.+/),

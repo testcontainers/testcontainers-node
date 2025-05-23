@@ -1,9 +1,7 @@
 import { EventStoreDBClient, StreamingRead, StreamSubscription } from "@eventstore/db-client";
 import { KurrentContainer } from "./kurrent-container";
 
-describe("KurrentContainer", () => {
-  jest.setTimeout(240_000);
-
+describe("KurrentContainer", { timeout: 240_000 }, () => {
   // startContainer {
   it("should execute write and read", async () => {
     const container = await new KurrentContainer().start();

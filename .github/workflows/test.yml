@@ -1,94 +1,162 @@
-name: Test
+name: Checks
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths-ignore:
-      - 'mkdocs.yml'
-      - 'docs/**'
-      - 'README.md'
+      - "mkdocs.yml"
+      - "docs/**"
+      - "README.md"
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths-ignore:
-      - 'mkdocs.yml'
-      - 'docs/**'
-      - 'README.md'
+      - "mkdocs.yml"
+      - "docs/**"
+      - "README.md"
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.head_ref || github.sha }}"
   cancel-in-progress: true
 
 jobs:
-  smoke-test:
-    name: Smoke test
-    runs-on: ${{ matrix.runner }}
+  detect-modules:
+    name: Detect packages to check
+    runs-on: ubuntu-22.04
+    outputs:
+      modules: ${{ steps.set-modified-modules.outputs.modules }}
+      modules_count: ${{ steps.set-modified-modules-count.outputs.modules_count }}
+    steps:
+      - name: Check out code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - id: changed-files
+        name: Get changed files
+        uses: tj-actions/changed-files@4edd678ac3f81e2dc578756871e4d00c19191daf # v45.0.4
+
+      - id: set-modified-modules
+        name: Set all modified modules
+        env:
+          ALL_CHANGED_FILES: "${{ steps.changed-files.outputs.all_changed_files }}"
+        run: echo "modules=$(./.github/scripts/changed-modules.sh)" >> $GITHUB_OUTPUT
+
+      - id: set-modified-modules-count
+        name: Set all modified modules count
+        run: echo "modules_count=$(echo ${{ toJSON(steps.set-modified-modules.outputs.modules) }} | jq '. | length')" >> $GITHUB_OUTPUT
+
+      - name: Print out the modules to be used
+        run: |
+          echo "${{ steps.set-modified-modules-count.outputs.modules_count }} modules in the build"
+          echo "${{ steps.set-modified-modules.outputs.modules }}"
+
+  lint:
+    if: ${{ needs.detect-modules.outputs.modules_count > 0 }}
+    name: "Lint"
+    needs:
+      - detect-modules
     strategy:
+      fail-fast: true
       matrix:
-        runner: [ ubuntu-22.04 ]
-        node-version: [ 18.x, 20.x, 22.x ]
+        module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
+    runs-on: ubuntu-22.04
     steps:
       - name: Code checkout
         uses: actions/checkout@v4
-      - name: Install NodeJS ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+      - name: Install Node and Dependencies
+        id: npm-install
+        uses: ./.github/actions/npm-setup
         with:
+          runner: ubuntu-22.04
+          node-version: 22.x
+          workspace: "${{ matrix.module }}"
+      - name: Code linting
+        env:
+          WORKSPACE_PATH: ${{ steps.npm-install.outputs.workspace_path }}
+        run: npm run lint:ci
+
+  smoke-test:
+    if: ${{ needs.detect-modules.outputs.modules_count > 0 }}
+    needs:
+      - detect-modules
+      - lint
+    name: Smoke tests
+    strategy:
+      fail-fast: true
+      matrix:
+        runner: [ubuntu-22.04]
+        node-version: [18.x, 20.x, 22.x]
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Code checkout
+        uses: actions/checkout@v4
+
+      - name: Install Node ${{ matrix.node-version }} and Dependencies
+        uses: ./.github/actions/npm-setup
+        with:
+          runner: ${{ matrix.runner }}
           node-version: ${{ matrix.node-version }}
-      - name: Install dependencies
-        run: npm ci --omit=optional
-      - name: Build workspaces
-        run: npm run build -ws
+          workspace: "testcontainers"
+
+      - name: Build testcontainers
+        run: npm run build --workspace packages/testcontainers
       - name: Remove dev dependencies
-        run: npm prune --omit=dev
+        run: npm prune --omit=dev --workspace packages/testcontainers
       - name: Run CommonJS module smoke test
         run: node packages/testcontainers/smoke-test.js
       - name: Run ES module smoke test
         run: node packages/testcontainers/smoke-test.mjs
 
-  test-testcontainers:
-    name: Testcontainers
-    needs: smoke-test
+  test:
+    if: ${{ needs.detect-modules.outputs.modules_count > 0 }}
+    name: Docker tests
+    needs:
+      - detect-modules
+      - lint
+      - smoke-test
     strategy:
+      fail-fast: false
       matrix:
-        node-version: [ 18.x, 20.x, 22.x ]
-        container-runtime: [ docker, podman ]
-        include:
-          - container-runtime: docker
-            runner: ubuntu-22.04
-          - container-runtime: podman
-            runner: ubuntu-22.04
+        module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
+        node-version: [18.x, 20.x, 22.x]
     uses: ./.github/workflows/test-template.yml
     with:
-      runner: ${{ matrix.runner }}
+      runner: ubuntu-22.04
       node-version: ${{ matrix.node-version }}
-      container-runtime: ${{ matrix.container-runtime }}
-      workspace: packages/testcontainers
+      container-runtime: docker
+      workspace: "${{ matrix.module }}"
 
-  list-modules:
-    name: List modules
-    runs-on: ubuntu-22.04
-    needs: test-testcontainers
-    outputs:
-      modules: ${{ steps.list_modules.outputs.modules }}
-    steps:
-      - uses: actions/checkout@v2
-      - id: list_modules
-        run: echo "modules=$(ls packages/modules | jq -cnR '[inputs | select(length>0) | select(. != "couchbase")]')" >> $GITHUB_OUTPUT
-  test-modules:
-    name: Module (${{ matrix.module }})
-    needs: [ test-testcontainers, list-modules ]
+  test-podman:
+    if: ${{ needs.detect-modules.outputs.modules_count > 0 }}
+    name: Podman tests
+    needs:
+      - detect-modules
+      - lint
+      - smoke-test
+      - test
     strategy:
+      fail-fast: false
       matrix:
-        node-version: [ 18.x, 20.x, 22.x ]
-        container-runtime: [ docker, podman ]
-        include:
-          - container-runtime: docker
-            runner: ubuntu-22.04
-          - container-runtime: podman
-            runner: ubuntu-22.04
-        module: ${{ fromJson(needs.list-modules.outputs.modules) }}
+        module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
+        node-version: [18.x, 20.x, 22.x]
     uses: ./.github/workflows/test-template.yml
     with:
-      runner: ${{ matrix.runner }}
+      runner: ubuntu-22.04
       node-version: ${{ matrix.node-version }}
-      container-runtime: ${{ matrix.container-runtime }}
-      workspace: packages/modules/${{ matrix.module }}
+      container-runtime: podman
+      workspace: "${{ matrix.module }}"
+
+  end:
+    if: ${{ needs.detect-modules.outputs.modules_count > 0 }}
+    name: Checks complete
+    needs:
+      - detect-modules
+      - lint
+      - smoke-test
+      - test
+      - test-podman
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Check if any jobs failed
+        if: ${{ failure() || cancelled() }}
+        run: exit 1
+
+      - run: echo "All tests completed successfully!"

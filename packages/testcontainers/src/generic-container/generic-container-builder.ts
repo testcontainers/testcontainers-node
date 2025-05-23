@@ -1,13 +1,13 @@
-import { AuthConfig, BuildArgs, RegistryConfig } from "../types";
 import type { ImageBuildOptions } from "dockerode";
 import path from "path";
-import { GenericContainer } from "./generic-container";
-import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
 import { log, RandomUuid, Uuid } from "../common";
 import { getAuthConfig, getContainerRuntimeClient, ImageName } from "../container-runtime";
 import { getReaper } from "../reaper/reaper";
+import { AuthConfig, BuildArgs, RegistryConfig } from "../types";
 import { getDockerfileImages } from "../utils/dockerfile-parser";
 import { createLabels, LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
+import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
+import { GenericContainer } from "./generic-container";
 
 export type BuildOptions = {
   deleteOnExit: boolean;
@@ -17,6 +17,7 @@ export class GenericContainerBuilder {
   private buildArgs: BuildArgs = {};
   private pullPolicy: ImagePullPolicy = PullPolicy.defaultPolicy();
   private cache = true;
+  private buildkit = false;
   private target?: string;
   private platform?: string;
 
@@ -38,6 +39,11 @@ export class GenericContainerBuilder {
 
   public withCache(cache: boolean): this {
     this.cache = cache;
+    return this;
+  }
+
+  public withBuildkit(): this {
+    this.buildkit = true;
     return this;
   }
 
@@ -79,6 +85,7 @@ export class GenericContainerBuilder {
       labels,
       target: this.target,
       platform: this.platform,
+      version: this.buildkit ? "2" : "1",
     };
 
     if (this.pullPolicy.shouldPull()) {

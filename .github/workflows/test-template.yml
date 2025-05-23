@@ -70,13 +70,13 @@ jobs:
         run: |
           brew install docker docker-compose
           brew install --cask rancher
-          
+
           TIMEOUT_SECS_CLI_TOOLS=60
           TIMEOUT_SECS_USER_SOCKET=300
-          
+
           echo "Open Rancher Desktop app"
           open "/Applications/Rancher Desktop.app"
-          
+
           echo "Wait max of ${TIMEOUT_SECS_CLI_TOOLS}s for Rancher Desktop to create CLI tools"
           for i in $(seq 1 ${TIMEOUT_SECS_CLI_TOOLS}); do
               if [ -e "$HOME/.rd/bin/rdctl" ]; then
@@ -85,12 +85,12 @@ jobs:
               fi
               sleep 1
           done
-          
+
           if [ ! -e "$HOME/.rd/bin/rdctl" ]; then
             echo "Rancher Desktop CLI tools not found"
             exit 1
           fi
-          
+
           echo "Rancher Desktop initialised successfully, now configure the container runtime"
           $HOME/.rd/bin/rdctl set \
             --container-engine.name=moby \
@@ -101,13 +101,13 @@ jobs:
             --virtual-machine.number-cpus=3 \
             --virtual-machine.memory-in-gb=14 \
             || true
-          
+
           echo "Restart Rancher Desktop"
           $HOME/.rd/bin/rdctl shutdown
           $HOME/.rd/bin/rdctl start
-          
+
           echo "Wait max of ${TIMEOUT_SECS_USER_SOCKET}s for Rancher socket"
-          
+
           for i in $(seq 1 ${TIMEOUT_SECS_USER_SOCKET}); do
               if [ -e "$HOME/.rd/docker.sock" ]; then
                 echo "Rancher Desktop socket created after ${i}s"
@@ -115,14 +115,14 @@ jobs:
               fi
               sleep 1
           done
-          
+
           if [ ! -e "$HOME/.rd/docker.sock" ]; then
             echo "Rancher Desktop socket not found"
             exit 1
           fi
-          
+
           echo "{}" > $HOME/.docker/config.json
-          
+
           echo "DOCKER_HOST=unix://${HOME}/.rd/docker.sock" >> $GITHUB_ENV
           echo "TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock" >> $GITHUB_ENV
           echo "NODE_OPTIONS=--dns-result-order=ipv4first" >> $GITHUB_ENV
@@ -130,13 +130,13 @@ jobs:
       - name: Code checkout
         uses: actions/checkout@v4
 
-      - name: Install NodeJS ${{ inputs.node-version }}
-        uses: actions/setup-node@v4
+      - name: Install Node ${{ inputs.node-version }} and Dependencies
+        id: npm-install
+        uses: ./.github/actions/npm-setup
         with:
+          runner: ${{ inputs.runner }}
           node-version: ${{ inputs.node-version }}
-
-      - name: Install dependencies
-        run: npm ci --omit=optional
+          workspace: "${{ inputs.workspace }}"
 
       - name: Run tests
-        run: npm run test:ci -- ${{ inputs.workspace }}
+        run: npm run test:ci -- --coverage.include=${{ steps.npm-install.outputs.workspace_path }} ${{ steps.npm-install.outputs.workspace_path }}

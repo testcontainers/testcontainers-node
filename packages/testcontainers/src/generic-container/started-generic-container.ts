@@ -1,20 +1,22 @@
-import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
-import Dockerode, { ContainerInspectInfo } from "dockerode";
-import { ContentToCopy, DirectoryToCopy, ExecOptions, ExecResult, FileToCopy, Labels } from "../types";
-import { Readable } from "stream";
-import { StoppedGenericContainer } from "./stopped-generic-container";
-import { WaitStrategy } from "../wait-strategies/wait-strategy";
-import AsyncLock from "async-lock";
 import archiver from "archiver";
-import { waitForContainer } from "../wait-strategies/wait-for-container";
-import { BoundPorts } from "../utils/bound-ports";
+import AsyncLock from "async-lock";
+import Dockerode, { ContainerInspectInfo } from "dockerode";
+import { Readable } from "stream";
 import { containerLog, log } from "../common";
-import { getContainerRuntimeClient } from "../container-runtime";
+import { ContainerRuntimeClient, getContainerRuntimeClient } from "../container-runtime";
+import { getReaper } from "../reaper/reaper";
+import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
+import { CommitOptions, ContentToCopy, DirectoryToCopy, ExecOptions, ExecResult, FileToCopy, Labels } from "../types";
+import { BoundPorts } from "../utils/bound-ports";
+import { LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
 import { mapInspectResult } from "../utils/map-inspect-result";
+import { waitForContainer } from "../wait-strategies/wait-for-container";
+import { WaitStrategy } from "../wait-strategies/wait-strategy";
+import { StoppedGenericContainer } from "./stopped-generic-container";
 
 export class StartedGenericContainer implements StartedTestContainer {
   private stoppedContainer?: StoppedTestContainer;
-  private stopContainerLock = new AsyncLock();
+  private readonly stopContainerLock = new AsyncLock();
 
   constructor(
     private readonly container: Dockerode.Container,
@@ -22,7 +24,8 @@ export class StartedGenericContainer implements StartedTestContainer {
     private inspectResult: ContainerInspectInfo,
     private boundPorts: BoundPorts,
     private readonly name: string,
-    private readonly waitStrategy: WaitStrategy
+    private readonly waitStrategy: WaitStrategy,
+    private readonly autoRemove: boolean
   ) {}
 
   protected containerIsStopping?(): Promise<void>;
@@ -35,6 +38,38 @@ export class StartedGenericContainer implements StartedTestContainer {
       this.stoppedContainer = await this.stopContainer(options);
       return this.stoppedContainer;
     });
+  }
+
+  /**
+   * Construct the command(s) to apply changes to the container before committing it to an image.
+   */
+  private async getContainerCommitChangeCommands(options: {
+    deleteOnExit: boolean;
+    changes?: string[];
+    client: ContainerRuntimeClient;
+  }): Promise<string> {
+    const { deleteOnExit, client } = options;
+    const changes = options.changes || [];
+    if (deleteOnExit) {
+      let sessionId = this.getLabels()[LABEL_TESTCONTAINERS_SESSION_ID];
+      if (!sessionId) {
+        sessionId = await getReaper(client).then((reaper) => reaper.sessionId);
+      }
+      changes.push(`LABEL ${LABEL_TESTCONTAINERS_SESSION_ID}=${sessionId}`);
+    } else if (!deleteOnExit && this.getLabels()[LABEL_TESTCONTAINERS_SESSION_ID]) {
+      // By default, commit will save the existing labels (including the session ID) to the new image.  If
+      // deleteOnExit is false, we need to remove the session ID label.
+      changes.push(`LABEL ${LABEL_TESTCONTAINERS_SESSION_ID}=`);
+    }
+    return changes.join("\n");
+  }
+
+  public async commit(options: CommitOptions): Promise<string> {
+    const client = await getContainerRuntimeClient();
+    const { deleteOnExit = true, changes, ...commitOpts } = options;
+    const changeCommands = await this.getContainerCommitChangeCommands({ deleteOnExit, changes, client });
+    const imageId = await client.container.commit(this.container, { ...commitOpts, changes: changeCommands });
+    return imageId;
   }
 
   protected containerIsStopped?(): Promise<void>;
@@ -71,7 +106,7 @@ export class StartedGenericContainer implements StartedTestContainer {
       await this.containerIsStopping();
     }
 
-    const resolvedOptions: StopOptions = { remove: true, timeout: 0, removeVolumes: true, ...options };
+    const resolvedOptions: StopOptions = { remove: this.autoRemove, timeout: 0, removeVolumes: true, ...options };
     await client.container.stop(this.container, { timeout: resolvedOptions.timeout });
     if (resolvedOptions.remove) {
       await client.container.remove(this.container, { removeVolumes: resolvedOptions.removeVolumes });
@@ -87,6 +122,10 @@ export class StartedGenericContainer implements StartedTestContainer {
 
   public getHost(): string {
     return this.host;
+  }
+
+  public getHostname(): string {
+    return this.inspectResult.Config.Hostname;
   }
 
   public getFirstMappedPort(): number {
@@ -160,6 +199,13 @@ export class StartedGenericContainer implements StartedTestContainer {
     tar.finalize();
     await client.container.putArchive(this.container, tar, "/");
     log.debug(`Copied content to container`, { containerId: this.container.id });
+  }
+
+  public async copyArchiveToContainer(tar: Readable, target = "/"): Promise<void> {
+    log.debug(`Copying archive to container...`, { containerId: this.container.id });
+    const client = await getContainerRuntimeClient();
+    await client.container.putArchive(this.container, tar, target);
+    log.debug(`Copied archive to container`, { containerId: this.container.id });
   }
 
   public async copyArchiveFromContainer(path: string): Promise<NodeJS.ReadableStream> {

@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/k3s",
-  "version": "10.17.1",
+  "version": "10.28.0",
   "license": "MIT",
   "keywords": [
     "k3s",
@@ -12,7 +12,7 @@
   "homepage": "https://github.com/testcontainers/testcontainers-node#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/testcontainers/testcontainers-node"
+    "url": "git+https://github.com/testcontainers/testcontainers-node.git"
   },
   "bugs": {
     "url": "https://github.com/testcontainers/testcontainers-node/issues"
@@ -29,7 +29,7 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "dependencies": {
-    "testcontainers": "^10.17.1"
+    "testcontainers": "^10.28.0"
   },
   "devDependencies": {
     "@kubernetes/client-node": "^1.0.0-rc7"

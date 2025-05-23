@@ -50,10 +50,13 @@ export class StartedToxiProxyContainer extends AbstractStartedContainer {
     // Firstly get the list of proxies to find the next available port
     const proxies = await this.client.getAll();
 
-    const usedPorts = PORT_ARRAY.reduce((acc, port) => {
-      acc[port] = false;
-      return acc;
-    }, {} as Record<string, boolean>);
+    const usedPorts = PORT_ARRAY.reduce(
+      (acc, port) => {
+        acc[port] = false;
+        return acc;
+      },
+      {} as Record<string, boolean>
+    );
 
     for (const proxy of Object.values(proxies)) {
       const lastColon = proxy.listen.lastIndexOf(":");

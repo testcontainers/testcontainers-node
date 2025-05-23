@@ -1,9 +1,7 @@
-import { MongoDBContainer } from "./mongodb-container";
 import mongoose from "mongoose";
+import { MongoDBContainer } from "./mongodb-container";
 
-describe("MongodbContainer", () => {
-  jest.setTimeout(240_000);
-
+describe("MongodbContainer", { timeout: 240_000 }, () => {
   // connect4 {
   it("should work using default version 4.0.1", async () => {
     const mongodbContainer = await new MongoDBContainer().start();

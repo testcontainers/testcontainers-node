@@ -1,38 +1,35 @@
-import { AbstractStartedContainer, GenericContainer, Wait } from "testcontainers";
-import type { StartedTestContainer } from "testcontainers";
+import { AbstractStartedContainer, StartedTestContainer, Wait } from "testcontainers";
+import { AbstractGcloudEmulator } from "./abstract-gcloud-emulator";
 
 const EMULATOR_PORT = 8085;
-const CMD = "gcloud beta emulators pubsub start --host-port 0.0.0.0:8085";
 const DEFAULT_IMAGE = "gcr.io/google.com/cloudsdktool/google-cloud-cli";
 
-export class PubSubEmulatorContainer extends GenericContainer {
-  private _projectId?: string;
+export class PubSubEmulatorContainer extends AbstractGcloudEmulator {
+  private projectId?: string;
 
   constructor(image = DEFAULT_IMAGE) {
-    super(image);
-
-    this.withExposedPorts(EMULATOR_PORT)
-      .withWaitStrategy(Wait.forLogMessage(/Server started/g, 1))
-      .withStartupTimeout(120_000);
+    super(image, EMULATOR_PORT, "gcloud beta emulators pubsub start");
+    this.withWaitStrategy(Wait.forLogMessage(/Server started/g));
   }
 
-  public withProjectId(projectId: string): PubSubEmulatorContainer {
-    this._projectId = projectId;
+  public withProjectId(projectId: string): this {
+    this.projectId = projectId;
     return this;
   }
 
   public override async start(): Promise<StartedPubSubEmulatorContainer> {
-    // Determine the valid command-line prompt when starting the Pub/Sub emulator
-    const selectedProjectId = this._projectId ?? "test-project";
-    const commandLine = `${CMD} --project=${selectedProjectId}`;
-    this.withCommand(["/bin/sh", "-c", commandLine]);
+    const selectedProjectId = this.projectId ?? "test-project";
+    this.withFlag("project", selectedProjectId);
 
     return new StartedPubSubEmulatorContainer(await super.start(), selectedProjectId);
   }
 }
 
 export class StartedPubSubEmulatorContainer extends AbstractStartedContainer {
-  constructor(startedTestContainer: StartedTestContainer, private readonly projectId: string) {
+  constructor(
+    startedTestContainer: StartedTestContainer,
+    private readonly projectId: string
+  ) {
     super(startedTestContainer);
   }
 

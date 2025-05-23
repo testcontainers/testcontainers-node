@@ -1,12 +1,9 @@
-import * as couchbase from "couchbase";
-import { Bucket, Cluster } from "couchbase";
+import couchbase, { Bucket, Cluster } from "couchbase";
 import { BucketDefinition } from "./bucket-definition";
 import { CouchbaseContainer, StartedCouchbaseContainer } from "./couchbase-container";
 import { CouchbaseService } from "./couchbase-service";
 
-describe("CouchbaseContainer", () => {
-  jest.setTimeout(180_000);
-
+describe("CouchbaseContainer", { timeout: 180_000 }, () => {
   // upsertAndGet {
   const upsertAndGet = async (
     bucket: Bucket,

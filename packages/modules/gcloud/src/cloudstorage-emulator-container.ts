@@ -1,5 +1,5 @@
-import { AbstractStartedContainer, GenericContainer, Wait } from "testcontainers";
 import type { StartedTestContainer } from "testcontainers";
+import { AbstractStartedContainer, GenericContainer, Wait } from "testcontainers";
 
 const PORT = 4443;
 const DEFAULT_IMAGE = "fsouza/fake-gcs-server";
@@ -102,7 +102,6 @@ export class StartedCloudStorageEmulatorContainer extends AbstractStartedContain
     });
 
     if (!response.ok) {
-      // eslint-disable-next-line
       console.warn(`error updating fake-gcs-server with external url, response status code: ${response.status}`);
     }
   }
