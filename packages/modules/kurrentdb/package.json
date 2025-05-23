@@ -1,14 +1,14 @@
 {
-  "name": "@testcontainers/kurrent",
+  "name": "@testcontainers/kurrentdb",
   "version": "10.28.0",
   "license": "MIT",
   "keywords": [
-    "kurrent",
+    "kurrentdb",
     "testing",
     "docker",
     "testcontainers"
   ],
-  "description": "Kurrent module for Testcontainers",
+  "description": "KurrentDB module for Testcontainers",
   "homepage": "https://github.com/testcontainers/testcontainers-node#readme",
   "repository": {
     "type": "git",

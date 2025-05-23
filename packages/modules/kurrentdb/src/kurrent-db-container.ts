@@ -1,12 +1,12 @@
 import { AbstractStartedContainer, GenericContainer, Wait } from "testcontainers";
 
-export class StartedKurrentContainer extends AbstractStartedContainer {
+export class StartedKurrentDbContainer extends AbstractStartedContainer {
   getConnectionString(): string {
     return `esdb://${this.getHost()}:${this.getFirstMappedPort()}?tls=false`;
   }
 }
 
-export class KurrentContainer extends GenericContainer {
+export class KurrentDbContainer extends GenericContainer {
   constructor(image = "kurrentplatform/kurrentdb:25.0") {
     super(image);
 
@@ -21,7 +21,7 @@ export class KurrentContainer extends GenericContainer {
       .withWaitStrategy(Wait.forHealthCheck());
   }
 
-  public override async start(): Promise<StartedKurrentContainer> {
-    return new StartedKurrentContainer(await super.start());
+  public override async start(): Promise<StartedKurrentDbContainer> {
+    return new StartedKurrentDbContainer(await super.start());
   }
 }
