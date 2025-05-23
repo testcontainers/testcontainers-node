@@ -1,12 +1,12 @@
-import { EventStoreDBClient, StreamingRead, StreamSubscription } from "@eventstore/db-client";
-import { EventStoreDBContainer } from "./eventstoredb-container";
+import { KurrentDBClient, StreamSubscription } from "@kurrent/kurrentdb-client";
+import { KurrentDbContainer } from "./kurrent-db-container";
 
-describe("EventStoreDBContainer", { timeout: 240_000 }, () => {
+describe("KurrentDbContainer", { timeout: 240_000 }, () => {
   // startContainer {
   it("should execute write and read", async () => {
-    const container = await new EventStoreDBContainer().start();
+    const container = await new KurrentDbContainer().start();
 
-    const client = EventStoreDBClient.connectionString(container.getConnectionString());
+    const client = KurrentDBClient.connectionString(container.getConnectionString());
 
     await client.appendToStream("User-1", [
       {
@@ -31,7 +31,7 @@ describe("EventStoreDBContainer", { timeout: 240_000 }, () => {
           metadata: {
             someMetadata: "bar",
           },
-          revision: 0n,
+          revision: 0,
           streamId: "User-1",
           type: "UserCreated",
         }),
@@ -44,8 +44,8 @@ describe("EventStoreDBContainer", { timeout: 240_000 }, () => {
 
   // usingStandardProjections {
   it("should use built-in projections", async () => {
-    const container = await new EventStoreDBContainer().start();
-    const client = EventStoreDBClient.connectionString(container.getConnectionString());
+    const container = await new KurrentDbContainer().start();
+    const client = KurrentDBClient.connectionString(container.getConnectionString());
 
     await client.appendToStream("Todo-1", [
       {
@@ -87,7 +87,7 @@ describe("EventStoreDBContainer", { timeout: 240_000 }, () => {
   // }
 });
 
-async function consumeSteamingRead(read: StreamingRead<unknown>): Promise<unknown[]> {
+async function consumeSteamingRead(read: AsyncIterableIterator<unknown>): Promise<unknown[]> {
   const events = [];
 
   for await (const event of read) {
