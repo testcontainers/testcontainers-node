@@ -448,12 +448,12 @@ export class CouchbaseContainer extends GenericContainer {
             return jsonResponse.results[0].present;
           },
           () => {
-            const message = `URL /query/service not accessible after ${this.startupTimeout || 60_000}ms`;
+            const message = `URL /query/service not accessible after ${this.startupTimeoutMs || 60_000}ms`;
             log.error(message, { containerId: client.container.getById(startedTestContainer.getId()).id });
 
             throw new Error(message);
           },
-          this.startupTimeout || 60_000
+          this.startupTimeoutMs || 60_000
         );
       }
 
@@ -509,12 +509,12 @@ export class CouchbaseContainer extends GenericContainer {
               return jsonResponse.results[0].online;
             },
             () => {
-              const message = `URL /query/service not accessible after ${this.startupTimeout || 60_000}ms`;
+              const message = `URL /query/service not accessible after ${this.startupTimeoutMs || 60_000}ms`;
               log.error(message, { containerId: client.container.getById(startedTestContainer.getId()).id });
 
               throw new Error(message);
             },
-            this.startupTimeout || 60_000
+            this.startupTimeoutMs || 60_000
           );
         } else {
           log.info(
