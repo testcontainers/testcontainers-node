@@ -47,11 +47,11 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
       () => portCheck.isBound(port),
       (isBound) => isBound,
       () => {
-        const message = `Port ${port} not bound after ${this.startupTimeout}ms`;
+        const message = `Port ${port} not bound after ${this.startupTimeoutMs}ms`;
         log.error(message, { containerId: container.id });
         throw new Error(message);
       },
-      this.startupTimeout
+      this.startupTimeoutMs
     );
   }
 }

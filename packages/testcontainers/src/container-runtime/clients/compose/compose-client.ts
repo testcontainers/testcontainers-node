@@ -1,5 +1,5 @@
 import compose from "docker-compose";
-import { log, pullLog } from "../../../common";
+import { log, pullLog, toSeconds } from "../../../common";
 import { defaultComposeOptions } from "./default-compose-options";
 import { ComposeDownOptions, ComposeOptions } from "./types";
 
@@ -126,7 +126,7 @@ function composeDownCommandOptions(options: ComposeDownOptions): string[] {
     result.push("-v");
   }
   if (options.timeout) {
-    result.push("-t", `${options.timeout / 1000}`);
+    result.push("-t", `${toSeconds(options.timeout)}`);
   }
   return result;
 }

@@ -19,11 +19,11 @@ export abstract class StartupCheckStrategy extends AbstractWaitStrategy {
       async () => await this.checkStartupState(client.container.dockerode, container.id),
       (startupStatus) => startupStatus === "SUCCESS" || startupStatus === "FAIL",
       () => {
-        const message = `Container not accessible after ${this.startupTimeout}ms`;
+        const message = `Container not accessible after ${this.startupTimeoutMs}ms`;
         log.error(message, { containerId: container.id });
         return new Error(message);
       },
-      this.startupTimeout
+      this.startupTimeoutMs
     );
 
     if (startupStatus instanceof Error) {
