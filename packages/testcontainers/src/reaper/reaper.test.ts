@@ -1,5 +1,5 @@
 import { ContainerRuntimeClient, getContainerRuntimeClient } from "../container-runtime";
-import { RandomUniquePortGenerator } from "../utils/port-generator";
+import { RandomPortGenerator } from "../utils/port-generator";
 
 describe("Reaper", { timeout: 120_000 }, () => {
   let client: ContainerRuntimeClient;
@@ -54,7 +54,7 @@ describe("Reaper", { timeout: 120_000 }, () => {
   });
 
   it("should use custom port when TESTCONTAINERS_RYUK_PORT is set", async () => {
-    const customPort = (await new RandomUniquePortGenerator().generatePort()).toString();
+    const customPort = (await new RandomPortGenerator().generatePort()).toString();
     vi.stubEnv("TESTCONTAINERS_RYUK_PORT", customPort);
     vi.spyOn(client.container, "list").mockResolvedValue([]);
 

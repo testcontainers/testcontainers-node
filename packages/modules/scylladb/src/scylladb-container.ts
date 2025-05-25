@@ -3,7 +3,7 @@ import { AbstractStartedContainer, GenericContainer, type StartedTestContainer }
 const SCYLLA_PORT = 9042;
 
 export class ScyllaContainer extends GenericContainer {
-  constructor(image = "scylladb/scylla:6.2.0") {
+  constructor(image: string) {
     super(image);
     this.withExposedPorts(SCYLLA_PORT);
     this.withCommand(["--skip-wait-for-gossip-to-settle=0"]);

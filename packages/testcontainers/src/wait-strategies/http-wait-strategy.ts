@@ -1,5 +1,5 @@
 import Dockerode from "dockerode";
-import { Agent } from "undici";
+import { Agent, Dispatcher, request } from "undici";
 import { IntervalRetry, log } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
 import { BoundPorts } from "../utils/bound-ports";
@@ -91,17 +91,18 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
 
             if (containerStatus === exitStatus) {
               containerExited = true;
-
               return;
             }
           }
 
-          return await fetch(url, {
-            method: this.method,
-            signal: AbortSignal.timeout(this.readTimeout),
-            headers: this.headers,
-            dispatcher: this.getAgent(),
-          });
+          return this.undiciResponseToFetchResponse(
+            await request(url, {
+              method: this.method,
+              signal: AbortSignal.timeout(this.readTimeout),
+              headers: this.headers,
+              dispatcher: this.getAgent(),
+            })
+          );
         } catch {
           return undefined;
         }
@@ -161,6 +162,31 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
     log.error(message, { containerId: container.id });
 
     throw new Error(message);
+  }
+
+  /**
+   * Converts an undici response to a fetch response.
+   * This is necessary because node's fetch does not support disabling SSL validation (https://github.com/orgs/nodejs/discussions/44038).
+   *
+   * @param undiciResponse The undici response to convert.
+   * @returns The fetch response.
+   */
+  private undiciResponseToFetchResponse(undiciResponse: Dispatcher.ResponseData): Response {
+    const headers = new Headers();
+    for (const [key, value] of Object.entries(undiciResponse.headers)) {
+      if (Array.isArray(value)) {
+        for (const v of value) {
+          headers.append(key, v);
+        }
+      } else if (value !== undefined) {
+        headers.set(key, value);
+      }
+    }
+
+    return new Response(undiciResponse.body, {
+      status: undiciResponse.statusCode,
+      headers,
+    });
   }
 
   private getAgent(): Agent | undefined {

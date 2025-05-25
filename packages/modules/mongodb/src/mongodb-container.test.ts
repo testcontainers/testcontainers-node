@@ -1,10 +1,12 @@
 import mongoose from "mongoose";
 import { MongoDBContainer } from "./mongodb-container";
 
+const IMAGE = "mongo:4.0.1";
+
 describe("MongodbContainer", { timeout: 240_000 }, () => {
   // connect4 {
   it("should work using default version 4.0.1", async () => {
-    const mongodbContainer = await new MongoDBContainer().start();
+    const mongodbContainer = await new MongoDBContainer(IMAGE).start();
 
     // directConnection: true is required as the testcontainer is created as a MongoDB Replica Set.
     const db = mongoose.createConnection(mongodbContainer.getConnectionString(), { directConnection: true });

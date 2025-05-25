@@ -16,7 +16,7 @@ See [LICENSE](https://github.com/testcontainers/testcontainers-node/blob/main/LI
 
 ## Copyright
 
-Copyright (c) 2018 - 2023 Cristian Greco and other authors.
+Copyright (c) 2018 - 2025 Cristian Greco and other authors.
 
 ## Contributing
 
@@ -24,7 +24,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for how to contribute to this repo.
 
 See [contributors](https://github.com/testcontainers/testcontainers-node/graphs/contributors/) for all contributors.
 
-
-----
+---
 
 Join our [Slack workspace](https://slack.testcontainers.org/) | [Testcontainers OSS](https://java.testcontainers.org/) | [Testcontainers Cloud](https://www.testcontainers.cloud/)

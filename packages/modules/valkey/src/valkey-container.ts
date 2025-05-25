@@ -9,7 +9,7 @@ export class ValkeyContainer extends GenericContainer {
   private persistenceVolume? = "";
   private initialImportScriptFile? = "";
 
-  constructor(image = "valkey/valkey:8.0") {
+  constructor(image: string) {
     super(image);
     this.withExposedPorts(VALKEY_PORT)
       .withStartupTimeout(120_000)

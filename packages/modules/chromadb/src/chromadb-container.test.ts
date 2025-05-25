@@ -5,10 +5,12 @@ import path from "node:path";
 import { GenericContainer } from "testcontainers";
 import { ChromaDBContainer, StartedChromaDBContainer } from "./chromadb-container";
 
+const IMAGE = "chromadb/chroma:0.6.3";
+
 describe("ChromaDB", { timeout: 360_000 }, () => {
   // startContainer {
   it("should connect", async () => {
-    const container = await new ChromaDBContainer().start();
+    const container = await new ChromaDBContainer(IMAGE).start();
     const client = await connectTo(container);
     expect(await client.heartbeat()).toBeDefined();
     // Do something with the client
@@ -29,7 +31,7 @@ describe("ChromaDB", { timeout: 360_000 }, () => {
 
   // createCollection {
   it("should create collection and get data", async () => {
-    const container = await new ChromaDBContainer().start();
+    const container = await new ChromaDBContainer(IMAGE).start();
     const client = await connectTo(container);
     const collection = await client.createCollection({ name: "test", metadata: { "hnsw:space": "cosine" } });
     expect(collection.name).toBe("test");
@@ -47,7 +49,7 @@ describe("ChromaDB", { timeout: 360_000 }, () => {
 
   // queryCollectionWithEmbeddingFunction {
   it("should create collection and query", async () => {
-    const container = await new ChromaDBContainer().start();
+    const container = await new ChromaDBContainer(IMAGE).start();
     const ollama = await new GenericContainer("ollama/ollama").withExposedPorts(11434).start();
     await ollama.exec(["ollama", "pull", "nomic-embed-text"]);
     const client = await connectTo(container);
@@ -78,7 +80,7 @@ describe("ChromaDB", { timeout: 360_000 }, () => {
   // persistentData {
   it("should reconnect with volume and persistence data", async () => {
     const sourcePath = fs.mkdtempSync(path.join(os.tmpdir(), "chroma-temp"));
-    const container = await new ChromaDBContainer()
+    const container = await new ChromaDBContainer(IMAGE)
       .withBindMounts([{ source: sourcePath, target: "/chroma/chroma" }])
       .start();
     const client = await connectTo(container);
@@ -106,7 +108,7 @@ describe("ChromaDB", { timeout: 360_000 }, () => {
     const tenant = "test-tenant";
     const key = "test-key";
     const database = "test-db";
-    const container = await new ChromaDBContainer()
+    const container = await new ChromaDBContainer(IMAGE)
       .withEnvironment({
         CHROMA_SERVER_AUTHN_CREDENTIALS: key,
         CHROMA_SERVER_AUTHN_PROVIDER: "chromadb.auth.token_authn.TokenAuthenticationServerProvider",

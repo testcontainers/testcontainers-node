@@ -1,11 +1,11 @@
 import { GenericContainer } from "../generic-container/generic-container";
-import { RandomUniquePortGenerator } from "../utils/port-generator";
+import { RandomPortGenerator } from "../utils/port-generator";
 import { createTestServer } from "../utils/test-helper";
 
 describe("Port Forwarder reuse", { timeout: 180_000 }, () => {
-  it("should expose additional ports", async () => {
-    const portGen = new RandomUniquePortGenerator();
+  const portGen = new RandomPortGenerator();
 
+  it("should expose additional ports", async () => {
     const { TestContainers: TC1 } = await import("../test-containers");
     const { PortForwarderInstance: PFI1 } = await import("../port-forwarder/port-forwarder");
     const port1 = await portGen.generatePort();
@@ -35,7 +35,6 @@ describe("Port Forwarder reuse", { timeout: 180_000 }, () => {
   });
 
   it("should reuse same ports", async () => {
-    const portGen = new RandomUniquePortGenerator();
     const port = await portGen.generatePort();
     const server = await createTestServer(port);
 
