@@ -113,7 +113,7 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
 
     await client.json.set("key", "$", { name: "test" });
     const result = await client.json.get("key");
-    expect(result).toEqual(JSON.stringify({ name: "test" }));
+    expect(result).toEqual({ name: "test" });
 
     client.destroy();
     await container.stop();
