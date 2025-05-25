@@ -57,11 +57,11 @@ nav:
       - CockroachDB: modules/cockroachdb.md
       - Elasticsearch: modules/elasticsearch.md
       - Etcd: modules/etcd.md
-      - EventStoreDB: modules/eventstoredb.md
       - GCloud: modules/gcloud.md
       - HiveMQ: modules/hivemq.md
       - K3s: modules/k3s.md
       - Kafka: modules/kafka.md
+      - KurrentDB: modules/kurrentdb.md
       - Localstack: modules/localstack.md
       - MariaDB: modules/mariadb.md
       - Mockserver: modules/mockserver.md
