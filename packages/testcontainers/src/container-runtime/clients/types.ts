@@ -1,7 +1,6 @@
 export type Info = {
   node: NodeInfo;
   containerRuntime: ContainerRuntimeInfo;
-  compose: ComposeInfo;
 };
 
 export type NodeInfo = {
@@ -24,7 +23,5 @@ export type ContainerRuntimeInfo = {
   runtimes: string[];
   labels: string[];
 };
-
-export type ComposeInfo = string;
 
 export type HostIp = { address: string; family: number };
