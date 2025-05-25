@@ -7,7 +7,7 @@ export class StartedKurrentDbContainer extends AbstractStartedContainer {
 }
 
 export class KurrentDbContainer extends GenericContainer {
-  constructor(image = "kurrentplatform/kurrentdb:25.0") {
+  constructor(image: string) {
     super(image);
 
     this.withExposedPorts(2113)

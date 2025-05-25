@@ -1,10 +1,12 @@
 import { KurrentDBClient, StreamSubscription } from "@kurrent/kurrentdb-client";
 import { KurrentDbContainer } from "./kurrent-db-container";
 
+const IMAGE = "kurrentplatform/kurrentdb:25.0";
+
 describe("KurrentDbContainer", { timeout: 240_000 }, () => {
   // startContainer {
   it("should execute write and read", async () => {
-    const container = await new KurrentDbContainer().start();
+    const container = await new KurrentDbContainer(IMAGE).start();
 
     const client = KurrentDBClient.connectionString(container.getConnectionString());
 
@@ -44,7 +46,7 @@ describe("KurrentDbContainer", { timeout: 240_000 }, () => {
 
   // usingStandardProjections {
   it("should use built-in projections", async () => {
-    const container = await new KurrentDbContainer().start();
+    const container = await new KurrentDbContainer(IMAGE).start();
     const client = KurrentDBClient.connectionString(container.getConnectionString());
 
     await client.appendToStream("Todo-1", [
