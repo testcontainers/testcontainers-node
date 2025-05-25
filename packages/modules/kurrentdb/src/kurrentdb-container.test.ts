@@ -1,5 +1,5 @@
 import { KurrentDBClient, StreamSubscription } from "@kurrent/kurrentdb-client";
-import { KurrentDbContainer } from "./kurrent-db-container";
+import { KurrentDbContainer } from "./kurrentdb-container";
 
 const IMAGE = "kurrentplatform/kurrentdb:25.0";
 

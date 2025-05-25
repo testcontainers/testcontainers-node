@@ -11,9 +11,9 @@ npm install @testcontainers/kurrentdb --save-dev
 ## Examples
 
 <!--codeinclude-->
-[Start container:](../../packages/modules/kurrentdb/src/kurrent-db-container.test.ts) inside_block:startContainer
+[Start container:](../../packages/modules/kurrentdb/src/kurrentdb-container.test.ts) inside_block:startContainer
 <!--/codeinclude-->
 
 <!--codeinclude-->
-[Subscribe to standard projection:](../../packages/modules/kurrentdb/src/kurrent-db-container.test.ts) inside_block:usingStandardProjections
+[Subscribe to standard projection:](../../packages/modules/kurrentdb/src/kurrentdb-container.test.ts) inside_block:usingStandardProjections
 <!--/codeinclude-->

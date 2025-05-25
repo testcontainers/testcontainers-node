@@ -1,1 +1,1 @@
-export { KurrentDbContainer, StartedKurrentDbContainer } from "./kurrent-db-container";
+export { KurrentDbContainer, StartedKurrentDbContainer } from "./kurrentdb-container";
