@@ -2,10 +2,9 @@ import { AbstractStartedContainer, StartedTestContainer } from "testcontainers";
 import { AbstractGcloudEmulator } from "./abstract-gcloud-emulator";
 
 const EMULATOR_PORT = 8080;
-const DEFAULT_IMAGE = "gcr.io/google.com/cloudsdktool/cloud-sdk:517.0.0-emulators";
 
 export class DatastoreEmulatorContainer extends AbstractGcloudEmulator {
-  constructor(image = DEFAULT_IMAGE) {
+  constructor(image: string) {
     super(image, EMULATOR_PORT, "gcloud beta emulators firestore start");
     this.withFlag("database-mode", `datastore-mode`);
   }

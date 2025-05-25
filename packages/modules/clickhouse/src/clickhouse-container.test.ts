@@ -1,6 +1,8 @@
 import { createClient } from "@clickhouse/client";
 import { ClickHouseContainer } from "./clickhouse-container";
 
+const IMAGE = "clickhouse/clickhouse-server:25.3-alpine";
+
 interface ClickHouseQueryResponse<T> {
   data: T[];
 }
@@ -8,7 +10,7 @@ interface ClickHouseQueryResponse<T> {
 describe("ClickHouseContainer", { timeout: 180_000 }, () => {
   // connectWithOptions {
   it("should connect using the client options object", async () => {
-    const container = await new ClickHouseContainer().start();
+    const container = await new ClickHouseContainer(IMAGE).start();
     const client = createClient(container.getClientOptions());
 
     const result = await client.query({
@@ -25,7 +27,7 @@ describe("ClickHouseContainer", { timeout: 180_000 }, () => {
 
   // connectWithUrl {
   it("should connect using the URL", async () => {
-    const container = await new ClickHouseContainer().start();
+    const container = await new ClickHouseContainer(IMAGE).start();
     const client = createClient({
       url: container.getConnectionUrl(),
     });
@@ -45,7 +47,7 @@ describe("ClickHouseContainer", { timeout: 180_000 }, () => {
 
   // connectWithUsernameAndPassword {
   it("should connect using the username and password", async () => {
-    const container = await new ClickHouseContainer()
+    const container = await new ClickHouseContainer(IMAGE)
       .withUsername("customUsername")
       .withPassword("customPassword")
       .start();
@@ -72,7 +74,7 @@ describe("ClickHouseContainer", { timeout: 180_000 }, () => {
   // setDatabase {
   it("should set database", async () => {
     const customDatabase = "customDatabase";
-    const container = await new ClickHouseContainer().withDatabase(customDatabase).start();
+    const container = await new ClickHouseContainer(IMAGE).withDatabase(customDatabase).start();
 
     const client = createClient(container.getClientOptions());
 
@@ -92,7 +94,7 @@ describe("ClickHouseContainer", { timeout: 180_000 }, () => {
   // setUsername {
   it("should set username", async () => {
     const customUsername = "customUsername";
-    const container = await new ClickHouseContainer().withUsername(customUsername).start();
+    const container = await new ClickHouseContainer(IMAGE).withUsername(customUsername).start();
 
     const client = createClient(container.getClientOptions());
 
@@ -110,7 +112,7 @@ describe("ClickHouseContainer", { timeout: 180_000 }, () => {
   // }
 
   it("should work with restarted container", async () => {
-    const container = await new ClickHouseContainer().start();
+    const container = await new ClickHouseContainer(IMAGE).start();
     await container.restart();
 
     const client = createClient(container.getClientOptions());

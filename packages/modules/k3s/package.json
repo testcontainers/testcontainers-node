@@ -32,6 +32,6 @@
     "testcontainers": "^10.28.0"
   },
   "devDependencies": {
-    "@kubernetes/client-node": "^1.0.0-rc7"
+    "@kubernetes/client-node": "^1.2.0"
   }
 }

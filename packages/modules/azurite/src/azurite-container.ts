@@ -7,7 +7,6 @@ import {
   Wait,
 } from "testcontainers";
 
-const AZURITE_IMAGE = "mcr.microsoft.com/azure-storage/azurite:3.33.0";
 const BLOB_PORT = 10000;
 const QUEUE_PORT = 10001;
 const TABLE_PORT = 10002;
@@ -15,7 +14,7 @@ const DEFAULT_ACCOUNT_NAME = "devstoreaccount1";
 const DEFAULT_ACCOUNT_KEY = "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==";
 
 export class AzuriteContainer extends GenericContainer {
-  constructor(image = AZURITE_IMAGE) {
+  constructor(image: string) {
     super(image);
     this.withEntrypoint(["azurite"])
       .withWaitStrategy(

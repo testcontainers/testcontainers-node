@@ -1,10 +1,12 @@
 import { EventStoreDBClient, StreamingRead, StreamSubscription } from "@eventstore/db-client";
 import { EventStoreDBContainer } from "./eventstoredb-container";
 
+const IMAGE = "eventstore/eventstore:24.10";
+
 describe("EventStoreDBContainer", { timeout: 240_000 }, () => {
   // startContainer {
   it("should execute write and read", async () => {
-    const container = await new EventStoreDBContainer().start();
+    const container = await new EventStoreDBContainer(IMAGE).start();
 
     const client = EventStoreDBClient.connectionString(container.getConnectionString());
 
@@ -44,7 +46,7 @@ describe("EventStoreDBContainer", { timeout: 240_000 }, () => {
 
   // usingStandardProjections {
   it("should use built-in projections", async () => {
-    const container = await new EventStoreDBContainer().start();
+    const container = await new EventStoreDBContainer(IMAGE).start();
     const client = EventStoreDBClient.connectionString(container.getConnectionString());
 
     await client.appendToStream("Todo-1", [

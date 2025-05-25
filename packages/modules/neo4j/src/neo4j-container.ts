@@ -27,7 +27,7 @@ export class Neo4jContainer extends GenericContainer {
   private ttl?: number;
   private plugins: Neo4jPlugin[] = [];
 
-  constructor(image = "neo4j:4.4.12") {
+  constructor(image: string) {
     super(image);
     this.withExposedPorts(BOLT_PORT, HTTP_PORT)
       .withWaitStrategy(Wait.forLogMessage("Started."))

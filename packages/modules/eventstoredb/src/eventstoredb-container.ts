@@ -9,7 +9,7 @@ export class StartedEventStoreDBContainer extends AbstractStartedContainer {
 const EVENT_STORE_DB_PORT = 2113;
 
 export class EventStoreDBContainer extends GenericContainer {
-  constructor(image = "eventstore/eventstore:24.10") {
+  constructor(image: string) {
     super(image);
 
     this.withExposedPorts(EVENT_STORE_DB_PORT)
