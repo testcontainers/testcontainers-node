@@ -41,6 +41,9 @@ updates:
       - "/packages/modules/weaviate"
     schedule:
       interval: "weekly"
+    labels:
+      - "dependencies"
+      - "javascript"
     groups:
       dependencies:
         patterns:
@@ -50,6 +53,9 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    labels:
+      - "dependencies"
+      - "github_actions"
     groups:
       actions:
         patterns:
