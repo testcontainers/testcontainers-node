@@ -32,6 +32,6 @@
     "testcontainers": "^10.28.0"
   },
   "devDependencies": {
-    "mariadb": "^3.4.0"
+    "mariadb": "^3.4.2"
   }
 }

@@ -29,7 +29,7 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "mqtt": "^4.3.8"
+    "mqtt": "^5.12.1"
   },
   "dependencies": {
     "testcontainers": "^10.28.0"

@@ -8,7 +8,7 @@ export class MariaDbContainer extends GenericContainer {
   private userPassword = "test";
   private rootPassword = "test";
 
-  constructor(image = "mariadb:11.5.2") {
+  constructor(image: string) {
     super(image);
     this.withExposedPorts(MARIADB_PORT).withStartupTimeout(120_000);
   }

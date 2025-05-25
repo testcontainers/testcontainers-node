@@ -9,7 +9,7 @@ export class MSSQLServerContainer extends GenericContainer {
   private acceptEula = "N";
   private message: string | RegExp = /.*Recovery is complete.*/;
 
-  constructor(image = "mcr.microsoft.com/mssql/server:2022-CU13-ubuntu-22.04") {
+  constructor(image: string) {
     super(image);
     this.withExposedPorts(MSSQL_PORT).withWaitStrategy(Wait.forLogMessage(this.message, 1)).withStartupTimeout(120_000);
   }
