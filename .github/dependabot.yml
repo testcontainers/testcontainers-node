@@ -15,7 +15,6 @@ updates:
       - "/packages/modules/couchbase"
       - "/packages/modules/elasticsearch"
       - "/packages/modules/etcd"
-      - "/packages/modules/eventstoredb"
       - "/packages/modules/gcloud"
       - "/packages/modules/hivemq"
       - "/packages/modules/k3s"
