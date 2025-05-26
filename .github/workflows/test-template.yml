@@ -18,6 +18,9 @@ jobs:
   test:
     runs-on: ${{ inputs.runner }}
     steps:
+      - name: Code checkout
+        uses: actions/checkout@v4
+
       - name: Docker rootless setup
         if: ${{ inputs.container-runtime == 'docker-rootless' }}
         uses: ./.github/actions/docker-rootless-setup
