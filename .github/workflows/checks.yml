@@ -140,12 +140,12 @@ jobs:
       fail-fast: false
       matrix:
         module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
-        ubuntu-version: [22.04]
+        runner: [ubuntu-22.04]
         node-version: [20.x, 22.x, 24.x]
         container-runtime: [docker, podman]
     uses: ./.github/workflows/test-template.yml
     with:
-      runner: ${{ matrix.ubuntu-version }}
+      runner: ${{ matrix.runner }}
       node-version: ${{ matrix.node-version }}
       container-runtime: ${{ matrix.container-runtime }}
       workspace: "${{ matrix.module }}"
