@@ -54,7 +54,7 @@ jobs:
     needs:
       - detect-modules
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
     runs-on: ubuntu-22.04
