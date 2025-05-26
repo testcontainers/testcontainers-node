@@ -19,7 +19,6 @@ on:
 
 jobs:
   test:
-    name: "Runner (${{ inputs.runner }}) / Node (${{ inputs.node-version }}) / Runtime (${{ inputs.container-runtime }}) / Workspace (${{ inputs.workspace }})"
     runs-on: ${{ inputs.runner }}
     steps:
       - name: Docker rootless setup 1/2

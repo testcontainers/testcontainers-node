@@ -146,10 +146,11 @@ jobs:
       fail-fast: false
       matrix:
         module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
+        ubuntu-version: [22.04]
         node-version: [20.x, 22.x, 24.x]
     uses: ./.github/workflows/test-template.yml
     with:
-      runner: ubuntu-22.04
+      runner: ${{ matrix.ubuntu-version }}
       node-version: ${{ matrix.node-version }}
       container-runtime: docker
       workspace: "${{ matrix.module }}"
@@ -167,10 +168,11 @@ jobs:
       fail-fast: false
       matrix:
         module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
+        ubuntu-version: [22.04]
         node-version: [20.x, 22.x, 24.x]
     uses: ./.github/workflows/test-template.yml
     with:
-      runner: ubuntu-22.04
+      runner: ${{ matrix.ubuntu-version }}
       node-version: ${{ matrix.node-version }}
       container-runtime: podman
       workspace: "${{ matrix.module }}"
