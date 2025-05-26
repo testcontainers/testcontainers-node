@@ -105,18 +105,17 @@ jobs:
       - compile
     name: Smoke tests
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
-        runner: [ubuntu-22.04]
         node-version: [20.x, 22.x, 24.x]
-    runs-on: ${{ matrix.runner }}
+    runs-on: ubuntu-22.04
     steps:
       - name: Code checkout
         uses: actions/checkout@v4
       - name: Install Node ${{ matrix.node-version }} and Dependencies
         uses: ./.github/actions/npm-setup
         with:
-          runner: ${{ matrix.runner }}
+          runner: ubuntu-22.04
           node-version: ${{ matrix.node-version }}
           workspace: "testcontainers"
       - name: Build testcontainers
