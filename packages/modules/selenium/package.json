@@ -33,6 +33,6 @@
     "selenium-webdriver": "^4.33.0"
   },
   "dependencies": {
-    "testcontainers": "^10.28.0"
+    "testcontainers": "^11.0.0"
   }
 }

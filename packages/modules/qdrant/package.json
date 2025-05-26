@@ -32,6 +32,6 @@
     "@qdrant/js-client-rest": "^1.14.1"
   },
   "dependencies": {
-    "testcontainers": "^10.28.0"
+    "testcontainers": "^11.0.0"
   }
 }
