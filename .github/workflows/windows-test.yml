@@ -39,7 +39,7 @@ jobs:
           node-version: 24.x
 
       - name: Install dependencies
-        run: npm ci --omit=optional
+        run: npm ci
 
       - name: Run tests
         run: npm run test:ci
