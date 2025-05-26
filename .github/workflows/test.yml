@@ -62,7 +62,7 @@ jobs:
       - name: Code checkout
         uses: actions/checkout@v4
       - name: Install Node and Dependencies
-        id: npm-install
+        id: npm-install-modules
         uses: ./.github/actions/npm-setup
         with:
           runner: ubuntu-22.04
@@ -70,7 +70,7 @@ jobs:
           workspace: "${{ matrix.module }}"
       - name: Code linting
         env:
-          WORKSPACE_PATH: ${{ steps.npm-install.outputs.workspace_path }}
+          WORKSPACE_PATH: ${{ steps.npm-install-modules.outputs.workspace_path }}
         run: npm run lint:ci
 
   compile:

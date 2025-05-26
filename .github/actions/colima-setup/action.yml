@@ -1,0 +1,26 @@
+name: 'Colima Setup'
+description: 'Sets up Colima'
+inputs:
+  runner:
+    description: 'The runner type (e.g., macos-latest)'
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Colima constraints
+      shell: bash
+      run: |
+        if [[ ! "${{ inputs.runner }}" =~ ^macos.* ]]; then
+          echo "::error::Colima is only supported on macOS"
+          exit 1
+        fi
+    - name: Colima setup
+      shell: bash
+      run: |
+        brew install docker docker-compose colima
+        colima start --cpu 3 --memory 14 --disk 14 --runtime docker
+        colima status
+        colima --version
+        echo "DOCKER_HOST=unix://${HOME}/.colima/default/docker.sock" >> $GITHUB_ENV
+        echo "TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock" >> $GITHUB_ENV
+        echo "NODE_OPTIONS=--dns-result-order=ipv4first" >> $GITHUB_ENV
