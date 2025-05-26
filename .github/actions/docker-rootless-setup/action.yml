@@ -1,5 +1,5 @@
-name: 'Docker Rootless Setup'
-description: 'Sets up Docker in rootless mode'
+name: "Docker Rootless Setup"
+description: "Sets up Docker in rootless mode"
 runs:
   using: "composite"
   steps:

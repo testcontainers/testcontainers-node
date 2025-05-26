@@ -1,5 +1,5 @@
-name: 'Podman Setup'
-description: 'Sets up Podman'
+name: "Podman Setup"
+description: "Sets up Podman"
 runs:
   using: "composite"
   steps:

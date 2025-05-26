@@ -1,8 +1,8 @@
-name: 'Rancher Desktop Setup'
-description: 'Sets up Rancher Desktop'
+name: "Rancher Desktop Setup"
+description: "Sets up Rancher Desktop"
 inputs:
   runner:
-    description: 'The runner type (e.g., macos-latest)'
+    description: "The runner type (e.g., macos-latest)"
     required: true
 runs:
   using: "composite"
