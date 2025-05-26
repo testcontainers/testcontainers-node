@@ -31,20 +31,20 @@
   },
   "dependencies": {
     "@balena/dockerignore": "^1.0.2",
-    "@types/dockerode": "^3.3.38",
+    "@types/dockerode": "^3.3.39",
     "archiver": "^7.0.1",
     "async-lock": "^1.4.1",
     "byline": "^5.0.0",
-    "debug": "^4.4.0",
+    "debug": "^4.4.1",
     "docker-compose": "^1.2.0",
     "dockerode": "^4.0.6",
     "get-port": "^7.1.0",
     "proper-lockfile": "^4.1.2",
     "properties-reader": "^2.3.0",
     "ssh-remote-port-forward": "^1.0.4",
-    "tar-fs": "^3.0.8",
+    "tar-fs": "^3.0.9",
     "tmp": "^0.2.3",
-    "undici": "^7.8.0"
+    "undici": "^7.10.0"
   },
   "devDependencies": {
     "@types/archiver": "^6.0.3",
