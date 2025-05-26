@@ -1,6 +1,3 @@
-name: Test
-run-name: "Runner (${{ inputs.runner }}) / Node (${{ inputs.node-version }}) / Runtime (${{ inputs.container-runtime }}) / Workspace (${{ inputs.workspace }})"
-
 on:
   workflow_call:
     inputs:

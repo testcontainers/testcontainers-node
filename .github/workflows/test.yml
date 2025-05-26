@@ -136,7 +136,7 @@ jobs:
 
   test:
     if: ${{ needs.detect-modules.outputs.modules_count > 0 }}
-    name: Docker tests
+    name: Tests
     needs:
       - detect-modules
       - lint
@@ -148,33 +148,12 @@ jobs:
         module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
         ubuntu-version: [22.04]
         node-version: [20.x, 22.x, 24.x]
+        container-runtime: [docker, podman]
     uses: ./.github/workflows/test-template.yml
     with:
       runner: ${{ matrix.ubuntu-version }}
       node-version: ${{ matrix.node-version }}
-      container-runtime: docker
-      workspace: "${{ matrix.module }}"
-
-  test-podman:
-    if: ${{ needs.detect-modules.outputs.modules_count > 0 }}
-    name: Podman tests
-    needs:
-      - detect-modules
-      - lint
-      - compile
-      - smoke-test
-      - test
-    strategy:
-      fail-fast: false
-      matrix:
-        module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
-        ubuntu-version: [22.04]
-        node-version: [20.x, 22.x, 24.x]
-    uses: ./.github/workflows/test-template.yml
-    with:
-      runner: ${{ matrix.ubuntu-version }}
-      node-version: ${{ matrix.node-version }}
-      container-runtime: podman
+      container-runtime: ${{ matrix.container-runtime }}
       workspace: "${{ matrix.module }}"
 
   end:
@@ -186,11 +165,9 @@ jobs:
       - compile
       - smoke-test
       - test
-      - test-podman
     runs-on: ubuntu-22.04
     steps:
       - name: Check if any jobs failed
         if: ${{ failure() || cancelled() }}
         run: exit 1
-
       - run: echo "All tests completed successfully!"
