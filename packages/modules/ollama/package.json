@@ -29,6 +29,6 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "dependencies": {
-    "testcontainers": "^10.28.0"
+    "testcontainers": "^11.0.0"
   }
 }
