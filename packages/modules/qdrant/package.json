@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/qdrant",
-  "version": "10.28.0",
+  "version": "11.0.0",
   "license": "MIT",
   "keywords": [
     "qdrant",
