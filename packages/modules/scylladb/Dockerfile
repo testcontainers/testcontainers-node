@@ -1,1 +1,1 @@
-FROM scylladb/scylla:6.2.0
+FROM scylladb/scylla:6.2.3
