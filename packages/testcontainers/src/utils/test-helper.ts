@@ -10,11 +10,11 @@ import { StartedDockerComposeEnvironment } from "../docker-compose-environment/s
 import { GenericContainer } from "../generic-container/generic-container";
 import { StartedTestContainer } from "../test-container";
 
-export const getImage = (dirname: string): string => {
+export const getImage = (dirname: string, index = 0): string => {
   return fs
     .readFileSync(path.resolve(dirname, "..", "Dockerfile"), "utf-8")
-    .split("\n")[0]
-    .split(" ")[1];
+    .split("\n")
+    [index].split(" ")[1];
 };
 
 export const checkContainerIsHealthy = async (container: StartedTestContainer): Promise<void> => {

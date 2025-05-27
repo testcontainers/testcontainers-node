@@ -4,7 +4,7 @@ import { ReadableStream } from "node:stream/web";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { CloudStorageEmulatorContainer, StartedCloudStorageEmulatorContainer } from "./cloudstorage-emulator-container";
 
-const IMAGE = getImage(__dirname);
+const IMAGE = getImage(__dirname, 1);
 
 async function getRequestBodyFromReadableStream(stream: ReadableStream<Uint8Array>): Promise<string> {
   const decoder = new TextDecoder();
