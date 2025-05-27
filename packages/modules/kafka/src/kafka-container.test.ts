@@ -2,9 +2,10 @@ import fs from "fs";
 import { Kafka, KafkaConfig, logLevel } from "kafkajs";
 import path from "path";
 import { GenericContainer, Network, StartedTestContainer } from "testcontainers";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { KafkaContainer } from "./kafka-container";
 
-const IMAGE = "confluentinc/cp-kafka:7.2.2";
+const IMAGE = getImage(__dirname);
 
 describe("KafkaContainer", { timeout: 240_000 }, () => {
   // connectBuiltInZK {

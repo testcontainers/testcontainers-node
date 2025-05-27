@@ -1,8 +1,9 @@
 import { Environment } from "testcontainers/src/types";
 import weaviate from "weaviate-ts-client";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { WeaviateContainer } from "./weaviate-container";
 
-const IMAGE = "semitechnologies/weaviate:1.24.5";
+const IMAGE = getImage(__dirname);
 
 describe("WeaviateContainer", { timeout: 100_000 }, () => {
   // connectWeaviate {

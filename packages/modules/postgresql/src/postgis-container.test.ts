@@ -1,7 +1,8 @@
 import { Client } from "pg";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { PostgreSqlContainer } from "./postgresql-container";
 
-const IMAGE = "postgis/postgis:16-3.4";
+const IMAGE = getImage(__dirname);
 
 describe("PostgisContainer", { timeout: 180_000 }, () => {
   it("should work", async () => {

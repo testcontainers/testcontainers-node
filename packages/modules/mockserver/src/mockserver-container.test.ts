@@ -1,8 +1,9 @@
 import { mockServerClient } from "mockserver-client";
 import superagent from "superagent";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { MockserverContainer } from "./mockserver-container";
 
-const IMAGE = "mockserver/mockserver:5.15.0";
+const IMAGE = getImage(__dirname);
 
 describe("MockserverContainer", { timeout: 240_000 }, () => {
   // startContainer {

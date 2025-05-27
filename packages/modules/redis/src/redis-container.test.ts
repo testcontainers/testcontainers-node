@@ -2,9 +2,10 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 import { createClient } from "redis";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { RedisContainer, StartedRedisContainer } from "./redis-container";
 
-const IMAGE = "redis:7.2";
+const IMAGE = getImage(__dirname);
 
 describe("RedisContainer", { timeout: 240_000 }, () => {
   // startContainer {

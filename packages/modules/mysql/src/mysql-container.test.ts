@@ -1,7 +1,8 @@
 import { createConnection } from "mysql2/promise";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { MySqlContainer } from "./mysql-container";
 
-const IMAGE = "mysql:8.0.31";
+const IMAGE = getImage(__dirname);
 
 describe("MySqlContainer", { timeout: 240_000 }, () => {
   // connect {

@@ -1,9 +1,10 @@
 import { QdrantClient } from "@qdrant/js-client-rest";
 import crypto from "crypto";
 import path from "path";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { QdrantContainer } from "./qdrant-container";
 
-const IMAGE = "qdrant/qdrant:v1.13.4";
+const IMAGE = getImage(__dirname);
 
 describe("QdrantContainer", { timeout: 100_000 }, () => {
   // connectQdrantSimple {

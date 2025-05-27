@@ -1,0 +1,1 @@
+FROM minio/minio:RELEASE.2024-12-13T22-19-12Z

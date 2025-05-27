@@ -1,7 +1,8 @@
 import amqp from "amqplib";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { RabbitMQContainer } from "./rabbitmq-container";
 
-const IMAGE = "rabbitmq:3.12.11-management-alpine";
+const IMAGE = getImage(__dirname);
 
 describe("RabbitMQContainer", { timeout: 240_000 }, () => {
   // start {

@@ -3,9 +3,10 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { GenericContainer } from "testcontainers";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { ChromaDBContainer, StartedChromaDBContainer } from "./chromadb-container";
 
-const IMAGE = "chromadb/chroma:0.6.3";
+const IMAGE = getImage(__dirname);
 
 describe("ChromaDB", { timeout: 360_000 }, () => {
   // startContainer {

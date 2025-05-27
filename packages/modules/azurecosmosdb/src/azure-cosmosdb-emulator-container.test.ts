@@ -1,8 +1,9 @@
 import { CosmosClient, PartitionKeyKind } from "@azure/cosmos";
 import https from "node:https";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { AzureCosmosDbEmulatorContainer } from "./azure-cosmosdb-emulator-container";
 
-const IMAGE = "mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-EN20250228";
+const IMAGE = getImage(__dirname);
 
 describe("AzureCosmosDbEmulatorContainer", { timeout: 180_000 }, async () => {
   it("should set https protocol", async () => {

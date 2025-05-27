@@ -1,7 +1,8 @@
 import neo4j from "neo4j-driver";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { Neo4jContainer, Neo4jPlugin } from "./neo4j-container";
 
-const IMAGE = "neo4j:4.4.12";
+const IMAGE = getImage(__dirname);
 
 describe("Neo4jContainer", { timeout: 180_000 }, () => {
   // createNode {

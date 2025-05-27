@@ -1,7 +1,8 @@
 import mariadb from "mariadb";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { MariaDbContainer } from "./mariadb-container";
 
-const IMAGE = "mariadb:11.5.2";
+const IMAGE = getImage(__dirname);
 
 describe("MariaDb", { timeout: 240_000 }, () => {
   // connect {

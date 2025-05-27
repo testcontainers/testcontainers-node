@@ -1,7 +1,8 @@
 import { Database } from "arangojs";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { ArangoDBContainer } from "./arangodb-container";
 
-const IMAGE = "arangodb:3.10.0";
+const IMAGE = getImage(__dirname);
 
 describe("ArangoDB", { timeout: 180_000 }, () => {
   // connect {

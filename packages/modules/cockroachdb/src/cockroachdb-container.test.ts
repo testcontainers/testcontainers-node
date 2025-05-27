@@ -1,7 +1,8 @@
 import { Client } from "pg";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { CockroachDbContainer } from "./cockroachdb-container";
 
-const IMAGE = "cockroachdb/cockroach:v24.3.5";
+const IMAGE = getImage(__dirname);
 
 describe("CockroachDbContainer", { timeout: 180_000 }, () => {
   // connect {

@@ -1,7 +1,8 @@
 import { BigQuery, TableSchema } from "@google-cloud/bigquery";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { BigQueryEmulatorContainer, StartedBigQueryEmulatorContainer } from "./bigquery-emulator-container";
 
-const IMAGE = "ghcr.io/goccy/bigquery-emulator:0.6.6";
+const IMAGE = getImage(__dirname);
 
 describe("BigQueryEmulatorContainer", { timeout: 240_000 }, () => {
   it("should work using default version", async () => {

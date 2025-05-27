@@ -1,7 +1,8 @@
 import * as minio from "minio";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { MinioContainer } from "./minio-container";
 
-const IMAGE = "minio/minio:RELEASE.2024-12-13T22-19-12Z";
+const IMAGE = getImage(__dirname);
 
 describe("MinIO", { timeout: 240_000 }, () => {
   // connectWithDefaultCredentials {

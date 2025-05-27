@@ -1,7 +1,8 @@
 import { Client } from "pg";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { PostgreSqlContainer } from "./postgresql-container";
 
-const IMAGE = "pgvector/pgvector:pg16";
+const IMAGE = getImage(__dirname);
 
 describe("PgvectorContainer", { timeout: 180_000 }, () => {
   it("should work", async () => {

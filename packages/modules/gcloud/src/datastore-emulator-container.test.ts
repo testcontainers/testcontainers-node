@@ -1,7 +1,8 @@
 import { Datastore } from "@google-cloud/datastore";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { DatastoreEmulatorContainer, StartedDatastoreEmulatorContainer } from "./datastore-emulator-container";
 
-const IMAGE = "gcr.io/google.com/cloudsdktool/cloud-sdk:517.0.0-emulators";
+const IMAGE = getImage(__dirname);
 
 describe("DatastoreEmulatorContainer", { timeout: 240_000 }, () => {
   // datastore4 {

@@ -2,9 +2,10 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 import { createClient } from "redis";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { StartedValkeyContainer, ValkeyContainer } from "./valkey-container";
 
-const IMAGE = "valkey/valkey:8.0";
+const IMAGE = getImage(__dirname);
 
 describe("ValkeyContainer", { timeout: 240_000 }, () => {
   it("should connect and execute set-get", async () => {
