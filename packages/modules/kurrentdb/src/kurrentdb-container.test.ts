@@ -1,7 +1,8 @@
 import { KurrentDBClient, StreamSubscription } from "@kurrent/kurrentdb-client";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { KurrentDbContainer } from "./kurrentdb-container";
 
-const IMAGE = "kurrentplatform/kurrentdb:25.0";
+const IMAGE = getImage(__dirname);
 
 describe("KurrentDbContainer", { timeout: 240_000 }, () => {
   // startContainer {

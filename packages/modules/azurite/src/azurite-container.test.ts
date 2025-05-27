@@ -1,9 +1,10 @@
 import { TableClient, TableEntity } from "@azure/data-tables";
 import { BlobServiceClient, StorageSharedKeyCredential } from "@azure/storage-blob";
 import { QueueServiceClient } from "@azure/storage-queue";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { AzuriteContainer } from "./azurite-container";
 
-const IMAGE = "mcr.microsoft.com/azure-storage/azurite:3.34.0";
+const IMAGE = getImage(__dirname);
 
 describe("Azurite", { timeout: 240_000 }, () => {
   // uploadAndDownloadBlob {

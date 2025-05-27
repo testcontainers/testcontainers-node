@@ -1,7 +1,8 @@
 import { createClient } from "@clickhouse/client";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { ClickHouseContainer } from "./clickhouse-container";
 
-const IMAGE = "clickhouse/clickhouse-server:25.3-alpine";
+const IMAGE = getImage(__dirname);
 
 interface ClickHouseQueryResponse<T> {
   data: T[];

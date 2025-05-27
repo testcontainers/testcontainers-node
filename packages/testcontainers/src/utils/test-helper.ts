@@ -1,5 +1,7 @@
 import { GetEventsOptions, ImageInspectInfo } from "dockerode";
 import { createServer, Server } from "http";
+import fs from "node:fs";
+import path from "node:path";
 import { Readable } from "stream";
 import { Agent, request } from "undici";
 import { IntervalRetry } from "../common";
@@ -7,6 +9,13 @@ import { getContainerRuntimeClient } from "../container-runtime";
 import { StartedDockerComposeEnvironment } from "../docker-compose-environment/started-docker-compose-environment";
 import { GenericContainer } from "../generic-container/generic-container";
 import { StartedTestContainer } from "../test-container";
+
+export const getImage = (dirname: string, index = 0): string => {
+  return fs
+    .readFileSync(path.resolve(dirname, "..", "Dockerfile"), "utf-8")
+    .split("\n")
+    [index].split(" ")[1];
+};
 
 export const checkContainerIsHealthy = async (container: StartedTestContainer): Promise<void> => {
   const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;

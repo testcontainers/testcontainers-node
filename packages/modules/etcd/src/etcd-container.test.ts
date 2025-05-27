@@ -1,8 +1,9 @@
 import { Etcd3 } from "etcd3";
 import { setTimeout } from "node:timers/promises";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { EtcdContainer, StartedEtcdContainer } from "./etcd-container";
 
-const IMAGE = "quay.io/coreos/etcd:v3.6.0";
+const IMAGE = getImage(__dirname);
 
 describe("etcd", () => {
   it("should construct a container", { timeout: 30_000 }, async () => {

@@ -1,7 +1,8 @@
 import { Client } from "cassandra-driver"; // Scylla uses Cassandra's driver in Node.js
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { ScyllaContainer } from "./scylladb-container";
 
-const IMAGE = "scylladb/scylla:6.2.0";
+const IMAGE = getImage(__dirname);
 
 describe("ScyllaDB", { timeout: 240_000 }, () => {
   // connectWithDefaultCredentials {

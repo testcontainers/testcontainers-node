@@ -1,7 +1,8 @@
 import { Client } from "cassandra-driver";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { CassandraContainer } from "./cassandra-container";
 
-const IMAGE = "cassandra:5.0.2";
+const IMAGE = getImage(__dirname);
 
 describe("Cassandra", { timeout: 240_000 }, () => {
   // connectWithDefaultCredentials {

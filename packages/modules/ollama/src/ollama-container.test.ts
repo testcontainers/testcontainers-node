@@ -1,6 +1,7 @@
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { OllamaContainer } from "./ollama-container";
 
-const IMAGE = "ollama/ollama:0.1.44";
+const IMAGE = getImage(__dirname);
 
 describe("OllamaContainer", { timeout: 180_000 }, () => {
   it("should run ollama with default config", async () => {

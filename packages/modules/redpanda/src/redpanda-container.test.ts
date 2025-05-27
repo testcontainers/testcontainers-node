@@ -1,7 +1,7 @@
 import { Kafka, KafkaConfig, logLevel } from "kafkajs";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { RedpandaContainer, StartedRedpandaContainer } from "./redpanda-container";
-
-const IMAGE = "docker.redpanda.com/redpandadata/redpanda:v23.3.10";
+const IMAGE = getImage(__dirname);
 
 describe("RedpandaContainer", { timeout: 240_000 }, () => {
   // connectToKafka {

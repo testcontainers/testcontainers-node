@@ -1,8 +1,9 @@
 import { createClient } from "redis";
 import { GenericContainer, Network } from "testcontainers";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { ToxiProxyContainer, TPClient } from "./toxiproxy-container";
 
-const IMAGE = "ghcr.io/shopify/toxiproxy:2.11.0";
+const IMAGE = getImage(__dirname);
 
 describe("ToxiProxyContainer", { timeout: 240_000 }, () => {
   // Helper to connect to redis

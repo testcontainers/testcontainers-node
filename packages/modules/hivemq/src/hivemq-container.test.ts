@@ -1,8 +1,8 @@
 import mqtt from "mqtt";
 import { expect } from "vitest";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { HiveMQContainer } from "./hivemq-container";
-
-const IMAGE = "hivemq/hivemq-ce:2023.5";
+const IMAGE = getImage(__dirname);
 
 describe("HiveMQContainer", { timeout: 240_000 }, () => {
   // connect {

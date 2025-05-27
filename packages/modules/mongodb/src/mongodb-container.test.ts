@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { MongoDBContainer } from "./mongodb-container";
 
-const IMAGE = "mongo:4.0.1";
+const IMAGE = getImage(__dirname);
 
 describe("MongodbContainer", { timeout: 240_000 }, () => {
   // connect4 {

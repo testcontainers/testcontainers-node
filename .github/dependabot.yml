@@ -49,6 +49,52 @@ updates:
         patterns:
           - "*"
 
+  - package-ecosystem: "docker"
+    directories:
+      - "/packages/modules/arangodb"
+      - "/packages/modules/azurecosmosdb"
+      - "/packages/modules/azurite"
+      - "/packages/modules/cassandra"
+      - "/packages/modules/chromadb"
+      - "/packages/modules/clickhouse"
+      - "/packages/modules/cockroachdb"
+      - "/packages/modules/couchbase"
+      - "/packages/modules/elasticsearch"
+      - "/packages/modules/etcd"
+      - "/packages/modules/gcloud"
+      - "/packages/modules/hivemq"
+      - "/packages/modules/k3s"
+      - "/packages/modules/kafka"
+      - "/packages/modules/localstack"
+      - "/packages/modules/mariadb"
+      - "/packages/modules/minio"
+      - "/packages/modules/mockserver"
+      - "/packages/modules/mongodb"
+      - "/packages/modules/mssqlserver"
+      - "/packages/modules/mysql"
+      - "/packages/modules/nats"
+      - "/packages/modules/neo4j"
+      - "/packages/modules/ollama"
+      - "/packages/modules/postgresql"
+      - "/packages/modules/qdrant"
+      - "/packages/modules/rabbitmq"
+      - "/packages/modules/redis"
+      - "/packages/modules/redpanda"
+      - "/packages/modules/scylladb"
+      - "/packages/modules/selenium"
+      - "/packages/modules/toxiproxy"
+      - "/packages/modules/valkey"
+      - "/packages/modules/weaviate"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "docker"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

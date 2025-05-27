@@ -1,8 +1,9 @@
 import { jetstreamManager } from "@nats-io/jetstream";
 import { connect } from "@nats-io/transport-node";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { NatsContainer } from "./nats-container";
 
-const IMAGE = "nats:2.8.4-alpine";
+const IMAGE = getImage(__dirname);
 
 describe("NatsContainer", { timeout: 180_000 }, () => {
   // connect {

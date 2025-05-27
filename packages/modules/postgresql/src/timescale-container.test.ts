@@ -1,7 +1,8 @@
 import { Client } from "pg";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { PostgreSqlContainer } from "./postgresql-container";
 
-const IMAGE = "timescale/timescaledb:2.1.0-pg11";
+const IMAGE = getImage(__dirname);
 
 describe("TimescaleContainer", { timeout: 180_000 }, () => {
   it("should work", async () => {

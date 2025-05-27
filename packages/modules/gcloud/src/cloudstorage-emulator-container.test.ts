@@ -1,9 +1,10 @@
 import { Storage } from "@google-cloud/storage";
 import { setupServer } from "msw/node";
 import { ReadableStream } from "node:stream/web";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { CloudStorageEmulatorContainer, StartedCloudStorageEmulatorContainer } from "./cloudstorage-emulator-container";
 
-const IMAGE = "fsouza/fake-gcs-server:1.52.2";
+const IMAGE = getImage(__dirname, 1);
 
 async function getRequestBodyFromReadableStream(stream: ReadableStream<Uint8Array>): Promise<string> {
   const decoder = new TextDecoder();

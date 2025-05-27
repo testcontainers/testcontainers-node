@@ -1,7 +1,8 @@
 import sql, { config } from "mssql";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { MSSQLServerContainer } from "./mssqlserver-container";
 
-const IMAGE = "mcr.microsoft.com/mssql/server:2022-CU13-ubuntu-22.04";
+const IMAGE = getImage(__dirname);
 
 describe("MSSqlServerContainer", { timeout: 180_000 }, () => {
   // connect {

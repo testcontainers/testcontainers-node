@@ -1,7 +1,8 @@
 import { Client } from "pg";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { PostgreSqlContainer } from "./postgresql-container";
 
-const IMAGE = "postgres:13.3-alpine";
+const IMAGE = getImage(__dirname);
 
 describe("PostgreSqlContainer", { timeout: 180_000 }, () => {
   // connect {

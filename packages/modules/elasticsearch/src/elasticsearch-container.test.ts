@@ -1,7 +1,8 @@
 import { Client } from "@elastic/elasticsearch";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { ElasticsearchContainer } from "./elasticsearch-container";
 
-const IMAGE = "elasticsearch:7.17.7";
+const IMAGE = getImage(__dirname);
 
 describe("ElasticsearchContainer", { timeout: 180_000 }, () => {
   // createIndex {
