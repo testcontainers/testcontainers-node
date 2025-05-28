@@ -50,10 +50,7 @@ runs:
       id: npm-cache
       with:
         path: ${{ env.CACHE_PATHS }}
-        key: ${{ inputs.runner }}-node-${{ inputs.node-version }}-${{ inputs.workspace }}-${{ hashFiles('package-lock.json', 'packages/testcontainers/package-lock.json', format('packages/modules/{0}/package-lock.json', inputs.workspace)) }}
-        restore-keys: |
-          ${{ inputs.runner }}-node-${{ inputs.node-version }}-${{ inputs.workspace }}-
-          ${{ inputs.runner }}-node-${{ inputs.node-version }}-
+        key: ${{ inputs.runner }}-node-${{ inputs.node-version }}-${{ inputs.workspace }}-${{ hashFiles('package-lock.json') }}
 
     - name: Install dependencies
       if: steps.npm-cache.outputs.cache-hit != 'true'
