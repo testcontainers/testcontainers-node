@@ -40,7 +40,7 @@
   },
   "devDependencies": {
     "@google-cloud/bigquery": "^8.0.0",
-    "@google-cloud/datastore": "10.0.1",
+    "@google-cloud/datastore": "^9.2.1",
     "@google-cloud/firestore": "7.11.1",
     "@google-cloud/pubsub": "^5.0.0",
     "@google-cloud/storage": "^7.16.0",
