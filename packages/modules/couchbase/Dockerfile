@@ -1,1 +1,1 @@
-FROM couchbase/server:6.5.1
+FROM couchbase/server:7.6.6

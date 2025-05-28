@@ -1,3 +1,4 @@
+import { ImageName } from "testcontainers";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { OllamaContainer } from "./ollama-container";
 
@@ -11,7 +12,7 @@ describe("OllamaContainer", { timeout: 180_000 }, () => {
     const response = await fetch(`${container.getEndpoint()}/api/version`);
     expect(response.status).toEqual(200);
     const body = (await response.json()) as { version: string };
-    expect(body.version).toEqual("0.1.44");
+    expect(body.version).toEqual(ImageName.fromString(IMAGE).tag);
     await container.stop();
   });
 
