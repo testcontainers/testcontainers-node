@@ -49,6 +49,7 @@ describe("LocalStackContainer", { timeout: 180_000 }, () => {
     const container = await new LocalstackContainer(IMAGE)
       .withNetwork(network)
       .withNetworkAliases("notthis", "localstack") // the last alias is used for HOSTNAME_EXTERNAL
+      .withEnvironment({ SQS_ENDPOINT_STRATEGY: "path" })
       .start();
 
     const awsCliInDockerNetwork = await new GenericContainer("amazon/aws-cli:2.7.27")
