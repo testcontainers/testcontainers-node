@@ -1,4 +1,5 @@
 import { Client } from "cassandra-driver";
+import { ImageName } from "testcontainers";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { CassandraContainer } from "./cassandra-container";
 
@@ -18,7 +19,7 @@ describe("Cassandra", { timeout: 240_000 }, () => {
     await client.connect();
 
     const result = await client.execute("SELECT release_version FROM system.local");
-    expect(result.rows[0].release_version).toBe("5.0.2");
+    expect(result.rows[0].release_version).toBe(ImageName.fromString(IMAGE).tag);
 
     await client.shutdown();
     await container.stop();
@@ -124,7 +125,7 @@ describe("Cassandra", { timeout: 240_000 }, () => {
     await client.connect();
 
     const result = await client.execute("SELECT release_version FROM system.local");
-    expect(result.rows[0].release_version).toBe("5.0.2");
+    expect(result.rows[0].release_version).toBe(ImageName.fromString(IMAGE).tag);
 
     await client.shutdown();
     await container.stop();
