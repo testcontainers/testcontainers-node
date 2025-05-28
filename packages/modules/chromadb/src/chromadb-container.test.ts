@@ -82,7 +82,7 @@ describe("ChromaDB", { timeout: 360_000 }, () => {
   it("should reconnect with volume and persistence data", async () => {
     const sourcePath = fs.mkdtempSync(path.join(os.tmpdir(), "chroma-temp"));
     const container = await new ChromaDBContainer(IMAGE)
-      .withBindMounts([{ source: sourcePath, target: "/chroma/chroma" }])
+      .withBindMounts([{ source: sourcePath, target: "/data" }])
       .start();
     const client = await connectTo(container);
     const collection = await client.createCollection({ name: "test", metadata: { "hnsw:space": "cosine" } });
