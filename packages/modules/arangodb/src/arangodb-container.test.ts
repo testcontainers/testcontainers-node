@@ -1,10 +1,13 @@
 import { Database } from "arangojs";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { ArangoDBContainer } from "./arangodb-container";
+
+const IMAGE = getImage(__dirname);
 
 describe("ArangoDB", { timeout: 180_000 }, () => {
   // connect {
   it("should connect and return a query result", async () => {
-    const container = await new ArangoDBContainer().start();
+    const container = await new ArangoDBContainer(IMAGE).start();
     const db = new Database({ url: container.getHttpUrl() });
 
     db.database("_system");

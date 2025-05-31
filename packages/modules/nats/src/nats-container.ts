@@ -11,7 +11,7 @@ export class NatsContainer extends GenericContainer {
   private args = new Set<string>();
   private values = new Map<string, string | undefined>();
 
-  constructor(image = "nats:2.8.4-alpine") {
+  constructor(image: string) {
     super(image);
 
     this.withUsername("test");
@@ -81,7 +81,7 @@ export class NatsContainer extends GenericContainer {
   }
 
   private getNormalizedCommand(): string[] {
-    const result: string[] = ["nats-server"];
+    const result: string[] = [];
     for (const arg of this.args) {
       result.push(arg);
       if (this.values.has(arg)) {

@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/cockroachdb",
-  "version": "10.24.2",
+  "version": "11.0.0",
   "license": "MIT",
   "keywords": [
     "cockroachdb",
@@ -30,10 +30,10 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "@types/pg": "^8.11.6",
-    "pg": "^8.12.0"
+    "@types/pg": "^8.15.2",
+    "pg": "^8.16.0"
   },
   "dependencies": {
-    "testcontainers": "^10.24.2"
+    "testcontainers": "^11.0.0"
   }
 }

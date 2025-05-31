@@ -1,10 +1,13 @@
 import { Client } from "cassandra-driver"; // Scylla uses Cassandra's driver in Node.js
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { ScyllaContainer } from "./scylladb-container";
+
+const IMAGE = getImage(__dirname);
 
 describe("ScyllaDB", { timeout: 240_000 }, () => {
   // connectWithDefaultCredentials {
   it("should connect and execute a query", async () => {
-    const container = await new ScyllaContainer("scylladb/scylla:6.2.0").start();
+    const container = await new ScyllaContainer(IMAGE).start();
 
     const client = new Client({
       contactPoints: [container.getContactPoint()],
@@ -24,7 +27,7 @@ describe("ScyllaDB", { timeout: 240_000 }, () => {
 
   // createAndFetchData {
   it("should create keyspace, a table, insert data, and retrieve it", async () => {
-    const container = await new ScyllaContainer().start();
+    const container = await new ScyllaContainer(IMAGE).start();
 
     const client = new Client({
       contactPoints: [container.getContactPoint()],
@@ -64,7 +67,7 @@ describe("ScyllaDB", { timeout: 240_000 }, () => {
   // }
 
   it("should work with restarted container", async () => {
-    const container = await new ScyllaContainer("scylladb/scylla:6.2.0").start();
+    const container = await new ScyllaContainer(IMAGE).start();
     await container.restart();
 
     const client = new Client({

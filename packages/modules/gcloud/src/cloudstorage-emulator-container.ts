@@ -2,14 +2,13 @@ import type { StartedTestContainer } from "testcontainers";
 import { AbstractStartedContainer, GenericContainer, Wait } from "testcontainers";
 
 const PORT = 4443;
-const DEFAULT_IMAGE = "fsouza/fake-gcs-server";
 
 export class CloudStorageEmulatorContainer extends GenericContainer {
   private _externalURL?: string;
   private _publicHost?: string;
   private autoUpdateExternalUrl = true;
 
-  constructor(image = DEFAULT_IMAGE) {
+  constructor(image: string) {
     super(image);
 
     this.withExposedPorts(PORT).withWaitStrategy(Wait.forLogMessage("server started")).withStartupTimeout(120_000);

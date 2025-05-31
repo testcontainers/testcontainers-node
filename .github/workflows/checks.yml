@@ -28,21 +28,17 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-
       - id: changed-files
         name: Get changed files
-        uses: tj-actions/changed-files@4edd678ac3f81e2dc578756871e4d00c19191daf # v45.0.4
-
+        uses: tj-actions/changed-files@ed68ef82c095e0d48ec87eccea555d944a631a4c # v46.0.5
       - id: set-modified-modules
         name: Set all modified modules
         env:
           ALL_CHANGED_FILES: "${{ steps.changed-files.outputs.all_changed_files }}"
         run: echo "modules=$(./.github/scripts/changed-modules.sh)" >> $GITHUB_OUTPUT
-
       - id: set-modified-modules-count
         name: Set all modified modules count
         run: echo "modules_count=$(echo ${{ toJSON(steps.set-modified-modules.outputs.modules) }} | jq '. | length')" >> $GITHUB_OUTPUT
-
       - name: Print out the modules to be used
         run: |
           echo "${{ steps.set-modified-modules-count.outputs.modules_count }} modules in the build"
@@ -54,7 +50,33 @@ jobs:
     needs:
       - detect-modules
     strategy:
-      fail-fast: true
+      fail-fast: false
+      matrix:
+        module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Code checkout
+        uses: actions/checkout@v4
+      - name: Install Node and Dependencies
+        id: npm-install-modules
+        uses: ./.github/actions/npm-setup
+        with:
+          runner: ubuntu-24.04
+          node-version: 24.x
+          workspace: "${{ matrix.module }}"
+      - name: Code linting
+        env:
+          WORKSPACE_PATH: ${{ steps.npm-install-modules.outputs.workspace_path }}
+        run: npm run lint:ci
+
+  compile:
+    if: ${{ needs.detect-modules.outputs.modules_count > 0 }}
+    name: Compile
+    needs:
+      - detect-modules
+      - lint
+    strategy:
+      fail-fast: false
       matrix:
         module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
     runs-on: ubuntu-24.04
@@ -66,36 +88,36 @@ jobs:
         uses: ./.github/actions/npm-setup
         with:
           runner: ubuntu-24.04
-          node-version: 22.x
+          node-version: 24.x
           workspace: "${{ matrix.module }}"
-      - name: Code linting
-        env:
-          WORKSPACE_PATH: ${{ steps.npm-install.outputs.workspace_path }}
-        run: npm run lint:ci
+      - name: Compile
+        run: |
+          npm run build --ignore-scripts --workspace packages/testcontainers -- --project tsconfig.json
+          if [ "${{ matrix.module }}" != "testcontainers" ]; then
+            npm run build --ignore-scripts --workspace ${{ steps.npm-install.outputs.workspace_path }} -- --project tsconfig.json --noEmit
+          fi
 
   smoke-test:
     if: ${{ needs.detect-modules.outputs.modules_count > 0 }}
     needs:
       - detect-modules
       - lint
+      - compile
     name: Smoke tests
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
-        runner: [ubuntu-24.04]
-        node-version: [18.x, 20.x, 22.x]
-    runs-on: ${{ matrix.runner }}
+        node-version: [20.x, 22.x, 24.x]
+    runs-on: ubuntu-24.04
     steps:
       - name: Code checkout
         uses: actions/checkout@v4
-
       - name: Install Node ${{ matrix.node-version }} and Dependencies
         uses: ./.github/actions/npm-setup
         with:
-          runner: ${{ matrix.runner }}
+          runner: ubuntu-24.04
           node-version: ${{ matrix.node-version }}
           workspace: "testcontainers"
-
       - name: Build testcontainers
         run: npm run build --workspace packages/testcontainers
       - name: Remove dev dependencies
@@ -107,41 +129,23 @@ jobs:
 
   test:
     if: ${{ needs.detect-modules.outputs.modules_count > 0 }}
-    name: Docker tests
+    name: Tests
     needs:
       - detect-modules
       - lint
+      - compile
       - smoke-test
     strategy:
       fail-fast: false
       matrix:
         module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
-        node-version: [18.x, 20.x, 22.x]
+        node-version: [20.x, 22.x, 24.x]
+        container-runtime: [docker, podman]
     uses: ./.github/workflows/test-template.yml
     with:
       runner: ubuntu-24.04
       node-version: ${{ matrix.node-version }}
-      container-runtime: docker
-      workspace: "${{ matrix.module }}"
-
-  test-podman:
-    if: ${{ needs.detect-modules.outputs.modules_count > 0 }}
-    name: Podman tests
-    needs:
-      - detect-modules
-      - lint
-      - smoke-test
-      - test
-    strategy:
-      fail-fast: false
-      matrix:
-        module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
-        node-version: [18.x, 20.x, 22.x]
-    uses: ./.github/workflows/test-template.yml
-    with:
-      runner: ubuntu-24.04
-      node-version: ${{ matrix.node-version }}
-      container-runtime: podman
+      container-runtime: ${{ matrix.container-runtime }}
       workspace: "${{ matrix.module }}"
 
   end:
@@ -150,13 +154,12 @@ jobs:
     needs:
       - detect-modules
       - lint
+      - compile
       - smoke-test
       - test
-      - test-podman
     runs-on: ubuntu-24.04
     steps:
       - name: Check if any jobs failed
         if: ${{ failure() || cancelled() }}
         run: exit 1
-
       - run: echo "All tests completed successfully!"

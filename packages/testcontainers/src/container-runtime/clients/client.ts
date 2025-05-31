@@ -17,7 +17,7 @@ import { DockerImageClient } from "./image/docker-image-client";
 import { ImageClient } from "./image/image-client";
 import { DockerNetworkClient } from "./network/docker-network-client";
 import { NetworkClient } from "./network/network-client";
-import { ComposeInfo, ContainerRuntimeInfo, Info, NodeInfo } from "./types";
+import { ContainerRuntimeInfo, Info, NodeInfo } from "./types";
 
 export class ContainerRuntimeClient {
   constructor(
@@ -123,9 +123,7 @@ async function initStrategy(strategy: ContainerRuntimeClientStrategy): Promise<C
     labels: dockerodeInfo.Labels ? dockerodeInfo.Labels : [],
   };
 
-  const composeInfo: ComposeInfo = composeClient.info;
-
-  const info: Info = { node: nodeInfo, containerRuntime: containerRuntimeInfo, compose: composeInfo };
+  const info: Info = { node: nodeInfo, containerRuntime: containerRuntimeInfo };
 
   log.trace(`Container runtime info:\n${JSON.stringify(info, null, 2)}`);
   return new ContainerRuntimeClient(info, composeClient, containerClient, imageClient, networkClient);

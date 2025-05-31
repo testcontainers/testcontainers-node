@@ -1,10 +1,13 @@
 import { createConnection } from "mysql2/promise";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { MySqlContainer } from "./mysql-container";
+
+const IMAGE = getImage(__dirname);
 
 describe("MySqlContainer", { timeout: 240_000 }, () => {
   // connect {
   it("should connect and execute query", async () => {
-    const container = await new MySqlContainer().start();
+    const container = await new MySqlContainer(IMAGE).start();
 
     const client = await createConnection({
       host: container.getHost(),
@@ -29,7 +32,7 @@ describe("MySqlContainer", { timeout: 240_000 }, () => {
     const database = "testDB";
 
     // Test non-root user
-    const container = await new MySqlContainer()
+    const container = await new MySqlContainer(IMAGE)
       .withUsername(username)
       .withUserPassword(password)
       .withDatabase(database)
@@ -40,7 +43,7 @@ describe("MySqlContainer", { timeout: 240_000 }, () => {
     await container.stop();
 
     // Test root user
-    const rootContainer = await new MySqlContainer().withRootPassword(password).withDatabase(database).start();
+    const rootContainer = await new MySqlContainer(IMAGE).withRootPassword(password).withDatabase(database).start();
     expect(rootContainer.getConnectionUri(true)).toEqual(
       `mysql://root:${password}@${rootContainer.getHost()}:${rootContainer.getPort()}/${database}`
     );
@@ -50,7 +53,7 @@ describe("MySqlContainer", { timeout: 240_000 }, () => {
 
   // setDatabase {
   it("should set database", async () => {
-    const container = await new MySqlContainer().withDatabase("customDatabase").start();
+    const container = await new MySqlContainer(IMAGE).withDatabase("customDatabase").start();
 
     const client = await createConnection({
       host: container.getHost(),
@@ -70,7 +73,7 @@ describe("MySqlContainer", { timeout: 240_000 }, () => {
 
   // setUsername {
   it("should set username", async () => {
-    const container = await new MySqlContainer().withUsername("customUsername").start();
+    const container = await new MySqlContainer(IMAGE).withUsername("customUsername").start();
 
     const client = await createConnection({
       host: container.getHost(),
@@ -90,7 +93,7 @@ describe("MySqlContainer", { timeout: 240_000 }, () => {
 
   // executeQuery {
   it("should execute a query and return the result", async () => {
-    const container = await new MySqlContainer().start();
+    const container = await new MySqlContainer(IMAGE).start();
 
     const queryResult = await container.executeQuery("SELECT 1 as res");
     expect(queryResult).toEqual(expect.stringContaining("res\n1\n"));
@@ -99,7 +102,7 @@ describe("MySqlContainer", { timeout: 240_000 }, () => {
   });
 
   it("should execute a query as root user", async () => {
-    const container = await new MySqlContainer().withUsername("customUsername").start();
+    const container = await new MySqlContainer(IMAGE).withUsername("customUsername").start();
 
     // Test non-root user
     const queryResult = await container.executeQuery("SELECT CURRENT_USER() as user");
@@ -114,7 +117,7 @@ describe("MySqlContainer", { timeout: 240_000 }, () => {
   // }
 
   it("should work with restarted container", async () => {
-    const container = await new MySqlContainer().start();
+    const container = await new MySqlContainer(IMAGE).start();
     await container.restart();
 
     const client = await createConnection({

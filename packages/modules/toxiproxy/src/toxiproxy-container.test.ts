@@ -1,6 +1,9 @@
 import { createClient } from "redis";
 import { GenericContainer, Network } from "testcontainers";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { ToxiProxyContainer, TPClient } from "./toxiproxy-container";
+
+const IMAGE = getImage(__dirname);
 
 describe("ToxiProxyContainer", { timeout: 240_000 }, () => {
   // Helper to connect to redis
@@ -22,7 +25,7 @@ describe("ToxiProxyContainer", { timeout: 240_000 }, () => {
       .withNetworkAliases("redis")
       .start();
 
-    const toxiproxyContainer = await new ToxiProxyContainer().withNetwork(containerNetwork).start();
+    const toxiproxyContainer = await new ToxiProxyContainer(IMAGE).withNetwork(containerNetwork).start();
 
     // Create the proxy between Toxiproxy and Redis
     const redisProxy = await toxiproxyContainer.createProxy({
@@ -49,7 +52,7 @@ describe("ToxiProxyContainer", { timeout: 240_000 }, () => {
       .withNetworkAliases("redis")
       .start();
 
-    const toxiproxyContainer = await new ToxiProxyContainer().withNetwork(containerNetwork).start();
+    const toxiproxyContainer = await new ToxiProxyContainer(IMAGE).withNetwork(containerNetwork).start();
 
     // Create the proxy between Toxiproxy and Redis
     const redisProxy = await toxiproxyContainer.createProxy({
@@ -87,7 +90,7 @@ describe("ToxiProxyContainer", { timeout: 240_000 }, () => {
       .withNetworkAliases("redis")
       .start();
 
-    const toxiproxyContainer = await new ToxiProxyContainer().withNetwork(containerNetwork).start();
+    const toxiproxyContainer = await new ToxiProxyContainer(IMAGE).withNetwork(containerNetwork).start();
 
     // Create the proxy between Toxiproxy and Redis
     const redisProxy = await toxiproxyContainer.createProxy({
@@ -130,7 +133,7 @@ describe("ToxiProxyContainer", { timeout: 240_000 }, () => {
       .withNetworkAliases("redis")
       .start();
 
-    const toxiproxyContainer = await new ToxiProxyContainer().withNetwork(containerNetwork).start();
+    const toxiproxyContainer = await new ToxiProxyContainer(IMAGE).withNetwork(containerNetwork).start();
 
     // Create the proxy between Toxiproxy and Redis
     const redisProxy = await toxiproxyContainer.createProxy({
@@ -160,7 +163,7 @@ describe("ToxiProxyContainer", { timeout: 240_000 }, () => {
   });
 
   it("Throws an error when too many proxies are created", async () => {
-    const toxiproxyContainer = await new ToxiProxyContainer().start();
+    const toxiproxyContainer = await new ToxiProxyContainer(IMAGE).start();
 
     for (let i = 0; i < 32; i++) {
       await toxiproxyContainer.createProxy({

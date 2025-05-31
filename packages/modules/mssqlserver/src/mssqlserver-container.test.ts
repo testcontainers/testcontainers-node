@@ -1,10 +1,13 @@
 import sql, { config } from "mssql";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { MSSQLServerContainer } from "./mssqlserver-container";
+
+const IMAGE = getImage(__dirname);
 
 describe("MSSqlServerContainer", { timeout: 180_000 }, () => {
   // connect {
   it("should connect and return a query result", async () => {
-    const container = await new MSSQLServerContainer().acceptLicense().start();
+    const container = await new MSSQLServerContainer(IMAGE).acceptLicense().start();
 
     const sqlConfig: config = {
       user: container.getUsername(),
@@ -34,7 +37,7 @@ describe("MSSqlServerContainer", { timeout: 180_000 }, () => {
 
   // uriConnect {
   it("should connect and return a query result with database URI", async () => {
-    const container = await new MSSQLServerContainer().acceptLicense().start();
+    const container = await new MSSQLServerContainer(IMAGE).acceptLicense().start();
 
     const connectionString = container.getConnectionUri();
     const connection = await sql.connect(connectionString);
@@ -49,7 +52,7 @@ describe("MSSqlServerContainer", { timeout: 180_000 }, () => {
 
   // validPassword {
   it("should connect and return a query result with valid custom password", async () => {
-    const container = await new MSSQLServerContainer().acceptLicense().withPassword("I!@M#$eCur3").start();
+    const container = await new MSSQLServerContainer(IMAGE).acceptLicense().withPassword("I!@M#$eCur3").start();
 
     const connectionString = container.getConnectionUri();
     const connection = await sql.connect(connectionString);
@@ -64,7 +67,7 @@ describe("MSSqlServerContainer", { timeout: 180_000 }, () => {
 
   // invalidPassword {
   it("should throw error with invalid password", async () => {
-    const container = new MSSQLServerContainer().acceptLicense().withPassword("password");
+    const container = new MSSQLServerContainer(IMAGE).acceptLicense().withPassword("password");
     await expect(container.start()).rejects.toThrow(
       Error('Log stream ended and message "/.*Recovery is complete.*/" was not received')
     );
@@ -73,7 +76,7 @@ describe("MSSqlServerContainer", { timeout: 180_000 }, () => {
 
   // expressEdition {
   it("should start db with express edition", async () => {
-    const container = await new MSSQLServerContainer()
+    const container = await new MSSQLServerContainer(IMAGE)
       .withWaitForMessage(/.*Attribute synchronization manager initialized*/)
       .acceptLicense()
       .withEnvironment({ MSSQL_PID: "Express" })

@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/azure-cosmosdb-emulator",
-  "version": "10.24.2",
+  "version": "11.0.0",
   "license": "MIT",
   "keywords": [
     "azure-cosmosdb",
@@ -31,9 +31,9 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "@azure/cosmos": "^4.2.0"
+    "@azure/cosmos": "^4.4.1"
   },
   "dependencies": {
-    "testcontainers": "^10.24.2"
+    "testcontainers": "^11.0.0"
   }
 }

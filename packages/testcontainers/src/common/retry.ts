@@ -5,7 +5,7 @@ export interface Retry<T, U> {
     fn: () => Promise<T>,
     predicate: (result: T) => boolean | Promise<boolean>,
     onTimeout: () => U,
-    timeout: number
+    timeoutMs: number
   ): Promise<T | U>;
 }
 
@@ -16,11 +16,11 @@ abstract class AbstractRetry<T, U> implements Retry<T, U> {
     fn: () => Promise<T>,
     predicate: (result: T) => boolean | Promise<boolean>,
     onTimeout: () => U,
-    timeout: number
+    timeoutMs: number
   ): Promise<T | U>;
 
-  protected hasTimedOut(timeout: number, startTime: Time): boolean {
-    return this.clock.getTime() - startTime > timeout;
+  protected hasTimedOut(timeoutMs: number, startTime: Time): boolean {
+    return this.clock.getTime() - startTime > timeoutMs;
   }
 
   protected wait(duration: number): Promise<void> {
@@ -37,7 +37,7 @@ export class IntervalRetry<T, U> extends AbstractRetry<T, U> {
     fn: (attempt: number) => Promise<T>,
     predicate: (result: T) => boolean | Promise<boolean>,
     onTimeout: () => U,
-    timeout: number
+    timeoutMs: number
   ): Promise<T | U> {
     const startTime = this.clock.getTime();
 
@@ -45,7 +45,7 @@ export class IntervalRetry<T, U> extends AbstractRetry<T, U> {
     let result = await fn(attemptNumber++);
 
     while (!(await predicate(result))) {
-      if (this.hasTimedOut(timeout, startTime)) {
+      if (this.hasTimedOut(timeoutMs, startTime)) {
         return onTimeout();
       }
       await this.wait(this.interval);

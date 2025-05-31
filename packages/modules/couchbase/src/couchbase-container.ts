@@ -16,9 +16,6 @@ import { CouchbaseService } from "./couchbase-service";
 import PORTS from "./ports";
 
 export class CouchbaseContainer extends GenericContainer {
-  private static readonly DEFAULT_IMAGE_NAME = "couchbase/server";
-  private static readonly DEFAULT_TAG = "6.5.1";
-
   private username = "Administrator";
   private password = "password";
 
@@ -35,7 +32,7 @@ export class CouchbaseContainer extends GenericContainer {
 
   private isEnterprise = false;
 
-  constructor(image = `${CouchbaseContainer.DEFAULT_IMAGE_NAME}:${CouchbaseContainer.DEFAULT_TAG}`) {
+  constructor(image: string) {
     super(image);
     this.withExposedPorts(...this.getPortsToExpose()).withWaitStrategy(
       Wait.forLogMessage("Starting Couchbase Server -- Web UI available at http://<ip>:8091")
@@ -451,12 +448,12 @@ export class CouchbaseContainer extends GenericContainer {
             return jsonResponse.results[0].present;
           },
           () => {
-            const message = `URL /query/service not accessible after ${this.startupTimeout || 60_000}ms`;
+            const message = `URL /query/service not accessible after ${this.startupTimeoutMs || 60_000}ms`;
             log.error(message, { containerId: client.container.getById(startedTestContainer.getId()).id });
 
             throw new Error(message);
           },
-          this.startupTimeout || 60_000
+          this.startupTimeoutMs || 60_000
         );
       }
 
@@ -512,12 +509,12 @@ export class CouchbaseContainer extends GenericContainer {
               return jsonResponse.results[0].online;
             },
             () => {
-              const message = `URL /query/service not accessible after ${this.startupTimeout || 60_000}ms`;
+              const message = `URL /query/service not accessible after ${this.startupTimeoutMs || 60_000}ms`;
               log.error(message, { containerId: client.container.getById(startedTestContainer.getId()).id });
 
               throw new Error(message);
             },
-            this.startupTimeout || 60_000
+            this.startupTimeoutMs || 60_000
           );
         } else {
           log.info(

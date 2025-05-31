@@ -1,0 +1,12 @@
+name: "Docker Rootless Setup"
+description: "Sets up Docker in rootless mode"
+runs:
+  using: "composite"
+  steps:
+    - name: Docker rootless setup 1/2
+      uses: ScribeMD/rootless-docker@0.2.2
+    - name: Docker rootless setup 2/2
+      shell: bash
+      run: |
+        sudo rm -rf /var/run/docker.sock
+        echo "CI_ROOTLESS=true" >> $GITHUB_ENV

@@ -89,7 +89,7 @@ export class GenericContainerBuilder {
     };
 
     if (this.pullPolicy.shouldPull()) {
-      buildOptions.pull = "true";
+      buildOptions.pull = true;
     }
 
     await client.image.build(this.context, buildOptions);

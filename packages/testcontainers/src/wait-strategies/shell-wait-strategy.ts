@@ -21,11 +21,11 @@ export class ShellWaitStrategy extends AbstractWaitStrategy {
       },
       (exitCode) => exitCode === 0,
       () => {
-        const message = `Shell command "${this.command}" not successful after ${this.startupTimeout}ms`;
+        const message = `Shell command "${this.command}" not successful after ${this.startupTimeoutMs}ms`;
         log.error(message, { containerId: container.id });
         throw new Error(message);
       },
-      this.startupTimeout
+      this.startupTimeoutMs
     );
 
     log.debug(`Shell wait strategy complete`, { containerId: container.id });

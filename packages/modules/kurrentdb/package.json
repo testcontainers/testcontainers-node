@@ -1,14 +1,14 @@
 {
-  "name": "@testcontainers/eventstoredb",
-  "version": "10.24.2",
+  "name": "@testcontainers/kurrentdb",
+  "version": "11.0.0",
   "license": "MIT",
   "keywords": [
-    "eventstoredb",
+    "kurrentdb",
     "testing",
     "docker",
     "testcontainers"
   ],
-  "description": "EventStoreDB module for Testcontainers",
+  "description": "KurrentDB module for Testcontainers",
   "homepage": "https://github.com/testcontainers/testcontainers-node#readme",
   "repository": {
     "type": "git",
@@ -29,9 +29,9 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "@eventstore/db-client": "^6.2.1"
+    "@kurrent/kurrentdb-client": "^1.0.1"
   },
   "dependencies": {
-    "testcontainers": "^10.24.2"
+    "testcontainers": "^11.0.0"
   }
 }

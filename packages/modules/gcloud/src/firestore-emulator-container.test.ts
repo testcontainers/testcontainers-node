@@ -1,5 +1,8 @@
 import admin from "firebase-admin";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { FirestoreEmulatorContainer, StartedFirestoreEmulatorContainer } from "./firestore-emulator-container";
+
+const IMAGE = getImage(__dirname);
 
 describe("FirestoreEmulatorContainer", { timeout: 240_000 }, () => {
   afterEach(async () => {
@@ -8,7 +11,7 @@ describe("FirestoreEmulatorContainer", { timeout: 240_000 }, () => {
 
   // firestore4 {
   it("should work using default version", async () => {
-    const firestoreEmulatorContainer = await new FirestoreEmulatorContainer().start();
+    const firestoreEmulatorContainer = await new FirestoreEmulatorContainer(IMAGE).start();
 
     await checkFirestore(firestoreEmulatorContainer);
 

@@ -7,10 +7,6 @@ import { ContainerRuntimeClientStrategyResult } from "./types";
 import { getContainerRuntimeConfig } from "./utils/config";
 
 export class ConfigurationStrategy implements ContainerRuntimeClientStrategy {
-  private dockerHost!: string;
-  private dockerTlsVerify: string | undefined;
-  private dockerCertPath: string | undefined;
-
   getName(): string {
     return "ConfigurationStrategy";
   }
@@ -22,13 +18,9 @@ export class ConfigurationStrategy implements ContainerRuntimeClientStrategy {
       return undefined;
     }
 
-    this.dockerHost = dockerHost;
-    this.dockerTlsVerify = dockerTlsVerify;
-    this.dockerCertPath = dockerCertPath;
-
     const dockerOptions: DockerOptions = {};
 
-    const { pathname, hostname, port } = new URL(this.dockerHost);
+    const { pathname, hostname, port } = new URL(dockerHost);
     if (hostname !== "") {
       dockerOptions.host = hostname;
       dockerOptions.port = port;
@@ -36,19 +28,19 @@ export class ConfigurationStrategy implements ContainerRuntimeClientStrategy {
       dockerOptions.socketPath = pathname;
     }
 
-    if (this.dockerTlsVerify === "1" && this.dockerCertPath !== undefined) {
-      dockerOptions.ca = await fs.readFile(path.resolve(this.dockerCertPath, "ca.pem"));
-      dockerOptions.cert = await fs.readFile(path.resolve(this.dockerCertPath, "cert.pem"));
-      dockerOptions.key = await fs.readFile(path.resolve(this.dockerCertPath, "key.pem"));
+    if (dockerTlsVerify === "1" && dockerCertPath !== undefined) {
+      dockerOptions.ca = await fs.readFile(path.resolve(dockerCertPath, "ca.pem"));
+      dockerOptions.cert = await fs.readFile(path.resolve(dockerCertPath, "cert.pem"));
+      dockerOptions.key = await fs.readFile(path.resolve(dockerCertPath, "key.pem"));
     }
 
     return {
-      uri: this.dockerHost,
+      uri: dockerHost,
       dockerOptions,
       composeEnvironment: {
-        DOCKER_HOST: this.dockerHost,
-        DOCKER_TLS_VERIFY: this.dockerTlsVerify,
-        DOCKER_CERT_PATH: this.dockerCertPath,
+        DOCKER_HOST: dockerHost,
+        DOCKER_TLS_VERIFY: dockerTlsVerify,
+        DOCKER_CERT_PATH: dockerCertPath,
       },
       allowUserOverrides: true,
     };

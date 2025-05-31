@@ -1,23 +1,23 @@
 site_name: Testcontainers for NodeJS
 site_url: https://node.testcontainers.org
-repo_name: 'testcontainers-node'
-repo_url: 'https://github.com/testcontainers/testcontainers-node'
+repo_name: "testcontainers-node"
+repo_url: "https://github.com/testcontainers/testcontainers-node"
 edit_uri: edit/main/docs/
 
 theme:
-  name: 'material'
-  custom_dir: 'docs/site/theme'
+  name: "material"
+  custom_dir: "docs/site/theme"
   palette:
     scheme: testcontainers
   font:
     text: Roboto
     code: Roboto Mono
-  logo: 'site/logo.svg'
-  favicon: 'site/favicon.ico'
+  logo: "site/logo.svg"
+  favicon: "site/favicon.ico"
 
 extra_css:
-  - 'site/css/extra.css'
-  - 'site/css/tc-header.css'
+  - "site/css/extra.css"
+  - "site/css/tc-header.css"
 
 plugins:
   - search
@@ -56,11 +56,12 @@ nav:
       - Couchbase: modules/couchbase.md
       - CockroachDB: modules/cockroachdb.md
       - Elasticsearch: modules/elasticsearch.md
-      - EventStoreDB: modules/eventstoredb.md
+      - Etcd: modules/etcd.md
       - GCloud: modules/gcloud.md
       - HiveMQ: modules/hivemq.md
       - K3s: modules/k3s.md
       - Kafka: modules/kafka.md
+      - KurrentDB: modules/kurrentdb.md
       - Localstack: modules/localstack.md
       - MariaDB: modules/mariadb.md
       - Mockserver: modules/mockserver.md

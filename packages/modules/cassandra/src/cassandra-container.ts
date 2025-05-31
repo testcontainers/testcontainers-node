@@ -8,9 +8,11 @@ export class CassandraContainer extends GenericContainer {
   private username = "cassandra";
   private password = "cassandra";
 
-  constructor(image = "cassandra:5.0.2") {
+  constructor(image: string) {
     super(image);
-    this.withExposedPorts(CASSANDRA_PORT).withWaitStrategy(Wait.forHealthCheck()).withStartupTimeout(120_000);
+    this.withExposedPorts(CASSANDRA_PORT)
+      .withWaitStrategy(Wait.forAll([Wait.forHealthCheck(), Wait.forListeningPorts()]))
+      .withStartupTimeout(120_000);
   }
 
   public withDatacenter(dc: string): this {

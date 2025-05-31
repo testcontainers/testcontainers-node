@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/kafka",
-  "version": "10.24.2",
+  "version": "11.0.0",
   "license": "MIT",
   "keywords": [
     "kafka",
@@ -32,6 +32,6 @@
     "kafkajs": "^2.2.4"
   },
   "dependencies": {
-    "testcontainers": "^10.24.2"
+    "testcontainers": "^11.0.0"
   }
 }

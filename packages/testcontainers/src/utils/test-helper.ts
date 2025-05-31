@@ -1,12 +1,21 @@
 import { GetEventsOptions, ImageInspectInfo } from "dockerode";
 import { createServer, Server } from "http";
+import fs from "node:fs";
+import path from "node:path";
 import { Readable } from "stream";
-import { Agent } from "undici";
+import { Agent, request } from "undici";
 import { IntervalRetry } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
 import { StartedDockerComposeEnvironment } from "../docker-compose-environment/started-docker-compose-environment";
 import { GenericContainer } from "../generic-container/generic-container";
 import { StartedTestContainer } from "../test-container";
+
+export const getImage = (dirname: string, index = 0): string => {
+  return fs
+    .readFileSync(path.resolve(dirname, "..", "Dockerfile"), "utf-8")
+    .split("\n")
+    [index].split(" ")[1];
+};
 
 export const checkContainerIsHealthy = async (container: StartedTestContainer): Promise<void> => {
   const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
@@ -17,8 +26,8 @@ export const checkContainerIsHealthy = async (container: StartedTestContainer): 
 export const checkContainerIsHealthyTls = async (container: StartedTestContainer): Promise<void> => {
   const url = `https://${container.getHost()}:${container.getMappedPort(8443)}`;
   const dispatcher = new Agent({ connect: { rejectUnauthorized: false } });
-  const response = await fetch(`${url}/hello-world`, { dispatcher });
-  expect(response.status).toBe(200);
+  const response = await request(`${url}/hello-world`, { dispatcher });
+  expect(response.statusCode).toBe(200);
 };
 
 export const checkEnvironmentContainerIsHealthy = async (
@@ -91,8 +100,7 @@ export const getVolumeNames = async (): Promise<string[]> => {
 };
 
 export const composeContainerName = async (serviceName: string, index = 1): Promise<string> => {
-  const client = await getContainerRuntimeClient();
-  return client.info.compose?.version.startsWith("1.") ? `${serviceName}_${index}` : `${serviceName}-${index}`;
+  return `${serviceName}-${index}`;
 };
 
 export const waitForDockerEvent = async (eventStream: Readable, eventName: string, times = 1) => {

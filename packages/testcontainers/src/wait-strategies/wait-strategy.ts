@@ -4,7 +4,7 @@ import { BoundPorts } from "../utils/bound-ports";
 export interface WaitStrategy {
   waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts, startTime?: Date): Promise<void>;
 
-  withStartupTimeout(startupTimeout: number): WaitStrategy;
+  withStartupTimeout(startupTimeoutMs: number): WaitStrategy;
 
   isStartupTimeoutSet(): boolean;
 
@@ -12,7 +12,7 @@ export interface WaitStrategy {
 }
 
 export abstract class AbstractWaitStrategy implements WaitStrategy {
-  protected startupTimeout = 60_000;
+  protected startupTimeoutMs = 60_000;
   private startupTimeoutSet = false;
 
   public abstract waitUntilReady(
@@ -21,8 +21,8 @@ export abstract class AbstractWaitStrategy implements WaitStrategy {
     startTime?: Date
   ): Promise<void>;
 
-  public withStartupTimeout(startupTimeout: number): this {
-    this.startupTimeout = startupTimeout;
+  public withStartupTimeout(startupTimeoutMs: number): this {
+    this.startupTimeoutMs = startupTimeoutMs;
     this.startupTimeoutSet = true;
     return this;
   }
@@ -32,6 +32,6 @@ export abstract class AbstractWaitStrategy implements WaitStrategy {
   }
 
   public getStartupTimeout(): number {
-    return this.startupTimeout;
+    return this.startupTimeoutMs;
   }
 }

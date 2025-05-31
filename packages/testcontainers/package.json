@@ -1,6 +1,6 @@
 {
   "name": "testcontainers",
-  "version": "10.24.2",
+  "version": "11.0.0",
   "author": "Cristian Greco",
   "license": "MIT",
   "keywords": [
@@ -31,23 +31,23 @@
   },
   "dependencies": {
     "@balena/dockerignore": "^1.0.2",
-    "@types/dockerode": "^3.3.35",
+    "@types/dockerode": "^3.3.39",
     "archiver": "^7.0.1",
     "async-lock": "^1.4.1",
     "byline": "^5.0.0",
-    "debug": "^4.3.5",
-    "docker-compose": "^0.24.8",
-    "dockerode": "^4.0.5",
+    "debug": "^4.4.1",
+    "docker-compose": "^1.2.0",
+    "dockerode": "^4.0.6",
     "get-port": "^7.1.0",
     "proper-lockfile": "^4.1.2",
     "properties-reader": "^2.3.0",
     "ssh-remote-port-forward": "^1.0.4",
-    "tar-fs": "^3.0.7",
+    "tar-fs": "^3.0.9",
     "tmp": "^0.2.3",
-    "undici": "^5.28.5"
+    "undici": "^7.10.0"
   },
   "devDependencies": {
-    "@types/archiver": "^6.0.2",
+    "@types/archiver": "^6.0.3",
     "@types/async-lock": "^1.4.2",
     "@types/byline": "^4.2.36",
     "@types/debug": "^4.1.12",

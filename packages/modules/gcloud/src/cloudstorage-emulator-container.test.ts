@@ -1,7 +1,10 @@
 import { Storage } from "@google-cloud/storage";
 import { setupServer } from "msw/node";
 import { ReadableStream } from "node:stream/web";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { CloudStorageEmulatorContainer, StartedCloudStorageEmulatorContainer } from "./cloudstorage-emulator-container";
+
+const IMAGE = getImage(__dirname, 1);
 
 async function getRequestBodyFromReadableStream(stream: ReadableStream<Uint8Array>): Promise<string> {
   const decoder = new TextDecoder();
@@ -46,7 +49,7 @@ describe("CloudStorageEmulatorContainer", { timeout: 240_000 }, () => {
 
   // cloud-storage {
   it("should work using default version", async () => {
-    const cloudstorageEmulatorContainer = await new CloudStorageEmulatorContainer().start();
+    const cloudstorageEmulatorContainer = await new CloudStorageEmulatorContainer(IMAGE).start();
 
     await checkCloudStorage(cloudstorageEmulatorContainer);
 
@@ -55,7 +58,7 @@ describe("CloudStorageEmulatorContainer", { timeout: 240_000 }, () => {
   // }
 
   it("should use the provided external URL", async () => {
-    const cloudstorageEmulatorContainer = await new CloudStorageEmulatorContainer()
+    const cloudstorageEmulatorContainer = await new CloudStorageEmulatorContainer(IMAGE)
       .withExternalURL("http://cdn.company.local")
       .start();
 
@@ -66,7 +69,7 @@ describe("CloudStorageEmulatorContainer", { timeout: 240_000 }, () => {
   });
 
   it("should be able update the external URL of running instance", async () => {
-    const cloudstorageEmulatorContainer = await new CloudStorageEmulatorContainer()
+    const cloudstorageEmulatorContainer = await new CloudStorageEmulatorContainer(IMAGE)
       .withExternalURL("http://cdn.company.local")
       .start();
 
@@ -110,7 +113,7 @@ describe("CloudStorageEmulatorContainer", { timeout: 240_000 }, () => {
       if (request.url.includes("/_internal/config")) configUpdated = true;
     });
 
-    const container = await new CloudStorageEmulatorContainer().start();
+    const container = await new CloudStorageEmulatorContainer(IMAGE).start();
 
     expect(configUpdated).toBe(true);
     expect(container.getExternalUrl()).toBe(container.getEmulatorEndpoint());
@@ -126,7 +129,7 @@ describe("CloudStorageEmulatorContainer", { timeout: 240_000 }, () => {
       if (request.url.includes("/_internal/config")) configUpdated = true;
     });
 
-    const container = await new CloudStorageEmulatorContainer().withAutoUpdateExternalUrl(false).start();
+    const container = await new CloudStorageEmulatorContainer(IMAGE).withAutoUpdateExternalUrl(false).start();
 
     expect(configUpdated).toBe(false);
     expect(container.getExternalUrl()).toBe(undefined);

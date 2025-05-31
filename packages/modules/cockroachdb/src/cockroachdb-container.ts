@@ -7,11 +7,11 @@ export class CockroachDbContainer extends GenericContainer {
   private database = "test";
   private username = "test";
 
-  constructor(image = "cockroachdb/cockroach:v24.3.5") {
+  constructor(image: string) {
     super(image);
     this.withExposedPorts(COCKROACH_PORT, COCKROACH_HTTP_PORT)
       .withCommand(["start-single-node", "--insecure", `--http-addr=0.0.0.0:${COCKROACH_HTTP_PORT}`])
-      .withWaitStrategy(Wait.forHealthCheck());
+      .withWaitStrategy(Wait.forAll([Wait.forHealthCheck(), Wait.forListeningPorts()]));
   }
 
   public withDatabase(database: string): this {

@@ -1,0 +1,38 @@
+{
+  "name": "@testcontainers/etcd",
+  "version": "11.0.0",
+  "license": "MIT",
+  "keywords": [
+    "etcd",
+    "etcd3",
+    "testing",
+    "docker",
+    "testcontainers"
+  ],
+  "description": "Etcd module for Testcontainers",
+  "homepage": "https://github.com/testcontainers/testcontainers-node#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/testcontainers/testcontainers-node"
+  },
+  "bugs": {
+    "url": "https://github.com/testcontainers/testcontainers-node/issues"
+  },
+  "main": "build/index.js",
+  "files": [
+    "build"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "prepack": "shx cp ../../../README.md . && shx cp ../../../LICENSE .",
+    "build": "tsc --project tsconfig.build.json"
+  },
+  "devDependencies": {
+    "etcd3": "^1.1.2"
+  },
+  "dependencies": {
+    "testcontainers": "^11.0.0"
+  }
+}

@@ -1,12 +1,15 @@
 import { TableClient, TableEntity } from "@azure/data-tables";
 import { BlobServiceClient, StorageSharedKeyCredential } from "@azure/storage-blob";
 import { QueueServiceClient } from "@azure/storage-queue";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { AzuriteContainer } from "./azurite-container";
+
+const IMAGE = getImage(__dirname);
 
 describe("Azurite", { timeout: 240_000 }, () => {
   // uploadAndDownloadBlob {
   it("should upload and download blob with default credentials", async () => {
-    const container = await new AzuriteContainer().start();
+    const container = await new AzuriteContainer(IMAGE).start();
 
     const connectionString = container.getConnectionString();
     expect(connectionString).toBeTruthy();
@@ -38,7 +41,7 @@ describe("Azurite", { timeout: 240_000 }, () => {
 
   // sendAndReceiveQueue {
   it("should add to queue with default credentials", async () => {
-    const container = await new AzuriteContainer().start();
+    const container = await new AzuriteContainer(IMAGE).start();
 
     const connectionString = container.getConnectionString();
     expect(connectionString).toBeTruthy();
@@ -62,7 +65,7 @@ describe("Azurite", { timeout: 240_000 }, () => {
 
   // createAndInsertOnTable {
   it("should add to table with default credentials", async () => {
-    const container = await new AzuriteContainer().start();
+    const container = await new AzuriteContainer(IMAGE).start();
 
     const connectionString = container.getConnectionString();
     expect(connectionString).toBeTruthy();
@@ -94,7 +97,7 @@ describe("Azurite", { timeout: 240_000 }, () => {
     // Account key must be base64 encoded
     const accountKey = Buffer.from("test-key").toString("base64");
 
-    const container = await new AzuriteContainer().withAccountName(accountName).withAccountKey(accountKey).start();
+    const container = await new AzuriteContainer(IMAGE).withAccountName(accountName).withAccountKey(accountKey).start();
 
     const credentials = new StorageSharedKeyCredential(accountName, accountKey);
     const serviceClient = new BlobServiceClient(container.getBlobEndpoint(), credentials);
@@ -116,7 +119,7 @@ describe("Azurite", { timeout: 240_000 }, () => {
     const blobPort = 13000;
     const queuePort = 14000;
     const tablePort = 15000;
-    const container = await new AzuriteContainer()
+    const container = await new AzuriteContainer(IMAGE)
       .withBlobPort({ container: 10001, host: blobPort })
       .withQueuePort({ container: 10002, host: queuePort })
       .withTablePort({ container: 10003, host: tablePort })
@@ -141,7 +144,7 @@ describe("Azurite", { timeout: 240_000 }, () => {
 
   // inMemoryPersistence {
   it("should be able to use in-memory persistence", async () => {
-    const container = await new AzuriteContainer().withInMemoryPersistence().start();
+    const container = await new AzuriteContainer(IMAGE).withInMemoryPersistence().start();
     const blobName = "hello.txt";
 
     {
