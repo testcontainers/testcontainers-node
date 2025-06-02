@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "chromadb": "2.4.6",
-    "ollama": "^0.5.15"
+    "ollama": "^0.5.16"
   },
   "dependencies": {
     "testcontainers": "^11.0.0"
