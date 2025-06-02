@@ -1,1 +1,1 @@
-FROM chromadb/chroma:1.0.10
+FROM chromadb/chroma:1.0.12
