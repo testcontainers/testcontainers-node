@@ -1,8 +1,8 @@
 import archiver from "archiver";
 import AsyncLock from "async-lock";
-import { Container, ContainerCreateOptions, HostConfig } from "dockerode";
+import { Container, ContainerCreateOptions, ContainerInspectInfo, HostConfig } from "dockerode";
 import { Readable } from "stream";
-import { containerLog, hash, log, toNanos } from "../common";
+import { containerLog, hash, IntervalRetry, log, toNanos } from "../common";
 import { ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "../container-runtime";
 import { CONTAINER_STATUSES } from "../container-runtime/clients/container/types";
 import { StartedNetwork } from "../network/network";
@@ -141,8 +141,7 @@ export class GenericContainer implements TestContainer {
     if (!inspectResult.State.Running) {
       log.debug("Reused container is not running, attempting to start it");
       await client.container.start(container);
-      // Refetch the inspect result to get the updated state
-      inspectResult = await client.container.inspect(container);
+      inspectResult = (await this.inspectContainer(client, container)).inspectResult;
     }
 
     const mappedInspectResult = mapInspectResult(inspectResult);
@@ -196,8 +195,7 @@ export class GenericContainer implements TestContainer {
     await client.container.start(container);
     log.info(`Started container for image "${this.createOpts.Image}"`, { containerId: container.id });
 
-    const inspectResult = await client.container.inspect(container);
-    const mappedInspectResult = mapInspectResult(inspectResult);
+    const { inspectResult, mappedInspectResult } = await this.inspectContainer(client, container);
     const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, mappedInspectResult).filter(
       this.exposedPorts
     );
@@ -239,6 +237,48 @@ export class GenericContainer implements TestContainer {
     }
 
     return startedContainer;
+  }
+
+  private async inspectContainer(
+    client: ContainerRuntimeClient,
+    container: Container
+  ): Promise<{
+    inspectResult: ContainerInspectInfo;
+    mappedInspectResult: InspectResult;
+  }> {
+    const containerInspectRetry = await new IntervalRetry<
+      {
+        inspectResult: ContainerInspectInfo;
+        mappedInspectResult: InspectResult;
+      },
+      Error
+    >(100).retryUntil(
+      async () => {
+        const inspectResult = await client.container.inspect(container);
+        const mappedInspectResult = mapInspectResult(inspectResult);
+        return { inspectResult, mappedInspectResult };
+      },
+      ({ mappedInspectResult }) =>
+        this.exposedPorts
+          .map((exposedPort) => getContainerPort(exposedPort))
+          .every(
+            (exposedPort) =>
+              mappedInspectResult.ports[exposedPort].length > 0 &&
+              mappedInspectResult.ports[exposedPort].every(({ hostPort }) => hostPort !== undefined)
+          ),
+      () => {
+        const message = `Container did not expose all ports after starting`;
+        log.error(message, { containerId: container.id });
+        return new Error(message);
+      },
+      3000
+    );
+
+    if (containerInspectRetry instanceof Error) {
+      throw containerInspectRetry;
+    }
+
+    return containerInspectRetry;
   }
 
   private async connectContainerToPortForwarder(client: ContainerRuntimeClient, container: Container) {
@@ -361,7 +401,7 @@ export class GenericContainer implements TestContainer {
   public withExposedPorts(...ports: PortWithOptionalBinding[]): this {
     const exposedPorts: { [port: string]: Record<string, never> } = {};
     for (const exposedPort of ports) {
-      exposedPorts[getContainerPort(exposedPort).toString()] = {};
+      exposedPorts[`${getContainerPort(exposedPort).toString()}/tcp`] = {};
     }
 
     this.exposedPorts = [...this.exposedPorts, ...ports];
@@ -373,9 +413,9 @@ export class GenericContainer implements TestContainer {
     const portBindings: Record<string, Array<Record<string, string>>> = {};
     for (const exposedPort of ports) {
       if (hasHostBinding(exposedPort)) {
-        portBindings[exposedPort.container] = [{ HostPort: exposedPort.host.toString() }];
+        portBindings[`${exposedPort.container}/tcp`] = [{ HostPort: exposedPort.host.toString() }];
       } else {
-        portBindings[exposedPort] = [{ HostPort: "0" }];
+        portBindings[`${exposedPort}/tcp`] = [{ HostPort: "0" }];
       }
     }
 
