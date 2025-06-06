@@ -81,7 +81,7 @@ test("retries the inspect if ports are not yet exposed", async () => {
   expect(inspectFn).toHaveBeenCalledTimes(3);
 });
 
-test("throws an error ", async () => {
+test("throws an error when ports are not exposed within timeout", async () => {
   const data = mockNotExposed();
   const inspectFn = vi.fn().mockResolvedValue(data.inspectResult);
 
