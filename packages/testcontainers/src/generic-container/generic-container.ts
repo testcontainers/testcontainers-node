@@ -33,6 +33,7 @@ import { Wait } from "../wait-strategies/wait";
 import { waitForContainer } from "../wait-strategies/wait-for-container";
 import { WaitStrategy } from "../wait-strategies/wait-strategy";
 import { GenericContainerBuilder } from "./generic-container-builder";
+import { inspectContainerUntilPortsExposed } from "./inspect-container-util-ports-exposed";
 import { StartedGenericContainer } from "./started-generic-container";
 
 const reusableContainerCreationLock = new AsyncLock();
@@ -141,8 +142,13 @@ export class GenericContainer implements TestContainer {
     if (!inspectResult.State.Running) {
       log.debug("Reused container is not running, attempting to start it");
       await client.container.start(container);
-      // Refetch the inspect result to get the updated state
-      inspectResult = await client.container.inspect(container);
+      inspectResult = (
+        await inspectContainerUntilPortsExposed(
+          () => client.container.inspect(container),
+          this.exposedPorts,
+          container.id
+        )
+      ).inspectResult;
     }
 
     const mappedInspectResult = mapInspectResult(inspectResult);
@@ -196,8 +202,11 @@ export class GenericContainer implements TestContainer {
     await client.container.start(container);
     log.info(`Started container for image "${this.createOpts.Image}"`, { containerId: container.id });
 
-    const inspectResult = await client.container.inspect(container);
-    const mappedInspectResult = mapInspectResult(inspectResult);
+    const { inspectResult, mappedInspectResult } = await inspectContainerUntilPortsExposed(
+      () => client.container.inspect(container),
+      this.exposedPorts,
+      container.id
+    );
     const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, mappedInspectResult).filter(
       this.exposedPorts
     );
@@ -361,7 +370,7 @@ export class GenericContainer implements TestContainer {
   public withExposedPorts(...ports: PortWithOptionalBinding[]): this {
     const exposedPorts: { [port: string]: Record<string, never> } = {};
     for (const exposedPort of ports) {
-      exposedPorts[getContainerPort(exposedPort).toString()] = {};
+      exposedPorts[`${getContainerPort(exposedPort).toString()}/tcp`] = {};
     }
 
     this.exposedPorts = [...this.exposedPorts, ...ports];
@@ -373,9 +382,9 @@ export class GenericContainer implements TestContainer {
     const portBindings: Record<string, Array<Record<string, string>>> = {};
     for (const exposedPort of ports) {
       if (hasHostBinding(exposedPort)) {
-        portBindings[exposedPort.container] = [{ HostPort: exposedPort.host.toString() }];
+        portBindings[`${exposedPort.container}/tcp`] = [{ HostPort: exposedPort.host.toString() }];
       } else {
-        portBindings[exposedPort] = [{ HostPort: "0" }];
+        portBindings[`${exposedPort}/tcp`] = [{ HostPort: "0" }];
       }
     }
 
