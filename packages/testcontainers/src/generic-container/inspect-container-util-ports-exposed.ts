@@ -24,11 +24,7 @@ export async function inspectContainerUntilPortsExposed(
     ({ mappedInspectResult }) =>
       ports
         .map((exposedPort) => getContainerPort(exposedPort))
-        .every(
-          (exposedPort) =>
-            mappedInspectResult.ports[exposedPort].length > 0 &&
-            mappedInspectResult.ports[exposedPort].every(({ hostPort }) => hostPort !== undefined)
-        ),
+        .every((exposedPort) => mappedInspectResult.ports[exposedPort].length > 0),
     () => {
       const message = `Container did not expose all ports after starting`;
       log.error(message, { containerId });
