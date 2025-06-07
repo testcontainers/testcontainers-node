@@ -1,9 +1,8 @@
 import { ContainerInspectInfo } from "dockerode";
-import { InspectResult } from "../types";
 import { mapInspectResult } from "../utils/map-inspect-result";
 import { inspectContainerUntilPortsExposed } from "./inspect-container-util-ports-exposed";
 
-function mockExposed(): { inspectResult: ContainerInspectInfo; mappedInspectResult: InspectResult } {
+function mockInspectResult(ports: ContainerInspectInfo["NetworkSettings"]["Ports"]) {
   const date = new Date();
 
   const inspectResult: ContainerInspectInfo = {
@@ -22,34 +21,7 @@ function mockExposed(): { inspectResult: ContainerInspectInfo; mappedInspectResu
       FinishedAt: date.toISOString(),
     },
     NetworkSettings: {
-      Ports: { "8080/tcp": [{ HostIp: "0.0.0.0", HostPort: "45000" }] },
-      Networks: {},
-    },
-  } as unknown as ContainerInspectInfo;
-
-  return { inspectResult, mappedInspectResult: mapInspectResult(inspectResult) };
-}
-
-function mockNotExposed(): { inspectResult: ContainerInspectInfo; mappedInspectResult: InspectResult } {
-  const date = new Date();
-
-  const inspectResult: ContainerInspectInfo = {
-    Name: "container-id",
-    Config: {
-      Hostname: "hostname",
-      Labels: {},
-    },
-    State: {
-      Health: {
-        Status: "healthy",
-      },
-      Status: "running",
-      Running: true,
-      StartedAt: date.toISOString(),
-      FinishedAt: date.toISOString(),
-    },
-    NetworkSettings: {
-      Ports: { "8080/tcp": [] },
+      Ports: ports,
       Networks: {},
     },
   } as unknown as ContainerInspectInfo;
@@ -58,7 +30,7 @@ function mockNotExposed(): { inspectResult: ContainerInspectInfo; mappedInspectR
 }
 
 test("returns the inspect results when all ports are exposed", async () => {
-  const data = mockExposed();
+  const data = mockInspectResult({ "8080/tcp": [{ HostIp: "0.0.0.0", HostPort: "45000" }] });
   const inspectFn = vi.fn().mockResolvedValueOnce(data.inspectResult);
 
   const result = await inspectContainerUntilPortsExposed(inspectFn, [8080], "container-id");
@@ -67,8 +39,8 @@ test("returns the inspect results when all ports are exposed", async () => {
 });
 
 test("retries the inspect if ports are not yet exposed", async () => {
-  const data1 = mockNotExposed();
-  const data2 = mockExposed();
+  const data1 = mockInspectResult({ "8080/tcp": [] });
+  const data2 = mockInspectResult({ "8080/tcp": [{ HostIp: "0.0.0.0", HostPort: "45000" }] });
   const inspectFn = vi
     .fn()
     .mockResolvedValueOnce(data1.inspectResult)
@@ -81,8 +53,17 @@ test("retries the inspect if ports are not yet exposed", async () => {
   expect(inspectFn).toHaveBeenCalledTimes(3);
 });
 
-test("throws an error when ports are not exposed within timeout", async () => {
-  const data = mockNotExposed();
+test("throws an error when host ports are not exposed within timeout", async () => {
+  const data = mockInspectResult({ "8080/tcp": [] });
+  const inspectFn = vi.fn().mockResolvedValue(data.inspectResult);
+
+  await expect(inspectContainerUntilPortsExposed(inspectFn, [8080], "container-id", 0)).rejects.toThrow(
+    "Container did not expose all ports after starting"
+  );
+});
+
+test("throws an error when container ports not exposed within timeout", async () => {
+  const data = mockInspectResult({});
   const inspectFn = vi.fn().mockResolvedValue(data.inspectResult);
 
   await expect(inspectContainerUntilPortsExposed(inspectFn, [8080], "container-id", 0)).rejects.toThrow(
