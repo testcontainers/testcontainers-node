@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/azure-cosmosdb-emulator",
-  "version": "11.0.1",
+  "version": "11.0.2",
   "license": "MIT",
   "keywords": [
     "azure-cosmosdb",
@@ -34,6 +34,6 @@
     "@azure/cosmos": "^4.4.1"
   },
   "dependencies": {
-    "testcontainers": "^11.0.1"
+    "testcontainers": "^11.0.2"
   }
 }
