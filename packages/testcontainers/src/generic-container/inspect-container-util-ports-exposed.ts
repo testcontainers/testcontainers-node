@@ -13,9 +13,9 @@ export async function inspectContainerUntilPortsExposed(
   inspectFn: () => Promise<ContainerInspectInfo>,
   ports: PortWithOptionalBinding[],
   containerId: string,
-  timeout = 5000
+  timeout = 10_000
 ): Promise<Result> {
-  const result = await new IntervalRetry<Result, Error>(100).retryUntil(
+  const result = await new IntervalRetry<Result, Error>(250).retryUntil(
     async () => {
       const inspectResult = await inspectFn();
       const mappedInspectResult = mapInspectResult(inspectResult);
