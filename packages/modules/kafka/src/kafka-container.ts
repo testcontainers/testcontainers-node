@@ -300,16 +300,10 @@ export class KafkaContainer extends GenericContainer {
   }
 
   private commandZookeeper(): string {
-    const port = DEFAULT_ZOOKEEPER_PORT;
-
     let command = `echo 'clientPort=${DEFAULT_ZOOKEEPER_PORT}' > zookeeper.properties\n`;
     command += "echo 'dataDir=/var/lib/zookeeper/data' >> zookeeper.properties\n";
     command += "echo 'dataLogDir=/var/lib/zookeeper/log' >> zookeeper.properties\n";
     command += "zookeeper-server-start zookeeper.properties &\n";
-
-    command += `echo "Waiting for ZooKeeper to be ready on port ${port}..."\n`;
-    command += `while ! (echo > /dev/tcp/localhost/${port}) &> /dev/null; do sleep 0.1; done\n`;
-    command += `echo "ZooKeeper is ready."\n`;
 
     return command;
   }

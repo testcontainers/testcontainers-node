@@ -29,7 +29,11 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
   it("should connect using in-built zoo-keeper and custom network", async () => {
     const network = await new Network().start();
 
-    const kafkaContainer = await new KafkaContainer(IMAGE).withNetwork(network).withExposedPorts(9093).start();
+    const kafkaContainer = await new KafkaContainer(IMAGE)
+      .withNetwork(network)
+      .withNetworkAliases("kafka")
+      .withExposedPorts(9093)
+      .start();
 
     await testPubSub(kafkaContainer);
 
