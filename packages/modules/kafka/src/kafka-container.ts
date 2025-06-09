@@ -64,6 +64,7 @@ export class KafkaContainer extends GenericContainer {
 
   constructor(image: string) {
     super(image);
+    // this.withWaitStrategy(Wait.forLogMessage(/Kafka startTimeMs/));
     this.withExposedPorts(KAFKA_PORT).withStartupTimeout(180_000).withEnvironment({
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "BROKER:PLAINTEXT,PLAINTEXT:PLAINTEXT",
       KAFKA_INTER_BROKER_LISTENER_NAME: "BROKER",
@@ -300,10 +301,17 @@ export class KafkaContainer extends GenericContainer {
   }
 
   private commandZookeeper(): string {
-    let command = "echo 'clientPort=" + DEFAULT_ZOOKEEPER_PORT + "' > zookeeper.properties\n";
+    const port = DEFAULT_ZOOKEEPER_PORT;
+
+    let command = `echo 'clientPort=${DEFAULT_ZOOKEEPER_PORT}' > zookeeper.properties\n`;
     command += "echo 'dataDir=/var/lib/zookeeper/data' >> zookeeper.properties\n";
     command += "echo 'dataLogDir=/var/lib/zookeeper/log' >> zookeeper.properties\n";
     command += "zookeeper-server-start zookeeper.properties &\n";
+
+    command += `echo "Waiting for ZooKeeper to be ready on port ${port}..."\n`;
+    command += `while ! (echo > /dev/tcp/localhost/${port}) &> /dev/null; do sleep 0.1; done\n`;
+    command += `echo "ZooKeeper is ready."\n`;
+
     return command;
   }
 }
