@@ -64,7 +64,6 @@ export class KafkaContainer extends GenericContainer {
 
   constructor(image: string) {
     super(image);
-    // this.withWaitStrategy(Wait.forLogMessage(/Kafka startTimeMs/));
     this.withExposedPorts(KAFKA_PORT).withStartupTimeout(180_000).withEnvironment({
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "BROKER:PLAINTEXT,PLAINTEXT:PLAINTEXT",
       KAFKA_INTER_BROKER_LISTENER_NAME: "BROKER",
