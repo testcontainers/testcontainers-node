@@ -1,4 +1,3 @@
-import { createClient } from "redis";
 import { GenericContainer, Network } from "testcontainers";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { ToxiProxyContainer, TPClient } from "./toxiproxy-container";
@@ -6,103 +5,78 @@ import { ToxiProxyContainer, TPClient } from "./toxiproxy-container";
 const IMAGE = getImage(__dirname);
 
 describe("ToxiProxyContainer", { timeout: 240_000 }, () => {
-  // Helper to connect to redis
-  async function connectTo(url: string) {
-    const client = createClient({
-      url,
-    });
-    client.on("error", () => {}); // Ignore errors
-    await client.connect();
-    expect(client.isOpen).toBeTruthy();
-    return client;
-  }
-
   // create_proxy {
-  it("Should create a proxy to an endpoint", async () => {
-    const containerNetwork = await new Network().start();
-    const redisContainer = await new GenericContainer("redis:7.2")
-      .withNetwork(containerNetwork)
-      .withNetworkAliases("redis")
+  it("should create a proxy to an endpoint", async () => {
+    const network = await new Network().start();
+    const appContainer = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withExposedPorts(8080)
+      .withNetwork(network)
+      .withNetworkAliases("app")
       .start();
 
-    const toxiproxyContainer = await new ToxiProxyContainer(IMAGE).withNetwork(containerNetwork).start();
+    const toxiproxyContainer = await new ToxiProxyContainer(IMAGE).withNetwork(network).start();
 
-    // Create the proxy between Toxiproxy and Redis
-    const redisProxy = await toxiproxyContainer.createProxy({
-      name: "redis",
-      upstream: "redis:6379",
+    const appProxy = await toxiproxyContainer.createProxy({
+      name: "app",
+      upstream: "app:8080",
     });
 
-    const url = `redis://${redisProxy.host}:${redisProxy.port}`;
-    const client = await connectTo(url);
-    await client.set("key", "val");
-    expect(await client.get("key")).toBe("val");
+    const response = await fetch(`http://${appProxy.host}:${appProxy.port}/hello-world`);
+    expect(response.status).toBe(200);
 
-    await client.disconnect();
     await toxiproxyContainer.stop();
-    await redisContainer.stop();
+    await appContainer.stop();
+    await network.stop();
   });
   // }
 
   // enabled_disabled {
-  it("Should enable and disable a proxy", async () => {
-    const containerNetwork = await new Network().start();
-    const redisContainer = await new GenericContainer("redis:7.2")
-      .withNetwork(containerNetwork)
-      .withNetworkAliases("redis")
+  it("should enable and disable a proxy", async () => {
+    const network = await new Network().start();
+    const appContainer = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withExposedPorts(8080)
+      .withNetwork(network)
+      .withNetworkAliases("app")
       .start();
 
-    const toxiproxyContainer = await new ToxiProxyContainer(IMAGE).withNetwork(containerNetwork).start();
+    const toxiproxyContainer = await new ToxiProxyContainer(IMAGE).withNetwork(network).start();
 
-    // Create the proxy between Toxiproxy and Redis
-    const redisProxy = await toxiproxyContainer.createProxy({
-      name: "redis",
-      upstream: "redis:6379",
+    const appProxy = await toxiproxyContainer.createProxy({
+      name: "app",
+      upstream: "app:8080",
     });
 
-    const url = `redis://${redisProxy.host}:${redisProxy.port}`;
-    const client = await connectTo(url);
+    await appProxy.setEnabled(false);
+    await expect(fetch(`http://${appProxy.host}:${appProxy.port}/hello-world`)).rejects.toThrow();
 
-    await client.set("key", "val");
-    expect(await client.get("key")).toBe("val");
+    await appProxy.setEnabled(true);
+    const response = await fetch(`http://${appProxy.host}:${appProxy.port}/hello-world`);
+    expect(response.status).toBe(200);
 
-    // Disable any new connections to the proxy
-    await redisProxy.setEnabled(false);
-
-    await expect(client.ping()).rejects.toThrow();
-
-    // Enable the proxy again
-    await redisProxy.setEnabled(true);
-
-    expect(await client.ping()).toBe("PONG");
-
-    await client.disconnect();
     await toxiproxyContainer.stop();
-    await redisContainer.stop();
+    await appContainer.stop();
+    await network.stop();
   });
   // }
 
   // adding_toxic {
-  it("Should add a toxic to a proxy and then remove", async () => {
-    const containerNetwork = await new Network().start();
-    const redisContainer = await new GenericContainer("redis:7.2")
-      .withNetwork(containerNetwork)
-      .withNetworkAliases("redis")
+  it("should add a toxic to a proxy and then remove", async () => {
+    const network = await new Network().start();
+    const appContainer = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withExposedPorts(8080)
+      .withNetwork(network)
+      .withNetworkAliases("app")
       .start();
 
-    const toxiproxyContainer = await new ToxiProxyContainer(IMAGE).withNetwork(containerNetwork).start();
+    const toxiproxyContainer = await new ToxiProxyContainer(IMAGE).withNetwork(network).start();
 
-    // Create the proxy between Toxiproxy and Redis
-    const redisProxy = await toxiproxyContainer.createProxy({
-      name: "redis",
-      upstream: "redis:6379",
+    const appProxy = await toxiproxyContainer.createProxy({
+      name: "app",
+      upstream: "app:8080",
     });
 
-    const url = `redis://${redisProxy.host}:${redisProxy.port}`;
-    const client = await connectTo(url);
-
     // See https://github.com/ihsw/toxiproxy-node-client for details on the instance interface
-    const toxic = await redisProxy.instance.addToxic<TPClient.Latency>({
+    const toxic = await appProxy.instance.addToxic<TPClient.Latency>({
       attributes: {
         jitter: 50,
         latency: 1500,
@@ -114,55 +88,49 @@ describe("ToxiProxyContainer", { timeout: 240_000 }, () => {
     });
 
     const before = Date.now();
-    await client.ping();
+    await fetch(`http://${appProxy.host}:${appProxy.port}/hello-world`);
     const after = Date.now();
     expect(after - before).toBeGreaterThan(1000);
 
     await toxic.remove();
 
-    await client.disconnect();
     await toxiproxyContainer.stop();
-    await redisContainer.stop();
+    await appContainer.stop();
+    await network.stop();
   });
   // }
 
-  it("Should create multiple proxies", async () => {
-    const containerNetwork = await new Network().start();
-    const redisContainer = await new GenericContainer("redis:7.2")
-      .withNetwork(containerNetwork)
-      .withNetworkAliases("redis")
+  it("should create multiple proxies", async () => {
+    const network = await new Network().start();
+    const appContainer = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withExposedPorts(8080)
+      .withNetwork(network)
+      .withNetworkAliases("app")
       .start();
 
-    const toxiproxyContainer = await new ToxiProxyContainer(IMAGE).withNetwork(containerNetwork).start();
+    const toxiproxyContainer = await new ToxiProxyContainer(IMAGE).withNetwork(network).start();
 
-    // Create the proxy between Toxiproxy and Redis
-    const redisProxy = await toxiproxyContainer.createProxy({
-      name: "redis",
-      upstream: "redis:6379",
+    const appProxy = await toxiproxyContainer.createProxy({
+      name: "app",
+      upstream: "app:8080",
+    });
+    const appProxy2 = await toxiproxyContainer.createProxy({
+      name: "app2",
+      upstream: "app:8080",
     });
 
-    // Create the proxy between Toxiproxy and Redis
-    const redisProxy2 = await toxiproxyContainer.createProxy({
-      name: "redis2",
-      upstream: "redis:6379",
-    });
+    const response = await fetch(`http://${appProxy.host}:${appProxy.port}/hello-world`);
+    expect(response.status).toBe(200);
 
-    const url = `redis://${redisProxy.host}:${redisProxy.port}`;
-    const client = await connectTo(url);
-    await client.set("key", "val");
-    expect(await client.get("key")).toBe("val");
+    const response2 = await fetch(`http://${appProxy2.host}:${appProxy2.port}/hello-world`);
+    expect(response2.status).toBe(200);
 
-    const url2 = `redis://${redisProxy2.host}:${redisProxy2.port}`;
-    const client2 = await connectTo(url2);
-    expect(await client2.get("key")).toBe("val");
-
-    await client.disconnect();
-    await client2.disconnect();
     await toxiproxyContainer.stop();
-    await redisContainer.stop();
+    await appContainer.stop();
+    await network.stop();
   });
 
-  it("Throws an error when too many proxies are created", async () => {
+  it("throws an error when too many proxies are created", async () => {
     const toxiproxyContainer = await new ToxiProxyContainer(IMAGE).start();
 
     for (let i = 0; i < 32; i++) {

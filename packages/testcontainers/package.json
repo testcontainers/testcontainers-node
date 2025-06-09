@@ -37,7 +37,7 @@
     "byline": "^5.0.0",
     "debug": "^4.4.1",
     "docker-compose": "^1.2.0",
-    "dockerode": "^4.0.6",
+    "dockerode": "^4.0.7",
     "get-port": "^7.1.0",
     "proper-lockfile": "^4.1.2",
     "properties-reader": "^2.3.0",
