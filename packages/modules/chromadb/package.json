@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/chromadb",
-  "version": "11.0.0",
+  "version": "11.0.3",
   "license": "MIT",
   "keywords": [
     "chromadb",
@@ -29,10 +29,10 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "chromadb": "2.4.6",
-    "ollama": "^0.5.15"
+    "chromadb": "^2.4.6",
+    "ollama": "^0.5.16"
   },
   "dependencies": {
-    "testcontainers": "^11.0.0"
+    "testcontainers": "^11.0.3"
   }
 }

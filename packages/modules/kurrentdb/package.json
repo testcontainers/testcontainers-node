@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/kurrentdb",
-  "version": "11.0.0",
+  "version": "11.0.3",
   "license": "MIT",
   "keywords": [
     "kurrentdb",
@@ -29,9 +29,9 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "@kurrent/kurrentdb-client": "^1.0.1"
+    "@kurrent/kurrentdb-client": "^1.0.2"
   },
   "dependencies": {
-    "testcontainers": "^11.0.0"
+    "testcontainers": "^11.0.3"
   }
 }
