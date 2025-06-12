@@ -1,3 +1,4 @@
+import { IDockerComposeExecutableOptions } from "docker-compose";
 import { Logger } from "../../../common";
 
 export type ComposeOptions = {
@@ -8,6 +9,7 @@ export type ComposeOptions = {
   composeOptions?: string[];
   environment?: NodeJS.ProcessEnv;
   logger?: Logger;
+  executable?: IDockerComposeExecutableOptions;
 };
 
 export type ComposeDownOptions = {

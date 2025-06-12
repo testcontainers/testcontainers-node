@@ -29,5 +29,6 @@ export function defaultComposeOptions(
       COMPOSE_PROJECT_NAME: options.projectName,
       ...{ ...environment, ...options.environment },
     },
+    executable: options.executable,
   };
 }
