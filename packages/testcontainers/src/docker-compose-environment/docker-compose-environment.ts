@@ -1,6 +1,6 @@
 import { ContainerInfo } from "dockerode";
 import { containerLog, log, RandomUuid, Uuid } from "../common";
-import { getContainerRuntimeClient, parseComposeContainerName } from "../container-runtime";
+import { ComposeOptions, getContainerRuntimeClient, parseComposeContainerName } from "../container-runtime";
 import { StartedGenericContainer } from "../generic-container/started-generic-container";
 import { getReaper } from "../reaper/reaper";
 import { Environment } from "../types";
@@ -26,6 +26,7 @@ export class DockerComposeEnvironment {
   private defaultWaitStrategy: WaitStrategy = Wait.forListeningPorts();
   private waitStrategy: { [containerName: string]: WaitStrategy } = {};
   private startupTimeoutMs?: number;
+  private clientOptions: Partial<ComposeOptions> = {};
 
   constructor(composeFilePath: string, composeFiles: string | string[], uuid: Uuid = new RandomUuid()) {
     this.composeFilePath = composeFilePath;
@@ -84,19 +85,33 @@ export class DockerComposeEnvironment {
     return this;
   }
 
+  public withClientOptions(
+    options: Partial<Omit<ComposeOptions, "filePath" | "files" | "projectName" | "environment">>
+  ): this {
+    this.clientOptions = { ...this.clientOptions, ...options };
+    return this;
+  }
+
   public async up(services?: Array<string>): Promise<StartedDockerComposeEnvironment> {
     log.info(`Starting DockerCompose environment "${this.projectName}"...`);
     const client = await getContainerRuntimeClient();
     const reaper = await getReaper(client);
     reaper.addComposeProject(this.projectName);
 
+    const {
+      composeOptions: clientComposeOptions = [],
+      commandOptions: clientCommandOptions = [],
+      ...remainingClientOptions
+    } = this.clientOptions;
+
     const options = {
+      ...remainingClientOptions,
       filePath: this.composeFilePath,
       files: this.composeFiles,
       projectName: this.projectName,
     };
 
-    const commandOptions = [];
+    const commandOptions = [...clientCommandOptions];
     if (this.build) {
       commandOptions.push("--build");
     }
@@ -104,7 +119,7 @@ export class DockerComposeEnvironment {
       commandOptions.push("--no-recreate");
     }
 
-    const composeOptions: string[] = [];
+    const composeOptions = [...clientComposeOptions];
     if (this.environmentFile) {
       composeOptions.push("--env-file", this.environmentFile);
     }
