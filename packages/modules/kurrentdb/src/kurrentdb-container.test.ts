@@ -55,7 +55,7 @@ describe("KurrentDbContainer", { timeout: 240_000 }, () => {
   })
   // }
 
-  // protocolAdaptsToImageName
+  // protocolAdaptsToImageName {
   it("should use the protocol esdb:// if the image name contains 'eventstore'", async () => {
     const container = await new KurrentDbContainer('eventstore/eventstore:23.10.7-bookworm-slim')
       .withEnvironment({

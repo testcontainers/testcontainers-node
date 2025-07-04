@@ -30,5 +30,5 @@ This package's `.getConnectionString()` will choose the protocol to use based on
 <!--/codeinclude-->
 
 <!--codeinclude-->
-[The package switches to `esdb://` if the provided image contains `eventstore`:](../../packages/modules/kurrentdb/src/kurrentdb-container.test.ts) inside_block:protocolAdaptsToImageName
+[Switches automatically to `esdb://` if the provided image contains `eventstore`:](../../packages/modules/kurrentdb/src/kurrentdb-container.test.ts) inside_block:protocolAdaptsToImageName
 <!--/codeinclude-->
