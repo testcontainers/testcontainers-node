@@ -1,19 +1,8 @@
 import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 
 export class StartedKurrentDbContainer extends AbstractStartedContainer {
-  private readonly image: string
-
-  constructor(started: StartedTestContainer, image: string) {
-    super(started)
-    this.image = image
-  }
-
   getConnectionString(): string {
-    const protocol = this.image.includes("eventstore")
-      ? 'esdb'
-      : 'kurrentdb'
-
-    return `${protocol}://${this.getHost()}:${this.getFirstMappedPort()}?tls=false`;
+    return `kurrentdb://${this.getHost()}:${this.getFirstMappedPort()}?tls=false`;
   }
 }
 
@@ -33,6 +22,6 @@ export class KurrentDbContainer extends GenericContainer {
   }
 
   public override async start(): Promise<StartedKurrentDbContainer> {
-    return new StartedKurrentDbContainer(await super.start(), this.imageName.image);
+    return new StartedKurrentDbContainer(await super.start());
   }
 }
