@@ -142,6 +142,17 @@ const environment = await new DockerComposeEnvironment(composeFilePath, composeF
   .up();
 ```
 
+### With custom client options
+
+See [docker-compose](https://github.com/PDMLab/docker-compose/) library.
+
+```javascript
+const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
+  .withClientOptions({ executable: { standalone: true, executablePath: "/path/to/docker-compose" } })
+  .up();
+```
+
+
 ## Downing a Docker compose environment
 
 Testcontainers by default will not wait until the environment has downed. It will simply issue the down command and return immediately. This is to save time when running tests.

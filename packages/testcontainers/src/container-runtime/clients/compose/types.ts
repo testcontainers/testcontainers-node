@@ -8,7 +8,20 @@ export type ComposeOptions = {
   composeOptions?: string[];
   environment?: NodeJS.ProcessEnv;
   logger?: Logger;
+  executable?: ComposeExecutableOptions;
 };
+
+export type ComposeExecutableOptions =
+  | {
+      executablePath: string;
+      options?: string[] | (string | string[])[];
+      standalone?: never;
+    }
+  | {
+      executablePath?: string;
+      options?: never;
+      standalone: true;
+    };
 
 export type ComposeDownOptions = {
   timeout: number;
