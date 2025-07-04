@@ -1,4 +1,4 @@
-import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
+import { AbstractStartedContainer, GenericContainer, Wait } from "testcontainers";
 
 export class StartedKurrentDbContainer extends AbstractStartedContainer {
   getConnectionString(): string {
