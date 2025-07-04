@@ -2,7 +2,7 @@ import { AbstractStartedContainer, GenericContainer, Wait } from "testcontainers
 
 export class StartedKurrentDbContainer extends AbstractStartedContainer {
   getConnectionString(): string {
-    return `esdb://${this.getHost()}:${this.getFirstMappedPort()}?tls=false`;
+    return `kurrentdb://${this.getHost()}:${this.getFirstMappedPort()}?tls=false`;
   }
 }
 
