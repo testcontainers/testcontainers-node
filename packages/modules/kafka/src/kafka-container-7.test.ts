@@ -1,16 +1,15 @@
 import fs from "fs";
-import { Kafka, KafkaConfig, logLevel } from "kafkajs";
 import path from "path";
-import { GenericContainer, Network, StartedTestContainer } from "testcontainers";
-import { getImage } from "../../../testcontainers/src/utils/test-helper";
+import { GenericContainer, Network } from "testcontainers";
 import { KafkaContainer } from "./kafka-container";
+import { testPubSub } from "./test-helper";
 
-const IMAGE = getImage(__dirname);
+const IMAGE = "confluentinc/cp-kafka:7.9.1";
 
 describe("KafkaContainer", { timeout: 240_000 }, () => {
   // connectBuiltInZK {
   it("should connect using in-built zoo-keeper", async () => {
-    const kafkaContainer = await new KafkaContainer(IMAGE).withExposedPorts(9093).start();
+    const kafkaContainer = await new KafkaContainer(IMAGE).start();
 
     await testPubSub(kafkaContainer);
 
@@ -19,7 +18,7 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
   // }
 
   it("should connect using in-built zoo-keeper and custom images", async () => {
-    const kafkaContainer = await new KafkaContainer(IMAGE).withExposedPorts(9093).start();
+    const kafkaContainer = await new KafkaContainer(IMAGE).start();
 
     await testPubSub(kafkaContainer);
 
@@ -29,7 +28,7 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
   it("should connect using in-built zoo-keeper and custom network", async () => {
     const network = await new Network().start();
 
-    const kafkaContainer = await new KafkaContainer(IMAGE).withNetwork(network).withExposedPorts(9093).start();
+    const kafkaContainer = await new KafkaContainer(IMAGE).withNetwork(network).start();
 
     await testPubSub(kafkaContainer);
 
@@ -53,7 +52,6 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
     const kafkaContainer = await new KafkaContainer(IMAGE)
       .withNetwork(network)
       .withZooKeeper(zooKeeperHost, zooKeeperPort)
-      .withExposedPorts(9093)
       .start();
 
     await testPubSub(kafkaContainer);
@@ -192,7 +190,7 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
 
   // connectKraft {
   it("should connect using kraft", async () => {
-    const kafkaContainer = await new KafkaContainer(IMAGE).withKraft().withExposedPorts(9093).start();
+    const kafkaContainer = await new KafkaContainer(IMAGE).withKraft().start();
 
     await testPubSub(kafkaContainer);
 
@@ -208,11 +206,7 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
 
   it("should connect using kraft and custom network", async () => {
     const network = await new Network().start();
-    const kafkaContainer = await new KafkaContainer(IMAGE)
-      .withKraft()
-      .withNetwork(network)
-      .withExposedPorts(9093)
-      .start();
+    const kafkaContainer = await new KafkaContainer(IMAGE).withKraft().withNetwork(network).start();
 
     await testPubSub(kafkaContainer);
 
@@ -221,61 +215,26 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
   });
 
   it("should throw an error when using kraft wit sasl and confluence platfom below 7.5.0", async () => {
-    const kafkaContainer = new KafkaContainer("confluentinc/cp-kafka:7.4.0")
-      .withKraft()
-      .withExposedPorts(9093)
-      .withSaslSslListener({
-        port: 9094,
-        sasl: {
-          mechanism: "SCRAM-SHA-512",
-          user: {
-            name: "app-user",
-            password: "userPassword",
-          },
+    const kafkaContainer = new KafkaContainer("confluentinc/cp-kafka:7.4.0").withKraft().withSaslSslListener({
+      port: 9094,
+      sasl: {
+        mechanism: "SCRAM-SHA-512",
+        user: {
+          name: "app-user",
+          password: "userPassword",
         },
-        keystore: {
-          content: "fake",
-          passphrase: "serverKeystorePassword",
-        },
-        truststore: {
-          content: "fake",
-          passphrase: "serverTruststorePassword",
-        },
-      });
+      },
+      keystore: {
+        content: "fake",
+        passphrase: "serverKeystorePassword",
+      },
+      truststore: {
+        content: "fake",
+        passphrase: "serverTruststorePassword",
+      },
+    });
     await expect(() => kafkaContainer.start()).rejects.toThrow(
       "Provided Confluent Platform's version 7.4.0 is not supported in Kraft mode with sasl (must be 7.5.0 or above)"
     );
   });
-
-  const testPubSub = async (kafkaContainer: StartedTestContainer, additionalConfig: Partial<KafkaConfig> = {}) => {
-    const kafka = new Kafka({
-      logLevel: logLevel.NOTHING,
-      brokers: [`${kafkaContainer.getHost()}:${kafkaContainer.getMappedPort(9093)}`],
-      ...additionalConfig,
-    });
-
-    const producer = kafka.producer();
-    await producer.connect();
-
-    const consumer = kafka.consumer({ groupId: "test-group" });
-    await consumer.connect();
-
-    await producer.send({
-      topic: "test-topic",
-      messages: [{ value: "test message" }],
-    });
-
-    await consumer.subscribe({ topic: "test-topic", fromBeginning: true });
-
-    const consumedMessage = await new Promise((resolve) => {
-      consumer.run({
-        eachMessage: async ({ message }) => resolve(message.value?.toString()),
-      });
-    });
-
-    expect(consumedMessage).toBe("test message");
-
-    await consumer.disconnect();
-    await producer.disconnect();
-  };
 });

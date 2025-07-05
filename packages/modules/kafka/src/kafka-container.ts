@@ -1,3 +1,4 @@
+import { satisfies } from "compare-versions";
 import {
   AbstractStartedContainer,
   BoundPorts,
@@ -25,7 +26,7 @@ const WAIT_FOR_SCRIPT_MESSAGE = "Waiting for script...";
 const MIN_KRAFT_VERSION = "7.0.0";
 const MIN_KRAFT_SASL_VERSION = "7.5.0";
 
-interface SaslSslListenerOptions {
+export interface SaslSslListenerOptions {
   sasl: SaslOptions;
   port: number;
   keystore: PKCS12CertificateStore;
@@ -64,6 +65,11 @@ export class KafkaContainer extends GenericContainer {
 
   constructor(image: string) {
     super(image);
+
+    if (satisfies(this.imageName.tag, ">=8.0.0")) {
+      this.withKraft();
+    }
+
     this.withExposedPorts(KAFKA_PORT).withStartupTimeout(180_000).withEnvironment({
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "BROKER:PLAINTEXT,PLAINTEXT:PLAINTEXT",
       KAFKA_INTER_BROKER_LISTENER_NAME: "BROKER",
@@ -142,7 +148,11 @@ export class KafkaContainer extends GenericContainer {
   }
 
   public override async start(): Promise<StartedKafkaContainer> {
-    if (this.mode === KafkaMode.KRAFT && this.saslSslConfig && this.isLessThanCP(7, 5)) {
+    if (
+      this.mode === KafkaMode.KRAFT &&
+      this.saslSslConfig &&
+      satisfies(this.imageName.tag, `<${MIN_KRAFT_SASL_VERSION}`)
+    ) {
       throw new Error(
         `Provided Confluent Platform's version ${this.imageName.tag} is not supported in Kraft mode with sasl (must be ${MIN_KRAFT_SASL_VERSION} or above)`
       );
@@ -159,7 +169,7 @@ export class KafkaContainer extends GenericContainer {
     // exporting KAFKA_ADVERTISED_LISTENERS with the container hostname
     command += `export KAFKA_ADVERTISED_LISTENERS=${advertisedListeners}\n`;
 
-    if (this.mode !== KafkaMode.KRAFT || this.isLessThanCP(7, 4)) {
+    if (this.mode !== KafkaMode.KRAFT || satisfies(this.imageName.tag, "<7.4.0")) {
       // Optimization: skip the checks
       command += "echo '' > /etc/confluent/docker/ensure \n";
     }
@@ -167,7 +177,7 @@ export class KafkaContainer extends GenericContainer {
       if (this.saslSslConfig) {
         command += this.commandKraftCreateUser(this.saslSslConfig);
       }
-      if (this.isLessThanCP(7, 4)) {
+      if (satisfies(this.imageName.tag, "<7.4.0")) {
         command += this.commandKraft();
       }
     } else if (this.mode === KafkaMode.EMBEDDED_ZOOKEEPER) {
@@ -261,24 +271,11 @@ export class KafkaContainer extends GenericContainer {
   }
 
   private verifyMinKraftVersion() {
-    if (this.isLessThanCP(7)) {
+    if (satisfies(this.imageName.tag, `<${MIN_KRAFT_VERSION}`)) {
       throw new Error(
         `Provided Confluent Platform's version ${this.imageName.tag} is not supported in Kraft mode (must be ${MIN_KRAFT_VERSION} or above)`
       );
     }
-  }
-
-  private isLessThanCP(max: number, min = 0, patch = 0): boolean {
-    if (this.imageName.tag === "latest") {
-      return false;
-    }
-    const parts = this.imageName.tag.split(".");
-    return !(
-      parts.length > 2 &&
-      (Number(parts[0]) > max ||
-        (Number(parts[0]) === max &&
-          (Number(parts[1]) > min || (Number(parts[1]) === min && Number(parts[2]) >= patch))))
-    );
   }
 
   private commandKraftCreateUser(saslOptions: SaslSslListenerOptions): string {
