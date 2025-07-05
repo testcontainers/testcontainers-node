@@ -1,1 +1,1 @@
-FROM docker.redpanda.com/redpandadata/redpanda:v25.1.4
+FROM docker.redpanda.com/redpandadata/redpanda:v25.1.7
