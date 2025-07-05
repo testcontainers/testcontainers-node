@@ -30,6 +30,8 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.tabbed:
       alternate_style: true
+  - toc:
+      permalink: true
 
 nav:
   - Home: index.md
