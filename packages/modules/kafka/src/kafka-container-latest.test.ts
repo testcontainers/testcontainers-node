@@ -10,7 +10,7 @@ const IMAGE = getImage(__dirname);
 describe("KafkaContainer", { timeout: 240_000 }, () => {
   const certificatesDir = path.resolve(__dirname, "..", "test-certs");
 
-  // connect {
+  // connectKafkaLatest {
   it("should connect", async () => {
     const kafkaContainer = await new KafkaContainer(IMAGE).withExposedPorts(9093).start();
 

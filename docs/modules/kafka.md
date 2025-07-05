@@ -13,7 +13,7 @@ npm install @testcontainers/kafka --save-dev
 ### Examples
 
 <!--codeinclude-->
-[Connect to Kafka:](../../packages/modules/kafka/src/kafka-container-latest.test.ts) inside_block:connect
+[Connect to Kafka:](../../packages/modules/kafka/src/kafka-container-latest.test.ts) inside_block:connectKafkaLatest
 <!--/codeinclude-->
 
 <!--codeinclude-->
