@@ -12,7 +12,7 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
 
   // connectKafkaLatest {
   it("should connect", async () => {
-    const kafkaContainer = await new KafkaContainer(IMAGE).withExposedPorts(9093).start();
+    const kafkaContainer = await new KafkaContainer(IMAGE).start();
 
     await testPubSub(kafkaContainer);
 
@@ -22,7 +22,7 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
 
   it("should connect with custom network", async () => {
     const network = await new Network().start();
-    const kafkaContainer = await new KafkaContainer(IMAGE).withNetwork(network).withExposedPorts(9093).start();
+    const kafkaContainer = await new KafkaContainer(IMAGE).withNetwork(network).start();
 
     await testPubSub(kafkaContainer);
 
