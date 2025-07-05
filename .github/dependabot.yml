@@ -2,43 +2,7 @@ version: 2
 
 updates:
   - package-ecosystem: "npm"
-    directories:
-      - "/"
-      - "/packages/testcontainers"
-      - "/packages/modules/arangodb"
-      - "/packages/modules/azurecosmosdb"
-      - "/packages/modules/azurite"
-      - "/packages/modules/cassandra"
-      - "/packages/modules/chromadb"
-      - "/packages/modules/clickhouse"
-      - "/packages/modules/cockroachdb"
-      - "/packages/modules/couchbase"
-      - "/packages/modules/elasticsearch"
-      - "/packages/modules/etcd"
-      - "/packages/modules/gcloud"
-      - "/packages/modules/hivemq"
-      - "/packages/modules/k3s"
-      - "/packages/modules/kafka"
-      - "/packages/modules/localstack"
-      - "/packages/modules/mariadb"
-      - "/packages/modules/minio"
-      - "/packages/modules/mockserver"
-      - "/packages/modules/mongodb"
-      - "/packages/modules/mssqlserver"
-      - "/packages/modules/mysql"
-      - "/packages/modules/nats"
-      - "/packages/modules/neo4j"
-      - "/packages/modules/ollama"
-      - "/packages/modules/postgresql"
-      - "/packages/modules/qdrant"
-      - "/packages/modules/rabbitmq"
-      - "/packages/modules/redis"
-      - "/packages/modules/redpanda"
-      - "/packages/modules/scylladb"
-      - "/packages/modules/selenium"
-      - "/packages/modules/toxiproxy"
-      - "/packages/modules/valkey"
-      - "/packages/modules/weaviate"
+    directory: "/"
     schedule:
       interval: "weekly"
     labels:
@@ -104,5 +68,41 @@ updates:
       - "github_actions"
     groups:
       actions:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "devcontainers"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "devcontainers"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "docker-compose"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "docker_compose"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "pip"
+    groups:
+      dependencies:
         patterns:
           - "*"
