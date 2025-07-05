@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/clickhouse",
-  "version": "11.0.3",
+  "version": "11.1.0",
   "license": "MIT",
   "keywords": [
     "clickhouse",
@@ -32,6 +32,6 @@
     "@clickhouse/client": "^1.11.2"
   },
   "dependencies": {
-    "testcontainers": "^11.0.3"
+    "testcontainers": "^11.1.0"
   }
 }
