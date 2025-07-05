@@ -8,20 +8,34 @@
 npm install @testcontainers/kafka --save-dev
 ```
 
-## Examples
+## Kafka 8.x
+
+### Examples
 
 <!--codeinclude-->
-[Connect to Kafka using in-built ZooKeeper:](../../packages/modules/kafka/src/kafka-container.test.ts) inside_block:connectBuiltInZK
+[Connect to Kafka:](../../packages/modules/kafka/src/kafka-container-latest.test.ts) inside_block:connect
 <!--/codeinclude-->
 
 <!--codeinclude-->
-[Connect to Kafka using your own ZooKeeper:](../../packages/modules/kafka/src/kafka-container.test.ts) inside_block:connectProvidedZK
+[Connect to Kafka using SSL:](../../packages/modules/kafka/src/kafka-container-latest.test.ts) inside_block:ssl
+<!--/codeinclude-->
+
+## Kafka 7.x
+
+### Examples
+
+<!--codeinclude-->
+[Connect to Kafka using in-built ZooKeeper:](../../packages/modules/kafka/src/kafka-container-7.test.ts) inside_block:connectBuiltInZK
 <!--/codeinclude-->
 
 <!--codeinclude-->
-[Connect to Kafka using SSL:](../../packages/modules/kafka/src/kafka-container.test.ts) inside_block:ssl
+[Connect to Kafka using your own ZooKeeper:](../../packages/modules/kafka/src/kafka-container-7.test.ts) inside_block:connectProvidedZK
 <!--/codeinclude-->
 
 <!--codeinclude-->
-[Connect to Kafka using Kraft:](../../packages/modules/kafka/src/kafka-container.test.ts) inside_block:connectKraft
+[Connect to Kafka using SSL:](../../packages/modules/kafka/src/kafka-container-7.test.ts) inside_block:ssl
+<!--/codeinclude-->
+
+<!--codeinclude-->
+[Connect to Kafka using Kraft:](../../packages/modules/kafka/src/kafka-container-7.test.ts) inside_block:connectKraft
 <!--/codeinclude-->

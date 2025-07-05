@@ -4,6 +4,7 @@ import {
   Content,
   GenericContainer,
   getContainerRuntimeClient,
+  ImageName,
   InspectResult,
   RandomUuid,
   StartedTestContainer,
@@ -25,7 +26,7 @@ const WAIT_FOR_SCRIPT_MESSAGE = "Waiting for script...";
 const MIN_KRAFT_VERSION = "7.0.0";
 const MIN_KRAFT_SASL_VERSION = "7.5.0";
 
-interface SaslSslListenerOptions {
+export interface SaslSslListenerOptions {
   sasl: SaslOptions;
   port: number;
   keystore: PKCS12CertificateStore;
@@ -64,6 +65,12 @@ export class KafkaContainer extends GenericContainer {
 
   constructor(image: string) {
     super(image);
+
+    const parsedImage = ImageName.fromString(image);
+    if (parsedImage.image === "confluentinc/cp-kafka" && parsedImage.tag.startsWith("8.")) {
+      this.withKraft();
+    }
+
     this.withExposedPorts(KAFKA_PORT).withStartupTimeout(180_000).withEnvironment({
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "BROKER:PLAINTEXT,PLAINTEXT:PLAINTEXT",
       KAFKA_INTER_BROKER_LISTENER_NAME: "BROKER",
