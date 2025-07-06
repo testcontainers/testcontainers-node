@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "pre-commit": "lint-staged",
-    "docs:serve": "docker-compose up",
+    "docs:serve": "docker compose up",
     "test": "vitest run",
     "test:ci": "npm run test -- --coverage",
     "format": "prettier --write package.json \"packages/**/*.ts\" \".github/**/*.yml\"",
