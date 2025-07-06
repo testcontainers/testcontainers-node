@@ -10,7 +10,7 @@ export class StartedMockserverContainer extends AbstractStartedContainer {
   }
 
   getSecureUrl(): string {
-    return `https://${this.getHost()}:${this.getFirstMappedPort()}`
+    return `https://${this.getHost()}:${this.getFirstMappedPort()}`;
   }
 }
 
