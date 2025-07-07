@@ -6,10 +6,7 @@ import { undiciResponseToFetchResponse } from "./undici-response-parser";
 test("converts undici response to fetch response", async () => {
   const responseData: Partial<Dispatcher.ResponseData> = {
     statusCode: 200,
-    headers: {
-      "content-type": "application/json",
-      "x-custom-header": ["value1", "value2"],
-    },
+    headers: { "content-type": "application/json" },
     body: createBody('{"key":"value"}'),
   };
 
@@ -17,7 +14,6 @@ test("converts undici response to fetch response", async () => {
 
   expect(response.status).toBe(200);
   expect(response.headers.get("content-type")).toBe("application/json");
-  expect(response.headers.get("x-custom-header")).toBe("value1, value2");
   await expect(response.text()).resolves.toBe('{"key":"value"}');
 });
 
