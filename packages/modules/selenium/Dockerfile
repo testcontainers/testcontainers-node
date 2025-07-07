@@ -1,1 +1,1 @@
-FROM selenium/standalone-chrome:137.0
+FROM selenium/standalone-chrome:138.0
