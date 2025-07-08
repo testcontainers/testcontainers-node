@@ -50,7 +50,7 @@ describe.sequential("Cassandra", { timeout: 240_000 }, () => {
   });
   // }
 
-  // customDataSenterAndRack {
+  // customDataCenterAndRack {
   it("should set datacenter and rack", async () => {
     const customDataCenter = "customDC";
     const customRack = "customRack";

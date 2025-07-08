@@ -1,14 +1,11 @@
 import admin from "firebase-admin";
+import { randomUuid } from "testcontainers";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { FirestoreEmulatorContainer, StartedFirestoreEmulatorContainer } from "./firestore-emulator-container";
 
 const IMAGE = getImage(__dirname);
 
 describe("FirestoreEmulatorContainer", { timeout: 240_000 }, () => {
-  afterEach(async () => {
-    await admin.app().delete();
-  });
-
   // firestore4 {
   it("should work using default version", async () => {
     const firestoreEmulatorContainer = await new FirestoreEmulatorContainer(IMAGE).start();
@@ -35,10 +32,11 @@ describe("FirestoreEmulatorContainer", { timeout: 240_000 }, () => {
   async function checkFirestore(firestoreEmulatorContainer: StartedFirestoreEmulatorContainer) {
     expect(firestoreEmulatorContainer).toBeDefined();
     const testProjectId = "test-project";
+    const testAppName = `test-app-${randomUuid()}`;
     const testCollection = "test-collection";
     const testDocument = "test-doc";
     const firebaseConfig = { projectId: testProjectId };
-    const firestore = admin.initializeApp(firebaseConfig).firestore();
+    const firestore = admin.initializeApp(firebaseConfig, testAppName).firestore();
     firestore.settings({ host: firestoreEmulatorContainer.getEmulatorEndpoint(), ssl: false });
 
     const docRef = firestore.collection(testCollection).doc(testDocument);

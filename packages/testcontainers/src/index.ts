@@ -1,4 +1,4 @@
-export { IntervalRetry, RandomUuid, Retry, Uuid, log } from "./common";
+export { IntervalRetry, RandomUuid, Retry, Uuid, log, randomUuid } from "./common";
 export { ContainerRuntimeClient, ImageName, getContainerRuntimeClient } from "./container-runtime";
 export { DockerComposeEnvironment } from "./docker-compose-environment/docker-compose-environment";
 export { DownedDockerComposeEnvironment } from "./docker-compose-environment/downed-docker-compose-environment";
