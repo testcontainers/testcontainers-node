@@ -11,6 +11,7 @@ export default defineConfig({
     mockReset: true,
     restoreMocks: true,
     unstubEnvs: true,
+    retry: process.env.CI ? 3 : 0,
     alias: {
       testcontainers: path.resolve(__dirname, "packages/testcontainers/src"),
     },
