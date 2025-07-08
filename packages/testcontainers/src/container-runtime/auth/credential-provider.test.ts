@@ -162,8 +162,8 @@ function mockSpawnReturns(exitCode: number, stdout: string) {
 
   sink.stdin = new Writable({
     write() {
-      sink.stdout?.emit.concurrent("data", stdout);
-      sink.emit.concurrent("close", exitCode);
+      sink.stdout?.emit("data", stdout);
+      sink.emit("close", exitCode);
     },
   });
 
