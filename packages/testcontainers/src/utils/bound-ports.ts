@@ -7,8 +7,16 @@ export class BoundPorts {
   private readonly ports = new Map<string, number>();
 
   public getBinding(port: number | string, protocol: string = "tcp"): number {
-    const key = typeof port === "string" ? port : `${port}/${protocol}`;
-    const binding = this.ports.get(key);
+    const normalizedProtocol = protocol.toLowerCase();
+    const key = typeof port === "string" ? port : `${port}/${normalizedProtocol}`;
+    let binding = this.ports.get(key);
+
+    // Try case-insensitive lookup if not found and port is a string that might contain a protocol
+    if (!binding && typeof port === "string" && port.includes("/")) {
+      const [portNumber, portProtocol] = port.split("/");
+      const normalizedKey = `${portNumber}/${portProtocol.toLowerCase()}`;
+      binding = this.ports.get(normalizedKey);
+    }
 
     if (!binding) {
       throw new Error(`No port binding found for :${key}`);
@@ -28,8 +36,19 @@ export class BoundPorts {
   }
 
   public setBinding(key: string | number, value: number, protocol: string = "tcp"): void {
-    const portKey = typeof key === "string" ? key : `${key}/${protocol}`;
-    this.ports.set(portKey, value);
+    // Normalize protocol to lowercase for consistency
+    const normalizedProtocol = protocol.toLowerCase();
+
+    if (typeof key === "string" && key.includes("/")) {
+      // If key contains protocol, normalize it
+      const [portNumber, portProtocol] = key.split("/");
+      const normalizedKey = `${portNumber}/${portProtocol.toLowerCase()}`;
+      this.ports.set(normalizedKey, value);
+    } else {
+      // Otherwise use the provided key/protocol
+      const portKey = typeof key === "string" ? key : `${key}/${normalizedProtocol}`;
+      this.ports.set(portKey, value);
+    }
   }
 
   public iterator(): Iterable<[string, number]> {
@@ -51,7 +70,11 @@ export class BoundPorts {
       const [internalPortStr, protocol] = internalPortWithProtocol.split("/");
       const internalPort = parseInt(internalPortStr, 10);
 
-      if (containerPortsWithProtocol.has(internalPort) && containerPortsWithProtocol.get(internalPort) === protocol) {
+      // Case-insensitive protocol comparison
+      if (
+        containerPortsWithProtocol.has(internalPort) &&
+        containerPortsWithProtocol.get(internalPort)?.toLowerCase() === protocol?.toLowerCase()
+      ) {
         boundPorts.setBinding(internalPortWithProtocol, hostPort);
       }
     }
