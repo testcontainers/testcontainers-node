@@ -8,7 +8,7 @@ import { Wait } from "../wait-strategies/wait";
 
 export const REAPER_IMAGE = process.env["RYUK_CONTAINER_IMAGE"]
   ? ImageName.fromString(process.env["RYUK_CONTAINER_IMAGE"]).string
-  : ImageName.fromString("testcontainers/ryuk:0.11.0").string;
+  : ImageName.fromString("testcontainers/ryuk:0.12.0").string;
 
 export interface Reaper {
   sessionId: string;
