@@ -27,7 +27,7 @@ import {
 import { BoundPorts } from "../utils/bound-ports";
 import { createLabels, LABEL_TESTCONTAINERS_CONTAINER_HASH, LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
 import { mapInspectResult } from "../utils/map-inspect-result";
-import { getContainerPort, hasHostBinding, PortWithOptionalBinding } from "../utils/port";
+import { getContainerPort, getProtocol, hasHostBinding, PortWithOptionalBinding } from "../utils/port";
 import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
 import { Wait } from "../wait-strategies/wait";
 import { waitForContainer } from "../wait-strategies/wait-for-container";
@@ -364,7 +364,9 @@ export class GenericContainer implements TestContainer {
   public withExposedPorts(...ports: PortWithOptionalBinding[]): this {
     const exposedPorts: { [port: string]: Record<string, never> } = {};
     for (const exposedPort of ports) {
-      exposedPorts[`${getContainerPort(exposedPort).toString()}/tcp`] = {};
+      const containerPort = getContainerPort(exposedPort);
+      const protocol = getProtocol(exposedPort);
+      exposedPorts[`${containerPort}/${protocol}`] = {};
     }
 
     this.exposedPorts = [...this.exposedPorts, ...ports];
@@ -376,9 +378,12 @@ export class GenericContainer implements TestContainer {
     const portBindings: Record<string, Array<Record<string, string>>> = {};
     for (const exposedPort of ports) {
       if (hasHostBinding(exposedPort)) {
-        portBindings[`${exposedPort.container}/tcp`] = [{ HostPort: exposedPort.host.toString() }];
+        const protocol = getProtocol(exposedPort);
+        portBindings[`${exposedPort.container}/${protocol}`] = [{ HostPort: exposedPort.host.toString() }];
       } else {
-        portBindings[`${exposedPort}/tcp`] = [{ HostPort: "0" }];
+        const containerPort = getContainerPort(exposedPort);
+        const protocol = getProtocol(exposedPort);
+        portBindings[`${containerPort}/${protocol}`] = [{ HostPort: "0" }];
       }
     }
 
