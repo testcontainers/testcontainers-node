@@ -1,16 +1,17 @@
 import net from "net";
 import { HostIp } from "../container-runtime";
 import { HostPortBindings, InspectResult } from "../types";
-import { getContainerPort, PortWithOptionalBinding } from "./port";
+import { getContainerPort, getProtocol, PortWithOptionalBinding } from "./port";
 
 export class BoundPorts {
-  private readonly ports = new Map<number, number>();
+  private readonly ports = new Map<string, number>();
 
-  public getBinding(port: number): number {
-    const binding = this.ports.get(port);
+  public getBinding(port: number | string, protocol: string = "tcp"): number {
+    const key = typeof port === "string" ? port : `${port}/${protocol}`;
+    const binding = this.ports.get(key);
 
     if (!binding) {
-      throw new Error(`No port binding found for :${port}`);
+      throw new Error(`No port binding found for :${key}`);
     }
 
     return binding;
@@ -26,22 +27,32 @@ export class BoundPorts {
     }
   }
 
-  public setBinding(key: number, value: number): void {
-    this.ports.set(key, value);
+  public setBinding(key: string | number, value: number, protocol: string = "tcp"): void {
+    const portKey = typeof key === "string" ? key : `${key}/${protocol}`;
+    this.ports.set(portKey, value);
   }
 
-  public iterator(): Iterable<[number, number]> {
+  public iterator(): Iterable<[string, number]> {
     return this.ports;
   }
 
   public filter(ports: PortWithOptionalBinding[]): BoundPorts {
     const boundPorts = new BoundPorts();
 
-    const containerPorts = ports.map((port) => getContainerPort(port));
+    // Create map of port to protocol for lookup
+    const containerPortsWithProtocol = new Map<number, string>();
+    ports.forEach((port) => {
+      const containerPort = getContainerPort(port);
+      const protocol = getProtocol(port);
+      containerPortsWithProtocol.set(containerPort, protocol);
+    });
 
-    for (const [internalPort, hostPort] of this.iterator()) {
-      if (containerPorts.includes(internalPort)) {
-        boundPorts.setBinding(internalPort, hostPort);
+    for (const [internalPortWithProtocol, hostPort] of this.iterator()) {
+      const [internalPortStr, protocol] = internalPortWithProtocol.split("/");
+      const internalPort = parseInt(internalPortStr, 10);
+
+      if (containerPortsWithProtocol.has(internalPort) && containerPortsWithProtocol.get(internalPort) === protocol) {
+        boundPorts.setBinding(internalPortWithProtocol, hostPort);
       }
     }
 
@@ -51,9 +62,9 @@ export class BoundPorts {
   public static fromInspectResult(hostIps: HostIp[], inspectResult: InspectResult): BoundPorts {
     const boundPorts = new BoundPorts();
 
-    Object.entries(inspectResult.ports).forEach(([containerPort, hostBindings]) => {
+    Object.entries(inspectResult.ports).forEach(([containerPortWithProtocol, hostBindings]) => {
       const hostPort = resolveHostPortBinding(hostIps, hostBindings);
-      boundPorts.setBinding(parseInt(containerPort), hostPort);
+      boundPorts.setBinding(containerPortWithProtocol, hostPort);
     });
 
     return boundPorts;
