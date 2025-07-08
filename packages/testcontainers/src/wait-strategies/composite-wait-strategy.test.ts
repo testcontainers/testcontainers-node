@@ -2,7 +2,7 @@ import { GenericContainer } from "../generic-container/generic-container";
 import { Wait } from "./wait";
 
 describe("CompositeWaitStrategy", { timeout: 180_000 }, () => {
-  it("should work with individual timeouts", async () => {
+  it.concurrent("should work with individual timeouts", async () => {
     const container = new GenericContainer("cristianrgreco/testcontainer:1.1.14").withWaitStrategy(
       Wait.forAll([
         Wait.forSuccessfulCommand("exit 1").withStartupTimeout(1000),
@@ -13,7 +13,7 @@ describe("CompositeWaitStrategy", { timeout: 180_000 }, () => {
     await expect(container.start()).rejects.toThrowError(`Shell command "exit 2" not successful after 100ms`);
   });
 
-  it("should work with outer timeout where inner strategy times out", async () => {
+  it.concurrent("should work with outer timeout where inner strategy times out", async () => {
     const container = new GenericContainer("cristianrgreco/testcontainer:1.1.14").withWaitStrategy(
       Wait.forAll([
         Wait.forSuccessfulCommand("exit 1"),
@@ -24,7 +24,7 @@ describe("CompositeWaitStrategy", { timeout: 180_000 }, () => {
     await expect(container.start()).rejects.toThrowError(`Shell command "exit 2" not successful after 100ms`);
   });
 
-  it("should work with outer timeout where outer strategy times out", async () => {
+  it.concurrent("should work with outer timeout where outer strategy times out", async () => {
     const container = new GenericContainer("cristianrgreco/testcontainer:1.1.14").withWaitStrategy(
       Wait.forAll([
         Wait.forSuccessfulCommand("exit 1"),
@@ -35,7 +35,7 @@ describe("CompositeWaitStrategy", { timeout: 180_000 }, () => {
     await expect(container.start()).rejects.toThrowError(`Shell command "exit 1" not successful after 100ms`);
   });
 
-  it("should work with maximum outer timeout", async () => {
+  it.concurrent("should work with maximum outer timeout", async () => {
     const container = new GenericContainer("cristianrgreco/testcontainer:1.1.14").withWaitStrategy(
       Wait.forAll([
         Wait.forListeningPorts(),

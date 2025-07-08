@@ -29,7 +29,7 @@ function mockInspectResult(ports: ContainerInspectInfo["NetworkSettings"]["Ports
   return { inspectResult, mappedInspectResult: mapInspectResult(inspectResult) };
 }
 
-test("returns the inspect results when all ports are exposed", async () => {
+test.concurrent("returns the inspect results when all ports are exposed", async () => {
   const data = mockInspectResult({ "8080/tcp": [{ HostIp: "0.0.0.0", HostPort: "45000" }] });
   const inspectFn = vi.fn().mockResolvedValueOnce(data.inspectResult);
 
@@ -38,7 +38,7 @@ test("returns the inspect results when all ports are exposed", async () => {
   expect(result).toEqual(data);
 });
 
-test("retries the inspect if ports are not yet exposed", async () => {
+test.concurrent("retries the inspect if ports are not yet exposed", async () => {
   const data1 = mockInspectResult({ "8080/tcp": [] });
   const data2 = mockInspectResult({ "8080/tcp": [{ HostIp: "0.0.0.0", HostPort: "45000" }] });
   const inspectFn = vi
@@ -53,7 +53,7 @@ test("retries the inspect if ports are not yet exposed", async () => {
   expect(inspectFn).toHaveBeenCalledTimes(3);
 });
 
-test("throws an error when host ports are not exposed within timeout", async () => {
+test.concurrent("throws an error when host ports are not exposed within timeout", async () => {
   const data = mockInspectResult({ "8080/tcp": [] });
   const inspectFn = vi.fn().mockResolvedValue(data.inspectResult);
 
@@ -62,7 +62,7 @@ test("throws an error when host ports are not exposed within timeout", async () 
   );
 });
 
-test("throws an error when container ports not exposed within timeout", async () => {
+test.concurrent("throws an error when container ports not exposed within timeout", async () => {
   const data = mockInspectResult({});
   const inspectFn = vi.fn().mockResolvedValue(data.inspectResult);
 

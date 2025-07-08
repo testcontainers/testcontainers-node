@@ -6,7 +6,7 @@ const IMAGE = getImage(__dirname);
 
 describe("PostgreSqlContainer snapshot and restore", { timeout: 180_000 }, () => {
   // createAndRestoreFromSnapshot {
-  it("should create and restore from snapshot", async () => {
+  it.concurrent("should create and restore from snapshot", async () => {
     const container = await new PostgreSqlContainer(IMAGE).start();
 
     // Connect to the database
@@ -62,7 +62,7 @@ describe("PostgreSqlContainer snapshot and restore", { timeout: 180_000 }, () =>
   });
   // }
 
-  it("should use custom snapshot name", async () => {
+  it.concurrent("should use custom snapshot name", async () => {
     const container = await new PostgreSqlContainer(IMAGE).start();
     const customSnapshotName = "my_custom_snapshot";
 
@@ -112,7 +112,7 @@ describe("PostgreSqlContainer snapshot and restore", { timeout: 180_000 }, () =>
     await container.stop();
   });
 
-  it("should handle multiple snapshots", async () => {
+  it.concurrent("should handle multiple snapshots", async () => {
     const container = await new PostgreSqlContainer(IMAGE).start();
 
     // Connect to the database
@@ -195,7 +195,7 @@ describe("PostgreSqlContainer snapshot and restore", { timeout: 180_000 }, () =>
     await container.stop();
   });
 
-  it("should throw an error when trying to snapshot postgres system database", async () => {
+  it.concurrent("should throw an error when trying to snapshot postgres system database", async () => {
     const container = await new PostgreSqlContainer(IMAGE).withDatabase("postgres").start();
 
     await expect(container.snapshot()).rejects.toThrow(

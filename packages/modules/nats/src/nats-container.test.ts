@@ -7,7 +7,7 @@ const IMAGE = getImage(__dirname);
 
 describe("NatsContainer", { timeout: 180_000 }, () => {
   // connect {
-  it("should start, connect and close", async () => {
+  it.concurrent("should start, connect and close", async () => {
     const container = await new NatsContainer(IMAGE).start();
 
     // establish connection
@@ -22,7 +22,7 @@ describe("NatsContainer", { timeout: 180_000 }, () => {
   });
   // }
 
-  it("should start, connect and close using scratch image", async () => {
+  it.concurrent("should start, connect and close using scratch image", async () => {
     const container = await new NatsContainer("nats:2.11").start();
 
     // establish connection
@@ -37,7 +37,7 @@ describe("NatsContainer", { timeout: 180_000 }, () => {
   });
 
   // pubsub {
-  it("should subscribe and receive one published message", async () => {
+  it.concurrent("should subscribe and receive one published message", async () => {
     const SUBJECT = "HELLO";
     const PAYLOAD = "WORLD";
 
@@ -69,7 +69,7 @@ describe("NatsContainer", { timeout: 180_000 }, () => {
   // }
 
   // credentials {
-  it("should start with alternative username and password ", async () => {
+  it.concurrent("should start with alternative username and password ", async () => {
     // set username and password like this
     const container = await new NatsContainer(IMAGE).withPass("1234").withUsername("George").start();
 
@@ -85,7 +85,7 @@ describe("NatsContainer", { timeout: 180_000 }, () => {
   // }
 
   // jetstream {
-  it("should start with JetStream ", async () => {
+  it.concurrent("should start with JetStream ", async () => {
     // enable JetStream
     const container = await new NatsContainer(IMAGE).withJetStream().start();
 
@@ -103,7 +103,7 @@ describe("NatsContainer", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should fail without JetStream ", async () => {
+  it.concurrent("should fail without JetStream ", async () => {
     const container = await new NatsContainer(IMAGE).start();
 
     const nc = await connect(container.getConnectionOptions());
@@ -121,7 +121,7 @@ describe("NatsContainer", { timeout: 180_000 }, () => {
   });
   // }
 
-  it("should immediately end when started with version argument ", async () => {
+  it.concurrent("should immediately end when started with version argument ", async () => {
     // for the complete list of available arguments see:
     // See Command Line Options section inside [NATS docker image documentation](https://hub.docker.com/_/nats)
     async function outputVersionAndExit() {

@@ -7,7 +7,7 @@ const IMAGE = getImage(__dirname);
 
 describe("WeaviateContainer", { timeout: 100_000 }, () => {
   // connectWeaviate {
-  it("should expose ports", async () => {
+  it.concurrent("should expose ports", async () => {
     const container = await new WeaviateContainer(IMAGE).start();
 
     expect(container.getHttpHostAddress()).toBeDefined();
@@ -18,7 +18,7 @@ describe("WeaviateContainer", { timeout: 100_000 }, () => {
   // }
 
   // connectWeaviateWithClient {
-  it("should connect to Weaviate", async () => {
+  it.concurrent("should connect to Weaviate", async () => {
     const container = await new WeaviateContainer(IMAGE).start();
 
     const client = weaviate.client({
@@ -34,7 +34,7 @@ describe("WeaviateContainer", { timeout: 100_000 }, () => {
   // }
 
   // connectWeaviateWithModules {
-  it("should connect to Weaviate with modules", async () => {
+  it.concurrent("should connect to Weaviate with modules", async () => {
     const enableModules = [
       "backup-filesystem",
       "text2vec-openai",

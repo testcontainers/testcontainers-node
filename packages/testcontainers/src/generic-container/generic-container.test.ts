@@ -14,7 +14,7 @@ import { GenericContainer } from "./generic-container";
 describe("GenericContainer", { timeout: 180_000 }, () => {
   const fixtures = path.resolve(__dirname, "..", "..", "fixtures", "docker");
 
-  it("should return first mapped port", async () => {
+  it.concurrent("should return first mapped port", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
 
     expect(container.getFirstMappedPort()).toBe(container.getMappedPort(8080));
@@ -22,7 +22,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should bind to specified host port", async () => {
+  it.concurrent("should bind to specified host port", async () => {
     const hostPort = await getPort();
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts({
@@ -37,7 +37,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should execute a command on a running container", async () => {
+  it.concurrent("should execute a command on a running container", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
 
     const { output, stdout, stderr, exitCode } = await container.exec(["echo", "hello", "world"]);
@@ -50,7 +50,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should execute a command in a different working directory", async () => {
+  it.concurrent("should execute a command in a different working directory", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
 
     const { output, stdout, stderr, exitCode } = await container.exec(["pwd"], { workingDir: "/var/log" });
@@ -63,7 +63,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should execute a command with custom environment variables", async () => {
+  it.concurrent("should execute a command with custom environment variables", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
 
     const { output, stdout, stderr, exitCode } = await container.exec(["env"], { env: { TEST_ENV: "test" } });
@@ -76,7 +76,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should execute a command with a different user", async () => {
+  it.concurrent("should execute a command with a different user", async () => {
     // By default, node:alpine runs as root
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
 
@@ -90,7 +90,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should capture stderr when a command fails", async () => {
+  it.concurrent("should capture stderr when a command fails", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
 
     const { output, stdout, stderr, exitCode } = await container.exec(["ls", "/nonexistent/path"]);
@@ -103,7 +103,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should capture stdout and stderr in the correct order", async () => {
+  it.concurrent("should capture stdout and stderr in the correct order", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
 
     // The command first writes to stdout and then tries to access a nonexistent file (stderr)
@@ -122,7 +122,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should set environment variables", async () => {
+  it.concurrent("should set environment variables", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withEnvironment({ customKey: "customValue" })
       .withExposedPorts(8080)
@@ -136,7 +136,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should set command", async () => {
+  it.concurrent("should set command", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withCommand(["node", "index.js", "one", "two", "three"])
       .withExposedPorts(8080)
@@ -150,7 +150,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should set working directory", async () => {
+  it.concurrent("should set working directory", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withWorkingDir("/tmp")
       .withCommand(["node", "../index.js"])
@@ -161,7 +161,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     expect(output).toEqual(expect.stringContaining("/tmp"));
   });
 
-  it("should set platform", async () => {
+  it.concurrent("should set platform", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withPullPolicy(PullPolicy.alwaysPull())
       .withCommand(["node", "../index.js"])
@@ -173,7 +173,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     expect(output).toEqual(expect.stringContaining("x86_64"));
   });
 
-  it("should set entrypoint", async () => {
+  it.concurrent("should set entrypoint", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withEntrypoint(["node"])
       .withCommand(["index.js"])
@@ -185,7 +185,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should set name", async () => {
+  it.concurrent("should set name", async () => {
     const containerName = "special-test-container";
     const expectedContainerName = "/special-test-container";
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withName(containerName).start();
@@ -195,7 +195,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should set labels", async () => {
+  it.concurrent("should set labels", async () => {
     const labels = {
       ["label-1"]: "value-1",
       ["label-2"]: "value-2",
@@ -208,7 +208,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should set bind mounts", async () => {
+  it.concurrent("should set bind mounts", async () => {
     const filename = "test.txt";
     const source = path.resolve(fixtures, "docker", filename);
     const target = `/tmp/${filename}`;
@@ -224,7 +224,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should set tmpfs", async () => {
+  it.concurrent("should set tmpfs", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withTmpFs({ "/testtmpfs": "rw" })
       .withExposedPorts(8080)
@@ -243,7 +243,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
   });
 
   if (!process.env["CI_ROOTLESS"]) {
-    it("should set ulimits", async () => {
+    it.concurrent("should set ulimits", async () => {
       const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
         .withUlimits({ memlock: { hard: -1, soft: -1 } })
         .withExposedPorts(8080)
@@ -256,7 +256,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     });
   }
 
-  it("should add capabilities", async () => {
+  it.concurrent("should add capabilities", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withAddedCapabilities("IPC_LOCK")
       .withExposedPorts(8080)
@@ -268,7 +268,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should drop capabilities", async () => {
+  it.concurrent("should drop capabilities", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withDroppedCapabilities("CHOWN")
       .withExposedPorts(8080)
@@ -280,7 +280,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should set default log driver", async () => {
+  it.concurrent("should set default log driver", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withDefaultLogDriver().start();
 
     const client = await getContainerRuntimeClient();
@@ -295,7 +295,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should set privileged mode", async () => {
+  it.concurrent("should set privileged mode", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withPrivilegedMode()
       .withExposedPorts(8080)
@@ -310,7 +310,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should use pull policy", async () => {
+  it.concurrent("should use pull policy", async () => {
     const container = new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080);
 
     const startedContainer1 = await container.start();
@@ -324,7 +324,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await startedContainer2.stop();
   });
 
-  it("should set the IPC mode", async () => {
+  it.concurrent("should set the IPC mode", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withIpcMode("host")
       .withExposedPorts(8080)
@@ -335,7 +335,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should set the user", async () => {
+  it.concurrent("should set the user", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withUser("node")
       .withExposedPorts(8080)
@@ -348,7 +348,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should copy file to container", async () => {
+  it.concurrent("should copy file to container", async () => {
     const source = path.resolve(fixtures, "docker", "test.txt");
     const target = "/tmp/test.txt";
 
@@ -362,7 +362,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should copy file to container with permissions", async () => {
+  it.concurrent("should copy file to container with permissions", async () => {
     const source = path.resolve(fixtures, "docker", "test.txt");
     const target = "/tmp/test.txt";
     const mode = parseInt("0777", 8);
@@ -377,7 +377,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should copy file to started container", async () => {
+  it.concurrent("should copy file to started container", async () => {
     const source = path.resolve(fixtures, "docker", "test.txt");
     const target = "/tmp/test.txt";
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
@@ -389,7 +389,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should copy directory to container", async () => {
+  it.concurrent("should copy directory to container", async () => {
     const source = path.resolve(fixtures, "docker");
     const target = "/tmp";
 
@@ -403,7 +403,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should copy directory to container with permissions", async () => {
+  it.concurrent("should copy directory to container with permissions", async () => {
     const source = path.resolve(fixtures, "docker");
     const target = "/tmp/newdir";
     const mode = parseInt("0777", 8);
@@ -418,7 +418,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should copy directory to started container", async () => {
+  it.concurrent("should copy directory to started container", async () => {
     const source = path.resolve(fixtures, "docker");
     const target = "/tmp";
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
@@ -430,7 +430,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should copy content to container", async () => {
+  it.concurrent("should copy content to container", async () => {
     const content = "hello world";
     const target = "/tmp/test.txt";
 
@@ -444,7 +444,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should copy content to container with permissions", async () => {
+  it.concurrent("should copy content to container with permissions", async () => {
     const content = "hello world";
     const target = "/tmp/test.txt";
     const mode = parseInt("0777", 8);
@@ -459,7 +459,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should copy content to started container", async () => {
+  it.concurrent("should copy content to started container", async () => {
     const content = "hello world";
     const target = "/tmp/test.txt";
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
@@ -471,7 +471,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should honour .dockerignore file", async () => {
+  it.concurrent("should honour .dockerignore file", async () => {
     const context = path.resolve(fixtures, "docker-with-dockerignore");
     const container = await GenericContainer.fromDockerfile(context).build();
     const startedContainer = await container.withExposedPorts(8080).start();
@@ -493,7 +493,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await startedContainer.stop();
   });
 
-  it("should stop the container", async () => {
+  it.concurrent("should stop the container", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withName(`container-${new RandomUuid().nextUuid()}`)
       .start();
@@ -503,7 +503,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     expect(await getRunningContainerNames()).not.toContain(container.getName());
   });
 
-  it("should stop the container idempotently", async () => {
+  it.concurrent("should stop the container idempotently", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withName(`container-${new RandomUuid().nextUuid()}`)
       .start();
@@ -518,7 +518,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     expect(await getRunningContainerNames()).not.toContain(container.getName());
   });
 
-  it("should stop but not remove the container", async () => {
+  it.concurrent("should stop but not remove the container", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withName(`container-${new RandomUuid().nextUuid()}`)
       .withAutoRemove(false)
@@ -531,7 +531,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     expect((await lowerLevelContainer.inspect()).State.Status).toEqual("exited");
   });
 
-  it("should stop and override .withAutoRemove", async () => {
+  it.concurrent("should stop and override .withAutoRemove", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withName(`container-${new RandomUuid().nextUuid()}`)
       .withAutoRemove(false)
@@ -546,7 +546,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await expect(lowerLevelContainer.inspect()).rejects.toThrow(/404/); // Error: (HTTP code 404) no such container
   });
 
-  it("should build a target stage", async () => {
+  it.concurrent("should build a target stage", async () => {
     const context = path.resolve(fixtures, "docker-multi-stage");
     const firstContainer = await GenericContainer.fromDockerfile(context).withTarget("first").build();
     const secondContainer = await GenericContainer.fromDockerfile(context).withTarget("second").build();
@@ -561,7 +561,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await secondStartedContainer.stop();
   });
 
-  it("should set the hostname", async () => {
+  it.concurrent("should set the hostname", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withHostname("hostname")
       .start();

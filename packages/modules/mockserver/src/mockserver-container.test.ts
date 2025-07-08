@@ -7,7 +7,7 @@ const IMAGE = getImage(__dirname);
 
 describe("MockserverContainer", { timeout: 240_000 }, () => {
   // startContainer {
-  it("should start and accept mocks", async () => {
+  it.concurrent("should start and accept mocks", async () => {
     const container = await new MockserverContainer(IMAGE).start();
     const client = mockServerClient(container.getHost(), container.getMockserverPort());
     const url = container.getUrl();
@@ -32,7 +32,7 @@ describe("MockserverContainer", { timeout: 240_000 }, () => {
   });
   // }
 
-  it("should return an https url", async () => {
+  it.concurrent("should return an https url", async () => {
     const container = await new MockserverContainer(IMAGE).start();
     const secureUrl = container.getSecureUrl();
     await container.stop();
@@ -40,7 +40,7 @@ describe("MockserverContainer", { timeout: 240_000 }, () => {
   });
 
   // httpsRequests {
-  it("should respond to https requests", async () => {
+  it.concurrent("should respond to https requests", async () => {
     const container = await new MockserverContainer(IMAGE).start();
     const client = mockServerClient(container.getHost(), container.getMockserverPort());
 

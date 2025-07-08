@@ -6,7 +6,7 @@ const IMAGE = getImage(__dirname);
 
 describe("MySqlContainer", { timeout: 240_000 }, () => {
   // connect {
-  it("should connect and execute query", async () => {
+  it.concurrent("should connect and execute query", async () => {
     const container = await new MySqlContainer(IMAGE).start();
 
     const client = await createConnection({
@@ -26,7 +26,7 @@ describe("MySqlContainer", { timeout: 240_000 }, () => {
   // }
 
   // uriConnect {
-  it("should work with database URI", async () => {
+  it.concurrent("should work with database URI", async () => {
     const username = "testUser";
     const password = "testPassword";
     const database = "testDB";
@@ -52,7 +52,7 @@ describe("MySqlContainer", { timeout: 240_000 }, () => {
   // }
 
   // setDatabase {
-  it("should set database", async () => {
+  it.concurrent("should set database", async () => {
     const container = await new MySqlContainer(IMAGE).withDatabase("customDatabase").start();
 
     const client = await createConnection({
@@ -72,7 +72,7 @@ describe("MySqlContainer", { timeout: 240_000 }, () => {
   // }
 
   // setUsername {
-  it("should set username", async () => {
+  it.concurrent("should set username", async () => {
     const container = await new MySqlContainer(IMAGE).withUsername("customUsername").start();
 
     const client = await createConnection({
@@ -92,7 +92,7 @@ describe("MySqlContainer", { timeout: 240_000 }, () => {
   // }
 
   // executeQuery {
-  it("should execute a query and return the result", async () => {
+  it.concurrent("should execute a query and return the result", async () => {
     const container = await new MySqlContainer(IMAGE).start();
 
     const queryResult = await container.executeQuery("SELECT 1 as res");
@@ -101,7 +101,7 @@ describe("MySqlContainer", { timeout: 240_000 }, () => {
     await container.stop();
   });
 
-  it("should execute a query as root user", async () => {
+  it.concurrent("should execute a query as root user", async () => {
     const container = await new MySqlContainer(IMAGE).withUsername("customUsername").start();
 
     // Test non-root user
@@ -116,7 +116,7 @@ describe("MySqlContainer", { timeout: 240_000 }, () => {
   });
   // }
 
-  it("should work with restarted container", async () => {
+  it.concurrent("should work with restarted container", async () => {
     const container = await new MySqlContainer(IMAGE).start();
     await container.restart();
 

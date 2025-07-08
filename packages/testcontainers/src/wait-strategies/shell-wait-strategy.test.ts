@@ -2,7 +2,7 @@ import { GenericContainer } from "../generic-container/generic-container";
 import { Wait } from "./wait";
 
 describe("ShellWaitStrategy", { timeout: 180_000 }, () => {
-  it("should wait for successful command", async () => {
+  it.concurrent("should wait for successful command", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withCommand(["/bin/sh", "-c", "sleep 0.5; touch /tmp/test.lock; node index.js"])
       .withWaitStrategy(Wait.forSuccessfulCommand("stat /tmp/test.lock"))
@@ -11,7 +11,7 @@ describe("ShellWaitStrategy", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should timeout when command not successful", async () => {
+  it.concurrent("should timeout when command not successful", async () => {
     await expect(() =>
       new GenericContainer("cristianrgreco/testcontainer:1.1.14")
         .withWaitStrategy(Wait.forSuccessfulCommand("stat /tmp/test.lock"))

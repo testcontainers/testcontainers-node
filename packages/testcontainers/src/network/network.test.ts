@@ -9,7 +9,7 @@ describe("Network", { timeout: 180_000 }, () => {
     client = await getContainerRuntimeClient();
   });
 
-  it("should start container via network mode", async () => {
+  it.concurrent("should start container via network mode", async () => {
     const network = await new Network().start();
 
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
@@ -24,7 +24,7 @@ describe("Network", { timeout: 180_000 }, () => {
     await network.stop();
   });
 
-  it("should start container via network", async () => {
+  it.concurrent("should start container via network", async () => {
     const network = await new Network().start();
 
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withNetwork(network).start();
@@ -37,7 +37,7 @@ describe("Network", { timeout: 180_000 }, () => {
     await network.stop();
   });
 
-  it("two containers in user-defined network should be able to ping each other by name", async () => {
+  it.concurrent("two containers in user-defined network should be able to ping each other by name", async () => {
     const network = await new Network().start();
 
     const container1 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
@@ -59,7 +59,7 @@ describe("Network", { timeout: 180_000 }, () => {
     await network.stop();
   });
 
-  it("should expose the IP address of a container in a given network", async () => {
+  it.concurrent("should expose the IP address of a container in a given network", async () => {
     const network = await new Network().start();
 
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withNetwork(network).start();

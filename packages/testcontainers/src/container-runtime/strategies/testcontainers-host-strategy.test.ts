@@ -6,7 +6,7 @@ vi.mock("./utils/config", () => ({
 }));
 
 describe("TestcontainersHostStrategy", () => {
-  it("should return undefined when tc.host property is not set", async () => {
+  it.concurrent("should return undefined when tc.host property is not set", async () => {
     mockGetContainerRuntimeConfig.mockResolvedValue({});
 
     const strategy = new TestcontainersHostStrategy();
@@ -15,7 +15,7 @@ describe("TestcontainersHostStrategy", () => {
     expect(result).toBeUndefined();
   });
 
-  it("should be defined when tc.host property is set", async () => {
+  it.concurrent("should be defined when tc.host property is set", async () => {
     mockGetContainerRuntimeConfig.mockResolvedValue({ tcHost: "tcp://tc:2375" });
 
     const strategy = new TestcontainersHostStrategy();
@@ -24,7 +24,7 @@ describe("TestcontainersHostStrategy", () => {
     expect(result).toBeDefined();
   });
 
-  it("should return relevant fields", async () => {
+  it.concurrent("should return relevant fields", async () => {
     mockGetContainerRuntimeConfig.mockResolvedValue({ tcHost: "tcp://tc:2375" });
 
     const strategy = new TestcontainersHostStrategy();

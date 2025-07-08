@@ -4,7 +4,7 @@ import { checkContainerIsHealthy, getRunningContainerNames } from "../utils/test
 import { Wait } from "./wait";
 
 describe("LogWaitStrategy", { timeout: 180_000 }, () => {
-  it("should wait for log", async () => {
+  it.concurrent("should wait for log", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
       .withWaitStrategy(Wait.forLogMessage("Listening on port 8080"))
@@ -15,7 +15,7 @@ describe("LogWaitStrategy", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should wait for log with regex", async () => {
+  it.concurrent("should wait for log with regex", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
       .withWaitStrategy(Wait.forLogMessage(/Listening on port \d+/))
@@ -26,7 +26,7 @@ describe("LogWaitStrategy", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should wait for a new log after restart", async () => {
+  it.concurrent("should wait for a new log after restart", async () => {
     const start = new Date();
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withCommand(["/bin/sh", "-c", 'sleep 2; echo "Ready"'])
@@ -40,7 +40,7 @@ describe("LogWaitStrategy", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should stop the container when the log message wait strategy times out", async () => {
+  it.concurrent("should stop the container when the log message wait strategy times out", async () => {
     const containerName = `container-${new RandomUuid().nextUuid()}`;
 
     await expect(

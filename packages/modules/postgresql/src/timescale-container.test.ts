@@ -5,7 +5,7 @@ import { PostgreSqlContainer } from "./postgresql-container";
 const IMAGE = getImage(__dirname);
 
 describe("TimescaleContainer", { timeout: 180_000 }, () => {
-  it("should work", async () => {
+  it.concurrent("should work", async () => {
     const container = await new PostgreSqlContainer(IMAGE).start();
 
     const client = new Client({
@@ -24,7 +24,7 @@ describe("TimescaleContainer", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should restart", async () => {
+  it.concurrent("should restart", async () => {
     const container = await new PostgreSqlContainer(IMAGE).start();
     await container.restart();
 

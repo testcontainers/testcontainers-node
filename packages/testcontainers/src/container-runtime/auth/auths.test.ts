@@ -5,17 +5,17 @@ describe("Auths", () => {
   const locator = new Auths();
 
   describe("getAuthConfig", () => {
-    it("should return undefined when auths is undefined", async () => {
+    it.concurrent("should return undefined when auths is undefined", async () => {
       const containerRuntimeConfig: ContainerRuntimeConfig = {};
       expect(await locator.getAuthConfig("registry-name", containerRuntimeConfig)).toBeUndefined();
     });
 
-    it("should return undefined when auths does not contain registry name", async () => {
+    it.concurrent("should return undefined when auths does not contain registry name", async () => {
       const containerRuntimeConfig: ContainerRuntimeConfig = { auths: {} };
       expect(await locator.getAuthConfig("registry-name", containerRuntimeConfig)).toBeUndefined();
     });
 
-    it("should return credentials from username and password", async () => {
+    it.concurrent("should return credentials from username and password", async () => {
       const containerRuntimeConfig: ContainerRuntimeConfig = {
         auths: {
           "https://registry.example.com": {
@@ -34,7 +34,7 @@ describe("Auths", () => {
       expect(await locator.getAuthConfig("https://registry.example.com", containerRuntimeConfig)).toEqual(authConfig);
     });
 
-    it("should not return credentials for registry which is a partial match", async () => {
+    it.concurrent("should not return credentials for registry which is a partial match", async () => {
       const containerRuntimeConfig: ContainerRuntimeConfig = {
         auths: {
           "https://registry.example.com": {
@@ -47,7 +47,7 @@ describe("Auths", () => {
       expect(await locator.getAuthConfig("registry.example.co", containerRuntimeConfig)).toBeUndefined();
     });
 
-    it("should return credentials from encoded auth", async () => {
+    it.concurrent("should return credentials from encoded auth", async () => {
       const containerRuntimeConfig: ContainerRuntimeConfig = {
         auths: {
           "https://registry.example.com": {
@@ -65,7 +65,7 @@ describe("Auths", () => {
       expect(await locator.getAuthConfig("https://registry.example.com", containerRuntimeConfig)).toEqual(authConfig);
     });
 
-    it("should return credentials from encoded auth when the password contains a colon", async () => {
+    it.concurrent("should return credentials from encoded auth when the password contains a colon", async () => {
       const containerRuntimeConfig: ContainerRuntimeConfig = {
         auths: {
           "https://registry.example.com": {

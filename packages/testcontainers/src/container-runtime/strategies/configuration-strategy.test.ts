@@ -9,7 +9,7 @@ const mockGetContainerRuntimeConfig = vi.mocked(getContainerRuntimeConfig);
 const mockReadFile = vi.mocked(readFile);
 
 describe("ConfigurationStrategy", () => {
-  it("should return undefined if no docker host is set", async () => {
+  it.concurrent("should return undefined if no docker host is set", async () => {
     mockGetContainerRuntimeConfig.mockResolvedValueOnce({ dockerHost: undefined });
 
     const result = await new ConfigurationStrategy().getResult();
@@ -17,7 +17,7 @@ describe("ConfigurationStrategy", () => {
     expect(result).toBeUndefined();
   });
 
-  it("should set host and port when docker host is a URL", async () => {
+  it.concurrent("should set host and port when docker host is a URL", async () => {
     mockGetContainerRuntimeConfig.mockResolvedValueOnce({ dockerHost: "tcp://docker:8025" });
 
     const result = await new ConfigurationStrategy().getResult();
@@ -36,7 +36,7 @@ describe("ConfigurationStrategy", () => {
     );
   });
 
-  it("should set socket path when docker host is a path", async () => {
+  it.concurrent("should set socket path when docker host is a path", async () => {
     mockGetContainerRuntimeConfig.mockResolvedValueOnce({ dockerHost: "unix:///var/run/docker.sock" });
 
     const result = await new ConfigurationStrategy().getResult();
@@ -54,7 +54,7 @@ describe("ConfigurationStrategy", () => {
     );
   });
 
-  it("should allow user overrides", async () => {
+  it.concurrent("should allow user overrides", async () => {
     mockGetContainerRuntimeConfig.mockResolvedValueOnce({ dockerHost: "tcp://docker:8025" });
 
     const result = await new ConfigurationStrategy().getResult();
@@ -62,7 +62,7 @@ describe("ConfigurationStrategy", () => {
     expect(result?.allowUserOverrides).toEqual(true);
   });
 
-  it("should set SSL options when TLS is enabled", async () => {
+  it.concurrent("should set SSL options when TLS is enabled", async () => {
     mockGetContainerRuntimeConfig.mockResolvedValueOnce({
       dockerHost: "tcp://docker:8025",
       dockerTlsVerify: "1",

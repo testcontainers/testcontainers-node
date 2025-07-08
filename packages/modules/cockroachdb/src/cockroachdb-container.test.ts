@@ -6,7 +6,7 @@ const IMAGE = getImage(__dirname);
 
 describe("CockroachDbContainer", { timeout: 180_000 }, () => {
   // connect {
-  it("should connect and return a query result", async () => {
+  it.concurrent("should connect and return a query result", async () => {
     const container = await new CockroachDbContainer(IMAGE).start();
 
     const client = new Client({
@@ -28,7 +28,7 @@ describe("CockroachDbContainer", { timeout: 180_000 }, () => {
   // }
 
   // uriConnect {
-  it("should work with database URI", async () => {
+  it.concurrent("should work with database URI", async () => {
     const container = await new CockroachDbContainer(IMAGE).start();
 
     const client = new Client({
@@ -45,7 +45,7 @@ describe("CockroachDbContainer", { timeout: 180_000 }, () => {
   // }
 
   // setDatabase {
-  it("should set database", async () => {
+  it.concurrent("should set database", async () => {
     const container = await new CockroachDbContainer(IMAGE).withDatabase("custom_database").start();
 
     const client = new Client({
@@ -65,7 +65,7 @@ describe("CockroachDbContainer", { timeout: 180_000 }, () => {
   // }
 
   // setUsername {
-  it("should set username", async () => {
+  it.concurrent("should set username", async () => {
     const container = await new CockroachDbContainer(IMAGE).withUsername("custom_username").start();
 
     const client = new Client({
@@ -84,7 +84,7 @@ describe("CockroachDbContainer", { timeout: 180_000 }, () => {
   });
   // }
 
-  it("should work with restarted container", async () => {
+  it.concurrent("should work with restarted container", async () => {
     const container = await new CockroachDbContainer(IMAGE).start();
     await container.restart();
 
@@ -103,7 +103,7 @@ describe("CockroachDbContainer", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should allow custom healthcheck", async () => {
+  it.concurrent("should allow custom healthcheck", async () => {
     const container = new CockroachDbContainer(IMAGE).withHealthCheck({
       test: ["CMD-SHELL", "exit 1"],
       interval: 100,

@@ -10,7 +10,7 @@ describe("FirestoreEmulatorContainer", { timeout: 240_000 }, () => {
   });
 
   // firestore4 {
-  it("should work using default version", async () => {
+  it.concurrent("should work using default version", async () => {
     const firestoreEmulatorContainer = await new FirestoreEmulatorContainer(IMAGE).start();
 
     await checkFirestore(firestoreEmulatorContainer);
@@ -20,7 +20,7 @@ describe("FirestoreEmulatorContainer", { timeout: 240_000 }, () => {
   // }
 
   // firestore5 {
-  it("should work using version 468.0.0", async () => {
+  it.concurrent("should work using version 468.0.0", async () => {
     const firestoreEmulatorContainer = await new FirestoreEmulatorContainer(
       "gcr.io/google.com/cloudsdktool/google-cloud-cli:468.0.0-emulators"
     ).start();

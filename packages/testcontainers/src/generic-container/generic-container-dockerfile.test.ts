@@ -18,7 +18,7 @@ describe("GenericContainer Dockerfile", { timeout: 180_000 }, () => {
   const uuidGen = new RandomUuid();
   const fixtures = path.resolve(__dirname, "..", "..", "fixtures", "docker");
 
-  it("should build and start", async () => {
+  it.concurrent("should build and start", async () => {
     const context = path.resolve(fixtures, "docker");
     const container = await GenericContainer.fromDockerfile(context).build();
     const startedContainer = await container.withExposedPorts(8080).start();
@@ -29,7 +29,7 @@ describe("GenericContainer Dockerfile", { timeout: 180_000 }, () => {
   });
 
   if (!process.env.CI_PODMAN) {
-    it("should build with buildkit", async () => {
+    it.concurrent("should build with buildkit", async () => {
       const context = path.resolve(fixtures, "docker-with-buildkit");
       const container = await GenericContainer.fromDockerfile(context).withBuildkit().build();
       const startedContainer = await container.withExposedPorts(8080).start();
@@ -40,7 +40,7 @@ describe("GenericContainer Dockerfile", { timeout: 180_000 }, () => {
     });
   }
 
-  it("should have a session ID label to be cleaned up by the Reaper", async () => {
+  it.concurrent("should have a session ID label to be cleaned up by the Reaper", async () => {
     const context = path.resolve(fixtures, "docker");
     const imageName = `${uuidGen.nextUuid()}:${uuidGen.nextUuid()}`;
 
@@ -54,7 +54,7 @@ describe("GenericContainer Dockerfile", { timeout: 180_000 }, () => {
     await deleteImageByName(imageName);
   });
 
-  it("should not have a session ID label when delete on exit set to false", async () => {
+  it.concurrent("should not have a session ID label when delete on exit set to false", async () => {
     const context = path.resolve(fixtures, "docker");
     const imageName = `${uuidGen.nextUuid()}:${uuidGen.nextUuid()}`;
 
@@ -68,7 +68,7 @@ describe("GenericContainer Dockerfile", { timeout: 180_000 }, () => {
 
   // https://github.com/containers/podman/issues/17779
   if (!process.env.CI_PODMAN) {
-    it("should use pull policy", async () => {
+    it.concurrent("should use pull policy", async () => {
       const dockerfile = path.resolve(fixtures, "docker");
       const containerSpec = GenericContainer.fromDockerfile(dockerfile).withPullPolicy(PullPolicy.alwaysPull());
 
@@ -81,7 +81,7 @@ describe("GenericContainer Dockerfile", { timeout: 180_000 }, () => {
       dockerEventStream.destroy();
     });
 
-    it("should not pull existing image without pull policy", async () => {
+    it.concurrent("should not pull existing image without pull policy", async () => {
       const client = await getContainerRuntimeClient();
       await client.image.pull(new ImageName("docker.io", "node", "10-alpine"));
 
@@ -101,7 +101,7 @@ describe("GenericContainer Dockerfile", { timeout: 180_000 }, () => {
     });
   }
 
-  it("should build and start with custom file name", async () => {
+  it.concurrent("should build and start with custom file name", async () => {
     const context = path.resolve(fixtures, "docker-with-custom-filename");
     const container = await GenericContainer.fromDockerfile(context, "Dockerfile-A").build();
     const startedContainer = await container.withExposedPorts(8080).start();
@@ -111,7 +111,7 @@ describe("GenericContainer Dockerfile", { timeout: 180_000 }, () => {
     await startedContainer.stop();
   });
 
-  it("should set build arguments", async () => {
+  it.concurrent("should set build arguments", async () => {
     const context = path.resolve(fixtures, "docker-with-buildargs");
     const container = await GenericContainer.fromDockerfile(context).withBuildArgs({ VERSION: "10-alpine" }).build();
     const startedContainer = await container.withExposedPorts(8080).start();
@@ -121,7 +121,7 @@ describe("GenericContainer Dockerfile", { timeout: 180_000 }, () => {
     await startedContainer.stop();
   });
 
-  it("should exit immediately and stop without exception", async () => {
+  it.concurrent("should exit immediately and stop without exception", async () => {
     const message = "This container will exit immediately.";
     const context = path.resolve(fixtures, "docker-exit-immediately");
     const container = await GenericContainer.fromDockerfile(context).build();

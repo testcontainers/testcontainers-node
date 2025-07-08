@@ -2,7 +2,7 @@ import { GenericContainer } from "../generic-container/generic-container";
 import { StartupCheckStrategy, StartupStatus } from "./startup-check-strategy";
 
 describe("StartupCheckStrategy", { timeout: 180_000 }, () => {
-  it("should wait until ready", async () => {
+  it.concurrent("should wait until ready", async () => {
     const waitStrategy = new (class extends StartupCheckStrategy {
       private count = 0;
 
@@ -23,7 +23,7 @@ describe("StartupCheckStrategy", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should fail when status PENDING after timeout", async () => {
+  it.concurrent("should fail when status PENDING after timeout", async () => {
     const waitStrategy = new (class extends StartupCheckStrategy {
       public override async checkStartupState(): Promise<StartupStatus> {
         return "PENDING";
@@ -38,7 +38,7 @@ describe("StartupCheckStrategy", { timeout: 180_000 }, () => {
     ).rejects.toThrowError("Container not accessible after 3000ms");
   });
 
-  it("should fail immediately when status FAILED", async () => {
+  it.concurrent("should fail immediately when status FAILED", async () => {
     const waitStrategy = new (class extends StartupCheckStrategy {
       public count = 0;
 

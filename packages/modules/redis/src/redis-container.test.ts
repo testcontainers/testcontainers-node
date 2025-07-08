@@ -9,7 +9,7 @@ const IMAGE = getImage(__dirname);
 
 describe("RedisContainer", { timeout: 240_000 }, () => {
   // startContainer {
-  it("should connect and execute set-get", async () => {
+  it.concurrent("should connect and execute set-get", async () => {
     const container = await new RedisContainer(IMAGE).start();
 
     const client = await connectTo(container);
@@ -22,7 +22,7 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
   });
   // }
 
-  it("should connect with password and execute set-get", async () => {
+  it.concurrent("should connect with password and execute set-get", async () => {
     const container = await new RedisContainer(IMAGE).withPassword("test").start();
 
     const client = await connectTo(container);
@@ -35,7 +35,7 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
   });
 
   // persistentData {
-  it("should reconnect with volume and persistence data", async () => {
+  it.concurrent("should reconnect with volume and persistence data", async () => {
     const sourcePath = fs.mkdtempSync(path.join(os.tmpdir(), "redis-"));
     const container = await new RedisContainer(IMAGE).withPassword("test").withPersistence(sourcePath).start();
     let client = await connectTo(container);
@@ -58,7 +58,7 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
   // }
 
   // initial data import {
-  it("should load initial data and can read it", async () => {
+  it.concurrent("should load initial data and can read it", async () => {
     const container = await new RedisContainer(IMAGE)
       .withPassword("test")
       .withInitialData(path.join(__dirname, "initData.redis"))
@@ -77,7 +77,7 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
   // }
 
   // startWithCredentials {
-  it("should start with credentials and login", async () => {
+  it.concurrent("should start with credentials and login", async () => {
     const password = "testPassword";
 
     // Test authentication
@@ -95,7 +95,7 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
   // }
 
   // executeCommand {
-  it("should execute container cmd and return the result", async () => {
+  it.concurrent("should execute container cmd and return the result", async () => {
     const container = await new RedisContainer(IMAGE).start();
 
     const queryResult = await container.executeCliCmd("info", ["clients"]);
@@ -106,7 +106,7 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
   // }
 
   // startWithRedisStack {
-  it("should start with redis-stack-server and json module", async () => {
+  it.concurrent("should start with redis-stack-server and json module", async () => {
     const container = await new RedisContainer("redis/redis-stack-server:7.4.0-v4")
       .withPassword("testPassword")
       .start();

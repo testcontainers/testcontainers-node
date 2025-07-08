@@ -5,7 +5,7 @@ import { createTestServer } from "../utils/test-helper";
 describe("Port Forwarder reuse", { timeout: 180_000 }, () => {
   const portGen = new RandomPortGenerator();
 
-  it("should expose additional ports", async () => {
+  it.concurrent("should expose additional ports", async () => {
     const { TestContainers: TC1 } = await import("../test-containers");
     const { PortForwarderInstance: PFI1 } = await import("../port-forwarder/port-forwarder");
     const port1 = await portGen.generatePort();
@@ -34,7 +34,7 @@ describe("Port Forwarder reuse", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should reuse same ports", async () => {
+  it.concurrent("should reuse same ports", async () => {
     const port = await portGen.generatePort();
     const server = await createTestServer(port);
 

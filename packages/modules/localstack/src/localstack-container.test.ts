@@ -18,7 +18,7 @@ const runAwsCliAgainstDockerNetworkContainer = async (
 
 describe("LocalStackContainer", { timeout: 180_000 }, () => {
   // createS3Bucket {
-  it("should create a S3 bucket", async () => {
+  it.concurrent("should create a S3 bucket", async () => {
     const container = await new LocalstackContainer(IMAGE).start();
 
     const client = new S3Client({
@@ -44,7 +44,7 @@ describe("LocalStackContainer", { timeout: 180_000 }, () => {
   });
   // }
 
-  it("should use custom network", async () => {
+  it.concurrent("should use custom network", async () => {
     const network = await new Network().start();
     const container = await new LocalstackContainer(IMAGE)
       .withNetwork(network)
@@ -73,7 +73,7 @@ describe("LocalStackContainer", { timeout: 180_000 }, () => {
     await network.stop();
   });
 
-  it("should not override LOCALSTACK_HOST assignment", async () => {
+  it.concurrent("should not override LOCALSTACK_HOST assignment", async () => {
     const container = await new LocalstackContainer(IMAGE)
       .withEnvironment({ LOCALSTACK_HOST: "myhost" })
       .withNetworkAliases("myalias")
@@ -86,7 +86,7 @@ describe("LocalStackContainer", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should override LOCALSTACK_HOST with last network alias", async () => {
+  it.concurrent("should override LOCALSTACK_HOST with last network alias", async () => {
     const container = await new LocalstackContainer(IMAGE).withNetworkAliases("other", "myalias").start();
 
     const { output, exitCode } = await container.exec(["printenv", "LOCALSTACK_HOST"]);
@@ -96,7 +96,7 @@ describe("LocalStackContainer", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should assign LOCALSTACK_HOST to localhost", async () => {
+  it.concurrent("should assign LOCALSTACK_HOST to localhost", async () => {
     const container = await new LocalstackContainer(IMAGE).start();
 
     const { output, exitCode } = await container.exec(["printenv", "LOCALSTACK_HOST"]);
@@ -106,7 +106,7 @@ describe("LocalStackContainer", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should add LAMBDA_DOCKER_FLAGS with sessionId label", async () => {
+  it.concurrent("should add LAMBDA_DOCKER_FLAGS with sessionId label", async () => {
     const container = await new LocalstackContainer(IMAGE).start();
     const sessionId = container.getLabels()[LABEL_TESTCONTAINERS_SESSION_ID];
 
@@ -115,7 +115,7 @@ describe("LocalStackContainer", { timeout: 180_000 }, () => {
     expect(output).toContain(`${LABEL_TESTCONTAINERS_SESSION_ID}=${sessionId}`);
   });
 
-  it("should concatenate sessionId label to LAMBDA_DOCKER_FLAGS", async () => {
+  it.concurrent("should concatenate sessionId label to LAMBDA_DOCKER_FLAGS", async () => {
     const container = await new LocalstackContainer(IMAGE)
       .withEnvironment({
         LAMBDA_DOCKER_FLAGS: `-l mylabel=myvalue`,

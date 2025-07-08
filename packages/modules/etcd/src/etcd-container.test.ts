@@ -6,14 +6,14 @@ import { EtcdContainer, StartedEtcdContainer } from "./etcd-container";
 const IMAGE = getImage(__dirname);
 
 describe("etcd", () => {
-  it("should construct a container", { timeout: 30_000 }, async () => {
+  it.concurrent("should construct a container", { timeout: 30_000 }, async () => {
     const container = await new EtcdContainer(IMAGE).start();
     expect(container).toBeInstanceOf(StartedEtcdContainer);
     container.stop();
   });
 
   // readWrite {
-  it("should connect and perform read/write operations", async () => {
+  it.concurrent("should connect and perform read/write operations", async () => {
     const container = await new EtcdContainer(IMAGE).start();
     const client = new Etcd3({
       hosts: container.getClientEndpoint(),
@@ -30,7 +30,7 @@ describe("etcd", () => {
   // }
 
   // subscribe {
-  it("should subscribe to key changes", async () => {
+  it.concurrent("should subscribe to key changes", async () => {
     const subscriber = vi.fn();
     const container = await new EtcdContainer(IMAGE).start();
     const client = new Etcd3({

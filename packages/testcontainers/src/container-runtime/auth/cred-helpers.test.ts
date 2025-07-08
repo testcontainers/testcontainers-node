@@ -5,7 +5,7 @@ describe("CredHelpers", () => {
   const locator = new CredHelpers();
 
   describe("getAuthConfig", () => {
-    it("should return undefined when config does not contain cred helpers", async () => {
+    it.concurrent("should return undefined when config does not contain cred helpers", async () => {
       const containerRuntimeConfig: ContainerRuntimeConfig = {};
       expect(await locator.getAuthConfig("registry-name", containerRuntimeConfig)).toBe(undefined);
     });

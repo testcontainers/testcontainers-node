@@ -22,7 +22,7 @@ describe("ElasticsearchContainer", { timeout: 180_000 }, () => {
   // }
 
   // indexDocument {
-  it("should index a document", async () => {
+  it.concurrent("should index a document", async () => {
     const container = await new ElasticsearchContainer(IMAGE).start();
     const client = new Client({
       node: container.getHttpUrl(),
@@ -44,7 +44,7 @@ describe("ElasticsearchContainer", { timeout: 180_000 }, () => {
   });
   // }
 
-  it("should work with restarted container", async () => {
+  it.concurrent("should work with restarted container", async () => {
     const container = await new ElasticsearchContainer(IMAGE).start();
     await container.restart();
 
@@ -59,7 +59,7 @@ describe("ElasticsearchContainer", { timeout: 180_000 }, () => {
     await container.stop();
   }); // }
 
-  it("should set custom password", async () => {
+  it.concurrent("should set custom password", async () => {
     const container = await new ElasticsearchContainer(IMAGE).withPassword("testPassword").start();
 
     const client = new Client({

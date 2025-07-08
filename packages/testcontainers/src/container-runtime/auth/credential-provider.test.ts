@@ -20,7 +20,7 @@ describe("CredentialProvider", () => {
     containerRuntimeConfig = {};
   });
 
-  it("should return the auth config for a registry", async () => {
+  it.concurrent("should return the auth config for a registry", async () => {
     mockExecReturns(JSON.stringify({ registry: "username" }));
     mockSpawnReturns(
       0,
@@ -40,7 +40,7 @@ describe("CredentialProvider", () => {
     });
   });
 
-  it("should not return auth config for registry which is a partial match", async () => {
+  it.concurrent("should not return auth config for registry which is a partial match", async () => {
     mockExecReturns(JSON.stringify({ "https://registry.example.com": "username" }));
     mockSpawnReturns(
       0,
@@ -56,7 +56,7 @@ describe("CredentialProvider", () => {
     ).toBeUndefined();
   });
 
-  it("should default to the registry url when the server url is not returned", async () => {
+  it.concurrent("should default to the registry url when the server url is not returned", async () => {
     mockExecReturns(JSON.stringify({ "https://registry.example.com": "username" }));
     mockSpawnReturns(
       0,
@@ -73,7 +73,7 @@ describe("CredentialProvider", () => {
     });
   });
 
-  it("should return undefined when no auth config found for registry", async () => {
+  it.concurrent("should return undefined when no auth config found for registry", async () => {
     mockExecReturns(JSON.stringify({ registry2: "username" }));
 
     const credentials = await credentialProvider.getAuthConfig("registry1", containerRuntimeConfig);
@@ -81,13 +81,13 @@ describe("CredentialProvider", () => {
     expect(credentials).toBeUndefined();
   });
 
-  it("should return undefined when provider name not provided", async () => {
+  it.concurrent("should return undefined when provider name not provided", async () => {
     const credentialProvider = new TestCredentialProvider("name", undefined!);
 
     expect(await credentialProvider.getAuthConfig("registry", containerRuntimeConfig)).toBeUndefined();
   });
 
-  it("should throw when list credentials fails", async () => {
+  it.concurrent("should throw when list credentials fails", async () => {
     mockExecThrows();
 
     await expect(() => credentialProvider.getAuthConfig("registry", containerRuntimeConfig)).rejects.toThrow(
@@ -95,7 +95,7 @@ describe("CredentialProvider", () => {
     );
   });
 
-  it("should throw when list credentials output cannot be parsed", async () => {
+  it.concurrent("should throw when list credentials output cannot be parsed", async () => {
     mockExecReturns("CANNOT_PARSE");
 
     await expect(() => credentialProvider.getAuthConfig("registry", containerRuntimeConfig)).rejects.toThrow(
@@ -103,7 +103,7 @@ describe("CredentialProvider", () => {
     );
   });
 
-  it("should not throw when list credentials command is not implemented", async () => {
+  it.concurrent("should not throw when list credentials command is not implemented", async () => {
     mockExec.mockImplementationOnce((command, callback) => {
       return callback(new Error(), null, "list is unimplemented\n");
     });
@@ -113,7 +113,7 @@ describe("CredentialProvider", () => {
     expect(credentials).toBeUndefined();
   });
 
-  it("should throw when get credentials fails", async () => {
+  it.concurrent("should throw when get credentials fails", async () => {
     mockExecReturns(JSON.stringify({ registry: "username" }));
     mockSpawnReturns(
       1,
@@ -129,7 +129,7 @@ describe("CredentialProvider", () => {
     );
   });
 
-  it("should throw when get credentials output cannot be parsed", async () => {
+  it.concurrent("should throw when get credentials output cannot be parsed", async () => {
     mockExecReturns(JSON.stringify({ registry: "username" }));
     mockSpawnReturns(0, "CANNOT_PARSE");
 
@@ -162,8 +162,8 @@ function mockSpawnReturns(exitCode: number, stdout: string) {
 
   sink.stdin = new Writable({
     write() {
-      sink.stdout?.emit("data", stdout);
-      sink.emit("close", exitCode);
+      sink.stdout?.emit.concurrent("data", stdout);
+      sink.emit.concurrent("close", exitCode);
     },
   });
 

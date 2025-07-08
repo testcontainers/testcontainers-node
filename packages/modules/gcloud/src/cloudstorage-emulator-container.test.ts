@@ -48,7 +48,7 @@ describe("CloudStorageEmulatorContainer", { timeout: 240_000 }, () => {
   });
 
   // cloud-storage {
-  it("should work using default version", async () => {
+  it.concurrent("should work using default version", async () => {
     const cloudstorageEmulatorContainer = await new CloudStorageEmulatorContainer(IMAGE).start();
 
     await checkCloudStorage(cloudstorageEmulatorContainer);
@@ -57,7 +57,7 @@ describe("CloudStorageEmulatorContainer", { timeout: 240_000 }, () => {
   });
   // }
 
-  it("should use the provided external URL", async () => {
+  it.concurrent("should use the provided external URL", async () => {
     const cloudstorageEmulatorContainer = await new CloudStorageEmulatorContainer(IMAGE)
       .withExternalURL("http://cdn.company.local")
       .start();
@@ -68,7 +68,7 @@ describe("CloudStorageEmulatorContainer", { timeout: 240_000 }, () => {
     await cloudstorageEmulatorContainer.stop();
   });
 
-  it("should be able update the external URL of running instance", async () => {
+  it.concurrent("should be able update the external URL of running instance", async () => {
     const cloudstorageEmulatorContainer = await new CloudStorageEmulatorContainer(IMAGE)
       .withExternalURL("http://cdn.company.local")
       .start();
@@ -106,7 +106,7 @@ describe("CloudStorageEmulatorContainer", { timeout: 240_000 }, () => {
     await cloudstorageEmulatorContainer.stop();
   });
 
-  it("should use emulator endpoint as default external URL", async () => {
+  it.concurrent("should use emulator endpoint as default external URL", async () => {
     let configUpdated = false;
 
     server.events.on("request:start", ({ request }) => {
@@ -122,7 +122,7 @@ describe("CloudStorageEmulatorContainer", { timeout: 240_000 }, () => {
     await container.stop();
   });
 
-  it("should allow skipping updating the external URL automatically", async () => {
+  it.concurrent("should allow skipping updating the external URL automatically", async () => {
     let configUpdated = false;
 
     server.events.on("request:start", ({ request }) => {

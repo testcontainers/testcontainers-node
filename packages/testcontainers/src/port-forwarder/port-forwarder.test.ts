@@ -18,7 +18,7 @@ describe("PortForwarder", { timeout: 180_000 }, () => {
     await new Promise((resolve) => server.close(resolve));
   });
 
-  it("should expose host ports to the container", async () => {
+  it.concurrent("should expose host ports to the container", async () => {
     await TestContainers.exposeHostPorts(randomPort);
 
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").start();
@@ -29,7 +29,7 @@ describe("PortForwarder", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should expose host ports to the container with custom network", async () => {
+  it.concurrent("should expose host ports to the container with custom network", async () => {
     await TestContainers.exposeHostPorts(randomPort);
 
     const network = await new Network().start();
@@ -42,7 +42,7 @@ describe("PortForwarder", { timeout: 180_000 }, () => {
     await network.stop();
   });
 
-  it("should expose host ports to the container with custom network and network alias", async () => {
+  it.concurrent("should expose host ports to the container with custom network and network alias", async () => {
     await TestContainers.exposeHostPorts(randomPort);
 
     const network = await new Network().start();

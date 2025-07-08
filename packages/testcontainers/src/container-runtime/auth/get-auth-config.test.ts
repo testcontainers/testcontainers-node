@@ -17,7 +17,7 @@ describe("get auth config", () => {
     vi.resetModules();
   });
 
-  it("should use DOCKER_AUTH_CONFIG environment variable as Docker config", async () => {
+  it.concurrent("should use DOCKER_AUTH_CONFIG environment variable as Docker config", async () => {
     vi.stubEnv(
       "DOCKER_AUTH_CONFIG",
       JSON.stringify({
@@ -39,7 +39,7 @@ describe("get auth config", () => {
     });
   });
 
-  it("should return auth from docker config file", async () => {
+  it.concurrent("should return auth from docker config file", async () => {
     mockExistsSync.mockReturnValue(true);
     mockReadFile.mockResolvedValue(
       Buffer.from(
@@ -63,7 +63,7 @@ describe("get auth config", () => {
     });
   });
 
-  it("should return empty auth when docker config file does not exist", async () => {
+  it.concurrent("should return empty auth when docker config file does not exist", async () => {
     mockExistsSync.mockReturnValue(false);
     const { getAuthConfig } = await import("./get-auth-config");
     expect(await getAuthConfig("https://registry.example.com")).toBeUndefined();

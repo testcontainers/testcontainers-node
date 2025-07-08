@@ -6,7 +6,7 @@ const IMAGE = getImage(__dirname);
 
 describe("ToxiProxyContainer", { timeout: 240_000 }, () => {
   // create_proxy {
-  it("should create a proxy to an endpoint", async () => {
+  it.concurrent("should create a proxy to an endpoint", async () => {
     const network = await new Network().start();
     const appContainer = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
@@ -31,7 +31,7 @@ describe("ToxiProxyContainer", { timeout: 240_000 }, () => {
   // }
 
   // enabled_disabled {
-  it("should enable and disable a proxy", async () => {
+  it.concurrent("should enable and disable a proxy", async () => {
     const network = await new Network().start();
     const appContainer = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
@@ -60,7 +60,7 @@ describe("ToxiProxyContainer", { timeout: 240_000 }, () => {
   // }
 
   // adding_toxic {
-  it("should add a toxic to a proxy and then remove", async () => {
+  it.concurrent("should add a toxic to a proxy and then remove", async () => {
     const network = await new Network().start();
     const appContainer = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
@@ -100,7 +100,7 @@ describe("ToxiProxyContainer", { timeout: 240_000 }, () => {
   });
   // }
 
-  it("should create multiple proxies", async () => {
+  it.concurrent("should create multiple proxies", async () => {
     const network = await new Network().start();
     const appContainer = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
@@ -130,7 +130,7 @@ describe("ToxiProxyContainer", { timeout: 240_000 }, () => {
     await network.stop();
   });
 
-  it("throws an error when too many proxies are created", async () => {
+  it.concurrent("throws an error when too many proxies are created", async () => {
     const toxiproxyContainer = await new ToxiProxyContainer(IMAGE).start();
 
     for (let i = 0; i < 32; i++) {

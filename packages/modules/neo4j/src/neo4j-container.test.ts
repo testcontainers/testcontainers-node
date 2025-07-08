@@ -6,7 +6,7 @@ const IMAGE = getImage(__dirname);
 
 describe("Neo4jContainer", { timeout: 180_000 }, () => {
   // createNode {
-  it("should create a person node", async () => {
+  it.concurrent("should create a person node", async () => {
     const container = await new Neo4jContainer(IMAGE).start();
     const driver = neo4j.driver(
       container.getBoltUri(),
@@ -27,7 +27,7 @@ describe("Neo4jContainer", { timeout: 180_000 }, () => {
   // }
 
   // v5DefaultPassword {
-  it("should connect to neo4j:v5 with default password", async () => {
+  it.concurrent("should connect to neo4j:v5 with default password", async () => {
     const container = await new Neo4jContainer("neo4j:5.23.0").start();
     const driver = neo4j.driver(
       container.getBoltUri(),
@@ -48,7 +48,7 @@ describe("Neo4jContainer", { timeout: 180_000 }, () => {
   // }
 
   // setPassword {
-  it("should connect with custom password", async () => {
+  it.concurrent("should connect with custom password", async () => {
     const container = await new Neo4jContainer(IMAGE).withPassword("xyz1234@!").start();
     const driver = neo4j.driver(
       container.getBoltUri(),
@@ -69,7 +69,7 @@ describe("Neo4jContainer", { timeout: 180_000 }, () => {
   // }
 
   // apoc {
-  it("should have APOC plugin installed", async () => {
+  it.concurrent("should have APOC plugin installed", async () => {
     const container = await new Neo4jContainer(IMAGE).withApoc().withStartupTimeout(120_000).start();
     const driver = neo4j.driver(
       container.getBoltUri(),
@@ -88,7 +88,7 @@ describe("Neo4jContainer", { timeout: 180_000 }, () => {
   // }
 
   // pluginsList {
-  it("should work with plugin list", async () => {
+  it.concurrent("should work with plugin list", async () => {
     const container = await new Neo4jContainer("neo4j:5.26.5")
       .withPlugins([Neo4jPlugin.APOC_EXTENDED, Neo4jPlugin.GRAPH_DATA_SCIENCE])
       .withStartupTimeout(120_000)

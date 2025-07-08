@@ -10,7 +10,7 @@ interface ClickHouseQueryResponse<T> {
 
 describe("ClickHouseContainer", { timeout: 180_000 }, () => {
   // connectWithOptions {
-  it("should connect using the client options object", async () => {
+  it.concurrent("should connect using the client options object", async () => {
     const container = await new ClickHouseContainer(IMAGE).start();
     const client = createClient(container.getClientOptions());
 
@@ -27,7 +27,7 @@ describe("ClickHouseContainer", { timeout: 180_000 }, () => {
   // }
 
   // connectWithUrl {
-  it("should connect using the URL", async () => {
+  it.concurrent("should connect using the URL", async () => {
     const container = await new ClickHouseContainer(IMAGE).start();
     const client = createClient({
       url: container.getConnectionUrl(),
@@ -47,7 +47,7 @@ describe("ClickHouseContainer", { timeout: 180_000 }, () => {
   // }
 
   // connectWithUsernameAndPassword {
-  it("should connect using the username and password", async () => {
+  it.concurrent("should connect using the username and password", async () => {
     const container = await new ClickHouseContainer(IMAGE)
       .withUsername("customUsername")
       .withPassword("customPassword")
@@ -73,7 +73,7 @@ describe("ClickHouseContainer", { timeout: 180_000 }, () => {
   // }
 
   // setDatabase {
-  it("should set database", async () => {
+  it.concurrent("should set database", async () => {
     const customDatabase = "customDatabase";
     const container = await new ClickHouseContainer(IMAGE).withDatabase(customDatabase).start();
 
@@ -93,7 +93,7 @@ describe("ClickHouseContainer", { timeout: 180_000 }, () => {
   // }
 
   // setUsername {
-  it("should set username", async () => {
+  it.concurrent("should set username", async () => {
     const customUsername = "customUsername";
     const container = await new ClickHouseContainer(IMAGE).withUsername(customUsername).start();
 
@@ -112,7 +112,7 @@ describe("ClickHouseContainer", { timeout: 180_000 }, () => {
   });
   // }
 
-  it("should work with restarted container", async () => {
+  it.concurrent("should work with restarted container", async () => {
     const container = await new ClickHouseContainer(IMAGE).start();
     await container.restart();
 

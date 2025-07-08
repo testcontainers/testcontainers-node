@@ -1,7 +1,7 @@
 import { ImageName } from "./image-name";
 
 describe("ContainerImage", () => {
-  it("should return whether two image names are equal", () => {
+  it.concurrent("should return whether two image names are equal", () => {
     const imageName = new ImageName("registry", "image", "tag");
 
     expect(imageName.equals(new ImageName("registry", "image", "tag"))).toBe(true);
@@ -11,27 +11,27 @@ describe("ContainerImage", () => {
   });
 
   describe("string", () => {
-    it("should work with registry", () => {
+    it.concurrent("should work with registry", () => {
       const imageName = new ImageName("registry", "image", "tag");
       expect(imageName.string).toBe("registry/image:tag");
     });
 
-    it("should work without registry", () => {
+    it.concurrent("should work without registry", () => {
       const imageName = new ImageName(undefined, "image", "tag");
       expect(imageName.string).toBe("image:tag");
     });
 
-    it("should work with tag being a hash", () => {
+    it.concurrent("should work with tag being a hash", () => {
       const imageName = new ImageName(undefined, "image", "sha256:1234abcd1234abcd1234abcd1234abcd");
       expect(imageName.string).toBe("image@sha256:1234abcd1234abcd1234abcd1234abcd");
     });
 
-    it("should work with registry and tag being a hash", () => {
+    it.concurrent("should work with registry and tag being a hash", () => {
       const imageName = new ImageName("registry", "image", "sha256:1234abcd1234abcd1234abcd1234abcd");
       expect(imageName.string).toBe("registry/image@sha256:1234abcd1234abcd1234abcd1234abcd");
     });
 
-    it("should not append the `latest` tag to image IDs", () => {
+    it.concurrent("should not append the `latest` tag to image IDs", () => {
       const imageName = new ImageName(
         undefined,
         "aa285b773a2c042056883845aea893a743d358a5d40f61734fa228fde93dae6f",
@@ -40,7 +40,7 @@ describe("ContainerImage", () => {
       expect(imageName.string).toBe("aa285b773a2c042056883845aea893a743d358a5d40f61734fa228fde93dae6f");
     });
 
-    it("should keep other tags (not `latest`) on image IDs", () => {
+    it.concurrent("should keep other tags (not `latest`) on image IDs", () => {
       // Note that the resulting image ID will not be accepted by Docker:
       //
       // > "invalid repository name [...], cannot specify 64-byte hexadecimal strings"
@@ -68,7 +68,7 @@ describe("ContainerImage", () => {
   });
 
   describe("fromString", () => {
-    it("should work", () => {
+    it.concurrent("should work", () => {
       const imageName = ImageName.fromString("image:latest");
 
       expect(imageName.registry).toBeUndefined();
@@ -76,7 +76,7 @@ describe("ContainerImage", () => {
       expect(imageName.tag).toBe("latest");
     });
 
-    it("should work without tag", () => {
+    it.concurrent("should work without tag", () => {
       const imageName = ImageName.fromString("image");
 
       expect(imageName.registry).toBeUndefined();
@@ -84,7 +84,7 @@ describe("ContainerImage", () => {
       expect(imageName.tag).toBe("latest");
     });
 
-    it("should work with registry", () => {
+    it.concurrent("should work with registry", () => {
       const imageName = ImageName.fromString("domain.com/image:latest");
 
       expect(imageName.registry).toBe("domain.com");
@@ -92,7 +92,7 @@ describe("ContainerImage", () => {
       expect(imageName.tag).toBe("latest");
     });
 
-    it("should work with registry with port", () => {
+    it.concurrent("should work with registry with port", () => {
       const imageName = ImageName.fromString("domain.com:5000/image:latest");
 
       expect(imageName.registry).toBe("domain.com:5000");
@@ -100,7 +100,7 @@ describe("ContainerImage", () => {
       expect(imageName.tag).toBe("latest");
     });
 
-    it("should work with registry without tag", () => {
+    it.concurrent("should work with registry without tag", () => {
       const imageName = ImageName.fromString("domain.com/image");
 
       expect(imageName.registry).toBe("domain.com");
@@ -108,7 +108,7 @@ describe("ContainerImage", () => {
       expect(imageName.tag).toBe("latest");
     });
 
-    it("should work with nested image", () => {
+    it.concurrent("should work with nested image", () => {
       const imageName = ImageName.fromString("parent/child:latest");
 
       expect(imageName.registry).toBe(undefined);
@@ -116,7 +116,7 @@ describe("ContainerImage", () => {
       expect(imageName.tag).toBe("latest");
     });
 
-    it("should work with registry and nested image", () => {
+    it.concurrent("should work with registry and nested image", () => {
       const imageName = ImageName.fromString("domain.com/parent/child:latest");
 
       expect(imageName.registry).toBe("domain.com");
@@ -124,7 +124,7 @@ describe("ContainerImage", () => {
       expect(imageName.tag).toBe("latest");
     });
 
-    it("should work with tag being a hash", () => {
+    it.concurrent("should work with tag being a hash", () => {
       const imageName = ImageName.fromString("image@sha256:1234abcd1234abcd1234abcd1234abcd");
 
       expect(imageName.registry).toBe(undefined);
@@ -132,7 +132,7 @@ describe("ContainerImage", () => {
       expect(imageName.tag).toBe("sha256:1234abcd1234abcd1234abcd1234abcd");
     });
 
-    it("should work with image being an image ID", () => {
+    it.concurrent("should work with image being an image ID", () => {
       const imageName = ImageName.fromString("aa285b773a2c042056883845aea893a743d358a5d40f61734fa228fde93dae6f");
 
       expect(imageName.registry).toBe(undefined);
@@ -140,7 +140,7 @@ describe("ContainerImage", () => {
       expect(imageName.tag).toBe("latest");
     });
 
-    it("should work with image being an image ID and an explicit tag", () => {
+    it.concurrent("should work with image being an image ID and an explicit tag", () => {
       // Note: Such an ID will not be accepted by docker:
       //
       // > "invalid repository name [...], cannot specify 64-byte hexadecimal strings"
@@ -171,7 +171,7 @@ describe("ContainerImage", () => {
         vi.stubEnv("TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX", customRegistry);
       });
 
-      it("should work", () => {
+      it.concurrent("should work", () => {
         const imageName = ImageName.fromString("image:latest");
 
         expect(imageName.registry).toEqual(expectedRegistry);
@@ -179,7 +179,7 @@ describe("ContainerImage", () => {
         expect(imageName.tag).toBe("latest");
       });
 
-      it("should work without tag", () => {
+      it.concurrent("should work without tag", () => {
         const imageName = ImageName.fromString("image");
 
         expect(imageName.registry).toEqual(expectedRegistry);
@@ -187,7 +187,7 @@ describe("ContainerImage", () => {
         expect(imageName.tag).toBe("latest");
       });
 
-      it("should work with registry", () => {
+      it.concurrent("should work with registry", () => {
         const imageName = ImageName.fromString("domain.com/image:latest");
 
         expect(imageName.registry).toBe("domain.com");
@@ -195,7 +195,7 @@ describe("ContainerImage", () => {
         expect(imageName.tag).toBe("latest");
       });
 
-      it("should work with registry with port", () => {
+      it.concurrent("should work with registry with port", () => {
         const imageName = ImageName.fromString("domain.com:5000/image:latest");
 
         expect(imageName.registry).toBe("domain.com:5000");
@@ -203,7 +203,7 @@ describe("ContainerImage", () => {
         expect(imageName.tag).toBe("latest");
       });
 
-      it("should work with registry without tag", () => {
+      it.concurrent("should work with registry without tag", () => {
         const imageName = ImageName.fromString("domain.com/image");
 
         expect(imageName.registry).toBe("domain.com");
@@ -211,7 +211,7 @@ describe("ContainerImage", () => {
         expect(imageName.tag).toBe("latest");
       });
 
-      it("should work with nested image", () => {
+      it.concurrent("should work with nested image", () => {
         const imageName = ImageName.fromString("parent/child:latest");
 
         expect(imageName.registry).toEqual(expectedRegistry);
@@ -219,7 +219,7 @@ describe("ContainerImage", () => {
         expect(imageName.tag).toBe("latest");
       });
 
-      it("should work with registry and nested image", () => {
+      it.concurrent("should work with registry and nested image", () => {
         const imageName = ImageName.fromString("domain.com/parent/child:latest");
 
         expect(imageName.registry).toBe("domain.com");
@@ -227,7 +227,7 @@ describe("ContainerImage", () => {
         expect(imageName.tag).toBe("latest");
       });
 
-      it("should work with tag being a hash", () => {
+      it.concurrent("should work with tag being a hash", () => {
         const imageName = ImageName.fromString("image@sha256:1234abcd1234abcd1234abcd1234abcd");
 
         expect(imageName.registry).toEqual(expectedRegistry);
@@ -235,7 +235,7 @@ describe("ContainerImage", () => {
         expect(imageName.tag).toBe("sha256:1234abcd1234abcd1234abcd1234abcd");
       });
 
-      it("should work with image being an image ID", () => {
+      it.concurrent("should work with image being an image ID", () => {
         const imageName = ImageName.fromString("aa285b773a2c042056883845aea893a743d358a5d40f61734fa228fde93dae6f");
 
         expect(imageName.registry).toEqual(expectedRegistry);
@@ -245,7 +245,7 @@ describe("ContainerImage", () => {
         expect(imageName.tag).toBe("latest");
       });
 
-      it("should work with image being an image ID and an explicit tag", () => {
+      it.concurrent("should work with image being an image ID and an explicit tag", () => {
         // Note: Such an ID will not be accepted by docker:
         //
         // > "invalid repository name [...], cannot specify 64-byte hexadecimal strings"

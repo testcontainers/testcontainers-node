@@ -27,7 +27,7 @@ vi.mock("./run-in-container", () => ({
   runInContainer: () => runInContainerMock(),
 }));
 
-test("should return TESTCONTAINERS_HOST_OVERRIDE from environment", async () => {
+test.concurrent("should return TESTCONTAINERS_HOST_OVERRIDE from environment", async () => {
   const strategyResult = {
     uri: "tcp://another:2375",
     allowUserOverrides: true,
@@ -40,7 +40,7 @@ test("should return TESTCONTAINERS_HOST_OVERRIDE from environment", async () => 
   expect(host).toEqual("tcp://another:2375");
 });
 
-test("should return hostname for TCP protocols", async () => {
+test.concurrent("should return hostname for TCP protocols", async () => {
   for (const uri of ["tcp://docker:2375", "http://docker:2375", "https://docker:2375"]) {
     const strategyResult = {
       uri,
@@ -53,7 +53,7 @@ test("should return hostname for TCP protocols", async () => {
   }
 });
 
-test("should not return TESTCONTAINERS_HOST_OVERRIDE when allow user override is false", async () => {
+test.concurrent("should not return TESTCONTAINERS_HOST_OVERRIDE when allow user override is false", async () => {
   const strategyResult = {
     uri: "tcp://docker:2375",
     allowUserOverrides: false,
@@ -66,7 +66,7 @@ test("should not return TESTCONTAINERS_HOST_OVERRIDE when allow user override is
   expect(host).toEqual("docker");
 });
 
-test("should return localhost for unix and npipe protocols when not running in a container", async () => {
+test.concurrent("should return localhost for unix and npipe protocols when not running in a container", async () => {
   mockExistsSync.mockReturnValue(false);
 
   for (const uri of ["unix://docker:2375", "npipe://docker:2375"]) {
@@ -81,7 +81,7 @@ test("should return localhost for unix and npipe protocols when not running in a
   }
 });
 
-test("should return host from gateway when running in a container", async () => {
+test.concurrent("should return host from gateway when running in a container", async () => {
   mockExistsSync.mockReturnValue(true);
   mockInspectNetwork.mockResolvedValue({
     IPAM: {
@@ -101,7 +101,7 @@ test("should return host from gateway when running in a container", async () => 
   }
 });
 
-test("should use bridge network as gateway for Docker provider", async () => {
+test.concurrent("should use bridge network as gateway for Docker provider", async () => {
   mockExistsSync.mockReturnValue(true);
   mockInspectNetwork.mockResolvedValue({
     IPAM: {
@@ -121,7 +121,7 @@ test("should use bridge network as gateway for Docker provider", async () => {
   }
 });
 
-test("should use podman network as gateway for Podman provider", async () => {
+test.concurrent("should use podman network as gateway for Podman provider", async () => {
   mockExistsSync.mockReturnValue(true);
   mockInspectNetwork.mockResolvedValue({
     IPAM: {
@@ -141,7 +141,7 @@ test("should use podman network as gateway for Podman provider", async () => {
   }
 });
 
-test("should return host from default gateway when running in a container", async () => {
+test.concurrent("should return host from default gateway when running in a container", async () => {
   mockExistsSync.mockReturnValue(true);
   mockInspectNetwork.mockResolvedValue({});
   runInContainerMock.mockResolvedValue("172.0.0.2");
@@ -158,7 +158,7 @@ test("should return host from default gateway when running in a container", asyn
   }
 });
 
-test("should return localhost if unable to find gateway", async () => {
+test.concurrent("should return localhost if unable to find gateway", async () => {
   mockExistsSync.mockReturnValue(true);
   mockInspectNetwork.mockResolvedValue({});
   runInContainerMock.mockResolvedValue(undefined);
@@ -175,7 +175,7 @@ test("should return localhost if unable to find gateway", async () => {
   }
 });
 
-test("should throw for unsupported protocol", async () => {
+test.concurrent("should throw for unsupported protocol", async () => {
   const strategyResult = {
     uri: "invalid://unknown",
     allowUserOverrides: true,

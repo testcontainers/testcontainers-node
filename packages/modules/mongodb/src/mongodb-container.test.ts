@@ -6,7 +6,7 @@ const IMAGE = getImage(__dirname);
 
 describe("MongodbContainer", { timeout: 240_000 }, () => {
   // connect4 {
-  it("should work using default version 4.0.1", async () => {
+  it.concurrent("should work using default version 4.0.1", async () => {
     const mongodbContainer = await new MongoDBContainer(IMAGE).start();
 
     // directConnection: true is required as the testcontainer is created as a MongoDB Replica Set.
@@ -36,7 +36,7 @@ describe("MongodbContainer", { timeout: 240_000 }, () => {
   // }
 
   // connect6 {
-  it("should work using version 6.0.1", async () => {
+  it.concurrent("should work using version 6.0.1", async () => {
     const mongodbContainer = await new MongoDBContainer("mongo:6.0.1").start();
 
     // directConnection: true is required as the testcontainer is created as a MongoDB Replica Set.

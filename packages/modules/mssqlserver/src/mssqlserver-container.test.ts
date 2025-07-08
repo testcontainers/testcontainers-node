@@ -6,7 +6,7 @@ const IMAGE = getImage(__dirname);
 
 describe("MSSqlServerContainer", { timeout: 180_000 }, () => {
   // connect {
-  it("should connect and return a query result", async () => {
+  it.concurrent("should connect and return a query result", async () => {
     const container = await new MSSQLServerContainer(IMAGE).acceptLicense().start();
 
     const sqlConfig: config = {
@@ -36,7 +36,7 @@ describe("MSSqlServerContainer", { timeout: 180_000 }, () => {
   // }
 
   // uriConnect {
-  it("should connect and return a query result with database URI", async () => {
+  it.concurrent("should connect and return a query result with database URI", async () => {
     const container = await new MSSQLServerContainer(IMAGE).acceptLicense().start();
 
     const connectionString = container.getConnectionUri();
@@ -51,7 +51,7 @@ describe("MSSqlServerContainer", { timeout: 180_000 }, () => {
   // }
 
   // validPassword {
-  it("should connect and return a query result with valid custom password", async () => {
+  it.concurrent("should connect and return a query result with valid custom password", async () => {
     const container = await new MSSQLServerContainer(IMAGE).acceptLicense().withPassword("I!@M#$eCur3").start();
 
     const connectionString = container.getConnectionUri();
@@ -66,7 +66,7 @@ describe("MSSqlServerContainer", { timeout: 180_000 }, () => {
   // }
 
   // invalidPassword {
-  it("should throw error with invalid password", async () => {
+  it.concurrent("should throw error with invalid password", async () => {
     const container = new MSSQLServerContainer(IMAGE).acceptLicense().withPassword("password");
     await expect(container.start()).rejects.toThrow(
       Error('Log stream ended and message "/.*Recovery is complete.*/" was not received')
@@ -75,7 +75,7 @@ describe("MSSqlServerContainer", { timeout: 180_000 }, () => {
   // }
 
   // expressEdition {
-  it("should start db with express edition", async () => {
+  it.concurrent("should start db with express edition", async () => {
     const container = await new MSSQLServerContainer(IMAGE)
       .withWaitForMessage(/.*Attribute synchronization manager initialized*/)
       .acceptLicense()

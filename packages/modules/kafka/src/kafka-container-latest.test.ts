@@ -11,7 +11,7 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
   const certificatesDir = path.resolve(__dirname, "..", "test-certs");
 
   // connectKafkaLatest {
-  it("should connect", async () => {
+  it.concurrent("should connect", async () => {
     const kafkaContainer = await new KafkaContainer(IMAGE).start();
 
     await testPubSub(kafkaContainer);
@@ -20,7 +20,7 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
   });
   // }
 
-  it("should connect with custom network", async () => {
+  it.concurrent("should connect with custom network", async () => {
     const network = await new Network().start();
     const kafkaContainer = await new KafkaContainer(IMAGE).withNetwork(network).start();
 
@@ -30,7 +30,7 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
     await network.stop();
   });
 
-  it("should be reusable", async () => {
+  it.concurrent("should be reusable", async () => {
     const originalKafkaContainer = await new KafkaContainer(IMAGE).withReuse().start();
     const newKafkaContainer = await new KafkaContainer(IMAGE).withReuse().start();
 
@@ -40,7 +40,7 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
   });
 
   // ssl {
-  it(`should connect with SASL`, async () => {
+  it.concurrent(`should connect with SASL`, async () => {
     const saslConfig: SaslSslListenerOptions = {
       port: 9096,
       sasl: {
@@ -78,7 +78,7 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
   });
   // }
 
-  it(`should connect with SASL in custom network`, async () => {
+  it.concurrent(`should connect with SASL in custom network`, async () => {
     const network = await new Network().start();
 
     const saslConfig: SaslSslListenerOptions = {

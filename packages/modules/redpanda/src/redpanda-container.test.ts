@@ -5,7 +5,7 @@ const IMAGE = getImage(__dirname);
 
 describe("RedpandaContainer", { timeout: 240_000 }, () => {
   // connectToKafka {
-  it("should connect", async () => {
+  it.concurrent("should connect", async () => {
     const redpandaContainer = await new RedpandaContainer(IMAGE).start();
     await testPubSub(redpandaContainer);
     await redpandaContainer.stop();
@@ -13,7 +13,7 @@ describe("RedpandaContainer", { timeout: 240_000 }, () => {
   // }
 
   // connectToSchemaRegistry {
-  it("should connect to schema registry", async () => {
+  it.concurrent("should connect to schema registry", async () => {
     const redpandaContainer = await new RedpandaContainer(IMAGE).start();
     const schemaRegistryUrl = redpandaContainer.getSchemaRegistryAddress();
 
@@ -31,7 +31,7 @@ describe("RedpandaContainer", { timeout: 240_000 }, () => {
   // }
 
   // connectToAdmin {
-  it("should connect to admin", async () => {
+  it.concurrent("should connect to admin", async () => {
     const redpandaContainer = await new RedpandaContainer(IMAGE).start();
     const adminUrl = `${redpandaContainer.getAdminAddress()}/v1`;
 
@@ -44,7 +44,7 @@ describe("RedpandaContainer", { timeout: 240_000 }, () => {
   // }
 
   // connectToRestProxy {
-  it("should connect to rest proxy", async () => {
+  it.concurrent("should connect to rest proxy", async () => {
     const redpandaContainer = await new RedpandaContainer(IMAGE).start();
     const restProxyUrl = `${redpandaContainer.getRestProxyAddress()}/topics`;
 

@@ -3,7 +3,7 @@ import { checkContainerIsHealthy } from "../utils/test-helper";
 import { GenericContainer } from "./generic-container";
 
 describe("GenericContainer restart", { timeout: 180_000 }, () => {
-  it("should restart", async () => {
+  it.concurrent("should restart", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withName(`container-${new RandomUuid().nextUuid()}`)
       .withExposedPorts(8080)
@@ -18,7 +18,7 @@ describe("GenericContainer restart", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should restart persisting state", async () => {
+  it.concurrent("should restart persisting state", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withName(`container-${new RandomUuid().nextUuid()}`)
       .withExposedPorts(8080)

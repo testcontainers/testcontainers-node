@@ -45,7 +45,7 @@ describe("CouchbaseContainer", { timeout: 180_000 }, () => {
     });
 
     // connectAndQuery {
-    it("should connect and query using enterprise image", async () => {
+    it.concurrent("should connect and query using enterprise image", async () => {
       const bucketDefinition = new BucketDefinition("mybucket");
       const container = new CouchbaseContainer(COUCHBASE_IMAGE_ENTERPRISE).withBucket(bucketDefinition);
 
@@ -63,7 +63,7 @@ describe("CouchbaseContainer", { timeout: 180_000 }, () => {
     });
     // }
 
-    it("should flush bucket if flushEnabled and check any document exists", async () => {
+    it.concurrent("should flush bucket if flushEnabled and check any document exists", async () => {
       const bucketDefinition = new BucketDefinition("mybucket").withFlushEnabled(true);
       const container = new CouchbaseContainer(COUCHBASE_IMAGE_ENTERPRISE).withBucket(bucketDefinition);
 
@@ -100,7 +100,7 @@ describe("CouchbaseContainer", { timeout: 180_000 }, () => {
       }
     });
 
-    it("should connect and query using community image", async () => {
+    it.concurrent("should connect and query using community image", async () => {
       const bucketDefinition = new BucketDefinition("mybucket");
       const container = new CouchbaseContainer(COUCHBASE_IMAGE_COMMUNITY).withBucket(bucketDefinition);
 
@@ -116,7 +116,7 @@ describe("CouchbaseContainer", { timeout: 180_000 }, () => {
       expect(result.content).toEqual({ foo: "bar" });
     });
 
-    it("should flush bucket if flushEnabled and check any document exists", async () => {
+    it.concurrent("should flush bucket if flushEnabled and check any document exists", async () => {
       const bucketDefinition = new BucketDefinition("mybucket").withFlushEnabled(true);
       const container = new CouchbaseContainer(COUCHBASE_IMAGE_COMMUNITY).withBucket(bucketDefinition);
 
@@ -136,7 +136,7 @@ describe("CouchbaseContainer", { timeout: 180_000 }, () => {
       expect(existResult.exists).toBe(false);
     });
 
-    it("should throw error if analytics service enabled with community version", async () => {
+    it.concurrent("should throw error if analytics service enabled with community version", async () => {
       const container = new CouchbaseContainer(COUCHBASE_IMAGE_COMMUNITY).withEnabledServices(
         CouchbaseService.KV,
         CouchbaseService.ANALYTICS
@@ -147,7 +147,7 @@ describe("CouchbaseContainer", { timeout: 180_000 }, () => {
       );
     });
 
-    it("should throw error if eventing service enabled with community version", async () => {
+    it.concurrent("should throw error if eventing service enabled with community version", async () => {
       const container = new CouchbaseContainer(COUCHBASE_IMAGE_COMMUNITY).withEnabledServices(
         CouchbaseService.KV,
         CouchbaseService.EVENTING

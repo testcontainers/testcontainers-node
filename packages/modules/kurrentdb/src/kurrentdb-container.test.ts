@@ -6,7 +6,7 @@ const IMAGE = getImage(__dirname);
 
 describe("KurrentDbContainer", { timeout: 240_000 }, () => {
   // startContainer {
-  it("should execute write and read", async () => {
+  it.concurrent("should execute write and read", async () => {
     const container = await new KurrentDbContainer(IMAGE).start();
 
     const client = KurrentDBClient.connectionString(container.getConnectionString());
@@ -46,7 +46,7 @@ describe("KurrentDbContainer", { timeout: 240_000 }, () => {
   // }
 
   // usingStandardProjections {
-  it("should use built-in projections", async () => {
+  it.concurrent("should use built-in projections", async () => {
     const container = await new KurrentDbContainer(IMAGE).start();
     const client = KurrentDBClient.connectionString(container.getConnectionString());
 

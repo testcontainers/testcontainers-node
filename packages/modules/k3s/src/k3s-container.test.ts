@@ -4,13 +4,13 @@ import { GenericContainer, Network, Wait } from "testcontainers";
 import { K3sContainer } from "./k3s-container";
 
 describe("K3s", { timeout: 120_000 }, () => {
-  it("should construct", () => {
+  it.concurrent("should construct", () => {
     new K3sContainer("rancher/k3s:v1.31.2-k3s1");
   });
 
   // K3sContainer runs as a privileged container
   if (!process.env["CI_ROOTLESS"]) {
-    it("should start and have listable node", async () => {
+    it.concurrent("should start and have listable node", async () => {
       // starting_k3s {
       const container = await new K3sContainer("rancher/k3s:v1.31.2-k3s1").start();
       // }
@@ -33,7 +33,7 @@ describe("K3s", { timeout: 120_000 }, () => {
       await container.stop();
     });
 
-    it("should expose kubeconfig for a network alias", async () => {
+    it.concurrent("should expose kubeconfig for a network alias", async () => {
       const network = await new Network().start();
       const container = await new K3sContainer("rancher/k3s:v1.31.2-k3s1")
         .withNetwork(network)
@@ -62,7 +62,7 @@ describe("K3s", { timeout: 120_000 }, () => {
       await network.stop();
     });
 
-    it("should start a pod", async () => {
+    it.concurrent("should start a pod", async () => {
       const container = await new K3sContainer("rancher/k3s:v1.31.2-k3s1").start();
       const kc = new k8s.KubeConfig();
       kc.loadFromString(container.getKubeConfig());

@@ -8,7 +8,7 @@ const IMAGE = getImage(__dirname);
 
 describe("QdrantContainer", { timeout: 100_000 }, () => {
   // connectQdrantSimple {
-  it("should connect to the client", async () => {
+  it.concurrent("should connect to the client", async () => {
     const container = await new QdrantContainer(IMAGE).start();
 
     const client = new QdrantClient({ url: `http://${container.getRestHostAddress()}` });
@@ -20,7 +20,7 @@ describe("QdrantContainer", { timeout: 100_000 }, () => {
   // }
 
   // connectQdrantWithApiKey {
-  it("should work with valid API keys", async () => {
+  it.concurrent("should work with valid API keys", async () => {
     const apiKey = crypto.randomUUID();
 
     const container = await new QdrantContainer(IMAGE).withApiKey(apiKey).start();
@@ -33,7 +33,7 @@ describe("QdrantContainer", { timeout: 100_000 }, () => {
   });
   // }
 
-  it("should fail for invalid API keys", async () => {
+  it.concurrent("should fail for invalid API keys", async () => {
     const apiKey = crypto.randomUUID();
 
     const container = await new QdrantContainer(IMAGE).withApiKey(apiKey).start();
@@ -49,7 +49,7 @@ describe("QdrantContainer", { timeout: 100_000 }, () => {
   });
 
   // connectQdrantWithConfig {
-  it("should work with config files - valid API key", async () => {
+  it.concurrent("should work with config files - valid API key", async () => {
     const container = await new QdrantContainer(IMAGE)
       .withConfigFile(path.resolve(__dirname, "test_config.yaml"))
       .start();
@@ -62,7 +62,7 @@ describe("QdrantContainer", { timeout: 100_000 }, () => {
   });
   // }
 
-  it("should work with config files - invalid API key", async () => {
+  it.concurrent("should work with config files - invalid API key", async () => {
     const container = await new QdrantContainer(IMAGE)
       .withConfigFile(path.resolve(__dirname, "test_config.yaml"))
       .start();

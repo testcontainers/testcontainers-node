@@ -6,7 +6,7 @@ const IMAGE = getImage(__dirname);
 
 describe("HiveMQContainer", { timeout: 240_000 }, () => {
   // connect {
-  it("should connect to HiveMQ Community Edition via MQTT.js", async () => {
+  it.concurrent("should connect to HiveMQ Community Edition via MQTT.js", async () => {
     const container = await new HiveMQContainer(IMAGE).start();
 
     const testMqttClient = mqtt.connect(container.getConnectionString());

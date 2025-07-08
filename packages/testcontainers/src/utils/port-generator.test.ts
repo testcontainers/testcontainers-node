@@ -2,7 +2,7 @@ import { FixedPortGenerator, RandomPortGenerator } from "./port-generator";
 
 describe("PortGenerator", () => {
   describe("FixedPortGenerator", () => {
-    it("should return pre-determined ports", async () => {
+    it.concurrent("should return pre-determined ports", async () => {
       const fixedPortGenerator = new FixedPortGenerator([1000, 1001]);
 
       await expect(fixedPortGenerator.generatePort()).resolves.toBe(1000);
@@ -11,7 +11,7 @@ describe("PortGenerator", () => {
   });
 
   describe("RandomPortGenerator", () => {
-    it("should generate a random available port", async () => {
+    it.concurrent("should generate a random available port", async () => {
       const randomPortGenerator = new RandomPortGenerator();
 
       const port1 = await randomPortGenerator.generatePort();

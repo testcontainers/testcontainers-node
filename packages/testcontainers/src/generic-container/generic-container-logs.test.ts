@@ -3,7 +3,7 @@ import { Wait } from "../wait-strategies/wait";
 import { GenericContainer } from "./generic-container";
 
 describe("GenericContainer logs", { timeout: 180_000 }, () => {
-  it("should stream logs from a container before start", async () => {
+  it.concurrent("should stream logs from a container before start", async () => {
     const line = await new Promise((resolve) => {
       return new GenericContainer("cristianrgreco/testcontainer:1.1.14")
         .withExposedPorts(8080)
@@ -15,7 +15,7 @@ describe("GenericContainer logs", { timeout: 180_000 }, () => {
     expect(line).toContain("Listening on port 8080");
   });
 
-  it("should stream logs from a started container", async () => {
+  it.concurrent("should stream logs from a started container", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
 
     const stream = await container.logs();
@@ -25,7 +25,7 @@ describe("GenericContainer logs", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should stream logs with since option from a started container", async () => {
+  it.concurrent("should stream logs with since option from a started container", async () => {
     const pauseMs = 5 * 1000;
     const logBeforeSleep = "first";
     const logAfterSleep = "second";
@@ -51,7 +51,7 @@ describe("GenericContainer logs", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should stream logs from a running container after restart", async () => {
+  it.concurrent("should stream logs from a running container after restart", async () => {
     const containerLogTraceSpy = vi.spyOn(containerLog, "trace");
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
 

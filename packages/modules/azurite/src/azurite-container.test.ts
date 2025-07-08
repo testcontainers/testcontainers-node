@@ -8,7 +8,7 @@ const IMAGE = getImage(__dirname);
 
 describe("Azurite", { timeout: 240_000 }, () => {
   // uploadAndDownloadBlob {
-  it("should upload and download blob with default credentials", async () => {
+  it.concurrent("should upload and download blob with default credentials", async () => {
     const container = await new AzuriteContainer(IMAGE).start();
 
     const connectionString = container.getConnectionString();
@@ -40,7 +40,7 @@ describe("Azurite", { timeout: 240_000 }, () => {
   // }
 
   // sendAndReceiveQueue {
-  it("should add to queue with default credentials", async () => {
+  it.concurrent("should add to queue with default credentials", async () => {
     const container = await new AzuriteContainer(IMAGE).start();
 
     const connectionString = container.getConnectionString();
@@ -64,7 +64,7 @@ describe("Azurite", { timeout: 240_000 }, () => {
   // }
 
   // createAndInsertOnTable {
-  it("should add to table with default credentials", async () => {
+  it.concurrent("should add to table with default credentials", async () => {
     const container = await new AzuriteContainer(IMAGE).start();
 
     const connectionString = container.getConnectionString();
@@ -92,7 +92,7 @@ describe("Azurite", { timeout: 240_000 }, () => {
   // }
 
   // customCredentials {
-  it("should be able to specify accountName and accountKey", async () => {
+  it.concurrent("should be able to specify accountName and accountKey", async () => {
     const accountName = "test-account";
     // Account key must be base64 encoded
     const accountKey = Buffer.from("test-key").toString("base64");
@@ -115,7 +115,7 @@ describe("Azurite", { timeout: 240_000 }, () => {
   // }
 
   // customPorts {
-  it("should be able to specify custom ports", async () => {
+  it.concurrent("should be able to specify custom ports", async () => {
     const blobPort = 13000;
     const queuePort = 14000;
     const tablePort = 15000;
@@ -143,7 +143,7 @@ describe("Azurite", { timeout: 240_000 }, () => {
   // }
 
   // inMemoryPersistence {
-  it("should be able to use in-memory persistence", async () => {
+  it.concurrent("should be able to use in-memory persistence", async () => {
     const container = await new AzuriteContainer(IMAGE).withInMemoryPersistence().start();
     const blobName = "hello.txt";
 

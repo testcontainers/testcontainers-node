@@ -3,7 +3,7 @@ import { Network } from "../network/network";
 import { GenericContainer } from "./generic-container";
 
 describe("GenericContainer network", { timeout: 180_000 }, () => {
-  it("should set network mode", async () => {
+  it.concurrent("should set network mode", async () => {
     const client = await getContainerRuntimeClient();
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withNetworkMode("host").start();
     const dockerContainer = await client.container.getById(container.getId());
@@ -14,7 +14,7 @@ describe("GenericContainer network", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should set network aliases", async () => {
+  it.concurrent("should set network aliases", async () => {
     const network = await new Network().start();
     const fooContainer = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withNetwork(network)
@@ -35,7 +35,7 @@ describe("GenericContainer network", { timeout: 180_000 }, () => {
     await network.stop();
   });
 
-  it("should set extra hosts", async () => {
+  it.concurrent("should set extra hosts", async () => {
     const fooContainer = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").start();
 
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")

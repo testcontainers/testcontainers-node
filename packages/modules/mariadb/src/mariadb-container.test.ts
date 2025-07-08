@@ -6,7 +6,7 @@ const IMAGE = getImage(__dirname);
 
 describe("MariaDb", { timeout: 240_000 }, () => {
   // connect {
-  it("should connect and execute query", async () => {
+  it.concurrent("should connect and execute query", async () => {
     const container = await new MariaDbContainer(IMAGE).start();
 
     const client = await mariadb.createConnection({
@@ -26,7 +26,7 @@ describe("MariaDb", { timeout: 240_000 }, () => {
   // }
 
   // uriConnect {
-  it("should work with database URI", async () => {
+  it.concurrent("should work with database URI", async () => {
     const username = "testUser";
     const password = "testPassword";
     const database = "testDB";
@@ -52,7 +52,7 @@ describe("MariaDb", { timeout: 240_000 }, () => {
   // }
 
   // setDatabase {
-  it("should set database", async () => {
+  it.concurrent("should set database", async () => {
     const container = await new MariaDbContainer(IMAGE).withDatabase("customDatabase").start();
 
     const client = await mariadb.createConnection({
@@ -72,7 +72,7 @@ describe("MariaDb", { timeout: 240_000 }, () => {
   // }
 
   // setUsername {
-  it("should set username", async () => {
+  it.concurrent("should set username", async () => {
     const container = await new MariaDbContainer(IMAGE).withUsername("customUsername").start();
 
     const client = await mariadb.createConnection({
@@ -92,7 +92,7 @@ describe("MariaDb", { timeout: 240_000 }, () => {
   // }
 
   // insertAndFetchData {
-  it("should create a table, insert a row, and fetch that row", async () => {
+  it.concurrent("should create a table, insert a row, and fetch that row", async () => {
     const container = await new MariaDbContainer(IMAGE).start();
 
     const client = await mariadb.createConnection({
@@ -127,7 +127,7 @@ describe("MariaDb", { timeout: 240_000 }, () => {
   });
   // }
 
-  it("should work with restarted container", async () => {
+  it.concurrent("should work with restarted container", async () => {
     const container = await new MariaDbContainer(IMAGE).start();
     await container.restart();
 

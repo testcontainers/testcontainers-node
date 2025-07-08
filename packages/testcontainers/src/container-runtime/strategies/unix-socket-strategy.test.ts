@@ -9,12 +9,12 @@ describe("UnixSocketStrategy", () => {
     mockExistsSync.mockReturnValue(true);
   });
 
-  it("should return undefined when platform is not linux or darwin", async () => {
+  it.concurrent("should return undefined when platform is not linux or darwin", async () => {
     const result = await new UnixSocketStrategy("win32").getResult();
     expect(result).toBeUndefined();
   });
 
-  it("should return undefined when platform is correct but socket does not exist", async () => {
+  it.concurrent("should return undefined when platform is correct but socket does not exist", async () => {
     mockExistsSync.mockReturnValue(false);
 
     const result = await new UnixSocketStrategy("linux").getResult();
@@ -22,7 +22,7 @@ describe("UnixSocketStrategy", () => {
     expect(result).toBeUndefined();
   });
 
-  it("should return expected result", async () => {
+  it.concurrent("should return expected result", async () => {
     const result = await new UnixSocketStrategy("linux").getResult();
 
     expect(result?.uri).toEqual("unix:///var/run/docker.sock");

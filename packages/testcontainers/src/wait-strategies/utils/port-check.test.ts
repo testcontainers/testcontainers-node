@@ -36,7 +36,7 @@ describe("PortCheck", () => {
       mockLogger.enabled.mockImplementation(() => true);
     });
 
-    it("should return true when at least one command returns exit code 0", async () => {
+    it.concurrent("should return true when at least one command returns exit code 0", async () => {
       mockContainerExec
         .mockReturnValueOnce(Promise.resolve({ output: "ERROR 1", exitCode: 1 }))
         .mockReturnValueOnce(Promise.resolve({ output: "ERROR 2", exitCode: 1 }))
@@ -47,7 +47,7 @@ describe("PortCheck", () => {
       expect(result).toBe(true);
     });
 
-    it("should trace log unique error messages", async () => {
+    it.concurrent("should trace log unique error messages", async () => {
       mockContainerExec
         .mockReturnValueOnce(Promise.resolve({ output: "ERROR 1", exitCode: 1 }))
         .mockReturnValueOnce(Promise.resolve({ output: "ERROR 2", exitCode: 1 }))
@@ -61,7 +61,7 @@ describe("PortCheck", () => {
       ]);
     });
 
-    it("should trace log unique error messages across multiple invocations", async () => {
+    it.concurrent("should trace log unique error messages across multiple invocations", async () => {
       mockContainerExec
         .mockReturnValueOnce(Promise.resolve({ output: "ERROR 1", exitCode: 1 }))
         .mockReturnValueOnce(Promise.resolve({ output: "ERROR 2", exitCode: 1 }))
@@ -79,7 +79,7 @@ describe("PortCheck", () => {
       ]);
     });
 
-    it("should not trace log error messages with empty output", async () => {
+    it.concurrent("should not trace log error messages with empty output", async () => {
       mockContainerExec
         .mockReturnValueOnce(Promise.resolve({ output: "ERROR 1", exitCode: 1 }))
         .mockReturnValueOnce(Promise.resolve({ output: "ERROR 1", exitCode: 1 }))
@@ -92,20 +92,23 @@ describe("PortCheck", () => {
       ]);
     });
 
-    it("should not trace log error messages where the shell is missing if another shell exists", async () => {
-      mockContainerExec
-        .mockReturnValueOnce(Promise.resolve({ output: "ERROR 1", exitCode: 1 }))
-        .mockReturnValueOnce(Promise.resolve({ output: "ERROR 1", exitCode: 1 }))
-        .mockReturnValueOnce(Promise.resolve({ output: "ERROR 2", exitCode: 126 }));
+    it.concurrent(
+      "should not trace log error messages where the shell is missing if another shell exists",
+      async () => {
+        mockContainerExec
+          .mockReturnValueOnce(Promise.resolve({ output: "ERROR 1", exitCode: 1 }))
+          .mockReturnValueOnce(Promise.resolve({ output: "ERROR 1", exitCode: 1 }))
+          .mockReturnValueOnce(Promise.resolve({ output: "ERROR 2", exitCode: 126 }));
 
-      await portCheck.isBound(8080);
+        await portCheck.isBound(8080);
 
-      expect(mockLogger.trace.mock.calls).toEqual([
-        ["Port check result exit code 1: ERROR 1", { containerId: "containerId" }],
-      ]);
-    });
+        expect(mockLogger.trace.mock.calls).toEqual([
+          ["Port check result exit code 1: ERROR 1", { containerId: "containerId" }],
+        ]);
+      }
+    );
 
-    it("should error log when the port-check will fail due to missing shells (distroless)", async () => {
+    it.concurrent("should error log when the port-check will fail due to missing shells (distroless)", async () => {
       mockContainerExec
         .mockReturnValueOnce(Promise.resolve({ output: "ERROR 1", exitCode: 126 }))
         .mockReturnValueOnce(Promise.resolve({ output: "ERROR 2", exitCode: 126 }))
@@ -121,7 +124,7 @@ describe("PortCheck", () => {
       ]);
     });
 
-    it("should error log the distroless image once", async () => {
+    it.concurrent("should error log the distroless image once", async () => {
       mockContainerExec
         .mockReturnValueOnce(Promise.resolve({ output: "ERROR 1", exitCode: 126 }))
         .mockReturnValueOnce(Promise.resolve({ output: "ERROR 2", exitCode: 126 }))
@@ -141,7 +144,7 @@ describe("PortCheck", () => {
       ]);
     });
 
-    it("should error log the distroless image once, regardless of logs enabled or not", async () => {
+    it.concurrent("should error log the distroless image once, regardless of logs enabled or not", async () => {
       // Make sure logging is disabled explicitly here
       mockLogger.enabled.mockImplementation(() => false);
 

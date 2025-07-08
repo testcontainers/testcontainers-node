@@ -3,7 +3,7 @@ import { Network } from "../network/network";
 import { SocatContainer } from "./socat-container";
 
 describe("SocatContainer", { timeout: 120_000 }, () => {
-  it("should forward requests to helloworld container", async () => {
+  it.concurrent("should forward requests to helloworld container", async () => {
     const network = await new Network().start();
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
@@ -23,7 +23,7 @@ describe("SocatContainer", { timeout: 120_000 }, () => {
     await network.stop();
   });
 
-  it("should forward requests to helloworld container in a different port", async () => {
+  it.concurrent("should forward requests to helloworld container in a different port", async () => {
     const network = await new Network().start();
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)

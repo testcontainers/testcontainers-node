@@ -6,7 +6,7 @@ const IMAGE = getImage(__dirname);
 
 describe("RabbitMQContainer", { timeout: 240_000 }, () => {
   // start {
-  it("should start, connect and close", async () => {
+  it.concurrent("should start, connect and close", async () => {
     const rabbitMQContainer = await new RabbitMQContainer(IMAGE).start();
 
     const connection = await amqp.connect(rabbitMQContainer.getAmqpUrl());
@@ -17,7 +17,7 @@ describe("RabbitMQContainer", { timeout: 240_000 }, () => {
   // }
 
   // credentials {
-  it("different username and password", async () => {
+  it.concurrent("different username and password", async () => {
     const USER = "user";
     const PASSWORD = "password";
 
@@ -41,29 +41,33 @@ describe("RabbitMQContainer", { timeout: 240_000 }, () => {
   // }
 
   // pubsub {
-  it("test publish and subscribe", async () => {
-    const QUEUE = "test";
-    const PAYLOAD = "Hello World";
+  it.concurrent(
+    "test publish and subscribe",
+    async () => {
+      const QUEUE = "test";
+      const PAYLOAD = "Hello World";
 
-    const rabbitMQContainer = await new RabbitMQContainer(IMAGE).start();
-    const connection = await amqp.connect(rabbitMQContainer.getAmqpUrl());
+      const rabbitMQContainer = await new RabbitMQContainer(IMAGE).start();
+      const connection = await amqp.connect(rabbitMQContainer.getAmqpUrl());
 
-    const channel = await connection.createChannel();
-    await channel.assertQueue(QUEUE);
+      const channel = await connection.createChannel();
+      await channel.assertQueue(QUEUE);
 
-    channel.sendToQueue(QUEUE, Buffer.from(PAYLOAD));
+      channel.sendToQueue(QUEUE, Buffer.from(PAYLOAD));
 
-    await new Promise((resolve) => {
-      channel.consume(QUEUE, (message) => {
-        expect(message?.content.toString()).toEqual(PAYLOAD);
-        resolve(true);
+      await new Promise((resolve) => {
+        channel.consume(QUEUE, (message) => {
+          expect(message?.content.toString()).toEqual(PAYLOAD);
+          resolve(true);
+        });
       });
-    });
 
-    await channel.close();
-    await connection.close();
+      await channel.close();
+      await connection.close();
 
-    await rabbitMQContainer.stop();
-  }, 20_000);
+      await rabbitMQContainer.stop();
+    },
+    20_000
+  );
   // }
 });

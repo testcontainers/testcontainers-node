@@ -10,7 +10,7 @@ const IMAGE = getImage(__dirname);
 
 describe("ChromaDB", { timeout: 360_000 }, () => {
   // startContainer {
-  it("should connect", async () => {
+  it.concurrent("should connect", async () => {
     const container = await new ChromaDBContainer(IMAGE).start();
     const client = await connectTo(container);
     expect(await client.heartbeat()).toBeDefined();
@@ -31,7 +31,7 @@ describe("ChromaDB", { timeout: 360_000 }, () => {
   // }
 
   // createCollection {
-  it("should create collection and get data", async () => {
+  it.concurrent("should create collection and get data", async () => {
     const container = await new ChromaDBContainer(IMAGE).start();
     const client = await connectTo(container);
     const collection = await client.createCollection({ name: "test", metadata: { "hnsw:space": "cosine" } });
@@ -49,7 +49,7 @@ describe("ChromaDB", { timeout: 360_000 }, () => {
   // }
 
   // queryCollectionWithEmbeddingFunction {
-  it("should create collection and query", async () => {
+  it.concurrent("should create collection and query", async () => {
     const container = await new ChromaDBContainer(IMAGE).start();
     const ollama = await new GenericContainer("ollama/ollama").withExposedPorts(11434).start();
     await ollama.exec(["ollama", "pull", "nomic-embed-text"]);
@@ -79,7 +79,7 @@ describe("ChromaDB", { timeout: 360_000 }, () => {
   });
 
   // persistentData {
-  it("should reconnect with volume and persistence data", async () => {
+  it.concurrent("should reconnect with volume and persistence data", async () => {
     const sourcePath = fs.mkdtempSync(path.join(os.tmpdir(), "chroma-temp"));
     const container = await new ChromaDBContainer(IMAGE)
       .withBindMounts([{ source: sourcePath, target: "/data" }])
@@ -105,7 +105,7 @@ describe("ChromaDB", { timeout: 360_000 }, () => {
   // }
 
   // auth {
-  it("should use auth", async () => {
+  it.concurrent("should use auth", async () => {
     const tenant = "test-tenant";
     const key = "test-key";
     const database = "test-db";

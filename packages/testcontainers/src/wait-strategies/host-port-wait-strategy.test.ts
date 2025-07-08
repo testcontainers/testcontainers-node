@@ -3,7 +3,7 @@ import { GenericContainer } from "../generic-container/generic-container";
 import { checkContainerIsHealthy, getRunningContainerNames } from "../utils/test-helper";
 
 describe("HostPortWaitStrategy", { timeout: 180_000 }, () => {
-  it("should wait for port", async () => {
+  it.concurrent("should wait for port", async () => {
     const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
 
     await checkContainerIsHealthy(container);
@@ -11,7 +11,7 @@ describe("HostPortWaitStrategy", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should stop the container when the host port check wait strategy times out", async () => {
+  it.concurrent("should stop the container when the host port check wait strategy times out", async () => {
     const containerName = `container-${new RandomUuid().nextUuid()}`;
 
     await expect(

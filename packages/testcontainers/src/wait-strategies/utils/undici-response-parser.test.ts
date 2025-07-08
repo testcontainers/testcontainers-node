@@ -3,7 +3,7 @@ import { Dispatcher } from "undici";
 import BodyReadable from "undici/types/readable";
 import { undiciResponseToFetchResponse } from "./undici-response-parser";
 
-test("converts undici response to fetch response", async () => {
+test.concurrent("converts undici response to fetch response", async () => {
   const responseData: Partial<Dispatcher.ResponseData> = {
     statusCode: 200,
     headers: { "content-type": "application/json" },
@@ -17,7 +17,7 @@ test("converts undici response to fetch response", async () => {
   await expect(response.text()).resolves.toBe('{"key":"value"}');
 });
 
-test("handles empty headers", async () => {
+test.concurrent("handles empty headers", async () => {
   const responseData: Partial<Dispatcher.ResponseData> = {
     statusCode: 200,
     body: createBody(),
@@ -28,7 +28,7 @@ test("handles empty headers", async () => {
   expect(response.headers).toEqual(new Headers());
 });
 
-test("handles a header array", async () => {
+test.concurrent("handles a header array", async () => {
   const responseData: Partial<Dispatcher.ResponseData> = {
     statusCode: 200,
     headers: {

@@ -5,7 +5,7 @@ import { PubSubEmulatorContainer, StartedPubSubEmulatorContainer } from "./pubsu
 const IMAGE = getImage(__dirname);
 
 describe("PubSubEmulatorContainer", { timeout: 240_000 }, () => {
-  it("should work using default version", async () => {
+  it.concurrent("should work using default version", async () => {
     const pubsubEmulatorContainer = await new PubSubEmulatorContainer(IMAGE).start();
 
     await checkPubSub(pubsubEmulatorContainer);

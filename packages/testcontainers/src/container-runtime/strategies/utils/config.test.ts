@@ -15,7 +15,7 @@ afterEach(() => {
   vi.resetModules();
 });
 
-test("should not set anything", async () => {
+test.concurrent("should not set anything", async () => {
   const dockerClientConfig = await getContainerRuntimeConfig({});
 
   expect(dockerClientConfig.dockerHost).toBeUndefined();
@@ -28,7 +28,7 @@ describe("environment", () => {
     mockExistsSync.mockReturnValue(false);
   });
 
-  test("should set the host", async () => {
+  test.concurrent("should set the host", async () => {
     const dockerClientConfig = await getContainerRuntimeConfig({
       DOCKER_HOST: "tcp://my.docker.host:1234",
     });
@@ -38,7 +38,7 @@ describe("environment", () => {
     expect(dockerClientConfig.dockerCertPath).toBeUndefined();
   });
 
-  test("should set TLS verify", async () => {
+  test.concurrent("should set TLS verify", async () => {
     const dockerClientConfig = await getContainerRuntimeConfig({
       DOCKER_HOST: "tcp://my.docker.host:1234",
       DOCKER_TLS_VERIFY: "1",
@@ -49,7 +49,7 @@ describe("environment", () => {
     expect(dockerClientConfig.dockerCertPath).toBeUndefined();
   });
 
-  test("should set the cert path", async () => {
+  test.concurrent("should set the cert path", async () => {
     const dockerClientConfig = await getContainerRuntimeConfig({
       DOCKER_HOST: "tcp://my.docker.host:1234",
       DOCKER_TLS_VERIFY: "1",
@@ -67,7 +67,7 @@ describe("testcontainers.properties file", () => {
     mockExistsSync.mockReturnValue(true);
   });
 
-  test("should set the tc host", async () => {
+  test.concurrent("should set the tc host", async () => {
     mockReadFile.mockResolvedValueOnce("tc.host=tcp://my.docker.host:1234");
 
     const dockerClientConfig = await getContainerRuntimeConfig({});
@@ -75,7 +75,7 @@ describe("testcontainers.properties file", () => {
     expect(dockerClientConfig.tcHost).toBe("tcp://my.docker.host:1234");
   });
 
-  test("should set the host", async () => {
+  test.concurrent("should set the host", async () => {
     mockReadFile.mockResolvedValueOnce("docker.host=tcp://my.docker.host:1234");
 
     const dockerClientConfig = await getContainerRuntimeConfig({});
@@ -85,7 +85,7 @@ describe("testcontainers.properties file", () => {
     expect(dockerClientConfig.dockerCertPath).toBeUndefined();
   });
 
-  test("should set TLS verify", async () => {
+  test.concurrent("should set TLS verify", async () => {
     mockReadFile.mockResolvedValueOnce(`
         docker.host=tcp://my.docker.host:1234
         docker.tls.verify=1
@@ -98,7 +98,7 @@ describe("testcontainers.properties file", () => {
     expect(dockerClientConfig.dockerCertPath).toBeUndefined();
   });
 
-  test("should set the cert path", async () => {
+  test.concurrent("should set the cert path", async () => {
     mockReadFile.mockResolvedValueOnce(`
         docker.host=tcp://my.docker.host:1234
         docker.tls.verify=1
@@ -113,7 +113,7 @@ describe("testcontainers.properties file", () => {
   });
 });
 
-test("should cache the result", async () => {
+test.concurrent("should cache the result", async () => {
   mockExistsSync.mockReturnValue(true);
   mockReadFile.mockResolvedValueOnce("tc.host=tcp://my.docker.host:1234");
 

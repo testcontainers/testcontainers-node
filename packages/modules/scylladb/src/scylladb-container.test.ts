@@ -6,7 +6,7 @@ const IMAGE = getImage(__dirname);
 
 describe("ScyllaDB", { timeout: 240_000 }, () => {
   // connectWithDefaultCredentials {
-  it("should connect and execute a query", async () => {
+  it.concurrent("should connect and execute a query", async () => {
     const container = await new ScyllaContainer(IMAGE).start();
 
     const client = new Client({
@@ -26,7 +26,7 @@ describe("ScyllaDB", { timeout: 240_000 }, () => {
   // }
 
   // createAndFetchData {
-  it("should create keyspace, a table, insert data, and retrieve it", async () => {
+  it.concurrent("should create keyspace, a table, insert data, and retrieve it", async () => {
     const container = await new ScyllaContainer(IMAGE).start();
 
     const client = new Client({
@@ -66,7 +66,7 @@ describe("ScyllaDB", { timeout: 240_000 }, () => {
   });
   // }
 
-  it("should work with restarted container", async () => {
+  it.concurrent("should work with restarted container", async () => {
     const container = await new ScyllaContainer(IMAGE).start();
     await container.restart();
 

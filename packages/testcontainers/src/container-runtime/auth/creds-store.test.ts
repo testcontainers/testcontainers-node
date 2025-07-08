@@ -5,12 +5,12 @@ describe("CredsStore", () => {
   const locator = new CredsStore();
 
   describe("getAuthConfig", () => {
-    it("should return undefined when config does not contain creds store", async () => {
+    it.concurrent("should return undefined when config does not contain creds store", async () => {
       const containerRuntimeConfig: ContainerRuntimeConfig = {};
       expect(await locator.getAuthConfig("registry-name", containerRuntimeConfig)).toBe(undefined);
     });
 
-    it("should return undefined when when creds store is empty", async () => {
+    it.concurrent("should return undefined when when creds store is empty", async () => {
       const containerRuntimeConfig: ContainerRuntimeConfig = { credsStore: "" };
       expect(await locator.getAuthConfig("registry-name", containerRuntimeConfig)).toBe(undefined);
     });

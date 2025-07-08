@@ -5,7 +5,7 @@ import { OllamaContainer } from "./ollama-container";
 const IMAGE = getImage(__dirname);
 
 describe("OllamaContainer", { timeout: 180_000 }, () => {
-  it("should run ollama with default config", async () => {
+  it.concurrent("should run ollama with default config", async () => {
     // container {
     const container = await new OllamaContainer(IMAGE).start();
     // }

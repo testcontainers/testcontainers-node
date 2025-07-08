@@ -10,7 +10,7 @@ describe("GenericContainer commit", { timeout: 180_000 }, () => {
   const imageName = "cristianrgreco/testcontainer";
   const imageVersion = "1.1.14";
 
-  it("should commit container changes to a new image", async () => {
+  it.concurrent("should commit container changes to a new image", async () => {
     const testContent = "test content";
     const newImageTag = `test-commit-${new RandomUuid().nextUuid()}`;
     const testAuthor = "test-author";
@@ -47,7 +47,7 @@ describe("GenericContainer commit", { timeout: 180_000 }, () => {
     await newContainer.stop();
   });
 
-  it("should add session ID label when deleteOnExit is true", async () => {
+  it.concurrent("should add session ID label when deleteOnExit is true", async () => {
     const newImageTag = `test-commit-${new RandomUuid().nextUuid()}`;
     const container = await new GenericContainer(`${imageName}:${imageVersion}`).withExposedPorts(8080).start();
 
@@ -66,7 +66,7 @@ describe("GenericContainer commit", { timeout: 180_000 }, () => {
     await container.stop();
   });
 
-  it("should not add session ID label when deleteOnExit is false", async () => {
+  it.concurrent("should not add session ID label when deleteOnExit is false", async () => {
     const newImageTag = `test-commit-${new RandomUuid().nextUuid()}`;
     const container = await new GenericContainer(`${imageName}:${imageVersion}`).withExposedPorts(8080).start();
 

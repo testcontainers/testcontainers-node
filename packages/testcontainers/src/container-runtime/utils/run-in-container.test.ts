@@ -9,7 +9,7 @@ describe("runInContainer", { timeout: 180_000 }, () => {
     dockerode = (await getContainerRuntimeClient()).container.dockerode;
   });
 
-  it("should return the command output", async () => {
+  it.concurrent("should return the command output", async () => {
     const output = await runInContainer(
       dockerode,
       "https://index.docker.io/v1/",
@@ -19,7 +19,7 @@ describe("runInContainer", { timeout: 180_000 }, () => {
     expect(output).toBe("hello world");
   });
 
-  it("should return the command output from stderr", async () => {
+  it.concurrent("should return the command output from stderr", async () => {
     const output = await runInContainer(
       dockerode,
       "https://index.docker.io/v1/",
@@ -29,7 +29,7 @@ describe("runInContainer", { timeout: 180_000 }, () => {
     expect(output).toBe("hello world");
   });
 
-  it("should return undefined when the container exits without output", async () => {
+  it.concurrent("should return undefined when the container exits without output", async () => {
     const output = await runInContainer(
       dockerode,
       "https://index.docker.io/v1/",

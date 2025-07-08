@@ -8,7 +8,7 @@ const IMAGE = "confluentinc/cp-kafka:7.9.1";
 
 describe("KafkaContainer", { timeout: 240_000 }, () => {
   // connectBuiltInZK {
-  it("should connect using in-built zoo-keeper", async () => {
+  it.concurrent("should connect using in-built zoo-keeper", async () => {
     const kafkaContainer = await new KafkaContainer(IMAGE).start();
 
     await testPubSub(kafkaContainer);
@@ -17,7 +17,7 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
   });
   // }
 
-  it("should connect using in-built zoo-keeper and custom images", async () => {
+  it.concurrent("should connect using in-built zoo-keeper and custom images", async () => {
     const kafkaContainer = await new KafkaContainer(IMAGE).start();
 
     await testPubSub(kafkaContainer);
@@ -25,7 +25,7 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
     await kafkaContainer.stop();
   });
 
-  it("should connect using in-built zoo-keeper and custom network", async () => {
+  it.concurrent("should connect using in-built zoo-keeper and custom network", async () => {
     const network = await new Network().start();
 
     const kafkaContainer = await new KafkaContainer(IMAGE).withNetwork(network).start();
@@ -37,7 +37,7 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
   });
 
   // connectProvidedZK {
-  it("should connect using provided zoo-keeper and network", async () => {
+  it.concurrent("should connect using provided zoo-keeper and network", async () => {
     const network = await new Network().start();
 
     const zooKeeperHost = "zookeeper";
@@ -62,7 +62,7 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
   });
   // }
 
-  it("should be reusable", async () => {
+  it.concurrent("should be reusable", async () => {
     const originalKafkaContainer = await new KafkaContainer(IMAGE).withReuse().start();
     const newKafkaContainer = await new KafkaContainer(IMAGE).withReuse().start();
 
@@ -84,7 +84,7 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
     const certificatesDir = path.resolve(__dirname, "..", "test-certs");
 
     // ssl {
-    it(`should connect locally`, async () => {
+    it.concurrent(`should connect locally`, async () => {
       const kafkaContainer = await new KafkaContainer("confluentinc/cp-kafka:7.5.0").withSaslSslListener({
         port: 9096,
         sasl: {
@@ -121,7 +121,7 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
     });
     // }
 
-    it(`should connect within Docker network`, async () => {
+    it.concurrent(`should connect within Docker network`, async () => {
       const network = await new Network().start();
 
       const kafkaContainer = await new KafkaContainer(IMAGE)
@@ -189,7 +189,7 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
   });
 
   // connectKraft {
-  it("should connect using kraft", async () => {
+  it.concurrent("should connect using kraft", async () => {
     const kafkaContainer = await new KafkaContainer(IMAGE).withKraft().start();
 
     await testPubSub(kafkaContainer);
@@ -198,13 +198,13 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
   });
   // }
 
-  it("should throw an error when using kraft and and confluence platfom below 7.0.0", async () => {
+  it.concurrent("should throw an error when using kraft and and confluence platfom below 7.0.0", async () => {
     expect(() => new KafkaContainer("confluentinc/cp-kafka:6.2.14").withKraft()).toThrow(
       "Provided Confluent Platform's version 6.2.14 is not supported in Kraft mode (must be 7.0.0 or above)"
     );
   });
 
-  it("should connect using kraft and custom network", async () => {
+  it.concurrent("should connect using kraft and custom network", async () => {
     const network = await new Network().start();
     const kafkaContainer = await new KafkaContainer(IMAGE).withKraft().withNetwork(network).start();
 
@@ -214,7 +214,7 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
     await network.stop();
   });
 
-  it("should throw an error when using kraft wit sasl and confluence platfom below 7.5.0", async () => {
+  it.concurrent("should throw an error when using kraft wit sasl and confluence platfom below 7.5.0", async () => {
     const kafkaContainer = new KafkaContainer("confluentinc/cp-kafka:7.4.0").withKraft().withSaslSslListener({
       port: 9094,
       sasl: {

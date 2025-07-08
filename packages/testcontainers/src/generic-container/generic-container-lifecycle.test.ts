@@ -18,7 +18,7 @@ describe("GenericContainer lifecycle", { timeout: 180_000 }, () => {
     containerStopped = vi.fn();
   });
 
-  it("should call lifecycle callbacks for a non-reused, generic container", async () => {
+  it.concurrent("should call lifecycle callbacks for a non-reused, generic container", async () => {
     const container = await new CustomContainerWithCustomStartedContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
       .start();
@@ -33,7 +33,7 @@ describe("GenericContainer lifecycle", { timeout: 180_000 }, () => {
     expect(containerStopped).toHaveBeenCalled();
   });
 
-  it("should not call lifecycle callbacks for a reused, generic container", async () => {
+  it.concurrent("should not call lifecycle callbacks for a reused, generic container", async () => {
     const container1 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
       .withReuse()

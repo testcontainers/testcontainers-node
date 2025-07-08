@@ -6,7 +6,7 @@ const IMAGE = getImage(__dirname);
 
 describe("MinIO", { timeout: 240_000 }, () => {
   // connectWithDefaultCredentials {
-  it("should connect and upload a file", async () => {
+  it.concurrent("should connect and upload a file", async () => {
     const container = await new MinioContainer(IMAGE).start();
 
     const minioClient = new minio.Client({
@@ -36,7 +36,7 @@ describe("MinIO", { timeout: 240_000 }, () => {
   // }
 
   // connectWithCustomCredentials {
-  it("should work with custom credentials", async () => {
+  it.concurrent("should work with custom credentials", async () => {
     const container = await new MinioContainer(IMAGE).withUsername("AzureDiamond").withPassword("hunter2!").start();
 
     const minioClient = new minio.Client({
