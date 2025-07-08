@@ -42,6 +42,7 @@ describe("KurrentDbContainer", { timeout: 240_000 }, () => {
     ]);
 
     await container.stop();
+    await client.dispose();
   });
   // }
 
@@ -86,6 +87,7 @@ describe("KurrentDbContainer", { timeout: 240_000 }, () => {
     );
     await stream.unsubscribe();
     await container.stop();
+    await client.dispose();
   });
   // }
 });
