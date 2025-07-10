@@ -32,6 +32,7 @@
     "mongoose": "^8.16.1"
   },
   "dependencies": {
-    "testcontainers": "^11.2.1"
+    "testcontainers": "^11.2.1",
+    "compare-versions": "^6.1.1"
   }
 }
