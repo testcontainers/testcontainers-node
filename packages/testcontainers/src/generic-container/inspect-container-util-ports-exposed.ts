@@ -2,7 +2,7 @@ import { ContainerInspectInfo } from "dockerode";
 import { IntervalRetry, log } from "../common";
 import { InspectResult } from "../types";
 import { mapInspectResult } from "../utils/map-inspect-result";
-import { getContainerPort, PortWithOptionalBinding } from "../utils/port";
+import { getContainerPort, getProtocol, PortWithOptionalBinding } from "../utils/port";
 
 type Result = {
   inspectResult: ContainerInspectInfo;
@@ -22,9 +22,12 @@ export async function inspectContainerUntilPortsExposed(
       return { inspectResult, mappedInspectResult };
     },
     ({ mappedInspectResult }) =>
-      ports
-        .map((exposedPort) => getContainerPort(exposedPort))
-        .every((exposedPort) => mappedInspectResult.ports[exposedPort]?.length > 0),
+      ports.every((exposedPort) => {
+        const containerPort = getContainerPort(exposedPort);
+        const protocol = getProtocol(exposedPort);
+        const portKey = `${containerPort}/${protocol}`;
+        return mappedInspectResult.ports[portKey]?.length > 0;
+      }),
     () => {
       const message = `Container did not expose all ports after starting`;
       log.error(message, { containerId });
