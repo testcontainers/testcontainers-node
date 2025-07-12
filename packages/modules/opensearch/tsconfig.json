@@ -1,0 +1,14 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "build",
+    "paths": {
+      "testcontainers": ["../../testcontainers/src"]
+    }
+  },
+  "exclude": ["build"],
+  "references": [
+    { "path": "../../testcontainers" }
+  ]
+}
