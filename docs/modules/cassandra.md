@@ -21,7 +21,7 @@ npm install @testcontainers/cassandra --save-dev
 <!--/codeinclude-->
 
 <!--codeinclude-->
-[With custom datacenter / rack](../../packages/modules/cassandra/src/cassandra-container.test.ts) inside_block:customDataSenterAndRack
+[With custom datacenter / rack](../../packages/modules/cassandra/src/cassandra-container.test.ts) inside_block:customDataCenterAndRack
 <!--/codeinclude-->
 
 <!--codeinclude-->

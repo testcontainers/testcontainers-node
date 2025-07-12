@@ -5,7 +5,7 @@ import { CassandraContainer } from "./cassandra-container";
 
 const IMAGE = getImage(__dirname);
 
-describe("Cassandra", { timeout: 240_000 }, () => {
+describe.sequential("Cassandra", { timeout: 240_000 }, () => {
   // connectWithDefaultCredentials {
   it("should connect and execute a query with default credentials", async () => {
     const container = await new CassandraContainer(IMAGE).start();
@@ -50,7 +50,7 @@ describe("Cassandra", { timeout: 240_000 }, () => {
   });
   // }
 
-  // customDataSenterAndRack {
+  // customDataCenterAndRack {
   it("should set datacenter and rack", async () => {
     const customDataCenter = "customDC";
     const customRack = "customRack";

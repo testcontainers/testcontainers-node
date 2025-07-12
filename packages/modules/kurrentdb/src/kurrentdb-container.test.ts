@@ -4,7 +4,7 @@ import { KurrentDbContainer } from "./kurrentdb-container";
 
 const IMAGE = getImage(__dirname);
 
-describe("KurrentDbContainer", { timeout: 240_000 }, () => {
+describe.sequential("KurrentDbContainer", { timeout: 240_000 }, () => {
   // startContainer {
   it("should execute write and read", async () => {
     const container = await new KurrentDbContainer(IMAGE).start();
@@ -42,6 +42,7 @@ describe("KurrentDbContainer", { timeout: 240_000 }, () => {
     ]);
 
     await container.stop();
+    await client.dispose();
   });
   // }
 
@@ -86,6 +87,7 @@ describe("KurrentDbContainer", { timeout: 240_000 }, () => {
     );
     await stream.unsubscribe();
     await container.stop();
+    await client.dispose();
   });
   // }
 });
