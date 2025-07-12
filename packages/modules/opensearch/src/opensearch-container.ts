@@ -1,9 +1,5 @@
-import {
-  AbstractStartedContainer,
-  GenericContainer,
-  StartedTestContainer,
-  Wait,
-} from "testcontainers";
+import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
+import zxcvbn from "zxcvbn";
 
 const OPENSEARCH_HTTP_PORT = 9200;
 const OPENSEARCH_TRANSPORT_PORT = 9300;
@@ -16,8 +12,7 @@ export class OpenSearchContainer extends GenericContainer {
   private readonly username = "admin";
 
   // HTTPS + Basic Auth wait strategy
-  private readonly defaultWaitStrategy = Wait
-    .forHttp("/", OPENSEARCH_HTTP_PORT)
+  private readonly defaultWaitStrategy = Wait.forHttp("/", OPENSEARCH_HTTP_PORT)
     .usingTls()
     .allowInsecure()
     .withBasicCredentials(this.username, this.password);
@@ -25,11 +20,7 @@ export class OpenSearchContainer extends GenericContainer {
   constructor(image: string) {
     super(image);
 
-    this.withExposedPorts(
-      OPENSEARCH_HTTP_PORT,
-      OPENSEARCH_TRANSPORT_PORT,
-      OPENSEARCH_PERFORMANCE_ANALYZER_PORT,
-    )
+    this.withExposedPorts(OPENSEARCH_HTTP_PORT, OPENSEARCH_TRANSPORT_PORT, OPENSEARCH_PERFORMANCE_ANALYZER_PORT)
       .withEnvironment({
         "discovery.type": "single-node",
         // disable security plugin if requested
@@ -52,10 +43,17 @@ export class OpenSearchContainer extends GenericContainer {
 
   /**
    * Override the 'admin' password.
+   * Enforces OpenSearch’s requirement of zxcvbn score ≥ 3
    */
   public withPassword(password: string): this {
+    const { score } = zxcvbn(password);
+    if (score < 3) {
+      throw new Error(
+        `Password "${password}" is too weak (zxcvbn score ${score}). Must score ≥ 3 to meet OpenSearch security requirements.`
+      );
+    }
+
     this.password = password;
-    // update the wait strategy to use the new credentials
     this.defaultWaitStrategy.withBasicCredentials(this.username, this.password);
     return this;
   }
@@ -78,7 +76,7 @@ export class StartedOpenSearchContainer extends AbstractStartedContainer {
   constructor(
     override readonly startedTestContainer: StartedTestContainer,
     private readonly username: string,
-    private readonly password: string,
+    private readonly password: string
   ) {
     super(startedTestContainer);
   }

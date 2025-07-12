@@ -1,2 +1,1 @@
-export { OpenSearchContainer, StartedOpenSearchContainer }
-  from "./opensearch-container";
+export { OpenSearchContainer, StartedOpenSearchContainer } from "./opensearch-container";
