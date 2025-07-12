@@ -2,7 +2,7 @@ import { GenericContainer } from "../generic-container/generic-container";
 import { RandomPortGenerator } from "../utils/port-generator";
 import { createTestServer } from "../utils/test-helper";
 
-describe("Port Forwarder reuse", { timeout: 180_000 }, () => {
+describe.sequential("Port Forwarder reuse", { timeout: 180_000 }, () => {
   const portGen = new RandomPortGenerator();
 
   it("should expose additional ports", async () => {

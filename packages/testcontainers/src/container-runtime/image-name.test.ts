@@ -1,6 +1,6 @@
 import { ImageName } from "./image-name";
 
-describe("ContainerImage", () => {
+describe.sequential("ContainerImage", () => {
   it("should return whether two image names are equal", () => {
     const imageName = new ImageName("registry", "image", "tag");
 
@@ -10,7 +10,7 @@ describe("ContainerImage", () => {
     expect(imageName.equals(new ImageName("anotherRegistry", "image", "tag"))).toBe(false);
   });
 
-  describe("string", () => {
+  describe.sequential("string", () => {
     it("should work with registry", () => {
       const imageName = new ImageName("registry", "image", "tag");
       expect(imageName.string).toBe("registry/image:tag");
@@ -67,7 +67,7 @@ describe("ContainerImage", () => {
     );
   });
 
-  describe("fromString", () => {
+  describe.sequential("fromString", () => {
     it("should work", () => {
       const imageName = ImageName.fromString("image:latest");
 
@@ -154,7 +154,7 @@ describe("ContainerImage", () => {
     });
   });
 
-  describe.each([
+  describe.sequential.each([
     { customRegistry: "custom.com/registry", expectedRegistry: "custom.com", expectedImagePrefix: "registry/" },
     { customRegistry: "custom.com/registry/", expectedRegistry: "custom.com", expectedImagePrefix: "registry/" },
     { customRegistry: "custom.com", expectedRegistry: "custom.com", expectedImagePrefix: "" },
