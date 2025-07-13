@@ -1,1 +1,1 @@
-FROM elasticsearch:9.0.2
+FROM elasticsearch:9.0.3
