@@ -39,6 +39,7 @@ updates:
       - "/packages/modules/nats"
       - "/packages/modules/neo4j"
       - "/packages/modules/ollama"
+      - "/packages/modules/opensearch"
       - "/packages/modules/postgresql"
       - "/packages/modules/qdrant"
       - "/packages/modules/rabbitmq"
