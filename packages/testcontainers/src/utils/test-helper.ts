@@ -14,7 +14,8 @@ export const getImage = (dirname: string, index = 0): string => {
   return fs
     .readFileSync(path.resolve(dirname, "..", "Dockerfile"), "utf-8")
     .split("\n")
-    [index].split(" ")[1];
+    [index].replace(/^from /i, "")
+    .trim();
 };
 
 export const checkContainerIsHealthy = async (container: StartedTestContainer): Promise<void> => {
