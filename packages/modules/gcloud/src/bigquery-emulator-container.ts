@@ -10,7 +10,7 @@ export class BigQueryEmulatorContainer extends GenericContainer {
     this.withExposedPorts(EMULATOR_PORT).withWaitStrategy(Wait.forListeningPorts()).withStartupTimeout(120_000);
 
     // The BigQuery emulator image is not multi platform
-    // so this fix is needed for M Macs
+    // so this fix is needed for ARM architectures
     if (process.arch === "arm64") {
       this.withPlatform("linux/amd64");
     }
