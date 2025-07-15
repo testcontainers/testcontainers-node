@@ -136,7 +136,7 @@ export class StartedGenericContainer implements StartedTestContainer {
     return this.boundPorts.getFirstBinding();
   }
 
-  public getMappedPort(port: number, protocol: string = "tcp"): number {
+  public getMappedPort(port: string | number, protocol: string = "tcp"): number {
     return this.boundPorts.getBinding(port, protocol);
   }
 

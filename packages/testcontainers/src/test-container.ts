@@ -71,7 +71,7 @@ export interface StartedTestContainer extends AsyncDisposable {
   getHost(): string;
   getHostname(): string;
   getFirstMappedPort(): number;
-  getMappedPort(port: number, protocol?: string): number;
+  getMappedPort(port: string | number, protocol?: string): number;
   getName(): string;
   getLabels(): Labels;
   getId(): string;

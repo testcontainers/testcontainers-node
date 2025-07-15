@@ -43,7 +43,7 @@ export class AbstractStartedContainer implements StartedTestContainer {
     return this.startedTestContainer.getFirstMappedPort();
   }
 
-  public getMappedPort(port: number, protocol?: string): number {
+  public getMappedPort(port: string | number, protocol?: string): number {
     return this.startedTestContainer.getMappedPort(port, protocol);
   }
 
