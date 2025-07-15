@@ -8,7 +8,7 @@ vi.mock("dns/promises", () => {
   };
 });
 
-describe("lookupHostIps", () => {
+describe.sequential("lookupHostIps", () => {
   it("should return a list of resolved host IPs when host is not an IP", async () => {
     const hostIps: HostIp[] = [{ address: "127.0.0.1", family: 4 }];
     mockDnsLookup.mockResolvedValueOnce(hostIps);

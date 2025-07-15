@@ -8,7 +8,7 @@ vi.mock("fs/promises");
 const mockGetContainerRuntimeConfig = vi.mocked(getContainerRuntimeConfig);
 const mockReadFile = vi.mocked(readFile);
 
-describe("ConfigurationStrategy", () => {
+describe.sequential("ConfigurationStrategy", () => {
   it("should return undefined if no docker host is set", async () => {
     mockGetContainerRuntimeConfig.mockResolvedValueOnce({ dockerHost: undefined });
 

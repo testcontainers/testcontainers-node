@@ -11,7 +11,7 @@ vi.mock("child_process", () => ({
   spawn: (...args: unknown[]) => mockSpawn(...args),
 }));
 
-describe("CredentialProvider", () => {
+describe.sequential("CredentialProvider", () => {
   let credentialProvider: CredentialProvider;
   let containerRuntimeConfig: ContainerRuntimeConfig;
 

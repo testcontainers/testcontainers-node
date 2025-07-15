@@ -5,7 +5,7 @@ import { RootlessUnixSocketStrategy } from "./rootless-unix-socket-strategy";
 
 vi.mock("fs", () => ({ existsSync: vi.fn() }));
 
-describe("RootlessUnixSocketStrategy", () => {
+describe.sequential("RootlessUnixSocketStrategy", () => {
   const mockExistsSync = vi.mocked(existsSync);
 
   it("should return undefined for non-linux and non-darwin platforms", async () => {

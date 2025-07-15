@@ -27,161 +27,163 @@ vi.mock("./run-in-container", () => ({
   runInContainer: () => runInContainerMock(),
 }));
 
-test("should return TESTCONTAINERS_HOST_OVERRIDE from environment", async () => {
-  const strategyResult = {
-    uri: "tcp://another:2375",
-    allowUserOverrides: true,
-  } as ContainerRuntimeClientStrategyResult;
-
-  const host = await resolveHost(new Dockerode(), strategyResult, "indexServerAddress", {
-    TESTCONTAINERS_HOST_OVERRIDE: "tcp://another:2375",
-  });
-
-  expect(host).toEqual("tcp://another:2375");
-});
-
-test("should return hostname for TCP protocols", async () => {
-  for (const uri of ["tcp://docker:2375", "http://docker:2375", "https://docker:2375"]) {
+describe.sequential("resolveHost", () => {
+  it("should return TESTCONTAINERS_HOST_OVERRIDE from environment", async () => {
     const strategyResult = {
-      uri,
+      uri: "tcp://another:2375",
       allowUserOverrides: true,
     } as ContainerRuntimeClientStrategyResult;
 
-    const host = await resolveHost(new Dockerode(), strategyResult, "indexServerAddress", {});
+    const host = await resolveHost(new Dockerode(), strategyResult, "indexServerAddress", {
+      TESTCONTAINERS_HOST_OVERRIDE: "tcp://another:2375",
+    });
+
+    expect(host).toEqual("tcp://another:2375");
+  });
+
+  it("should return hostname for TCP protocols", async () => {
+    for (const uri of ["tcp://docker:2375", "http://docker:2375", "https://docker:2375"]) {
+      const strategyResult = {
+        uri,
+        allowUserOverrides: true,
+      } as ContainerRuntimeClientStrategyResult;
+
+      const host = await resolveHost(new Dockerode(), strategyResult, "indexServerAddress", {});
+
+      expect(host).toEqual("docker");
+    }
+  });
+
+  it("should not return TESTCONTAINERS_HOST_OVERRIDE when allow user override is false", async () => {
+    const strategyResult = {
+      uri: "tcp://docker:2375",
+      allowUserOverrides: false,
+    } as ContainerRuntimeClientStrategyResult;
+
+    const host = await resolveHost(new Dockerode(), strategyResult, "indexServerAddress", {
+      TESTCONTAINERS_HOST_OVERRIDE: "tcp://another:2375",
+    });
 
     expect(host).toEqual("docker");
-  }
-});
-
-test("should not return TESTCONTAINERS_HOST_OVERRIDE when allow user override is false", async () => {
-  const strategyResult = {
-    uri: "tcp://docker:2375",
-    allowUserOverrides: false,
-  } as ContainerRuntimeClientStrategyResult;
-
-  const host = await resolveHost(new Dockerode(), strategyResult, "indexServerAddress", {
-    TESTCONTAINERS_HOST_OVERRIDE: "tcp://another:2375",
   });
 
-  expect(host).toEqual("docker");
-});
+  it("should return localhost for unix and npipe protocols when not running in a container", async () => {
+    mockExistsSync.mockReturnValue(false);
 
-test("should return localhost for unix and npipe protocols when not running in a container", async () => {
-  mockExistsSync.mockReturnValue(false);
+    for (const uri of ["unix://docker:2375", "npipe://docker:2375"]) {
+      const strategyResult = {
+        uri,
+        allowUserOverrides: true,
+      } as ContainerRuntimeClientStrategyResult;
 
-  for (const uri of ["unix://docker:2375", "npipe://docker:2375"]) {
-    const strategyResult = {
-      uri,
-      allowUserOverrides: true,
-    } as ContainerRuntimeClientStrategyResult;
+      const host = await resolveHost(new Dockerode(), strategyResult, "indexServerAddress", {});
 
-    const host = await resolveHost(new Dockerode(), strategyResult, "indexServerAddress", {});
-
-    expect(host).toEqual("localhost");
-  }
-});
-
-test("should return host from gateway when running in a container", async () => {
-  mockExistsSync.mockReturnValue(true);
-  mockInspectNetwork.mockResolvedValue({
-    IPAM: {
-      Config: [{ Gateway: "172.0.0.1" }],
-    },
+      expect(host).toEqual("localhost");
+    }
   });
 
-  for (const uri of ["unix://docker:2375", "npipe://docker:2375"]) {
-    const strategyResult = {
-      uri,
-      allowUserOverrides: true,
-    } as ContainerRuntimeClientStrategyResult;
+  it("should return host from gateway when running in a container", async () => {
+    mockExistsSync.mockReturnValue(true);
+    mockInspectNetwork.mockResolvedValue({
+      IPAM: {
+        Config: [{ Gateway: "172.0.0.1" }],
+      },
+    });
 
-    const host = await resolveHost(new Dockerode(), strategyResult, "indexServerAddress", {});
+    for (const uri of ["unix://docker:2375", "npipe://docker:2375"]) {
+      const strategyResult = {
+        uri,
+        allowUserOverrides: true,
+      } as ContainerRuntimeClientStrategyResult;
 
-    expect(host).toEqual("172.0.0.1");
-  }
-});
+      const host = await resolveHost(new Dockerode(), strategyResult, "indexServerAddress", {});
 
-test("should use bridge network as gateway for Docker provider", async () => {
-  mockExistsSync.mockReturnValue(true);
-  mockInspectNetwork.mockResolvedValue({
-    IPAM: {
-      Config: [{ Gateway: "172.0.0.1" }],
-    },
+      expect(host).toEqual("172.0.0.1");
+    }
   });
 
-  for (const uri of ["unix://docker:2375", "npipe://docker:2375"]) {
-    const strategyResult = {
-      uri,
-      allowUserOverrides: true,
-    } as ContainerRuntimeClientStrategyResult;
+  it("should use bridge network as gateway for Docker provider", async () => {
+    mockExistsSync.mockReturnValue(true);
+    mockInspectNetwork.mockResolvedValue({
+      IPAM: {
+        Config: [{ Gateway: "172.0.0.1" }],
+      },
+    });
 
-    await resolveHost(new Dockerode(), strategyResult, "indexServerAddress", {});
+    for (const uri of ["unix://docker:2375", "npipe://docker:2375"]) {
+      const strategyResult = {
+        uri,
+        allowUserOverrides: true,
+      } as ContainerRuntimeClientStrategyResult;
 
-    expect(mockGetNetwork).toHaveBeenCalledWith("bridge");
-  }
-});
+      await resolveHost(new Dockerode(), strategyResult, "indexServerAddress", {});
 
-test("should use podman network as gateway for Podman provider", async () => {
-  mockExistsSync.mockReturnValue(true);
-  mockInspectNetwork.mockResolvedValue({
-    IPAM: {
-      Config: [{ Gateway: "172.0.0.1" }],
-    },
+      expect(mockGetNetwork).toHaveBeenCalledWith("bridge");
+    }
   });
 
-  for (const uri of ["unix://podman.sock", "npipe://podman.sock"]) {
+  it("should use podman network as gateway for Podman provider", async () => {
+    mockExistsSync.mockReturnValue(true);
+    mockInspectNetwork.mockResolvedValue({
+      IPAM: {
+        Config: [{ Gateway: "172.0.0.1" }],
+      },
+    });
+
+    for (const uri of ["unix://podman.sock", "npipe://podman.sock"]) {
+      const strategyResult = {
+        uri,
+        allowUserOverrides: true,
+      } as ContainerRuntimeClientStrategyResult;
+
+      await resolveHost(new Dockerode(), strategyResult, "indexServerAddress", {});
+
+      expect(mockGetNetwork).toHaveBeenCalledWith("podman");
+    }
+  });
+
+  it("should return host from default gateway when running in a container", async () => {
+    mockExistsSync.mockReturnValue(true);
+    mockInspectNetwork.mockResolvedValue({});
+    runInContainerMock.mockResolvedValue("172.0.0.2");
+
+    for (const uri of ["unix://docker:2375", "npipe://docker:2375"]) {
+      const strategyResult = {
+        uri,
+        allowUserOverrides: true,
+      } as ContainerRuntimeClientStrategyResult;
+
+      const host = await resolveHost(new Dockerode(), strategyResult, "indexServerAddress", {});
+
+      expect(host).toEqual("172.0.0.2");
+    }
+  });
+
+  it("should return localhost if unable to find gateway", async () => {
+    mockExistsSync.mockReturnValue(true);
+    mockInspectNetwork.mockResolvedValue({});
+    runInContainerMock.mockResolvedValue(undefined);
+
+    for (const uri of ["unix://docker:2375", "npipe://docker:2375"]) {
+      const strategyResult = {
+        uri,
+        allowUserOverrides: true,
+      } as ContainerRuntimeClientStrategyResult;
+
+      const host = await resolveHost(new Dockerode(), strategyResult, "indexServerAddress", {});
+
+      expect(host).toEqual("localhost");
+    }
+  });
+
+  it("should throw for unsupported protocol", async () => {
     const strategyResult = {
-      uri,
+      uri: "invalid://unknown",
       allowUserOverrides: true,
     } as ContainerRuntimeClientStrategyResult;
 
-    await resolveHost(new Dockerode(), strategyResult, "indexServerAddress", {});
-
-    expect(mockGetNetwork).toHaveBeenCalledWith("podman");
-  }
-});
-
-test("should return host from default gateway when running in a container", async () => {
-  mockExistsSync.mockReturnValue(true);
-  mockInspectNetwork.mockResolvedValue({});
-  runInContainerMock.mockResolvedValue("172.0.0.2");
-
-  for (const uri of ["unix://docker:2375", "npipe://docker:2375"]) {
-    const strategyResult = {
-      uri,
-      allowUserOverrides: true,
-    } as ContainerRuntimeClientStrategyResult;
-
-    const host = await resolveHost(new Dockerode(), strategyResult, "indexServerAddress", {});
-
-    expect(host).toEqual("172.0.0.2");
-  }
-});
-
-test("should return localhost if unable to find gateway", async () => {
-  mockExistsSync.mockReturnValue(true);
-  mockInspectNetwork.mockResolvedValue({});
-  runInContainerMock.mockResolvedValue(undefined);
-
-  for (const uri of ["unix://docker:2375", "npipe://docker:2375"]) {
-    const strategyResult = {
-      uri,
-      allowUserOverrides: true,
-    } as ContainerRuntimeClientStrategyResult;
-
-    const host = await resolveHost(new Dockerode(), strategyResult, "indexServerAddress", {});
-
-    expect(host).toEqual("localhost");
-  }
-});
-
-test("should throw for unsupported protocol", async () => {
-  const strategyResult = {
-    uri: "invalid://unknown",
-    allowUserOverrides: true,
-  } as ContainerRuntimeClientStrategyResult;
-
-  await expect(() => resolveHost(new Dockerode(), strategyResult, "indexServerAddress", {})).rejects.toThrowError(
-    "Unsupported protocol: invalid"
-  );
+    await expect(() => resolveHost(new Dockerode(), strategyResult, "indexServerAddress", {})).rejects.toThrowError(
+      "Unsupported protocol: invalid"
+    );
+  });
 });
