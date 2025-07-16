@@ -72,5 +72,5 @@ The Cloud Spanner emulator container wraps Google's official emulator image. It 
 <!--/codeinclude-->
 
 <!--codeinclude-->
-[Creating and deleting instance and database via helper](../../packages/modules/gcloud/src/spanner-emulator-container.test.ts) inside_block:createAndDelete
+[Creating and deleting instance and database via helper](../../packages/modules/gcloud/src/spanner-emulator-helper.test.ts) inside_block:createAndDelete
 <!--/codeinclude-->
