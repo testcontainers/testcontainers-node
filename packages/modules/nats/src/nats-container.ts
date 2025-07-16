@@ -122,12 +122,11 @@ export class StartedNatsContainer extends AbstractStartedContainer {
   ) {
     super(startedTestContainer);
     const port = startedTestContainer.getMappedPort(CLIENT_PORT);
-    this.connectionOptions = Object.assign({
+    this.connectionOptions = {
       servers: `${this.startedTestContainer.getHost()}:${port}`,
-
       user: this.username,
       pass: this.password,
-    });
+    };
   }
 
   public getConnectionOptions(): NatsConnectionOptions {
