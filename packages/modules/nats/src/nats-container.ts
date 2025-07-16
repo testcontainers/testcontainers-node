@@ -10,8 +10,8 @@ const PASS_ARGUMENT_KEY = "--pass";
 export class NatsContainer extends GenericContainer {
   private args = new Set<string>();
   private values = new Map<string, string | undefined>();
-  private useCredenitals = true
-  
+  private useCredentials = true;
+
   constructor(image: string) {
     super(image);
 
@@ -43,9 +43,16 @@ export class NatsContainer extends GenericContainer {
     return this;
   }
 
-  public noCredentials(): this {
-    this.useCredentials = false
-    return this
+  public withCredentials(useCredentials: boolean): this {
+    this.useCredentials = useCredentials;
+    if (!useCredentials) {
+      this.args.delete(USER_ARGUMENT_KEY);
+      this.args.delete(PASS_ARGUMENT_KEY);
+    } else {
+      this.withUsername("test");
+      this.withPass("test");
+    }
+    return this;
   }
 
   public withArg(name: string, value: string): this;
@@ -75,7 +82,11 @@ export class NatsContainer extends GenericContainer {
 
   public override async start(): Promise<StartedNatsContainer> {
     this.withCommand(this.getNormalizedCommand());
-    return new StartedNatsContainer(await super.start(), this.useCredentials && this.getUser() || undefined, this.useCredentials && this.getPass() || undefined);
+    return new StartedNatsContainer(
+      await super.start(),
+      (this.useCredentials && this.getUser()) || undefined,
+      (this.useCredentials && this.getPass()) || undefined
+    );
   }
 
   private getUser(): string | undefined {
@@ -111,11 +122,12 @@ export class StartedNatsContainer extends AbstractStartedContainer {
   ) {
     super(startedTestContainer);
     const port = startedTestContainer.getMappedPort(CLIENT_PORT);
-    this.connectionOptions = {
+    this.connectionOptions = Object.assign({
       servers: `${this.startedTestContainer.getHost()}:${port}`,
+
       user: this.username,
       pass: this.password,
-    };
+    });
   }
 
   public getConnectionOptions(): NatsConnectionOptions {

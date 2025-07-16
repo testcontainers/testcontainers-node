@@ -20,7 +20,20 @@ describe("NatsContainer", { timeout: 180_000 }, () => {
 
     await container.stop();
   });
-  // }
+
+  it("should start, connect and close when noCredentials is true", async () => {
+    const container = await new NatsContainer(IMAGE).withCredentials(false).start();
+
+    // establish connection
+    const nc = await connect(container.getConnectionOptions());
+    // close the connection
+    await nc.close();
+    // check if the close was OK
+    const err = await nc.closed();
+    expect(err).toBe(undefined);
+
+    await container.stop();
+  });
 
   it("should start, connect and close using scratch image", async () => {
     const container = await new NatsContainer("nats:2.11").start();
