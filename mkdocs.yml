@@ -84,5 +84,6 @@ nav:
       - Selenium: modules/selenium.md
       - ToxiProxy: modules/toxiproxy.md
       - Valkey: modules/valkey.md
+      - Vault: modules/vault.md
       - Weaviate: modules/weaviate.md
   - Configuration: configuration.md
