@@ -11,6 +11,7 @@ describe("vault", { timeout: 180_000 }, () => {
     await container?.stop();
   });
 
+  // inside_block:readWrite {
   it("should start Vault and allow reading/writing secrets", async () => {
     container = await new VaultContainer().withVaultToken(VAULT_TOKEN).start();
 
@@ -35,7 +36,9 @@ describe("vault", { timeout: 180_000 }, () => {
     expect(data.message).toBe("world");
     expect(data.other).toBe("vault");
   });
+  // }
 
+  // inside_block:initCommands {
   it("should execute init commands using vault CLI", async () => {
     container = await new VaultContainer()
       .withVaultToken(VAULT_TOKEN)
@@ -47,4 +50,5 @@ describe("vault", { timeout: 180_000 }, () => {
     expect(result.exitCode).toBe(0);
     expect(result.output).toContain("my-key");
   });
+  // }
 });

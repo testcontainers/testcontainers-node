@@ -10,15 +10,11 @@ npm install @testcontainers/vault --save-dev
 
 ## Examples
 
-Start a Vault container with a root token:
-
 <!--codeinclude-->
 
 [Start and perform read/write with node-vault:](../../packages/modules/vault/src/vault-container.test.ts) inside_block:readWrite
 
 <!--/codeinclude-->
-
-Initialize secret engines and keys using Vault CLI:
 
 <!--codeinclude-->
 
