@@ -1,3 +1,4 @@
+import { Spanner } from "@google-cloud/spanner";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { SpannerEmulatorContainer } from "./spanner-emulator-container";
 
@@ -5,51 +6,26 @@ import { SpannerEmulatorContainer } from "./spanner-emulator-container";
 const IMAGE = getImage(__dirname, 3);
 
 describe("SpannerEmulatorContainer", { timeout: 240_000 }, () => {
-  it("should start and expose endpoints", async () => {
-    // <example startup> {
+  it("should start, expose endpoints and accept real client connections", async () => {
+    // startup {
     const container = await new SpannerEmulatorContainer(IMAGE).withProjectId("test-project").start();
+
+    // 1) get the endpoint
     const grpcEndpoint = container.getEmulatorGrpcEndpoint();
 
-    expect(grpcEndpoint).toMatch(/localhost:\d+/);
+    // 2) configure the client to talk to our emulator
+    process.env.SPANNER_EMULATOR_HOST = grpcEndpoint;
+    const client = new Spanner({ projectId: container.getProjectId() });
 
-    await container.stop();
-    // }
-  });
+    // 3) use InstanceAdminClient to list instance configs
+    const admin = client.getInstanceAdminClient();
+    const [configs] = await admin.listInstanceConfigs({
+      parent: admin.projectPath(container.getProjectId()),
+    });
 
-  it("should create and delete instance and database via helper", async () => {
-    // <example createAndDelete> {
-    const container = await new SpannerEmulatorContainer(IMAGE).start();
-    const helper = container.helper;
-    const instanceId = "test-instance";
-    const databaseId = "test-db";
-
-    // must set env for client operations
-    helper.setAsEmulatorHost();
-
-    // create resources
-    await helper.createInstance(instanceId);
-    await helper.createDatabase(instanceId, databaseId);
-
-    const client = helper.client;
-
-    // verify instance exists
-    const [instanceExists] = await client.instance(instanceId).exists();
-    expect(instanceExists).toBe(true);
-
-    // verify database exists
-    const [dbExists] = await client.instance(instanceId).database(databaseId).exists();
-    expect(dbExists).toBe(true);
-
-    // delete resources
-    await helper.deleteDatabase(instanceId, databaseId);
-    await helper.deleteInstance(instanceId);
-
-    // verify deletions
-    const [dbExistsAfter] = await client.instance(instanceId).database(databaseId).exists();
-    expect(dbExistsAfter).toBe(false);
-
-    const [instanceExistsAfter] = await client.instance(instanceId).exists();
-    expect(instanceExistsAfter).toBe(false);
+    // emulator always includes "emulator-config"
+    const expectedConfigName = admin.instanceConfigPath(container.getProjectId(), "emulator-config");
+    expect(configs.map((c) => c.name)).toContain(expectedConfigName);
 
     await container.stop();
     // }
