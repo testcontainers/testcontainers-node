@@ -34,7 +34,7 @@ describe("NatsContainer", { timeout: 180_000 }, () => {
 
     await container.stop();
   });
-  //}
+  // }
 
   it("should start, connect and close using scratch image", async () => {
     const container = await new NatsContainer("nats:2.11").start();
