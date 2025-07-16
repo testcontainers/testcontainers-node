@@ -10,7 +10,8 @@ const PASS_ARGUMENT_KEY = "--pass";
 export class NatsContainer extends GenericContainer {
   private args = new Set<string>();
   private values = new Map<string, string | undefined>();
-
+  private useCredenitals = true
+  
   constructor(image: string) {
     super(image);
 
@@ -42,6 +43,11 @@ export class NatsContainer extends GenericContainer {
     return this;
   }
 
+  public noCredentials(): this {
+    this.useCredentials = false
+    return this
+  }
+
   public withArg(name: string, value: string): this;
   public withArg(name: string): this;
   public withArg(...args: [string, string] | [string]): this {
@@ -69,7 +75,7 @@ export class NatsContainer extends GenericContainer {
 
   public override async start(): Promise<StartedNatsContainer> {
     this.withCommand(this.getNormalizedCommand());
-    return new StartedNatsContainer(await super.start(), this.getUser(), this.getPass());
+    return new StartedNatsContainer(await super.start(), this.useCredentials && this.getUser() || undefined, this.useCredentials && this.getPass() || undefined);
   }
 
   private getUser(): string | undefined {
