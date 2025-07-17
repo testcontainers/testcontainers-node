@@ -15,9 +15,7 @@ describe("BoundPorts", () => {
     boundPorts.setBinding(1, 1000, "tcp");
     boundPorts.setBinding(1, 2000, "udp");
 
-    // Default protocol is tcp
     expect(boundPorts.getBinding(1)).toBe(1000);
-    // Can explicitly specify protocol
     expect(boundPorts.getBinding(1, "tcp")).toBe(1000);
     expect(boundPorts.getBinding(1, "udp")).toBe(2000);
   });
@@ -29,7 +27,6 @@ describe("BoundPorts", () => {
 
     expect(boundPorts.getBinding("8080/tcp")).toBe(1000);
     expect(boundPorts.getBinding("8080/udp")).toBe(2000);
-    // Can also specify as number + protocol
     expect(boundPorts.getBinding(8080, "tcp")).toBe(1000);
     expect(boundPorts.getBinding(8080, "udp")).toBe(2000);
   });
@@ -79,10 +76,8 @@ describe("BoundPorts", () => {
 
       const boundPorts = BoundPorts.fromInspectResult(hostIps, inspectResult as InspectResult);
 
-      // Default to TCP
       expect(boundPorts.getBinding(8080)).toBe(10000);
       expect(boundPorts.getBinding(8081)).toBe(10001);
-      // Explicitly specify protocol
       expect(boundPorts.getBinding(8080, "tcp")).toBe(10000);
       expect(boundPorts.getBinding(8080, "udp")).toBe(10002);
     });
@@ -104,18 +99,12 @@ describe("BoundPorts", () => {
       boundPorts.setBinding(8080, 2000, "udp");
       boundPorts.setBinding(9090, 3000, "tcp");
 
-      // Create a simplified filter test
-      let filtered = boundPorts.filter([8080]); // Just filter TCP port
-
-      // Should only include the TCP binding
+      let filtered = boundPorts.filter([8080]);
       expect(filtered.getBinding(8080)).toBe(1000);
       expect(() => filtered.getBinding(8080, "udp")).toThrowError("No port binding found for :8080/udp");
       expect(() => filtered.getBinding(9090)).toThrowError("No port binding found for :9090/tcp");
 
-      // Now filter only the UDP port
       filtered = boundPorts.filter(["8080/udp"]);
-
-      // Should only include the UDP binding
       expect(filtered.getBinding(8080, "udp")).toBe(2000);
       expect(() => filtered.getBinding(8080, "tcp")).toThrowError("No port binding found for :8080/tcp");
     });
@@ -123,11 +112,8 @@ describe("BoundPorts", () => {
     it("should handle case-insensitive protocols", () => {
       const boundPorts = new BoundPorts();
       boundPorts.setBinding(8080, 1000, "tcp");
-
-      // Should be able to retrieve with uppercase protocol
       expect(boundPorts.getBinding(8080, "TCP")).toBe(1000);
 
-      // Also works with uppercase in the key
       boundPorts.setBinding("9090/TCP", 2000);
       expect(boundPorts.getBinding(9090, "tcp")).toBe(2000);
       expect(boundPorts.getBinding("9090/tcp")).toBe(2000);

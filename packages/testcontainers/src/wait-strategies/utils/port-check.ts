@@ -11,7 +11,6 @@ export class HostPortCheck implements PortCheck {
   constructor(private readonly client: ContainerRuntimeClient) {}
 
   public isBound(port: number | string): Promise<boolean> {
-    // Skip check for UDP ports as they can't be verified with a TCP socket connection
     if (typeof port === "string" && port.toLowerCase().includes("/udp")) {
       log.debug(`Skipping host port check for UDP port ${port} (UDP port checks not supported)`);
       return Promise.resolve(true);
@@ -48,7 +47,6 @@ export class InternalPortCheck implements PortCheck {
   ) {}
 
   public async isBound(port: number | string): Promise<boolean> {
-    // Skip check for UDP ports as they require different verification methods
     if (typeof port === "string" && port.toLowerCase().includes("/udp")) {
       log.debug(`Skipping internal port check for UDP port ${port} (UDP port checks not supported)`, {
         containerId: this.container.id,

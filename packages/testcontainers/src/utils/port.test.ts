@@ -67,16 +67,14 @@ describe("port utilities", () => {
     });
 
     test("maintains backward compatibility", () => {
-      // Original usage patterns should still work
-      expect(getProtocol(8080)).toBe("tcp"); // Number defaults to TCP
-      expect(getProtocol("8080")).toBe("tcp"); // Simple string defaults to TCP
-      expect(getProtocol({ container: 8080, host: 49000 })).toBe("tcp"); // Object without protocol defaults to TCP
+      expect(getProtocol(8080)).toBe("tcp");
+      expect(getProtocol("8080")).toBe("tcp");
+      expect(getProtocol({ container: 8080, host: 49000 })).toBe("tcp");
     });
 
     test("supports protocol specification in all formats", () => {
-      // New usage patterns with protocols
-      expect(getProtocol("8080/udp")).toBe("udp"); // String with protocol
-      expect(getProtocol({ container: 8080, host: 49000, protocol: "udp" })).toBe("udp"); // Object with protocol
+      expect(getProtocol("8080/udp")).toBe("udp");
+      expect(getProtocol({ container: 8080, host: 49000, protocol: "udp" })).toBe("udp");
     });
 
     test("note about UDP port checks", () => {

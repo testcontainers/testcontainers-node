@@ -10,8 +10,6 @@ export class BoundPorts {
     const normalizedProtocol = protocol.toLowerCase();
     const key = typeof port === "string" ? port : `${port}/${normalizedProtocol}`;
     let binding = this.ports.get(key);
-
-    // Try case-insensitive lookup if not found and port is a string that might contain a protocol
     if (!binding && typeof port === "string" && port.includes("/")) {
       const [portNumber, portProtocol] = port.split("/");
       const normalizedKey = `${portNumber}/${portProtocol.toLowerCase()}`;
@@ -36,16 +34,13 @@ export class BoundPorts {
   }
 
   public setBinding(key: string | number, value: number, protocol: string = "tcp"): void {
-    // Normalize protocol to lowercase for consistency
     const normalizedProtocol = protocol.toLowerCase();
 
     if (typeof key === "string" && key.includes("/")) {
-      // If key contains protocol, normalize it
       const [portNumber, portProtocol] = key.split("/");
       const normalizedKey = `${portNumber}/${portProtocol.toLowerCase()}`;
       this.ports.set(normalizedKey, value);
     } else {
-      // Otherwise use the provided key/protocol
       const portKey = typeof key === "string" ? key : `${key}/${normalizedProtocol}`;
       this.ports.set(portKey, value);
     }
@@ -57,8 +52,6 @@ export class BoundPorts {
 
   public filter(ports: PortWithOptionalBinding[]): BoundPorts {
     const boundPorts = new BoundPorts();
-
-    // Create map of port to protocol for lookup
     const containerPortsWithProtocol = new Map<number, string>();
     ports.forEach((port) => {
       const containerPort = getContainerPort(port);
@@ -69,8 +62,6 @@ export class BoundPorts {
     for (const [internalPortWithProtocol, hostPort] of this.iterator()) {
       const [internalPortStr, protocol] = internalPortWithProtocol.split("/");
       const internalPort = parseInt(internalPortStr, 10);
-
-      // Case-insensitive protocol comparison
       if (
         containerPortsWithProtocol.has(internalPort) &&
         containerPortsWithProtocol.get(internalPort)?.toLowerCase() === protocol?.toLowerCase()

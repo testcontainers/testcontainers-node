@@ -118,7 +118,6 @@ test("handles multiple ports with different protocols", async () => {
 });
 
 test("fails when protocol doesn't match exposed port", async () => {
-  // Container exposes TCP port but we're looking for UDP
   const data = mockInspectResult({ "8080/tcp": [{ HostIp: "0.0.0.0", HostPort: "45000" }] });
   const inspectFn = vi.fn().mockResolvedValue(data.inspectResult);
 
@@ -135,7 +134,6 @@ test("ignores ports with wrong protocol", async () => {
   const data = mockInspectResult(ports);
   const inspectFn = vi.fn().mockResolvedValueOnce(data.inspectResult);
 
-  // Should only match the UDP port
   const result = await inspectContainerUntilPortsExposed(inspectFn, ["8080/udp"], "container-id");
 
   expect(result).toEqual(data);
@@ -152,11 +150,7 @@ test("handles mixed protocol specifications in different formats", async () => {
 
   const result = await inspectContainerUntilPortsExposed(
     inspectFn,
-    [
-      8080, // number (default tcp)
-      "9090/udp", // string with protocol
-      { container: 7070, host: 47000 }, // object (default tcp)
-    ],
+    [8080, "9090/udp", { container: 7070, host: 47000 }],
     "container-id"
   );
 
@@ -164,13 +158,8 @@ test("handles mixed protocol specifications in different formats", async () => {
 });
 
 test("retry with gradually exposed ports of different protocols", async () => {
-  // First call: No ports exposed
   const data1 = mockInspectResult({});
-
-  // Second call: Only TCP port exposed
   const data2 = mockInspectResult({ "8080/tcp": [{ HostIp: "0.0.0.0", HostPort: "45000" }] });
-
-  // Third call: Both TCP and UDP ports exposed
   const data3 = mockInspectResult({
     "8080/tcp": [{ HostIp: "0.0.0.0", HostPort: "45000" }],
     "8080/udp": [{ HostIp: "0.0.0.0", HostPort: "46000" }],
@@ -182,11 +171,7 @@ test("retry with gradually exposed ports of different protocols", async () => {
     .mockResolvedValueOnce(data2.inspectResult)
     .mockResolvedValueOnce(data3.inspectResult);
 
-  const result = await inspectContainerUntilPortsExposed(
-    inspectFn,
-    [8080, "8080/udp"], // Need both TCP and UDP ports
-    "container-id"
-  );
+  const result = await inspectContainerUntilPortsExposed(inspectFn, [8080, "8080/udp"], "container-id");
 
   expect(result).toEqual(data3);
   expect(inspectFn).toHaveBeenCalledTimes(3);
