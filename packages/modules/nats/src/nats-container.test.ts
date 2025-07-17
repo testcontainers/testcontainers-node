@@ -1,6 +1,6 @@
 import { jetstreamManager } from "@nats-io/jetstream";
 import { connect } from "@nats-io/transport-node";
-import { getImage } from "../../../testcontainers/src/utils/test-helper";
+import { getImage } from "testcontainers/src/utils/test-helper";
 import { NatsContainer } from "./nats-container";
 
 const IMAGE = getImage(__dirname);
@@ -8,7 +8,7 @@ const IMAGE = getImage(__dirname);
 describe("NatsContainer", { timeout: 180_000 }, () => {
   // connect {
   it("should start, connect and close", async () => {
-    const container = await new NatsContainer(IMAGE).start();
+    await using container = await new NatsContainer(IMAGE).start();
 
     // establish connection
     const nc = await connect(container.getConnectionOptions());
@@ -17,13 +17,11 @@ describe("NatsContainer", { timeout: 180_000 }, () => {
     // check if the close was OK
     const err = await nc.closed();
     expect(err).toBe(undefined);
-
-    await container.stop();
   });
   // }
 
   it("should start, connect and close using scratch image", async () => {
-    const container = await new NatsContainer("nats:2.11").start();
+    await using container = await new NatsContainer("nats:2.11").start();
 
     // establish connection
     const nc = await connect(container.getConnectionOptions());
@@ -32,8 +30,6 @@ describe("NatsContainer", { timeout: 180_000 }, () => {
     // check if the close was OK
     const err = await nc.closed();
     expect(err).toBe(undefined);
-
-    await container.stop();
   });
 
   // pubsub {
@@ -41,7 +37,7 @@ describe("NatsContainer", { timeout: 180_000 }, () => {
     const SUBJECT = "HELLO";
     const PAYLOAD = "WORLD";
 
-    const container = await new NatsContainer(IMAGE).start();
+    await using container = await new NatsContainer(IMAGE).start();
     const nc = await connect(container.getConnectionOptions());
     const TE = new TextEncoder();
     const TD = new TextDecoder();
@@ -63,15 +59,13 @@ describe("NatsContainer", { timeout: 180_000 }, () => {
     await nc.close();
     const err = await nc.closed();
     expect(err).toBe(undefined);
-
-    await container.stop();
   });
   // }
 
   // credentials {
   it("should start with alternative username and password ", async () => {
     // set username and password like this
-    const container = await new NatsContainer(IMAGE).withPass("1234").withUsername("George").start();
+    await using container = await new NatsContainer(IMAGE).withPass("1234").withUsername("George").start();
 
     const nc = await connect(container.getConnectionOptions());
     // close the connection
@@ -79,15 +73,13 @@ describe("NatsContainer", { timeout: 180_000 }, () => {
     // check if the close was OK
     const err = await nc.closed();
     expect(err).toBe(undefined);
-
-    await container.stop();
   });
   // }
 
   // jetstream {
   it("should start with JetStream ", async () => {
     // enable JetStream
-    const container = await new NatsContainer(IMAGE).withJetStream().start();
+    await using container = await new NatsContainer(IMAGE).withJetStream().start();
 
     const nc = await connect(container.getConnectionOptions());
 
@@ -99,12 +91,10 @@ describe("NatsContainer", { timeout: 180_000 }, () => {
     // check if the close was OK
     const err = await nc.closed();
     expect(err).toBe(undefined);
-
-    await container.stop();
   });
 
   it("should fail without JetStream ", async () => {
-    const container = await new NatsContainer(IMAGE).start();
+    await using container = await new NatsContainer(IMAGE).start();
 
     const nc = await connect(container.getConnectionOptions());
 
@@ -116,8 +106,6 @@ describe("NatsContainer", { timeout: 180_000 }, () => {
     // check if the close was OK
     const err = await nc.closed();
     expect(err).toBe(undefined);
-
-    await container.stop();
   });
   // }
 
@@ -125,7 +113,7 @@ describe("NatsContainer", { timeout: 180_000 }, () => {
     // for the complete list of available arguments see:
     // See Command Line Options section inside [NATS docker image documentation](https://hub.docker.com/_/nats)
     async function outputVersionAndExit() {
-      const container = await new NatsContainer(IMAGE).withArg("version", "").start();
+      await using container = await new NatsContainer(IMAGE).withArg("version", "").start();
       await connect(container.getConnectionOptions());
     }
 

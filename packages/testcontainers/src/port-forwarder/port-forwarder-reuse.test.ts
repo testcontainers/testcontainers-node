@@ -21,7 +21,7 @@ describe.sequential("Port Forwarder reuse", { timeout: 180_000 }, () => {
     await TC2.exposeHostPorts(port2);
     const portForwarder2ContainerId = (await PFI2.getInstance()).getContainerId();
 
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").start();
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").start();
 
     expect(portForwarder1ContainerId).toEqual(portForwarder2ContainerId);
     const { output: output1 } = await container.exec(["curl", "-s", `http://host.testcontainers.internal:${port1}`]);
@@ -31,7 +31,6 @@ describe.sequential("Port Forwarder reuse", { timeout: 180_000 }, () => {
 
     await new Promise((resolve) => server1.close(resolve));
     await new Promise((resolve) => server2.close(resolve));
-    await container.stop();
   });
 
   it("should reuse same ports", async () => {
@@ -49,13 +48,12 @@ describe.sequential("Port Forwarder reuse", { timeout: 180_000 }, () => {
     await TC2.exposeHostPorts(port);
     const portForwarder2ContainerId = (await PFI2.getInstance()).getContainerId();
 
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").start();
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").start();
 
     expect(portForwarder1ContainerId).toEqual(portForwarder2ContainerId);
     const { output } = await container.exec(["curl", "-s", `http://host.testcontainers.internal:${port}`]);
     expect(output).toEqual(expect.stringContaining("hello world"));
 
     await new Promise((resolve) => server.close(resolve));
-    await container.stop();
   });
 });

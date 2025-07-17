@@ -1,5 +1,5 @@
 import { createClient } from "@clickhouse/client";
-import { getImage } from "../../../testcontainers/src/utils/test-helper";
+import { getImage } from "testcontainers/src/utils/test-helper";
 import { ClickHouseContainer } from "./clickhouse-container";
 
 const IMAGE = getImage(__dirname);
@@ -11,7 +11,7 @@ interface ClickHouseQueryResponse<T> {
 describe("ClickHouseContainer", { timeout: 180_000 }, () => {
   // connectWithOptions {
   it("should connect using the client options object", async () => {
-    const container = await new ClickHouseContainer(IMAGE).start();
+    await using container = await new ClickHouseContainer(IMAGE).start();
     const client = createClient(container.getClientOptions());
 
     const result = await client.query({
@@ -22,13 +22,12 @@ describe("ClickHouseContainer", { timeout: 180_000 }, () => {
     expect(data?.data?.[0]?.value).toBe(1);
 
     await client.close();
-    await container.stop();
   });
   // }
 
   // connectWithUrl {
   it("should connect using the URL", async () => {
-    const container = await new ClickHouseContainer(IMAGE).start();
+    await using container = await new ClickHouseContainer(IMAGE).start();
     const client = createClient({
       url: container.getConnectionUrl(),
     });
@@ -42,13 +41,12 @@ describe("ClickHouseContainer", { timeout: 180_000 }, () => {
     expect(data?.data?.[0]?.value).toBe(1);
 
     await client.close();
-    await container.stop();
   });
   // }
 
   // connectWithUsernameAndPassword {
   it("should connect using the username and password", async () => {
-    const container = await new ClickHouseContainer(IMAGE)
+    await using container = await new ClickHouseContainer(IMAGE)
       .withUsername("customUsername")
       .withPassword("customPassword")
       .start();
@@ -68,14 +66,13 @@ describe("ClickHouseContainer", { timeout: 180_000 }, () => {
     expect(data?.data?.[0]?.value).toBe(1);
 
     await client.close();
-    await container.stop();
   });
   // }
 
   // setDatabase {
   it("should set database", async () => {
     const customDatabase = "customDatabase";
-    const container = await new ClickHouseContainer(IMAGE).withDatabase(customDatabase).start();
+    await using container = await new ClickHouseContainer(IMAGE).withDatabase(customDatabase).start();
 
     const client = createClient(container.getClientOptions());
 
@@ -88,14 +85,13 @@ describe("ClickHouseContainer", { timeout: 180_000 }, () => {
     expect(data?.data?.[0]?.current_database).toBe(customDatabase);
 
     await client.close();
-    await container.stop();
   });
   // }
 
   // setUsername {
   it("should set username", async () => {
     const customUsername = "customUsername";
-    const container = await new ClickHouseContainer(IMAGE).withUsername(customUsername).start();
+    await using container = await new ClickHouseContainer(IMAGE).withUsername(customUsername).start();
 
     const client = createClient(container.getClientOptions());
 
@@ -108,12 +104,11 @@ describe("ClickHouseContainer", { timeout: 180_000 }, () => {
     expect(data?.data?.[0]?.current_user).toBe(customUsername);
 
     await client.close();
-    await container.stop();
   });
   // }
 
   it("should work with restarted container", async () => {
-    const container = await new ClickHouseContainer(IMAGE).start();
+    await using container = await new ClickHouseContainer(IMAGE).start();
     await container.restart();
 
     const client = createClient(container.getClientOptions());
@@ -127,6 +122,5 @@ describe("ClickHouseContainer", { timeout: 180_000 }, () => {
     expect(data?.data?.[0]?.value).toBe(1);
 
     await client.close();
-    await container.stop();
   });
 });

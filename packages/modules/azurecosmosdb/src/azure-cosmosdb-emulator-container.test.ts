@@ -1,27 +1,26 @@
 import { CosmosClient, PartitionKeyKind } from "@azure/cosmos";
 import https from "node:https";
-import { getImage } from "../../../testcontainers/src/utils/test-helper";
+import { getImage } from "testcontainers/src/utils/test-helper";
 import { AzureCosmosDbEmulatorContainer } from "./azure-cosmosdb-emulator-container";
 
 const IMAGE = getImage(__dirname);
 
 describe("AzureCosmosDbEmulatorContainer", { timeout: 180_000 }, async () => {
   it("should set https protocol", async () => {
-    const container = await new AzureCosmosDbEmulatorContainer(IMAGE).withProtocol("https").start();
+    await using container = await new AzureCosmosDbEmulatorContainer(IMAGE).withProtocol("https").start();
     const connectionUri = container.getConnectionUri();
     expect(connectionUri).toContain("AccountEndpoint=https://");
-    await container.stop();
   });
+
   it("should set http protocol if no protocol is specified", async () => {
-    const container = await new AzureCosmosDbEmulatorContainer(IMAGE).start();
+    await using container = await new AzureCosmosDbEmulatorContainer(IMAGE).start();
     const connectionUri = container.getConnectionUri();
     expect(connectionUri).toContain("AccountEndpoint=http://");
-    await container.stop();
   });
 
   // httpCreateDB {
   it("should be able to create a database using http", async () => {
-    const container = await new AzureCosmosDbEmulatorContainer(IMAGE).withProtocol("http").start();
+    await using container = await new AzureCosmosDbEmulatorContainer(IMAGE).withProtocol("http").start();
     const cosmosClient = new CosmosClient({
       endpoint: container.getEndpoint(),
       key: container.getKey(),
@@ -35,14 +34,12 @@ describe("AzureCosmosDbEmulatorContainer", { timeout: 180_000 }, async () => {
 
     const db = await cosmosClient.database(dbName).read();
     expect(db.database.id).toBe(dbName);
-
-    await container.stop();
   });
   // }
 
   // httpsCreateDB {
   it("should be able to create a database using https", async () => {
-    const container = await new AzureCosmosDbEmulatorContainer(IMAGE).withProtocol("https").start();
+    await using container = await new AzureCosmosDbEmulatorContainer(IMAGE).withProtocol("https").start();
     const cosmosClient = new CosmosClient({
       endpoint: container.getEndpoint(),
       key: container.getKey(),
@@ -59,14 +56,12 @@ describe("AzureCosmosDbEmulatorContainer", { timeout: 180_000 }, async () => {
 
     const db = await cosmosClient.database(dbName).read();
     expect(db.database.id).toBe(dbName);
-
-    await container.stop();
   });
   // }
 
   // createAndRead {
   it("should be able to create a container and store and retrieve items", async () => {
-    const container = await new AzureCosmosDbEmulatorContainer(IMAGE).withProtocol("http").start();
+    await using container = await new AzureCosmosDbEmulatorContainer(IMAGE).withProtocol("http").start();
     const cosmosClient = new CosmosClient({
       endpoint: container.getEndpoint(),
       key: container.getKey(),
@@ -94,8 +89,6 @@ describe("AzureCosmosDbEmulatorContainer", { timeout: 180_000 }, async () => {
 
     const readItem = await containerClient.item(createResponse.item.id, "bar").read();
     expect(readItem.resource.foo).toEqual("bar");
-
-    await container.stop();
   });
   // }
 });

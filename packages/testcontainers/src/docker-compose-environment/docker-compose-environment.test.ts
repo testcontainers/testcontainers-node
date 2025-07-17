@@ -21,95 +21,78 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
   });
 
   it("should start all containers in the compose file", async () => {
-    const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml").up();
+    await using startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml").up();
 
     await Promise.all(
       [await composeContainerName("container"), await composeContainerName("another_container")].map(
         async (containerName) => await checkEnvironmentContainerIsHealthy(startedEnvironment, containerName)
       )
     );
-
-    await startedEnvironment.down();
   });
 
   it("should start container with a given name", async () => {
     const name = `custom_container_name_${randomUuid()}`;
-    const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-name.yml")
+    await using startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-name.yml")
       .withEnvironment({ CONTAINER_NAME: name })
       .up();
 
     await checkEnvironmentContainerIsHealthy(startedEnvironment, name);
-
-    await startedEnvironment.down();
   });
 
   if (!process.env.CI_PODMAN) {
     it("should work with buildkit", async () => {
       const buildkitFixtures = path.resolve(fixtures, "docker-compose-with-buildkit");
-      const startedEnvironment = await new DockerComposeEnvironment(buildkitFixtures, "docker-compose.yml").up();
+      await using startedEnvironment = await new DockerComposeEnvironment(buildkitFixtures, "docker-compose.yml").up();
       await checkEnvironmentContainerIsHealthy(startedEnvironment, await composeContainerName("container"));
-      await startedEnvironment.down();
     });
   }
 
   it("should use pull policy", async () => {
     const env = new DockerComposeEnvironment(fixtures, "docker-compose-with-many-services.yml");
 
-    const startedEnv1 = await env.up();
-    const dockerEventStream = await getDockerEventStream();
-    const dockerPullEventPromise = waitForDockerEvent(dockerEventStream, "pull");
-    const startedEnv2 = await env.withPullPolicy(PullPolicy.alwaysPull()).up();
+    await using _ = await env.up();
+    await using dockerEventStream = await getDockerEventStream();
+    const dockerPullEventPromise = waitForDockerEvent(dockerEventStream.events, "pull");
+    await using _ = await env.withPullPolicy(PullPolicy.alwaysPull()).up();
     await dockerPullEventPromise;
-
-    dockerEventStream.destroy();
-    await startedEnv1.stop();
-    await startedEnv2.stop();
   });
 
   it("should use pull policy for specific service", async () => {
     const env = new DockerComposeEnvironment(fixtures, "docker-compose-with-many-services.yml");
 
-    const startedEnv1 = await env.up(["service_2"]);
-    const dockerEventStream = await getDockerEventStream();
-    const dockerPullEventPromise = waitForDockerEvent(dockerEventStream, "pull");
-    const startedEnv2 = await env.withPullPolicy(PullPolicy.alwaysPull()).up(["service_2"]);
+    await using _ = await env.up(["service_2"]);
+    await using dockerEventStream = await getDockerEventStream();
+    const dockerPullEventPromise = waitForDockerEvent(dockerEventStream.events, "pull");
+    await using _ = await env.withPullPolicy(PullPolicy.alwaysPull()).up(["service_2"]);
     await dockerPullEventPromise;
-
-    dockerEventStream.destroy();
-    await startedEnv1.stop();
-    await startedEnv2.stop();
   });
 
   it("should start environment with multiple compose files", async () => {
     const overrideFixtures = path.resolve(fixtures, "docker-compose-with-override");
 
-    const startedEnvironment = await new DockerComposeEnvironment(overrideFixtures, [
+    await using startedEnvironment = await new DockerComposeEnvironment(overrideFixtures, [
       "docker-compose.yml",
       "docker-compose-update.yml",
     ]).up();
-    const container = startedEnvironment.getContainer(await composeContainerName("container"));
+    await using container = startedEnvironment.getContainer(await composeContainerName("container"));
 
     const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
     const response = await fetch(`${url}/env`);
     const responseBody = (await response.json()) as { [key: string]: string };
 
     expect(responseBody["IS_OVERRIDDEN"]).toBe("true");
-
-    await startedEnvironment.down();
   });
 
   it("should support default wait strategy", async () => {
-    const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-healthcheck.yml")
+    await using startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-healthcheck.yml")
       .withDefaultWaitStrategy(Wait.forHealthCheck())
       .up();
 
     await checkEnvironmentContainerIsHealthy(startedEnvironment, await composeContainerName("container"));
-
-    await startedEnvironment.down();
   });
 
   it("should support log message wait strategy", async () => {
-    const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml")
+    await using startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml")
       .withWaitStrategy(await composeContainerName("container"), Wait.forLogMessage("Listening on port 8080"))
       .withWaitStrategy(await composeContainerName("another_container"), Wait.forLogMessage("Listening on port 8080"))
       .up();
@@ -119,8 +102,6 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
         async (containerName) => await checkEnvironmentContainerIsHealthy(startedEnvironment, containerName)
       )
     );
-
-    await startedEnvironment.down();
   });
 
   it("should stop the container when the log message wait strategy times out", async () => {
@@ -137,13 +118,11 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
   });
 
   it("should support health check wait strategy", async () => {
-    const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-healthcheck.yml")
+    await using startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-healthcheck.yml")
       .withWaitStrategy(await composeContainerName("container"), Wait.forHealthCheck())
       .up();
 
     await checkEnvironmentContainerIsHealthy(startedEnvironment, await composeContainerName("container"));
-
-    await startedEnvironment.down();
   });
 
   it("should support failing health check wait strategy", async () => {
@@ -175,106 +154,89 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
   });
 
   it("should not wait for non-public ports", async () => {
-    const startedEnvironment = await new DockerComposeEnvironment(
-      fixtures,
-      "docker-compose-with-private-port.yml"
-    ).up();
-
-    await startedEnvironment.down();
+    await using _ = await new DockerComposeEnvironment(fixtures, "docker-compose-with-private-port.yml").up();
   });
 
   it("should re-build the Dockerfiles", async () => {
-    const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml").withBuild().up();
+    await using startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml")
+      .withBuild()
+      .up();
 
     await Promise.all(
       [await composeContainerName("container"), await composeContainerName("another_container")].map(
         async (containerName) => await checkEnvironmentContainerIsHealthy(startedEnvironment, containerName)
       )
     );
-
-    await startedEnvironment.down();
   });
 
   it("should bind environment variables to the docker compose file", async () => {
-    const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-env.yml")
+    await using startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-env.yml")
       .withEnvironment({ ENV_VAR: "ENV_VAR_VALUE" })
       .up();
 
-    const container = startedEnvironment.getContainer(await composeContainerName("container"));
+    await using container = startedEnvironment.getContainer(await composeContainerName("container"));
     const response = await fetch(`http://${container.getHost()}:${container.getMappedPort(8080)}/env`);
     const responseBody = (await response.json()) as { [key: string]: string };
     expect(responseBody["ENV_VAR"]).toBe("ENV_VAR_VALUE");
-
-    await startedEnvironment.down();
   });
 
   it("should throw error when you get container that does not exist", async () => {
-    const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml").up();
+    await using startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml").up();
 
     expect(() => startedEnvironment.getContainer("non_existent_container")).toThrow(
       `Cannot get container "non_existent_container" as it is not running`
     );
-
-    await startedEnvironment.down();
   });
 
   it("should support starting a subset of services defined in the docker-compose file", async () => {
-    const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-many-services.yml").up(
-      ["service_2"]
-    );
+    await using startedEnvironment = await new DockerComposeEnvironment(
+      fixtures,
+      "docker-compose-with-many-services.yml"
+    ).up(["service_2"]);
 
     await checkEnvironmentContainerIsHealthy(startedEnvironment, await composeContainerName("service_2"));
     expect(() => startedEnvironment.getContainer("service_1")).toThrow(
       `Cannot get container "service_1" as it is not running`
     );
-
-    await startedEnvironment.down();
   });
 
   it("should not recreate the containers when no recreate option is set", async () => {
-    const startedEnvironment1 = await new DockerComposeEnvironment(fixtures, "docker-compose-with-name.yml")
+    await using _ = await new DockerComposeEnvironment(fixtures, "docker-compose-with-name.yml")
       .withEnvironment({ CONTAINER_NAME: `custom_container_name_${randomUuid()}` })
       .withNoRecreate()
       .up();
-    const startedEnvironment2 = await new DockerComposeEnvironment(fixtures, "docker-compose-with-name.yml")
+    await using _ = await new DockerComposeEnvironment(fixtures, "docker-compose-with-name.yml")
       .withEnvironment({ CONTAINER_NAME: `custom_container_name_${randomUuid()}` })
       .withNoRecreate()
       .up();
-
-    await startedEnvironment1.down();
-    await startedEnvironment2.down();
   });
 
   it("should load .env if no environment file option given", async () => {
     const overrideFixtures = path.resolve(fixtures, "docker-compose-with-env-file");
 
-    const startedEnvironment = await new DockerComposeEnvironment(overrideFixtures, "docker-compose.yml").up();
+    await using startedEnvironment = await new DockerComposeEnvironment(overrideFixtures, "docker-compose.yml").up();
 
-    const container = startedEnvironment.getContainer(await composeContainerName("container"));
+    await using container = startedEnvironment.getContainer(await composeContainerName("container"));
     const response = await fetch(`http://${container.getHost()}:${container.getMappedPort(8080)}/env`);
     const responseBody = (await response.json()) as { [key: string]: string };
     expect(responseBody["ENV_VAR"]).toBe("default");
-
-    await startedEnvironment.down();
   });
 
   it("should load the values in the environment file if the environment file option is set", async () => {
     const overrideFixtures = path.resolve(fixtures, "docker-compose-with-env-file");
 
-    const startedEnvironment = await new DockerComposeEnvironment(overrideFixtures, "docker-compose.yml")
+    await using startedEnvironment = await new DockerComposeEnvironment(overrideFixtures, "docker-compose.yml")
       .withEnvironmentFile(".env.override")
       .up();
 
-    const container = startedEnvironment.getContainer(await composeContainerName("container"));
+    await using container = startedEnvironment.getContainer(await composeContainerName("container"));
     const response = await fetch(`http://${container.getHost()}:${container.getMappedPort(8080)}/env`);
     const responseBody = (await response.json()) as { [key: string]: string };
     expect(responseBody["ENV_VAR"]).toBe("override");
-
-    await startedEnvironment.down();
   });
 
   it("should start containers with a profile if profile option is set", async () => {
-    const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-profile.yml")
+    await using startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-profile.yml")
       .withProfiles("debug")
       .up();
 
@@ -283,18 +245,14 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
         async (containerName) => await checkEnvironmentContainerIsHealthy(startedEnvironment, containerName)
       )
     );
-
-    await startedEnvironment.down();
   });
 
   it("should use a custom project name if set", async () => {
     const customProjectName = `custom-${new RandomUuid().nextUuid()}`;
-    const startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml")
+    await using _ = await new DockerComposeEnvironment(fixtures, "docker-compose.yml")
       .withProjectName(customProjectName)
       .up();
 
     expect(await getRunningContainerNames()).toContain(`${customProjectName}-container-1`);
-
-    await startedEnvironment.down();
   });
 });

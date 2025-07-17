@@ -1,5 +1,5 @@
 import { Datastore } from "@google-cloud/datastore";
-import { getImage } from "../../../testcontainers/src/utils/test-helper";
+import { getImage } from "testcontainers/src/utils/test-helper";
 import { DatastoreEmulatorContainer, StartedDatastoreEmulatorContainer } from "./datastore-emulator-container";
 
 const IMAGE = getImage(__dirname);
@@ -7,23 +7,19 @@ const IMAGE = getImage(__dirname);
 describe("DatastoreEmulatorContainer", { timeout: 240_000 }, () => {
   // datastore4 {
   it("should work using default version", async () => {
-    const datastoreEmulatorContainer = await new DatastoreEmulatorContainer(IMAGE).start();
+    await using datastoreEmulatorContainer = await new DatastoreEmulatorContainer(IMAGE).start();
 
     await checkDatastore(datastoreEmulatorContainer);
-
-    await datastoreEmulatorContainer.stop();
   });
   // }
 
   // datastore5 {
   it("should work using version 468.0.0", async () => {
-    const datastoreEmulatorContainer = await new DatastoreEmulatorContainer(
+    await using datastoreEmulatorContainer = await new DatastoreEmulatorContainer(
       "gcr.io/google.com/cloudsdktool/google-cloud-cli:468.0.0-emulators"
     ).start();
 
     await checkDatastore(datastoreEmulatorContainer);
-
-    await datastoreEmulatorContainer.stop();
   });
 
   // }

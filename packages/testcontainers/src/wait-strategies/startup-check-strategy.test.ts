@@ -16,11 +16,9 @@ describe("StartupCheckStrategy", { timeout: 180_000 }, () => {
       }
     })();
 
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+    await using _ = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withWaitStrategy(waitStrategy)
       .start();
-
-    await container.stop();
   });
 
   it("should fail when status PENDING after timeout", async () => {

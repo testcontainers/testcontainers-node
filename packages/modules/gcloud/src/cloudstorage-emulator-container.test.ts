@@ -1,7 +1,7 @@
 import { Storage } from "@google-cloud/storage";
 import { setupServer } from "msw/node";
 import { ReadableStream } from "node:stream/web";
-import { getImage } from "../../../testcontainers/src/utils/test-helper";
+import { getImage } from "testcontainers/src/utils/test-helper";
 import { CloudStorageEmulatorContainer, StartedCloudStorageEmulatorContainer } from "./cloudstorage-emulator-container";
 
 const IMAGE = getImage(__dirname, 1);
@@ -49,27 +49,23 @@ describe.sequential("CloudStorageEmulatorContainer", { timeout: 240_000 }, () =>
 
   // cloud-storage {
   it("should work using default version", async () => {
-    const cloudstorageEmulatorContainer = await new CloudStorageEmulatorContainer(IMAGE).start();
+    await using cloudstorageEmulatorContainer = await new CloudStorageEmulatorContainer(IMAGE).start();
 
     await checkCloudStorage(cloudstorageEmulatorContainer);
-
-    await cloudstorageEmulatorContainer.stop();
   });
   // }
 
   it("should use the provided external URL", async () => {
-    const cloudstorageEmulatorContainer = await new CloudStorageEmulatorContainer(IMAGE)
+    await using cloudstorageEmulatorContainer = await new CloudStorageEmulatorContainer(IMAGE)
       .withExternalURL("http://cdn.company.local")
       .start();
 
     expect(cloudstorageEmulatorContainer).toBeDefined();
     expect(cloudstorageEmulatorContainer.getExternalUrl()).toBe("http://cdn.company.local");
-
-    await cloudstorageEmulatorContainer.stop();
   });
 
   it("should be able update the external URL of running instance", async () => {
-    const cloudstorageEmulatorContainer = await new CloudStorageEmulatorContainer(IMAGE)
+    await using cloudstorageEmulatorContainer = await new CloudStorageEmulatorContainer(IMAGE)
       .withExternalURL("http://cdn.company.local")
       .start();
 
@@ -102,8 +98,6 @@ describe.sequential("CloudStorageEmulatorContainer", { timeout: 240_000 }, () =>
     expect(requestBodyAsJson).toEqual(expect.objectContaining({ externalUrl: "http://files.company.local" }));
 
     expect(cloudstorageEmulatorContainer.getExternalUrl()).toBe("http://files.company.local");
-
-    await cloudstorageEmulatorContainer.stop();
   });
 
   it("should use emulator endpoint as default external URL", async () => {
@@ -113,13 +107,11 @@ describe.sequential("CloudStorageEmulatorContainer", { timeout: 240_000 }, () =>
       if (request.url.includes("/_internal/config")) configUpdated = true;
     });
 
-    const container = await new CloudStorageEmulatorContainer(IMAGE).start();
+    await using container = await new CloudStorageEmulatorContainer(IMAGE).start();
 
     expect(configUpdated).toBe(true);
     expect(container.getExternalUrl()).toBe(container.getEmulatorEndpoint());
     expect((await fetch(`${container.getExternalUrl()}/_internal/healthcheck`)).status).toBe(200);
-
-    await container.stop();
   });
 
   it("should allow skipping updating the external URL automatically", async () => {
@@ -129,13 +121,11 @@ describe.sequential("CloudStorageEmulatorContainer", { timeout: 240_000 }, () =>
       if (request.url.includes("/_internal/config")) configUpdated = true;
     });
 
-    const container = await new CloudStorageEmulatorContainer(IMAGE).withAutoUpdateExternalUrl(false).start();
+    await using container = await new CloudStorageEmulatorContainer(IMAGE).withAutoUpdateExternalUrl(false).start();
 
     expect(configUpdated).toBe(false);
     expect(container.getExternalUrl()).toBe(undefined);
     expect((await fetch(`${container.getEmulatorEndpoint()}/_internal/healthcheck`)).status).toBe(200);
-
-    await container.stop();
   });
 
   async function checkCloudStorage(cloudstorageEmulatorContainer: StartedCloudStorageEmulatorContainer) {

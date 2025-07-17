@@ -9,66 +9,53 @@ const IMAGE = "confluentinc/cp-kafka:7.9.1";
 describe("KafkaContainer", { timeout: 240_000 }, () => {
   // connectBuiltInZK {
   it("should connect using in-built zoo-keeper", async () => {
-    const kafkaContainer = await new KafkaContainer(IMAGE).start();
+    await using kafkaContainer = await new KafkaContainer(IMAGE).start();
 
     await testPubSub(kafkaContainer);
-
-    await kafkaContainer.stop();
   });
   // }
 
   it("should connect using in-built zoo-keeper and custom images", async () => {
-    const kafkaContainer = await new KafkaContainer(IMAGE).start();
+    await using kafkaContainer = await new KafkaContainer(IMAGE).start();
 
     await testPubSub(kafkaContainer);
-
-    await kafkaContainer.stop();
   });
 
   it("should connect using in-built zoo-keeper and custom network", async () => {
-    const network = await new Network().start();
+    await using network = await new Network().start();
 
-    const kafkaContainer = await new KafkaContainer(IMAGE).withNetwork(network).start();
+    await using kafkaContainer = await new KafkaContainer(IMAGE).withNetwork(network).start();
 
     await testPubSub(kafkaContainer);
-
-    await kafkaContainer.stop();
-    await network.stop();
   });
 
   // connectProvidedZK {
   it("should connect using provided zoo-keeper and network", async () => {
-    const network = await new Network().start();
+    await using network = await new Network().start();
 
     const zooKeeperHost = "zookeeper";
     const zooKeeperPort = 2181;
-    const zookeeperContainer = await new GenericContainer("confluentinc/cp-zookeeper:5.5.4")
+    await using _ = await new GenericContainer("confluentinc/cp-zookeeper:5.5.4")
       .withNetwork(network)
       .withNetworkAliases(zooKeeperHost)
       .withEnvironment({ ZOOKEEPER_CLIENT_PORT: zooKeeperPort.toString() })
       .withExposedPorts(zooKeeperPort)
       .start();
 
-    const kafkaContainer = await new KafkaContainer(IMAGE)
+    await using kafkaContainer = await new KafkaContainer(IMAGE)
       .withNetwork(network)
       .withZooKeeper(zooKeeperHost, zooKeeperPort)
       .start();
 
     await testPubSub(kafkaContainer);
-
-    await zookeeperContainer.stop();
-    await kafkaContainer.stop();
-    await network.stop();
   });
   // }
 
   it("should be reusable", async () => {
-    const originalKafkaContainer = await new KafkaContainer(IMAGE).withReuse().start();
+    await using originalKafkaContainer = await new KafkaContainer(IMAGE).withReuse().start();
     const newKafkaContainer = await new KafkaContainer(IMAGE).withReuse().start();
 
     expect(newKafkaContainer.getId()).toBe(originalKafkaContainer.getId());
-
-    await originalKafkaContainer.stop();
   });
 
   describe.each([
@@ -104,7 +91,7 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
         },
       });
       configure(kafkaContainer);
-      const startedKafkaContainer = await kafkaContainer.start();
+      await using startedKafkaContainer = await kafkaContainer.start();
 
       await testPubSub(startedKafkaContainer, {
         brokers: [`${startedKafkaContainer.getHost()}:${startedKafkaContainer.getMappedPort(9096)}`],
@@ -117,14 +104,13 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
           ca: [fs.readFileSync(path.resolve(certificatesDir, "kafka.client.truststore.pem"))],
         },
       });
-      await startedKafkaContainer.stop();
     });
     // }
 
     it(`should connect within Docker network`, async () => {
-      const network = await new Network().start();
+      await using network = await new Network().start();
 
-      const kafkaContainer = await new KafkaContainer(IMAGE)
+      await using _ = await new KafkaContainer(IMAGE)
         .withNetwork(network)
         .withNetworkAliases("kafka")
         .withSaslSslListener({
@@ -147,7 +133,7 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
         })
         .start();
 
-      const kafkaCliContainer = await new GenericContainer(IMAGE)
+      await using kafkaCliContainer = await new GenericContainer(IMAGE)
         .withNetwork(network)
         .withCommand(["bash", "-c", "sleep infinity"])
         .withCopyFilesToContainer([
@@ -182,19 +168,14 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
 
       expect(exitCode).toBe(0);
       expect(output).toContain("test-topic");
-
-      await kafkaCliContainer.stop();
-      await kafkaContainer.stop();
     });
   });
 
   // connectKraft {
   it("should connect using kraft", async () => {
-    const kafkaContainer = await new KafkaContainer(IMAGE).withKraft().start();
+    await using kafkaContainer = await new KafkaContainer(IMAGE).withKraft().start();
 
     await testPubSub(kafkaContainer);
-
-    await kafkaContainer.stop();
   });
   // }
 
@@ -205,13 +186,10 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
   });
 
   it("should connect using kraft and custom network", async () => {
-    const network = await new Network().start();
-    const kafkaContainer = await new KafkaContainer(IMAGE).withKraft().withNetwork(network).start();
+    await using network = await new Network().start();
+    await using kafkaContainer = await new KafkaContainer(IMAGE).withKraft().withNetwork(network).start();
 
     await testPubSub(kafkaContainer);
-
-    await kafkaContainer.stop();
-    await network.stop();
   });
 
   it("should throw an error when using kraft wit sasl and confluence platfom below 7.5.0", async () => {

@@ -100,6 +100,6 @@ export class AbstractStartedContainer implements StartedTestContainer {
   }
 
   async [Symbol.asyncDispose]() {
-    await this[Symbol.asyncDispose]();
+    await this.startedTestContainer[Symbol.asyncDispose]();
   }
 }

@@ -1,5 +1,5 @@
 import { Client } from "pg";
-import { getImage } from "../../../testcontainers/src/utils/test-helper";
+import { getImage } from "testcontainers/src/utils/test-helper";
 import { PostgreSqlContainer } from "./postgresql-container";
 
 const IMAGE = getImage(__dirname);
@@ -7,7 +7,7 @@ const IMAGE = getImage(__dirname);
 describe("PostgreSqlContainer snapshot and restore", { timeout: 180_000 }, () => {
   // createAndRestoreFromSnapshot {
   it("should create and restore from snapshot", async () => {
-    const container = await new PostgreSqlContainer(IMAGE).start();
+    await using container = await new PostgreSqlContainer(IMAGE).start();
 
     // Connect to the database
     let client = new Client({
@@ -58,12 +58,11 @@ describe("PostgreSqlContainer snapshot and restore", { timeout: 180_000 }, () =>
     expect(result.rows[0].name).toEqual("initial data");
 
     await client.end();
-    await container.stop();
   });
   // }
 
   it("should use custom snapshot name", async () => {
-    const container = await new PostgreSqlContainer(IMAGE).start();
+    await using container = await new PostgreSqlContainer(IMAGE).start();
     const customSnapshotName = "my_custom_snapshot";
 
     // Connect to the database
@@ -109,11 +108,10 @@ describe("PostgreSqlContainer snapshot and restore", { timeout: 180_000 }, () =>
     expect(result.rows[0].name).toEqual("initial data");
 
     await client.end();
-    await container.stop();
   });
 
   it("should handle multiple snapshots", async () => {
-    const container = await new PostgreSqlContainer(IMAGE).start();
+    await using container = await new PostgreSqlContainer(IMAGE).start();
 
     // Connect to the database
     let client = new Client({
@@ -192,11 +190,10 @@ describe("PostgreSqlContainer snapshot and restore", { timeout: 180_000 }, () =>
     expect(result.rows[0].name).toEqual("data for snapshot 2");
 
     await client.end();
-    await container.stop();
   });
 
   it("should throw an error when trying to snapshot postgres system database", async () => {
-    const container = await new PostgreSqlContainer(IMAGE).withDatabase("postgres").start();
+    await using container = await new PostgreSqlContainer(IMAGE).withDatabase("postgres").start();
 
     await expect(container.snapshot()).rejects.toThrow(
       "Snapshot feature is not supported when using the postgres system database"
@@ -205,7 +202,5 @@ describe("PostgreSqlContainer snapshot and restore", { timeout: 180_000 }, () =>
     await expect(container.restoreSnapshot()).rejects.toThrow(
       "Snapshot feature is not supported when using the postgres system database"
     );
-
-    await container.stop();
   });
 });

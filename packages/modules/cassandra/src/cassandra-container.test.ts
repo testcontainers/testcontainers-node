@@ -1,6 +1,6 @@
 import { Client } from "cassandra-driver";
 import { ImageName } from "testcontainers";
-import { getImage } from "../../../testcontainers/src/utils/test-helper";
+import { getImage } from "testcontainers/src/utils/test-helper";
 import { CassandraContainer } from "./cassandra-container";
 
 const IMAGE = getImage(__dirname);
@@ -8,7 +8,7 @@ const IMAGE = getImage(__dirname);
 describe.sequential("Cassandra", { timeout: 240_000 }, () => {
   // connectWithDefaultCredentials {
   it("should connect and execute a query with default credentials", async () => {
-    const container = await new CassandraContainer(IMAGE).start();
+    await using container = await new CassandraContainer(IMAGE).start();
 
     const client = new Client({
       contactPoints: [container.getContactPoint()],
@@ -22,7 +22,6 @@ describe.sequential("Cassandra", { timeout: 240_000 }, () => {
     expect(result.rows[0].release_version).toBe(ImageName.fromString(IMAGE).tag);
 
     await client.shutdown();
-    await container.stop();
   });
   // }
 
@@ -31,7 +30,7 @@ describe.sequential("Cassandra", { timeout: 240_000 }, () => {
     const username = "testUser";
     const password = "testPassword";
 
-    const container = await new CassandraContainer(IMAGE).withUsername(username).withPassword(password).start();
+    await using container = await new CassandraContainer(IMAGE).withUsername(username).withPassword(password).start();
 
     const client = new Client({
       contactPoints: [container.getContactPoint()],
@@ -46,7 +45,6 @@ describe.sequential("Cassandra", { timeout: 240_000 }, () => {
     expect(result.rows.length).toBeGreaterThan(0);
 
     await client.shutdown();
-    await container.stop();
   });
   // }
 
@@ -54,7 +52,10 @@ describe.sequential("Cassandra", { timeout: 240_000 }, () => {
   it("should set datacenter and rack", async () => {
     const customDataCenter = "customDC";
     const customRack = "customRack";
-    const container = await new CassandraContainer(IMAGE).withDatacenter(customDataCenter).withRack(customRack).start();
+    await using container = await new CassandraContainer(IMAGE)
+      .withDatacenter(customDataCenter)
+      .withRack(customRack)
+      .start();
 
     const client = new Client({
       contactPoints: [container.getContactPoint()],
@@ -67,13 +68,12 @@ describe.sequential("Cassandra", { timeout: 240_000 }, () => {
     expect(result.rows[0].rack).toBe(customRack);
 
     await client.shutdown();
-    await container.stop();
   });
   // }
 
   // createAndFetchData {
   it("should create keyspace, a table, insert data, and retrieve it", async () => {
-    const container = await new CassandraContainer(IMAGE).start();
+    await using container = await new CassandraContainer(IMAGE).start();
 
     const client = new Client({
       contactPoints: [container.getContactPoint()],
@@ -108,12 +108,11 @@ describe.sequential("Cassandra", { timeout: 240_000 }, () => {
     expect(result.rows[0].name).toBe(username);
 
     await client.shutdown();
-    await container.stop();
   });
   // }
 
   it("should work with restarted container", async () => {
-    const container = await new CassandraContainer(IMAGE).start();
+    await using container = await new CassandraContainer(IMAGE).start();
     await container.restart();
 
     const client = new Client({
@@ -128,6 +127,5 @@ describe.sequential("Cassandra", { timeout: 240_000 }, () => {
     expect(result.rows[0].release_version).toBe(ImageName.fromString(IMAGE).tag);
 
     await client.shutdown();
-    await container.stop();
   });
 });

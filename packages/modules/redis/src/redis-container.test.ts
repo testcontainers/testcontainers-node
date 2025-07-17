@@ -2,7 +2,7 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 import { createClient } from "redis";
-import { getImage } from "../../../testcontainers/src/utils/test-helper";
+import { getImage } from "testcontainers/src/utils/test-helper";
 import { RedisContainer, StartedRedisContainer } from "./redis-container";
 
 const IMAGE = getImage(__dirname);
@@ -10,7 +10,7 @@ const IMAGE = getImage(__dirname);
 describe("RedisContainer", { timeout: 240_000 }, () => {
   // startContainer {
   it("should connect and execute set-get", async () => {
-    const container = await new RedisContainer(IMAGE).start();
+    await using container = await new RedisContainer(IMAGE).start();
 
     const client = await connectTo(container);
 
@@ -18,12 +18,11 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
     expect(await client.get("key")).toBe("val");
 
     client.destroy();
-    await container.stop();
   });
   // }
 
   it("should connect with password and execute set-get", async () => {
-    const container = await new RedisContainer(IMAGE).withPassword("test").start();
+    await using container = await new RedisContainer(IMAGE).withPassword("test").start();
 
     const client = await connectTo(container);
 
@@ -31,13 +30,12 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
     expect(await client.get("key")).toBe("val");
 
     client.destroy();
-    await container.stop();
   });
 
   // persistentData {
   it("should reconnect with volume and persistence data", async () => {
     const sourcePath = fs.mkdtempSync(path.join(os.tmpdir(), "redis-"));
-    const container = await new RedisContainer(IMAGE).withPassword("test").withPersistence(sourcePath).start();
+    await using container = await new RedisContainer(IMAGE).withPassword("test").withPersistence(sourcePath).start();
     let client = await connectTo(container);
 
     await client.set("key", "val");
@@ -47,7 +45,6 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
     expect(await client.get("key")).toBe("val");
 
     client.destroy();
-    await container.stop();
     try {
       fs.rmSync(sourcePath, { force: true, recursive: true });
     } catch (e) {
@@ -59,7 +56,7 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
 
   // initial data import {
   it("should load initial data and can read it", async () => {
-    const container = await new RedisContainer(IMAGE)
+    await using container = await new RedisContainer(IMAGE)
       .withPassword("test")
       .withInitialData(path.join(__dirname, "initData.redis"))
       .start();
@@ -72,7 +69,6 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
     expect(await client.get("user:002")).toBe(JSON.stringify(user));
 
     client.destroy();
-    await container.stop();
   });
   // }
 
@@ -81,7 +77,7 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
     const password = "testPassword";
 
     // Test authentication
-    const container = await new RedisContainer(IMAGE).withPassword(password).start();
+    await using container = await new RedisContainer(IMAGE).withPassword(password).start();
     expect(container.getConnectionUrl()).toEqual(`redis://:${password}@${container.getHost()}:${container.getPort()}`);
 
     const client = await connectTo(container);
@@ -90,24 +86,21 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
     expect(await client.get("key")).toBe("val");
 
     client.destroy();
-    await container.stop();
   });
   // }
 
   // executeCommand {
   it("should execute container cmd and return the result", async () => {
-    const container = await new RedisContainer(IMAGE).start();
+    await using container = await new RedisContainer(IMAGE).start();
 
     const queryResult = await container.executeCliCmd("info", ["clients"]);
     expect(queryResult).toEqual(expect.stringContaining("connected_clients:1"));
-
-    await container.stop();
   });
   // }
 
   // startWithRedisStack {
   it("should start with redis-stack-server and json module", async () => {
-    const container = await new RedisContainer("redis/redis-stack-server:7.4.0-v4")
+    await using container = await new RedisContainer("redis/redis-stack-server:7.4.0-v4")
       .withPassword("testPassword")
       .start();
     const client = await connectTo(container);
@@ -117,7 +110,6 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
     expect(result).toEqual({ name: "test" });
 
     client.destroy();
-    await container.stop();
   });
   // }
 

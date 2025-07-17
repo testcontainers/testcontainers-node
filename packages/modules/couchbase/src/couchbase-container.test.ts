@@ -1,6 +1,6 @@
 import couchbase, { Bucket, Cluster } from "couchbase";
 import { BucketDefinition } from "./bucket-definition";
-import { CouchbaseContainer, StartedCouchbaseContainer } from "./couchbase-container";
+import { CouchbaseContainer } from "./couchbase-container";
 import { CouchbaseService } from "./couchbase-service";
 
 describe("CouchbaseContainer", { timeout: 180_000 }, () => {
@@ -31,27 +31,14 @@ describe("CouchbaseContainer", { timeout: 180_000 }, () => {
   describe("Enterprise Image", () => {
     const COUCHBASE_IMAGE_ENTERPRISE = "couchbase/server:enterprise-7.0.3";
 
-    let startedTestContainer: StartedCouchbaseContainer;
-    let cluster: Cluster;
-
-    afterEach(async () => {
-      if (cluster) {
-        await cluster.close();
-      }
-
-      if (startedTestContainer) {
-        await startedTestContainer.stop();
-      }
-    });
-
     // connectAndQuery {
     it("should connect and query using enterprise image", async () => {
       const bucketDefinition = new BucketDefinition("mybucket");
       const container = new CouchbaseContainer(COUCHBASE_IMAGE_ENTERPRISE).withBucket(bucketDefinition);
 
-      startedTestContainer = await container.start();
+      await using startedTestContainer = await container.start();
 
-      cluster = await couchbase.Cluster.connect(startedTestContainer.getConnectionString(), {
+      const cluster = await couchbase.Cluster.connect(startedTestContainer.getConnectionString(), {
         username: startedTestContainer.getUsername(),
         password: startedTestContainer.getPassword(),
       });
@@ -60,6 +47,7 @@ describe("CouchbaseContainer", { timeout: 180_000 }, () => {
       const result = await upsertAndGet(bucket, "testdoc", { foo: "bar" });
 
       expect(result.content).toEqual({ foo: "bar" });
+      await cluster.close();
     });
     // }
 
@@ -67,8 +55,8 @@ describe("CouchbaseContainer", { timeout: 180_000 }, () => {
       const bucketDefinition = new BucketDefinition("mybucket").withFlushEnabled(true);
       const container = new CouchbaseContainer(COUCHBASE_IMAGE_ENTERPRISE).withBucket(bucketDefinition);
 
-      startedTestContainer = await container.start();
-      cluster = await couchbase.Cluster.connect(startedTestContainer.getConnectionString(), {
+      await using startedTestContainer = await container.start();
+      const cluster = await couchbase.Cluster.connect(startedTestContainer.getConnectionString(), {
         username: startedTestContainer.getUsername(),
         password: startedTestContainer.getPassword(),
       });
@@ -81,31 +69,19 @@ describe("CouchbaseContainer", { timeout: 180_000 }, () => {
       const existResult = await flushBucketAndCheckExists(cluster, bucket, "testdoc");
 
       expect(existResult.exists).toBe(false);
+      await cluster.close();
     });
   });
 
   describe("Community Image", () => {
     const COUCHBASE_IMAGE_COMMUNITY = "couchbase/server:community-7.0.2";
 
-    let startedTestContainer: StartedCouchbaseContainer;
-    let cluster: Cluster;
-
-    afterEach(async () => {
-      if (cluster) {
-        await cluster.close();
-      }
-
-      if (startedTestContainer) {
-        await startedTestContainer.stop();
-      }
-    });
-
     it("should connect and query using community image", async () => {
       const bucketDefinition = new BucketDefinition("mybucket");
       const container = new CouchbaseContainer(COUCHBASE_IMAGE_COMMUNITY).withBucket(bucketDefinition);
 
-      startedTestContainer = await container.start();
-      cluster = await couchbase.Cluster.connect(startedTestContainer.getConnectionString(), {
+      await using startedTestContainer = await container.start();
+      const cluster = await couchbase.Cluster.connect(startedTestContainer.getConnectionString(), {
         username: startedTestContainer.getUsername(),
         password: startedTestContainer.getPassword(),
       });
@@ -114,14 +90,15 @@ describe("CouchbaseContainer", { timeout: 180_000 }, () => {
       const result = await upsertAndGet(bucket, "testdoc", { foo: "bar" });
 
       expect(result.content).toEqual({ foo: "bar" });
+      await cluster.close();
     });
 
     it("should flush bucket if flushEnabled and check any document exists", async () => {
       const bucketDefinition = new BucketDefinition("mybucket").withFlushEnabled(true);
       const container = new CouchbaseContainer(COUCHBASE_IMAGE_COMMUNITY).withBucket(bucketDefinition);
 
-      startedTestContainer = await container.start();
-      cluster = await couchbase.Cluster.connect(startedTestContainer.getConnectionString(), {
+      await using startedTestContainer = await container.start();
+      const cluster = await couchbase.Cluster.connect(startedTestContainer.getConnectionString(), {
         username: startedTestContainer.getUsername(),
         password: startedTestContainer.getPassword(),
       });
@@ -134,6 +111,7 @@ describe("CouchbaseContainer", { timeout: 180_000 }, () => {
       const existResult = await flushBucketAndCheckExists(cluster, bucket, "testdoc");
 
       expect(existResult.exists).toBe(false);
+      await cluster.close();
     });
 
     it("should throw error if analytics service enabled with community version", async () => {

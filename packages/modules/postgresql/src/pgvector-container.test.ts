@@ -1,12 +1,12 @@
 import { Client } from "pg";
-import { getImage } from "../../../testcontainers/src/utils/test-helper";
+import { getImage } from "testcontainers/src/utils/test-helper";
 import { PostgreSqlContainer } from "./postgresql-container";
 
 const IMAGE = getImage(__dirname);
 
 describe("PgvectorContainer", { timeout: 180_000 }, () => {
   it("should work", async () => {
-    const container = await new PostgreSqlContainer(IMAGE).start();
+    await using container = await new PostgreSqlContainer(IMAGE).start();
 
     const client = new Client({
       host: container.getHost(),
@@ -21,11 +21,10 @@ describe("PgvectorContainer", { timeout: 180_000 }, () => {
     expect(result.rows[0]).toEqual({ "?column?": 1 });
 
     await client.end();
-    await container.stop();
   });
 
   it("should restart", async () => {
-    const container = await new PostgreSqlContainer(IMAGE).start();
+    await using container = await new PostgreSqlContainer(IMAGE).start();
     await container.restart();
 
     const client = new Client({
@@ -41,6 +40,5 @@ describe("PgvectorContainer", { timeout: 180_000 }, () => {
     expect(result.rows[0]).toEqual({ "?column?": 1 });
 
     await client.end();
-    await container.stop();
   });
 });

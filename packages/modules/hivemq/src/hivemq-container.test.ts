@@ -1,13 +1,13 @@
 import mqtt from "mqtt";
+import { getImage } from "testcontainers/src/utils/test-helper";
 import { expect } from "vitest";
-import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { HiveMQContainer } from "./hivemq-container";
 const IMAGE = getImage(__dirname);
 
 describe("HiveMQContainer", { timeout: 240_000 }, () => {
   // connect {
   it("should connect to HiveMQ Community Edition via MQTT.js", async () => {
-    const container = await new HiveMQContainer(IMAGE).start();
+    await using container = await new HiveMQContainer(IMAGE).start();
 
     const testMqttClient = mqtt.connect(container.getConnectionString());
 

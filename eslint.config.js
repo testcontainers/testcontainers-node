@@ -32,6 +32,7 @@ export default [
         "error",
         {
           caughtErrors: "none",
+          varsIgnorePattern: "^_",
         },
       ],
       "no-irregular-whitespace": "off",

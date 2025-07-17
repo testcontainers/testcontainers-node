@@ -1,5 +1,5 @@
 import { Client } from "@opensearch-project/opensearch";
-import { getImage } from "../../../testcontainers/src/utils/test-helper";
+import { getImage } from "testcontainers/src/utils/test-helper";
 import { OpenSearchContainer } from "./opensearch-container";
 
 const IMAGE = getImage(__dirname);
@@ -8,7 +8,7 @@ const images = ["opensearchproject/opensearch:2.19.2", IMAGE];
 describe("OpenSearchContainer", { timeout: 180_000 }, () => {
   // createIndex {
   it.each(images)("should create an index with %s", async (image) => {
-    const container = await new OpenSearchContainer(image).start();
+    await using container = await new OpenSearchContainer(image).start();
     const client = new Client({
       node: container.getHttpUrl(),
       auth: {
@@ -24,13 +24,12 @@ describe("OpenSearchContainer", { timeout: 180_000 }, () => {
     await client.indices.create({ index: "people" });
     const existsResponse = await client.indices.exists({ index: "people" });
     expect(existsResponse.body).toBe(true);
-    await container.stop();
   });
   // }
 
   // indexDocument {
   it("should index a document", async () => {
-    const container = await new OpenSearchContainer(IMAGE).start();
+    await using container = await new OpenSearchContainer(IMAGE).start();
     const client = new Client({
       node: container.getHttpUrl(),
       auth: {
@@ -52,12 +51,11 @@ describe("OpenSearchContainer", { timeout: 180_000 }, () => {
 
     const getResponse = await client.get({ index: "people", id: document.id });
     expect(getResponse.body._source).toStrictEqual(document);
-    await container.stop();
   });
   // }
 
   it("should work with restarted container", async () => {
-    const container = await new OpenSearchContainer(IMAGE).start();
+    await using container = await new OpenSearchContainer(IMAGE).start();
     await container.restart();
 
     const client = new Client({
@@ -74,7 +72,6 @@ describe("OpenSearchContainer", { timeout: 180_000 }, () => {
     await client.indices.create({ index: "people" });
     const existsResponse = await client.indices.exists({ index: "people" });
     expect(existsResponse.body).toBe(true);
-    await container.stop();
   });
 
   it("should throw when given an invalid password", () => {
@@ -83,7 +80,7 @@ describe("OpenSearchContainer", { timeout: 180_000 }, () => {
 
   // customPassword {
   it("should set custom password", async () => {
-    const container = await new OpenSearchContainer(IMAGE).withPassword("Str0ng!Passw0rd2025").start();
+    await using container = await new OpenSearchContainer(IMAGE).withPassword("Str0ng!Passw0rd2025").start();
 
     const client = new Client({
       node: container.getHttpUrl(),
@@ -99,7 +96,6 @@ describe("OpenSearchContainer", { timeout: 180_000 }, () => {
     await client.indices.create({ index: "people" });
     const existsResponse = await client.indices.exists({ index: "people" });
     expect(existsResponse.body).toBe(true);
-    await container.stop();
   });
   // }
 });

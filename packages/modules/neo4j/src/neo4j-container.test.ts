@@ -1,5 +1,5 @@
 import neo4j from "neo4j-driver";
-import { getImage } from "../../../testcontainers/src/utils/test-helper";
+import { getImage } from "testcontainers/src/utils/test-helper";
 import { Neo4jContainer, Neo4jPlugin } from "./neo4j-container";
 
 const IMAGE = getImage(__dirname);
@@ -7,7 +7,7 @@ const IMAGE = getImage(__dirname);
 describe("Neo4jContainer", { timeout: 180_000 }, () => {
   // createNode {
   it("should create a person node", async () => {
-    const container = await new Neo4jContainer(IMAGE).start();
+    await using container = await new Neo4jContainer(IMAGE).start();
     const driver = neo4j.driver(
       container.getBoltUri(),
       neo4j.auth.basic(container.getUsername(), container.getPassword())
@@ -22,13 +22,12 @@ describe("Neo4jContainer", { timeout: 180_000 }, () => {
 
     await session.close();
     await driver.close();
-    await container.stop();
   });
   // }
 
   // v5DefaultPassword {
   it("should connect to neo4j:v5 with default password", async () => {
-    const container = await new Neo4jContainer("neo4j:5.23.0").start();
+    await using container = await new Neo4jContainer("neo4j:5.23.0").start();
     const driver = neo4j.driver(
       container.getBoltUri(),
       neo4j.auth.basic(container.getUsername(), container.getPassword())
@@ -43,13 +42,12 @@ describe("Neo4jContainer", { timeout: 180_000 }, () => {
 
     await session.close();
     await driver.close();
-    await container.stop();
   });
   // }
 
   // setPassword {
   it("should connect with custom password", async () => {
-    const container = await new Neo4jContainer(IMAGE).withPassword("xyz1234@!").start();
+    await using container = await new Neo4jContainer(IMAGE).withPassword("xyz1234@!").start();
     const driver = neo4j.driver(
       container.getBoltUri(),
       neo4j.auth.basic(container.getUsername(), container.getPassword())
@@ -64,13 +62,12 @@ describe("Neo4jContainer", { timeout: 180_000 }, () => {
 
     await session.close();
     await driver.close();
-    await container.stop();
   });
   // }
 
   // apoc {
   it("should have APOC plugin installed", async () => {
-    const container = await new Neo4jContainer(IMAGE).withApoc().withStartupTimeout(120_000).start();
+    await using container = await new Neo4jContainer(IMAGE).withApoc().withStartupTimeout(120_000).start();
     const driver = neo4j.driver(
       container.getBoltUri(),
       neo4j.auth.basic(container.getUsername(), container.getPassword())
@@ -83,13 +80,12 @@ describe("Neo4jContainer", { timeout: 180_000 }, () => {
 
     await session.close();
     await driver.close();
-    await container.stop();
   });
   // }
 
   // pluginsList {
   it("should work with plugin list", async () => {
-    const container = await new Neo4jContainer("neo4j:5.26.5")
+    await using container = await new Neo4jContainer("neo4j:5.26.5")
       .withPlugins([Neo4jPlugin.APOC_EXTENDED, Neo4jPlugin.GRAPH_DATA_SCIENCE])
       .withStartupTimeout(120_000)
       .start();
@@ -113,7 +109,6 @@ describe("Neo4jContainer", { timeout: 180_000 }, () => {
 
     await session.close();
     await driver.close();
-    await container.stop();
   });
   // }
 });
