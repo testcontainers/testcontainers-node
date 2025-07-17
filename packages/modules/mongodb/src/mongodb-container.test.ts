@@ -65,3 +65,27 @@ describe("MongodbContainer", { timeout: 240_000 }, () => {
   });
   // }
 });
+
+describe("MongodbContainer connect with credentials", { timeout: 240_000 }, () => {
+  it.for([["mongo:4.0.1"], ["mongo:5.0"], ["mongo:8.0"]])("should connect to %s with credentials", async ([image]) => {
+    const mongodbContainer = await new MongoDBContainer(image)
+      .withUsername("mongo_user")
+      .withPassword("mongo_password")
+      .start();
+    const connection = mongoose.createConnection(mongodbContainer.getConnectionString(), {
+      directConnection: true,
+    });
+    try {
+      const result = await connection.collection("testcontainers").insertOne({ title: "testcontainers" });
+      const id = result.insertedId.toString();
+      expect(id).not.toBeNull();
+      expect(id).not.toBe("");
+      const rsStatus = await connection.db?.admin().replSetGetStatus();
+      expect(rsStatus).toBeDefined();
+      expect(rsStatus?.set).toBe("rs0");
+    } finally {
+      await connection.close();
+      await mongodbContainer.stop();
+    }
+  });
+});
