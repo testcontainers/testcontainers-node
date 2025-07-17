@@ -68,7 +68,11 @@ The BigQuery emulator is by [Masaaki Goshima](https://github.com/goccy) and uses
 The Cloud Spanner emulator container wraps Google's official emulator image. It exposes gRPC and HTTP ports, and provides a `helper` for instance/database operations.
 
 <!--codeinclude-->
-[Starting a Spanner Emulator container and exposing endpoints](../../packages/modules/gcloud/src/spanner-emulator-container.test.ts) inside_block:startup
+[Starting a Spanner Emulator container and exposing endpoints using projectId and SPANNER_EMULATOR_HOST](../../packages/modules/gcloud/src/spanner-emulator-container.test.ts) inside_block:startupWithEnvironmentVariable
+<!--/codeinclude-->
+
+<!--codeinclude-->
+[Starting a Spanner Emulator container and exposing endpoints using explicitly configured client](../../packages/modules/gcloud/src/spanner-emulator-container.test.ts) inside_block:startupWithExplicitClient
 <!--/codeinclude-->
 
 <!--codeinclude-->

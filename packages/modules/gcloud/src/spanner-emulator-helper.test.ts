@@ -6,8 +6,8 @@ import { SpannerEmulatorHelper } from "./spanner-emulator-helper";
 const IMAGE = getImage(__dirname, 3);
 
 describe("SpannerEmulatorHelper", { timeout: 240_000 }, () => {
+  // createAndDelete {
   it("should create and delete instance and database via helper", async () => {
-    // createAndDelete {
     const container = await new SpannerEmulatorContainer(IMAGE).start();
     const helper = new SpannerEmulatorHelper(container);
     const instanceId = "test-instance";
@@ -39,6 +39,6 @@ describe("SpannerEmulatorHelper", { timeout: 240_000 }, () => {
     expect(instanceExistsAfter).toBe(false);
 
     await container.stop();
-    // }
   });
+  // }
 });

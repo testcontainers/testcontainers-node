@@ -1,3 +1,4 @@
+import { credentials } from "@grpc/grpc-js";
 import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 
 const GRPC_PORT = 9010;
@@ -43,10 +44,17 @@ export class StartedSpannerEmulatorContainer extends AbstractStartedContainer {
   }
 
   /**
+   * @returns mapped port for gRPC.
+   */
+  public getGrpcPort(): number {
+    return this.getMappedPort(GRPC_PORT);
+  }
+
+  /**
    * @returns host:port for gRPC.
    */
   public getEmulatorGrpcEndpoint(): string {
-    return `${this.getHost()}:${this.getMappedPort(GRPC_PORT)}`;
+    return `${this.getHost()}:${this.getGrpcPort()}`;
   }
 
   /**
@@ -54,5 +62,12 @@ export class StartedSpannerEmulatorContainer extends AbstractStartedContainer {
    */
   public getProjectId(): string {
     return this.projectId;
+  }
+
+  /**
+   * @returns insecure credentials for emulator.
+   */
+  public getSslCredentials() {
+    return credentials.createInsecure();
   }
 }

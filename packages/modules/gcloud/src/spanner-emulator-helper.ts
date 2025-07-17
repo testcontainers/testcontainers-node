@@ -12,7 +12,9 @@ export class SpannerEmulatorHelper {
   private databaseAdminClientInstance?: ReturnType<Spanner["getDatabaseAdminClient"]>;
   private instanceConfigValue?: string;
 
-  constructor(private readonly emulator: StartedSpannerEmulatorContainer) {
+  constructor(private readonly emulator: StartedSpannerEmulatorContainer) {}
+
+  public setEmulatorHost(): void {
     process.env.SPANNER_EMULATOR_HOST = this.emulator.getEmulatorGrpcEndpoint();
   }
 
@@ -21,16 +23,12 @@ export class SpannerEmulatorHelper {
    */
   public get client(): Spanner {
     if (!this.clientInstance) {
-      if (!process.env.SPANNER_EMULATOR_HOST) {
-        throw new Error("SPANNER_EMULATOR_HOST is not set. Call setAsEmulatorHost() before using the client.");
-      }
       // Provide fake credentials so the auth library never tries metadata
       this.clientInstance = new Spanner({
         projectId: this.emulator.getProjectId(),
-        credentials: {
-          client_email: "test@example.com",
-          private_key: "not-a-real-key",
-        },
+        apiEndpoint: this.emulator.getHost(),
+        port: this.emulator.getGrpcPort(),
+        sslCreds: this.emulator.getSslCredentials(),
       });
     }
     return this.clientInstance;
