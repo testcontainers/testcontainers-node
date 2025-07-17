@@ -9,10 +9,11 @@ describe("NatsContainer", { timeout: 180_000 }, () => {
   // connect {
   it("should start, connect and close", async () => {
     const container = await new NatsContainer(IMAGE).start();
-
+    expect(container.getConnectionOptions().pass).toEqual("test");
+    expect(container.getConnectionOptions().user).toEqual("test");
     // establish connection
     const nc = await connect(container.getConnectionOptions());
-    // close the connection
+
     await nc.close();
     // check if the close was OK
     const err = await nc.closed();
@@ -23,7 +24,8 @@ describe("NatsContainer", { timeout: 180_000 }, () => {
   // noCredentials {
   it("should start, connect and close when noCredentials is true", async () => {
     const container = await new NatsContainer(IMAGE).withCredentials(false).start();
-
+    expect(container.getConnectionOptions().user).toBeUndefined();
+    expect(container.getConnectionOptions().pass).toBeUndefined();
     // establish connection
     const nc = await connect(container.getConnectionOptions());
     // close the connection
