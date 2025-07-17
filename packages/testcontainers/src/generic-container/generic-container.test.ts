@@ -15,11 +15,11 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
   const fixtures = path.resolve(__dirname, "..", "..", "fixtures", "docker");
 
   it("should return first mapped port", async () => {
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withExposedPorts(8080)
+      .start();
 
     expect(container.getFirstMappedPort()).toBe(container.getMappedPort(8080));
-
-    await container.stop();
   });
 
   it("should bind to specified host port", async () => {
