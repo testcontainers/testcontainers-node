@@ -294,10 +294,13 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     const container = new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080);
 
     await using _ = await container.start();
-    await using dockerEventStream = await getDockerEventStream();
-    const dockerPullEventPromise = waitForDockerEvent(dockerEventStream.events, "pull");
-    await using _ = await container.withPullPolicy(PullPolicy.alwaysPull()).start();
-    await dockerPullEventPromise;
+
+    {
+      await using dockerEventStream = await getDockerEventStream();
+      const dockerPullEventPromise = waitForDockerEvent(dockerEventStream.events, "pull");
+      await using _ = await container.withPullPolicy(PullPolicy.alwaysPull()).start();
+      await dockerPullEventPromise;
+    }
   });
 
   it("should set the IPC mode", async () => {

@@ -51,10 +51,13 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
     const env = new DockerComposeEnvironment(fixtures, "docker-compose-with-many-services.yml");
 
     await using _ = await env.up();
-    await using dockerEventStream = await getDockerEventStream();
-    const dockerPullEventPromise = waitForDockerEvent(dockerEventStream.events, "pull");
-    await using _ = await env.withPullPolicy(PullPolicy.alwaysPull()).up();
-    await dockerPullEventPromise;
+
+    {
+      await using dockerEventStream = await getDockerEventStream();
+      const dockerPullEventPromise = waitForDockerEvent(dockerEventStream.events, "pull");
+      await using _ = await env.withPullPolicy(PullPolicy.alwaysPull()).up();
+      await dockerPullEventPromise;
+    }
   });
 
   it("should use pull policy for specific service", async () => {
