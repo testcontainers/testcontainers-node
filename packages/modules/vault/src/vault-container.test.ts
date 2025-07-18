@@ -4,7 +4,7 @@ import { StartedVaultContainer, VaultContainer } from "./vault-container";
 
 const VAULT_TOKEN = "my-root-token";
 
-describe("vault", { timeout: 180_000 }, () => {
+describe("VaultContainer", { timeout: 180_000 }, () => {
   let container: StartedVaultContainer;
 
   afterEach(async () => {
