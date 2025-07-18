@@ -23,5 +23,9 @@ npm install @testcontainers/nats --save-dev
 <!--/codeinclude-->
 
 <!--codeinclude-->
+[No credentials:](../../packages/modules/nats/src/nats-container.test.ts) inside_block:noCredentials
+<!--/codeinclude-->
+
+<!--codeinclude-->
 [Enable JetStream:](../../packages/modules/nats/src/nats-container.test.ts) inside_block:jetstream
 <!--/codeinclude-->
