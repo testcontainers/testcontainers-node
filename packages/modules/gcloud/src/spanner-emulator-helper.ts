@@ -4,7 +4,7 @@ import type { StartedSpannerEmulatorContainer } from "./spanner-emulator-contain
 
 /**
  * Helper class that encapsulates all Spanner client interactions against the emulator.
- * Clients and configs are lazily instantiated; user must call setAsEmulatorHost().
+ * Clients and configs are lazily instantiated.
  */
 export class SpannerEmulatorHelper {
   private clientInstance?: Spanner;
@@ -14,23 +14,16 @@ export class SpannerEmulatorHelper {
 
   constructor(private readonly emulator: StartedSpannerEmulatorContainer) {}
 
-  public setEmulatorHost(): void {
-    process.env.SPANNER_EMULATOR_HOST = this.emulator.getEmulatorGrpcEndpoint();
-  }
-
   /**
    * Lazily get or create the Spanner client.
    */
   public get client(): Spanner {
-    if (!this.clientInstance) {
-      // Provide fake credentials so the auth library never tries metadata
-      this.clientInstance = new Spanner({
-        projectId: this.emulator.getProjectId(),
-        apiEndpoint: this.emulator.getHost(),
-        port: this.emulator.getGrpcPort(),
-        sslCreds: this.emulator.getSslCredentials(),
-      });
-    }
+    this.clientInstance ??= new Spanner({
+      projectId: this.emulator.getProjectId(),
+      apiEndpoint: this.emulator.getHost(),
+      port: this.emulator.getGrpcPort(),
+      sslCreds: this.emulator.getSslCredentials(),
+    });
     return this.clientInstance;
   }
 
@@ -38,9 +31,7 @@ export class SpannerEmulatorHelper {
    * Lazily get or create the InstanceAdminClient.
    */
   private get instanceAdminClient(): ReturnType<Spanner["getInstanceAdminClient"]> {
-    if (!this.instanceAdminClientInstance) {
-      this.instanceAdminClientInstance = this.client.getInstanceAdminClient();
-    }
+    this.instanceAdminClientInstance ??= this.client.getInstanceAdminClient();
     return this.instanceAdminClientInstance;
   }
 
@@ -48,9 +39,7 @@ export class SpannerEmulatorHelper {
    * Lazily get or create the DatabaseAdminClient.
    */
   private get databaseAdminClient(): ReturnType<Spanner["getDatabaseAdminClient"]> {
-    if (!this.databaseAdminClientInstance) {
-      this.databaseAdminClientInstance = this.client.getDatabaseAdminClient();
-    }
+    this.databaseAdminClientInstance ??= this.client.getDatabaseAdminClient();
     return this.databaseAdminClientInstance;
   }
 
@@ -58,12 +47,10 @@ export class SpannerEmulatorHelper {
    * Lazily compute the instanceConfig path.
    */
   public get instanceConfig(): string {
-    if (!this.instanceConfigValue) {
-      this.instanceConfigValue = this.instanceAdminClient.instanceConfigPath(
-        this.emulator.getProjectId(),
-        "emulator-config"
-      );
-    }
+    this.instanceConfigValue ??= this.instanceAdminClient.instanceConfigPath(
+      this.emulator.getProjectId(),
+      "emulator-config"
+    );
     return this.instanceConfigValue;
   }
 
