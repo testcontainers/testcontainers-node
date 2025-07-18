@@ -11,15 +11,11 @@ npm install @testcontainers/vault --save-dev
 ## Examples
 
 <!--codeinclude-->
-
 [Start and perform read/write with node-vault:](../../packages/modules/vault/src/vault-container.test.ts) inside_block:readWrite
-
 <!--/codeinclude-->
 
 <!--codeinclude-->
-
 [Run Vault CLI init commands at startup:](../../packages/modules/vault/src/vault-container.test.ts) inside_block:initCommands
-
 <!--/codeinclude-->
 
 ## Why use Vault in integration tests?
