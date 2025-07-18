@@ -1,6 +1,6 @@
 import admin from "firebase-admin";
 import { randomUuid } from "testcontainers";
-import { getImage } from "testcontainers/src/utils/test-helper";
+import { getImage } from "../../testcontainers/src/utils/test-helper";
 import { FirestoreEmulatorContainer, StartedFirestoreEmulatorContainer } from "./firestore-emulator-container";
 
 const IMAGE = getImage(__dirname);

@@ -1,5 +1,5 @@
 import amqp from "amqplib";
-import { getImage } from "testcontainers/src/utils/test-helper";
+import { getImage } from "../../testcontainers/src/utils/test-helper";
 import { RabbitMQContainer } from "./rabbitmq-container";
 
 const IMAGE = getImage(__dirname);

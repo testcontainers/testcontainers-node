@@ -2,7 +2,7 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 import { createClient } from "redis";
-import { getImage } from "testcontainers/src/utils/test-helper";
+import { getImage } from "../../testcontainers/src/utils/test-helper";
 import { StartedValkeyContainer, ValkeyContainer } from "./valkey-container";
 
 const IMAGE = getImage(__dirname);

@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { GenericContainer, Network } from "testcontainers";
-import { getImage } from "testcontainers/src/utils/test-helper";
+import { getImage } from "../../testcontainers/src/utils/test-helper";
 import { KafkaContainer, SaslSslListenerOptions } from "./kafka-container";
 import { testPubSub } from "./test-helper";
 

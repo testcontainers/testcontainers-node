@@ -1,5 +1,5 @@
 import { Client } from "@elastic/elasticsearch";
-import { getImage } from "testcontainers/src/utils/test-helper";
+import { getImage } from "../../testcontainers/src/utils/test-helper";
 import { ElasticsearchContainer } from "./elasticsearch-container";
 
 const IMAGE = getImage(__dirname);

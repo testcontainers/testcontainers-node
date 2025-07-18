@@ -1,7 +1,7 @@
 import { Storage } from "@google-cloud/storage";
 import { setupServer } from "msw/node";
 import { ReadableStream } from "node:stream/web";
-import { getImage } from "testcontainers/src/utils/test-helper";
+import { getImage } from "../../testcontainers/src/utils/test-helper";
 import { CloudStorageEmulatorContainer, StartedCloudStorageEmulatorContainer } from "./cloudstorage-emulator-container";
 
 const IMAGE = getImage(__dirname, 1);

@@ -1,7 +1,7 @@
 import { TableClient, TableEntity } from "@azure/data-tables";
 import { BlobServiceClient, StorageSharedKeyCredential } from "@azure/storage-blob";
 import { QueueServiceClient } from "@azure/storage-queue";
-import { getImage } from "testcontainers/src/utils/test-helper";
+import { getImage } from "../../testcontainers/src/utils/test-helper";
 import { AzuriteContainer } from "./azurite-container";
 
 const IMAGE = getImage(__dirname);

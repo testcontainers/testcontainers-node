@@ -1,6 +1,6 @@
 import { mockServerClient } from "mockserver-client";
 import superagent from "superagent";
-import { getImage } from "testcontainers/src/utils/test-helper";
+import { getImage } from "../../testcontainers/src/utils/test-helper";
 import { MockserverContainer } from "./mockserver-container";
 
 const IMAGE = getImage(__dirname);

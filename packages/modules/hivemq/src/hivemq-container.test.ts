@@ -1,6 +1,6 @@
 import mqtt from "mqtt";
-import { getImage } from "testcontainers/src/utils/test-helper";
 import { expect } from "vitest";
+import { getImage } from "../../testcontainers/src/utils/test-helper";
 import { HiveMQContainer } from "./hivemq-container";
 const IMAGE = getImage(__dirname);
 

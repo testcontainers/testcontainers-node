@@ -1,5 +1,5 @@
 import neo4j from "neo4j-driver";
-import { getImage } from "testcontainers/src/utils/test-helper";
+import { getImage } from "../../testcontainers/src/utils/test-helper";
 import { Neo4jContainer, Neo4jPlugin } from "./neo4j-container";
 
 const IMAGE = getImage(__dirname);
