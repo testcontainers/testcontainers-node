@@ -64,10 +64,13 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
     const env = new DockerComposeEnvironment(fixtures, "docker-compose-with-many-services.yml");
 
     await using _ = await env.up(["service_2"]);
-    await using dockerEventStream = await getDockerEventStream();
-    const dockerPullEventPromise = waitForDockerEvent(dockerEventStream.events, "pull");
-    await using _ = await env.withPullPolicy(PullPolicy.alwaysPull()).up(["service_2"]);
-    await dockerPullEventPromise;
+
+    {
+      await using dockerEventStream = await getDockerEventStream();
+      const dockerPullEventPromise = waitForDockerEvent(dockerEventStream.events, "pull");
+      await using _ = await env.withPullPolicy(PullPolicy.alwaysPull()).up(["service_2"]);
+      await dockerPullEventPromise;
+    }
   });
 
   it("should start environment with multiple compose files", async () => {
@@ -204,10 +207,12 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
   });
 
   it("should not recreate the containers when no recreate option is set", async () => {
-    await using _ = await new DockerComposeEnvironment(fixtures, "docker-compose-with-name.yml")
-      .withEnvironment({ CONTAINER_NAME: `custom_container_name_${randomUuid()}` })
-      .withNoRecreate()
-      .up();
+    {
+      await using _ = await new DockerComposeEnvironment(fixtures, "docker-compose-with-name.yml")
+        .withEnvironment({ CONTAINER_NAME: `custom_container_name_${randomUuid()}` })
+        .withNoRecreate()
+        .up();
+    }
     await using _ = await new DockerComposeEnvironment(fixtures, "docker-compose-with-name.yml")
       .withEnvironment({ CONTAINER_NAME: `custom_container_name_${randomUuid()}` })
       .withNoRecreate()
