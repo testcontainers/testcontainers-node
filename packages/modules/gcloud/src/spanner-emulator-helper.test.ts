@@ -8,7 +8,7 @@ const IMAGE = getImage(__dirname, 3);
 describe("SpannerEmulatorHelper", { timeout: 240_000 }, () => {
   // createAndDelete {
   it("should create and delete instance and database via helper", async () => {
-    const container = await new SpannerEmulatorContainer(IMAGE).start();
+    await using container = await new SpannerEmulatorContainer(IMAGE).start();
     const helper = new SpannerEmulatorHelper(container);
     const instanceId = "test-instance";
     const databaseId = "test-db";
@@ -37,8 +37,6 @@ describe("SpannerEmulatorHelper", { timeout: 240_000 }, () => {
 
     const [instanceExistsAfter] = await client.instance(instanceId).exists();
     expect(instanceExistsAfter).toBe(false);
-
-    await container.stop();
   });
   // }
 });
