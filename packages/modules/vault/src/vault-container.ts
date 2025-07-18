@@ -110,18 +110,26 @@ export class StartedVaultContainer extends AbstractStartedContainer {
   }
 
   /**
-   * Executes a list of Vault CLI commands inside the container after it has started.
+   * Executes Vault CLI commands inside the container after it has started.
    *
    * This is typically used to pre-configure secret engines or seed test data.
    *
-   * @param commands Array of CLI commands (without `vault` prefix)
+   * @example
+   * await container.execVaultCommands([
+   *   "secrets enable transit",
+   *   "write -f transit/keys/my-key",
+   *   "kv put secret/my-secret value=123",
+   * ]);
+   *
+   * @param commands Array of Vault CLI commands (without the `vault` prefix)
+   * @throws If the command fails (non-zero exit code)
    */
   public async execVaultCommands(commands: string[]): Promise<void> {
     const cmd = commands.map((c) => `vault ${c}`).join(" && ");
     const result = await this.exec(["/bin/sh", "-c", cmd]);
 
     if (result.exitCode !== 0) {
-      throw new Error(`Vault init commands failed: ${result.output}`);
+      throw new Error(`execVaultCommands failed with exit code ${result.exitCode}: ${result.output}`);
     }
   }
 }
