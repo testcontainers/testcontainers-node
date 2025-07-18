@@ -101,7 +101,7 @@ describe("PostgreSqlContainer", { timeout: 180_000 }, () => {
   });
 
   it("should allow custom healthcheck", async () => {
-    await using container = new PostgreSqlContainer(IMAGE).withHealthCheck({
+    const container = new PostgreSqlContainer(IMAGE).withHealthCheck({
       test: ["CMD-SHELL", "exit 1"],
       interval: 100,
       retries: 0,

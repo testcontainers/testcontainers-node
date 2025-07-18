@@ -99,7 +99,7 @@ describe("CockroachDbContainer", { timeout: 180_000 }, () => {
   });
 
   it("should allow custom healthcheck", async () => {
-    await using container = new CockroachDbContainer(IMAGE).withHealthCheck({
+    const container = new CockroachDbContainer(IMAGE).withHealthCheck({
       test: ["CMD-SHELL", "exit 1"],
       interval: 100,
       retries: 0,
