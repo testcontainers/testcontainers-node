@@ -27,13 +27,12 @@ export class MongoDBContainer extends GenericContainer {
   public override async start(): Promise<StartedMongoDBContainer> {
     const cmdArgs = ["--replSet", "rs0", "--bind_ip_all"];
     this.withHealthCheck({
-      test: ["CMD", ...this.buildMongoEvalCommand(this.buildMongoWaitCommand())],
-      startPeriod: 1_000,
-      timeout: 60_000,
-      retries: 10,
-      interval: 2_000,
+      test: ["CMD-SHELL", this.buildMongoEvalCommand(this.initRsAndWait())],
+      interval: 250,
+      timeout: 60000,
+      retries: 1000,
     }).withWaitStrategy(Wait.forHealthCheck());
-    if (this.authEnabled()) {
+    if (this.username && this.password) {
       cmdArgs.push("--keyFile", "/data/db/key.txt");
       this.withEnvironment({
         MONGO_INITDB_ROOT_USERNAME: this.username,
@@ -58,16 +57,13 @@ export class MongoDBContainer extends GenericContainer {
     const args = [];
     if (useMongosh) args.push("mongosh");
     else args.push("mongo", "admin");
-    args.push("-u", this.username, "-p", this.password, "--eval", command);
-    return args;
+    if (this.username && this.password) args.push("-u", this.username, "-p", this.password);
+    args.push("--host", "localhost", "--quiet", "--eval", command);
+    return args.join(" ");
   }
 
-  private buildMongoWaitCommand() {
-    return `rs.initiate(); while (db.runCommand({isMaster: 1}).ismaster==false) { sleep(1000); } `;
-  }
-
-  private authEnabled() {
-    return this.username && this.password;
+  private initRsAndWait() {
+    return `'try { rs.initiate(); } catch (e){} while (db.runCommand({isMaster: 1}).ismaster==false) { sleep(100); }'`;
   }
 }
 

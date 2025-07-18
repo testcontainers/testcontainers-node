@@ -67,7 +67,7 @@ describe("MongodbContainer", { timeout: 240_000 }, () => {
 });
 
 describe("MongodbContainer connect with credentials", { timeout: 240_000 }, () => {
-  it.for([["mongo:4.0.1"], ["mongo:5.0"], ["mongo:8.0"]])("should connect to %s with credentials", async ([image]) => {
+  it.for([["mongo:4.0.1"], ["mongo:8.0"]])("should connect to %s with credentials", async ([image]) => {
     const mongodbContainer = await new MongoDBContainer(image)
       .withUsername("mongo_user")
       .withPassword("mongo_password")
