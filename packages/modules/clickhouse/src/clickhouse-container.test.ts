@@ -1,5 +1,5 @@
 import { createClient } from "@clickhouse/client";
-import { getImage } from "../../testcontainers/src/utils/test-helper";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { ClickHouseContainer } from "./clickhouse-container";
 
 const IMAGE = getImage(__dirname);

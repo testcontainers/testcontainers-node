@@ -1,6 +1,6 @@
 import { Client } from "cassandra-driver";
 import { ImageName } from "testcontainers";
-import { getImage } from "../../testcontainers/src/utils/test-helper";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { CassandraContainer } from "./cassandra-container";
 
 const IMAGE = getImage(__dirname);

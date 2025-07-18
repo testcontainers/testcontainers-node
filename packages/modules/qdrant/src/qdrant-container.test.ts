@@ -1,7 +1,7 @@
 import { QdrantClient } from "@qdrant/js-client-rest";
 import crypto from "crypto";
 import path from "path";
-import { getImage } from "../../testcontainers/src/utils/test-helper";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { QdrantContainer } from "./qdrant-container";
 
 const IMAGE = getImage(__dirname);

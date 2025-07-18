@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { getImage } from "../../testcontainers/src/utils/test-helper";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { MongoDBContainer } from "./mongodb-container";
 
 const IMAGE = getImage(__dirname);

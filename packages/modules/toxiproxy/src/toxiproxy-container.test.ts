@@ -1,5 +1,5 @@
 import { GenericContainer, Network } from "testcontainers";
-import { getImage } from "../../testcontainers/src/utils/test-helper";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { ToxiProxyContainer, TPClient } from "./toxiproxy-container";
 
 const IMAGE = getImage(__dirname);

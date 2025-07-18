@@ -1,5 +1,5 @@
 import { ImageName } from "testcontainers";
-import { getImage } from "../../testcontainers/src/utils/test-helper";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { OllamaContainer } from "./ollama-container";
 
 const IMAGE = getImage(__dirname);

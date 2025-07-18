@@ -1,5 +1,5 @@
 import { Datastore } from "@google-cloud/datastore";
-import { getImage } from "../../testcontainers/src/utils/test-helper";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { DatastoreEmulatorContainer, StartedDatastoreEmulatorContainer } from "./datastore-emulator-container";
 
 const IMAGE = getImage(__dirname);

@@ -1,5 +1,5 @@
 import { Database } from "arangojs";
-import { getImage } from "../../testcontainers/src/utils/test-helper";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { ArangoDBContainer } from "./arangodb-container";
 
 const IMAGE = getImage(__dirname);

@@ -1,5 +1,5 @@
 import { createConnection } from "mysql2/promise";
-import { getImage } from "../../testcontainers/src/utils/test-helper";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { MySqlContainer } from "./mysql-container";
 
 const IMAGE = getImage(__dirname);

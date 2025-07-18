@@ -1,5 +1,5 @@
 import { Client } from "pg";
-import { getImage } from "../../testcontainers/src/utils/test-helper";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { CockroachDbContainer } from "./cockroachdb-container";
 
 const IMAGE = getImage(__dirname);

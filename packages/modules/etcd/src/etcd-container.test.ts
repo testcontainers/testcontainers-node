@@ -1,6 +1,6 @@
 import { Etcd3 } from "etcd3";
 import { setTimeout } from "node:timers/promises";
-import { getImage } from "../../testcontainers/src/utils/test-helper";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { EtcdContainer } from "./etcd-container";
 
 const IMAGE = getImage(__dirname);

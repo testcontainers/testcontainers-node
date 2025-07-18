@@ -1,6 +1,6 @@
 import { Environment } from "testcontainers/src/types";
 import weaviate from "weaviate-ts-client";
-import { getImage } from "../../testcontainers/src/utils/test-helper";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { WeaviateContainer } from "./weaviate-container";
 
 const IMAGE = getImage(__dirname);

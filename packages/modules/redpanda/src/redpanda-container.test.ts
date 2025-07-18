@@ -1,5 +1,5 @@
 import { Kafka, KafkaConfig, logLevel } from "kafkajs";
-import { getImage } from "../../testcontainers/src/utils/test-helper";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { RedpandaContainer, StartedRedpandaContainer } from "./redpanda-container";
 
 const IMAGE = getImage(__dirname);
