@@ -27,7 +27,7 @@ describe("HiveMQContainer", { timeout: 240_000 }, () => {
       });
     });
 
-    return expect(promise).resolves.toBeUndefined();
+    await expect(promise).resolves.toBeUndefined();
   });
   // }
 });
