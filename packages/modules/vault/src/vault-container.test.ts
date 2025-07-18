@@ -1,5 +1,4 @@
 import vault from "node-vault";
-import { setTimeout } from "node:timers/promises";
 import { StartedVaultContainer, VaultContainer } from "./vault-container";
 
 const VAULT_TOKEN = "my-root-token";
@@ -27,8 +26,6 @@ describe("VaultContainer", { timeout: 180_000 }, () => {
         other: "vault",
       },
     });
-
-    await setTimeout(1000);
 
     const result = await client.read("secret/data/hello");
     const data = result?.data?.data;
