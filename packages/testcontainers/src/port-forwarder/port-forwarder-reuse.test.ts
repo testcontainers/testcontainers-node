@@ -2,7 +2,7 @@ import { GenericContainer } from "../generic-container/generic-container";
 import { RandomPortGenerator } from "../utils/port-generator";
 import { createTestServer } from "../utils/test-helper";
 
-describe("Port Forwarder reuse", { timeout: 180_000 }, () => {
+describe.sequential("Port Forwarder reuse", { timeout: 180_000 }, () => {
   const portGen = new RandomPortGenerator();
 
   it("should expose additional ports", async () => {
@@ -21,7 +21,7 @@ describe("Port Forwarder reuse", { timeout: 180_000 }, () => {
     await TC2.exposeHostPorts(port2);
     const portForwarder2ContainerId = (await PFI2.getInstance()).getContainerId();
 
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").start();
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").start();
 
     expect(portForwarder1ContainerId).toEqual(portForwarder2ContainerId);
     const { output: output1 } = await container.exec(["curl", "-s", `http://host.testcontainers.internal:${port1}`]);
@@ -31,7 +31,6 @@ describe("Port Forwarder reuse", { timeout: 180_000 }, () => {
 
     await new Promise((resolve) => server1.close(resolve));
     await new Promise((resolve) => server2.close(resolve));
-    await container.stop();
   });
 
   it("should reuse same ports", async () => {
@@ -49,13 +48,12 @@ describe("Port Forwarder reuse", { timeout: 180_000 }, () => {
     await TC2.exposeHostPorts(port);
     const portForwarder2ContainerId = (await PFI2.getInstance()).getContainerId();
 
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").start();
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").start();
 
     expect(portForwarder1ContainerId).toEqual(portForwarder2ContainerId);
     const { output } = await container.exec(["curl", "-s", `http://host.testcontainers.internal:${port}`]);
     expect(output).toEqual(expect.stringContaining("hello world"));
 
     await new Promise((resolve) => server.close(resolve));
-    await container.stop();
   });
 });

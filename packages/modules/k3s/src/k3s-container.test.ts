@@ -12,7 +12,7 @@ describe("K3s", { timeout: 120_000 }, () => {
   if (!process.env["CI_ROOTLESS"]) {
     it("should start and have listable node", async () => {
       // starting_k3s {
-      const container = await new K3sContainer("rancher/k3s:v1.31.2-k3s1").start();
+      await using container = await new K3sContainer("rancher/k3s:v1.31.2-k3s1").start();
       // }
 
       // connecting_with_client {
@@ -29,13 +29,11 @@ describe("K3s", { timeout: 120_000 }, () => {
       // }
 
       expect(nodeList.items).toHaveLength(1);
-
-      await container.stop();
     });
 
     it("should expose kubeconfig for a network alias", async () => {
-      const network = await new Network().start();
-      const container = await new K3sContainer("rancher/k3s:v1.31.2-k3s1")
+      await using network = await new Network().start();
+      await using container = await new K3sContainer("rancher/k3s:v1.31.2-k3s1")
         .withNetwork(network)
         .withNetworkAliases("k3s")
         .start();
@@ -43,7 +41,7 @@ describe("K3s", { timeout: 120_000 }, () => {
       // obtain a kubeconfig that allows us to connect on the custom network
       const kubeConfig = container.getAliasedKubeConfig("k3s");
 
-      const kubectlContainer = await new GenericContainer("rancher/kubectl:v1.31.2")
+      await using kubectlContainer = await new GenericContainer("rancher/kubectl:v1.31.2")
         .withNetwork(network)
         .withCopyContentToContainer([{ content: kubeConfig, target: "/home/kubectl/.kube/config" }])
         .withCommand(["get", "namespaces"])
@@ -56,14 +54,10 @@ describe("K3s", { timeout: 120_000 }, () => {
         chunks.push(chunk);
       }
       expect(chunks).toEqual(expect.arrayContaining([expect.stringContaining("kube-system")]));
-
-      await kubectlContainer.stop();
-      await container.stop();
-      await network.stop();
     });
 
     it("should start a pod", async () => {
-      const container = await new K3sContainer("rancher/k3s:v1.31.2-k3s1").start();
+      await using container = await new K3sContainer("rancher/k3s:v1.31.2-k3s1").start();
       const kc = new k8s.KubeConfig();
       kc.loadFromString(container.getKubeConfig());
 
@@ -96,8 +90,6 @@ describe("K3s", { timeout: 120_000 }, () => {
 
       // wait for pod to be ready
       expect(await podIsReady(client, "default", "helloworld", 60_000)).toBe(true);
-
-      await container.stop();
     });
   }
 });

@@ -1,0 +1,38 @@
+{
+  "name": "@testcontainers/vault",
+  "version": "11.3.0",
+  "license": "MIT",
+  "keywords": [
+    "vault",
+    "hashicorp",
+    "testing",
+    "docker",
+    "testcontainers"
+  ],
+  "description": "HashiCorp Vault module for Testcontainers",
+  "homepage": "https://github.com/testcontainers/testcontainers-node#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/testcontainers/testcontainers-node"
+  },
+  "bugs": {
+    "url": "https://github.com/testcontainers/testcontainers-node/issues"
+  },
+  "main": "build/index.js",
+  "files": [
+    "build"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "prepack": "shx cp ../../../README.md . && shx cp ../../../LICENSE .",
+    "build": "tsc --project tsconfig.build.json"
+  },
+  "devDependencies": {
+    "node-vault": "^0.10.5"
+  },
+  "dependencies": {
+    "testcontainers": "^11.3.0"
+  }
+}

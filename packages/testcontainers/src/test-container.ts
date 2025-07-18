@@ -64,7 +64,7 @@ export interface StopOptions {
   removeVolumes: boolean;
 }
 
-export interface StartedTestContainer {
+export interface StartedTestContainer extends AsyncDisposable {
   stop(options?: Partial<StopOptions>): Promise<StoppedTestContainer>;
   restart(options?: Partial<RestartOptions>): Promise<void>;
   commit(options: CommitOptions): Promise<string>;

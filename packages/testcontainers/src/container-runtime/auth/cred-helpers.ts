@@ -7,7 +7,7 @@ export class CredHelpers extends CredentialProvider {
   }
 
   public getCredentialProviderName(registry: string, dockerConfig: ContainerRuntimeConfig): string | undefined {
-    if (dockerConfig.credHelpers !== undefined && dockerConfig.credHelpers[registry] !== undefined) {
+    if (dockerConfig.credHelpers?.[registry] !== undefined) {
       return dockerConfig.credHelpers[registry];
     }
   }

@@ -4,10 +4,10 @@ import { KurrentDbContainer } from "./kurrentdb-container";
 
 const IMAGE = getImage(__dirname);
 
-describe("KurrentDbContainer", { timeout: 240_000 }, () => {
+describe.sequential("KurrentDbContainer", { timeout: 240_000 }, () => {
   // startContainer {
   it("should execute write and read", async () => {
-    const container = await new KurrentDbContainer(IMAGE).start();
+    await using container = await new KurrentDbContainer(IMAGE).start();
 
     const client = KurrentDBClient.connectionString(container.getConnectionString());
 
@@ -41,13 +41,13 @@ describe("KurrentDbContainer", { timeout: 240_000 }, () => {
       }),
     ]);
 
-    await container.stop();
+    await client.dispose();
   });
   // }
 
   // usingStandardProjections {
   it("should use built-in projections", async () => {
-    const container = await new KurrentDbContainer(IMAGE).start();
+    await using container = await new KurrentDbContainer(IMAGE).start();
     const client = KurrentDBClient.connectionString(container.getConnectionString());
 
     await client.appendToStream("Todo-1", [
@@ -85,7 +85,7 @@ describe("KurrentDbContainer", { timeout: 240_000 }, () => {
       })
     );
     await stream.unsubscribe();
-    await container.stop();
+    await client.dispose();
   });
   // }
 });

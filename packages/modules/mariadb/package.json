@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/mariadb",
-  "version": "11.2.1",
+  "version": "11.3.0",
   "license": "MIT",
   "keywords": [
     "mariadb",
@@ -29,7 +29,7 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "dependencies": {
-    "testcontainers": "^11.2.1"
+    "testcontainers": "^11.3.0"
   },
   "devDependencies": {
     "mariadb": "^3.4.4"

@@ -5,4 +5,4 @@ export { IntervalRetry, Retry } from "./retry";
 export { streamToString } from "./streams";
 export * from "./time";
 export * from "./type-guards";
-export { RandomUuid, Uuid } from "./uuid";
+export { RandomUuid, Uuid, randomUuid } from "./uuid";

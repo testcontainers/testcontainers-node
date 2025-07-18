@@ -33,7 +33,7 @@ export class Network {
   }
 }
 
-export class StartedNetwork {
+export class StartedNetwork implements AsyncDisposable {
   constructor(
     private readonly client: ContainerRuntimeClient,
     private readonly name: string,
@@ -54,6 +54,9 @@ export class StartedNetwork {
     log.info(`Stopped network with ID "${this.network.id}"`);
     return new StoppedNetwork();
   }
-}
 
+  async [Symbol.asyncDispose]() {
+    await this.stop();
+  }
+}
 export class StoppedNetwork {}
