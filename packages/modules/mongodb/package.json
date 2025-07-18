@@ -29,9 +29,10 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "mongoose": "^8.16.1"
+    "mongoose": "8.15.0"
   },
   "dependencies": {
-    "testcontainers": "^11.3.0"
+    "testcontainers": "^11.3.0",
+    "compare-versions": "^6.1.1"
   }
 }
