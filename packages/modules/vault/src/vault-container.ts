@@ -5,8 +5,7 @@ const VAULT_PORT = 8200;
 /**
  * Testcontainers module for HashiCorp Vault.
  *
- * Based on the upstream image `hashicorp/vault:1.13.0`, this container exposes Vault
- * on port 8200, sets up a wait strategy using the health check endpoint, and supports:
+ * This container exposes Vault on port 8200, sets up a wait strategy using the health check endpoint, and supports:
  * - Supplying a root token
  * - Executing post-start CLI init commands
  */
@@ -21,10 +20,9 @@ export class VaultContainer extends GenericContainer {
    * - Adds IPC_LOCK capability (required by Vault)
    * - Exposes Vault on port 8200
    * - Waits for HTTP 200 response from /v1/sys/health
-   *
-   * @param image Optional Docker image to use (default: hashicorp/vault:1.13.0)
+   * @param image Docker image to use (e.g. `hashicorp/vault:1.13.0`)
    */
-  constructor(image: string = "hashicorp/vault:1.13.0") {
+  constructor(image: string) {
     super(image);
 
     this.withExposedPorts(VAULT_PORT)

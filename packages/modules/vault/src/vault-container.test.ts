@@ -1,7 +1,9 @@
 import vault from "node-vault";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { StartedVaultContainer, VaultContainer } from "./vault-container";
 
 const VAULT_TOKEN = "my-root-token";
+const IMAGE = getImage(__dirname);
 
 describe("VaultContainer", { timeout: 180_000 }, () => {
   let container: StartedVaultContainer;
@@ -12,7 +14,7 @@ describe("VaultContainer", { timeout: 180_000 }, () => {
 
   // inside_block:readWrite {
   it("should start Vault and allow reading/writing secrets", async () => {
-    container = await new VaultContainer().withVaultToken(VAULT_TOKEN).start();
+    container = await new VaultContainer(IMAGE).withVaultToken(VAULT_TOKEN).start();
 
     const client = vault({
       apiVersion: "v1",
@@ -37,7 +39,7 @@ describe("VaultContainer", { timeout: 180_000 }, () => {
 
   // inside_block:initCommands {
   it("should execute init commands using vault CLI", async () => {
-    container = await new VaultContainer()
+    container = await new VaultContainer(IMAGE)
       .withVaultToken(VAULT_TOKEN)
       .withInitCommands("secrets enable transit", "write -f transit/keys/my-key")
       .start();
