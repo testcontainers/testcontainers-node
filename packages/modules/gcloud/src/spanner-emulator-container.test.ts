@@ -6,18 +6,18 @@ import { SpannerEmulatorContainer } from "./spanner-emulator-container";
 const IMAGE = getImage(__dirname, 3);
 
 describe("SpannerEmulatorContainer", { timeout: 240_000 }, () => {
-  // startupWithEnvironmentVariable {
-  it("should start, expose endpoints and accept real client connections using projectId and SPANNER_EMULATOR_HOST", async () => {
+  // startupWithExplicitClient {
+  it("should start, expose endpoints and accept real client connections using explicitly configured client", async () => {
     const container = await new SpannerEmulatorContainer(IMAGE).withProjectId("test-project").start();
 
-    // 1) get the endpoint
-    const grpcEndpoint = container.getEmulatorGrpcEndpoint();
+    const client = new Spanner({
+      projectId: container.getProjectId(),
+      apiEndpoint: container.getHost(),
+      port: container.getGrpcPort(),
+      sslCreds: container.getSslCredentials(),
+    });
 
-    // 2) configure the client to talk to our emulator
-    process.env.SPANNER_EMULATOR_HOST = grpcEndpoint;
-    const client = new Spanner({ projectId: container.getProjectId() });
-
-    // 3) use InstanceAdminClient to list instance configs
+    // list instance configs
     const admin = client.getInstanceAdminClient();
     const [configs] = await admin.listInstanceConfigs({
       parent: admin.projectPath(container.getProjectId()),
@@ -31,23 +31,15 @@ describe("SpannerEmulatorContainer", { timeout: 240_000 }, () => {
   });
   // }
 
-  // startupWithExplicitClient {
-  it("should start, expose endpoints and accept real client connections using explicitly configured client", async () => {
+  // startupWithEnvironmentVariable {
+  it("should start, expose endpoints and accept real client connections using projectId and SPANNER_EMULATOR_HOST", async () => {
     const container = await new SpannerEmulatorContainer(IMAGE).withProjectId("test-project").start();
 
-    // 1) get the endpoint
-    const grpcEndpoint = container.getEmulatorGrpcEndpoint();
+    // configure the client to talk to our emulator
+    process.env.SPANNER_EMULATOR_HOST = container.getEmulatorGrpcEndpoint();
+    const client = new Spanner({ projectId: container.getProjectId() });
 
-    // 2) configure the client to talk to our emulator
-    process.env.SPANNER_EMULATOR_HOST = grpcEndpoint;
-    const client = new Spanner({
-      projectId: container.getProjectId(),
-      apiEndpoint: container.getHost(),
-      port: container.getGrpcPort(),
-      sslCreds: container.getSslCredentials(),
-    });
-
-    // 3) use InstanceAdminClient to list instance configs
+    // list instance configs
     const admin = client.getInstanceAdminClient();
     const [configs] = await admin.listInstanceConfigs({
       parent: admin.projectPath(container.getProjectId()),
