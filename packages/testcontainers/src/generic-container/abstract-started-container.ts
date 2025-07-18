@@ -98,4 +98,8 @@ export class AbstractStartedContainer implements StartedTestContainer {
   public logs(opts?: { since?: number; tail?: number }): Promise<Readable> {
     return this.startedTestContainer.logs(opts);
   }
+
+  async [Symbol.asyncDispose]() {
+    await this.startedTestContainer[Symbol.asyncDispose]();
+  }
 }

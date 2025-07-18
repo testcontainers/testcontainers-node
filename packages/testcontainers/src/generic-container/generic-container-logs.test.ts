@@ -16,20 +16,20 @@ describe("GenericContainer logs", { timeout: 180_000 }, () => {
   });
 
   it("should stream logs from a started container", async () => {
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withExposedPorts(8080)
+      .start();
 
     const stream = await container.logs();
     const log = await new Promise((resolve) => stream.on("data", (line) => resolve(line)));
     expect(log).toContain("Listening on port 8080");
-
-    await container.stop();
   });
 
   it("should stream logs with since option from a started container", async () => {
     const pauseMs = 5 * 1000;
     const logBeforeSleep = "first";
     const logAfterSleep = "second";
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withEntrypoint([
         "/bin/sh",
         "-c",
@@ -47,19 +47,17 @@ describe("GenericContainer logs", { timeout: 180_000 }, () => {
     const log: string = await new Promise((resolve) => stream.on("data", (line) => resolve(line.trim())));
 
     expect(log).toBe(logAfterSleep);
-
-    await container.stop();
   });
 
   it("should stream logs from a running container after restart", async () => {
     const containerLogTraceSpy = vi.spyOn(containerLog, "trace");
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withExposedPorts(8080)
+      .start();
 
     await container.restart();
 
     const logs = containerLogTraceSpy.mock.calls;
     expect(logs.some((line) => line.includes("Listening on port 8080"))).toBe(true);
-
-    await container.stop();
   });
 });

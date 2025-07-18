@@ -9,7 +9,7 @@ const IMAGE = getImage(__dirname);
 describe("Azurite", { timeout: 240_000 }, () => {
   // uploadAndDownloadBlob {
   it("should upload and download blob with default credentials", async () => {
-    const container = await new AzuriteContainer(IMAGE).start();
+    await using container = await new AzuriteContainer(IMAGE).start();
 
     const connectionString = container.getConnectionString();
     expect(connectionString).toBeTruthy();
@@ -34,14 +34,12 @@ describe("Azurite", { timeout: 240_000 }, () => {
     }
 
     expect(data).toBe(content);
-
-    await container.stop();
   });
   // }
 
   // sendAndReceiveQueue {
   it("should add to queue with default credentials", async () => {
-    const container = await new AzuriteContainer(IMAGE).start();
+    await using container = await new AzuriteContainer(IMAGE).start();
 
     const connectionString = container.getConnectionString();
     expect(connectionString).toBeTruthy();
@@ -58,14 +56,12 @@ describe("Azurite", { timeout: 240_000 }, () => {
     const messages = await queueClient.receiveMessages();
     expect(messages.receivedMessageItems).toHaveLength(1);
     expect(messages.receivedMessageItems[0].messageText).toBe(message);
-
-    await container.stop();
   });
   // }
 
   // createAndInsertOnTable {
   it("should add to table with default credentials", async () => {
-    const container = await new AzuriteContainer(IMAGE).start();
+    await using container = await new AzuriteContainer(IMAGE).start();
 
     const connectionString = container.getConnectionString();
     expect(connectionString).toBeTruthy();
@@ -86,8 +82,6 @@ describe("Azurite", { timeout: 240_000 }, () => {
     const e1 = await tableClient.listEntities().next();
     expect(e1.value).toBeTruthy();
     expect(e1.value.name).toBe(entity.name);
-
-    await container.stop();
   });
   // }
 
@@ -97,7 +91,10 @@ describe("Azurite", { timeout: 240_000 }, () => {
     // Account key must be base64 encoded
     const accountKey = Buffer.from("test-key").toString("base64");
 
-    const container = await new AzuriteContainer(IMAGE).withAccountName(accountName).withAccountKey(accountKey).start();
+    await using container = await new AzuriteContainer(IMAGE)
+      .withAccountName(accountName)
+      .withAccountKey(accountKey)
+      .start();
 
     const credentials = new StorageSharedKeyCredential(accountName, accountKey);
     const serviceClient = new BlobServiceClient(container.getBlobEndpoint(), credentials);
@@ -109,8 +106,6 @@ describe("Azurite", { timeout: 240_000 }, () => {
     const blobContainer = await serviceClient.listContainers().next();
     expect(blobContainer.value).toBeTruthy();
     expect(blobContainer.value.name).toBe(blobContainerName);
-
-    await container.stop();
   });
   // }
 
@@ -119,7 +114,7 @@ describe("Azurite", { timeout: 240_000 }, () => {
     const blobPort = 13000;
     const queuePort = 14000;
     const tablePort = 15000;
-    const container = await new AzuriteContainer(IMAGE)
+    await using container = await new AzuriteContainer(IMAGE)
       .withBlobPort({ container: 10001, host: blobPort })
       .withQueuePort({ container: 10002, host: queuePort })
       .withTablePort({ container: 10003, host: tablePort })
@@ -137,14 +132,12 @@ describe("Azurite", { timeout: 240_000 }, () => {
     const serviceClient = BlobServiceClient.fromConnectionString(connectionString);
     const containerClient = serviceClient.getContainerClient("test");
     await containerClient.createIfNotExists();
-
-    await container.stop();
   });
   // }
 
   // inMemoryPersistence {
   it("should be able to use in-memory persistence", async () => {
-    const container = await new AzuriteContainer(IMAGE).withInMemoryPersistence().start();
+    await using container = await new AzuriteContainer(IMAGE).withInMemoryPersistence().start();
     const blobName = "hello.txt";
 
     {

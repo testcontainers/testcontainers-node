@@ -7,7 +7,7 @@ const IMAGE = getImage(__dirname);
 describe("MSSqlServerContainer", { timeout: 180_000 }, () => {
   // connect {
   it("should connect and return a query result", async () => {
-    const container = await new MSSQLServerContainer(IMAGE).acceptLicense().start();
+    await using container = await new MSSQLServerContainer(IMAGE).acceptLicense().start();
 
     const sqlConfig: config = {
       user: container.getUsername(),
@@ -31,13 +31,12 @@ describe("MSSqlServerContainer", { timeout: 180_000 }, () => {
     expect(recordset).toStrictEqual([{ "": 1 }]);
 
     await connection.close();
-    await container.stop();
   });
   // }
 
   // uriConnect {
   it("should connect and return a query result with database URI", async () => {
-    const container = await new MSSQLServerContainer(IMAGE).acceptLicense().start();
+    await using container = await new MSSQLServerContainer(IMAGE).acceptLicense().start();
 
     const connectionString = container.getConnectionUri();
     const connection = await sql.connect(connectionString);
@@ -46,13 +45,12 @@ describe("MSSqlServerContainer", { timeout: 180_000 }, () => {
     expect(recordset).toStrictEqual([{ "": 1 }]);
 
     await connection.close();
-    await container.stop();
   });
   // }
 
   // validPassword {
   it("should connect and return a query result with valid custom password", async () => {
-    const container = await new MSSQLServerContainer(IMAGE).acceptLicense().withPassword("I!@M#$eCur3").start();
+    await using container = await new MSSQLServerContainer(IMAGE).acceptLicense().withPassword("I!@M#$eCur3").start();
 
     const connectionString = container.getConnectionUri();
     const connection = await sql.connect(connectionString);
@@ -61,7 +59,6 @@ describe("MSSqlServerContainer", { timeout: 180_000 }, () => {
     expect(recordset).toStrictEqual([{ "": 1 }]);
 
     await connection.close();
-    await container.stop();
   });
   // }
 
@@ -76,7 +73,7 @@ describe("MSSqlServerContainer", { timeout: 180_000 }, () => {
 
   // expressEdition {
   it("should start db with express edition", async () => {
-    const container = await new MSSQLServerContainer(IMAGE)
+    await using container = await new MSSQLServerContainer(IMAGE)
       .withWaitForMessage(/.*Attribute synchronization manager initialized*/)
       .acceptLicense()
       .withEnvironment({ MSSQL_PID: "Express" })
@@ -96,8 +93,6 @@ describe("MSSqlServerContainer", { timeout: 180_000 }, () => {
 
     expect(exitCode).toBe(0);
     expect(output).toContain("Express Edition");
-
-    await container.stop();
   });
   // }
 });

@@ -8,18 +8,16 @@ const IMAGE = getImage(__dirname);
 describe("WeaviateContainer", { timeout: 100_000 }, () => {
   // connectWeaviate {
   it("should expose ports", async () => {
-    const container = await new WeaviateContainer(IMAGE).start();
+    await using container = await new WeaviateContainer(IMAGE).start();
 
     expect(container.getHttpHostAddress()).toBeDefined();
     expect(container.getGrpcHostAddress()).toBeDefined();
-
-    await container.stop();
   });
   // }
 
   // connectWeaviateWithClient {
   it("should connect to Weaviate", async () => {
-    const container = await new WeaviateContainer(IMAGE).start();
+    await using container = await new WeaviateContainer(IMAGE).start();
 
     const client = weaviate.client({
       scheme: "http",
@@ -28,8 +26,6 @@ describe("WeaviateContainer", { timeout: 100_000 }, () => {
 
     const res = await client.misc.metaGetter().do();
     expect(res.version).toBeDefined();
-
-    await container.stop();
   });
   // }
 
@@ -46,7 +42,7 @@ describe("WeaviateContainer", { timeout: 100_000 }, () => {
       ENABLE_MODULES: enableModules.join(","),
       BACKUP_FILESYSTEM_PATH: "/tmp/backups",
     };
-    const container = await new WeaviateContainer(IMAGE).withEnvironment(environment).start();
+    await using container = await new WeaviateContainer(IMAGE).withEnvironment(environment).start();
 
     const client = weaviate.client({
       scheme: "http",
@@ -59,8 +55,6 @@ describe("WeaviateContainer", { timeout: 100_000 }, () => {
     enableModules.forEach((module) => {
       expect(res.modules[module]).toBeDefined();
     });
-
-    await container.stop();
   });
   // }
 });

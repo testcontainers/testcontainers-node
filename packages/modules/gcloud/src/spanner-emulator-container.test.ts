@@ -8,7 +8,7 @@ const IMAGE = getImage(__dirname, 3);
 describe("SpannerEmulatorContainer", { timeout: 240_000 }, () => {
   // startupWithExplicitClient {
   it("should start, expose endpoints and accept real client connections using explicitly configured client", async () => {
-    const container = await new SpannerEmulatorContainer(IMAGE).withProjectId("test-project").start();
+    await using container = await new SpannerEmulatorContainer(IMAGE).withProjectId("test-project").start();
 
     const client = new Spanner({
       projectId: container.getProjectId(),
@@ -26,8 +26,6 @@ describe("SpannerEmulatorContainer", { timeout: 240_000 }, () => {
     // emulator always includes "emulator-config"
     const expectedConfigName = admin.instanceConfigPath(container.getProjectId(), "emulator-config");
     expect(configs.map((c) => c.name)).toContain(expectedConfigName);
-
-    await container.stop();
   });
   // }
 
@@ -38,7 +36,7 @@ describe("SpannerEmulatorContainer", { timeout: 240_000 }, () => {
 
     // startupWithEnvironmentVariable {
     it("should start, expose endpoints and accept real client connections using projectId and SPANNER_EMULATOR_HOST", async () => {
-      const container = await new SpannerEmulatorContainer(IMAGE).withProjectId("test-project").start();
+      await using container = await new SpannerEmulatorContainer(IMAGE).withProjectId("test-project").start();
 
       // configure the client to talk to our emulator
       process.env.SPANNER_EMULATOR_HOST = container.getEmulatorGrpcEndpoint();
@@ -53,8 +51,6 @@ describe("SpannerEmulatorContainer", { timeout: 240_000 }, () => {
       // emulator always includes "emulator-config"
       const expectedConfigName = admin.instanceConfigPath(container.getProjectId(), "emulator-config");
       expect(configs.map((c) => c.name)).toContain(expectedConfigName);
-
-      await container.stop();
     });
     // }
   });

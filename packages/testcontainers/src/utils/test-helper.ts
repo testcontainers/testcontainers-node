@@ -38,11 +38,17 @@ export const checkEnvironmentContainerIsHealthy = async (
   await checkContainerIsHealthy(container);
 };
 
-export const getDockerEventStream = async (opts: GetEventsOptions = {}): Promise<Readable> => {
+export const getDockerEventStream = async (opts: GetEventsOptions = {}): Promise<{ events: Readable } & Disposable> => {
   const dockerode = (await getContainerRuntimeClient()).container.dockerode;
   const events = (await dockerode.getEvents(opts)) as Readable;
   events.setEncoding("utf-8");
-  return events;
+
+  return {
+    events,
+    [Symbol.dispose]() {
+      events.destroy();
+    },
+  };
 };
 
 export const getRunningContainerNames = async (): Promise<string[]> => {

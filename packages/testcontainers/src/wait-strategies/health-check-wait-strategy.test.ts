@@ -10,18 +10,16 @@ describe("HealthCheckWaitStrategy", { timeout: 180_000 }, () => {
   it("should wait for health check", async () => {
     const context = path.resolve(fixtures, "docker-with-health-check");
     const customGenericContainer = await GenericContainer.fromDockerfile(context).build();
-    const container = await customGenericContainer
+    await using container = await customGenericContainer
       .withExposedPorts(8080)
       .withWaitStrategy(Wait.forHealthCheck())
       .start();
 
     await checkContainerIsHealthy(container);
-
-    await container.stop();
   });
 
   it("should wait for custom health check", async () => {
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
       .withHealthCheck({
         test: ["CMD-SHELL", "curl -f http://localhost:8080/hello-world || exit 1"],
@@ -34,8 +32,6 @@ describe("HealthCheckWaitStrategy", { timeout: 180_000 }, () => {
       .start();
 
     await checkContainerIsHealthy(container);
-
-    await container.stop();
   });
 
   it("should stop the container when the health check fails", async () => {
@@ -74,7 +70,7 @@ describe("HealthCheckWaitStrategy", { timeout: 180_000 }, () => {
   });
 
   it("should wait for custom health check using CMD to run the command directly without a shell", async () => {
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
       .withHealthCheck({
         test: ["CMD", "/usr/bin/wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/hello-world"],
@@ -87,7 +83,5 @@ describe("HealthCheckWaitStrategy", { timeout: 180_000 }, () => {
       .start();
 
     await checkContainerIsHealthy(container);
-
-    await container.stop();
   });
 });

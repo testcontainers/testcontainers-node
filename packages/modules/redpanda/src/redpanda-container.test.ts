@@ -1,20 +1,20 @@
 import { Kafka, KafkaConfig, logLevel } from "kafkajs";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { RedpandaContainer, StartedRedpandaContainer } from "./redpanda-container";
+
 const IMAGE = getImage(__dirname);
 
 describe("RedpandaContainer", { timeout: 240_000 }, () => {
   // connectToKafka {
   it("should connect", async () => {
-    const redpandaContainer = await new RedpandaContainer(IMAGE).start();
+    await using redpandaContainer = await new RedpandaContainer(IMAGE).start();
     await testPubSub(redpandaContainer);
-    await redpandaContainer.stop();
   });
   // }
 
   // connectToSchemaRegistry {
   it("should connect to schema registry", async () => {
-    const redpandaContainer = await new RedpandaContainer(IMAGE).start();
+    await using redpandaContainer = await new RedpandaContainer(IMAGE).start();
     const schemaRegistryUrl = redpandaContainer.getSchemaRegistryAddress();
 
     const response = await fetch(`${schemaRegistryUrl}/subjects`, {
@@ -25,34 +25,28 @@ describe("RedpandaContainer", { timeout: 240_000 }, () => {
     });
 
     expect(response.status).toBe(200);
-
-    await redpandaContainer.stop();
   });
   // }
 
   // connectToAdmin {
   it("should connect to admin", async () => {
-    const redpandaContainer = await new RedpandaContainer(IMAGE).start();
+    await using redpandaContainer = await new RedpandaContainer(IMAGE).start();
     const adminUrl = `${redpandaContainer.getAdminAddress()}/v1`;
 
     const response = await fetch(adminUrl);
 
     expect(response.status).toBe(200);
-
-    await redpandaContainer.stop();
   });
   // }
 
   // connectToRestProxy {
   it("should connect to rest proxy", async () => {
-    const redpandaContainer = await new RedpandaContainer(IMAGE).start();
+    await using redpandaContainer = await new RedpandaContainer(IMAGE).start();
     const restProxyUrl = `${redpandaContainer.getRestProxyAddress()}/topics`;
 
     const response = await fetch(restProxyUrl);
 
     expect(response.status).toBe(200);
-
-    await redpandaContainer.stop();
   });
   // }
 

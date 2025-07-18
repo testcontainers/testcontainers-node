@@ -7,7 +7,7 @@ const IMAGE = getImage(__dirname);
 describe("PostgreSqlContainer", { timeout: 180_000 }, () => {
   // connect {
   it("should connect and return a query result", async () => {
-    const container = await new PostgreSqlContainer(IMAGE).start();
+    await using container = await new PostgreSqlContainer(IMAGE).start();
 
     const client = new Client({
       host: container.getHost(),
@@ -22,13 +22,12 @@ describe("PostgreSqlContainer", { timeout: 180_000 }, () => {
     expect(result.rows[0]).toEqual({ "?column?": 1 });
 
     await client.end();
-    await container.stop();
   });
   // }
 
   // uriConnect {
   it("should work with database URI", async () => {
-    const container = await new PostgreSqlContainer(IMAGE).start();
+    await using container = await new PostgreSqlContainer(IMAGE).start();
 
     const client = new Client({
       connectionString: container.getConnectionUri(),
@@ -39,13 +38,12 @@ describe("PostgreSqlContainer", { timeout: 180_000 }, () => {
     expect(result.rows[0]).toEqual({ "?column?": 1 });
 
     await client.end();
-    await container.stop();
   });
   // }
 
   // setDatabase {
   it("should set database", async () => {
-    const container = await new PostgreSqlContainer(IMAGE).withDatabase("customDatabase").start();
+    await using container = await new PostgreSqlContainer(IMAGE).withDatabase("customDatabase").start();
 
     const client = new Client({
       host: container.getHost(),
@@ -60,13 +58,12 @@ describe("PostgreSqlContainer", { timeout: 180_000 }, () => {
     expect(result.rows[0]).toEqual({ current_database: "customDatabase" });
 
     await client.end();
-    await container.stop();
   });
   // }
 
   // setUsername {
   it("should set username", async () => {
-    const container = await new PostgreSqlContainer(IMAGE).withUsername("customUsername").start();
+    await using container = await new PostgreSqlContainer(IMAGE).withUsername("customUsername").start();
 
     const client = new Client({
       host: container.getHost(),
@@ -81,12 +78,11 @@ describe("PostgreSqlContainer", { timeout: 180_000 }, () => {
     expect(result.rows[0]).toEqual({ current_user: "customUsername" });
 
     await client.end();
-    await container.stop();
   });
   // }
 
   it("should work with restarted container", async () => {
-    const container = await new PostgreSqlContainer(IMAGE).start();
+    await using container = await new PostgreSqlContainer(IMAGE).start();
     await container.restart();
 
     const client = new Client({
@@ -102,7 +98,6 @@ describe("PostgreSqlContainer", { timeout: 180_000 }, () => {
     expect(result.rows[0]).toEqual({ "?column?": 1 });
 
     await client.end();
-    await container.stop();
   });
 
   it("should allow custom healthcheck", async () => {

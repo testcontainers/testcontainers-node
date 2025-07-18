@@ -12,31 +12,24 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
 
   // connectKafkaLatest {
   it("should connect", async () => {
-    const kafkaContainer = await new KafkaContainer(IMAGE).start();
+    await using kafkaContainer = await new KafkaContainer(IMAGE).start();
 
     await testPubSub(kafkaContainer);
-
-    await kafkaContainer.stop();
   });
   // }
 
   it("should connect with custom network", async () => {
-    const network = await new Network().start();
-    const kafkaContainer = await new KafkaContainer(IMAGE).withNetwork(network).start();
+    await using network = await new Network().start();
+    await using kafkaContainer = await new KafkaContainer(IMAGE).withNetwork(network).start();
 
     await testPubSub(kafkaContainer);
-
-    await kafkaContainer.stop();
-    await network.stop();
   });
 
   it("should be reusable", async () => {
-    const originalKafkaContainer = await new KafkaContainer(IMAGE).withReuse().start();
+    await using originalKafkaContainer = await new KafkaContainer(IMAGE).withReuse().start();
     const newKafkaContainer = await new KafkaContainer(IMAGE).withReuse().start();
 
     expect(newKafkaContainer.getId()).toBe(originalKafkaContainer.getId());
-
-    await originalKafkaContainer.stop();
   });
 
   // ssl {
@@ -61,7 +54,7 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
     };
 
     const kafkaContainer = new KafkaContainer("confluentinc/cp-kafka:7.5.0").withSaslSslListener(saslConfig);
-    const startedKafkaContainer = await kafkaContainer.start();
+    await using startedKafkaContainer = await kafkaContainer.start();
 
     await testPubSub(startedKafkaContainer, {
       brokers: [`${startedKafkaContainer.getHost()}:${startedKafkaContainer.getMappedPort(9096)}`],
@@ -74,12 +67,11 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
         ca: [fs.readFileSync(path.resolve(certificatesDir, "kafka.client.truststore.pem"))],
       },
     });
-    await startedKafkaContainer.stop();
   });
   // }
 
   it(`should connect with SASL in custom network`, async () => {
-    const network = await new Network().start();
+    await using network = await new Network().start();
 
     const saslConfig: SaslSslListenerOptions = {
       port: 9096,
@@ -100,13 +92,13 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
       },
     };
 
-    const kafkaContainer = await new KafkaContainer(IMAGE)
+    await using _ = await new KafkaContainer(IMAGE)
       .withNetwork(network)
       .withNetworkAliases("kafka")
       .withSaslSslListener(saslConfig)
       .start();
 
-    const kafkaCliContainer = await new GenericContainer(IMAGE)
+    await using kafkaCliContainer = await new GenericContainer(IMAGE)
       .withNetwork(network)
       .withCommand(["bash", "-c", "sleep infinity"])
       .withCopyFilesToContainer([
@@ -141,8 +133,5 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
 
     expect(exitCode).toBe(0);
     expect(output).toContain("test-topic");
-
-    await kafkaCliContainer.stop();
-    await kafkaContainer.stop();
   });
 });

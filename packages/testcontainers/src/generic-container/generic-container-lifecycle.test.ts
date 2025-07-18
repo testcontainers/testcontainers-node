@@ -34,7 +34,7 @@ describe.sequential("GenericContainer lifecycle", { timeout: 180_000 }, () => {
   });
 
   it("should not call lifecycle callbacks for a reused, generic container", async () => {
-    const container1 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+    await using container1 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
       .withReuse()
       .start();
@@ -48,8 +48,6 @@ describe.sequential("GenericContainer lifecycle", { timeout: 180_000 }, () => {
     expect(containerCreated).not.toHaveBeenCalled();
     expect(containerStarting).not.toHaveBeenCalled();
     expect(containerStarted).not.toHaveBeenCalled();
-
-    await container1.stop();
   });
 
   class CustomContainer extends GenericContainer {

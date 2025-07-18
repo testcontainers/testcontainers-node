@@ -232,4 +232,8 @@ export class StartedGenericContainer implements StartedTestContainer {
 
     return client.container.logs(this.container, opts);
   }
+
+  async [Symbol.asyncDispose]() {
+    await this.stop();
+  }
 }
