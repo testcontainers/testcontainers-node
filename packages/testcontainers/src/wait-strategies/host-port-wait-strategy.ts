@@ -22,7 +22,13 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
     container: Dockerode.Container,
     boundPorts: BoundPorts
   ): Promise<void> {
-    for (const [, hostPort] of boundPorts.iterator()) {
+    for (const [portKey, hostPort] of boundPorts.iterator()) {
+      if (portKey.toLowerCase().includes("/udp")) {
+        log.debug(`Skipping wait for host port ${hostPort} (mapped from UDP port ${portKey})`, {
+          containerId: container.id,
+        });
+        continue;
+      }
       log.debug(`Waiting for host port ${hostPort}...`, { containerId: container.id });
       await this.waitForPort(container, hostPort, portCheck);
       log.debug(`Host port ${hostPort} ready`, { containerId: container.id });
@@ -36,22 +42,55 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
     boundPorts: BoundPorts
   ): Promise<void> {
     for (const [internalPort] of boundPorts.iterator()) {
+      if (typeof internalPort === "string" && internalPort.toLowerCase().includes("/udp")) {
+        log.debug(`Skipping wait for internal UDP port ${internalPort}`, {
+          containerId: container.id,
+        });
+        continue;
+      }
       log.debug(`Waiting for internal port ${internalPort}...`, { containerId: container.id });
       await this.waitForPort(container, internalPort, portCheck);
       log.debug(`Internal port ${internalPort} ready`, { containerId: container.id });
     }
+    log.debug(`Internal port wait strategy complete`, { containerId: container.id });
   }
 
-  private async waitForPort(container: Dockerode.Container, port: number, portCheck: PortCheck): Promise<void> {
-    await new IntervalRetry<boolean, Error>(100).retryUntil(
-      () => portCheck.isBound(port),
-      (isBound) => isBound,
-      () => {
-        const message = `Port ${port} not bound after ${this.startupTimeoutMs}ms`;
-        log.error(message, { containerId: container.id });
-        throw new Error(message);
-      },
-      this.startupTimeoutMs
-    );
+  private async waitForPort(
+    container: Dockerode.Container,
+    port: number | string,
+    portCheck: PortCheck
+  ): Promise<void> {
+    // Skip waiting for UDP ports
+    if (typeof port === "string" && port.toLowerCase().includes("/udp")) {
+      log.debug(`Skipping wait for UDP port ${port} (UDP port checks not supported)`, { containerId: container.id });
+      return;
+    }
+
+    log.debug(`Checking availability for port: ${port}`);
+
+    try {
+      await new IntervalRetry<boolean, Error>(100).retryUntil(
+        () => {
+          console.log(`Checking if port ${port} is bound...`);
+          return portCheck.isBound(port);
+        },
+        (isBound) => {
+          if (isBound) {
+            console.log(`Port ${port} is now bound!`);
+          }
+          return isBound;
+        },
+        () => {
+          const message = `Port ${port} not bound after ${this.startupTimeoutMs}ms`;
+          console.log(`TIMEOUT: ${message}`);
+          log.error(message, { containerId: container.id });
+          throw new Error(message);
+        },
+        this.startupTimeoutMs
+      );
+    } catch (err) {
+      log.error(`Error checking port ${port} with error ${err}`);
+      throw err;
+    }
   }
 }
