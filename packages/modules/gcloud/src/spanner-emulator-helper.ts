@@ -1,4 +1,4 @@
-import { Spanner } from "@google-cloud/spanner";
+import type { Spanner } from "@google-cloud/spanner";
 import type { IInstance } from "@google-cloud/spanner/build/src/instance";
 import type { StartedSpannerEmulatorContainer } from "./spanner-emulator-container";
 
@@ -17,7 +17,8 @@ export class SpannerEmulatorHelper {
   /**
    * Lazily get or create the Spanner client.
    */
-  public get client(): Spanner {
+  public async client(): Promise<Spanner> {
+    const { Spanner } = await import("@google-cloud/spanner");
     this.clientInstance ??= new Spanner({
       projectId: this.emulator.getProjectId(),
       apiEndpoint: this.emulator.getHost(),
@@ -30,24 +31,24 @@ export class SpannerEmulatorHelper {
   /**
    * Lazily get or create the InstanceAdminClient.
    */
-  private get instanceAdminClient(): ReturnType<Spanner["getInstanceAdminClient"]> {
-    this.instanceAdminClientInstance ??= this.client.getInstanceAdminClient();
+  private async instanceAdminClient(): Promise<ReturnType<Spanner["getInstanceAdminClient"]>> {
+    this.instanceAdminClientInstance ??= (await this.client()).getInstanceAdminClient();
     return this.instanceAdminClientInstance;
   }
 
   /**
    * Lazily get or create the DatabaseAdminClient.
    */
-  private get databaseAdminClient(): ReturnType<Spanner["getDatabaseAdminClient"]> {
-    this.databaseAdminClientInstance ??= this.client.getDatabaseAdminClient();
+  private async databaseAdminClient(): Promise<ReturnType<Spanner["getDatabaseAdminClient"]>> {
+    this.databaseAdminClientInstance ??= (await this.client()).getDatabaseAdminClient();
     return this.databaseAdminClientInstance;
   }
 
   /**
    * Lazily compute the instanceConfig path.
    */
-  public get instanceConfig(): string {
-    this.instanceConfigValue ??= this.instanceAdminClient.instanceConfigPath(
+  public async instanceConfig(): Promise<string> {
+    this.instanceConfigValue ??= (await this.instanceAdminClient()).instanceConfigPath(
       this.emulator.getProjectId(),
       "emulator-config"
     );
@@ -58,9 +59,11 @@ export class SpannerEmulatorHelper {
    * Creates a new Spanner instance in the emulator.
    */
   public async createInstance(instanceId: string, options?: IInstance): Promise<unknown> {
-    const [operation] = await this.instanceAdminClient.createInstance({
+    const [operation] = await (
+      await this.instanceAdminClient()
+    ).createInstance({
       instanceId,
-      parent: this.instanceAdminClient.projectPath(this.emulator.getProjectId()),
+      parent: (await this.instanceAdminClient()).projectPath(this.emulator.getProjectId()),
       instance: options,
     });
     const [result] = await operation.promise();
@@ -71,15 +74,17 @@ export class SpannerEmulatorHelper {
    * Deletes an existing Spanner instance in the emulator.
    */
   public async deleteInstance(instanceId: string): Promise<void> {
-    await this.client.instance(instanceId).delete();
+    await (await this.client()).instance(instanceId).delete();
   }
 
   /**
    * Creates a new database under the specified instance in the emulator.
    */
   public async createDatabase(instanceId: string, databaseId: string): Promise<unknown> {
-    const [operation] = await this.databaseAdminClient.createDatabase({
-      parent: this.databaseAdminClient.instancePath(this.emulator.getProjectId(), instanceId),
+    const [operation] = await (
+      await this.databaseAdminClient()
+    ).createDatabase({
+      parent: (await this.databaseAdminClient()).instancePath(this.emulator.getProjectId(), instanceId),
       createStatement: `CREATE DATABASE \`${databaseId}\``,
     });
     const [result] = await operation.promise();
@@ -90,6 +95,6 @@ export class SpannerEmulatorHelper {
    * Deletes a database under the specified instance in the emulator.
    */
   public async deleteDatabase(instanceId: string, databaseId: string): Promise<void> {
-    await this.client.instance(instanceId).database(databaseId).delete();
+    await (await this.client()).instance(instanceId).database(databaseId).delete();
   }
 }

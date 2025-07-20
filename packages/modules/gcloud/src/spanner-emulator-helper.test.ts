@@ -17,7 +17,7 @@ describe("SpannerEmulatorHelper", { timeout: 240_000 }, () => {
     await helper.createInstance(instanceId);
     await helper.createDatabase(instanceId, databaseId);
 
-    const client = helper.client;
+    const client = await helper.client();
 
     // verify instance exists
     const [instanceExists] = await client.instance(instanceId).exists();
