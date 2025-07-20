@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/gcloud",
-  "version": "11.3.0",
+  "version": "11.3.1",
   "license": "MIT",
   "author": "Anietie Asuquo <hello@anietieasuquo.com>",
   "keywords": [
@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.13.4",
-    "testcontainers": "^11.3.0"
+    "testcontainers": "^11.3.1"
   },
   "devDependencies": {
     "@google-cloud/bigquery": "^8.1.0",
