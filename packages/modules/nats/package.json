@@ -32,7 +32,7 @@
     "testcontainers": "^11.3.1"
   },
   "devDependencies": {
-    "@nats-io/jetstream": "^3.0.2",
-    "@nats-io/transport-node": "^3.0.2"
+    "@nats-io/jetstream": "^3.1.0",
+    "@nats-io/transport-node": "^3.1.0"
   }
 }
