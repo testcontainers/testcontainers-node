@@ -4,34 +4,29 @@ import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait 
 const MONGODB_PORT = 27017;
 
 export class MongoDBContainer extends GenericContainer {
-  private username = "";
-  private password = "";
+  private username: string | undefined;
+  private password: string | undefined;
 
   constructor(image: string) {
     super(image);
-    this.withExposedPorts(MONGODB_PORT).withStartupTimeout(120_000);
+    this.withExposedPorts(MONGODB_PORT).withWaitStrategy(Wait.forHealthCheck()).withStartupTimeout(120_000);
   }
 
   public withUsername(username: string): this {
-    if (username === "") throw new Error("Username should not be empty.");
+    if (!username) throw new Error("Username should not be empty.");
     this.username = username;
     return this;
   }
 
   public withPassword(password: string): this {
-    if (password === "") throw new Error("Password should not be empty.");
+    if (!password) throw new Error("Password should not be empty.");
     this.password = password;
     return this;
   }
 
   public override async start(): Promise<StartedMongoDBContainer> {
-    const cmdArgs = ["--replSet", "rs0", "--bind_ip_all"];
-    this.withHealthCheck({
-      test: ["CMD-SHELL", this.buildMongoEvalCommand(this.initRsAndWait())],
-      interval: 250,
-      timeout: 60000,
-      retries: 1000,
-    }).withWaitStrategy(Wait.forHealthCheck());
+    const cmdArgs = ["--replSet", "rs0"];
+    if (!this.healthCheck) this.withWaitForRsHealthCheck();
     if (this.username && this.password) {
       cmdArgs.push("--keyFile", "/data/db/key.txt");
       this.withEnvironment({
@@ -52,26 +47,36 @@ export class MongoDBContainer extends GenericContainer {
     return new StartedMongoDBContainer(await super.start(), this.username, this.password);
   }
 
+  private withWaitForRsHealthCheck(): this {
+    return this.withHealthCheck({
+      test: [
+        "CMD-SHELL",
+        this.buildMongoEvalCommand(
+          `'try { rs.initiate(); } catch (e){} while (db.runCommand({isMaster: 1}).ismaster==false) { sleep(100); }'`
+        ),
+      ],
+      interval: 250,
+      timeout: 60000,
+      retries: 1000,
+    });
+  }
+
   private buildMongoEvalCommand(command: string) {
     const useMongosh = satisfies(this.imageName.tag, ">=5.0.0");
     const args = [];
     if (useMongosh) args.push("mongosh");
     else args.push("mongo", "admin");
     if (this.username && this.password) args.push("-u", this.username, "-p", this.password);
-    args.push("--host", "localhost", "--quiet", "--eval", command);
+    args.push("--quiet", "--eval", command);
     return args.join(" ");
-  }
-
-  private initRsAndWait() {
-    return `'try { rs.initiate(); } catch (e){} while (db.runCommand({isMaster: 1}).ismaster==false) { sleep(100); }'`;
   }
 }
 
 export class StartedMongoDBContainer extends AbstractStartedContainer {
-  private readonly username: string = "";
-  private readonly password: string = "";
+  private readonly username: string | undefined;
+  private readonly password: string | undefined;
 
-  constructor(startedTestContainer: StartedTestContainer, username: string, password: string) {
+  constructor(startedTestContainer: StartedTestContainer, username: string | undefined, password: string | undefined) {
     super(startedTestContainer);
     this.username = username;
     this.password = password;
