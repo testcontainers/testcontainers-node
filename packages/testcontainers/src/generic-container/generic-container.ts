@@ -142,13 +142,7 @@ export class GenericContainer implements TestContainer {
     if (!inspectResult.State.Running) {
       log.debug("Reused container is not running, attempting to start it");
       await client.container.start(container);
-      inspectResult = (
-        await inspectContainerUntilPortsExposed(
-          () => client.container.inspect(container),
-          this.exposedPorts,
-          container.id
-        )
-      ).inspectResult;
+      inspectResult = await inspectContainerUntilPortsExposed(() => client.container.inspect(container), container.id);
     }
 
     const mappedInspectResult = mapInspectResult(inspectResult);
@@ -202,11 +196,11 @@ export class GenericContainer implements TestContainer {
     await client.container.start(container);
     log.info(`Started container for image "${this.createOpts.Image}"`, { containerId: container.id });
 
-    const { inspectResult, mappedInspectResult } = await inspectContainerUntilPortsExposed(
+    const inspectResult = await inspectContainerUntilPortsExposed(
       () => client.container.inspect(container),
-      this.exposedPorts,
       container.id
     );
+    const mappedInspectResult = mapInspectResult(inspectResult);
     const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, mappedInspectResult).filter(
       this.exposedPorts
     );
