@@ -9,8 +9,10 @@ export async function inspectContainerUntilPortsExposed(
   const result = await new IntervalRetry<ContainerInspectInfo, Error>(250).retryUntil(
     () => inspectFn(),
     (inspectResult) => {
-      const exposedPorts = Object.keys(inspectResult.HostConfig.PortBindings);
-      return exposedPorts.every((exposedPort) => inspectResult.NetworkSettings.Ports[exposedPort]?.length > 0);
+      const portBindings = inspectResult?.HostConfig?.PortBindings;
+      if (!portBindings) return false;
+      const expectedlyBoundPorts = Object.keys(portBindings);
+      return expectedlyBoundPorts.every((exposedPort) => inspectResult.NetworkSettings.Ports[exposedPort]?.length > 0);
     },
     () => {
       const message = `Container did not expose all ports after starting`;
