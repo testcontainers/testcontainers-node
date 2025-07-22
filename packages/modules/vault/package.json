@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/vault",
-  "version": "11.3.1",
+  "version": "11.3.2",
   "license": "MIT",
   "keywords": [
     "vault",
@@ -33,6 +33,6 @@
     "node-vault": "^0.10.5"
   },
   "dependencies": {
-    "testcontainers": "^11.3.1"
+    "testcontainers": "^11.3.2"
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/mongodb",
-  "version": "11.3.1",
+  "version": "11.3.2",
   "license": "MIT",
   "keywords": [
     "mongodb",

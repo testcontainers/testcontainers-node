@@ -1,1 +1,1 @@
-FROM hashicorp/vault:1.13.0
+FROM hashicorp/vault:1.20.0

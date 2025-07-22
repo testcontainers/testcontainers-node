@@ -1,12 +1,12 @@
 {
   "name": "@testcontainers/mockserver",
-  "version": "11.3.1",
+  "version": "11.3.2",
   "description": "Mockserver module for Testcontainers",
   "main": "build/index.js",
   "devDependencies": {
     "@types/superagent": "^8.1.9",
     "mockserver-client": "^5.15.0",
-    "superagent": "^10.2.1"
+    "superagent": "^10.2.2"
   },
   "scripts": {
     "prepack": "shx cp ../../../README.md . && shx cp ../../../LICENSE .",
@@ -34,6 +34,6 @@
     "access": "public"
   },
   "dependencies": {
-    "testcontainers": "^11.3.1"
+    "testcontainers": "^11.3.2"
   }
 }
