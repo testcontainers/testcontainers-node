@@ -7,14 +7,14 @@ const IMAGE = getImage(__dirname);
 describe("ToxiProxyContainer", { timeout: 240_000 }, () => {
   // create_proxy {
   it("should create a proxy to an endpoint", async () => {
-    const network = await new Network().start();
-    const appContainer = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+    await using network = await new Network().start();
+    await using _ = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
       .withNetwork(network)
       .withNetworkAliases("app")
       .start();
 
-    const toxiproxyContainer = await new ToxiProxyContainer(IMAGE).withNetwork(network).start();
+    await using toxiproxyContainer = await new ToxiProxyContainer(IMAGE).withNetwork(network).start();
 
     const appProxy = await toxiproxyContainer.createProxy({
       name: "app",
@@ -23,23 +23,19 @@ describe("ToxiProxyContainer", { timeout: 240_000 }, () => {
 
     const response = await fetch(`http://${appProxy.host}:${appProxy.port}/hello-world`);
     expect(response.status).toBe(200);
-
-    await toxiproxyContainer.stop();
-    await appContainer.stop();
-    await network.stop();
   });
   // }
 
   // enabled_disabled {
   it("should enable and disable a proxy", async () => {
-    const network = await new Network().start();
-    const appContainer = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+    await using network = await new Network().start();
+    await using _ = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
       .withNetwork(network)
       .withNetworkAliases("app")
       .start();
 
-    const toxiproxyContainer = await new ToxiProxyContainer(IMAGE).withNetwork(network).start();
+    await using toxiproxyContainer = await new ToxiProxyContainer(IMAGE).withNetwork(network).start();
 
     const appProxy = await toxiproxyContainer.createProxy({
       name: "app",
@@ -52,23 +48,19 @@ describe("ToxiProxyContainer", { timeout: 240_000 }, () => {
     await appProxy.setEnabled(true);
     const response = await fetch(`http://${appProxy.host}:${appProxy.port}/hello-world`);
     expect(response.status).toBe(200);
-
-    await toxiproxyContainer.stop();
-    await appContainer.stop();
-    await network.stop();
   });
   // }
 
   // adding_toxic {
   it("should add a toxic to a proxy and then remove", async () => {
-    const network = await new Network().start();
-    const appContainer = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+    await using network = await new Network().start();
+    await using _ = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
       .withNetwork(network)
       .withNetworkAliases("app")
       .start();
 
-    const toxiproxyContainer = await new ToxiProxyContainer(IMAGE).withNetwork(network).start();
+    await using toxiproxyContainer = await new ToxiProxyContainer(IMAGE).withNetwork(network).start();
 
     const appProxy = await toxiproxyContainer.createProxy({
       name: "app",
@@ -93,22 +85,18 @@ describe("ToxiProxyContainer", { timeout: 240_000 }, () => {
     expect(after - before).toBeGreaterThan(1000);
 
     await toxic.remove();
-
-    await toxiproxyContainer.stop();
-    await appContainer.stop();
-    await network.stop();
   });
   // }
 
   it("should create multiple proxies", async () => {
-    const network = await new Network().start();
-    const appContainer = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+    await using network = await new Network().start();
+    await using _ = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
       .withNetwork(network)
       .withNetworkAliases("app")
       .start();
 
-    const toxiproxyContainer = await new ToxiProxyContainer(IMAGE).withNetwork(network).start();
+    await using toxiproxyContainer = await new ToxiProxyContainer(IMAGE).withNetwork(network).start();
 
     const appProxy = await toxiproxyContainer.createProxy({
       name: "app",
@@ -124,14 +112,10 @@ describe("ToxiProxyContainer", { timeout: 240_000 }, () => {
 
     const response2 = await fetch(`http://${appProxy2.host}:${appProxy2.port}/hello-world`);
     expect(response2.status).toBe(200);
-
-    await toxiproxyContainer.stop();
-    await appContainer.stop();
-    await network.stop();
   });
 
   it("throws an error when too many proxies are created", async () => {
-    const toxiproxyContainer = await new ToxiProxyContainer(IMAGE).start();
+    await using toxiproxyContainer = await new ToxiProxyContainer(IMAGE).start();
 
     for (let i = 0; i < 32; i++) {
       await toxiproxyContainer.createProxy({
@@ -146,7 +130,5 @@ describe("ToxiProxyContainer", { timeout: 240_000 }, () => {
         upstream: `google.com:80`,
       })
     ).rejects.toThrow();
-
-    await toxiproxyContainer.stop();
   });
 });

@@ -4,11 +4,11 @@ import { checkContainerIsHealthy, getRunningContainerNames } from "../utils/test
 
 describe("HostPortWaitStrategy", { timeout: 180_000 }, () => {
   it("should wait for port", async () => {
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withExposedPorts(8080)
+      .start();
 
     await checkContainerIsHealthy(container);
-
-    await container.stop();
   });
 
   it("should stop the container when the host port check wait strategy times out", async () => {

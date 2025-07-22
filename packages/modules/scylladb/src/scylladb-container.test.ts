@@ -7,7 +7,7 @@ const IMAGE = getImage(__dirname);
 describe("ScyllaDB", { timeout: 240_000 }, () => {
   // connectWithDefaultCredentials {
   it("should connect and execute a query", async () => {
-    const container = await new ScyllaContainer(IMAGE).start();
+    await using container = await new ScyllaContainer(IMAGE).start();
 
     const client = new Client({
       contactPoints: [container.getContactPoint()],
@@ -21,13 +21,12 @@ describe("ScyllaDB", { timeout: 240_000 }, () => {
     expect(result.rows[0].cql_version).toBe("3.3.1");
 
     await client.shutdown();
-    await container.stop();
   });
   // }
 
   // createAndFetchData {
   it("should create keyspace, a table, insert data, and retrieve it", async () => {
-    const container = await new ScyllaContainer(IMAGE).start();
+    await using container = await new ScyllaContainer(IMAGE).start();
 
     const client = new Client({
       contactPoints: [container.getContactPoint()],
@@ -62,12 +61,11 @@ describe("ScyllaDB", { timeout: 240_000 }, () => {
     expect(result.rows[0].name).toEqual(username);
 
     await client.shutdown();
-    await container.stop();
   });
   // }
 
   it("should work with restarted container", async () => {
-    const container = await new ScyllaContainer(IMAGE).start();
+    await using container = await new ScyllaContainer(IMAGE).start();
     await container.restart();
 
     const client = new Client({
@@ -82,6 +80,5 @@ describe("ScyllaDB", { timeout: 240_000 }, () => {
     expect(result.rows[0].cql_version).toBe("3.3.1");
 
     await client.shutdown();
-    await container.stop();
   });
 });

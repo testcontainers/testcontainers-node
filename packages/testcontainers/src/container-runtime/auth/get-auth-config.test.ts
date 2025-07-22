@@ -1,6 +1,6 @@
-import { Mock } from "vitest";
+import type { Mock } from "vitest";
 
-describe("get auth config", () => {
+describe.sequential("get auth config", () => {
   let mockExistsSync: Mock;
   let mockReadFile: Mock;
 

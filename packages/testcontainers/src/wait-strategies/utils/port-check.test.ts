@@ -19,8 +19,8 @@ vi.mock("../../container-runtime", () => {
   };
 });
 
-describe("PortCheck", () => {
-  describe("InternalPortCheck", () => {
+describe.sequential("PortCheck", () => {
+  describe.sequential("InternalPortCheck", () => {
     let client: ContainerRuntimeClient;
     let mockContainer: Container;
     let portCheck: InternalPortCheck;

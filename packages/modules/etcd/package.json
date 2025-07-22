@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/etcd",
-  "version": "11.1.0",
+  "version": "11.3.2",
   "license": "MIT",
   "keywords": [
     "etcd",
@@ -33,6 +33,6 @@
     "etcd3": "^1.1.2"
   },
   "dependencies": {
-    "testcontainers": "^11.1.0"
+    "testcontainers": "^11.3.2"
   }
 }

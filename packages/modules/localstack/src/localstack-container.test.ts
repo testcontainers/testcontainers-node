@@ -19,7 +19,7 @@ const runAwsCliAgainstDockerNetworkContainer = async (
 describe("LocalStackContainer", { timeout: 180_000 }, () => {
   // createS3Bucket {
   it("should create a S3 bucket", async () => {
-    const container = await new LocalstackContainer(IMAGE).start();
+    await using container = await new LocalstackContainer(IMAGE).start();
 
     const client = new S3Client({
       endpoint: container.getConnectionUri(),
@@ -39,20 +39,18 @@ describe("LocalStackContainer", { timeout: 180_000 }, () => {
     expect(createBucketResponse.$metadata.httpStatusCode).toEqual(200);
     const headBucketResponse = await client.send(new HeadBucketCommand(input));
     expect(headBucketResponse.$metadata.httpStatusCode).toEqual(200);
-
-    await container.stop();
   });
   // }
 
   it("should use custom network", async () => {
-    const network = await new Network().start();
-    const container = await new LocalstackContainer(IMAGE)
+    await using network = await new Network().start();
+    await using _ = await new LocalstackContainer(IMAGE)
       .withNetwork(network)
       .withNetworkAliases("notthis", "localstack") // the last alias is used for HOSTNAME_EXTERNAL
       .withEnvironment({ SQS_ENDPOINT_STRATEGY: "path" })
       .start();
 
-    const awsCliInDockerNetwork = await new GenericContainer("amazon/aws-cli:2.7.27")
+    await using awsCliInDockerNetwork = await new GenericContainer("amazon/aws-cli:2.7.27")
       .withNetwork(network)
       .withEntrypoint(["bash"])
       .withCommand(["-c", "sleep infinity"])
@@ -68,13 +66,10 @@ describe("LocalStackContainer", { timeout: 180_000 }, () => {
       awsCliInDockerNetwork
     );
     expect(response).toContain(`http://localstack:${LOCALSTACK_PORT}`);
-    await container.stop();
-    await awsCliInDockerNetwork.stop();
-    await network.stop();
   });
 
   it("should not override LOCALSTACK_HOST assignment", async () => {
-    const container = await new LocalstackContainer(IMAGE)
+    await using container = await new LocalstackContainer(IMAGE)
       .withEnvironment({ LOCALSTACK_HOST: "myhost" })
       .withNetworkAliases("myalias")
       .start();
@@ -82,32 +77,26 @@ describe("LocalStackContainer", { timeout: 180_000 }, () => {
     const { output, exitCode } = await container.exec(["printenv", "LOCALSTACK_HOST"]);
     expect(exitCode).toBe(0);
     expect(output).toContain("myhost");
-
-    await container.stop();
   });
 
   it("should override LOCALSTACK_HOST with last network alias", async () => {
-    const container = await new LocalstackContainer(IMAGE).withNetworkAliases("other", "myalias").start();
+    await using container = await new LocalstackContainer(IMAGE).withNetworkAliases("other", "myalias").start();
 
     const { output, exitCode } = await container.exec(["printenv", "LOCALSTACK_HOST"]);
     expect(exitCode).toBe(0);
     expect(output).toContain("myalias");
-
-    await container.stop();
   });
 
   it("should assign LOCALSTACK_HOST to localhost", async () => {
-    const container = await new LocalstackContainer(IMAGE).start();
+    await using container = await new LocalstackContainer(IMAGE).start();
 
     const { output, exitCode } = await container.exec(["printenv", "LOCALSTACK_HOST"]);
     expect(exitCode).toBe(0);
     expect(output).toContain("localhost");
-
-    await container.stop();
   });
 
   it("should add LAMBDA_DOCKER_FLAGS with sessionId label", async () => {
-    const container = await new LocalstackContainer(IMAGE).start();
+    await using container = await new LocalstackContainer(IMAGE).start();
     const sessionId = container.getLabels()[LABEL_TESTCONTAINERS_SESSION_ID];
 
     const { output, exitCode } = await container.exec(["printenv", "LAMBDA_DOCKER_FLAGS"]);
@@ -116,7 +105,7 @@ describe("LocalStackContainer", { timeout: 180_000 }, () => {
   });
 
   it("should concatenate sessionId label to LAMBDA_DOCKER_FLAGS", async () => {
-    const container = await new LocalstackContainer(IMAGE)
+    await using container = await new LocalstackContainer(IMAGE)
       .withEnvironment({
         LAMBDA_DOCKER_FLAGS: `-l mylabel=myvalue`,
       })

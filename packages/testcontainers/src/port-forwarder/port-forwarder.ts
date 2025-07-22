@@ -9,7 +9,7 @@ import { PortWithOptionalBinding } from "../utils/port";
 
 export const SSHD_IMAGE = process.env["SSHD_CONTAINER_IMAGE"]
   ? ImageName.fromString(process.env["SSHD_CONTAINER_IMAGE"]).string
-  : ImageName.fromString("testcontainers/sshd:1.2.0").string;
+  : ImageName.fromString("testcontainers/sshd:1.3.0").string;
 
 class PortForwarder {
   constructor(

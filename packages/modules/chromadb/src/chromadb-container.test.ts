@@ -11,11 +11,10 @@ const IMAGE = getImage(__dirname);
 describe("ChromaDB", { timeout: 360_000 }, () => {
   // startContainer {
   it("should connect", async () => {
-    const container = await new ChromaDBContainer(IMAGE).start();
+    await using container = await new ChromaDBContainer(IMAGE).start();
     const client = await connectTo(container);
     expect(await client.heartbeat()).toBeDefined();
     // Do something with the client
-    await container.stop();
   });
   // }
 
@@ -32,7 +31,7 @@ describe("ChromaDB", { timeout: 360_000 }, () => {
 
   // createCollection {
   it("should create collection and get data", async () => {
-    const container = await new ChromaDBContainer(IMAGE).start();
+    await using container = await new ChromaDBContainer(IMAGE).start();
     const client = await connectTo(container);
     const collection = await client.createCollection({ name: "test", metadata: { "hnsw:space": "cosine" } });
     expect(collection.name).toBe("test");
@@ -44,13 +43,12 @@ describe("ChromaDB", { timeout: 360_000 }, () => {
     expect(getResults.documents[0]).toStrictEqual("my doc");
     expect(getResults.metadatas).toBeDefined();
     expect(getResults.metadatas?.[0]?.key).toStrictEqual("value");
-    await container.stop();
   });
   // }
 
   // queryCollectionWithEmbeddingFunction {
   it("should create collection and query", async () => {
-    const container = await new ChromaDBContainer(IMAGE).start();
+    await using container = await new ChromaDBContainer(IMAGE).start();
     const ollama = await new GenericContainer("ollama/ollama").withExposedPorts(11434).start();
     await ollama.exec(["ollama", "pull", "nomic-embed-text"]);
     const client = await connectTo(container);
@@ -75,13 +73,12 @@ describe("ChromaDB", { timeout: 360_000 }, () => {
     expect(results).toBeDefined();
     expect(results.ids[0]).toEqual(["1"]);
     expect(results.ids[0][0]).toBe("1");
-    await container.stop();
   });
 
   // persistentData {
   it("should reconnect with volume and persistence data", async () => {
     const sourcePath = fs.mkdtempSync(path.join(os.tmpdir(), "chroma-temp"));
-    const container = await new ChromaDBContainer(IMAGE)
+    await using container = await new ChromaDBContainer(IMAGE)
       .withBindMounts([{ source: sourcePath, target: "/data" }])
       .start();
     const client = await connectTo(container);
@@ -93,7 +90,6 @@ describe("ChromaDB", { timeout: 360_000 }, () => {
     const getResults = await collection.get({ ids: ["1"] });
     expect(getResults.ids[0]).toBe("1");
     expect(getResults.documents[0]).toStrictEqual("my doc");
-    await container.stop();
     expect(fs.existsSync(`${sourcePath}/chroma.sqlite3`)).toBe(true);
     try {
       fs.rmSync(sourcePath, { force: true, recursive: true });
@@ -109,7 +105,7 @@ describe("ChromaDB", { timeout: 360_000 }, () => {
     const tenant = "test-tenant";
     const key = "test-key";
     const database = "test-db";
-    const container = await new ChromaDBContainer(IMAGE)
+    await using container = await new ChromaDBContainer(IMAGE)
       .withEnvironment({
         CHROMA_SERVER_AUTHN_CREDENTIALS: key,
         CHROMA_SERVER_AUTHN_PROVIDER: "chromadb.auth.token_authn.TokenAuthenticationServerProvider",

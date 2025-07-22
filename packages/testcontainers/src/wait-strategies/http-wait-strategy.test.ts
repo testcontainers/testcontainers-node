@@ -5,25 +5,21 @@ import { Wait } from "./wait";
 
 describe("HttpWaitStrategy", { timeout: 180_000 }, () => {
   it("should wait for 200", async () => {
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
       .withWaitStrategy(Wait.forHttp("/hello-world", 8080))
       .start();
 
     await checkContainerIsHealthy(container);
-
-    await container.stop();
   });
 
   it("should wait for status code", async () => {
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
       .withWaitStrategy(Wait.forHttp("/unknown-path", 8080).forStatusCode(404))
       .start();
 
     await checkContainerIsHealthy(container);
-
-    await container.stop();
   });
 
   it("should timeout for mismatching status code", async () => {
@@ -37,7 +33,7 @@ describe("HttpWaitStrategy", { timeout: 180_000 }, () => {
   });
 
   it("should wait for status code matching", async () => {
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
       .withWaitStrategy(
         Wait.forHttp("/hello-world", 8080).forStatusCodeMatching(
@@ -47,8 +43,6 @@ describe("HttpWaitStrategy", { timeout: 180_000 }, () => {
       .start();
 
     await checkContainerIsHealthy(container);
-
-    await container.stop();
   });
 
   it("should timeout for falsy status code matching", async () => {
@@ -62,7 +56,7 @@ describe("HttpWaitStrategy", { timeout: 180_000 }, () => {
   });
 
   it("should wait for response body predicate", async () => {
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
       .withWaitStrategy(
         Wait.forHttp("/hello-world", 8080).forResponsePredicate((response) => response === "hello-world")
@@ -70,8 +64,6 @@ describe("HttpWaitStrategy", { timeout: 180_000 }, () => {
       .start();
 
     await checkContainerIsHealthy(container);
-
-    await container.stop();
   });
 
   it("should timeout for falsy response body predicate", async () => {
@@ -123,47 +115,39 @@ describe("HttpWaitStrategy", { timeout: 180_000 }, () => {
   });
 
   it("should set method", async () => {
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
       .withWaitStrategy(Wait.forHttp("/hello-world-post", 8080).withMethod("POST"))
       .start();
 
     await checkContainerIsHealthy(container);
-
-    await container.stop();
   });
 
   it("should set headers", async () => {
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
       .withWaitStrategy(Wait.forHttp("/header-or-400/custom", 8080).withHeaders({ custom: "value" }))
       .start();
 
     await checkContainerIsHealthy(container);
-
-    await container.stop();
   });
 
   it("should set basic credentials", async () => {
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
       .withWaitStrategy(Wait.forHttp("/auth", 8080).withBasicCredentials("user", "pass"))
       .start();
 
     await checkContainerIsHealthy(container);
-
-    await container.stop();
   });
 
   it("should set read timeout", async () => {
-    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
       .withWaitStrategy(Wait.forHttp("/hello-world-delay", 8080).withReadTimeout(5000))
       .start();
 
     await checkContainerIsHealthy(container);
-
-    await container.stop();
   });
 
   describe("should wait for TLS", () => {
@@ -178,14 +162,12 @@ describe("HttpWaitStrategy", { timeout: 180_000 }, () => {
     });
 
     it("allow self-signed certificates", async () => {
-      const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
         .withExposedPorts(8443)
         .withWaitStrategy(Wait.forHttp("/hello-world", 8443).usingTls().allowInsecure())
         .start();
 
       await checkContainerIsHealthyTls(container);
-
-      await container.stop();
     });
   });
 });

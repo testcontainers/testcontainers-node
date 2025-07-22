@@ -74,6 +74,7 @@ nav:
       - Nats: modules/nats.md
       - Neo4J: modules/neo4j.md
       - Ollama: modules/ollama.md
+      - OpenSearch: modules/opensearch.md
       - PostgreSQL: modules/postgresql.md
       - Qdrant: modules/qdrant.md
       - RabbitMQ: modules/rabbitmq.md
@@ -83,5 +84,6 @@ nav:
       - Selenium: modules/selenium.md
       - ToxiProxy: modules/toxiproxy.md
       - Valkey: modules/valkey.md
+      - Vault: modules/vault.md
       - Weaviate: modules/weaviate.md
   - Configuration: configuration.md

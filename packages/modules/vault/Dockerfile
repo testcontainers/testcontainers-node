@@ -1,0 +1,1 @@
+FROM hashicorp/vault:1.20.0

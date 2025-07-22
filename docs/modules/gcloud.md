@@ -8,16 +8,16 @@ Testcontainers module for the Google Cloud Platform's [Cloud SDK](https://cloud.
 npm install @testcontainers/gcloud --save-dev
 ```
 
-The module now supports multiple emulators, including `firestore`, which offers both `native` and `datastore` modes.
-To utilize these emulators, you should employ the following classes:
+The module supports multiple emulators. Use the following classes:
 
-Emulator | Class | Container Image
+Emulator | Class | Container Image
 -|-|-
-Firestore (Native mode) | FirestoreEmulatorContainer | [gcr.io/google.com/cloudsdktool/google-cloud-cli:emulators](https://gcr.io/google.com/cloudsdktool/google-cloud-cli)
-Firestore (Datastore mode) | DatastoreEmulatorContainer | [gcr.io/google.com/cloudsdktool/google-cloud-cli:emulators](https://gcr.io/google.com/cloudsdktool/google-cloud-cli)
+Firestore (Native mode) | FirestoreEmulatorContainer | [gcr.io/google.com/cloudsdktool/google-cloud-cli:emulators](https://gcr.io/google.com/cloudsdktool/google-cloud-cli)
+Firestore (Datastore mode) | DatastoreEmulatorContainer | [gcr.io/google.com/cloudsdktool/google-cloud-cli:emulators](https://gcr.io/google.com/cloudsdktool/google-cloud-cli)
 Cloud PubSub | PubSubEmulatorContainer | [gcr.io/google.com/cloudsdktool/google-cloud-cli:emulators](https://gcr.io/google.com/cloudsdktool/google-cloud-cli)
-Cloud Storage | CloudStorageEmulatorContainer | [https://hub.docker.com/r/fsouza/fake-gcs-server](https://hub.docker.com/r/fsouza/fake-gcs-server)
-BigQuery | BigQueryEmulatorContainer | [ghcr.io/goccy/bigquery-emulator](ghcr.io/goccy/bigquery-emulator)
+Cloud Storage | CloudStorageEmulatorContainer | [fsouza/fake-gcs-server:1.52.2](https://hub.docker.com/r/fsouza/fake-gcs-server)
+BigQuery | BigQueryEmulatorContainer | [ghcr.io/goccy/bigquery-emulator:0.6.6](https://ghcr.io/goccy/bigquery-emulator)
+Cloud Spanner | SpannerEmulatorContainer | [gcr.io/cloud-spanner-emulator/emulator:1.5.37](https://gcr.io/cloud-spanner-emulator/emulator:1.5.37)
 
 ## Examples
 
@@ -49,16 +49,32 @@ BigQuery | BigQueryEmulatorContainer | [ghcr.io/goccy/bigquery-emulator](ghcr.
 
 ### Cloud Storage
 
-The Cloud Storage container doesn't rely on a built-in emulator created by Google but instead depends on a fake Cloud Storage server implemented by [Francisco Souza](https://github.com/fsouza). The project is open-source, and the repository can be found at [fsouza/fake-gcs-server](https://github.com/fsouza/fake-gcs-server).
+The Cloud Storage container uses a fake Cloud Storage server by [Francisco Souza](https://github.com/fsouza).
+
 <!--codeinclude-->
 [Starting a Cloud Storage Emulator container with the default image](../../packages/modules/gcloud/src/cloudstorage-emulator-container.test.ts) inside_block:cloud-storage
 <!--/codeinclude-->
 
 ### BigQuery
 
-The BigQuery container doesn't rely on a built-in emulator created by Google, but instead depends on an implementation written in Go by [Masaaki Goshima](https://github.com/goccy). The project is open-source, and the repository can be found at [goccy/bigquery-emulator](https://github.com/goccy/bigquery-emulator).
+The BigQuery emulator is by [Masaaki Goshima](https://github.com/goccy) and uses [go-zetasqlite](https://github.com/goccy/go-zetasqlite).
 
-BigQuery emulator uses [go-zetasqlite](https://github.com/goccy/go-zetasqlite) to interpret ZetaSQL (the language used in BigQuery) and runs it in SQLite. The [README](https://github.com/goccy/go-zetasqlite?tab=readme-ov-file#status) lists BigQuery features currently supported.
 <!--codeinclude-->
 [Starting a BigQuery Emulator container with the default image](../../packages/modules/gcloud/src/bigquery-emulator-container.test.ts)
+<!--/codeinclude-->
+
+### Cloud Spanner
+
+The Cloud Spanner emulator container wraps Google's official emulator image.
+
+<!--codeinclude-->
+[Starting a Spanner Emulator container and exposing endpoints using explicitly configured client](../../packages/modules/gcloud/src/spanner-emulator-container.test.ts) inside_block:startupWithExplicitClient
+<!--/codeinclude-->
+
+<!--codeinclude-->
+[Starting a Spanner Emulator container and exposing endpoints using projectId and SPANNER_EMULATOR_HOST](../../packages/modules/gcloud/src/spanner-emulator-container.test.ts) inside_block:startupWithEnvironmentVariable
+<!--/codeinclude-->
+
+<!--codeinclude-->
+[Creating and deleting instance and database via helper](../../packages/modules/gcloud/src/spanner-emulator-helper.test.ts) inside_block:createAndDelete
 <!--/codeinclude-->

@@ -4,7 +4,7 @@ import { StartedGenericContainer } from "../generic-container/started-generic-co
 import { DownedDockerComposeEnvironment } from "./downed-docker-compose-environment";
 import { StoppedDockerComposeEnvironment } from "./stopped-docker-compose-environment";
 
-export class StartedDockerComposeEnvironment {
+export class StartedDockerComposeEnvironment implements AsyncDisposable {
   constructor(
     private readonly startedGenericContainers: { [containerName: string]: StartedGenericContainer },
     private readonly options: ComposeOptions
@@ -31,5 +31,9 @@ export class StartedDockerComposeEnvironment {
       throw new Error(error);
     }
     return container;
+  }
+
+  async [Symbol.asyncDispose]() {
+    await this.down();
   }
 }
