@@ -20,7 +20,7 @@ describe("HostPortWaitStrategy", { timeout: 180_000 }, () => {
         .withExposedPorts(8081)
         .withStartupTimeout(0)
         .start()
-    ).rejects.toThrowError(/Port \d+ not bound after 0ms/);
+    ).rejects.toThrowError(/Port (?:\d+|\d+\/\w+) not bound after 0ms/);
 
     expect(await getRunningContainerNames()).not.toContain(containerName);
   });
