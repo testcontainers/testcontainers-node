@@ -59,7 +59,7 @@ describe.sequential("inspectContainerUntilPortsExposed", () => {
     const inspectFn = vi.fn().mockResolvedValue(data);
 
     await expect(inspectContainerUntilPortsExposed(inspectFn, "container-id", 0)).rejects.toThrow(
-      "Container did not expose all ports after starting"
+      "Timed out after 0ms while waiting for container ports to be bound to the host"
     );
   });
 
@@ -68,7 +68,7 @@ describe.sequential("inspectContainerUntilPortsExposed", () => {
     const inspectFn = vi.fn().mockResolvedValue(data);
 
     await expect(inspectContainerUntilPortsExposed(inspectFn, "container-id", 0)).rejects.toThrow(
-      "Container did not expose all ports after starting"
+      "Timed out after 0ms while waiting for container ports to be bound to the host"
     );
   });
 });

@@ -15,7 +15,7 @@ export async function inspectContainerUntilPortsExposed(
       return expectedlyBoundPorts.every((exposedPort) => inspectResult.NetworkSettings.Ports[exposedPort]?.length > 0);
     },
     () => {
-      const message = `Container did not expose all ports after starting`;
+      const message = `Timed out after ${timeout}ms while waiting for container ports to be bound to the host`;
       log.error(message, { containerId });
       return new Error(message);
     },
