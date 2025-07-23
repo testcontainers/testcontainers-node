@@ -34,19 +34,17 @@ describe.sequential("inspectContainerUntilPortsExposed", () => {
     expect(result).toEqual(data);
   });
 
-  it("retries the inspect if ports are not yet exposed", async () => {
-    const data1 = mockInspectResult({ "8080/tcp": [] }, { "8080/tcp": [] });
-    const data2 = mockInspectResult({ "8080/tcp": [] }, { "8080/tcp": [{ HostIp: "0.0.0.0", HostPort: "45000" }] });
-    const inspectFn = vi.fn().mockResolvedValueOnce(data1).mockResolvedValueOnce(data1).mockResolvedValueOnce(data2);
+  it("returns the inspect result if host config port bindings are null", async () => {
+    const data = mockInspectResult(null, {});
+    const inspectFn = vi.fn().mockResolvedValueOnce(data);
 
     const result = await inspectContainerUntilPortsExposed(inspectFn, "container-id");
 
-    expect(result).toEqual(data2);
-    expect(inspectFn).toHaveBeenCalledTimes(3);
+    expect(result).toEqual(data);
   });
 
-  it("retries the inspect if port bindings are undefined", async () => {
-    const data1 = mockInspectResult(undefined, { "8080/tcp": [{ HostIp: "0.0.0.0", HostPort: "45000" }] });
+  it("retries the inspect if ports are not yet exposed", async () => {
+    const data1 = mockInspectResult({ "8080/tcp": [] }, { "8080/tcp": [] });
     const data2 = mockInspectResult({ "8080/tcp": [] }, { "8080/tcp": [{ HostIp: "0.0.0.0", HostPort: "45000" }] });
     const inspectFn = vi.fn().mockResolvedValueOnce(data1).mockResolvedValueOnce(data1).mockResolvedValueOnce(data2);
 
