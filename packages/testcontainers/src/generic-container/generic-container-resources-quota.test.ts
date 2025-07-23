@@ -44,6 +44,18 @@ describe("GenericContainer resources quota", { timeout: 180_000 }, () => {
     expect(containerInfo.HostConfig.NanoCpus).toEqual(0);
   });
 
+  it("should round values to match target int64 type", async () => {
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withResourcesQuota({ memory: 0.2, cpu: 0.3 })
+      .start();
+
+    const dockerContainer = await client.container.getById(container.getId());
+    const containerInfo = await dockerContainer.inspect();
+
+    expect(containerInfo.HostConfig.Memory).toEqual(214748365);
+    expect(containerInfo.HostConfig.NanoCpus).toEqual(300000000);
+  });
+
   if (!process.env["CI_ROOTLESS"]) {
     it("should set resources quota cpu only, memory should be 0", async () => {
       await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
