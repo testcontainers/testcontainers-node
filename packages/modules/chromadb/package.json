@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/chromadb",
-  "version": "11.3.2",
+  "version": "11.4.0",
   "license": "MIT",
   "keywords": [
     "chromadb",
@@ -33,6 +33,6 @@
     "ollama": "^0.5.16"
   },
   "dependencies": {
-    "testcontainers": "^11.3.2"
+    "testcontainers": "^11.4.0"
   }
 }

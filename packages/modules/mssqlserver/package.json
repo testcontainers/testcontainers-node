@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/mssqlserver",
-  "version": "11.3.2",
+  "version": "11.4.0",
   "license": "MIT",
   "keywords": [
     "mssqlserver",
@@ -35,6 +35,6 @@
     "mssql": "^11.0.1"
   },
   "dependencies": {
-    "testcontainers": "^11.3.2"
+    "testcontainers": "^11.4.0"
   }
 }
