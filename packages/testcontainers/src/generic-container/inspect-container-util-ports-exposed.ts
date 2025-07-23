@@ -10,6 +10,7 @@ export async function inspectContainerUntilPortsExposed(
     () => inspectFn(),
     (inspectResult) => {
       const portBindings = inspectResult?.HostConfig?.PortBindings;
+      console.log(new Date().toISOString(), JSON.stringify(inspectResult, null, 2));
       if (!portBindings) return false;
       const expectedlyBoundPorts = Object.keys(portBindings);
       return expectedlyBoundPorts.every((exposedPort) => inspectResult.NetworkSettings.Ports[exposedPort]?.length > 0);
