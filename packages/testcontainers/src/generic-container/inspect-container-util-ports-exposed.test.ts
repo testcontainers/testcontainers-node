@@ -71,108 +71,23 @@ describe.sequential("inspectContainerUntilPortsExposed", () => {
       "Timed out after 0ms while waiting for container ports to be bound to the host"
     );
   });
-});
 
-test("correctly handles protocol parameter when specified as string", async () => {
-  const data = mockInspectResult({ "8080/udp": [{ HostIp: "0.0.0.0", HostPort: "45000" }] });
-  const inspectFn = vi.fn().mockResolvedValueOnce(data.inspectResult);
+  test("handles multiple ports with different protocols", async () => {
+    const data = mockInspectResult(
+      {
+        "8080/tcp": [{ HostIp: "0.0.0.0", HostPort: "45000" }],
+        "9090/udp": [{ HostIp: "0.0.0.0", HostPort: "46000" }],
+      },
+      {
+        "8080/tcp": [{ HostIp: "0.0.0.0", HostPort: "45000" }],
+        "9090/udp": [{ HostIp: "0.0.0.0", HostPort: "46000" }],
+      }
+    );
 
-  const result = await inspectContainerUntilPortsExposed(inspectFn, ["8080/udp"], "container-id");
+    const inspectFn = vi.fn().mockResolvedValueOnce(data);
 
-  expect(result).toEqual(data);
-});
+    const result = await inspectContainerUntilPortsExposed(inspectFn, "container-id");
 
-test("correctly handles protocol parameter when specified in object format", async () => {
-  const data = mockInspectResult({ "8080/udp": [{ HostIp: "0.0.0.0", HostPort: "45000" }] });
-  const inspectFn = vi.fn().mockResolvedValueOnce(data.inspectResult);
-
-  const result = await inspectContainerUntilPortsExposed(
-    inspectFn,
-    [{ container: 8080, host: 45000, protocol: "udp" }],
-    "container-id"
-  );
-
-  expect(result).toEqual(data);
-});
-
-test("uses tcp as default protocol when not specified", async () => {
-  const data = mockInspectResult({ "8080/tcp": [{ HostIp: "0.0.0.0", HostPort: "45000" }] });
-  const inspectFn = vi.fn().mockResolvedValueOnce(data.inspectResult);
-
-  const result = await inspectContainerUntilPortsExposed(inspectFn, [8080], "container-id");
-
-  expect(result).toEqual(data);
-});
-
-test("handles multiple ports with different protocols", async () => {
-  const ports = {
-    "8080/tcp": [{ HostIp: "0.0.0.0", HostPort: "45000" }],
-    "9090/udp": [{ HostIp: "0.0.0.0", HostPort: "46000" }],
-  };
-  const data = mockInspectResult(ports);
-  const inspectFn = vi.fn().mockResolvedValueOnce(data.inspectResult);
-
-  const result = await inspectContainerUntilPortsExposed(inspectFn, [8080, "9090/udp"], "container-id");
-
-  expect(result).toEqual(data);
-});
-
-test("fails when protocol doesn't match exposed port", async () => {
-  const data = mockInspectResult({ "8080/tcp": [{ HostIp: "0.0.0.0", HostPort: "45000" }] });
-  const inspectFn = vi.fn().mockResolvedValue(data.inspectResult);
-
-  await expect(inspectContainerUntilPortsExposed(inspectFn, ["8080/udp"], "container-id", 0)).rejects.toThrow(
-    "Container did not expose all ports after starting"
-  );
-});
-
-test("ignores ports with wrong protocol", async () => {
-  const ports = {
-    "8080/tcp": [{ HostIp: "0.0.0.0", HostPort: "45000" }],
-    "8080/udp": [{ HostIp: "0.0.0.0", HostPort: "46000" }],
-  };
-  const data = mockInspectResult(ports);
-  const inspectFn = vi.fn().mockResolvedValueOnce(data.inspectResult);
-
-  const result = await inspectContainerUntilPortsExposed(inspectFn, ["8080/udp"], "container-id");
-
-  expect(result).toEqual(data);
-});
-
-test("handles mixed protocol specifications in different formats", async () => {
-  const ports = {
-    "8080/tcp": [{ HostIp: "0.0.0.0", HostPort: "45000" }],
-    "9090/udp": [{ HostIp: "0.0.0.0", HostPort: "46000" }],
-    "7070/tcp": [{ HostIp: "0.0.0.0", HostPort: "47000" }],
-  };
-  const data = mockInspectResult(ports);
-  const inspectFn = vi.fn().mockResolvedValueOnce(data.inspectResult);
-
-  const result = await inspectContainerUntilPortsExposed(
-    inspectFn,
-    [8080, "9090/udp", { container: 7070, host: 47000 }],
-    "container-id"
-  );
-
-  expect(result).toEqual(data);
-});
-
-test("retry with gradually exposed ports of different protocols", async () => {
-  const data1 = mockInspectResult({});
-  const data2 = mockInspectResult({ "8080/tcp": [{ HostIp: "0.0.0.0", HostPort: "45000" }] });
-  const data3 = mockInspectResult({
-    "8080/tcp": [{ HostIp: "0.0.0.0", HostPort: "45000" }],
-    "8080/udp": [{ HostIp: "0.0.0.0", HostPort: "46000" }],
+    expect(result).toEqual(data);
   });
-
-  const inspectFn = vi
-    .fn()
-    .mockResolvedValueOnce(data1.inspectResult)
-    .mockResolvedValueOnce(data2.inspectResult)
-    .mockResolvedValueOnce(data3.inspectResult);
-
-  const result = await inspectContainerUntilPortsExposed(inspectFn, [8080, "8080/udp"], "container-id");
-
-  expect(result).toEqual(data3);
-  expect(inspectFn).toHaveBeenCalledTimes(3);
 });
