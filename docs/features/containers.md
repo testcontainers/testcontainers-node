@@ -572,6 +572,29 @@ const container = await new GenericContainer("alpine")
 const httpPort = container.getFirstMappedPort();
 ```
 
+Specify a protocol for the exposed port:
+
+```javascript
+const container = await new GenericContainer("alpine")
+  .withExposedPorts({
+    container: 80,
+    protocol: "udp"
+  })
+  .start();
+const httpPort = container.getMappedPort(80, "udp");
+```
+
+Alternatively, specify the protocol using a string with the format `port/protocol`:
+
+```javascript
+const container = await new GenericContainer("alpine")
+  .withExposedPorts("80/udp")
+  .start();
+const httpPort = container.getMappedPort("80/udp");
+```
+
+If no protocol is specified, it defaults to `tcp`.
+
 Specify fixed host port bindings (**not recommended**):
 
 ```javascript
@@ -609,12 +632,12 @@ expect(response.status).toBe(200);
 expect(await response.text()).toBe("PONG");
 ```
 
-The example above starts a `testcontainers/helloworld` container and a `socat` container. 
+The example above starts a `testcontainers/helloworld` container and a `socat` container.
 The `socat` container is configured to forward traffic from port `8081` to the `testcontainers/helloworld` container on port `8080`.
 
 ## Running commands
 
-To run a command inside an already started container, use the exec method. 
+To run a command inside an already started container, use the exec method.
 The command will be run in the container's working directory,
 returning the combined output (`output`), standard output (`stdout`), standard error (`stderr`), and exit code (`exitCode`).
 
