@@ -8,11 +8,11 @@ npm install @testcontainers/arangodb --save-dev
 
 ## Example
 
-This example uses the [arangojs](https://www.npmjs.com/package/arangojs/v/6.0.0-alpha.0) library:
+This example uses the following libraries:
 
-```bash
-npm install arangojs
-```
+- [arangojs](https://www.npmjs.com/package/arangojs/v/6.0.0-alpha.0)
+
+        npm install arangojs
 
 ---
 
