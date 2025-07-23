@@ -6,10 +6,9 @@ const IMAGE = getImage(__dirname);
 
 describe("MongoDBContainer", { timeout: 240_000 }, () => {
   it.each([IMAGE, "mongo:6.0.25", "mongo:4.4.29"])("should work with %s", async (image) => {
-    // mongoConnect {
+    // connectMongo {
     await using mongodbContainer = await new MongoDBContainer(image).start();
 
-    // directConnection: true is required as the container is created as a MongoDB Replica Set.
     const db = mongoose.createConnection(mongodbContainer.getConnectionString(), { directConnection: true });
     const fooCollection = db.collection("foo");
     const obj = { value: 1 };
@@ -25,7 +24,7 @@ describe("MongoDBContainer", { timeout: 240_000 }, () => {
   });
 
   it("should connect with credentials", async () => {
-    // mongoConnectWithCredentials {
+    // connectWithCredentials {
     await using mongodbContainer = await new MongoDBContainer(IMAGE)
       .withUsername("mongo_user")
       .withPassword("mongo_password")
