@@ -6,7 +6,7 @@ const IMAGE = getImage(__dirname);
 
 describe("ArangoDB", { timeout: 180_000 }, () => {
   it("should connect and return a query result", async () => {
-    // connectArangoDB {
+    // example {
     await using container = await new ArangoDBContainer(IMAGE).start();
 
     const db = new Database({ url: container.getHttpUrl() });
