@@ -4,8 +4,6 @@
 
 Works out of the box.
 
----
-
 ## Podman
 
 ### Usage
@@ -59,8 +57,6 @@ When running rootful, the resource reaper can be made to work by running it priv
 export TESTCONTAINERS_RYUK_PRIVILEGED=true
 ```
 
----
-
 ## Colima
 
 ### Usage
@@ -91,7 +87,7 @@ The way Colima works is it periodically checks for exposed ports, and then forwa
 
 You can use a composite wait strategy to additionally wait for a port to be bound, on top of an existing wait strategy. For example:
 
-```javascript linenums="1"
+```js
 const { GenericContainer, Wait } = require("testcontainers");
 
 const container = await new GenericContainer("redis")
@@ -101,8 +97,6 @@ const container = await new GenericContainer("redis")
   ]))
   .start();
 ```
-
----
 
 ## Rancher Desktop
 

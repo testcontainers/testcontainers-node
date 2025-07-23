@@ -15,7 +15,7 @@ Many popular test frameworks like Jest and Vitest support global setup and teard
 
 Here's an example which sets up a single Redis container globally, so it can be reused across tests. In this case we're using Vitest:
 
-```ts title="setup.js" linenums="1"
+```ts title="setup.js"
 import { createClient } from "redis";
 import { RedisContainer } from "testcontainers";
 
@@ -34,7 +34,7 @@ export async function teardown() {
 }
 ```
 
-```ts title="vite.config.js" linenums="1"
+```ts title="vite.config.js"
 import { defineConfig } from "vite";
 
 export default defineConfig({
@@ -46,7 +46,7 @@ export default defineConfig({
 
 And to use the container/client in your tests:
 
-```ts linenums="1"
+```ts
 await globalThis.redisClient.set("key", "test-value");
 const result = await globalThis.redisClient.get("key");
 ```

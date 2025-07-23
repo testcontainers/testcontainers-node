@@ -4,7 +4,7 @@
 
 Create and start any container using a Generic Container:
 
-```javascript
+```js
 const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("alpine").start();
@@ -12,7 +12,7 @@ const container = await new GenericContainer("alpine").start();
 
 To use a specific image version:
 
-```javascript
+```js
 const container = await new GenericContainer("alpine:3.10").start();
 ```
 
@@ -20,7 +20,7 @@ const container = await new GenericContainer("alpine:3.10").start();
 
 Testcontainers will automatically pull an image if it doesn't exist. This is configurable:
 
-```javascript
+```js
 const { GenericContainer, PullPolicy } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
@@ -30,7 +30,7 @@ const container = await new GenericContainer("alpine")
 
 Create a custom pull policy:
 
-```typescript
+```ts
 const { GenericContainer, ImagePullPolicy } = require("testcontainers");
 
 class CustomPullPolicy implements ImagePullPolicy {
@@ -46,7 +46,7 @@ const container = await new GenericContainer("alpine")
 
 ### With a command
 
-```javascript
+```js
 const container = await new GenericContainer("alpine")
   .withCommand(["sleep", "infinity"])
   .start();
@@ -54,7 +54,7 @@ const container = await new GenericContainer("alpine")
 
 ### With an entrypoint
 
-```javascript
+```js
 const container = await new GenericContainer("alpine")
   .withEntrypoint(["cat"])
   .start();
@@ -62,7 +62,7 @@ const container = await new GenericContainer("alpine")
 
 ### With environment variables
 
-```javascript
+```js
 const container = await new GenericContainer("alpine")
   .withEnvironment({ ENV: "VALUE" })
   .start();
@@ -70,7 +70,7 @@ const container = await new GenericContainer("alpine")
 
 ### With a platform
 
-```javascript
+```js
 const container = await new GenericContainer("alpine")
   .withPlatform("linux/arm64") // similar to `--platform linux/arm64`
   .start();
@@ -82,7 +82,7 @@ const container = await new GenericContainer("alpine")
 
 Bind mounts are not portable. They do not work with Docker in Docker or in cases where the Docker agent is remote. It is preferred to [copy files/directories/content into the container](../containers#with-filesdirectoriescontent) instead.
 
-```javascript
+```js
 const container = await new GenericContainer("alpine")
   .withBindMounts([{
     source: "/local/file.txt",
@@ -97,7 +97,7 @@ const container = await new GenericContainer("alpine")
 
 ### With labels
 
-```javascript
+```js
 const container = await new GenericContainer("alpine")
   .withLabels({ label: "value" })
   .start();
@@ -109,7 +109,7 @@ const container = await new GenericContainer("alpine")
 
 If a container with the same name already exists, Docker will raise a conflict. If you are specifying a name to enable container to container communication, look into creating a network and using [network aliases](../networking#network-aliases).
 
-```javascript
+```js
 const container = await new GenericContainer("alpine")
   .withName("custom-container-name")
   .start();
@@ -119,7 +119,7 @@ const container = await new GenericContainer("alpine")
 
 Copy files/directories or content to a container before it starts:
 
-```javascript
+```js
 const container = await new GenericContainer("alpine")
   .withCopyFilesToContainer([{
     source: "/local/file.txt",
@@ -142,7 +142,7 @@ const container = await new GenericContainer("alpine")
 
 Or after it starts:
 
-```javascript
+```js
 const container = await new GenericContainer("alpine").start();
 
 container.copyFilesToContainer([{
@@ -162,7 +162,7 @@ container.copyArchiveToContainer(nodeReadable, "/some/nested/remotedir");
 
 An optional `mode` can be specified in octal for setting file permissions:
 
-```javascript
+```js
 const container = await new GenericContainer("alpine")
   .withCopyFilesToContainer([{
     source: "/local/file.txt",
@@ -186,14 +186,14 @@ const container = await new GenericContainer("alpine")
 
 Files and directories can be fetched from a started or stopped container as a tar archive. The archive is returned as a readable stream:
 
-```javascript
+```js
 const container = await new GenericContainer("alpine").start();
 const tarArchiveStream = await container.copyArchiveFromContainer("/var/log")
 ```
 
 And when a container is stopped but not removed:
 
-```javascript
+```js
 const container = await new GenericContainer("alpine").start();
 const stoppedContainer = await container.stop({ remove: false });
 const tarArchiveStream = await stoppedContainer.copyArchiveFromContainer("/var/log/syslog")
@@ -201,7 +201,7 @@ const tarArchiveStream = await stoppedContainer.copyArchiveFromContainer("/var/l
 
 ### With working directory
 
-```javascript
+```js
 const container = await new GenericContainer("alpine")
   .withWorkingDir("/opt")
   .start();
@@ -213,7 +213,7 @@ May be necessary when the driver of your docker host does not support reading lo
 
 See [log drivers](https://docs.docker.com/config/containers/logging/configure/#configure-the-logging-driver-for-a-container).
 
-```javascript
+```js
 const container = await new GenericContainer("alpine")
   .withDefaultLogDriver()
   .start();
@@ -221,7 +221,7 @@ const container = await new GenericContainer("alpine")
 
 ### With a tmpfs mount
 
-```javascript
+```js
 const container = await new GenericContainer("alpine")
   .withTmpFs({ "/temp_pgdata": "rw,noexec,nosuid,size=65536k" })
   .start();
@@ -231,7 +231,7 @@ const container = await new GenericContainer("alpine")
 
 Value can be a username or UID (format: `<name|uid>[:<group|gid>]`).
 
-```javascript
+```js
 const container = await new GenericContainer("alpine")
   .withUser("bob")
   .start();
@@ -239,7 +239,7 @@ const container = await new GenericContainer("alpine")
 
 ### With privileged mode
 
-```javascript
+```js
 const container = await new GenericContainer("alpine")
   .withPrivilegedMode()
   .start();
@@ -249,7 +249,7 @@ const container = await new GenericContainer("alpine")
 
 See [capabilities](https://man7.org/linux/man-pages/man7/capabilities.7.html).
 
-```javascript
+```js
 const container = await new GenericContainer("alpine")
   .withAddedCapabilities("NET_ADMIN", "IPC_LOCK")
   .start();
@@ -259,7 +259,7 @@ const container = await new GenericContainer("alpine")
 
 See [capabilities](https://man7.org/linux/man-pages/man7/capabilities.7.html).
 
-```javascript
+```js
 const container = await new GenericContainer("alpine")
   .withDroppedCapabilities("NET_ADMIN", "IPC_LOCK")
   .start();
@@ -269,7 +269,7 @@ const container = await new GenericContainer("alpine")
 
 **Not supported in rootless container runtimes.**
 
-```javascript
+```js
 const container = await new GenericContainer("aline")
   .withUlimits({
     memlock: {
@@ -284,7 +284,7 @@ const container = await new GenericContainer("aline")
 
 See [IPC mode](https://docs.docker.com/engine/reference/run/#ipc-settings---ipc).
 
-```javascript
+```js
 const container = await new GenericContainer("alpine")
   .withIpcMode("host")
   .start();
@@ -299,7 +299,7 @@ See [NanoCpu and Memory in ContainerCreate](https://docs.docker.com/engine/api/v
 - Memory – Limit in Gigabytes
 - CPU – Quota in units of CPUs
 
-```javascript
+```js
 const container = await new GenericContainer("alpine")
   .withResourcesQuota({ memory: 0.5, cpu: 1 })
   .start();
@@ -307,7 +307,7 @@ const container = await new GenericContainer("alpine")
 
 ### With shared memory size
 
-```javascript
+```js
 const container = await new GenericContainer("alpine")
   .withSharedMemorySize(512 * 1024 * 1024)
   .start();
@@ -319,7 +319,7 @@ const container = await new GenericContainer("alpine")
 
 See this [Docker blog post on Testcontainers best practices](https://www.docker.com/blog/testcontainers-best-practices/#:~:text=Don't%20hardcode%20the%20hostname)
 
-```javascript
+```js
 const container = await new GenericContainer("alpine")
   .withHostname("my-hostname")
   .start();
@@ -329,28 +329,28 @@ const container = await new GenericContainer("alpine")
 
 Testcontainers by default will not wait until the container has stopped. It will simply issue the stop command and return immediately. This is to save time when running tests.
 
-```javascript
+```js
 const container = await new GenericContainer("alpine").start();
 await container.stop();
 ```
 
 If you need to wait for the container to be stopped, you can provide a timeout:
 
-```javascript
+```js
 const container = await new GenericContainer("alpine").start();
 await container.stop({ timeout: 10_000 }); // 10 seconds
 ```
 
 You can disable automatic removal of the container, which is useful for debugging, or if for example you want to copy content from the container once it has stopped:
 
-```javascript
+```js
 const container = await new GenericContainer("alpine").start();
 await container.stop({ remove: false });
 ```
 
 Alternatively, you can disable automatic removal while configuring the container:
 
-```javascript
+```js
 const container = await new GenericContainer("alpine")
   .withAutoRemove(false)
   .start();
@@ -360,7 +360,7 @@ await container.stop();
 
 The value specified to `.withAutoRemove()` can be overridden by `.stop()`:
 
-```javascript
+```js
 const container = await new GenericContainer("alpine")
   .withAutoRemove(false)
   .start();
@@ -373,21 +373,21 @@ Keep in mind that disabling ryuk (set `TESTCONTAINERS_RYUK_DISABLED` to `true`) 
 
 Volumes created by the container are removed when stopped. This is configurable:
 
-```javascript
+```js
 const container = await new GenericContainer("alpine").start();
 await container.stop({ removeVolumes: false });
 ```
 
 ## Restarting a container
 
-```javascript
+```js
 const container = await new GenericContainer("alpine").start();
 await container.restart();
 ```
 
 ## Committing a container to an image
 
-```javascript
+```js
 const container = await new GenericContainer("alpine").start();
 // Do something with the container
 await container.exec(["sh", "-c", `echo 'hello world' > /hello-world.txt`]);
@@ -400,7 +400,7 @@ const containerFromCommit = await new GenericContainer(newImageId).start();
 By default, the image inherits the behavior of being marked for cleanup on exit. You can override this behavior using
 the `deleteOnExit` option:
 
-```javascript
+```js
 const container = await new GenericContainer("alpine").start();
 // Do something with the container
 await container.exec(["sh", "-c", `echo 'hello world' > /hello-world.txt`]);
@@ -414,7 +414,7 @@ Enabling container re-use means that Testcontainers will not start a new contain
 
 This is useful for example if you want to share a container across tests without global set up.
 
-```javascript
+```js
 const container1 = await new GenericContainer("alpine")
   .withCommand(["sleep", "infinity"])
   .withReuse()
@@ -430,7 +430,7 @@ expect(container1.getId()).toBe(container2.getId());
 
 You can also re-use stopped but not removed containers.
 
-```javascript
+```js
 const container1 = await new GenericContainer("alpine")
   .withReuse()
   .withAutoRemove(false)
@@ -451,7 +451,7 @@ If this environment variable is not declared, the feature is enabled by default.
 
 You can create your own Generic Container as follows:
 
-```typescript
+```ts
 import {
   GenericContainer,
   TestContainer,
@@ -492,7 +492,7 @@ const startedCustomContainer: StartedTestContainer = await customContainer.start
 
 Define your own lifecycle callbacks for better control over your custom containers:
 
-```typescript
+```ts
 import {
   GenericContainer,
   AbstractStartedContainer,
@@ -544,7 +544,7 @@ class CustomStartedContainer extends AbstractStartedContainer {
 
 Specify which container ports you want accessible by the host:
 
-```javascript
+```js
 const container = await new GenericContainer("alpine")
   .withExposedPorts(22, 80, 443)
   .start();
@@ -554,7 +554,7 @@ Testcontainers will automatically bind an available, random port on the host to 
 
 Retrieve the mapped port as follows:
 
-```javascript
+```js
 const container = await new GenericContainer("alpine")
   .withExposedPorts(80)
   .start();
@@ -564,7 +564,7 @@ const httpPort = container.getMappedPort(80);
 
 If a container exposes a single port, you can use the following convenience method:
 
-```javascript
+```js
 const container = await new GenericContainer("alpine")
   .withExposedPorts(80)
   .start();
@@ -574,7 +574,7 @@ const httpPort = container.getFirstMappedPort();
 
 Specify fixed host port bindings (**not recommended**):
 
-```javascript
+```js
 const container = await new GenericContainer("alpine")
   .withExposedPorts({
     container: 80,
@@ -587,7 +587,7 @@ const container = await new GenericContainer("alpine")
 
 `SocatContainer` enables any TCP port of another container to be exposed publicly.
 
-```javascript
+```js
 const network = await new Network().start();
 
 const container = await new GenericContainer("testcontainers/helloworld:1.2.0")
@@ -618,7 +618,7 @@ To run a command inside an already started container, use the exec method.
 The command will be run in the container's working directory,
 returning the combined output (`output`), standard output (`stdout`), standard error (`stderr`), and exit code (`exitCode`).
 
-```javascript
+```js
 const container = await new GenericContainer("alpine")
   .withCommand(["sleep", "infinity"])
   .start();
@@ -634,7 +634,7 @@ The following options can be provided to modify the command execution:
 
 3. **`env`:** A map of environment variables to set inside the container.
 
-```javascript
+```js
 const container = await new GenericContainer("alpine")
   .withCommand(["sleep", "infinity"])
   .start();
@@ -653,7 +653,7 @@ const { output, stdout, stderr, exitCode } = await container.exec(["echo", "hell
 
 Logs can be consumed either from a started container:
 
-```javascript
+```js
 const container = await new GenericContainer("alpine").start();
 
 (await container.logs())
@@ -664,7 +664,7 @@ const container = await new GenericContainer("alpine").start();
 
 Or a consumer can be provided before start. This is useful for example if your container is failing to start:
 
-```javascript
+```js
 const container = await new GenericContainer("alpine")
   .withLogConsumer(stream => {
     stream.on("data", line => console.log(line));
@@ -676,7 +676,7 @@ const container = await new GenericContainer("alpine")
 
 You can specify a point in time as a UNIX timestamp from which you want the logs to start:
 
-```javascript
+```js
 const msInSec = 1000;
 const tenSecondsAgoMs = new Date().getTime() - 10 * msInSec;
 const since = tenSecondsAgoMs / msInSec;

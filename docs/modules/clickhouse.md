@@ -35,7 +35,7 @@ npm install @testcontainers/clickhouse --save-dev
 The module provides several methods to connect to the ClickHouse container:
 
 1. `getClientOptions()` - Returns a configuration object suitable for `@clickhouse/client`:
-   ```typescript
+   ```ts
    {
      url: string; // HTTP URL with host and port
      username: string; // Container username

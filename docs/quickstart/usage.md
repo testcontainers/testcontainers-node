@@ -15,7 +15,7 @@ npm install redis
 
 Next, we'll write a test that starts a Redis container, connects to it, and performs an operation:
 
-```ts linenums="1" hl_lines="2 5 9-11 14 22"
+```ts hl_lines="2 5 9-11 14 22"
 import { createClient, RedisClientType } from "redis";
 import { GenericContainer, StartedTestContainer } from "testcontainers";
 
@@ -68,7 +68,7 @@ For example, using the [Redis module](../modules/redis.md), the example above ca
 npm install @testcontainers/redis --save-dev
 ```
 
-```ts linenums="1" hl_lines="2 5 9-10"
+```ts hl_lines="2 5 9-10"
 import { createClient, RedisClientType } from "redis";
 import { RedisContainer, StartedRedisContainer } from "@testcontainers/redis";
 

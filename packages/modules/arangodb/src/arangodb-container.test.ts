@@ -5,11 +5,11 @@ import { ArangoDBContainer } from "./arangodb-container";
 const IMAGE = getImage(__dirname);
 
 describe("ArangoDB", { timeout: 180_000 }, () => {
-  // connect {
   it("should connect and return a query result", async () => {
+    // connectArangoDB {
     await using container = await new ArangoDBContainer(IMAGE).start();
-    const db = new Database({ url: container.getHttpUrl() });
 
+    const db = new Database({ url: container.getHttpUrl() });
     db.database("_system");
     db.useBasicAuth(container.getUsername(), container.getPassword());
 
@@ -19,7 +19,8 @@ describe("ArangoDB", { timeout: 180_000 }, () => {
       bindVars: { value },
     });
     const returnValue = await result.next();
+
     expect(returnValue).toBe(value);
+    // }
   });
-  // }
 });

@@ -4,7 +4,7 @@
 
 Create and start a new network. Start a container within the network:
 
-```javascript
+```js
 const { GenericContainer, Network } = require("testcontainers");
 
 const network = await new Network().start();
@@ -19,7 +19,7 @@ await network.stop();
 
 Find a container's IP address in a given network:
 
-```javascript
+```js
 const network = await new Network().start();
 
 const container = await new GenericContainer("alpine")
@@ -33,7 +33,7 @@ const networkIpAddress = container.getIpAddress(network.getName());
 
 Note that some network modes, for example `host`, only work on Linux machines.
 
-```javascript
+```js
 const container = await new GenericContainer("alpine")
   .withNetworkMode("bridge")
   .start();
@@ -41,7 +41,7 @@ const container = await new GenericContainer("alpine")
 
 ### With extra hosts
 
-```javascript
+```js
 const container = await new GenericContainer("alpine")
   .withExtraHosts([{
     host: "foo",
@@ -60,7 +60,7 @@ expect((await container.exec(["getent", "hosts", "bar"])).exitCode).toBe(0);
 
 Network aliases are the preferred option for container communication on the same network:
 
-```javascript
+```js
 const network = await new Network().start();
 
 const container = await new GenericContainer("alpine")
@@ -81,7 +81,7 @@ expect((await container.exec(["getent", "hosts", "foo"])).exitCode).toBe(0);
 
 You can expose a host port to a container:
 
-```javascript
+```js
 const { GenericContainer, TestContainers } = require("testcontainers");
 const { createServer } = require("http");
 
