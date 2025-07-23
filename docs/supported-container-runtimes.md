@@ -23,29 +23,25 @@ export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock
 
 #### Linux
 
-1. Ensure the Podman socket is exposed:
+Ensure the Podman socket is exposed, choose between rootless or rootful:
 
-    Rootless:
- 
-    ```bash
-    systemctl --user status podman.socket
-    ```
- 
-    Rootful:
- 
-    ```bash
-    sudo systemctl enable --now podman.socket
-    ```
+```bash title="Rootless"
+systemctl --user status podman.socket
+```
 
-2. Export the `DOCKER_HOST`:
+```bash title="Rootful"
+sudo systemctl enable --now podman.socket
+```
 
-    ```bash
-    {% raw %}
-    export DOCKER_HOST=unix://$(
-      podman info --format '{{.Host.RemoteSocket.Path}}'
-    )
-    {% endraw %}
-    ```
+Export the `DOCKER_HOST`:
+
+```bash
+{% raw %}
+export DOCKER_HOST=unix://$(
+  podman info --format '{{.Host.RemoteSocket.Path}}'
+)
+{% endraw %}
+```
 
 ### Known issues
 
@@ -95,11 +91,14 @@ The way Colima works is it periodically checks for exposed ports, and then forwa
 
 You can use a composite wait strategy to additionally wait for a port to be bound, on top of an existing wait strategy. For example:
 
-```javascript
+```javascript linenums="1"
 const { GenericContainer, Wait } = require("testcontainers");
 
 const container = await new GenericContainer("redis")
-  .withWaitStrategy(Wait.forAll([Wait.forListeningPorts(), Wait.forLogMessage("Ready to accept connections")]))
+  .withWaitStrategy(Wait.forAll([
+    Wait.forListeningPorts(), 
+    Wait.forLogMessage("Ready to accept connections")
+  ]))
   .start();
 ```
 
