@@ -124,8 +124,12 @@ jobs:
         run: npm prune --omit=dev --workspace packages/testcontainers
       - name: Run CommonJS module smoke test
         run: node packages/testcontainers/smoke-test.js
+        env:
+          DEBUG: "testcontainers*"
       - name: Run ES module smoke test
         run: node packages/testcontainers/smoke-test.mjs
+        env:
+          DEBUG: "testcontainers*"
 
   test:
     if: ${{ needs.detect-modules.outputs.modules_count > 0 }}

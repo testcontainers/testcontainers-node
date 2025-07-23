@@ -12,6 +12,7 @@ import { LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
 import { mapInspectResult } from "../utils/map-inspect-result";
 import { waitForContainer } from "../wait-strategies/wait-for-container";
 import { WaitStrategy } from "../wait-strategies/wait-strategy";
+import { inspectContainerUntilPortsExposed } from "./inspect-container-util-ports-exposed";
 import { StoppedGenericContainer } from "./stopped-generic-container";
 
 export class StartedGenericContainer implements StartedTestContainer {
@@ -80,7 +81,10 @@ export class StartedGenericContainer implements StartedTestContainer {
     const resolvedOptions: RestartOptions = { timeout: 0, ...options };
     await client.container.restart(this.container, resolvedOptions);
 
-    this.inspectResult = await client.container.inspect(this.container);
+    this.inspectResult = await inspectContainerUntilPortsExposed(
+      () => client.container.inspect(this.container),
+      this.container.id
+    );
     const mappedInspectResult = mapInspectResult(this.inspectResult);
     const startTime = new Date(this.inspectResult.State.StartedAt);
 
