@@ -11,9 +11,5 @@ npm install @testcontainers/mongodb --save-dev
 ## Examples
 
 <!--codeinclude-->
-[Mongo 4.0.x:](../../packages/modules/mongodb/src/mongodb-container.test.ts) inside_block:connect4
-<!--/codeinclude-->
-
-<!--codeinclude-->
-[MongoDB 6.0.x:](../../packages/modules/mongodb/src/mongodb-container.test.ts) inside_block:connect6
+[Connect and execute query:](../../packages/modules/mongodb/src/mongodb-container.test.ts) inside_block:connect
 <!--/codeinclude-->
