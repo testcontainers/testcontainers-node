@@ -125,11 +125,11 @@ jobs:
       - name: Run CommonJS module smoke test
         run: node packages/testcontainers/smoke-test.js
         env:
-          DEBUG: "testcontainers:*"
+          DEBUG: "testcontainers*"
       - name: Run ES module smoke test
         run: node packages/testcontainers/smoke-test.mjs
         env:
-          DEBUG: "testcontainers:*"
+          DEBUG: "testcontainers*"
 
   test:
     if: ${{ needs.detect-modules.outputs.modules_count > 0 }}
