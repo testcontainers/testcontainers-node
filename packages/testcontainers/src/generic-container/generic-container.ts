@@ -484,8 +484,8 @@ export class GenericContainer implements TestContainer {
   }
 
   public withResourcesQuota({ memory, cpu }: ResourcesQuota): this {
-    this.hostConfig.Memory = memory !== undefined ? memory * 1024 ** 3 : undefined;
-    this.hostConfig.NanoCpus = cpu !== undefined ? cpu * 10 ** 9 : undefined;
+    this.hostConfig.Memory = memory !== undefined ? Math.ceil(memory * 1024 ** 3) : undefined;
+    this.hostConfig.NanoCpus = cpu !== undefined ? Math.ceil(cpu * 10 ** 9) : undefined;
     return this;
   }
 
