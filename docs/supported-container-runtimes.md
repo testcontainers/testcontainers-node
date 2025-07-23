@@ -4,20 +4,24 @@
 
 Works out of the box.
 
+---
+
 ## Podman
 
 ### Usage
 
-#### MacOS:
+#### MacOS
 
 ```bash
 {% raw %}
-export DOCKER_HOST=unix://$(podman machine inspect --format '{{.ConnectionInfo.PodmanSocket.Path}}')
+export DOCKER_HOST=unix://$(
+  podman machine inspect --format '{{.ConnectionInfo.PodmanSocket.Path}}'
+)
 export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock
 {% endraw %}
 ```
 
-#### Linux:
+#### Linux
 
 1. Ensure the Podman socket is exposed:
 
@@ -37,7 +41,9 @@ export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock
 
     ```bash
     {% raw %}
-    export DOCKER_HOST="unix://$(podman info --format '{{.Host.RemoteSocket.Path}}')"
+    export DOCKER_HOST=unix://$(
+      podman info --format '{{.Host.RemoteSocket.Path}}'
+    )
     {% endraw %}
     ```
 
@@ -51,11 +57,13 @@ When running rootless, the resource reaper will not work, disable it:
 export TESTCONTAINERS_RYUK_DISABLED=true
 ```
 
-When running rootful, the resource reaper can be made to work by telling it to run privileged:
+When running rootful, the resource reaper can be made to work by running it privileged:
 
 ```bash
 export TESTCONTAINERS_RYUK_PRIVILEGED=true
 ```
+
+---
 
 ## Colima
 
@@ -94,6 +102,8 @@ const container = await new GenericContainer("redis")
   .withWaitStrategy(Wait.forAll([Wait.forListeningPorts(), Wait.forLogMessage("Ready to accept connections")]))
   .start();
 ```
+
+---
 
 ## Rancher Desktop
 

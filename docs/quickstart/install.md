@@ -1,7 +1,5 @@
 # Install
 
-Install the Testcontainers dependency.
-
 ## NPM
 
 ```bash
