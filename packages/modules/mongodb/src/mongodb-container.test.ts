@@ -62,11 +62,9 @@ describe("MongodbContainer", { timeout: 240_000 }, () => {
     await mongoose.disconnect();
   });
   // }
-});
 
-describe("MongodbContainer connect with credentials", { timeout: 240_000 }, () => {
-  it("should connect to %s with credentials", async () => {
-    const mongodbContainer = await new MongoDBContainer("mongo:8.0")
+  it("should connect with credentials", async () => {
+    const mongodbContainer = await new MongoDBContainer(IMAGE)
       .withUsername("mongo_user")
       .withPassword("mongo_password")
       .start();
