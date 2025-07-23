@@ -11,9 +11,9 @@ npm install @testcontainers/mongodb --save-dev
 ## Examples
 
 <!--codeinclude-->
-[Connect:](../../packages/modules/mongodb/src/mongodb-container.test.ts) inside_block:connect
+[Connect:](../../packages/modules/mongodb/src/mongodb-container.test.ts) inside_block:mongoConnect
 <!--/codeinclude-->
 
 <!--codeinclude-->
-[Connect with credentials:](../../packages/modules/mongodb/src/mongodb-container.test.ts) inside_block:connectWithCredentials
+[Connect with credentials:](../../packages/modules/mongodb/src/mongodb-container.test.ts) inside_block:mongoConnectWithCredentials
 <!--/codeinclude-->
