@@ -5,6 +5,7 @@ import { getContainerRuntimeClient } from "../container-runtime";
 import { PullPolicy } from "../utils/pull-policy";
 import {
   checkContainerIsHealthy,
+  checkContainerIsHealthyUdp,
   getDockerEventStream,
   getRunningContainerNames,
   waitForDockerEvent,
@@ -24,6 +25,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
 
   it("should return first mapped port with regardless of protocol", async () => {
     await using container = await new GenericContainer("mendhak/udp-listener").withExposedPorts("5005/udp").start();
+    await checkContainerIsHealthyUdp(container);
     expect(container.getFirstMappedPort()).toBe(container.getMappedPort("5005/udp"));
   });
 
@@ -49,6 +51,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
         protocol: "udp",
       })
       .start();
+    await checkContainerIsHealthyUdp(container);
     expect(container.getMappedPort("5005/udp")).toBe(hostPort);
     expect(container.getMappedPort(5005, "udp")).toBe(hostPort);
   });

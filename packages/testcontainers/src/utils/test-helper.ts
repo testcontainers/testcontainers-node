@@ -1,5 +1,6 @@
 import { GetEventsOptions, ImageInspectInfo } from "dockerode";
 import { createServer, Server } from "http";
+import { createSocket } from "node:dgram";
 import fs from "node:fs";
 import path from "node:path";
 import { Readable } from "stream";
@@ -28,6 +29,27 @@ export const checkContainerIsHealthyTls = async (container: StartedTestContainer
   const dispatcher = new Agent({ connect: { rejectUnauthorized: false } });
   const response = await request(`${url}/hello-world`, { dispatcher });
   expect(response.statusCode).toBe(200);
+};
+
+export const checkContainerIsHealthyUdp = async (container: StartedTestContainer): Promise<void> => {
+  const host = container.getHost();
+  const port = container.getMappedPort("5005/udp");
+  const readyMessage = "Listening on UDP port 5005";
+  const testMessage = "health_check";
+  const client = createSocket("udp4");
+  try {
+    const logs = await container.logs();
+    for await (const log of logs) {
+      if (log.includes(readyMessage)) {
+        client.send(Buffer.from(testMessage), port, host);
+      }
+      if (log.includes(testMessage)) {
+        return;
+      }
+    }
+  } finally {
+    client.close();
+  }
 };
 
 export const checkEnvironmentContainerIsHealthy = async (
