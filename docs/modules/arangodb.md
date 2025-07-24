@@ -18,6 +18,8 @@ This example uses the following libraries:
 
 Choose an image from [Docker Hub](https://hub.docker.com/_/arangodb) and substitute `IMAGE`.
 
+### Execute a query
+
 <!--codeinclude-->
-[Creating an ArangoDB container](../../packages/modules/arangodb/src/arangodb-container.test.ts) inside_block:example
+[](../../packages/modules/arangodb/src/arangodb-container.test.ts) inside_block:example
 <!--/codeinclude-->

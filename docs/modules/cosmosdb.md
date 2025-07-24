@@ -1,6 +1,13 @@
-# Cosmos DB Emulator Module (Linux-based)
+# CosmosDB
 
-[Azure Cosmos DB](https://azure.microsoft.com/en-GB/products/cosmos-db) is a globally distributed, multi-model database service provided by Microsoft.
+!!!info
+    This module uses the **Linux-based** version of the CosmosDB emulator. In general, it:
+
+    - Provides better compatibility on a variety of systems.
+    - Consumes significantly less resources.
+    - Comes with much faster startup times.
+  
+    However, not all features of a full CosmosDB are implemented yet. Refer to [this overview](https://learn.microsoft.com/en-us/azure/cosmos-db/emulator-linux#feature-support) for a detailed list.
 
 ## Install
 
@@ -9,24 +16,25 @@ npm install @testcontainers/azurecosmosdb --save-dev
 ```
 
 ## Examples
-<!--codeinclude-->
-[Connect to emulator and create a database:](../../packages/modules/azurecosmosdb/src/azure-cosmosdb-emulator-container.test.ts) inside_block:httpCreateDB
-<!--/codeinclude-->
+
+These examples use the following libraries:
+
+- [@azure/cosmos](https://www.npmjs.com/package/@azure/cosmos)
+
+        npm install @azure/cosmos
+
+---
+
+Choose an image from [Microsoft Artifact Registry](https://mcr.microsoft.com/) and substitute `IMAGE`. For example, `mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-preview`.
+
+### Execute a query
 
 <!--codeinclude-->
-[Using HTTPS:](../../packages/modules/azurecosmosdb/src/azure-cosmosdb-emulator-container.test.ts) inside_block:httpsCreateDB
+[](../../packages/modules/azurecosmosdb/src/azure-cosmosdb-emulator-container.test.ts) inside_block:createAndRead
 <!--/codeinclude-->
+
+### With HTTPS
 
 <!--codeinclude-->
-[Create and read items:](../../packages/modules/azurecosmosdb/src/azure-cosmosdb-emulator-container.test.ts) inside_block:createAndRead
+[](../../packages/modules/azurecosmosdb/src/azure-cosmosdb-emulator-container.test.ts) inside_block:httpsCreateDB
 <!--/codeinclude-->
-
-## Caveats
-### Compatibility
-This testcontainer uses the [linux-based](https://learn.microsoft.com/en-us/azure/cosmos-db/emulator-linux) version. In general, it:
-
-- Provides better compatibility on a variety of systems
-- Consumes significantly less resources
-- Comes with much faster startup times
-
-However, not all features of a full CosmosDB are implemented yet - please refer to [this overview](https://learn.microsoft.com/en-us/azure/cosmos-db/emulator-linux#feature-support) for a detailed list.
