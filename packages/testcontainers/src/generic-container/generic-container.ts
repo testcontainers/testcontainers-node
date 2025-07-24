@@ -377,12 +377,11 @@ export class GenericContainer implements TestContainer {
 
     const portBindings: Record<string, Array<Record<string, string>>> = {};
     for (const exposedPort of ports) {
+      const protocol = getProtocol(exposedPort);
       if (hasHostBinding(exposedPort)) {
-        const protocol = getProtocol(exposedPort);
         portBindings[`${exposedPort.container}/${protocol}`] = [{ HostPort: exposedPort.host.toString() }];
       } else {
         const containerPort = getContainerPort(exposedPort);
-        const protocol = getProtocol(exposedPort);
         portBindings[`${containerPort}/${protocol}`] = [{ HostPort: "0" }];
       }
     }

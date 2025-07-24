@@ -581,6 +581,7 @@ const container = await new GenericContainer("alpine")
     protocol: "udp"
   })
   .start();
+
 const httpPort = container.getMappedPort(80, "udp");
 ```
 
@@ -590,6 +591,7 @@ Alternatively, specify the protocol using a string with the format `port/protoco
 const container = await new GenericContainer("alpine")
   .withExposedPorts("80/udp")
   .start();
+
 const httpPort = container.getMappedPort("80/udp");
 ```
 
