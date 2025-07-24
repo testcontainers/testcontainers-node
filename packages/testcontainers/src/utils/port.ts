@@ -12,7 +12,7 @@ export const getContainerPort = (port: PortWithOptionalBinding): number => {
   if (typeof port === "number") {
     return port;
   } else if (typeof port === "string") {
-    const match = port.match(/^(\d+)(?:\/(udp|tcp))?$/);
+    const match = portWithProtocolRegex.exec(port);
     if (match) {
       return parseInt(match[1], 10);
     }
@@ -30,8 +30,8 @@ export const getProtocol = (port: PortWithOptionalBinding): string => {
   if (typeof port === "number") {
     return "tcp";
   } else if (typeof port === "string") {
-    const match = port.match(/^(\d+)(?:\/(udp|tcp))?$/i);
-    if (match && match[2]) {
+    const match = portWithProtocolRegex.exec(port);
+    if (match?.[2]) {
       return match[2].toLowerCase();
     }
     return "tcp";
