@@ -1,10 +1,12 @@
 export type PortWithBinding = {
   container: number;
   host: number;
-  protocol?: string;
+  protocol?: "tcp" | "udp";
 };
 
-export type PortWithOptionalBinding = number | string | PortWithBinding;
+export type PortWithOptionalBinding = number | `${number}/${"tcp" | "udp"}` | PortWithBinding;
+
+const portWithProtocolRegex = RegExp(/^(\d+)(?:\/(udp|tcp))?$/i);
 
 export const getContainerPort = (port: PortWithOptionalBinding): number => {
   if (typeof port === "number") {
