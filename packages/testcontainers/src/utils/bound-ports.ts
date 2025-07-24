@@ -7,14 +7,16 @@ export class BoundPorts {
   private readonly ports = new Map<string, number>();
 
   public getBinding(port: number | string, protocol: string = "tcp"): number {
-    const normalizedProtocol = protocol.toLowerCase();
-    const key = typeof port === "string" ? port : `${port}/${normalizedProtocol}`;
-    let binding = this.ports.get(key);
-    if (!binding && typeof port === "string" && port.includes("/")) {
+    let key: string;
+
+    if (typeof port === "string" && port.includes("/")) {
       const [portNumber, portProtocol] = port.split("/");
-      const normalizedKey = `${portNumber}/${portProtocol.toLowerCase()}`;
-      binding = this.ports.get(normalizedKey);
+      key = `${portNumber}/${portProtocol.toLowerCase()}`;
+    } else {
+      key = `${port}/${protocol.toLowerCase()}`;
     }
+
+    const binding = this.ports.get(key);
 
     if (!binding) {
       throw new Error(`No port binding found for :${key}`);
