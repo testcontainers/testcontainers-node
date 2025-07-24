@@ -44,4 +44,4 @@ Choose an image from [Docker Hub](https://hub.docker.com/r/chromadb/chroma) and 
 
 <!--codeinclude-->
 [](../../packages/modules/chromadb/src/chromadb-container.test.ts) inside_block:chromaAuth
-<!--/codeinclude-->_
+<!--/codeinclude-->

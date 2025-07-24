@@ -44,20 +44,20 @@ Choose an image from [Docker Hub](https://hub.docker.com/r/microsoft/azure-stora
 [](../../packages/modules/azurite/src/azurite-container.test.ts) inside_block:createAndInsertOnTable
 <!--/codeinclude-->
 
-### Custom credentials
+### In memory persistence
+
+<!--codeinclude-->
+[](../../packages/modules/azurite/src/azurite-container.test.ts) inside_block:inMemoryPersistence
+<!--/codeinclude-->
+
+### With credentials
 
 <!--codeinclude-->
 [](../../packages/modules/azurite/src/azurite-container.test.ts) inside_block:customCredentials
 <!--/codeinclude-->
 
-### Custom ports
+### With ports
 
 <!--codeinclude-->
 [](../../packages/modules/azurite/src/azurite-container.test.ts) inside_block:customPorts
-<!--/codeinclude-->
-
-### In memory persistence
-
-<!--codeinclude-->
-[](../../packages/modules/azurite/src/azurite-container.test.ts) inside_block:inMemoryPersistence
 <!--/codeinclude-->

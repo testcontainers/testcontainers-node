@@ -24,13 +24,13 @@ Choose an image from [Docker Hub](https://hub.docker.com/_/cassandra) and substi
 [](../../packages/modules/cassandra/src/cassandra-container.test.ts) inside_block:connectWithDefaultCredentials
 <!--/codeinclude-->
 
-### Custom credentials
+### With credentials
 
 <!--codeinclude-->
 [](../../packages/modules/cassandra/src/cassandra-container.test.ts) inside_block:connectWithCustomCredentials
 <!--/codeinclude-->
 
-### Custom datacenter / rack
+### With datacenter/rack
 
 <!--codeinclude-->
 [](../../packages/modules/cassandra/src/cassandra-container.test.ts) inside_block:customDataCenterAndRack

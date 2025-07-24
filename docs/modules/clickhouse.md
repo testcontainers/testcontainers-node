@@ -30,13 +30,13 @@ Choose an image from [Docker Hub](https://hub.docker.com/r/clickhouse/clickhouse
 [](../../packages/modules/clickhouse/src/clickhouse-container.test.ts) inside_block:connectWithUrl
 <!--/codeinclude-->
 
-### Connect with credentials
+### With credentials
 
 <!--codeinclude-->
 [](../../packages/modules/clickhouse/src/clickhouse-container.test.ts) inside_block:connectWithUsernameAndPassword
 <!--/codeinclude-->
 
-### Set database
+### With database
 
 <!--codeinclude-->
 [](../../packages/modules/clickhouse/src/clickhouse-container.test.ts) inside_block:setDatabase

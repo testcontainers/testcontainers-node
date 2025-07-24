@@ -60,9 +60,9 @@ nav:
       - Cassandra: modules/cassandra.md
       - ChromaDB: modules/chromadb.md
       - ClickHouse: modules/clickhouse.md
+      - CockroachDB: modules/cockroachdb.md
       - CosmosDB: modules/cosmosdb.md
       - Couchbase: modules/couchbase.md
-      - CockroachDB: modules/cockroachdb.md
       - Elasticsearch: modules/elasticsearch.md
       - Etcd: modules/etcd.md
       - GCloud: modules/gcloud.md
