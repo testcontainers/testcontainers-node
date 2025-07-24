@@ -1,4 +1,4 @@
-# ChromaDB
+_# ChromaDB
 
 ## Install
 
@@ -22,7 +22,7 @@ These examples use the following libraries:
 
 Choose an image from [Docker Hub](https://hub.docker.com/r/chromadb/chroma) and substitute `IMAGE`.
 
-### Create/query collection
+### Execute a query
 
 <!--codeinclude-->
 [](../../packages/modules/chromadb/src/chromadb-container.test.ts) inside_block:chromaCreateCollection
@@ -44,5 +44,4 @@ Choose an image from [Docker Hub](https://hub.docker.com/r/chromadb/chroma) and 
 
 <!--codeinclude-->
 [](../../packages/modules/chromadb/src/chromadb-container.test.ts) inside_block:chromaAuth
-<!--/codeinclude-->
- 
+<!--/codeinclude-->_
