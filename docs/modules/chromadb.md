@@ -1,6 +1,4 @@
-# ChromaDB Module
-
-[ChromaDB](https://www.trychroma.com/) is an AI-native open-source embedding database.
+# ChromaDB
 
 ## Install
 
@@ -8,37 +6,43 @@
 npm install @testcontainers/chromadb --save-dev
 ```
 
-## Resources
-
-* [GitHub](https://github.com/chroma-core/chroma)
-* [Node.js Client](https://www.npmjs.com/package/chromadb)
-* [Docs](https://docs.trychroma.com)
-* [Discord](https://discord.gg/MMeYNTmh3x)
-* [Cookbook](https://cookbook.chromadb.dev)
-
 ## Examples
 
-<!--codeinclude-->
-[Connect to Chroma:](../../packages/modules/chromadb/src/chromadb-container.test.ts)
-inside_block:simpleConnect
-<!--/codeinclude-->
+These examples use the following libraries:
+
+- [chromadb](https://www.npmjs.com/package/chromadb)
+
+        npm install chromadb
+
+- [ollama](https://www.npmjs.com/package/ollama)
+
+        npm install ollama
+
+---
+
+Choose an image from [Docker Hub](https://hub.docker.com/r/chromadb/chroma) and substitute `IMAGE`.
+
+### Create/query collection
 
 <!--codeinclude-->
-[Create Collection:](../../packages/modules/chromadb/src/chromadb-container.test.ts)
-inside_block:createCollection
+[](../../packages/modules/chromadb/src/chromadb-container.test.ts) inside_block:chromaCreateCollection
 <!--/codeinclude-->
+
+### Embedding function
 
 <!--codeinclude-->
-[Query Collection with Embedding Function:](../../packages/modules/chromadb/src/chromadb-container.test.ts)
-inside_block:queryCollectionWithEmbeddingFunction
+[](../../packages/modules/chromadb/src/chromadb-container.test.ts) inside_block:queryCollectionWithEmbeddingFunction
 <!--/codeinclude-->
+
+### Persistent directory
 
 <!--codeinclude-->
-[Work with persistent directory:](../../packages/modules/chromadb/src/chromadb-container.test.ts)
-inside_block:persistentData
+[](../../packages/modules/chromadb/src/chromadb-container.test.ts) inside_block:persistentData
 <!--/codeinclude-->
+
+### Authentication
 
 <!--codeinclude-->
-[Work with authentication:](../../packages/modules/chromadb/src/chromadb-container.test.ts) inside_block:auth
+[](../../packages/modules/chromadb/src/chromadb-container.test.ts) inside_block:chromaAuth
 <!--/codeinclude-->
-
+ 

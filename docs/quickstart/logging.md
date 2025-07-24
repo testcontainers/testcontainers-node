@@ -5,7 +5,7 @@ Testcontainers writes logs using the [debug](https://www.npmjs.com/package/debug
 The following namespaces are available:
 
 - `testcontainers*`: Show all logs
-- `testcontainers`: Show Testcontainers core logs
+- `testcontainers`: Show core logs
 - `testcontainers:containers`: Show logs from containers
 - `testcontainers:compose`: Show logs from Docker Compose
 - `testcontainers:build`: Show build logs
