@@ -10,9 +10,6 @@ describe("FirestoreEmulatorContainer", { timeout: 240_000 }, () => {
     "should work with %s",
     async (image) => {
       // firestoreExample {
-      const collection = "test-collection";
-      const document = "test-doc";
-
       await using container = await new FirestoreEmulatorContainer(image).start();
 
       const firestore = admin.initializeApp({ projectId: "test-project" }, `test-app-${randomUuid()}`).firestore();
@@ -21,6 +18,8 @@ describe("FirestoreEmulatorContainer", { timeout: 240_000 }, () => {
         ssl: false,
       });
 
+      const collection = "test-collection";
+      const document = "test-doc";
       const docRef = firestore.collection(collection).doc(document);
       await docRef.set({ message: "Hello, Firestore!" });
       const snapshot = await docRef.get();

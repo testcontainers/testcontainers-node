@@ -50,10 +50,8 @@ These examples use the following libraries:
 
 Choose an image from the [container registry](https://gcr.io/google.com/cloudsdktool/google-cloud-cli) and substitute `IMAGE`.
 
-#### With default image
-
 <!--codeinclude-->
-[](../../packages/modules/gcloud/src/pubsub-emulator-container.test.ts)
+[](../../packages/modules/gcloud/src/pubsub-emulator-container.test.ts) inside_block:pubsubExample
 <!--/codeinclude-->
 
 ---
@@ -68,10 +66,8 @@ These examples use the following libraries:
 
 Choose an image from the [container registry](https://hub.docker.com/r/fsouza/fake-gcs-server) and substitute `IMAGE`.
 
-#### With default image
-
 <!--codeinclude-->
-[](../../packages/modules/gcloud/src/cloudstorage-emulator-container.test.ts) inside_block:cloud-storage
+[](../../packages/modules/gcloud/src/cloudstorage-emulator-container.test.ts) inside_block:cloudstorageExample
 <!--/codeinclude-->
 
 ---
@@ -116,8 +112,6 @@ These examples use the following libraries:
 
 Choose an image from the [container registry](https://ghcr.io/goccy/bigquery-emulator) and substitute `IMAGE`.
 
-#### With default image
-
 <!--codeinclude-->
-[](../../packages/modules/gcloud/src/bigquery-emulator-container.test.ts)
+[](../../packages/modules/gcloud/src/bigquery-emulator-container.test.ts)  inside_block:bigqueryExample
 <!--/codeinclude-->
