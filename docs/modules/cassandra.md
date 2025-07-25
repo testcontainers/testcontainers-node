@@ -14,9 +14,7 @@ These examples use the following libraries:
 
         npm install cassandra-driver
 
----
-
-Choose an image from [Docker Hub](https://hub.docker.com/_/cassandra) and substitute `IMAGE`.
+Choose an image from the [container registry](https://hub.docker.com/_/cassandra) and substitute `IMAGE`.
  
 ### Execute a query
 

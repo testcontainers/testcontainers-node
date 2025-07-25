@@ -29,7 +29,10 @@ describe("DatastoreEmulatorContainer", { timeout: 240_000 }, () => {
     const testProjectId = "test-project";
     const testKind = "test-kind";
     const testId = "123";
-    const databaseConfig = { projectId: testProjectId, apiEndpoint: datastoreEmulatorContainer.getEmulatorEndpoint() };
+    const databaseConfig = {
+      projectId: testProjectId,
+      apiEndpoint: datastoreEmulatorContainer.getEmulatorEndpoint(),
+    };
     const datastore = new Datastore(databaseConfig);
 
     const key = datastore.key([testKind, testId]);
@@ -37,6 +40,9 @@ describe("DatastoreEmulatorContainer", { timeout: 240_000 }, () => {
     await datastore.save({ key, data });
     const [entity] = await datastore.get(key);
 
-    expect(entity).toEqual({ message: "Hello, Datastore!", [Datastore.KEY]: key });
+    expect(entity).toEqual({
+      message: "Hello, Datastore!",
+      [Datastore.KEY]: key,
+    });
   }
 });

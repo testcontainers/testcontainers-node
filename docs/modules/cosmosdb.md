@@ -23,8 +23,6 @@ These examples use the following libraries:
 
         npm install @azure/cosmos
 
----
-
 Choose an image from [Microsoft Artifact Registry](https://mcr.microsoft.com/) and substitute `IMAGE`. For example, `mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-preview`.
 
 ### Execute a query

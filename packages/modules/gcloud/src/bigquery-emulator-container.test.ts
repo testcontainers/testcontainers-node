@@ -15,7 +15,9 @@ describe("BigQueryEmulatorContainer", { timeout: 240_000 }, () => {
     expect(bigQueryEmulatorContainer).toBeDefined();
     const testDataset = "test-dataset";
     const testTable = "test-table";
-    const testSchema: TableSchema = { fields: [{ name: "message", type: "STRING" }] };
+    const testSchema: TableSchema = {
+      fields: [{ name: "message", type: "STRING" }],
+    };
     const config = {
       projectId: bigQueryEmulatorContainer.getProjectId(),
       apiEndpoint: bigQueryEmulatorContainer.getEmulatorEndpoint(),

@@ -22,9 +22,7 @@ These examples use the following libraries:
 
         npm install @azure/storage-queue
 
----
-
-Choose an image from [Docker Hub](https://hub.docker.com/r/microsoft/azure-storage-azurite) and substitute `IMAGE`.
+Choose an image from the [container registry](https://hub.docker.com/r/microsoft/azure-storage-azurite) and substitute `IMAGE`.
 
 ### Upload/download a blob
 

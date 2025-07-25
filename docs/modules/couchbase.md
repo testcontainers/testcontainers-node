@@ -14,9 +14,7 @@ These examples use the following libraries:
 
         npm install couchbase
 
----
-
-Choose an image from [Docker Hub](https://hub.docker.com/r/couchbase/server) and substitute `IMAGE`.
+Choose an image from the [container registry](https://hub.docker.com/r/couchbase/server) and substitute `IMAGE`.
 
 ### Execute a query
 

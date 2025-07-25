@@ -14,9 +14,7 @@ These examples use the following libraries:
 
         npm install etcd3
 
----
-
-Choose an image from [Docker Hub](https://quay.io/repository/coreos/etcd?tab=info) and substitute `IMAGE`.
+Choose an image from the [container registry](https://quay.io/repository/coreos/etcd?tab=info) and substitute `IMAGE`.
 
 ### Read and write key-value pairs
 

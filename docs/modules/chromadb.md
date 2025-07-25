@@ -18,9 +18,7 @@ These examples use the following libraries:
 
         npm install ollama
 
----
-
-Choose an image from [Docker Hub](https://hub.docker.com/r/chromadb/chroma) and substitute `IMAGE`.
+Choose an image from the [container registry](https://hub.docker.com/r/chromadb/chroma) and substitute `IMAGE`.
 
 ### Execute a query
 

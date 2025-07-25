@@ -14,9 +14,7 @@ This example uses the following libraries:
 
         npm install arangojs
 
----
-
-Choose an image from [Docker Hub](https://hub.docker.com/_/arangodb) and substitute `IMAGE`.
+Choose an image from the [container registry](https://hub.docker.com/_/arangodb) and substitute `IMAGE`.
 
 ### Execute a query
 

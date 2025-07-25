@@ -14,9 +14,7 @@ These examples use the following libraries:
 
         npm install @elastic/elasticsearch
 
----
-
-Choose an image from [Docker Hub](https://hub.docker.com/_/elasticsearch) and substitute `IMAGE`.
+Choose an image from the [container registry](https://hub.docker.com/_/elasticsearch) and substitute `IMAGE`.
 
 ### Create an index
 
