@@ -1,6 +1,4 @@
-# KurrentDB Module
-
-[KurrentDB](https://kurrent.io) is an event sourcing database that stores data in streams of immutable events.
+# KurrentDB
 
 ## Install
 
@@ -10,10 +8,22 @@ npm install @testcontainers/kurrentdb --save-dev
 
 ## Examples
 
-<!--codeinclude-->
-[Start container:](../../packages/modules/kurrentdb/src/kurrentdb-container.test.ts) inside_block:startContainer
-<!--/codeinclude-->
+These examples use the following libraries:
+
+- [@kurrent/kurrentdb-client](https://www.npmjs.com/package/@kurrent/kurrentdb-client)
+
+        npm install @kurrent/kurrentdb-client
+
+Choose an image from the [container registry](https://hub.docker.com/r/kurrentplatform/kurrentdb) and substitute `IMAGE`.
+
+### Execute a query
 
 <!--codeinclude-->
-[Subscribe to standard projection:](../../packages/modules/kurrentdb/src/kurrentdb-container.test.ts) inside_block:usingStandardProjections
+[](../../packages/modules/kurrentdb/src/kurrentdb-container.test.ts) inside_block:startContainer
+<!--/codeinclude-->
+
+### Subscribe to a standard projection
+
+<!--codeinclude-->
+[](../../packages/modules/kurrentdb/src/kurrentdb-container.test.ts) inside_block:usingStandardProjections
 <!--/codeinclude-->
