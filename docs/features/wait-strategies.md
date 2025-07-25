@@ -70,10 +70,12 @@ Wait until the container's health check is successful:
 ```js
 const { GenericContainer, Wait } = require("testcontainers");
 
-const container = await new GenericContainer("alpine").withWaitStrategy(Wait.forHealthCheck()).start();
+const container = await new GenericContainer("alpine")
+  .withWaitStrategy(Wait.forHealthCheck())
+  .start();
 ```
 
-Define your own health check:
+Define your own health check. Note that time units are in seconds:
 
 ```js
 const { GenericContainer, Wait } = require("testcontainers");
@@ -81,16 +83,18 @@ const { GenericContainer, Wait } = require("testcontainers");
 const container = await new GenericContainer("alpine")
   .withHealthCheck({
     test: ["CMD-SHELL", "curl -f http://localhost || exit 1"],
-    interval: 1000, // 1 second
-    timeout: 3000, // 3 seconds
+    interval: 1000,
+    timeout: 3000,
     retries: 5,
-    startPeriod: 1000, // 1 second
+    startPeriod: 1000,
   })
   .withWaitStrategy(Wait.forHealthCheck())
   .start();
 ```
 
 Note that `interval`, `timeout`, `retries` and `startPeriod` are optional as they are inherited from the image or parent image if omitted.
+
+---
 
 To execute the test with a shell use the form `["CMD-SHELL", "command"]`:
 
@@ -106,12 +110,14 @@ To execute the test without a shell, use the form: `["CMD", "command", "arg1", "
 
 ## HTTP
 
-Wait for an HTTP request to satisfy a condition. By default, it will wait for a 200 response:
+Wait for a HTTP request to satisfy a condition. By default, it will wait for a 200 response:
 
 ```js
 const { GenericContainer, Wait } = require("testcontainers");
 
-const container = await new GenericContainer("redis").withWaitStrategy(Wait.forHttp("/health", 8080)).start();
+const container = await new GenericContainer("redis")
+  .withWaitStrategy(Wait.forHttp("/health", 8080))
+  .start();
 ```
 
 Stop waiting after container exited if waiting for container restart not needed.
@@ -131,7 +137,7 @@ const container = await new GenericContainer("redis")
   .forStatusCode(201))
 
 .withWaitStrategy(Wait.forHttp("/health", 8080)
-  .forStatusCodeMatching(statusCode => statusCode === 201))
+  .forStatusCodeMatching(statusCode => `${statusCode}`.startsWith("2")))
 ```
 
 ### For response body
