@@ -36,7 +36,7 @@ describe("ChromaDB", { timeout: 360_000 }, () => {
     // queryCollectionWithEmbeddingFunction {
     await using container = await new ChromaDBContainer(IMAGE).start();
 
-    const ollama = await new GenericContainer("ollama/ollama").withExposedPorts(11434).start();
+    await using ollama = await new GenericContainer("ollama/ollama").withExposedPorts(11434).start();
     await ollama.exec(["ollama", "pull", "nomic-embed-text"]);
     const client = new ChromaClient({ path: container.getHttpUrl() });
     const embedder = new OllamaEmbeddingFunction({
