@@ -76,25 +76,25 @@ Choose an image from the [container registry](https://hub.docker.com/r/fsouza/fa
 
 These examples use the following libraries:
 
-- [@google-cloud/datastore](https://www.npmjs.com/package/@google-cloud/datastore)
+- [@google-cloud/spanner](https://www.npmjs.com/package/@google-cloud/spanner)
 
-        npm install @google-cloud/datastore
+        npm install @google-cloud/spanner
 
 Choose an image from the [container registry](https://gcr.io/cloud-spanner-emulator/emulator:1.5.37) and substitute `IMAGE`.
 
-#### Default
-
+#### Connect via client
+ 
 <!--codeinclude-->
 [](../../packages/modules/gcloud/src/spanner-emulator-container.test.ts) inside_block:startupWithExplicitClient
 <!--/codeinclude-->
 
-#### With environment variable
+#### Connect via environment 
 
 <!--codeinclude-->
 [](../../packages/modules/gcloud/src/spanner-emulator-container.test.ts) inside_block:startupWithEnvironmentVariable
 <!--/codeinclude-->
 
-#### Helper
+#### Helper usage
 
 <!--codeinclude-->
 [](../../packages/modules/gcloud/src/spanner-emulator-helper.test.ts) inside_block:createAndDelete
