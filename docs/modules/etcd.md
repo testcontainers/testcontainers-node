@@ -1,6 +1,4 @@
-# Etcd Module
-
-[Etcd](https://etcd.io/) is a strongly consistent, distributed key-value store that provides a reliable way to store data that needs to be accessed by a distributed system or cluster of machines.
+# Etcd
 
 ## Install
 
@@ -10,10 +8,25 @@ npm install @testcontainers/etcd --save-dev
 
 ## Examples
 
-<!--codeinclude-->
-[Read and write key-value pairs:](../../packages/modules/etcd/src/etcd-container.test.ts) inside_block:readWrite
-<!--/codeinclude-->
+These examples use the following libraries:
+
+- [etcd3](https://www.npmjs.com/package/etcd3)
+
+        npm install etcd3
+
+---
+
+Choose an image from [Docker Hub](https://quay.io/repository/coreos/etcd?tab=info) and substitute `IMAGE`.
+
+### Read and write key-value pairs
 
 <!--codeinclude-->
-[Subscribe to key changes:](../../packages/modules/etcd/src/etcd-container.test.ts) inside_block:subscribe
+[](../../packages/modules/etcd/src/etcd-container.test.ts) inside_block:readWrite
 <!--/codeinclude-->
+
+### Subscribe to key changes
+
+<!--codeinclude-->
+[](../../packages/modules/etcd/src/etcd-container.test.ts) inside_block:etcdSubscribe
+<!--/codeinclude-->
+ 
