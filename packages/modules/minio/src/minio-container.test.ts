@@ -5,11 +5,11 @@ import { MinioContainer } from "./minio-container";
 const IMAGE = getImage(__dirname);
 
 describe("MinIO", { timeout: 240_000 }, () => {
-  // connectWithDefaultCredentials {
   it("should connect and upload a file", async () => {
+    // connectWithDefaultCredentials {
     await using container = await new MinioContainer(IMAGE).start();
 
-    const minioClient = new minio.Client({
+    const client = new minio.Client({
       endPoint: container.getHost(),
       port: container.getPort(),
       useSSL: false,
@@ -17,30 +17,27 @@ describe("MinIO", { timeout: 240_000 }, () => {
       secretKey: "minioadmin",
     });
 
-    // Upload dummy test file.
     const testFile = `${__dirname}/dummy-file.txt`;
+    await client.makeBucket("test-bucket");
+    await client.fPutObject("test-bucket", "minio-test-file.txt", testFile);
 
-    await minioClient.makeBucket("test-bucket");
-    await minioClient.fPutObject("test-bucket", "minio-test-file.txt", testFile);
-
-    // Verify upload
-    const objectExists = await minioClient
+    const objectExists = await client
       .statObject("test-bucket", "minio-test-file.txt")
       .then(() => true)
       .catch(() => false);
 
     expect(objectExists).toBeTruthy();
+    // }
   });
-  // }
 
-  // connectWithCustomCredentials {
   it("should work with custom credentials", async () => {
+    // connectWithCustomCredentials {
     await using container = await new MinioContainer(IMAGE)
       .withUsername("AzureDiamond")
       .withPassword("hunter2!")
       .start();
 
-    const minioClient = new minio.Client({
+    const client = new minio.Client({
       endPoint: container.getHost(),
       port: container.getPort(),
       useSSL: false,
@@ -48,13 +45,10 @@ describe("MinIO", { timeout: 240_000 }, () => {
       secretKey: "hunter2!",
     });
 
-    // Create a bucket.
-    await minioClient.makeBucket("test-bucket");
+    await client.makeBucket("test-bucket");
 
-    // Verify bucket.
-    const bucketExits = await minioClient.bucketExists("test-bucket");
-
+    const bucketExits = await client.bucketExists("test-bucket");
     expect(bucketExits).toBeTruthy();
+    // }
   });
-  // }
 });
