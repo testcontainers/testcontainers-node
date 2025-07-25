@@ -1,7 +1,4 @@
-# Couchbase Module
-
-[Couchbase](https://www.couchbase.com/) is a distributed document database with a powerful search engine and in-built operational and analytical capabilities. It brings the power of NoSQL to the edge and provides fast, efficient bidirectional synchronization of data between the edge and the cloud.
-
+# Couchbase
 
 ## Install
 
@@ -11,10 +8,18 @@ npm install @testcontainers/couchbase --save-dev
 
 ## Examples
 
-<!--codeinclude-->
-[upsertAndGet:](../../packages/modules/couchbase/src/couchbase-container.test.ts) inside_block:upsertAndGet
-<!--/codeinclude-->
+These examples use the following libraries:
+
+- [couchbase](https://www.npmjs.com/package/couchbase)
+
+        npm install couchbase
+
+---
+
+Choose an image from [Docker Hub](https://hub.docker.com/r/couchbase/server) and substitute `IMAGE`.
+
+### Execute a query
 
 <!--codeinclude-->
-[Connect and execute query:](../../packages/modules/couchbase/src/couchbase-container.test.ts) inside_block:connectAndQuery
+[](../../packages/modules/couchbase/src/couchbase-container.test.ts) inside_block:connectAndQuery
 <!--/codeinclude-->
