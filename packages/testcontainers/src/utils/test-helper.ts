@@ -32,23 +32,14 @@ export const checkContainerIsHealthyTls = async (container: StartedTestContainer
 };
 
 export const checkContainerIsHealthyUdp = async (container: StartedTestContainer): Promise<void> => {
-  const host = container.getHost();
-  const port = container.getMappedPort("5005/udp");
-  const readyMessage = "Listening on UDP port 5005";
   const testMessage = "health_check";
-  const client = createSocket("udp4");
-  try {
-    const logs = await container.logs();
-    for await (const log of logs) {
-      if (log.includes(readyMessage)) {
-        client.send(Buffer.from(testMessage), port, host);
-      }
-      if (log.includes(testMessage)) {
-        return;
-      }
+  await using client = createSocket("udp4");
+  client.send(Buffer.from(testMessage), container.getFirstMappedPort(), container.getHost());
+  const logs = await container.logs();
+  for await (const log of logs) {
+    if (log.includes(testMessage)) {
+      return;
     }
-  } finally {
-    client.close();
   }
 };
 

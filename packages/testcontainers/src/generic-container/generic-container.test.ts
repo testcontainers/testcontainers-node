@@ -10,6 +10,7 @@ import {
   getRunningContainerNames,
   waitForDockerEvent,
 } from "../utils/test-helper";
+import { Wait } from "../wait-strategies/wait";
 import { GenericContainer } from "./generic-container";
 
 describe("GenericContainer", { timeout: 180_000 }, () => {
@@ -24,9 +25,14 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
   });
 
   it("should return first mapped port with regardless of protocol", async () => {
-    await using container = await new GenericContainer("mendhak/udp-listener").withExposedPorts("5005/udp").start();
+    await using container = await new GenericContainer("mendhak/udp-listener")
+      .withWaitStrategy(Wait.forLogMessage("Listening on UDP port 5005"))
+      .withExposedPorts("5005/udp")
+      .start();
+
     await checkContainerIsHealthyUdp(container);
     expect(container.getFirstMappedPort()).toBe(container.getMappedPort("5005/udp"));
+    expect(container.getFirstMappedPort()).toBe(container.getMappedPort(5005, "udp"));
   });
 
   it("should bind to specified host port", async () => {
@@ -45,12 +51,14 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
   it("should bind to specified host port with a different protocol", async () => {
     const hostPort = await getPort();
     await using container = await new GenericContainer("mendhak/udp-listener")
+      .withWaitStrategy(Wait.forLogMessage("Listening on UDP port 5005"))
       .withExposedPorts({
         container: 5005,
         host: hostPort,
         protocol: "udp",
       })
       .start();
+
     await checkContainerIsHealthyUdp(container);
     expect(container.getMappedPort("5005/udp")).toBe(hostPort);
     expect(container.getMappedPort(5005, "udp")).toBe(hostPort);
