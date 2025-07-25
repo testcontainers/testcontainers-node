@@ -33,19 +33,11 @@ These examples use the following libraries:
         npm install @google-cloud/datastore
 
 Choose an image from the [container registry](https://gcr.io/google.com/cloudsdktool/google-cloud-cli) and substitute `IMAGE`.
-
-#### With default image
-
+ 
 <!--codeinclude-->
-[](../../packages/modules/gcloud/src/datastore-emulator-container.test.ts) inside_block:datastore4
+[](../../packages/modules/gcloud/src/datastore-emulator-container.test.ts) inside_block:datastoreExample
 <!--/codeinclude-->
-
-#### With custom image
-
-<!--codeinclude-->
-[](../../packages/modules/gcloud/src/datastore-emulator-container.test.ts) inside_block:datastore5
-<!--/codeinclude-->
-
+ 
 ---
 
 ### Cloud PubSub

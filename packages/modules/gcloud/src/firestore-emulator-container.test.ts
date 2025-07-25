@@ -13,12 +13,11 @@ describe("FirestoreEmulatorContainer", { timeout: 240_000 }, () => {
       const collection = "test-collection";
       const document = "test-doc";
 
-      await using firestoreEmulatorContainer = await new FirestoreEmulatorContainer(image).start();
+      await using container = await new FirestoreEmulatorContainer(image).start();
 
       const firestore = admin.initializeApp({ projectId: "test-project" }, `test-app-${randomUuid()}`).firestore();
-
       firestore.settings({
-        host: firestoreEmulatorContainer.getEmulatorEndpoint(),
+        host: container.getEmulatorEndpoint(),
         ssl: false,
       });
 
