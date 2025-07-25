@@ -6,8 +6,8 @@ import { CassandraContainer } from "./cassandra-container";
 const IMAGE = getImage(__dirname);
 
 describe.sequential("Cassandra", { timeout: 240_000 }, () => {
-  // connectWithDefaultCredentials {
   it("should connect and execute a query with default credentials", async () => {
+    // connectWithDefaultCredentials {
     await using container = await new CassandraContainer(IMAGE).start();
 
     const client = new Client({
@@ -15,18 +15,17 @@ describe.sequential("Cassandra", { timeout: 240_000 }, () => {
       localDataCenter: container.getDatacenter(),
       keyspace: "system",
     });
-
     await client.connect();
 
     const result = await client.execute("SELECT release_version FROM system.local");
     expect(result.rows[0].release_version).toBe(ImageName.fromString(IMAGE).tag);
 
     await client.shutdown();
+    // }
   });
-  // }
 
-  // connectWithCustomCredentials {
   it("should connect with custom username and password", async () => {
+    // connectWithCustomCredentials {
     const username = "testUser";
     const password = "testPassword";
 
@@ -38,6 +37,7 @@ describe.sequential("Cassandra", { timeout: 240_000 }, () => {
       credentials: { username, password },
       keyspace: "system",
     });
+    // }
 
     await client.connect();
 
@@ -46,12 +46,12 @@ describe.sequential("Cassandra", { timeout: 240_000 }, () => {
 
     await client.shutdown();
   });
-  // }
 
-  // customDataCenterAndRack {
   it("should set datacenter and rack", async () => {
+    // customDataCenterAndRack {
     const customDataCenter = "customDC";
     const customRack = "customRack";
+
     await using container = await new CassandraContainer(IMAGE)
       .withDatacenter(customDataCenter)
       .withRack(customRack)
@@ -61,15 +61,15 @@ describe.sequential("Cassandra", { timeout: 240_000 }, () => {
       contactPoints: [container.getContactPoint()],
       localDataCenter: container.getDatacenter(),
     });
-
     await client.connect();
+
     const result = await client.execute("SELECT data_center, rack FROM system.local");
     expect(result.rows[0].data_center).toBe(customDataCenter);
     expect(result.rows[0].rack).toBe(customRack);
 
     await client.shutdown();
+    // }
   });
-  // }
 
   // createAndFetchData {
   it("should create keyspace, a table, insert data, and retrieve it", async () => {

@@ -5,8 +5,8 @@ import { CockroachDbContainer } from "./cockroachdb-container";
 const IMAGE = getImage(__dirname);
 
 describe("CockroachDbContainer", { timeout: 180_000 }, () => {
-  // connect {
   it("should connect and return a query result", async () => {
+    // cockroachConnect {
     await using container = await new CockroachDbContainer(IMAGE).start();
 
     const client = new Client({
@@ -23,16 +23,18 @@ describe("CockroachDbContainer", { timeout: 180_000 }, () => {
     expect(result.rows[0]).toEqual({ "?column?": "1" });
 
     await client.end();
+    // }
   });
-  // }
 
-  // uriConnect {
   it("should work with database URI", async () => {
+    // uriConnect {
     await using container = await new CockroachDbContainer(IMAGE).start();
 
     const client = new Client({
       connectionString: container.getConnectionUri(),
     });
+    // }
+
     await client.connect();
 
     const result = await client.query("SELECT 1");
@@ -40,11 +42,11 @@ describe("CockroachDbContainer", { timeout: 180_000 }, () => {
 
     await client.end();
   });
-  // }
 
-  // setDatabase {
   it("should set database", async () => {
+    // setDatabase {
     await using container = await new CockroachDbContainer(IMAGE).withDatabase("custom_database").start();
+    // }
 
     const client = new Client({
       host: container.getHost(),
@@ -52,6 +54,7 @@ describe("CockroachDbContainer", { timeout: 180_000 }, () => {
       database: container.getDatabase(),
       user: container.getUsername(),
     });
+
     await client.connect();
 
     const result = await client.query("SELECT current_database()");
@@ -59,11 +62,11 @@ describe("CockroachDbContainer", { timeout: 180_000 }, () => {
 
     await client.end();
   });
-  // }
 
-  // setUsername {
   it("should set username", async () => {
+    // setUsername {
     await using container = await new CockroachDbContainer(IMAGE).withUsername("custom_username").start();
+    // }
 
     const client = new Client({
       host: container.getHost(),
@@ -71,6 +74,7 @@ describe("CockroachDbContainer", { timeout: 180_000 }, () => {
       database: container.getDatabase(),
       user: container.getUsername(),
     });
+
     await client.connect();
 
     const result = await client.query("SELECT current_user");
@@ -78,7 +82,6 @@ describe("CockroachDbContainer", { timeout: 180_000 }, () => {
 
     await client.end();
   });
-  // }
 
   it("should work with restarted container", async () => {
     await using container = await new CockroachDbContainer(IMAGE).start();

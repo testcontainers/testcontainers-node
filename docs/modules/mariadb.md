@@ -1,8 +1,4 @@
-# MariaDB Module
-
-[MariaDB](https://mariadb.org/) is one of the most popular open source relational databases. It’s made by the original developers of MySQL and guaranteed to stay open source. It is part of most cloud offerings and the default in most Linux distributions.
-
-
+# MariaDB
 
 ## Install
 
@@ -12,18 +8,34 @@ npm install @testcontainers/mariadb --save-dev
 
 ## Examples
 
-<!--codeinclude-->
-[Connect and execute query:](../../packages/modules/mariadb/src/mariadb-container.test.ts) inside_block:connect
-<!--/codeinclude-->
+These examples use the following libraries:
+
+- [mariadb](https://www.npmjs.com/package/mariadb)
+
+        npm install mariadb
+
+Choose an image from the [container registry](https://hub.docker.com/_/mariadb) and substitute `IMAGE`.
+
+### Execute a query
 
 <!--codeinclude-->
-[Connect and execute query using URI:](../../packages/modules/mariadb/src/mariadb-container.test.ts) inside_block:uriConnect
+[](../../packages/modules/mariadb/src/mariadb-container.test.ts) inside_block:mariaDbConnect
 <!--/codeinclude-->
 
-<!--codeinclude-->
-[Set username:](../../packages/modules/mariadb/src/mariadb-container.test.ts) inside_block:setUsername
-<!--/codeinclude-->
+### Connect via URI
 
 <!--codeinclude-->
-[Insert & fetch data:](../../packages/modules/mariadb/src/mariadb-container.test.ts) inside_block:insertAndFetchData
+[](../../packages/modules/mariadb/src/mariadb-container.test.ts) inside_block:mariaDbUriConnect
+<!--/codeinclude-->
+
+### With user
+
+<!--codeinclude-->
+[](../../packages/modules/mariadb/src/mariadb-container.test.ts) inside_block:mariaDbSetUsername
+<!--/codeinclude-->
+
+### With database
+
+<!--codeinclude-->
+[](../../packages/modules/mariadb/src/mariadb-container.test.ts) inside_block:mariaDbSetDatabase
 <!--/codeinclude-->

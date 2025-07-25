@@ -3,37 +3,36 @@ import path from "path";
 import { GenericContainer, Network } from "testcontainers";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { KafkaContainer, SaslSslListenerOptions } from "./kafka-container";
-import { testPubSub } from "./test-helper";
+import { assertMessageProducedAndConsumed } from "./test-helper";
 
 const IMAGE = getImage(__dirname);
 
 describe("KafkaContainer", { timeout: 240_000 }, () => {
   const certificatesDir = path.resolve(__dirname, "..", "test-certs");
 
-  // connectKafkaLatest {
   it("should connect", async () => {
-    await using kafkaContainer = await new KafkaContainer(IMAGE).start();
-
-    await testPubSub(kafkaContainer);
+    // kafkaLatestConnect {
+    await using container = await new KafkaContainer(IMAGE).start();
+    await assertMessageProducedAndConsumed(container);
+    // }
   });
-  // }
 
   it("should connect with custom network", async () => {
     await using network = await new Network().start();
-    await using kafkaContainer = await new KafkaContainer(IMAGE).withNetwork(network).start();
+    await using container = await new KafkaContainer(IMAGE).withNetwork(network).start();
 
-    await testPubSub(kafkaContainer);
+    await assertMessageProducedAndConsumed(container);
   });
 
   it("should be reusable", async () => {
-    await using originalKafkaContainer = await new KafkaContainer(IMAGE).withReuse().start();
-    const newKafkaContainer = await new KafkaContainer(IMAGE).withReuse().start();
+    await using container1 = await new KafkaContainer(IMAGE).withReuse().start();
+    const container2 = await new KafkaContainer(IMAGE).withReuse().start();
 
-    expect(newKafkaContainer.getId()).toBe(originalKafkaContainer.getId());
+    expect(container2.getId()).toBe(container1.getId());
   });
 
-  // ssl {
   it(`should connect with SASL`, async () => {
+    // kafkaLatestSsl {
     const saslConfig: SaslSslListenerOptions = {
       port: 9096,
       sasl: {
@@ -53,11 +52,10 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
       },
     };
 
-    const kafkaContainer = new KafkaContainer("confluentinc/cp-kafka:7.5.0").withSaslSslListener(saslConfig);
-    await using startedKafkaContainer = await kafkaContainer.start();
+    await using container = await new KafkaContainer(IMAGE).withSaslSslListener(saslConfig).start();
 
-    await testPubSub(startedKafkaContainer, {
-      brokers: [`${startedKafkaContainer.getHost()}:${startedKafkaContainer.getMappedPort(9096)}`],
+    await assertMessageProducedAndConsumed(container, {
+      brokers: [`${container.getHost()}:${container.getMappedPort(9096)}`],
       sasl: {
         username: "app-user",
         password: "userPassword",
@@ -67,8 +65,8 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
         ca: [fs.readFileSync(path.resolve(certificatesDir, "kafka.client.truststore.pem"))],
       },
     });
+    // }
   });
-  // }
 
   it(`should connect with SASL in custom network`, async () => {
     await using network = await new Network().start();

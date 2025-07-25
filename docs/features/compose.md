@@ -4,7 +4,7 @@
 
 Create and start a Docker Compose environment:
 
-```javascript
+```js
 const { DockerComposeEnvironment } = require("testcontainers");
 
 const composeFilePath = "/path/to/build-context";
@@ -15,7 +15,7 @@ const environment = await new DockerComposeEnvironment(composeFilePath, composeF
 
 You can override by providing [multiple compose files](https://docs.docker.com/compose/extends/#multiple-compose-files):
 
-```javascript
+```js
 const environment = await new DockerComposeEnvironment(
   composeFilePath, 
   [
@@ -27,14 +27,14 @@ const environment = await new DockerComposeEnvironment(
 
 Provide a list of service names to only start those services:
 
-```javascript
+```js
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
   .up(["redis-1", "postgres-1"]);
 ```
 
 ### With wait strategy
 
-```javascript
+```js
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
   .withWaitStrategy("redis-1", Wait.forLogMessage("Ready to accept connections"))
   .withWaitStrategy("postgres-1", Wait.forHealthCheck())
@@ -46,7 +46,7 @@ const environment = await new DockerComposeEnvironment(composeFilePath, composeF
 By default Testcontainers uses the "listening ports" wait strategy for all containers. If you'd like to override
 the default wait strategy for all services, you can do so:
 
-```javascript
+```js
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
   .withDefaultWaitStrategy(Wait.forHealthCheck())
   .up();
@@ -56,7 +56,7 @@ const environment = await new DockerComposeEnvironment(composeFilePath, composeF
 
 Testcontainers will automatically pull an image if it doesn't exist. This is configurable:
 
-```javascript
+```js
 const { DockerComposeEnvironment, PullPolicy } = require("testcontainers");
 
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
@@ -66,7 +66,7 @@ const environment = await new DockerComposeEnvironment(composeFilePath, composeF
 
 Create a custom pull policy:
 
-```typescript
+```ts
 const { GenericContainer, ImagePullPolicy } = require("testcontainers");
 
 class CustomPullPolicy implements ImagePullPolicy {
@@ -82,7 +82,7 @@ const environment = await new DockerComposeEnvironment(composeFilePath, composeF
 
 ### With rebuild
 
-```javascript
+```js
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
   .withBuild()
   .up();
@@ -92,7 +92,7 @@ const environment = await new DockerComposeEnvironment(composeFilePath, composeF
 
 See [environment file](https://docs.docker.com/compose/environment-variables/#using-the---env-file--option).
 
-```javascript
+```js
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
   .withEnvironmentFile(".env.custom")
   .up();
@@ -102,7 +102,7 @@ const environment = await new DockerComposeEnvironment(composeFilePath, composeF
 
 See [profiles](https://docs.docker.com/compose/profiles/).
 
-```javascript
+```js
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
   .withProfiles("profile1", "profile2")
   .up();
@@ -110,7 +110,7 @@ const environment = await new DockerComposeEnvironment(composeFilePath, composeF
 
 ### With no recreate
 
-```javascript
+```js
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
   .withNoRecreate()
   .up();
@@ -126,7 +126,7 @@ services:
     image: redis:${TAG}
 ```
 
-```javascript
+```js
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
   .withEnvironment({ "TAG": "VALUE" })
   .up();
@@ -136,7 +136,7 @@ const environment = await new DockerComposeEnvironment(composeFilePath, composeF
 
 See [project name](https://docs.docker.com/compose/project-name/).
 
-```javascript
+```js
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
   .withProjectName("test")
   .up();
@@ -146,7 +146,7 @@ const environment = await new DockerComposeEnvironment(composeFilePath, composeF
 
 See [docker-compose](https://github.com/PDMLab/docker-compose/) library.
 
-```javascript
+```js
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
   .withClientOptions({ executable: { standalone: true, executablePath: "/path/to/docker-compose" } })
   .up();
@@ -157,21 +157,21 @@ const environment = await new DockerComposeEnvironment(composeFilePath, composeF
 
 Testcontainers by default will not wait until the environment has downed. It will simply issue the down command and return immediately. This is to save time when running tests.
 
-```javascript
+```js
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile).up();
 await environment.down();
 ```
 
 If you need to wait for the environment to be downed, you can provide a timeout:
 
-```javascript
+```js
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile).up();
 await environment.down({ timeout: 10_000 }); // 10 seconds
 ```
 
 Volumes created by the environment are removed when stopped. This is configurable:
 
-```javascript
+```js
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile).up();
 await environment.down({ removeVolumes: false });
 ```
@@ -180,7 +180,7 @@ await environment.down({ removeVolumes: false });
 
 If you have multiple docker-compose environments which share dependencies such as networks, you can stop the environment instead of downing it:
 
-```javascript
+```js
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile).up();
 await environment.stop();
 ```
@@ -189,6 +189,6 @@ await environment.stop();
 
 Interact with the containers in your compose environment as you would any other Generic Container. Note that the container name suffix has changed from `_` to `-` between docker-compose v1 and v2 respectively.
 
-```javascript
+```js
 const container = environment.getContainer("alpine-1");
 ```

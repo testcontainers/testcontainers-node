@@ -5,8 +5,8 @@ import { KurrentDbContainer } from "./kurrentdb-container";
 const IMAGE = getImage(__dirname);
 
 describe.sequential("KurrentDbContainer", { timeout: 240_000 }, () => {
-  // startContainer {
   it("should execute write and read", async () => {
+    // startContainer {
     await using container = await new KurrentDbContainer(IMAGE).start();
 
     const client = KurrentDBClient.connectionString(container.getConnectionString());
@@ -17,23 +17,17 @@ describe.sequential("KurrentDbContainer", { timeout: 240_000 }, () => {
         data: { email: "john@foo.local" },
         type: "UserCreated",
         id: "28ab6bca-d9ae-418b-a1af-eb65dd653c38",
-        metadata: {
-          someMetadata: "bar",
-        },
+        metadata: { someMetadata: "bar" },
       },
     ]);
 
     expect(await consumeSteamingRead(client.readStream("User-1"))).toEqual([
       expect.objectContaining({
         event: expect.objectContaining({
-          data: {
-            email: "john@foo.local",
-          },
+          data: { email: "john@foo.local" },
           id: "28ab6bca-d9ae-418b-a1af-eb65dd653c38",
           isJson: true,
-          metadata: {
-            someMetadata: "bar",
-          },
+          metadata: { someMetadata: "bar" },
           revision: 0,
           streamId: "User-1",
           type: "UserCreated",
@@ -42,11 +36,19 @@ describe.sequential("KurrentDbContainer", { timeout: 240_000 }, () => {
     ]);
 
     await client.dispose();
-  });
-  // }
 
-  // usingStandardProjections {
+    async function consumeSteamingRead(read: AsyncIterableIterator<unknown>): Promise<unknown[]> {
+      const events = [];
+      for await (const event of read) {
+        events.push(event);
+      }
+      return events;
+    }
+    // }
+  });
+
   it("should use built-in projections", async () => {
+    // usingStandardProjections {
     await using container = await new KurrentDbContainer(IMAGE).start();
     const client = KurrentDBClient.connectionString(container.getConnectionString());
 
@@ -86,22 +88,12 @@ describe.sequential("KurrentDbContainer", { timeout: 240_000 }, () => {
     );
     await stream.unsubscribe();
     await client.dispose();
+
+    async function getStreamFirstEvent(stream: StreamSubscription): Promise<unknown> {
+      for await (const event of stream) {
+        return event;
+      }
+    }
+    // }
   });
-  // }
 });
-
-async function consumeSteamingRead(read: AsyncIterableIterator<unknown>): Promise<unknown[]> {
-  const events = [];
-
-  for await (const event of read) {
-    events.push(event);
-  }
-
-  return events;
-}
-
-async function getStreamFirstEvent(stream: StreamSubscription): Promise<unknown> {
-  for await (const event of stream) {
-    return event;
-  }
-}

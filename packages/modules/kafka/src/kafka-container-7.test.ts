@@ -2,39 +2,39 @@ import fs from "fs";
 import path from "path";
 import { GenericContainer, Network } from "testcontainers";
 import { KafkaContainer } from "./kafka-container";
-import { testPubSub } from "./test-helper";
+import { assertMessageProducedAndConsumed } from "./test-helper";
 
 const IMAGE = "confluentinc/cp-kafka:7.9.1";
 
 describe("KafkaContainer", { timeout: 240_000 }, () => {
-  // connectBuiltInZK {
   it("should connect using in-built zoo-keeper", async () => {
-    await using kafkaContainer = await new KafkaContainer(IMAGE).start();
-
-    await testPubSub(kafkaContainer);
+    // connectBuiltInZK {
+    await using container = await new KafkaContainer(IMAGE).start();
+    await assertMessageProducedAndConsumed(container);
+    // }
   });
-  // }
 
   it("should connect using in-built zoo-keeper and custom images", async () => {
-    await using kafkaContainer = await new KafkaContainer(IMAGE).start();
+    await using container = await new KafkaContainer(IMAGE).start();
 
-    await testPubSub(kafkaContainer);
+    await assertMessageProducedAndConsumed(container);
   });
 
   it("should connect using in-built zoo-keeper and custom network", async () => {
     await using network = await new Network().start();
 
-    await using kafkaContainer = await new KafkaContainer(IMAGE).withNetwork(network).start();
+    await using container = await new KafkaContainer(IMAGE).withNetwork(network).start();
 
-    await testPubSub(kafkaContainer);
+    await assertMessageProducedAndConsumed(container);
   });
 
-  // connectProvidedZK {
   it("should connect using provided zoo-keeper and network", async () => {
+    // connectProvidedZK {
     await using network = await new Network().start();
 
     const zooKeeperHost = "zookeeper";
     const zooKeeperPort = 2181;
+
     await using _ = await new GenericContainer("confluentinc/cp-zookeeper:5.5.4")
       .withNetwork(network)
       .withNetworkAliases(zooKeeperHost)
@@ -42,59 +42,87 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
       .withExposedPorts(zooKeeperPort)
       .start();
 
-    await using kafkaContainer = await new KafkaContainer(IMAGE)
+    await using container = await new KafkaContainer(IMAGE)
       .withNetwork(network)
       .withZooKeeper(zooKeeperHost, zooKeeperPort)
       .start();
+    // }
 
-    await testPubSub(kafkaContainer);
+    await assertMessageProducedAndConsumed(container);
   });
-  // }
 
   it("should be reusable", async () => {
-    await using originalKafkaContainer = await new KafkaContainer(IMAGE).withReuse().start();
-    const newKafkaContainer = await new KafkaContainer(IMAGE).withReuse().start();
+    await using container1 = await new KafkaContainer(IMAGE).withReuse().start();
+    const container2 = await new KafkaContainer(IMAGE).withReuse().start();
 
-    expect(newKafkaContainer.getId()).toBe(originalKafkaContainer.getId());
+    expect(container2.getId()).toBe(container1.getId());
   });
 
-  describe.each([
-    {
-      name: "and zookpeer enabled",
-      configure: () => ({}),
-    },
-    {
-      name: "and kraft enabled",
-      configure: (kafkaContainer: KafkaContainer) => kafkaContainer.withKraft(),
-    },
-  ])("when SASL SSL config listener provided $name", ({ configure }) => {
+  describe("when SASL SSL config listener provided with Kraft", () => {
     const certificatesDir = path.resolve(__dirname, "..", "test-certs");
 
-    // ssl {
-    it(`should connect locally`, async () => {
-      const kafkaContainer = await new KafkaContainer("confluentinc/cp-kafka:7.5.0").withSaslSslListener({
-        port: 9096,
-        sasl: {
-          mechanism: "SCRAM-SHA-512",
-          user: {
-            name: "app-user",
-            password: "userPassword",
+    it(`should connect locally with ZK`, async () => {
+      // kafkaSsl {
+      await using container = await new KafkaContainer("confluentinc/cp-kafka:7.5.0")
+        .withSaslSslListener({
+          port: 9096,
+          sasl: {
+            mechanism: "SCRAM-SHA-512",
+            user: {
+              name: "app-user",
+              password: "userPassword",
+            },
           },
+          keystore: {
+            content: fs.readFileSync(path.resolve(certificatesDir, "kafka.server.keystore.pfx")),
+            passphrase: "serverKeystorePassword",
+          },
+          truststore: {
+            content: fs.readFileSync(path.resolve(certificatesDir, "kafka.server.truststore.pfx")),
+            passphrase: "serverTruststorePassword",
+          },
+        })
+        .start();
+
+      await assertMessageProducedAndConsumed(container, {
+        brokers: [`${container.getHost()}:${container.getMappedPort(9096)}`],
+        sasl: {
+          username: "app-user",
+          password: "userPassword",
+          mechanism: "scram-sha-512",
         },
-        keystore: {
-          content: fs.readFileSync(path.resolve(certificatesDir, "kafka.server.keystore.pfx")),
-          passphrase: "serverKeystorePassword",
-        },
-        truststore: {
-          content: fs.readFileSync(path.resolve(certificatesDir, "kafka.server.truststore.pfx")),
-          passphrase: "serverTruststorePassword",
+        ssl: {
+          ca: [fs.readFileSync(path.resolve(certificatesDir, "kafka.client.truststore.pem"))],
         },
       });
-      configure(kafkaContainer);
-      await using startedKafkaContainer = await kafkaContainer.start();
+      // }
+    });
 
-      await testPubSub(startedKafkaContainer, {
-        brokers: [`${startedKafkaContainer.getHost()}:${startedKafkaContainer.getMappedPort(9096)}`],
+    it(`should connect locally with Kraft`, async () => {
+      await using container = await new KafkaContainer("confluentinc/cp-kafka:7.5.0")
+        .withKraft()
+        .withSaslSslListener({
+          port: 9096,
+          sasl: {
+            mechanism: "SCRAM-SHA-512",
+            user: {
+              name: "app-user",
+              password: "userPassword",
+            },
+          },
+          keystore: {
+            content: fs.readFileSync(path.resolve(certificatesDir, "kafka.server.keystore.pfx")),
+            passphrase: "serverKeystorePassword",
+          },
+          truststore: {
+            content: fs.readFileSync(path.resolve(certificatesDir, "kafka.server.truststore.pfx")),
+            passphrase: "serverTruststorePassword",
+          },
+        })
+        .start();
+
+      await assertMessageProducedAndConsumed(container, {
+        brokers: [`${container.getHost()}:${container.getMappedPort(9096)}`],
         sasl: {
           username: "app-user",
           password: "userPassword",
@@ -105,7 +133,6 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
         },
       });
     });
-    // }
 
     it(`should connect within Docker network`, async () => {
       await using network = await new Network().start();
@@ -171,13 +198,13 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
     });
   });
 
-  // connectKraft {
   it("should connect using kraft", async () => {
-    await using kafkaContainer = await new KafkaContainer(IMAGE).withKraft().start();
+    // connectKraft {
+    await using container = await new KafkaContainer(IMAGE).withKraft().start();
+    // }
 
-    await testPubSub(kafkaContainer);
+    await assertMessageProducedAndConsumed(container);
   });
-  // }
 
   it("should throw an error when using kraft and and confluence platfom below 7.0.0", async () => {
     expect(() => new KafkaContainer("confluentinc/cp-kafka:6.2.14").withKraft()).toThrow(
@@ -187,9 +214,9 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
 
   it("should connect using kraft and custom network", async () => {
     await using network = await new Network().start();
-    await using kafkaContainer = await new KafkaContainer(IMAGE).withKraft().withNetwork(network).start();
+    await using container = await new KafkaContainer(IMAGE).withKraft().withNetwork(network).start();
 
-    await testPubSub(kafkaContainer);
+    await assertMessageProducedAndConsumed(container);
   });
 
   it("should throw an error when using kraft wit sasl and confluence platfom below 7.5.0", async () => {

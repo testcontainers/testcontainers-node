@@ -14,7 +14,7 @@ npm install @testcontainers/selenium --save-dev
 
 Spin up a Chrome web browser and navigate to a URL:
 
-```javascript
+```js
 const { SeleniumContainer } = require("@testcontainers/selenium");
 
 const container = await new SeleniumContainer("selenium/standalone-chrome:112.0")
@@ -31,7 +31,7 @@ await driver.quit();
 
 You can use any Selenium supported web browser by providing the appropriate image and driver configuration, for example:
 
-```javascript
+```js
 const container = await new SeleniumContainer("selenium/standalone-edge:112.0")
   .start();
 
@@ -43,7 +43,7 @@ const driver = await new Builder()
 
 A video recording of the browser session can be enabled and saved to disk once the container has been stopped:
 
-```javascript
+```js
 const container = await new SeleniumContainer("selenium/standalone-chrome:112.0")
   .withRecording()
   .start();
@@ -64,7 +64,7 @@ seleniarm/standalone-chromium:112.0
 seleniarm/standalone-firefox:112.0
 ```
 
-```javascript
+```js
 const { SeleniumContainer } = require("@testcontainers/selenium");
 
 const container = await new SeleniumContainer("seleniarm/standalone-chromium:112.0")

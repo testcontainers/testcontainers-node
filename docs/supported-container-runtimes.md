@@ -8,38 +8,38 @@ Works out of the box.
 
 ### Usage
 
-#### MacOS:
+#### MacOS
 
 ```bash
 {% raw %}
-export DOCKER_HOST=unix://$(podman machine inspect --format '{{.ConnectionInfo.PodmanSocket.Path}}')
+export DOCKER_HOST=unix://$(
+  podman machine inspect --format '{{.ConnectionInfo.PodmanSocket.Path}}'
+)
 export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock
 {% endraw %}
 ```
 
-#### Linux:
+#### Linux
 
-1. Ensure the Podman socket is exposed:
+Ensure the Podman socket is exposed, choose between rootless or rootful:
 
-    Rootless:
- 
-    ```bash
-    systemctl --user status podman.socket
-    ```
- 
-    Rootful:
- 
-    ```bash
-    sudo systemctl enable --now podman.socket
-    ```
+```bash title="Rootless"
+systemctl --user status podman.socket
+```
 
-2. Export the `DOCKER_HOST`:
+```bash title="Rootful"
+sudo systemctl enable --now podman.socket
+```
 
-    ```bash
-    {% raw %}
-    export DOCKER_HOST="unix://$(podman info --format '{{.Host.RemoteSocket.Path}}')"
-    {% endraw %}
-    ```
+Export the `DOCKER_HOST`:
+
+```bash
+{% raw %}
+export DOCKER_HOST=unix://$(
+  podman info --format '{{.Host.RemoteSocket.Path}}'
+)
+{% endraw %}
+```
 
 ### Known issues
 
@@ -51,7 +51,7 @@ When running rootless, the resource reaper will not work, disable it:
 export TESTCONTAINERS_RYUK_DISABLED=true
 ```
 
-When running rootful, the resource reaper can be made to work by telling it to run privileged:
+When running rootful, the resource reaper can be made to work by running it privileged:
 
 ```bash
 export TESTCONTAINERS_RYUK_PRIVILEGED=true
@@ -87,11 +87,14 @@ The way Colima works is it periodically checks for exposed ports, and then forwa
 
 You can use a composite wait strategy to additionally wait for a port to be bound, on top of an existing wait strategy. For example:
 
-```javascript
+```js
 const { GenericContainer, Wait } = require("testcontainers");
 
 const container = await new GenericContainer("redis")
-  .withWaitStrategy(Wait.forAll([Wait.forListeningPorts(), Wait.forLogMessage("Ready to accept connections")]))
+  .withWaitStrategy(Wait.forAll([
+    Wait.forListeningPorts(), 
+    Wait.forLogMessage("Ready to accept connections")
+  ]))
   .start();
 ```
 

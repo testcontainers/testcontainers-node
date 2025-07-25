@@ -2,7 +2,7 @@ import { Storage } from "@google-cloud/storage";
 import { setupServer } from "msw/node";
 import { ReadableStream } from "node:stream/web";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
-import { CloudStorageEmulatorContainer, StartedCloudStorageEmulatorContainer } from "./cloudstorage-emulator-container";
+import { CloudStorageEmulatorContainer } from "./cloudstorage-emulator-container";
 
 const IMAGE = getImage(__dirname, 1);
 
@@ -47,30 +47,38 @@ describe.sequential("CloudStorageEmulatorContainer", { timeout: 240_000 }, () =>
     server.close();
   });
 
-  // cloud-storage {
   it("should work using default version", async () => {
-    await using cloudstorageEmulatorContainer = await new CloudStorageEmulatorContainer(IMAGE).start();
+    // cloudstorageExample {
+    await using container = await new CloudStorageEmulatorContainer(IMAGE).start();
 
-    await checkCloudStorage(cloudstorageEmulatorContainer);
+    const storage = new Storage({
+      projectId: "test-project",
+      apiEndpoint: container.getExternalUrl(),
+    });
+
+    await storage.createBucket("test-bucket");
+    const [buckets] = await storage.getBuckets();
+
+    expect(buckets[0].name).toBe("test-bucket");
+    // }
   });
-  // }
 
   it("should use the provided external URL", async () => {
-    await using cloudstorageEmulatorContainer = await new CloudStorageEmulatorContainer(IMAGE)
+    await using container = await new CloudStorageEmulatorContainer(IMAGE)
       .withExternalURL("http://cdn.company.local")
       .start();
 
-    expect(cloudstorageEmulatorContainer).toBeDefined();
-    expect(cloudstorageEmulatorContainer.getExternalUrl()).toBe("http://cdn.company.local");
+    expect(container).toBeDefined();
+    expect(container.getExternalUrl()).toBe("http://cdn.company.local");
   });
 
   it("should be able update the external URL of running instance", async () => {
-    await using cloudstorageEmulatorContainer = await new CloudStorageEmulatorContainer(IMAGE)
+    await using container = await new CloudStorageEmulatorContainer(IMAGE)
       .withExternalURL("http://cdn.company.local")
       .start();
 
-    expect(cloudstorageEmulatorContainer).toBeDefined();
-    expect(cloudstorageEmulatorContainer.getExternalUrl()).toBe("http://cdn.company.local");
+    expect(container).toBeDefined();
+    expect(container.getExternalUrl()).toBe("http://cdn.company.local");
 
     const executedRequests: Request[] = [];
 
@@ -82,13 +90,13 @@ describe.sequential("CloudStorageEmulatorContainer", { timeout: 240_000 }, () =>
       }
     });
 
-    await cloudstorageEmulatorContainer.updateExternalUrl("http://files.company.local");
+    await container.updateExternalUrl("http://files.company.local");
 
     expect(executedRequests).toHaveLength(1);
 
     const [requestInfo] = executedRequests;
 
-    const expectedRequestUrl = cloudstorageEmulatorContainer.getEmulatorEndpoint() + "/_internal/config";
+    const expectedRequestUrl = container.getEmulatorEndpoint() + "/_internal/config";
     expect(requestInfo.url).toContain(expectedRequestUrl);
     expect(requestInfo.method).toBe("PUT");
 
@@ -97,7 +105,7 @@ describe.sequential("CloudStorageEmulatorContainer", { timeout: 240_000 }, () =>
     const requestBodyAsJson = JSON.parse(requestBody);
     expect(requestBodyAsJson).toEqual(expect.objectContaining({ externalUrl: "http://files.company.local" }));
 
-    expect(cloudstorageEmulatorContainer.getExternalUrl()).toBe("http://files.company.local");
+    expect(container.getExternalUrl()).toBe("http://files.company.local");
   });
 
   it("should use emulator endpoint as default external URL", async () => {
@@ -127,23 +135,4 @@ describe.sequential("CloudStorageEmulatorContainer", { timeout: 240_000 }, () =>
     expect(container.getExternalUrl()).toBe(undefined);
     expect((await fetch(`${container.getEmulatorEndpoint()}/_internal/healthcheck`)).status).toBe(200);
   });
-
-  async function checkCloudStorage(cloudstorageEmulatorContainer: StartedCloudStorageEmulatorContainer) {
-    expect(cloudstorageEmulatorContainer).toBeDefined();
-
-    const cloudStorageClient = new Storage({
-      projectId: "test-project",
-      apiEndpoint: cloudstorageEmulatorContainer.getExternalUrl(),
-    });
-    expect(cloudStorageClient).toBeDefined();
-
-    const createdBucket = await cloudStorageClient.createBucket("test-bucket");
-    expect(createdBucket).toBeDefined();
-
-    const [buckets] = await cloudStorageClient.getBuckets();
-    expect(buckets).toBeDefined();
-    expect(buckets).toHaveLength(1);
-    const [firstBucket] = buckets;
-    expect(firstBucket.name).toBe("test-bucket");
-  }
 });
