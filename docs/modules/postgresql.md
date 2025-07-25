@@ -32,7 +32,7 @@ This example shows the usage of the postgres module's Snapshot feature to give e
 to recreate the database container on every test or run heavy scripts to clean your database. This makes the individual
 tests very modular, since they always run on a brand-new database.
 
-!!!tip
+!!! tip
     You should never pass the `"postgres"` system database as the container database name if you want to use snapshots. 
     The Snapshot logic requires dropping the connected database and using the system database to run commands, which will
     not work if the database for the container is set to `"postgres"`.

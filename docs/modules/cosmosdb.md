@@ -1,6 +1,6 @@
 # CosmosDB
 
-!!!info
+!!! info
     This module uses the **Linux-based** version of the CosmosDB emulator. In general, it:
 
     - Provides better compatibility on a variety of systems.
