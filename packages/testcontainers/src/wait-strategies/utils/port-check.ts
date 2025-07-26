@@ -11,7 +11,7 @@ export class HostPortCheck implements PortCheck {
   constructor(private readonly client: ContainerRuntimeClient) {}
 
   public isBound(port: number | string): Promise<boolean> {
-    if (typeof port === "string" && port.toLowerCase().includes("/udp")) {
+    if (typeof port === "string" && port.toLowerCase().endsWith("/udp")) {
       log.debug(`Skipping host port check for UDP port ${port} (UDP port checks not supported)`);
       return Promise.resolve(true);
     }

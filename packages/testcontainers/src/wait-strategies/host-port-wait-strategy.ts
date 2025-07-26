@@ -23,7 +23,7 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
     boundPorts: BoundPorts
   ): Promise<void> {
     for (const [portKey, hostPort] of boundPorts.iterator()) {
-      if (portKey.toLowerCase().includes("/udp")) {
+      if (portKey.toLowerCase().endsWith("/udp")) {
         log.debug(`Skipping wait for host port ${hostPort} (mapped from UDP port ${portKey})`, {
           containerId: container.id,
         });
@@ -42,7 +42,7 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
     boundPorts: BoundPorts
   ): Promise<void> {
     for (const [internalPort] of boundPorts.iterator()) {
-      if (internalPort.toLowerCase().includes("/udp")) {
+      if (internalPort.toLowerCase().endsWith("/udp")) {
         log.debug(`Skipping wait for internal UDP port ${internalPort}`, {
           containerId: container.id,
         });
