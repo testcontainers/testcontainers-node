@@ -1,6 +1,4 @@
-# Neo4j Module
-
-[Neo4j](https://neo4j.com/) is a highly scalable, robust native graph database.
+# Neo4j
 
 ## Install
 
@@ -10,18 +8,34 @@ npm install @testcontainers/neo4j --save-dev
 
 ## Examples
 
-<!--codeinclude-->
-[Connect and create a node:](../../packages/modules/neo4j/src/neo4j-container.test.ts) inside_block:createNode
-<!--/codeinclude-->
+These examples use the following libraries:
+
+- [neo4j-driver](https://www.npmjs.com/package/neo4j-driver)
+
+        npm install neo4j-driver
+
+Choose an image from the [container registry](https://hub.docker.com/_/neo4j) and substitute `IMAGE`.
+
+### Create a node
 
 <!--codeinclude-->
-[Set password:](../../packages/modules/neo4j/src/neo4j-container.test.ts) inside_block:setPassword
+[](../../packages/modules/neo4j/src/neo4j-container.test.ts) inside_block:createNode
 <!--/codeinclude-->
 
-<!--codeinclude-->
-[Configure APOC:](../../packages/modules/neo4j/src/neo4j-container.test.ts) inside_block:apoc
-<!--/codeinclude-->
+### With credentials
 
 <!--codeinclude-->
-[Configure other supported plugins:](../../packages/modules/neo4j/src/neo4j-container.test.ts) inside_block:pluginsList
+[](../../packages/modules/neo4j/src/neo4j-container.test.ts) inside_block:setPassword
+<!--/codeinclude-->
+
+### With APOC
+
+<!--codeinclude-->
+[](../../packages/modules/neo4j/src/neo4j-container.test.ts) inside_block:apoc
+<!--/codeinclude-->
+
+### With plugins
+
+<!--codeinclude-->
+[](../../packages/modules/neo4j/src/neo4j-container.test.ts) inside_block:pluginsList
 <!--/codeinclude-->
