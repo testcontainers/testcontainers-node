@@ -21,8 +21,6 @@ These examples use the following libraries:
 
 Choose an image from the [container registry](https://hub.docker.com/r/mockserver/mockserver) and substitute `IMAGE`.
 
-## Examples
-
 ### Mock HTTP request
 
 <!--codeinclude-->
