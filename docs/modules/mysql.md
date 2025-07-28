@@ -1,6 +1,4 @@
-# MySQL Module
-
-[MySQL](https://www.mysql.com/) is the world's most popular open source database. With its proven performance, reliability and ease-of-use, MySQL has become the leading database choice for web-based applications, covering the entire range from personal projects and websites, via e-commerce and information services, all the way to high profile web properties including Facebook, Twitter, YouTube, Yahoo! and many more.
+# MySQL
 
 ## Install
 
@@ -10,18 +8,28 @@ npm install @testcontainers/mysql --save-dev
 
 ## Examples
 
-<!--codeinclude-->
-[Connect and execute query:](../../packages/modules/mysql/src/mysql-container.test.ts) inside_block:connect
-<!--/codeinclude-->
+These examples use the following libraries:
+
+- [mysql2](https://www.npmjs.com/package/mysql2)
+
+        npm install mysql2
+
+Choose an image from the [container registry](https://hub.docker.com/_/mysql) and substitute `IMAGE`.
+
+### Execute a query
 
 <!--codeinclude-->
-[Connect and execute query using URI:](../../packages/modules/mysql/src/mysql-container.test.ts) inside_block:uriConnect
+[](../../packages/modules/mysql/src/mysql-container.test.ts) inside_block:mysqlConnect
 <!--/codeinclude-->
 
-<!--codeinclude-->
-[Set username:](../../packages/modules/mysql/src/mysql-container.test.ts) inside_block:setUsername
-<!--/codeinclude-->
+### Execute a query inside the container
 
 <!--codeinclude-->
-[Execute a query inside the container:](../../packages/modules/mysql/src/mysql-container.test.ts) inside_block:executeQuery
+[](../../packages/modules/mysql/src/mysql-container.test.ts) inside_block:mysqlExecuteQuery
+<!--/codeinclude-->
+
+### With credentials
+
+<!--codeinclude-->
+[](../../packages/modules/mysql/src/mysql-container.test.ts) inside_block:mysqlUriConnect
 <!--/codeinclude-->
