@@ -29,7 +29,7 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "redis": "^5.6.0"
+    "redis": "^5.6.1"
   },
   "dependencies": {
     "testcontainers": "^11.4.0"
