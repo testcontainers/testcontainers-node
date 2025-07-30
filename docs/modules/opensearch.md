@@ -1,6 +1,4 @@
-# OpenSearch Module
-
-[OpenSearch](https://opensearch.org/) is a community-driven, open source search and analytics suite derived from Elasticsearch. It provides a distributed, multitenant-capable full-text search engine with an HTTP web interface and schema-free JSON documents.
+# OpenSearch
 
 ## Install
 
@@ -10,14 +8,28 @@ npm install @testcontainers/opensearch --save-dev
 
 ## Examples
 
-<!--codeinclude-->
-[Create an index:](../../packages/modules/opensearch/src/opensearch-container.test.ts) inside_block:createIndex
-<!--/codeinclude-->
+These examples use the following libraries:
+
+- [@opensearch-project/opensearch](https://www.npmjs.com/package/@opensearch-project/opensearch)
+
+        npm install @opensearch-project/opensearch
+
+Choose an image from the [container registry](https://hub.docker.com/r/opensearchproject/opensearch) and substitute `IMAGE`.
+
+### Create an index
 
 <!--codeinclude-->
-[Index a document:](../../packages/modules/opensearch/src/opensearch-container.test.ts) inside_block:indexDocument
+[](../../packages/modules/opensearch/src/opensearch-container.test.ts) inside_block:opensearchCreateIndex
 <!--/codeinclude-->
 
+### Index a document
+
 <!--codeinclude-->
-[Set a custom password:](../../packages/modules/opensearch/src/opensearch-container.test.ts) inside_block:customPassword
+[](../../packages/modules/opensearch/src/opensearch-container.test.ts) inside_block:opensearchIndexDocument
+<!--/codeinclude-->
+
+### With password
+
+<!--codeinclude-->
+[](../../packages/modules/opensearch/src/opensearch-container.test.ts) inside_block:opensearchCustomPassword
 <!--/codeinclude-->
