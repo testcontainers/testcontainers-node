@@ -4,7 +4,7 @@ import { MSSQLServerContainer } from "./mssqlserver-container";
 
 const IMAGE = getImage(__dirname);
 
-describe("MSSqlServerContainer", { timeout: 180_000 }, () => {
+describe("MSSQLServerContainer", { timeout: 180_000 }, () => {
   it("should connect and return a query result", async () => {
     // mssqlConnect {
     await using container = await new MSSQLServerContainer(IMAGE).acceptLicense().start();

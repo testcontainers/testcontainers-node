@@ -4,7 +4,7 @@ import { EtcdContainer } from "./etcd-container";
 
 const IMAGE = getImage(__dirname);
 
-describe("etcd", { timeout: 180_000 }, () => {
+describe("EtcdContainer", { timeout: 180_000 }, () => {
   it("should connect and perform read/write operations", async () => {
     // readWrite {
     await using container = await new EtcdContainer(IMAGE).start();

@@ -22,14 +22,14 @@ Choose an image from the [container registry](https://hub.docker.com/r/confluent
 
 <!--codeinclude-->
 [Code](../../packages/modules/kafka/src/kafka-container-latest.test.ts) inside_block:kafkaLatestConnect
-[Helper function](../../packages/modules/kafka/src/test-helper.ts) inside_block:kafkaTestHelper
+[`assertMessageProducedAndConsumed`](../../packages/modules/kafka/src/test-helper.ts) inside_block:kafkaTestHelper
 <!--/codeinclude-->
 
 #### With SSL
 
 <!--codeinclude-->
 [Code](../../packages/modules/kafka/src/kafka-container-latest.test.ts) inside_block:kafkaLatestSsl
-[Helper function](../../packages/modules/kafka/src/test-helper.ts) inside_block:kafkaTestHelper
+[`assertMessageProducedAndConsumed`](../../packages/modules/kafka/src/test-helper.ts) inside_block:kafkaTestHelper
 <!--/codeinclude-->
 
 ---
@@ -48,14 +48,14 @@ Choose an image from the [container registry](https://hub.docker.com/r/confluent
 
 <!--codeinclude-->
 [Code](../../packages/modules/kafka/src/kafka-container-7.test.ts) inside_block:connectBuiltInZK
-[Helper function](../../packages/modules/kafka/src/test-helper.ts) inside_block:kafkaTestHelper
+[`assertMessageProducedAndConsumed`](../../packages/modules/kafka/src/test-helper.ts) inside_block:kafkaTestHelper
 <!--/codeinclude-->
 
 #### With SSL
 
 <!--codeinclude-->
 [Code](../../packages/modules/kafka/src/kafka-container-7.test.ts) inside_block:kafkaSsl
-[Helper function](../../packages/modules/kafka/src/test-helper.ts) inside_block:kafkaTestHelper
+[`assertMessageProducedAndConsumed`](../../packages/modules/kafka/src/test-helper.ts) inside_block:kafkaTestHelper
 <!--/codeinclude-->
 
 #### With provided ZooKeeper

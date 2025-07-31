@@ -5,7 +5,7 @@ import { K3sContainer } from "./k3s-container";
 
 const IMAGE = getImage(__dirname);
 
-describe("K3s", { timeout: 120_000 }, () => {
+describe("K3sContainer", { timeout: 120_000 }, () => {
   // K3sContainer runs as a privileged container
   if (!process.env["CI_ROOTLESS"]) {
     it("should start and have listable node", async () => {

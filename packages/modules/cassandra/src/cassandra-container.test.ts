@@ -5,7 +5,7 @@ import { CassandraContainer } from "./cassandra-container";
 
 const IMAGE = getImage(__dirname);
 
-describe.sequential("Cassandra", { timeout: 240_000 }, () => {
+describe.sequential("CassandraContainer", { timeout: 240_000 }, () => {
   it("should connect and execute a query with default credentials", async () => {
     // connectWithDefaultCredentials {
     await using container = await new CassandraContainer(IMAGE).start();

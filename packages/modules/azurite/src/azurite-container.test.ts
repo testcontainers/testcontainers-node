@@ -6,7 +6,7 @@ import { AzuriteContainer } from "./azurite-container";
 
 const IMAGE = getImage(__dirname);
 
-describe("Azurite", { timeout: 240_000 }, () => {
+describe("AzuriteContainer", { timeout: 240_000 }, () => {
   it("should upload and download blob with default credentials", async () => {
     // uploadAndDownloadBlob {
     await using container = await new AzuriteContainer(IMAGE).start();

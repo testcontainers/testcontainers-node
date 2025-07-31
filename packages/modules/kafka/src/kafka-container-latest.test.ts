@@ -13,6 +13,7 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
   it("should connect", async () => {
     // kafkaLatestConnect {
     await using container = await new KafkaContainer(IMAGE).start();
+
     await assertMessageProducedAndConsumed(container);
     // }
   });

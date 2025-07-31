@@ -4,7 +4,7 @@ import { ArangoDBContainer } from "./arangodb-container";
 
 const IMAGE = getImage(__dirname);
 
-describe("ArangoDB", { timeout: 180_000 }, () => {
+describe("ArangoDBContainer", { timeout: 180_000 }, () => {
   it("should connect and return a query result", async () => {
     // example {
     await using container = await new ArangoDBContainer(IMAGE).start();

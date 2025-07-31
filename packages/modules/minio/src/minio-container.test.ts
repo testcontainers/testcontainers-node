@@ -4,7 +4,7 @@ import { MinioContainer } from "./minio-container";
 
 const IMAGE = getImage(__dirname);
 
-describe("MinIO", { timeout: 240_000 }, () => {
+describe("MinioContainer", { timeout: 240_000 }, () => {
   it("should connect and upload a file", async () => {
     // connectWithDefaultCredentials {
     await using container = await new MinioContainer(IMAGE).start();

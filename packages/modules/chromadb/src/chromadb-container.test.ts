@@ -8,7 +8,7 @@ import { ChromaDBContainer } from "./chromadb-container";
 
 const IMAGE = getImage(__dirname);
 
-describe("ChromaDB", { timeout: 360_000 }, () => {
+describe("ChromaDBContainer", { timeout: 360_000 }, () => {
   it("should connect", async () => {
     await using container = await new ChromaDBContainer(IMAGE).start();
     const client = new ChromaClient({ path: container.getHttpUrl() });
