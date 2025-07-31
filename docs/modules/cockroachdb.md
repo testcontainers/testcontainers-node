@@ -13,7 +13,7 @@ These examples use the following libraries:
 - [pg](https://www.npmjs.com/package/pg)
 
         npm install pg
-        npm install @types/pg
+        npm install @types/pg --save-dev
 
 Choose an image from the [container registry](https://hub.docker.com/r/cockroachdb/cockroach) and substitute `IMAGE`.
 

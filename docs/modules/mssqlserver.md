@@ -13,7 +13,7 @@ These examples use the following libraries:
 - [mssql](https://www.npmjs.com/package/mssql)
 
         npm install mssql
-        npm install @types/mssql
+        npm install @types/mssql --save-dev
 
 Choose an image from the [container registry](https://mcr.microsoft.com/en-us/artifact/mar/mssql/server) and substitute `IMAGE`.
 

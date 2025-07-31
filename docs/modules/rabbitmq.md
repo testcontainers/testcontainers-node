@@ -1,6 +1,4 @@
-# RabbitMQ Module
-
-[RabbitMQ](https://www.rabbitmq.com/) is a reliable and mature messaging and streaming broker, which is easy to deploy on cloud environments, on-premises, and on your local machine. It is currently used by millions worldwide.
+# RabbitMQ
 
 ## Install
 
@@ -10,14 +8,23 @@ npm install @testcontainers/rabbitmq --save-dev
 
 ## Examples
 
-<!--codeinclude-->
-[Connect:](../../packages/modules/rabbitmq/src/rabbitmq-container.test.ts) inside_block:start
-<!--/codeinclude-->
+These examples use the following libraries:
+
+- [amqplib](https://www.npmjs.com/package/amqplib)
+
+        npm install amqplib
+        npm install @types/amqplib --save-dev
+
+Choose an image from the [container registry](https://hub.docker.com/_/rabbitmq) and substitute `IMAGE`.
+
+### Produce/consume a message
 
 <!--codeinclude-->
-[Set credentials:](../../packages/modules/rabbitmq/src/rabbitmq-container.test.ts) inside_block:credentials
+[](../../packages/modules/rabbitmq/src/rabbitmq-container.test.ts) inside_block:pubsub
 <!--/codeinclude-->
 
+### With credentials
+
 <!--codeinclude-->
-[Publish and subscribe:](../../packages/modules/rabbitmq/src/rabbitmq-container.test.ts) inside_block:pubsub
+[](../../packages/modules/rabbitmq/src/rabbitmq-container.test.ts) inside_block:credentials
 <!--/codeinclude-->

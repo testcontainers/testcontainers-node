@@ -17,7 +17,7 @@ These examples use the following libraries:
 - [superagent](https://www.npmjs.com/package/superagent)
 
         npm install superagent
-        npm install @types/superagent
+        npm install @types/superagent --save-dev
 
 Choose an image from the [container registry](https://hub.docker.com/r/mockserver/mockserver) and substitute `IMAGE`.
 
