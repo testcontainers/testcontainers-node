@@ -5,8 +5,8 @@ import { PostgreSqlContainer } from "./postgresql-container";
 const IMAGE = getImage(__dirname);
 
 describe("PostgreSqlContainer", { timeout: 180_000 }, () => {
-  // connect {
   it("should connect and return a query result", async () => {
+    // pgConnect {
     await using container = await new PostgreSqlContainer(IMAGE).start();
 
     const client = new Client({
@@ -22,16 +22,17 @@ describe("PostgreSqlContainer", { timeout: 180_000 }, () => {
     expect(result.rows[0]).toEqual({ "?column?": 1 });
 
     await client.end();
+    // }
   });
-  // }
 
-  // uriConnect {
   it("should work with database URI", async () => {
+    // pgUriConnect {
     await using container = await new PostgreSqlContainer(IMAGE).start();
 
     const client = new Client({
       connectionString: container.getConnectionUri(),
     });
+    // }
     await client.connect();
 
     const result = await client.query("SELECT 1");
@@ -39,11 +40,11 @@ describe("PostgreSqlContainer", { timeout: 180_000 }, () => {
 
     await client.end();
   });
-  // }
 
-  // setDatabase {
   it("should set database", async () => {
+    // pgSetDatabase {
     await using container = await new PostgreSqlContainer(IMAGE).withDatabase("customDatabase").start();
+    // }
 
     const client = new Client({
       host: container.getHost(),
@@ -59,11 +60,11 @@ describe("PostgreSqlContainer", { timeout: 180_000 }, () => {
 
     await client.end();
   });
-  // }
 
-  // setUsername {
   it("should set username", async () => {
+    // pgSetUsername {
     await using container = await new PostgreSqlContainer(IMAGE).withUsername("customUsername").start();
+    // }
 
     const client = new Client({
       host: container.getHost(),
@@ -79,7 +80,6 @@ describe("PostgreSqlContainer", { timeout: 180_000 }, () => {
 
     await client.end();
   });
-  // }
 
   it("should work with restarted container", async () => {
     await using container = await new PostgreSqlContainer(IMAGE).start();
