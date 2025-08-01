@@ -1,5 +1,4 @@
 import fs from "fs";
-import os from "os";
 import path from "path";
 import { createClient } from "redis";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
@@ -36,7 +35,7 @@ describe("ValkeyContainer", { timeout: 240_000 }, () => {
 
   it("should reconnect with volume and persistence data", async () => {
     // valkeyWithPersistentData {
-    const sourcePath = fs.mkdtempSync(path.join(os.tmpdir(), "valkey-"));
+    const sourcePath = fs.mkdtempSync("valkey-");
 
     await using container = await new ValkeyContainer(IMAGE).withPassword("test").withPersistence(sourcePath).start();
 
