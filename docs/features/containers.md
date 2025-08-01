@@ -574,7 +574,7 @@ const httpPort = container.getFirstMappedPort();
 
 Specify a protocol for the exposed port:
 
-```javascript
+```js
 const container = await new GenericContainer("alpine")
   .withExposedPorts({
     container: 80,
@@ -587,7 +587,7 @@ const httpPort = container.getMappedPort(80, "udp");
 
 Alternatively, specify the protocol using a string with the format `port/protocol`:
 
-```javascript
+```js
 const container = await new GenericContainer("alpine")
   .withExposedPorts("80/udp")
   .start();
