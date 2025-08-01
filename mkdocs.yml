@@ -44,8 +44,6 @@ nav:
       - Usage: quickstart/usage.md
       - Global setup: quickstart/global-setup.md
       - Logging: quickstart/logging.md
-      #- Authentication: quickstart/authentication.md
-      #- Resource cleanup: quickstart/resource-cleanup.md
   - Supported container runtimes: supported-container-runtimes.md
   - Features:
       - Containers: features/containers.md
