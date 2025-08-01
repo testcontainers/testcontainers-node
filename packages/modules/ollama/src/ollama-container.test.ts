@@ -1,4 +1,4 @@
-import { ImageName } from "testcontainers";
+import { ImageName, randomUuid } from "testcontainers";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { OllamaContainer } from "./ollama-container";
 
@@ -16,27 +16,23 @@ describe("OllamaContainer", { timeout: 180_000 }, () => {
   });
 
   it.skip("download model and commit to image", async () => {
+    // ollamaPullModel {
     await using container = await new OllamaContainer(IMAGE).start();
-    // pullModel {
-    const execResult = await container.exec(["ollama", "pull", "all-minilm"]);
-    // }
-    console.log(execResult.output);
+    await container.exec(["ollama", "pull", "all-minilm"]);
+
     const response = await fetch(`${container.getEndpoint()}/api/tags`);
     expect(response.status).toEqual(200);
     const body = (await response.json()) as { models: { name: string }[] };
     expect(body.models[0].name).toContain("all-minilm");
 
-    const newImageName: string = "tc-ollama-allminilm-" + (Math.random() + 1).toString(36).substring(4).toLowerCase();
-    // commitToImage {
+    const newImageName = "tc-ollama-allminilm-" + randomUuid().substring(4);
     await container.commitToImage(newImageName);
-    // }
 
-    // substitute {
     await using newContainer = await new OllamaContainer(newImageName).start();
+    const newResponse = await fetch(`${newContainer.getEndpoint()}/api/tags`);
+    expect(newResponse.status).toEqual(200);
+    const newBody = (await newResponse.json()) as { models: { name: string }[] };
+    expect(newBody.models[0].name).toContain("all-minilm");
     // }
-    const response2 = await fetch(`${newContainer.getEndpoint()}/api/tags`);
-    expect(response2.status).toEqual(200);
-    const body2 = (await response2.json()) as { models: { name: string }[] };
-    expect(body2.models[0].name).toContain("all-minilm");
   });
 });

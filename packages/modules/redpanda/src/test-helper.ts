@@ -1,13 +1,9 @@
-import { Kafka, KafkaConfig, logLevel } from "kafkajs";
-import { StartedKafkaContainer } from "./kafka-container";
+import { Kafka, logLevel } from "kafkajs";
+import { StartedRedpandaContainer } from "./redpanda-container";
 
-// kafkaTestHelper {
-export async function assertMessageProducedAndConsumed(
-  container: StartedKafkaContainer,
-  additionalConfig: Partial<KafkaConfig> = {}
-) {
-  const brokers = [`${container.getHost()}:${container.getMappedPort(9093)}`];
-  const kafka = new Kafka({ logLevel: logLevel.NOTHING, brokers: brokers, ...additionalConfig });
+// redpandaTestHelper {
+export async function assertMessageProducedAndConsumed(container: StartedRedpandaContainer) {
+  const kafka = new Kafka({ logLevel: logLevel.NOTHING, brokers: [container.getBootstrapServers()] });
 
   const producer = kafka.producer();
   await producer.connect();

@@ -33,7 +33,7 @@ Configuration of the Docker daemon:
 Configuration of Testcontainers and its behaviours:
 
 | Variable                              | Example                    | Description                                  |
-| ------------------------------------- | -------------------------- | -------------------------------------------- |
+| ------------------------------------- |----------------------------| -------------------------------------------- |
 | TESTCONTAINERS_HOST_OVERRIDE          | tcp://docker:2375          | Docker's host on which ports are exposed     |
 | TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE | /var/run/docker.sock       | Path to Docker's socket used by ryuk         |
 | TESTCONTAINERS_RYUK_PRIVILEGED        | true                       | Run ryuk as a privileged container           |
@@ -41,7 +41,7 @@ Configuration of Testcontainers and its behaviours:
 | TESTCONTAINERS_RYUK_PORT              | 65515                      | Set ryuk host port (not recommended)         |
 | TESTCONTAINERS_SSHD_PORT              | 65515                      | Set SSHd host port (not recommended)         |
 | TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX  | mycompany.com/registry     | Set default image registry                   |
-| RYUK_CONTAINER_IMAGE                  | testcontainers/ryuk:0.11.0 | Custom image for ryuk                        |
-| SSHD_CONTAINER_IMAGE                  | testcontainers/sshd:1.1.0  | Custom image for SSHd                        |
+| RYUK_CONTAINER_IMAGE                  | testcontainers/ryuk:0.12.0 | Custom image for ryuk                        |
+| SSHD_CONTAINER_IMAGE                  | testcontainers/sshd:1.3.0  | Custom image for SSHd                        |
 | TESTCONTAINERS_REUSE_ENABLE           | true                       | Enable reusable containers                   |
 | TESTCONTAINERS_RYUK_VERBOSE           | true                       | Sets RYUK_VERBOSE env var in ryuk container  |

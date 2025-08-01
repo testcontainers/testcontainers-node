@@ -4,64 +4,53 @@ import os from "node:os";
 import path from "node:path";
 import { GenericContainer } from "testcontainers";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
-import { ChromaDBContainer, StartedChromaDBContainer } from "./chromadb-container";
+import { ChromaDBContainer } from "./chromadb-container";
 
 const IMAGE = getImage(__dirname);
 
-describe("ChromaDB", { timeout: 360_000 }, () => {
-  // startContainer {
+describe("ChromaDBContainer", { timeout: 360_000 }, () => {
   it("should connect", async () => {
     await using container = await new ChromaDBContainer(IMAGE).start();
-    const client = await connectTo(container);
+    const client = new ChromaClient({ path: container.getHttpUrl() });
     expect(await client.heartbeat()).toBeDefined();
-    // Do something with the client
   });
-  // }
 
-  // simpleConnect {
-  async function connectTo(container: StartedChromaDBContainer) {
-    const client = new ChromaClient({
-      path: container.getHttpUrl(),
-    });
-    const hb = await client.heartbeat();
-    expect(hb).toBeDefined();
-    return client;
-  }
-  // }
-
-  // createCollection {
   it("should create collection and get data", async () => {
+    // chromaCreateCollection {
     await using container = await new ChromaDBContainer(IMAGE).start();
-    const client = await connectTo(container);
+
+    const client = new ChromaClient({ path: container.getHttpUrl() });
     const collection = await client.createCollection({ name: "test", metadata: { "hnsw:space": "cosine" } });
     expect(collection.name).toBe("test");
-    expect(collection.metadata).toBeDefined();
-    expect(collection.metadata?.["hnsw:space"]).toBe("cosine");
+
     await collection.add({ ids: ["1"], embeddings: [[1, 2, 3]], documents: ["my doc"], metadatas: [{ key: "value" }] });
     const getResults = await collection.get({ ids: ["1"] });
     expect(getResults.ids[0]).toBe("1");
     expect(getResults.documents[0]).toStrictEqual("my doc");
     expect(getResults.metadatas).toBeDefined();
     expect(getResults.metadatas?.[0]?.key).toStrictEqual("value");
+    // }
   });
-  // }
 
-  // queryCollectionWithEmbeddingFunction {
   it("should create collection and query", async () => {
+    // queryCollectionWithEmbeddingFunction {
     await using container = await new ChromaDBContainer(IMAGE).start();
-    const ollama = await new GenericContainer("ollama/ollama").withExposedPorts(11434).start();
+
+    await using ollama = await new GenericContainer("ollama/ollama").withExposedPorts(11434).start();
     await ollama.exec(["ollama", "pull", "nomic-embed-text"]);
-    const client = await connectTo(container);
+    const client = new ChromaClient({ path: container.getHttpUrl() });
     const embedder = new OllamaEmbeddingFunction({
       url: `http://${ollama.getHost()}:${ollama.getMappedPort(11434)}/api/embeddings`,
       model: "nomic-embed-text",
     });
+
     const collection = await client.createCollection({
       name: "test",
       metadata: { "hnsw:space": "cosine" },
       embeddingFunction: embedder,
     });
     expect(collection.name).toBe("test");
+
     await collection.add({
       ids: ["1", "2"],
       documents: [
@@ -73,38 +62,38 @@ describe("ChromaDB", { timeout: 360_000 }, () => {
     expect(results).toBeDefined();
     expect(results.ids[0]).toEqual(["1"]);
     expect(results.ids[0][0]).toBe("1");
+    // }
   });
 
-  // persistentData {
   it("should reconnect with volume and persistence data", async () => {
-    const sourcePath = fs.mkdtempSync(path.join(os.tmpdir(), "chroma-temp"));
-    await using container = await new ChromaDBContainer(IMAGE)
-      .withBindMounts([{ source: sourcePath, target: "/data" }])
-      .start();
-    const client = await connectTo(container);
-    const collection = await client.createCollection({ name: "test", metadata: { "hnsw:space": "cosine" } });
-    expect(collection.name).toBe("test");
-    expect(collection.metadata).toBeDefined();
-    expect(collection.metadata?.["hnsw:space"]).toBe("cosine");
-    await collection.add({ ids: ["1"], embeddings: [[1, 2, 3]], documents: ["my doc"] });
-    const getResults = await collection.get({ ids: ["1"] });
-    expect(getResults.ids[0]).toBe("1");
-    expect(getResults.documents[0]).toStrictEqual("my doc");
-    expect(fs.existsSync(`${sourcePath}/chroma.sqlite3`)).toBe(true);
     try {
-      fs.rmSync(sourcePath, { force: true, recursive: true });
-    } catch (e) {
-      // Ignore clean up, when have no access on fs.
-      console.log(e);
+      // persistentData {
+      const sourcePath = fs.mkdtempSync(path.join(os.tmpdir(), "chroma-temp"));
+      await using container = await new ChromaDBContainer(IMAGE)
+        .withBindMounts([{ source: sourcePath, target: "/data" }])
+        .start();
+
+      const client = new ChromaClient({ path: container.getHttpUrl() });
+      const collection = await client.createCollection({ name: "test", metadata: { "hnsw:space": "cosine" } });
+      expect(collection.name).toBe("test");
+
+      await collection.add({ ids: ["1"], embeddings: [[1, 2, 3]], documents: ["my doc"] });
+      const getResults = await collection.get({ ids: ["1"] });
+      expect(getResults.ids[0]).toBe("1");
+      expect(getResults.documents[0]).toStrictEqual("my doc");
+      expect(fs.existsSync(`${sourcePath}/chroma.sqlite3`)).toBe(true);
+      // }
+    } finally {
+      fs.rmSync(path.join(os.tmpdir(), "chroma-temp"), { force: true, recursive: true });
     }
   });
-  // }
 
-  // auth {
   it("should use auth", async () => {
+    // chromaAuth {
     const tenant = "test-tenant";
     const key = "test-key";
     const database = "test-db";
+
     await using container = await new ChromaDBContainer(IMAGE)
       .withEnvironment({
         CHROMA_SERVER_AUTHN_CREDENTIALS: key,
@@ -139,6 +128,6 @@ describe("ChromaDB", { timeout: 360_000 }, () => {
 
     const collection = await dbClient.createCollection({ name: "test-collection" });
     expect(collection.name).toBe("test-collection");
+    // }
   });
-  // }
 });

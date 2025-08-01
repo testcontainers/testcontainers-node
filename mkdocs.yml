@@ -14,6 +14,8 @@ theme:
     code: Roboto Mono
   logo: "site/logo.svg"
   favicon: "site/favicon.ico"
+  features:
+    - content.code.copy
 
 extra_css:
   - "site/css/extra.css"
@@ -28,8 +30,10 @@ markdown_extensions:
   - admonition
   - pymdownx.details
   - pymdownx.superfences
+  - pymdownx.highlight:
+      linenums: true
   - pymdownx.tabbed:
-      alternate_style: false
+      alternate_style: true
   - toc:
       permalink: true
 
@@ -54,9 +58,9 @@ nav:
       - Cassandra: modules/cassandra.md
       - ChromaDB: modules/chromadb.md
       - ClickHouse: modules/clickhouse.md
+      - CockroachDB: modules/cockroachdb.md
       - CosmosDB: modules/cosmosdb.md
       - Couchbase: modules/couchbase.md
-      - CockroachDB: modules/cockroachdb.md
       - Elasticsearch: modules/elasticsearch.md
       - Etcd: modules/etcd.md
       - GCloud: modules/gcloud.md
@@ -66,8 +70,8 @@ nav:
       - KurrentDB: modules/kurrentdb.md
       - Localstack: modules/localstack.md
       - MariaDB: modules/mariadb.md
-      - Mockserver: modules/mockserver.md
       - MinIO: modules/minio.md
+      - Mockserver: modules/mockserver.md
       - MongoDB: modules/mongodb.md
       - MSSQLServer: modules/mssqlserver.md
       - MySQL: modules/mysql.md

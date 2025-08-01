@@ -1,6 +1,4 @@
-# Redis Module
-
-[Redis](https://redis.io/) The open source, in-memory data store used by millions of developers as a database, cache, streaming engine, and message broker.
+# Redis
 
 ## Install
 
@@ -10,38 +8,46 @@ npm install @testcontainers/redis --save-dev
 
 ## Examples
 
+These examples use the following libraries:
+
+- [redis](https://www.npmjs.com/package/redis)
+
+        npm install redis
+
+Choose an image from the [container registry](https://hub.docker.com/_/redis) and substitute `IMAGE`.
+
+### Set/get a value
+
 <!--codeinclude-->
-
-[Start container:](../../packages/modules/redis/src/redis-container.test.ts) inside_block:startContainer
-
+[](../../packages/modules/redis/src/redis-container.test.ts) inside_block:redisStartContainer
 <!--/codeinclude-->
 
+### With password
+
 <!--codeinclude-->
-
-[Connect redis client to container:](../../packages/modules/redis/src/redis-container.test.ts) inside_block:simpleConnect
-
+[](../../packages/modules/redis/src/redis-container.test.ts) inside_block:redisStartWithCredentials
 <!--/codeinclude-->
 
+### With persistent data
+
 <!--codeinclude-->
-
-[Start container with password authentication:](../../packages/modules/redis/src/redis-container.test.ts) inside_block:startWithCredentials
-
+[](../../packages/modules/redis/src/redis-container.test.ts) inside_block:persistentData
 <!--/codeinclude-->
 
+### With predefined data
+
 <!--codeinclude-->
-
-[Define volume for persistent/predefined data:](../../packages/modules/redis/src/redis-container.test.ts) inside_block:persistentData
-
+[](../../packages/modules/redis/src/redis-container.test.ts) inside_block:withPredefinedData
 <!--/codeinclude-->
 
+### Redis stack
+
 <!--codeinclude-->
-
-[Start container with redis/redis-stack-server image:](../../packages/modules/redis/src/redis-container.test.ts) inside_block:startWithRedisStack
-
+[](../../packages/modules/redis/src/redis-container.test.ts) inside_block:startWithRedisStack
 <!--/codeinclude-->
 
+### Execute a command inside the container
+
 <!--codeinclude-->
-
-[Execute a command inside the container:](../../packages/modules/redis/src/redis-container.test.ts) inside_block:executeCommand
-
+[](../../packages/modules/redis/src/redis-container.test.ts) inside_block:executeCommand
 <!--/codeinclude-->

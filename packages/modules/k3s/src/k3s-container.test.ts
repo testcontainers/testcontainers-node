@@ -1,65 +1,33 @@
 import * as k8s from "@kubernetes/client-node";
-import { setTimeout } from "node:timers/promises";
 import { GenericContainer, Network, Wait } from "testcontainers";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { K3sContainer } from "./k3s-container";
 
-describe("K3s", { timeout: 120_000 }, () => {
-  it("should construct", () => {
-    new K3sContainer("rancher/k3s:v1.31.2-k3s1");
-  });
+const IMAGE = getImage(__dirname);
 
+describe("K3sContainer", { timeout: 120_000 }, () => {
   // K3sContainer runs as a privileged container
   if (!process.env["CI_ROOTLESS"]) {
     it("should start and have listable node", async () => {
-      // starting_k3s {
-      await using container = await new K3sContainer("rancher/k3s:v1.31.2-k3s1").start();
-      // }
+      // k3sListNodes {
+      await using container = await new K3sContainer(IMAGE).start();
 
-      // connecting_with_client {
-      // obtain a kubeconfig file that allows us to connect to k3s
-      const kubeConfig = container.getKubeConfig();
+      const kubeConfig = new k8s.KubeConfig();
+      kubeConfig.loadFromString(container.getKubeConfig());
 
-      const kc = new k8s.KubeConfig();
-      kc.loadFromString(kubeConfig);
-
-      const client = kc.makeApiClient(k8s.CoreV1Api);
-
-      // interact with the running K3s server, e.g.:
+      const client = kubeConfig.makeApiClient(k8s.CoreV1Api);
       const nodeList = await client.listNode();
-      // }
 
       expect(nodeList.items).toHaveLength(1);
-    });
-
-    it("should expose kubeconfig for a network alias", async () => {
-      await using network = await new Network().start();
-      await using container = await new K3sContainer("rancher/k3s:v1.31.2-k3s1")
-        .withNetwork(network)
-        .withNetworkAliases("k3s")
-        .start();
-
-      // obtain a kubeconfig that allows us to connect on the custom network
-      const kubeConfig = container.getAliasedKubeConfig("k3s");
-
-      await using kubectlContainer = await new GenericContainer("rancher/kubectl:v1.31.2")
-        .withNetwork(network)
-        .withCopyContentToContainer([{ content: kubeConfig, target: "/home/kubectl/.kube/config" }])
-        .withCommand(["get", "namespaces"])
-        .withWaitStrategy(Wait.forOneShotStartup())
-        .withStartupTimeout(30_000)
-        .start();
-
-      const chunks = [];
-      for await (const chunk of await kubectlContainer.logs()) {
-        chunks.push(chunk);
-      }
-      expect(chunks).toEqual(expect.arrayContaining([expect.stringContaining("kube-system")]));
+      // }
     });
 
     it("should start a pod", async () => {
-      await using container = await new K3sContainer("rancher/k3s:v1.31.2-k3s1").start();
-      const kc = new k8s.KubeConfig();
-      kc.loadFromString(container.getKubeConfig());
+      // k3sStartPod {
+      await using container = await new K3sContainer(IMAGE).start();
+
+      const kubeConfig = new k8s.KubeConfig();
+      kubeConfig.loadFromString(container.getKubeConfig());
 
       const pod = {
         metadata: {
@@ -85,23 +53,37 @@ describe("K3s", { timeout: 120_000 }, () => {
         },
       };
 
-      const client = kc.makeApiClient(k8s.CoreV1Api);
+      const client = kubeConfig.makeApiClient(k8s.CoreV1Api);
       await client.createNamespacedPod({ namespace: "default", body: pod });
 
-      // wait for pod to be ready
-      expect(await podIsReady(client, "default", "helloworld", 60_000)).toBe(true);
+      await vi.waitFor(async () => {
+        const { status } = await client.readNamespacedPodStatus({ namespace: "default", name: "helloworld" });
+
+        return (
+          status?.phase === "Running" &&
+          status?.conditions?.some((cond) => cond.type === "Ready" && cond.status === "True")
+        );
+      }, 60_000);
+      // }
+    });
+
+    it("should expose kubeconfig for a network alias", async () => {
+      // k3sAliasedKubeConfig {
+      await using network = await new Network().start();
+      await using container = await new K3sContainer(IMAGE).withNetwork(network).withNetworkAliases("k3s").start();
+
+      const kubeConfig = container.getAliasedKubeConfig("k3s");
+
+      await using kubectlContainer = await new GenericContainer("rancher/kubectl:v1.31.2")
+        .withNetwork(network)
+        .withCopyContentToContainer([{ content: kubeConfig, target: "/home/kubectl/.kube/config" }])
+        .withCommand(["get", "namespaces"])
+        .withWaitStrategy(Wait.forOneShotStartup())
+        .start();
+
+      const chunks = await (await kubectlContainer.logs()).toArray();
+      expect(chunks).toEqual(expect.arrayContaining([expect.stringContaining("kube-system")]));
+      // }
     });
   }
 });
-
-async function podIsReady(client: k8s.CoreV1Api, namespace: string, name: string, timeout: number): Promise<boolean> {
-  for (const startTime = Date.now(); Date.now() - startTime < timeout; ) {
-    const res = await client.readNamespacedPodStatus({ namespace, name });
-    const ready =
-      res.status?.phase === "Running" &&
-      !!res.status?.conditions?.some((cond) => cond.type === "Ready" && cond.status === "True");
-    if (ready) return true;
-    await setTimeout(3_000);
-  }
-  return false;
-}

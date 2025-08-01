@@ -1,8 +1,4 @@
-# MinIO Module
-
-[MinIO](https://min.io/) is a high performance object storage solution. It is API compatible with the Amazon S3 cloud storage service and can handle unstructured data such as photos, videos, log files, backups, and container images
-
-
+# MinIO
 
 ## Install
 
@@ -12,10 +8,22 @@ npm install @testcontainers/minio --save-dev
 
 ## Examples
 
-<!--codeinclude-->
-[Connect with default credentials:](../../packages/modules/minio/src/minio-container.test.ts) inside_block:connectWithDefaultCredentials
-<!--/codeinclude-->
+These examples use the following libraries:
+
+- [minio](https://www.npmjs.com/package/minio)
+
+        npm install minio
+
+Choose an image from the [container registry](https://hub.docker.com/r/minio/minio) and substitute `IMAGE`.
+
+### Upload a file
 
 <!--codeinclude-->
-[Connect with custom credentials:](../../packages/modules/minio/src/minio-container.test.ts) inside_block:connectWithCustomCredentials
+[](../../packages/modules/minio/src/minio-container.test.ts) inside_block:connectWithDefaultCredentials
+<!--/codeinclude-->
+
+### With credentials
+
+<!--codeinclude-->
+[](../../packages/modules/minio/src/minio-container.test.ts) inside_block:connectWithCustomCredentials
 <!--/codeinclude-->

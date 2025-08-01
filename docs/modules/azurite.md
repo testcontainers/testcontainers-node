@@ -1,6 +1,4 @@
-# Azurite Module
-
-[Azurite](https://github.com/Azure/Azurite) is an open source Azure Storage API compatible server (emulator). Based on Node.js, Azurite provides cross platform experiences for developers wanting to try Azure Storage easily in a local environment. Azurite simulates most of the commands supported by Azure Storage with minimal dependencies.
+# Azurite
 
 ## Install
 
@@ -10,26 +8,54 @@ npm install @testcontainers/azurite --save-dev
 
 ## Examples
 
-<!--codeinclude-->
-[Upload and download a blob:](../../packages/modules/azurite/src/azurite-container.test.ts) inside_block:uploadAndDownloadBlob
-<!--/codeinclude-->
+These examples use the following libraries:
+
+- [@azure/data-tables](https://www.npmjs.com/package/@azure/data-tables)
+   
+        npm install @azure/data-tables
+
+- [@azure/storage-blob](https://www.npmjs.com/package/@azure/storage-blob)
+
+        npm install @azure/storage-blob
+
+- [@azure/storage-queue](https://www.npmjs.com/package/@azure/storage-queue)
+
+        npm install @azure/storage-queue
+
+Choose an image from the [container registry](https://hub.docker.com/r/microsoft/azure-storage-azurite) and substitute `IMAGE`.
+
+### Upload/download a blob
 
 <!--codeinclude-->
-[Send and receive queue messages:](../../packages/modules/azurite/src/azurite-container.test.ts) inside_block:sendAndReceiveQueue
+[](../../packages/modules/azurite/src/azurite-container.test.ts) inside_block:uploadAndDownloadBlob
 <!--/codeinclude-->
 
-<!--codeinclude-->
-[Create and insert on table:](../../packages/modules/azurite/src/azurite-container.test.ts) inside_block:createAndInsertOnTable
-<!--/codeinclude-->
+### Send/receive queue messages
 
 <!--codeinclude-->
-[Use custom credentials:](../../packages/modules/azurite/src/azurite-container.test.ts) inside_block:customCredentials
+[](../../packages/modules/azurite/src/azurite-container.test.ts) inside_block:sendAndReceiveQueue
 <!--/codeinclude-->
 
-<!--codeinclude-->
-[Use custom ports:](../../packages/modules/azurite/src/azurite-container.test.ts) inside_block:customPorts
-<!--/codeinclude-->
+### Create/insert/fetch on a table
 
 <!--codeinclude-->
-[Enable in-memory persistence:](../../packages/modules/azurite/src/azurite-container.test.ts) inside_block:inMemoryPersistence
+[](../../packages/modules/azurite/src/azurite-container.test.ts) inside_block:createAndInsertOnTable
+<!--/codeinclude-->
+
+### In memory persistence
+
+<!--codeinclude-->
+[](../../packages/modules/azurite/src/azurite-container.test.ts) inside_block:inMemoryPersistence
+<!--/codeinclude-->
+
+### With credentials
+
+<!--codeinclude-->
+[](../../packages/modules/azurite/src/azurite-container.test.ts) inside_block:customCredentials
+<!--/codeinclude-->
+
+### With ports
+
+<!--codeinclude-->
+[](../../packages/modules/azurite/src/azurite-container.test.ts) inside_block:customPorts
 <!--/codeinclude-->

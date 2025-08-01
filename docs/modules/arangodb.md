@@ -1,6 +1,4 @@
-# ArangoDB Module
-
-[ArangoDB](https://www.arangodb.com/) is an open source friendly multi-model database. You can find the documentation of the [ArangoDB JavaScript](https://www.arangodb.com/docs/stable/drivers/js.html) driver here.
+# ArangoDB
 
 ## Install
 
@@ -8,9 +6,18 @@
 npm install @testcontainers/arangodb --save-dev
 ```
 
-## Example
+## Examples
+
+These examples use the following libraries:
+
+- [arangojs](https://www.npmjs.com/package/arangojs/v/6.0.0-alpha.0)
+
+        npm install arangojs
+
+Choose an image from the [container registry](https://hub.docker.com/_/arangodb) and substitute `IMAGE`.
+
+### Execute a query
 
 <!--codeinclude-->
-[](../../packages/modules/arangodb/src/arangodb-container.test.ts) inside_block:connect
+[](../../packages/modules/arangodb/src/arangodb-container.test.ts) inside_block:example
 <!--/codeinclude-->
-

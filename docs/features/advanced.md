@@ -2,7 +2,7 @@
 
 ## Container Runtime Client
 
-Testcontainers configures an underlying container runtime to perform its tasks. This runtime works automatically with several providers like Docker, Podman, Colima, Rancher Desktop and Testcontainers Desktop. There are too many usage examples to list here, but here are some common examples:
+Testcontainers configures an underlying container runtime to perform its tasks. This runtime works automatically with several providers like Docker, Podman, Colima, Rancher Desktop and Testcontainers Desktop. There are too many usage examples to list here, but here are some common examples.
 
 ### Fetch container runtime information
 

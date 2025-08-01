@@ -5,8 +5,8 @@ import { PostgreSqlContainer } from "./postgresql-container";
 const IMAGE = getImage(__dirname);
 
 describe("PostgreSqlContainer snapshot and restore", { timeout: 180_000 }, () => {
-  // createAndRestoreFromSnapshot {
   it("should create and restore from snapshot", async () => {
+    // createAndRestoreFromSnapshot {
     await using container = await new PostgreSqlContainer(IMAGE).start();
 
     // Connect to the database
@@ -58,8 +58,8 @@ describe("PostgreSqlContainer snapshot and restore", { timeout: 180_000 }, () =>
     expect(result.rows[0].name).toEqual("initial data");
 
     await client.end();
+    // }
   });
-  // }
 
   it("should use custom snapshot name", async () => {
     await using container = await new PostgreSqlContainer(IMAGE).start();

@@ -2,7 +2,8 @@
   "extends": "./tsconfig.json",
   "exclude": [
     "build",
-    "src/**/*.test.ts"
+    "src/**/*.test.ts",
+    "src/test-helper.ts"
   ],
   "references": [
     {

@@ -1,6 +1,4 @@
-# Elasticsearch Module
-
-[Elasticsearch](https://www.elastic.co/elasticsearch/) is a search engine based on the Lucene library. It provides a distributed, multitenant-capable full-text search engine with an HTTP web interface and schema-free JSON documents.
+# Elasticsearch
 
 ## Install
 
@@ -10,10 +8,28 @@ npm install @testcontainers/elasticsearch --save-dev
 
 ## Examples
 
-<!--codeinclude-->
-[Create an index:](../../packages/modules/elasticsearch/src/elasticsearch-container.test.ts) inside_block:createIndex
-<!--/codeinclude-->
+These examples use the following libraries:
+
+- [@elastic/elasticsearch](https://www.npmjs.com/package/@elastic/elasticsearch)
+
+        npm install @elastic/elasticsearch
+
+Choose an image from the [container registry](https://hub.docker.com/_/elasticsearch) and substitute `IMAGE`.
+
+### Create an index
 
 <!--codeinclude-->
-[Index a document:](../../packages/modules/elasticsearch/src/elasticsearch-container.test.ts) inside_block:indexDocument
+[](../../packages/modules/elasticsearch/src/elasticsearch-container.test.ts) inside_block:createIndex
+<!--/codeinclude-->
+
+### Index a document
+
+<!--codeinclude-->
+[](../../packages/modules/elasticsearch/src/elasticsearch-container.test.ts) inside_block:indexDocument
+<!--/codeinclude-->
+
+### With password
+
+<!--codeinclude-->
+[](../../packages/modules/elasticsearch/src/elasticsearch-container.test.ts) inside_block:withPassword
 <!--/codeinclude-->

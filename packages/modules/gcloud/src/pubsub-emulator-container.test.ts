@@ -1,28 +1,22 @@
 import { PubSub } from "@google-cloud/pubsub";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
-import { PubSubEmulatorContainer, StartedPubSubEmulatorContainer } from "./pubsub-emulator-container";
+import { PubSubEmulatorContainer } from "./pubsub-emulator-container";
 
 const IMAGE = getImage(__dirname);
 
 describe("PubSubEmulatorContainer", { timeout: 240_000 }, () => {
   it("should work using default version", async () => {
-    await using pubsubEmulatorContainer = await new PubSubEmulatorContainer(IMAGE).start();
+    // pubsubExample {
+    await using container = await new PubSubEmulatorContainer(IMAGE).start();
 
-    await checkPubSub(pubsubEmulatorContainer);
-  });
-
-  async function checkPubSub(pubsubEmulatorContainer: StartedPubSubEmulatorContainer) {
-    expect(pubsubEmulatorContainer).toBeDefined();
-
-    const pubSubClient = new PubSub({
+    const pubSub = new PubSub({
       projectId: "test-project",
-      apiEndpoint: pubsubEmulatorContainer.getEmulatorEndpoint(),
+      apiEndpoint: container.getEmulatorEndpoint(),
     });
-    expect(pubSubClient).toBeDefined();
 
-    const [createdTopic] = await pubSubClient.createTopic("test-topic");
-    expect(createdTopic).toBeDefined();
-    // Note: topic name format is projects/<projectId>/topics/<topicName>
+    const [createdTopic] = await pubSub.createTopic("test-topic");
+
     expect(createdTopic.name).toContain("test-topic");
-  }
+    // }
+  });
 });

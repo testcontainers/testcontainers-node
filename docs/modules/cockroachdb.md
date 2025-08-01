@@ -1,7 +1,4 @@
-# CockroachDB Module
-
-[CockroachDB](https://github.com/cockroachdb/cockroach) is a cloud-native, postgresql compatible, distributed SQL database designed to build, scale, and manage modern, data-intensive applications.
-
+# CockroachDB
 
 ## Install
 
@@ -11,18 +8,35 @@ npm install @testcontainers/cockroachdb --save-dev
 
 ## Examples
 
+These examples use the following libraries:
+
+- [pg](https://www.npmjs.com/package/pg)
+
+        npm install pg
+        npm install @types/pg --save-dev
+
+Choose an image from the [container registry](https://hub.docker.com/r/cockroachdb/cockroach) and substitute `IMAGE`.
+
+### Execute a query
+ 
 <!--codeinclude-->
-[Connect and execute query:](../../packages/modules/cockroachdb/src/cockroachdb-container.test.ts) inside_block:connect
+[](../../packages/modules/cockroachdb/src/cockroachdb-container.test.ts) inside_block:cockroachConnect
 <!--/codeinclude-->
 
-<!--codeinclude-->
-[Connect and execute query using URI:](../../packages/modules/cockroachdb/src/cockroachdb-container.test.ts) inside_block:uriConnect
-<!--/codeinclude-->
+### Connect with URI
 
 <!--codeinclude-->
-[Set database:](../../packages/modules/cockroachdb/src/cockroachdb-container.test.ts) inside_block:setDatabase
+[](../../packages/modules/cockroachdb/src/cockroachdb-container.test.ts) inside_block:uriConnect
 <!--/codeinclude-->
 
+### With database
+
 <!--codeinclude-->
-[Set username:](../../packages/modules/cockroachdb/src/cockroachdb-container.test.ts) inside_block:setUsername
+[](../../packages/modules/cockroachdb/src/cockroachdb-container.test.ts) inside_block:setDatabase
+<!--/codeinclude-->
+
+### With username
+
+<!--codeinclude-->
+[](../../packages/modules/cockroachdb/src/cockroachdb-container.test.ts) inside_block:setUsername
 <!--/codeinclude-->

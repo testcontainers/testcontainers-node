@@ -1,22 +1,13 @@
 import couchbase, { Bucket, Cluster } from "couchbase";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { BucketDefinition } from "./bucket-definition";
 import { CouchbaseContainer } from "./couchbase-container";
 import { CouchbaseService } from "./couchbase-service";
 
+const ENTERPRISE_IMAGE = getImage(__dirname, 0);
+const COMMUNITY_IMAGE = getImage(__dirname, 1);
+
 describe("CouchbaseContainer", { timeout: 180_000 }, () => {
-  // upsertAndGet {
-  const upsertAndGet = async (
-    bucket: Bucket,
-    key: string,
-    value: Record<string, string>
-  ): Promise<couchbase.GetResult> => {
-    const coll = bucket.defaultCollection();
-    await coll.upsert(key, value);
-
-    return coll.get(key);
-  };
-  // }
-
   const flushBucketAndCheckExists = async (
     cluster: Cluster,
     bucket: Bucket,
@@ -28,74 +19,33 @@ describe("CouchbaseContainer", { timeout: 180_000 }, () => {
     return coll.exists(key);
   };
 
-  describe("Enterprise Image", () => {
-    const COUCHBASE_IMAGE_ENTERPRISE = "couchbase/server:enterprise-7.0.3";
-
+  it.each([ENTERPRISE_IMAGE, COMMUNITY_IMAGE])("should connect and query using %s image", async (image) => {
     // connectAndQuery {
-    it("should connect and query using enterprise image", async () => {
-      const bucketDefinition = new BucketDefinition("mybucket");
-      const container = new CouchbaseContainer(COUCHBASE_IMAGE_ENTERPRISE).withBucket(bucketDefinition);
+    const bucketDefinition = new BucketDefinition("mybucket");
+    await using container = await new CouchbaseContainer(image).withBucket(bucketDefinition).start();
 
-      await using startedTestContainer = await container.start();
-
-      const cluster = await couchbase.Cluster.connect(startedTestContainer.getConnectionString(), {
-        username: startedTestContainer.getUsername(),
-        password: startedTestContainer.getPassword(),
-      });
-
-      const bucket = cluster.bucket(bucketDefinition.getName());
-      const result = await upsertAndGet(bucket, "testdoc", { foo: "bar" });
-
-      expect(result.content).toEqual({ foo: "bar" });
-      await cluster.close();
+    const cluster = await couchbase.Cluster.connect(container.getConnectionString(), {
+      username: container.getUsername(),
+      password: container.getPassword(),
     });
+
+    const bucket = cluster.bucket(bucketDefinition.getName());
+
+    const coll = bucket.defaultCollection();
+    await coll.upsert("testdoc", { foo: "bar" });
+    const result = await coll.get("testdoc");
+
+    expect(result.content).toEqual({ foo: "bar" });
+
+    await cluster.close();
     // }
-
-    it("should flush bucket if flushEnabled and check any document exists", async () => {
-      const bucketDefinition = new BucketDefinition("mybucket").withFlushEnabled(true);
-      const container = new CouchbaseContainer(COUCHBASE_IMAGE_ENTERPRISE).withBucket(bucketDefinition);
-
-      await using startedTestContainer = await container.start();
-      const cluster = await couchbase.Cluster.connect(startedTestContainer.getConnectionString(), {
-        username: startedTestContainer.getUsername(),
-        password: startedTestContainer.getPassword(),
-      });
-
-      const bucket = cluster.bucket(bucketDefinition.getName());
-      const coll = bucket.defaultCollection();
-
-      await coll.upsert("testdoc", { foo: "bar" });
-
-      const existResult = await flushBucketAndCheckExists(cluster, bucket, "testdoc");
-
-      expect(existResult.exists).toBe(false);
-      await cluster.close();
-    });
   });
 
-  describe("Community Image", () => {
-    const COUCHBASE_IMAGE_COMMUNITY = "couchbase/server:community-7.0.2";
-
-    it("should connect and query using community image", async () => {
-      const bucketDefinition = new BucketDefinition("mybucket");
-      const container = new CouchbaseContainer(COUCHBASE_IMAGE_COMMUNITY).withBucket(bucketDefinition);
-
-      await using startedTestContainer = await container.start();
-      const cluster = await couchbase.Cluster.connect(startedTestContainer.getConnectionString(), {
-        username: startedTestContainer.getUsername(),
-        password: startedTestContainer.getPassword(),
-      });
-
-      const bucket = cluster.bucket(bucketDefinition.getName());
-      const result = await upsertAndGet(bucket, "testdoc", { foo: "bar" });
-
-      expect(result.content).toEqual({ foo: "bar" });
-      await cluster.close();
-    });
-
-    it("should flush bucket if flushEnabled and check any document exists", async () => {
+  it.each([ENTERPRISE_IMAGE, COMMUNITY_IMAGE])(
+    "should flush bucket if flushEnabled and check any document exists with %s image",
+    async (image) => {
       const bucketDefinition = new BucketDefinition("mybucket").withFlushEnabled(true);
-      const container = new CouchbaseContainer(COUCHBASE_IMAGE_COMMUNITY).withBucket(bucketDefinition);
+      const container = new CouchbaseContainer(image).withBucket(bucketDefinition);
 
       await using startedTestContainer = await container.start();
       const cluster = await couchbase.Cluster.connect(startedTestContainer.getConnectionString(), {
@@ -112,28 +62,28 @@ describe("CouchbaseContainer", { timeout: 180_000 }, () => {
 
       expect(existResult.exists).toBe(false);
       await cluster.close();
-    });
+    }
+  );
 
-    it("should throw error if analytics service enabled with community version", async () => {
-      const container = new CouchbaseContainer(COUCHBASE_IMAGE_COMMUNITY).withEnabledServices(
-        CouchbaseService.KV,
-        CouchbaseService.ANALYTICS
-      );
+  it("should throw error if analytics service enabled with community version", async () => {
+    const container = new CouchbaseContainer(COMMUNITY_IMAGE).withEnabledServices(
+      CouchbaseService.KV,
+      CouchbaseService.ANALYTICS
+    );
 
-      await expect(() => container.start()).rejects.toThrowError(
-        "The Analytics Service is only supported with the Enterprise version"
-      );
-    });
+    await expect(() => container.start()).rejects.toThrowError(
+      "The Analytics Service is only supported with the Enterprise version"
+    );
+  });
 
-    it("should throw error if eventing service enabled with community version", async () => {
-      const container = new CouchbaseContainer(COUCHBASE_IMAGE_COMMUNITY).withEnabledServices(
-        CouchbaseService.KV,
-        CouchbaseService.EVENTING
-      );
+  it("should throw error if eventing service enabled with community version", async () => {
+    const container = new CouchbaseContainer(COMMUNITY_IMAGE).withEnabledServices(
+      CouchbaseService.KV,
+      CouchbaseService.EVENTING
+    );
 
-      await expect(() => container.start()).rejects.toThrowError(
-        "The Eventing Service is only supported with the Enterprise version"
-      );
-    });
+    await expect(() => container.start()).rejects.toThrowError(
+      "The Eventing Service is only supported with the Enterprise version"
+    );
   });
 });

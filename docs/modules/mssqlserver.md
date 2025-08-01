@@ -1,6 +1,4 @@
-# MS SQL Server Module
-
-[Microsoft SQL Server](https://www.microsoft.com/en-us/sql-server) is a relational database management system developed by Microsoft. It provides a platform for efficiently storing, managing, and retrieving structured data. MSSQL offers features for data storage, retrieval, manipulation, and analysis, making it a key component in various applications ranging from small-scale projects to enterprise-level systems.
+# MSSQL Server
 
 ## Install
 
@@ -10,27 +8,40 @@ npm install @testcontainers/mssqlserver --save-dev
 
 ## Examples
 
+These examples use the following libraries:
+
+- [mssql](https://www.npmjs.com/package/mssql)
+
+        npm install mssql
+        npm install @types/mssql --save-dev
+
+Choose an image from the [container registry](https://mcr.microsoft.com/en-us/artifact/mar/mssql/server) and substitute `IMAGE`.
+
 !!! warning "EULA Acceptance"
-Due to licencing restrictions you are required to accept an EULA for this container image. To indicate that you accept the MS SQL Server image EULA, call the `acceptLicense()` method.
+    Due to licencing restrictions you are required to accept an EULA for this container image. To indicate that you accept the MS SQL Server image EULA, call the `acceptLicense()` method.
 
     Please see the [`microsoft-mssql-server` image documentation](https://hub.docker.com/_/microsoft-mssql-server#environment-variables) for a link to the EULA document.
 
-<!--codeinclude-->
-[Connect and execute query:](../../packages/modules/mssqlserver/src/mssqlserver-container.test.ts) inside_block:connect
-<!--/codeinclude-->
+### Execute a query
 
 <!--codeinclude-->
-[Connect and execute query using URI:](../../packages/modules/mssqlserver/src/mssqlserver-container.test.ts) inside_block:uriConnect
+[](../../packages/modules/mssqlserver/src/mssqlserver-container.test.ts) inside_block:mssqlConnect
 <!--/codeinclude-->
 
-<!--codeinclude-->
-[Connect and execute query using a valid custom password:](../../packages/modules/mssqlserver/src/mssqlserver-container.test.ts) inside_block:validPassword
-<!--/codeinclude-->
+### Connect via URI
 
 <!--codeinclude-->
-[Throw error with an invalid password:](../../packages/modules/mssqlserver/src/mssqlserver-container.test.ts) inside_block:invalidPassword
+[](../../packages/modules/mssqlserver/src/mssqlserver-container.test.ts) inside_block:mssqlUriConnect
 <!--/codeinclude-->
 
+### With password
+
 <!--codeinclude-->
-[Use a different edition:](../../packages/modules/mssqlserver/src/mssqlserver-container.test.ts) inside_block:expressEdition
+[](../../packages/modules/mssqlserver/src/mssqlserver-container.test.ts) inside_block:mssqlValidPassword
+<!--/codeinclude-->
+
+### With different edition
+
+<!--codeinclude-->
+[](../../packages/modules/mssqlserver/src/mssqlserver-container.test.ts) inside_block:mssqlExpressEdition
 <!--/codeinclude-->

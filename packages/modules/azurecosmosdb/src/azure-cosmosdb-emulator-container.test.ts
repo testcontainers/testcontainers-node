@@ -37,16 +37,18 @@ describe("AzureCosmosDbEmulatorContainer", { timeout: 180_000 }, async () => {
   });
   // }
 
-  // httpsCreateDB {
   it("should be able to create a database using https", async () => {
+    // httpsCreateDB {
     await using container = await new AzureCosmosDbEmulatorContainer(IMAGE).withProtocol("https").start();
+
     const cosmosClient = new CosmosClient({
       endpoint: container.getEndpoint(),
       key: container.getKey(),
       agent: new https.Agent({
-        rejectUnauthorized: false, //allows insecure TLS; import * as https from "node:https";
+        rejectUnauthorized: false,
       }),
     });
+    // }
 
     const dbName = "testdb";
     const createResponse = await cosmosClient.databases.createIfNotExists({
@@ -57,23 +59,22 @@ describe("AzureCosmosDbEmulatorContainer", { timeout: 180_000 }, async () => {
     const db = await cosmosClient.database(dbName).read();
     expect(db.database.id).toBe(dbName);
   });
-  // }
 
-  // createAndRead {
   it("should be able to create a container and store and retrieve items", async () => {
+    // createAndRead {
+    const dbName = "testdb";
+    const containerName = "testcontainer";
+
     await using container = await new AzureCosmosDbEmulatorContainer(IMAGE).withProtocol("http").start();
+
     const cosmosClient = new CosmosClient({
       endpoint: container.getEndpoint(),
       key: container.getKey(),
     });
 
-    const dbName = "testdb";
-    await cosmosClient.databases.createIfNotExists({
-      id: dbName,
-    });
-    const dbClient = cosmosClient.database(dbName);
+    await cosmosClient.databases.createIfNotExists({ id: dbName });
 
-    const containerName = "testcontainer";
+    const dbClient = cosmosClient.database(dbName);
     await dbClient.containers.createIfNotExists({
       id: containerName,
       partitionKey: {
@@ -83,12 +84,10 @@ describe("AzureCosmosDbEmulatorContainer", { timeout: 180_000 }, async () => {
     });
 
     const containerClient = dbClient.container(containerName);
-    const createResponse = await containerClient.items.create({
-      foo: "bar",
-    });
+    const createResponse = await containerClient.items.create({ foo: "bar" });
 
     const readItem = await containerClient.item(createResponse.item.id, "bar").read();
     expect(readItem.resource.foo).toEqual("bar");
+    // }
   });
-  // }
 });

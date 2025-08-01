@@ -6,66 +6,49 @@ import { AzuriteContainer } from "./azurite-container";
 
 const IMAGE = getImage(__dirname);
 
-describe("Azurite", { timeout: 240_000 }, () => {
-  // uploadAndDownloadBlob {
+describe("AzuriteContainer", { timeout: 240_000 }, () => {
   it("should upload and download blob with default credentials", async () => {
+    // uploadAndDownloadBlob {
     await using container = await new AzuriteContainer(IMAGE).start();
 
     const connectionString = container.getConnectionString();
-    expect(connectionString).toBeTruthy();
-
     const serviceClient = BlobServiceClient.fromConnectionString(connectionString);
     const containerClient = serviceClient.getContainerClient("test");
     await containerClient.createIfNotExists();
+
     const blobName = "hello.txt";
     const content = "Hello world!";
     await containerClient.uploadBlockBlob(blobName, content, Buffer.byteLength(content));
 
     const blobClient = containerClient.getBlockBlobClient(blobName);
-    const downloadResponse = await blobClient.download(0, undefined);
-
-    const readable = downloadResponse.readableStreamBody as NodeJS.ReadableStream;
-    expect(readable).toBeTruthy();
-
-    readable.setEncoding("utf8");
-    let data = "";
-    for await (const chunk of readable) {
-      data += chunk;
-    }
-
-    expect(data).toBe(content);
+    const downloadBuffer = await blobClient.downloadToBuffer();
+    expect(downloadBuffer.toString()).toBe(content);
+    // }
   });
-  // }
 
-  // sendAndReceiveQueue {
   it("should add to queue with default credentials", async () => {
+    // sendAndReceiveQueue {
     await using container = await new AzuriteContainer(IMAGE).start();
 
     const connectionString = container.getConnectionString();
-    expect(connectionString).toBeTruthy();
-
     const serviceClient = QueueServiceClient.fromConnectionString(connectionString);
     const queueName = "test-queue";
     await serviceClient.createQueue(queueName);
 
+    const messageText = "Hello world!";
     const queueClient = serviceClient.getQueueClient(queueName);
-
-    const message = "Hello world!";
-    await queueClient.sendMessage(message);
+    await queueClient.sendMessage(messageText);
 
     const messages = await queueClient.receiveMessages();
-    expect(messages.receivedMessageItems).toHaveLength(1);
-    expect(messages.receivedMessageItems[0].messageText).toBe(message);
+    expect(messages.receivedMessageItems).toMatchObject([{ messageText }]);
+    // }
   });
-  // }
 
-  // createAndInsertOnTable {
   it("should add to table with default credentials", async () => {
+    // createAndInsertOnTable {
     await using container = await new AzuriteContainer(IMAGE).start();
 
     const connectionString = container.getConnectionString();
-    expect(connectionString).toBeTruthy();
-
     const tableName = "person";
     const tableClient = TableClient.fromConnectionString(connectionString, tableName, {
       allowInsecureConnection: true,
@@ -79,16 +62,14 @@ describe("Azurite", { timeout: 240_000 }, () => {
     };
     await tableClient.createEntity(entity);
 
-    const e1 = await tableClient.listEntities().next();
-    expect(e1.value).toBeTruthy();
-    expect(e1.value.name).toBe(entity.name);
+    const nextEntity = await tableClient.listEntities().next();
+    expect(nextEntity.value).toEqual(expect.objectContaining(entity));
+    // }
   });
-  // }
 
-  // customCredentials {
   it("should be able to specify accountName and accountKey", async () => {
+    // customCredentials {
     const accountName = "test-account";
-    // Account key must be base64 encoded
     const accountKey = Buffer.from("test-key").toString("base64");
 
     await using container = await new AzuriteContainer(IMAGE)
@@ -98,6 +79,7 @@ describe("Azurite", { timeout: 240_000 }, () => {
 
     const credentials = new StorageSharedKeyCredential(accountName, accountKey);
     const serviceClient = new BlobServiceClient(container.getBlobEndpoint(), credentials);
+    // }
 
     const blobContainerName = "test";
     const containerClient = serviceClient.getContainerClient(blobContainerName);
@@ -107,13 +89,13 @@ describe("Azurite", { timeout: 240_000 }, () => {
     expect(blobContainer.value).toBeTruthy();
     expect(blobContainer.value.name).toBe(blobContainerName);
   });
-  // }
 
-  // customPorts {
   it("should be able to specify custom ports", async () => {
+    // customPorts {
     const blobPort = 13000;
     const queuePort = 14000;
     const tablePort = 15000;
+
     await using container = await new AzuriteContainer(IMAGE)
       .withBlobPort({ container: 10001, host: blobPort })
       .withQueuePort({ container: 10002, host: queuePort })
@@ -123,6 +105,7 @@ describe("Azurite", { timeout: 240_000 }, () => {
     expect(container.getBlobPort()).toBe(blobPort);
     expect(container.getQueuePort()).toBe(queuePort);
     expect(container.getTablePort()).toBe(tablePort);
+    // }
 
     const connectionString = container.getConnectionString();
     expect(connectionString).toContain("13000");
@@ -133,17 +116,15 @@ describe("Azurite", { timeout: 240_000 }, () => {
     const containerClient = serviceClient.getContainerClient("test");
     await containerClient.createIfNotExists();
   });
-  // }
 
-  // inMemoryPersistence {
   it("should be able to use in-memory persistence", async () => {
+    // inMemoryPersistence {
     await using container = await new AzuriteContainer(IMAGE).withInMemoryPersistence().start();
+
     const blobName = "hello.txt";
 
     {
       const connectionString = container.getConnectionString();
-      expect(connectionString).toBeTruthy();
-
       const serviceClient = BlobServiceClient.fromConnectionString(connectionString);
       const containerClient = serviceClient.getContainerClient("test");
       await containerClient.createIfNotExists();
@@ -158,14 +139,12 @@ describe("Azurite", { timeout: 240_000 }, () => {
 
     {
       const connectionString = container.getConnectionString();
-      expect(connectionString).toBeTruthy();
-
       const serviceClient = BlobServiceClient.fromConnectionString(connectionString);
       const containerClient = serviceClient.getContainerClient("test");
       const blobClient = containerClient.getBlockBlobClient(blobName);
       const blobExistsAfterRestart = await blobClient.exists();
       expect(blobExistsAfterRestart).toBeFalsy();
     }
+    // }
   });
-  // }
 });
