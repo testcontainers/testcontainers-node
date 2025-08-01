@@ -24,9 +24,10 @@ function mapPorts(inspectInfo: ContainerInspectInfo): Ports {
   return Object.entries(inspectInfo.NetworkSettings.Ports)
     .filter(([, hostPorts]) => hostPorts !== null)
     .map(([containerPortAndProtocol, hostPorts]) => {
-      const containerPort = parseInt(containerPortAndProtocol.split("/")[0]);
+      const [port, protocol] = containerPortAndProtocol.split("/");
+      const containerPort = parseInt(port);
       return {
-        [containerPort]: hostPorts.map((hostPort) => ({
+        [`${containerPort}/${protocol}`]: hostPorts.map((hostPort) => ({
           hostIp: hostPort.HostIp,
           hostPort: parseInt(hostPort.HostPort),
         })),

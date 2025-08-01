@@ -31,8 +31,6 @@ describe.sequential("PortCheck", () => {
       // @ts-ignore
       client = new ContainerRuntimeClient();
       portCheck = new InternalPortCheck(client, mockContainer);
-
-      // Make sure logging is enabled to capture all logs
       mockLogger.enabled.mockImplementation(() => true);
     });
 
