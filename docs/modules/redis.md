@@ -16,7 +16,7 @@ These examples use the following libraries:
 
 Choose an image from the [container registry](https://hub.docker.com/_/redis) and substitute `IMAGE`.
 
-### Set and get a value
+### Set/get a value
 
 <!--codeinclude-->
 [](../../packages/modules/redis/src/redis-container.test.ts) inside_block:redisStartContainer
