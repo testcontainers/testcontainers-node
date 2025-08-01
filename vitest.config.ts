@@ -7,6 +7,7 @@ export default defineConfig({
     env: {
       DEBUG: "testcontainers*",
     },
+    passWithNoTests: true,
     silent: "passed-only",
     mockReset: true,
     restoreMocks: true,
