@@ -10,7 +10,7 @@ const browsers = [
   ["FIREFOX", process.arch === "arm64" ? getImage(__dirname, 3) : getImage(__dirname, 2)],
 ] as const;
 
-describe.for(browsers)("SeleniumContainer", { timeout: 30_000 }, ([browser, image]) => {
+describe.for(browsers)("SeleniumContainer", { timeout: 240_000 }, ([browser, image]) => {
   it(`should work for ${browser}`, async () => {
     // seleniumExample {
     await using container = await new SeleniumContainer(image).start();
