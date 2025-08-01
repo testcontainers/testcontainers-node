@@ -6,8 +6,8 @@ const VAULT_TOKEN = "my-root-token";
 const IMAGE = getImage(__dirname);
 
 describe("VaultContainer", { timeout: 180_000 }, () => {
-  // inside_block:readWrite {
   it("should start Vault and allow reading/writing secrets", async () => {
+    // inside_block:readWrite {
     await using container = await new VaultContainer(IMAGE).withVaultToken(VAULT_TOKEN).start();
 
     const client = vault({
@@ -28,11 +28,11 @@ describe("VaultContainer", { timeout: 180_000 }, () => {
 
     expect(data.message).toBe("world");
     expect(data.other).toBe("vault");
+    // }
   });
-  // }
 
-  // inside_block:initCommands {
   it("should execute init commands using vault CLI", async () => {
+    // inside_block:initCommands {
     await using container = await new VaultContainer(IMAGE)
       .withVaultToken(VAULT_TOKEN)
       .withInitCommands("secrets enable transit", "write -f transit/keys/my-key")
@@ -42,6 +42,6 @@ describe("VaultContainer", { timeout: 180_000 }, () => {
 
     expect(result.exitCode).toBe(0);
     expect(result.output).toContain("my-key");
+    // }
   });
-  // }
 });
