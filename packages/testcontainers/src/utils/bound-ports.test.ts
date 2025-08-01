@@ -10,6 +10,27 @@ describe("BoundPorts", () => {
     expect(boundPorts.getBinding(1)).toBe(1000);
   });
 
+  it("should return a binding with protocol", () => {
+    const boundPorts = new BoundPorts();
+    boundPorts.setBinding(1, 1000, "tcp");
+    boundPorts.setBinding(1, 2000, "udp");
+
+    expect(boundPorts.getBinding(1)).toBe(1000);
+    expect(boundPorts.getBinding(1, "tcp")).toBe(1000);
+    expect(boundPorts.getBinding(1, "udp")).toBe(2000);
+  });
+
+  it("should accept string port keys", () => {
+    const boundPorts = new BoundPorts();
+    boundPorts.setBinding("8080/tcp", 1000);
+    boundPorts.setBinding("8080/udp", 2000);
+
+    expect(boundPorts.getBinding("8080/tcp")).toBe(1000);
+    expect(boundPorts.getBinding("8080/udp")).toBe(2000);
+    expect(boundPorts.getBinding(8080, "tcp")).toBe(1000);
+    expect(boundPorts.getBinding(8080, "udp")).toBe(2000);
+  });
+
   describe("BoundPorts", () => {
     it("should return a binding", () => {
       const boundPorts = new BoundPorts();
@@ -38,7 +59,7 @@ describe("BoundPorts", () => {
       boundPorts.setBinding(1, 1000);
 
       for (const [internalPort, hostPort] of boundPorts.iterator()) {
-        expect(internalPort).toBe(1);
+        expect(internalPort).toBe("1/tcp");
         expect(hostPort).toBe(1000);
       }
     });
@@ -46,8 +67,9 @@ describe("BoundPorts", () => {
     it("should instantiate from an inspect result", () => {
       const inspectResult: Partial<InspectResult> = {
         ports: {
-          8080: [{ hostIp: "0.0.0.0", hostPort: 10000 }],
-          8081: [{ hostIp: "0.0.0.0", hostPort: 10001 }],
+          "8080/tcp": [{ hostIp: "0.0.0.0", hostPort: 10000 }],
+          "8081/tcp": [{ hostIp: "0.0.0.0", hostPort: 10001 }],
+          "8080/udp": [{ hostIp: "0.0.0.0", hostPort: 10002 }],
         },
       };
       const hostIps: HostIp[] = [{ address: "127.0.0.1", family: 4 }];
@@ -56,6 +78,8 @@ describe("BoundPorts", () => {
 
       expect(boundPorts.getBinding(8080)).toBe(10000);
       expect(boundPorts.getBinding(8081)).toBe(10001);
+      expect(boundPorts.getBinding(8080, "tcp")).toBe(10000);
+      expect(boundPorts.getBinding(8080, "udp")).toBe(10002);
     });
 
     it("should filter port bindings", () => {
@@ -67,6 +91,32 @@ describe("BoundPorts", () => {
 
       expect(() => filtered.getBinding(1)).toThrowError("No port binding found for :1");
       expect(filtered.getBinding(2)).toBe(2000);
+    });
+
+    it("should filter port bindings with protocols", () => {
+      const boundPorts = new BoundPorts();
+      boundPorts.setBinding(8080, 1000, "tcp");
+      boundPorts.setBinding(8080, 2000, "udp");
+      boundPorts.setBinding(9090, 3000, "tcp");
+
+      let filtered = boundPorts.filter([8080]);
+      expect(filtered.getBinding(8080)).toBe(1000);
+      expect(() => filtered.getBinding(8080, "udp")).toThrowError("No port binding found for :8080/udp");
+      expect(() => filtered.getBinding(9090)).toThrowError("No port binding found for :9090/tcp");
+
+      filtered = boundPorts.filter(["8080/udp"]);
+      expect(filtered.getBinding(8080, "udp")).toBe(2000);
+      expect(() => filtered.getBinding(8080, "tcp")).toThrowError("No port binding found for :8080/tcp");
+    });
+
+    it("should handle case-insensitive protocols", () => {
+      const boundPorts = new BoundPorts();
+      boundPorts.setBinding(8080, 1000, "tcp");
+      expect(boundPorts.getBinding(8080, "TCP")).toBe(1000);
+
+      boundPorts.setBinding("9090/TCP", 2000);
+      expect(boundPorts.getBinding(9090, "tcp")).toBe(2000);
+      expect(boundPorts.getBinding("9090/tcp")).toBe(2000);
     });
   });
 

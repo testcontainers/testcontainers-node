@@ -1,6 +1,7 @@
 import {
   AbstractStartedContainer,
   GenericContainer,
+  getContainerPort,
   hasHostBinding,
   PortWithOptionalBinding,
   StartedTestContainer,
@@ -171,7 +172,8 @@ export class StartedAzuriteContainer extends AbstractStartedContainer {
     if (hasHostBinding(this.blobPort)) {
       return this.blobPort.host;
     } else {
-      return this.getMappedPort(this.blobPort);
+      const containerPort = getContainerPort(this.blobPort);
+      return this.getMappedPort(containerPort);
     }
   }
 
@@ -179,7 +181,8 @@ export class StartedAzuriteContainer extends AbstractStartedContainer {
     if (hasHostBinding(this.queuePort)) {
       return this.queuePort.host;
     } else {
-      return this.getMappedPort(this.queuePort);
+      const containerPort = getContainerPort(this.queuePort);
+      return this.getMappedPort(containerPort);
     }
   }
 
@@ -187,7 +190,8 @@ export class StartedAzuriteContainer extends AbstractStartedContainer {
     if (hasHostBinding(this.tablePort)) {
       return this.tablePort.host;
     } else {
-      return this.getMappedPort(this.tablePort);
+      const containerPort = getContainerPort(this.tablePort);
+      return this.getMappedPort(containerPort);
     }
   }
 

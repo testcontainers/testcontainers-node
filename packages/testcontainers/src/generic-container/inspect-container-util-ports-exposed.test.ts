@@ -17,7 +17,10 @@ function mockInspectResult(
 
 describe.sequential("inspectContainerUntilPortsExposed", () => {
   it("returns the inspect result when all ports are exposed", async () => {
-    const data = mockInspectResult({ "8080/tcp": [] }, { "8080/tcp": [{ HostIp: "0.0.0.0", HostPort: "45000" }] });
+    const data = mockInspectResult(
+      { "8080/tcp": [], "8081/udp": [] },
+      { "8080/tcp": [{ HostIp: "0.0.0.0", HostPort: "45000" }], "8081/udp": [{ HostIp: "0.0.0.0", HostPort: "45001" }] }
+    );
     const inspectFn = vi.fn().mockResolvedValueOnce(data);
 
     const result = await inspectContainerUntilPortsExposed(inspectFn, "container-id");
