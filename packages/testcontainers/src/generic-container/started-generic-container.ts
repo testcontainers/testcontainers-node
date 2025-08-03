@@ -168,6 +168,10 @@ export class StartedGenericContainer implements StartedTestContainer {
     return this.getNetworkSettings()[networkName].ipAddress;
   }
 
+  public getWaitStrategy() {
+    return this.waitStrategy;
+  }
+
   private getNetworkSettings() {
     return Object.entries(this.inspectResult.NetworkSettings.Networks)
       .map(([networkName, network]) => ({

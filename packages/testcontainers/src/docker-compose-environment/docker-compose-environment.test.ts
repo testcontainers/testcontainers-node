@@ -97,6 +97,20 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
     await checkEnvironmentContainerIsHealthy(startedEnvironment, await composeContainerName("container"));
   });
 
+  it("should use wait strategy Wait.forHealthCheck() if healthcheck is defined in service", async () => {
+    await using startedEnvironment = await new DockerComposeEnvironment(
+      fixtures,
+      "docker-compose-with-healthcheck.yml"
+    ).up();
+
+    await checkEnvironmentContainerIsHealthy(startedEnvironment, await composeContainerName("container"));
+  });
+  it("should use wait strategy Wait.forListeningPorts() if healthcheck is NOT defined in service", async () => {
+    await using startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-name.yml").up();
+
+    await checkEnvironmentContainerIsHealthy(startedEnvironment, "custom_container_name");
+  });
+
   it("should support log message wait strategy", async () => {
     await using startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml")
       .withWaitStrategy(await composeContainerName("container"), Wait.forLogMessage("Listening on port 8080"))
