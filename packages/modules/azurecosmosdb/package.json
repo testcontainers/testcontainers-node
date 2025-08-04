@@ -31,7 +31,7 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "@azure/cosmos": "^4.4.1"
+    "@azure/cosmos": "^4.5.0"
   },
   "dependencies": {
     "testcontainers": "^11.5.0"
