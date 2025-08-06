@@ -7,6 +7,7 @@ import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { ChromaDBContainer } from "./chromadb-container";
 
 const IMAGE = getImage(__dirname);
+const OLLAMA_IMAGE = getImage(__dirname, 1);
 
 describe("ChromaDBContainer", { timeout: 360_000 }, () => {
   it("should connect", async () => {
@@ -36,7 +37,7 @@ describe("ChromaDBContainer", { timeout: 360_000 }, () => {
     // queryCollectionWithEmbeddingFunction {
     await using container = await new ChromaDBContainer(IMAGE).start();
 
-    await using ollama = await new GenericContainer("ollama/ollama").withExposedPorts(11434).start();
+    await using ollama = await new GenericContainer(OLLAMA_IMAGE).withExposedPorts(11434).start();
     await ollama.exec(["ollama", "pull", "nomic-embed-text"]);
     const client = new ChromaClient({ path: container.getHttpUrl() });
     const embedder = new OllamaEmbeddingFunction({

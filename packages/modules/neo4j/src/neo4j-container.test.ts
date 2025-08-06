@@ -26,26 +26,6 @@ describe("Neo4jContainer", { timeout: 180_000 }, () => {
     // }
   });
 
-  // v5DefaultPassword {
-  it("should connect to neo4j:v5 with default password", async () => {
-    await using container = await new Neo4jContainer("neo4j:5.23.0").start();
-    const driver = neo4j.driver(
-      container.getBoltUri(),
-      neo4j.auth.basic(container.getUsername(), container.getPassword())
-    );
-
-    const session = driver.session();
-    const personName = "Chris";
-    const result = await session.run("CREATE (a:Person {name: $name}) RETURN a", { name: personName });
-    const singleRecord = result.records[0];
-    const node = singleRecord.get(0);
-    expect(node.properties.name).toBe(personName);
-
-    await session.close();
-    await driver.close();
-  });
-  // }
-
   it("should connect with custom password", async () => {
     // setPassword {
     await using container = await new Neo4jContainer(IMAGE).withPassword("xyz1234@!").start();
@@ -88,7 +68,7 @@ describe("Neo4jContainer", { timeout: 180_000 }, () => {
 
   it("should work with plugin list", async () => {
     // pluginsList {
-    await using container = await new Neo4jContainer("neo4j:5.26.5")
+    await using container = await new Neo4jContainer(IMAGE)
       .withPlugins([Neo4jPlugin.APOC_EXTENDED, Neo4jPlugin.GRAPH_DATA_SCIENCE])
       .withStartupTimeout(120_000)
       .start();
