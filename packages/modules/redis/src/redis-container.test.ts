@@ -5,6 +5,7 @@ import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { RedisContainer } from "./redis-container";
 
 const IMAGE = getImage(__dirname);
+const REDISSTACK_IMAGE = getImage(__dirname, 1);
 
 describe("RedisContainer", { timeout: 240_000 }, () => {
   it("should connect and execute set-get", async () => {
@@ -106,9 +107,7 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
 
   it("should start with redis-stack-server and json module", async () => {
     // startWithRedisStack {
-    await using container = await new RedisContainer("redis/redis-stack-server:7.4.0-v4")
-      .withPassword("testPassword")
-      .start();
+    await using container = await new RedisContainer(REDISSTACK_IMAGE).withPassword("testPassword").start();
 
     const client = createClient({ url: container.getConnectionUrl() });
     await client.connect();
