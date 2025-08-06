@@ -24,6 +24,11 @@ export class SpannerEmulatorHelper {
       apiEndpoint: this.emulator.getHost(),
       port: this.emulator.getGrpcPort(),
       sslCreds: this.emulator.getSslCredentials(),
+      // Provide fake credentials so the auth library never tries metadata
+      credentials: {
+        client_email: "test@example.com",
+        private_key: "not-a-real-key",
+      },
     });
     return this.clientInstance;
   }
