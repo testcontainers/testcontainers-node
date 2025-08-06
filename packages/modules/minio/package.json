@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/minio",
-  "version": "11.5.0",
+  "version": "11.5.1",
   "license": "MIT",
   "keywords": [
     "minio",
@@ -29,7 +29,7 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "dependencies": {
-    "testcontainers": "^11.5.0"
+    "testcontainers": "^11.5.1"
   },
   "devDependencies": {
     "minio": "^8.0.5"
