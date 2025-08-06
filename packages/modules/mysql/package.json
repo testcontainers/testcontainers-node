@@ -29,7 +29,7 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "mysql2": "^3.14.2"
+    "mysql2": "^3.14.3"
   },
   "dependencies": {
     "testcontainers": "^11.5.0"
