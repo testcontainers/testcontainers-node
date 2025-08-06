@@ -1,4 +1,4 @@
-import { ContainerInfo } from "dockerode";
+import { ContainerInfo, ContainerInspectInfo, HealthConfig } from "dockerode";
 import { containerLog, log, RandomUuid, Uuid } from "../common";
 import { ComposeOptions, getContainerRuntimeClient, parseComposeContainerName } from "../container-runtime";
 import { StartedGenericContainer } from "../generic-container/started-generic-container";
@@ -7,6 +7,7 @@ import { Environment } from "../types";
 import { BoundPorts } from "../utils/bound-ports";
 import { mapInspectResult } from "../utils/map-inspect-result";
 import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
+import { NullWaitStrategy } from "../wait-strategies/null-wait-strategy";
 import { Wait } from "../wait-strategies/wait";
 import { waitForContainer } from "../wait-strategies/wait-for-container";
 import { WaitStrategy } from "../wait-strategies/wait-strategy";
@@ -23,7 +24,7 @@ export class DockerComposeEnvironment {
   private profiles: string[] = [];
   private environment: Environment = {};
   private pullPolicy: ImagePullPolicy = PullPolicy.defaultPolicy();
-  private defaultWaitStrategy: WaitStrategy = Wait.forListeningPorts();
+  private defaultWaitStrategy: WaitStrategy = new NullWaitStrategy();
   private waitStrategy: { [containerName: string]: WaitStrategy } = {};
   private startupTimeoutMs?: number;
   private clientOptions: Partial<ComposeOptions> = {};
@@ -159,9 +160,7 @@ export class DockerComposeEnvironment {
           const inspectResult = await client.container.inspect(container);
           const mappedInspectResult = mapInspectResult(inspectResult);
           const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, mappedInspectResult);
-          const waitStrategy = this.waitStrategy[containerName]
-            ? this.waitStrategy[containerName]
-            : this.defaultWaitStrategy;
+          const waitStrategy = this.selectWaitStrategy(containerName, inspectResult);
           if (this.startupTimeoutMs !== undefined) {
             waitStrategy.withStartupTimeout(this.startupTimeoutMs);
           }
@@ -206,5 +205,23 @@ export class DockerComposeEnvironment {
       composeOptions,
       environment: this.environment,
     });
+  }
+
+  private selectWaitStrategy(containerName: string, inspectResult: ContainerInspectInfo) {
+    const containerWaitStrategy = this.waitStrategy[containerName]
+      ? this.waitStrategy[containerName]
+      : this.defaultWaitStrategy;
+    if (!(containerWaitStrategy instanceof NullWaitStrategy)) return containerWaitStrategy;
+    const healthcheck = (
+      inspectResult as ContainerInspectInfo & {
+        Config: ContainerInspectInfo["Config"] & {
+          Healthcheck: HealthConfig | undefined;
+        };
+      }
+    ).Config.Healthcheck;
+    if (healthcheck?.Test) {
+      return Wait.forHealthCheck();
+    }
+    return Wait.forListeningPorts();
   }
 }

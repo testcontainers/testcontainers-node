@@ -1,6 +1,6 @@
 import archiver from "archiver";
 import AsyncLock from "async-lock";
-import { Container, ContainerCreateOptions, HostConfig } from "dockerode";
+import { Container, ContainerCreateOptions, HealthConfig, HostConfig, ImageInspectInfo } from "dockerode";
 import { Readable } from "stream";
 import { containerLog, hash, log, toNanos } from "../common";
 import { ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "../container-runtime";
@@ -29,6 +29,7 @@ import { createLabels, LABEL_TESTCONTAINERS_CONTAINER_HASH, LABEL_TESTCONTAINERS
 import { mapInspectResult } from "../utils/map-inspect-result";
 import { getContainerPort, getProtocol, hasHostBinding, PortWithOptionalBinding } from "../utils/port";
 import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
+import { NullWaitStrategy } from "../wait-strategies/null-wait-strategy";
 import { Wait } from "../wait-strategies/wait";
 import { waitForContainer } from "../wait-strategies/wait-for-container";
 import { WaitStrategy } from "../wait-strategies/wait-strategy";
@@ -48,7 +49,7 @@ export class GenericContainer implements TestContainer {
 
   protected imageName: ImageName;
   protected startupTimeoutMs?: number;
-  protected waitStrategy: WaitStrategy = Wait.forListeningPorts();
+  protected waitStrategy: WaitStrategy = new NullWaitStrategy();
   protected environment: Record<string, string> = {};
   protected exposedPorts: PortWithOptionalBinding[] = [];
   protected reuse = false;
@@ -94,6 +95,8 @@ export class GenericContainer implements TestContainer {
       await this.beforeContainerCreated();
     }
 
+    this.waitStrategy = await this.selectWaitStrategy(client);
+
     if (!this.isHelperContainer() && PortForwarderInstance.isRunning()) {
       const portForwarder = await PortForwarderInstance.getInstance();
       this.hostConfig.ExtraHosts = [
@@ -115,6 +118,22 @@ export class GenericContainer implements TestContainer {
     }
 
     return this.startContainer(client);
+  }
+
+  private async selectWaitStrategy(client: ContainerRuntimeClient): Promise<WaitStrategy> {
+    if (!(this.waitStrategy instanceof NullWaitStrategy)) return this.waitStrategy;
+    if (this.healthCheck) {
+      return Wait.forHealthCheck();
+    }
+    const imageInfo = (await client.image.inspect(this.imageName)) as ImageInspectInfo & {
+      Config: ImageInspectInfo["Config"] & {
+        Healthcheck: HealthConfig | undefined;
+      };
+    };
+    if (imageInfo.Config.Healthcheck?.Test) {
+      return Wait.forHealthCheck();
+    }
+    return Wait.forListeningPorts();
   }
 
   private async reuseOrStartContainer(client: ContainerRuntimeClient) {

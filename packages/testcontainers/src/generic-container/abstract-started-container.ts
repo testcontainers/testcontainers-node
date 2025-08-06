@@ -76,6 +76,10 @@ export class AbstractStartedContainer implements StartedTestContainer {
     return this.startedTestContainer.getIpAddress(networkName);
   }
 
+  public getWaitStrategy() {
+    return this.startedTestContainer.getWaitStrategy();
+  }
+
   public async copyFilesToContainer(filesToCopy: FileToCopy[]): Promise<void> {
     return this.startedTestContainer.copyFilesToContainer(filesToCopy);
   }
