@@ -43,7 +43,7 @@
     "properties-reader": "^2.3.0",
     "ssh-remote-port-forward": "^1.0.4",
     "tar-fs": "^3.1.0",
-    "tmp": "^0.2.4",
+    "tmp": "^0.2.5",
     "undici": "^7.13.0"
   },
   "devDependencies": {
