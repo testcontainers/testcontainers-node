@@ -7,7 +7,6 @@ import { Environment } from "../types";
 import { BoundPorts } from "../utils/bound-ports";
 import { mapInspectResult } from "../utils/map-inspect-result";
 import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
-import { NullWaitStrategy } from "../wait-strategies/null-wait-strategy";
 import { Wait } from "../wait-strategies/wait";
 import { waitForContainer } from "../wait-strategies/wait-for-container";
 import { WaitStrategy } from "../wait-strategies/wait-strategy";
@@ -24,7 +23,7 @@ export class DockerComposeEnvironment {
   private profiles: string[] = [];
   private environment: Environment = {};
   private pullPolicy: ImagePullPolicy = PullPolicy.defaultPolicy();
-  private defaultWaitStrategy: WaitStrategy = new NullWaitStrategy();
+  private defaultWaitStrategy: WaitStrategy | undefined;
   private waitStrategy: { [containerName: string]: WaitStrategy } = {};
   private startupTimeoutMs?: number;
   private clientOptions: Partial<ComposeOptions> = {};
@@ -207,11 +206,11 @@ export class DockerComposeEnvironment {
     });
   }
 
-  private selectWaitStrategy(containerName: string, inspectResult: ContainerInspectInfo) {
+  private selectWaitStrategy(containerName: string, inspectResult: ContainerInspectInfo): WaitStrategy {
     const containerWaitStrategy = this.waitStrategy[containerName]
       ? this.waitStrategy[containerName]
       : this.defaultWaitStrategy;
-    if (!(containerWaitStrategy instanceof NullWaitStrategy)) return containerWaitStrategy;
+    if (containerWaitStrategy) return containerWaitStrategy;
     const healthcheck = (
       inspectResult as ContainerInspectInfo & {
         Config: ContainerInspectInfo["Config"] & {

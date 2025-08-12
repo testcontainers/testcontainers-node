@@ -79,7 +79,6 @@ export interface StartedTestContainer extends AsyncDisposable {
   getNetworkNames(): string[];
   getNetworkId(networkName: string): string;
   getIpAddress(networkName: string): string;
-  getWaitStrategy(): WaitStrategy;
   copyArchiveFromContainer(path: string): Promise<NodeJS.ReadableStream>;
   copyArchiveToContainer(tar: Readable, target?: string): Promise<void>;
   copyDirectoriesToContainer(directoriesToCopy: DirectoryToCopy[]): Promise<void>;

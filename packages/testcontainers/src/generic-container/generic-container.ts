@@ -29,7 +29,6 @@ import { createLabels, LABEL_TESTCONTAINERS_CONTAINER_HASH, LABEL_TESTCONTAINERS
 import { mapInspectResult } from "../utils/map-inspect-result";
 import { getContainerPort, getProtocol, hasHostBinding, PortWithOptionalBinding } from "../utils/port";
 import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
-import { NullWaitStrategy } from "../wait-strategies/null-wait-strategy";
 import { Wait } from "../wait-strategies/wait";
 import { waitForContainer } from "../wait-strategies/wait-for-container";
 import { WaitStrategy } from "../wait-strategies/wait-strategy";
@@ -49,7 +48,7 @@ export class GenericContainer implements TestContainer {
 
   protected imageName: ImageName;
   protected startupTimeoutMs?: number;
-  protected waitStrategy: WaitStrategy = new NullWaitStrategy();
+  protected waitStrategy: WaitStrategy | undefined;
   protected environment: Record<string, string> = {};
   protected exposedPorts: PortWithOptionalBinding[] = [];
   protected reuse = false;
@@ -121,7 +120,7 @@ export class GenericContainer implements TestContainer {
   }
 
   private async selectWaitStrategy(client: ContainerRuntimeClient): Promise<WaitStrategy> {
-    if (!(this.waitStrategy instanceof NullWaitStrategy)) return this.waitStrategy;
+    if (this.waitStrategy) return this.waitStrategy;
     if (this.healthCheck) {
       return Wait.forHealthCheck();
     }
@@ -169,7 +168,7 @@ export class GenericContainer implements TestContainer {
       this.exposedPorts
     );
     if (this.startupTimeoutMs !== undefined) {
-      this.waitStrategy.withStartupTimeout(this.startupTimeoutMs);
+      this.waitStrategy?.withStartupTimeout(this.startupTimeoutMs);
     }
 
     await waitForContainer(client, container, this.waitStrategy, boundPorts);
@@ -180,7 +179,7 @@ export class GenericContainer implements TestContainer {
       inspectResult,
       boundPorts,
       inspectResult.Name,
-      this.waitStrategy,
+      this.waitStrategy ?? Wait.forListeningPorts(),
       this.autoRemove
     );
   }
@@ -225,7 +224,7 @@ export class GenericContainer implements TestContainer {
     );
 
     if (this.startupTimeoutMs !== undefined) {
-      this.waitStrategy.withStartupTimeout(this.startupTimeoutMs);
+      this.waitStrategy?.withStartupTimeout(this.startupTimeoutMs);
     }
 
     if (containerLog.enabled() || this.logConsumer !== undefined) {
@@ -252,7 +251,7 @@ export class GenericContainer implements TestContainer {
       inspectResult,
       boundPorts,
       inspectResult.Name,
-      this.waitStrategy,
+      this.waitStrategy ?? Wait.forListeningPorts(),
       this.autoRemove
     );
 
