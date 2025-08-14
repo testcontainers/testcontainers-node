@@ -52,6 +52,7 @@ export interface TestContainer {
   withSharedMemorySize(bytes: number): this;
   withLogConsumer(logConsumer: (stream: Readable) => unknown): this;
   withHostname(hostname: string): this;
+  withSignal(signal: string): this;
 }
 
 export interface RestartOptions {

@@ -35,6 +35,8 @@ import { WaitStrategy } from "../wait-strategies/wait-strategy";
 import { GenericContainerBuilder } from "./generic-container-builder";
 import { inspectContainerUntilPortsExposed } from "./inspect-container-util-ports-exposed";
 import { StartedGenericContainer } from "./started-generic-container";
+import { Signal } from "../enum";
+import { sendSignal } from "../signal-manager/signal-observer";
 
 const reusableContainerCreationLock = new AsyncLock();
 
@@ -67,6 +69,10 @@ export class GenericContainer implements TestContainer {
     this.imageName = ImageName.fromString(image);
     this.createOpts = { Image: this.imageName.string };
     this.hostConfig = { AutoRemove: this.imageName.string === REAPER_IMAGE };
+  }
+  public withSignal(): this {
+    this.hostConfig.DeleteOnSignal = true;
+    return this;
   }
 
   private isHelperContainer() {
@@ -246,6 +252,7 @@ export class GenericContainer implements TestContainer {
     if (this.containerStarted) {
       await this.containerStarted(startedContainer, mappedInspectResult, false);
     }
+    sendSignal(Signal.ADD, startedContainer);
 
     return startedContainer;
   }
