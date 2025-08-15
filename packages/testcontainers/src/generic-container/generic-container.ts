@@ -35,8 +35,7 @@ import { WaitStrategy } from "../wait-strategies/wait-strategy";
 import { GenericContainerBuilder } from "./generic-container-builder";
 import { inspectContainerUntilPortsExposed } from "./inspect-container-util-ports-exposed";
 import { StartedGenericContainer } from "./started-generic-container";
-import { Signal } from "../enum";
-import { sendSignal } from "../signal-manager/signal-observer";
+import { ContainerManager } from "../container-manager/destory-manager";
 
 const reusableContainerCreationLock = new AsyncLock();
 
@@ -71,7 +70,8 @@ export class GenericContainer implements TestContainer {
     this.hostConfig = { AutoRemove: this.imageName.string === REAPER_IMAGE };
   }
   public withSignal(): this {
-    this.hostConfig.DeleteOnSignal = true;
+    this.hostConfig.BulkDelete = true;
+    this.createOpts.Labels = { ...this.createOpts.Labels, "testcontainers.bulkDelete": "true" };
     return this;
   }
 
@@ -252,7 +252,9 @@ export class GenericContainer implements TestContainer {
     if (this.containerStarted) {
       await this.containerStarted(startedContainer, mappedInspectResult, false);
     }
-    sendSignal(Signal.ADD, startedContainer);
+    if (this.hostConfig.BulkDelete) {
+      ContainerManager.addContainer(startedContainer);
+    }
 
     return startedContainer;
   }

@@ -1,0 +1,53 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Container Manager",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/packages/testcontainers/src/signal-manager/container-manager.ts",
+      "preLaunchTask": "tsc: build - packages/testcontainers/tsconfig.build.json",
+      "outFiles": ["${workspaceFolder}/packages/testcontainers/build/**/*.js"],
+      "sourceMaps": true,
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "!**/node_modules/**"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": ["<node_internals>/**"],
+      "env": {
+        "NODE_ENV": "development"
+      }
+    },
+    {
+      "name": "Debug Tests",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/packages/testcontainers/src/generic-container/generic-container.test.ts",
+      "preLaunchTask": "tsc: build - packages/testcontainers/tsconfig.build.json",
+      "outFiles": ["${workspaceFolder}/packages/testcontainers/build/**/*.js"],
+      "sourceMaps": true,
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "!**/node_modules/**"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": ["<node_internals>/**"],
+      "env": {
+        "NODE_ENV": "test"
+      }
+    },
+    {
+      "name": "Attach to Process",
+      "type": "node",
+      "request": "attach",
+      "port": 9229,
+      "restart": true,
+      "localRoot": "${workspaceFolder}",
+      "remoteRoot": "${workspaceFolder}",
+      "sourceMaps": true
+    }
+  ]
+}

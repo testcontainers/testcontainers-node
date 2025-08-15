@@ -13,6 +13,7 @@ import { mapInspectResult } from "../utils/map-inspect-result";
 import { waitForContainer } from "../wait-strategies/wait-for-container";
 import { WaitStrategy } from "../wait-strategies/wait-strategy";
 import { StoppedGenericContainer } from "./stopped-generic-container";
+import { ContainerManager } from "../container-manager/destory-manager";
 
 export class StartedGenericContainer implements StartedTestContainer {
   private stoppedContainer?: StoppedTestContainer;
@@ -36,6 +37,9 @@ export class StartedGenericContainer implements StartedTestContainer {
         return this.stoppedContainer;
       }
       this.stoppedContainer = await this.stopContainer(options);
+      if (this.getLabels()["testcontainers.bulkDelete"] === "true") {
+        ContainerManager.removeContainer(this);
+      }
       return this.stoppedContainer;
     });
   }

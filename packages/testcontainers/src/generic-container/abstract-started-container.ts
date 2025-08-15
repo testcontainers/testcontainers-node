@@ -1,6 +1,7 @@
 import { Readable } from "stream";
 import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
 import { CommitOptions, ContentToCopy, DirectoryToCopy, ExecOptions, ExecResult, FileToCopy, Labels } from "../types";
+import { ContainerManager } from "../container-manager/destory-manager";
 
 export class AbstractStartedContainer implements StartedTestContainer {
   constructor(protected readonly startedTestContainer: StartedTestContainer) {}
@@ -16,6 +17,9 @@ export class AbstractStartedContainer implements StartedTestContainer {
 
     if (this.containerStopped) {
       await this.containerStopped();
+    }
+    if (this.startedTestContainer.getLabels()["testcontainers.bulkDelete"] === "true") {
+      ContainerManager.removeContainer(this.startedTestContainer);
     }
 
     return stoppedContainer;
