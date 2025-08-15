@@ -3,6 +3,7 @@ import AsyncLock from "async-lock";
 import { Container, ContainerCreateOptions, HostConfig } from "dockerode";
 import { Readable } from "stream";
 import { containerLog, hash, log, toNanos } from "../common";
+import { ContainerManager } from "../container-manager/destory-manager";
 import { ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "../container-runtime";
 import { CONTAINER_STATUSES } from "../container-runtime/clients/container/types";
 import { StartedNetwork } from "../network/network";
@@ -35,7 +36,6 @@ import { WaitStrategy } from "../wait-strategies/wait-strategy";
 import { GenericContainerBuilder } from "./generic-container-builder";
 import { inspectContainerUntilPortsExposed } from "./inspect-container-util-ports-exposed";
 import { StartedGenericContainer } from "./started-generic-container";
-import { ContainerManager } from "../container-manager/destory-manager";
 
 const reusableContainerCreationLock = new AsyncLock();
 
