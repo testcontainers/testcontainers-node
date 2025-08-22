@@ -71,7 +71,7 @@ export class ValkeyContainer extends GenericContainer {
       ]);
     }
 
-    return new StartedValkeyContainer(await super.start(), this.password);
+    return new StartedValkeyContainer(await super.start(), this.password, this.username);
   }
 
   private async importInitialData(container: StartedTestContainer) {
@@ -85,7 +85,8 @@ export class ValkeyContainer extends GenericContainer {
 export class StartedValkeyContainer extends AbstractStartedContainer {
   constructor(
     startedTestContainer: StartedTestContainer,
-    private readonly password?: string
+    private readonly password?: string,
+    private readonly username?: string,
   ) {
     super(startedTestContainer);
   }
@@ -98,18 +99,27 @@ export class StartedValkeyContainer extends AbstractStartedContainer {
     return this.password ? this.password.toString() : "";
   }
 
+  public getUsername(): string {
+    return this.username ? this.username.toString() : "";
+  }
+
   public getConnectionUrl(): string {
     const url = new URL("", "redis://");
     url.hostname = this.getHost();
     url.port = this.getPort().toString();
     url.password = this.getPassword();
+    url.username = this.getUsername();
     return url.toString();
   }
 
   public async executeCliCmd(cmd: string, additionalFlags: string[] = []): Promise<string> {
+    const authCommand = this.password ? [
+      `--pass ${this.password}`,
+      ...(this.username ? [`--user ${this.username}`] : [])
+    ] : [];
     const result = await this.startedTestContainer.exec([
       "redis-cli",
-      ...(this.password != "" ? [`-a ${this.password}`] : []),
+      ...authCommand,
       `${cmd}`,
       ...additionalFlags,
     ]);
