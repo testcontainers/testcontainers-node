@@ -6,6 +6,7 @@ const VALKEY_PORT = 6379;
 export class ValkeyContainer extends GenericContainer {
   private readonly importFilePath = "/tmp/import.valkey";
   private password? = "";
+  private username? = "";
   private persistenceVolume? = "";
   private initialImportScriptFile? = "";
 
@@ -18,6 +19,11 @@ export class ValkeyContainer extends GenericContainer {
 
   public withPassword(password: string): this {
     this.password = password;
+    return this;
+  }
+
+  public withUsername(username: string): this {
+    this.username = username;
     return this;
   }
 
@@ -38,9 +44,13 @@ export class ValkeyContainer extends GenericContainer {
   }
 
   public override async start(): Promise<StartedValkeyContainer> {
+    const authCommand = this.password ? [
+      `--requirepass "${this.password}"`,
+      ...(this.username ? [`--user "${this.username}" on >${this.password} ~* +@all`] : [])
+    ] : [];
     this.withCommand([
       "valkey-server",
-      ...(this.password ? [`--requirepass "${this.password}"`] : []),
+      ...authCommand,
       ...(this.persistenceVolume ? ["--save 1 1 ", "--appendonly yes"] : []),
     ]);
     if (this.persistenceVolume) {
