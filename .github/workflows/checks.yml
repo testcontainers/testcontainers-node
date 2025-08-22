@@ -21,7 +21,7 @@ concurrency:
 jobs:
   detect-modules:
     name: Detect packages to check
-    runs-on: ubuntu-22.04
+    runs-on: shipfox-2vcpu-ubuntu-2404
     outputs:
       modules: ${{ steps.set-modified-modules.outputs.modules }}
       modules_count: ${{ steps.set-modified-modules-count.outputs.modules_count }}
@@ -53,7 +53,7 @@ jobs:
       fail-fast: false
       matrix:
         module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
-    runs-on: ubuntu-22.04
+    runs-on: shipfox-2vcpu-ubuntu-2404
     steps:
       - name: Code checkout
         uses: actions/checkout@v5
@@ -61,7 +61,7 @@ jobs:
         id: npm-install-modules
         uses: ./.github/actions/npm-setup
         with:
-          runner: ubuntu-22.04
+          runner: shipfox-2vcpu-ubuntu-2404
           node-version: 24.x
           workspace: "${{ matrix.module }}"
       - name: Code linting
@@ -79,7 +79,7 @@ jobs:
       fail-fast: false
       matrix:
         module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
-    runs-on: ubuntu-22.04
+    runs-on: shipfox-2vcpu-ubuntu-2404
     steps:
       - name: Code checkout
         uses: actions/checkout@v5
@@ -87,7 +87,7 @@ jobs:
         id: npm-install
         uses: ./.github/actions/npm-setup
         with:
-          runner: ubuntu-22.04
+          runner: shipfox-2vcpu-ubuntu-2404
           node-version: 24.x
           workspace: "${{ matrix.module }}"
       - name: Compile
@@ -108,14 +108,14 @@ jobs:
       fail-fast: false
       matrix:
         node-version: [20.x, 22.x, 24.x]
-    runs-on: ubuntu-22.04
+    runs-on: shipfox-2vcpu-ubuntu-2404
     steps:
       - name: Code checkout
         uses: actions/checkout@v5
       - name: Install Node ${{ matrix.node-version }} and Dependencies
         uses: ./.github/actions/npm-setup
         with:
-          runner: ubuntu-22.04
+          runner: shipfox-2vcpu-ubuntu-2404
           node-version: ${{ matrix.node-version }}
           workspace: "testcontainers"
       - name: Build testcontainers
@@ -147,7 +147,7 @@ jobs:
         container-runtime: [docker, podman]
     uses: ./.github/workflows/test-template.yml
     with:
-      runner: ubuntu-22.04
+      runner: shipfox-2vcpu-ubuntu-2404
       node-version: ${{ matrix.node-version }}
       container-runtime: ${{ matrix.container-runtime }}
       workspace: "${{ matrix.module }}"
@@ -161,7 +161,7 @@ jobs:
       - compile
       - smoke-test
       - test
-    runs-on: ubuntu-22.04
+    runs-on: shipfox-2vcpu-ubuntu-2404
     steps:
       - name: Check if any jobs failed
         if: ${{ failure() || cancelled() }}
