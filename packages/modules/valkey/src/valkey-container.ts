@@ -44,10 +44,12 @@ export class ValkeyContainer extends GenericContainer {
   }
 
   public override async start(): Promise<StartedValkeyContainer> {
-    const authCommand = this.password ? [
-      `--requirepass "${this.password}"`,
-      ...(this.username ? [`--user "${this.username}" on >${this.password} ~* +@all`] : [])
-    ] : [];
+    const authCommand = this.password
+      ? [
+          `--requirepass "${this.password}"`,
+          ...(this.username ? [`--user "${this.username}" on >${this.password} ~* +@all`] : []),
+        ]
+      : [];
     this.withCommand([
       "valkey-server",
       ...authCommand,
@@ -86,7 +88,7 @@ export class StartedValkeyContainer extends AbstractStartedContainer {
   constructor(
     startedTestContainer: StartedTestContainer,
     private readonly password?: string,
-    private readonly username?: string,
+    private readonly username?: string
   ) {
     super(startedTestContainer);
   }
@@ -113,16 +115,10 @@ export class StartedValkeyContainer extends AbstractStartedContainer {
   }
 
   public async executeCliCmd(cmd: string, additionalFlags: string[] = []): Promise<string> {
-    const authCommand = this.password ? [
-      `--pass ${this.password}`,
-      ...(this.username ? [`--user ${this.username}`] : [])
-    ] : [];
-    const result = await this.startedTestContainer.exec([
-      "redis-cli",
-      ...authCommand,
-      `${cmd}`,
-      ...additionalFlags,
-    ]);
+    const authCommand = this.password
+      ? [`--pass ${this.password}`, ...(this.username ? [`--user ${this.username}`] : [])]
+      : [];
+    const result = await this.startedTestContainer.exec(["redis-cli", ...authCommand, `${cmd}`, ...additionalFlags]);
     if (result.exitCode !== 0) {
       throw new Error(`executeQuery failed with exit code ${result.exitCode} for query: ${cmd}. ${result.output}`);
     }

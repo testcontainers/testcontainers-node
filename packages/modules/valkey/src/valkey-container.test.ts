@@ -96,7 +96,9 @@ describe("ValkeyContainer", { timeout: 240_000 }, () => {
 
     await using container = await new ValkeyContainer(IMAGE).withUsername(username).withPassword(password).start();
 
-    expect(container.getConnectionUrl()).toEqual(`redis://${username}:${password}@${container.getHost()}:${container.getPort()}`);
+    expect(container.getConnectionUrl()).toEqual(
+      `redis://${username}:${password}@${container.getHost()}:${container.getPort()}`
+    );
     // }
 
     const client = createClient({ url: container.getConnectionUrl() });
