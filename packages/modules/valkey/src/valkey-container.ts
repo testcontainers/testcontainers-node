@@ -6,6 +6,7 @@ const VALKEY_PORT = 6379;
 export class ValkeyContainer extends GenericContainer {
   private readonly importFilePath = "/tmp/import.valkey";
   private password? = "";
+  private username? = "";
   private persistenceVolume? = "";
   private initialImportScriptFile? = "";
 
@@ -18,6 +19,11 @@ export class ValkeyContainer extends GenericContainer {
 
   public withPassword(password: string): this {
     this.password = password;
+    return this;
+  }
+
+  public withUsername(username: string): this {
+    this.username = username;
     return this;
   }
 
@@ -38,9 +44,15 @@ export class ValkeyContainer extends GenericContainer {
   }
 
   public override async start(): Promise<StartedValkeyContainer> {
+    const authCommand = this.password
+      ? [
+          `--requirepass "${this.password}"`,
+          ...(this.username ? [`--user "${this.username}" on >${this.password} ~* +@all`] : []),
+        ]
+      : [];
     this.withCommand([
       "valkey-server",
-      ...(this.password ? [`--requirepass "${this.password}"`] : []),
+      ...authCommand,
       ...(this.persistenceVolume ? ["--save 1 1 ", "--appendonly yes"] : []),
     ]);
     if (this.persistenceVolume) {
@@ -61,7 +73,7 @@ export class ValkeyContainer extends GenericContainer {
       ]);
     }
 
-    return new StartedValkeyContainer(await super.start(), this.password);
+    return new StartedValkeyContainer(await super.start(), this.password, this.username);
   }
 
   private async importInitialData(container: StartedTestContainer) {
@@ -75,7 +87,8 @@ export class ValkeyContainer extends GenericContainer {
 export class StartedValkeyContainer extends AbstractStartedContainer {
   constructor(
     startedTestContainer: StartedTestContainer,
-    private readonly password?: string
+    private readonly password?: string,
+    private readonly username?: string
   ) {
     super(startedTestContainer);
   }
@@ -88,21 +101,24 @@ export class StartedValkeyContainer extends AbstractStartedContainer {
     return this.password ? this.password.toString() : "";
   }
 
+  public getUsername(): string {
+    return this.username ? this.username.toString() : "";
+  }
+
   public getConnectionUrl(): string {
     const url = new URL("", "redis://");
     url.hostname = this.getHost();
     url.port = this.getPort().toString();
     url.password = this.getPassword();
+    url.username = this.getUsername();
     return url.toString();
   }
 
   public async executeCliCmd(cmd: string, additionalFlags: string[] = []): Promise<string> {
-    const result = await this.startedTestContainer.exec([
-      "redis-cli",
-      ...(this.password != "" ? [`-a ${this.password}`] : []),
-      `${cmd}`,
-      ...additionalFlags,
-    ]);
+    const authCommand = this.password
+      ? [`--pass ${this.password}`, ...(this.username ? [`--user ${this.username}`] : [])]
+      : [];
+    const result = await this.startedTestContainer.exec(["redis-cli", ...authCommand, `${cmd}`, ...additionalFlags]);
     if (result.exitCode !== 0) {
       throw new Error(`executeQuery failed with exit code ${result.exitCode} for query: ${cmd}. ${result.output}`);
     }

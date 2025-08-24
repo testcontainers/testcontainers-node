@@ -33,6 +33,18 @@ describe("ValkeyContainer", { timeout: 240_000 }, () => {
     client.destroy();
   });
 
+  it("should connect with username & password and execute set-get", async () => {
+    await using container = await new ValkeyContainer(IMAGE).withUsername("tester").withPassword("test").start();
+
+    const client = createClient({ url: container.getConnectionUrl() });
+    await client.connect();
+
+    await client.set("key", "val");
+    expect(await client.get("key")).toBe("val");
+
+    client.destroy();
+  });
+
   it("should reconnect with volume and persistence data", async () => {
     // valkeyWithPersistentData {
     const sourcePath = fs.mkdtempSync("valkey-");
@@ -77,8 +89,29 @@ describe("ValkeyContainer", { timeout: 240_000 }, () => {
     // }
   });
 
-  it("should start with credentials and login", async () => {
-    // valkeyWithCredentials {
+  it("should start with username and password", async () => {
+    // valkeyWithUsernameAndPassword {
+    const username = "testUser";
+    const password = "testPassword";
+
+    await using container = await new ValkeyContainer(IMAGE).withUsername(username).withPassword(password).start();
+
+    expect(container.getConnectionUrl()).toEqual(
+      `redis://${username}:${password}@${container.getHost()}:${container.getPort()}`
+    );
+    // }
+
+    const client = createClient({ url: container.getConnectionUrl() });
+    await client.connect();
+
+    await client.set("key", "val");
+    expect(await client.get("key")).toBe("val");
+
+    client.destroy();
+  });
+
+  it("should start with password only", async () => {
+    // valkeyWithPassword {
     const password = "testPassword";
 
     await using container = await new ValkeyContainer(IMAGE).withPassword(password).start();
