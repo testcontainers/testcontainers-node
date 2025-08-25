@@ -1,4 +1,4 @@
-import { ContainerInfo, ContainerInspectInfo, HealthConfig } from "dockerode";
+import { ContainerInfo, ContainerInspectInfo } from "dockerode";
 import { containerLog, log, RandomUuid, Uuid } from "../common";
 import { ComposeOptions, getContainerRuntimeClient, parseComposeContainerName } from "../container-runtime";
 import { StartedGenericContainer } from "../generic-container/started-generic-container";
@@ -211,13 +211,7 @@ export class DockerComposeEnvironment {
       ? this.waitStrategy[containerName]
       : this.defaultWaitStrategy;
     if (containerWaitStrategy) return containerWaitStrategy;
-    const healthcheck = (
-      inspectResult as ContainerInspectInfo & {
-        Config: ContainerInspectInfo["Config"] & {
-          Healthcheck: HealthConfig | undefined;
-        };
-      }
-    ).Config.Healthcheck;
+    const healthcheck = inspectResult.Config.Healthcheck;
     if (healthcheck?.Test) {
       return Wait.forHealthCheck();
     }

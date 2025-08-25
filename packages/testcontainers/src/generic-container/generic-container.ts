@@ -1,6 +1,6 @@
 import archiver from "archiver";
 import AsyncLock from "async-lock";
-import { Container, ContainerCreateOptions, HealthConfig, HostConfig, ImageInspectInfo } from "dockerode";
+import { Container, ContainerCreateOptions, HostConfig } from "dockerode";
 import { Readable } from "stream";
 import { containerLog, hash, log, toNanos } from "../common";
 import { ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "../container-runtime";
@@ -124,11 +124,7 @@ export class GenericContainer implements TestContainer {
     if (this.healthCheck) {
       return Wait.forHealthCheck();
     }
-    const imageInfo = (await client.image.inspect(this.imageName)) as ImageInspectInfo & {
-      Config: ImageInspectInfo["Config"] & {
-        Healthcheck: HealthConfig | undefined;
-      };
-    };
+    const imageInfo = await client.image.inspect(this.imageName);
     if (imageInfo.Config.Healthcheck?.Test) {
       return Wait.forHealthCheck();
     }
