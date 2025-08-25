@@ -1,4 +1,4 @@
-import { ContainerInfo } from "dockerode";
+import { ContainerInfo, ContainerInspectInfo } from "dockerode";
 import { containerLog, log, RandomUuid, Uuid } from "../common";
 import { ComposeOptions, getContainerRuntimeClient, parseComposeContainerName } from "../container-runtime";
 import { StartedGenericContainer } from "../generic-container/started-generic-container";
@@ -23,7 +23,7 @@ export class DockerComposeEnvironment {
   private profiles: string[] = [];
   private environment: Environment = {};
   private pullPolicy: ImagePullPolicy = PullPolicy.defaultPolicy();
-  private defaultWaitStrategy: WaitStrategy = Wait.forListeningPorts();
+  private defaultWaitStrategy: WaitStrategy | undefined;
   private waitStrategy: { [containerName: string]: WaitStrategy } = {};
   private startupTimeoutMs?: number;
   private clientOptions: Partial<ComposeOptions> = {};
@@ -159,9 +159,7 @@ export class DockerComposeEnvironment {
           const inspectResult = await client.container.inspect(container);
           const mappedInspectResult = mapInspectResult(inspectResult);
           const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, mappedInspectResult);
-          const waitStrategy = this.waitStrategy[containerName]
-            ? this.waitStrategy[containerName]
-            : this.defaultWaitStrategy;
+          const waitStrategy = this.selectWaitStrategy(containerName, inspectResult);
           if (this.startupTimeoutMs !== undefined) {
             waitStrategy.withStartupTimeout(this.startupTimeoutMs);
           }
@@ -206,5 +204,17 @@ export class DockerComposeEnvironment {
       composeOptions,
       environment: this.environment,
     });
+  }
+
+  private selectWaitStrategy(containerName: string, inspectResult: ContainerInspectInfo): WaitStrategy {
+    const containerWaitStrategy = this.waitStrategy[containerName]
+      ? this.waitStrategy[containerName]
+      : this.defaultWaitStrategy;
+    if (containerWaitStrategy) return containerWaitStrategy;
+    const healthcheck = inspectResult.Config.Healthcheck;
+    if (healthcheck?.Test) {
+      return Wait.forHealthCheck();
+    }
+    return Wait.forListeningPorts();
   }
 }

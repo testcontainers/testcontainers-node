@@ -48,7 +48,7 @@ export class GenericContainer implements TestContainer {
 
   protected imageName: ImageName;
   protected startupTimeoutMs?: number;
-  protected waitStrategy: WaitStrategy = Wait.forListeningPorts();
+  protected waitStrategy: WaitStrategy | undefined;
   protected environment: Record<string, string> = {};
   protected exposedPorts: PortWithOptionalBinding[] = [];
   protected reuse = false;
@@ -94,6 +94,8 @@ export class GenericContainer implements TestContainer {
       await this.beforeContainerCreated();
     }
 
+    this.waitStrategy = await this.selectWaitStrategy(client);
+
     if (!this.isHelperContainer() && PortForwarderInstance.isRunning()) {
       const portForwarder = await PortForwarderInstance.getInstance();
       this.hostConfig.ExtraHosts = [
@@ -115,6 +117,18 @@ export class GenericContainer implements TestContainer {
     }
 
     return this.startContainer(client);
+  }
+
+  private async selectWaitStrategy(client: ContainerRuntimeClient): Promise<WaitStrategy> {
+    if (this.waitStrategy) return this.waitStrategy;
+    if (this.healthCheck) {
+      return Wait.forHealthCheck();
+    }
+    const imageInfo = await client.image.inspect(this.imageName);
+    if (imageInfo.Config.Healthcheck?.Test) {
+      return Wait.forHealthCheck();
+    }
+    return Wait.forListeningPorts();
   }
 
   private async reuseOrStartContainer(client: ContainerRuntimeClient) {
@@ -150,7 +164,7 @@ export class GenericContainer implements TestContainer {
       this.exposedPorts
     );
     if (this.startupTimeoutMs !== undefined) {
-      this.waitStrategy.withStartupTimeout(this.startupTimeoutMs);
+      this.waitStrategy?.withStartupTimeout(this.startupTimeoutMs);
     }
 
     await waitForContainer(client, container, this.waitStrategy, boundPorts);
@@ -161,7 +175,7 @@ export class GenericContainer implements TestContainer {
       inspectResult,
       boundPorts,
       inspectResult.Name,
-      this.waitStrategy,
+      this.waitStrategy ?? Wait.forListeningPorts(),
       this.autoRemove
     );
   }
@@ -206,7 +220,7 @@ export class GenericContainer implements TestContainer {
     );
 
     if (this.startupTimeoutMs !== undefined) {
-      this.waitStrategy.withStartupTimeout(this.startupTimeoutMs);
+      this.waitStrategy?.withStartupTimeout(this.startupTimeoutMs);
     }
 
     if (containerLog.enabled() || this.logConsumer !== undefined) {
@@ -233,7 +247,7 @@ export class GenericContainer implements TestContainer {
       inspectResult,
       boundPorts,
       inspectResult.Name,
-      this.waitStrategy,
+      this.waitStrategy ?? Wait.forListeningPorts(),
       this.autoRemove
     );
 
