@@ -1,13 +1,7 @@
-import { exec, spawn } from "child_process";
+import { spawn } from "child_process";
 import { log } from "../../common";
 import { RegistryAuthLocator } from "./registry-auth-locator";
-import { registryMatches } from "./registry-matches";
-import {
-  AuthConfig,
-  ContainerRuntimeConfig,
-  CredentialProviderGetResponse,
-  CredentialProviderListResponse,
-} from "./types";
+import { AuthConfig, ContainerRuntimeConfig, CredentialProviderGetResponse } from "./types";
 
 export abstract class CredentialProvider implements RegistryAuthLocator {
   abstract getName(): string;
@@ -23,43 +17,13 @@ export abstract class CredentialProvider implements RegistryAuthLocator {
     const programName = `docker-credential-${credentialProviderName}`;
     log.debug(`Executing Docker credential provider "${programName}"`);
 
-    const credentials = await this.listCredentials(programName);
-
-    const credentialForRegistry = Object.keys(credentials).find((aRegistry) => registryMatches(aRegistry, registry));
-    if (!credentialForRegistry) {
-      log.debug(`No credential found for registry "${registry}"`);
-      return undefined;
-    }
-
     const response = await this.runCredentialProvider(registry, programName);
 
     return {
       username: response.Username,
       password: response.Secret,
-      registryAddress: response.ServerURL ?? credentialForRegistry,
+      registryAddress: response.ServerURL ?? registry,
     };
-  }
-
-  private listCredentials(providerName: string): Promise<CredentialProviderListResponse> {
-    return new Promise((resolve, reject) => {
-      exec(`${providerName} list`, (err, stdout, stderr) => {
-        if (err) {
-          if (stderr === "list is unimplemented\n") {
-            return resolve({});
-          }
-
-          log.error(`An error occurred listing credentials: ${err}`);
-          return reject(new Error("An error occurred listing credentials"));
-        }
-        try {
-          const response = JSON.parse(stdout);
-          return resolve(response);
-        } catch (e) {
-          log.error(`Unexpected response from Docker credential provider LIST command: "${stdout}"`);
-          return reject(new Error("Unexpected response from Docker credential provider LIST command"));
-        }
-      });
-    });
   }
 
   private runCredentialProvider(registry: string, providerName: string): Promise<CredentialProviderGetResponse> {
