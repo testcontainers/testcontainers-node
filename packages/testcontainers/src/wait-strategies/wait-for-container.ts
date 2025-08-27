@@ -7,14 +7,14 @@ import { WaitStrategy } from "./wait-strategy";
 export const waitForContainer = async (
   client: ContainerRuntimeClient,
   container: Container,
-  waitStrategy: WaitStrategy | undefined,
+  waitStrategy: WaitStrategy,
   boundPorts: BoundPorts,
   startTime?: Date
 ): Promise<void> => {
   log.debug(`Waiting for container to be ready...`, { containerId: container.id });
 
   try {
-    await waitStrategy?.waitUntilReady(container, boundPorts, startTime);
+    await waitStrategy.waitUntilReady(container, boundPorts, startTime);
     log.info(`Container is ready`, { containerId: container.id });
   } catch (err) {
     log.error(`Container failed to be ready: ${err}`, { containerId: container.id });
