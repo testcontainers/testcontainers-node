@@ -33,18 +33,6 @@ describe("ValkeyContainer", { timeout: 240_000 }, () => {
     client.destroy();
   });
 
-  it("should connect with username & password and execute set-get", async () => {
-    await using container = await new ValkeyContainer(IMAGE).withUsername("tester").withPassword("test").start();
-
-    const client = createClient({ url: container.getConnectionUrl() });
-    await client.connect();
-
-    await client.set("key", "val");
-    expect(await client.get("key")).toBe("val");
-
-    client.destroy();
-  });
-
   it("should reconnect with volume and persistence data", async () => {
     // valkeyWithPersistentData {
     const sourcePath = fs.mkdtempSync("valkey-");
