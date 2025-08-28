@@ -25,7 +25,13 @@ Choose an image from the [container registry](https://hub.docker.com/r/valkey/va
 ### With password
 
 <!--codeinclude-->
-[](../../packages/modules/valkey/src/valkey-container.test.ts) inside_block:valkeyWithCredentials
+[](../../packages/modules/valkey/src/valkey-container.test.ts) inside_block:valkeyWithPassword
+<!--/codeinclude-->
+
+### With username and password
+
+<!--codeinclude-->
+[](../../packages/modules/valkey/src/valkey-container.test.ts) inside_block:valkeyWithUsernameAndPassword
 <!--/codeinclude-->
 
 ### With persistent data
