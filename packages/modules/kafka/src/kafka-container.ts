@@ -61,7 +61,7 @@ export class KafkaContainer extends GenericContainer {
   private zooKeeperHost?: string;
   private zooKeeperPort?: number;
   private saslSslConfig?: SaslSslListenerOptions;
-  private originalWaitinStrategy: WaitStrategy;
+  private originalWaitinStrategy: WaitStrategy | undefined;
 
   constructor(image: string) {
     super(image);
@@ -193,7 +193,12 @@ export class KafkaContainer extends GenericContainer {
     const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, inspectResult).filter(
       this.exposedPorts
     );
-    await waitForContainer(client, dockerContainer, this.originalWaitinStrategy, boundPorts);
+    await waitForContainer(
+      client,
+      dockerContainer,
+      this.originalWaitinStrategy ?? Wait.forListeningPorts(),
+      boundPorts
+    );
 
     if (this.saslSslConfig && this.mode !== KafkaMode.KRAFT) {
       await this.createUser(container, this.saslSslConfig.sasl);
