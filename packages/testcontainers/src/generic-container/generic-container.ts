@@ -48,7 +48,7 @@ export class GenericContainer implements TestContainer {
 
   protected imageName: ImageName;
   protected startupTimeoutMs?: number;
-  protected waitStrategy: WaitStrategy = Wait.forListeningPorts();
+  protected waitStrategy: WaitStrategy | undefined;
   protected environment: Record<string, string> = {};
   protected exposedPorts: PortWithOptionalBinding[] = [];
   protected reuse = false;
@@ -117,6 +117,18 @@ export class GenericContainer implements TestContainer {
     return this.startContainer(client);
   }
 
+  private async selectWaitStrategy(client: ContainerRuntimeClient, container: Container): Promise<WaitStrategy> {
+    if (this.waitStrategy) return this.waitStrategy;
+    if (this.healthCheck) {
+      return Wait.forHealthCheck();
+    }
+    const containerInfo = await client.container.inspect(container);
+    if (containerInfo.Config.Healthcheck?.Test) {
+      return Wait.forHealthCheck();
+    }
+    return Wait.forListeningPorts();
+  }
+
   private async reuseOrStartContainer(client: ContainerRuntimeClient) {
     const containerHash = hash(JSON.stringify(this.createOpts));
     this.createOpts.Labels = { ...this.createOpts.Labels, [LABEL_TESTCONTAINERS_CONTAINER_HASH]: containerHash };
@@ -150,10 +162,12 @@ export class GenericContainer implements TestContainer {
       this.exposedPorts
     );
     if (this.startupTimeoutMs !== undefined) {
-      this.waitStrategy.withStartupTimeout(this.startupTimeoutMs);
+      this.waitStrategy?.withStartupTimeout(this.startupTimeoutMs);
     }
 
-    await waitForContainer(client, container, this.waitStrategy, boundPorts);
+    const waitStrategy = this.waitStrategy ?? Wait.forListeningPorts();
+
+    await waitForContainer(client, container, waitStrategy, boundPorts);
 
     return new StartedGenericContainer(
       container,
@@ -161,13 +175,15 @@ export class GenericContainer implements TestContainer {
       inspectResult,
       boundPorts,
       inspectResult.Name,
-      this.waitStrategy,
+      waitStrategy,
       this.autoRemove
     );
   }
 
   private async startContainer(client: ContainerRuntimeClient): Promise<StartedTestContainer> {
     const container = await client.container.create({ ...this.createOpts, HostConfig: this.hostConfig });
+
+    this.waitStrategy = await this.selectWaitStrategy(client, container);
 
     if (!this.isHelperContainer() && PortForwarderInstance.isRunning()) {
       await this.connectContainerToPortForwarder(client, container);
@@ -206,7 +222,7 @@ export class GenericContainer implements TestContainer {
     );
 
     if (this.startupTimeoutMs !== undefined) {
-      this.waitStrategy.withStartupTimeout(this.startupTimeoutMs);
+      this.waitStrategy?.withStartupTimeout(this.startupTimeoutMs);
     }
 
     if (containerLog.enabled() || this.logConsumer !== undefined) {
@@ -225,7 +241,9 @@ export class GenericContainer implements TestContainer {
       await this.containerStarting(mappedInspectResult, false);
     }
 
-    await waitForContainer(client, container, this.waitStrategy, boundPorts);
+    const waitStrategy = this.waitStrategy ?? Wait.forListeningPorts();
+
+    await waitForContainer(client, container, waitStrategy, boundPorts);
 
     const startedContainer = new StartedGenericContainer(
       container,
@@ -233,7 +251,7 @@ export class GenericContainer implements TestContainer {
       inspectResult,
       boundPorts,
       inspectResult.Name,
-      this.waitStrategy,
+      waitStrategy,
       this.autoRemove
     );
 
