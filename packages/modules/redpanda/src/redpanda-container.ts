@@ -21,7 +21,7 @@ const STARTER_SCRIPT = "/testcontainers_start.sh";
 const WAIT_FOR_SCRIPT_MESSAGE = "Waiting for script...";
 
 export class RedpandaContainer extends GenericContainer {
-  private originalWaitinStrategy: WaitStrategy;
+  private originalWaitinStrategy: WaitStrategy | undefined;
 
   constructor(image: string) {
     super(image);
@@ -71,7 +71,12 @@ export class RedpandaContainer extends GenericContainer {
     const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, inspectResult).filter(
       this.exposedPorts
     );
-    await waitForContainer(client, dockerContainer, this.originalWaitinStrategy, boundPorts);
+    await waitForContainer(
+      client,
+      dockerContainer,
+      this.originalWaitinStrategy ?? Wait.forListeningPorts(),
+      boundPorts
+    );
   }
 
   private renderRedpandaFile(host: string, port: number): string {
