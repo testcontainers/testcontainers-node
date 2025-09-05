@@ -17,11 +17,11 @@ export const pullImage = async (
 ): Promise<void> => {
   try {
     if (!options.force && (await imageExists(dockerode, options.imageName))) {
-      log.debug(`Not pulling image "${options.imageName}" as it already exists`);
+      log.debug(`Not pulling image "${options.imageName.string}" as it already exists`);
       return;
     }
 
-    log.info(`Pulling image "${options.imageName}"...`);
+    log.info(`Pulling image "${options.imageName.string}"...`);
     const authconfig = await getAuthConfig(options.imageName.registry ?? indexServerAddress);
     const stream = await dockerode.pull(options.imageName.string, { authconfig });
     return new Promise<void>((resolve) => {
@@ -33,7 +33,7 @@ export const pullImage = async (
       stream.on("end", resolve);
     });
   } catch (err) {
-    log.error(`Failed to pull image "${options.imageName}": ${err}`);
+    log.error(`Failed to pull image "${options.imageName.string}": ${err}`);
     throw err;
   }
 };
