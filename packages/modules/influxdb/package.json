@@ -1,0 +1,40 @@
+{
+  "name": "@testcontainers/influxdb",
+  "version": "11.5.1",
+  "license": "MIT",
+  "keywords": [
+    "influxdb",
+    "influx",
+    "timeseries",
+    "testing",
+    "docker",
+    "testcontainers"
+  ],
+  "description": "InfluxDB module for Testcontainers",
+  "homepage": "https://github.com/testcontainers/testcontainers-node#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/testcontainers/testcontainers-node.git"
+  },
+  "bugs": {
+    "url": "https://github.com/testcontainers/testcontainers-node/issues"
+  },
+  "main": "build/index.js",
+  "files": [
+    "build"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "prepack": "shx cp ../../../README.md . && shx cp ../../../LICENSE .",
+    "build": "tsc --project tsconfig.build.json"
+  },
+  "devDependencies": {
+    "@influxdata/influxdb-client": "^1.35.0",
+    "axios": "^1.7.9"
+  },
+  "dependencies": {
+    "testcontainers": "^11.5.1"
+  }
+}
