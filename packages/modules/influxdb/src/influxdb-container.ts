@@ -10,13 +10,13 @@ export class InfluxDBContainer extends GenericContainer {
   private retention?: string;
   private adminToken?: string;
   private readonly httpWait = Wait.forHttp("/ping", INFLUXDB_PORT).forStatusCode(204);
-  
+
   // InfluxDB 1.x specific properties
   private authEnabled = true;
   private admin = "admin";
   private adminPassword = "password";
   private database?: string;
-  
+
   private isVersion2: boolean = true;
 
   constructor(image: string) {
@@ -148,14 +148,14 @@ export class InfluxDBContainer extends GenericContainer {
     if (tag === "latest") {
       return true; // Assume latest is v2
     }
-    
+
     // Parse version number
     const versionMatch = tag.match(/^(\d+)(?:\.(\d+))?/);
     if (versionMatch) {
       const majorVersion = parseInt(versionMatch[1], 10);
       return majorVersion >= 2;
     }
-    
+
     return true; // Default to v2 if unable to parse
   }
 }
@@ -222,11 +222,11 @@ export class StartedInfluxDBContainer extends AbstractStartedContainer {
         org: this.organization,
         bucket: this.bucket,
       });
-      
+
       if (this.adminToken) {
         params.append("token", this.adminToken);
       }
-      
+
       return `${this.getUrl()}?${params.toString()}`;
     } else {
       // InfluxDB 1.x connection string format

@@ -1,11 +1,10 @@
-import { InfluxDBContainer, StartedInfluxDBContainer } from "./influxdb-container";
-import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import axios from "axios";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
+import { InfluxDBContainer, StartedInfluxDBContainer } from "./influxdb-container";
 
 const IMAGE = getImage(__dirname);
 
 describe("InfluxDBContainer", { timeout: 240_000 }, () => {
-
   describe("InfluxDB 2.x", { timeout: 240_000 }, () => {
     let container: StartedInfluxDBContainer;
 
@@ -66,21 +65,19 @@ describe("InfluxDBContainer", { timeout: 240_000 }, () => {
 
     it("should be able to write and query data", async () => {
       const adminToken = "test-admin-token";
-      container = await new InfluxDBContainer(IMAGE)
-        .withAdminToken(adminToken)
-        .start();
+      container = await new InfluxDBContainer(IMAGE).withAdminToken(adminToken).start();
 
       // Write data using the InfluxDB 2.x API
       const writeUrl = `${container.getUrl()}/api/v2/write?org=${container.getOrganization()}&bucket=${container.getBucket()}`;
       const writeData = "temperature,location=room1 value=23.5";
-      
+
       const writeResponse = await axios.post(writeUrl, writeData, {
         headers: {
           Authorization: `Token ${adminToken}`,
           "Content-Type": "text/plain",
         },
       });
-      
+
       expect(writeResponse.status).toBe(204);
 
       // Query data
@@ -104,7 +101,7 @@ describe("InfluxDBContainer", { timeout: 240_000 }, () => {
       container = await new InfluxDBContainer(IMAGE).start();
 
       expect(container.isInfluxDB2()).toBe(true);
-      
+
       const response = await axios.get(`${container.getUrl()}/ping`);
       expect(response.status).toBe(204);
     });
@@ -144,9 +141,7 @@ describe("InfluxDBContainer", { timeout: 240_000 }, () => {
     });
 
     it("should respond to ping endpoint for v1", async () => {
-      container = await new InfluxDBContainer("influxdb:1.8")
-        .withAuthEnabled(false)
-        .start();
+      container = await new InfluxDBContainer("influxdb:1.8").withAuthEnabled(false).start();
 
       const response = await axios.get(`${container.getUrl()}/ping`);
       expect(response.status).toBe(204);
@@ -167,21 +162,18 @@ describe("InfluxDBContainer", { timeout: 240_000 }, () => {
     });
 
     it("should be able to write data with v1 API", async () => {
-      container = await new InfluxDBContainer("influxdb:1.8")
-        .withDatabase("testdb")
-        .withAuthEnabled(false)
-        .start();
+      container = await new InfluxDBContainer("influxdb:1.8").withDatabase("testdb").withAuthEnabled(false).start();
 
       // Write data using the InfluxDB 1.x API
       const writeUrl = `${container.getUrl()}/write?db=testdb`;
       const writeData = "cpu_usage,host=server01 value=0.64";
-      
+
       const writeResponse = await axios.post(writeUrl, writeData, {
         headers: {
           "Content-Type": "text/plain",
         },
       });
-      
+
       expect(writeResponse.status).toBe(204);
 
       // Query data
