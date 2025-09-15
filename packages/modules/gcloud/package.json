@@ -42,12 +42,12 @@
   },
   "devDependencies": {
     "@google-cloud/bigquery": "^8.1.1",
-    "@google-cloud/datastore": "^9.2.1",
+    "@google-cloud/datastore": "^10.0.1",
     "@google-cloud/firestore": "7.11.3",
     "@google-cloud/pubsub": "^5.2.0",
-    "@google-cloud/spanner": "^8.2.0",
-    "@google-cloud/storage": "^7.17.0",
-    "firebase-admin": "13.4.0",
-    "msw": "^2.10.5"
+    "@google-cloud/spanner": "^8.2.1",
+    "@google-cloud/storage": "^7.17.1",
+    "firebase-admin": "13.5.0",
+    "msw": "^2.11.2"
   }
 }
