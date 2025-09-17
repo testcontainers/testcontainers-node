@@ -77,7 +77,7 @@ describe("Redis", () => {
   let redisClient: RedisClientType;
 
   beforeAll(async () => {
-    container = await new StartedRedisContainer("redis:8").start();
+    container = await new RedisContainer("redis:8").start();
     redisClient = createClient({ url: container.getConnectionUrl() });
     await redisClient.connect();
   });
