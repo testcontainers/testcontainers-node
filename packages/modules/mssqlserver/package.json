@@ -31,7 +31,7 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "@types/mssql": "^9.1.7",
+    "@types/mssql": "^9.1.8",
     "mssql": "^11.0.1"
   },
   "dependencies": {
