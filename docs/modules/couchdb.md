@@ -16,7 +16,7 @@ These examples use the following libraries:
 
 Choose an image from the [container registry](https://hub.docker.com/_/couchdb) and substitute `IMAGE`.
 
-### Start the container
+### Execute a query
 
 <!--codeinclude-->
 [](../../packages/modules/couchdb/src/couchdb-container.test.ts) inside_block:startContainer
