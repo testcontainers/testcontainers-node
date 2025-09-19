@@ -31,7 +31,7 @@ export class StartedGenericContainer implements StartedTestContainer {
   protected containerIsStopping?(): Promise<void>;
 
   public async stop(options: Partial<StopOptions> = {}): Promise<StoppedTestContainer> {
-    return withFileLock(`testcontainers-node-stop-${this.container.id}.lock`, async () => {
+    return withFileLock(`testcontainers-node-stop-${this.container.id.substring(0, 12)}.lock`, async () => {
       if (this.stoppedContainer) {
         return this.stoppedContainer;
       }

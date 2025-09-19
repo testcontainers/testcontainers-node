@@ -5,7 +5,7 @@ import { ImageName } from "../image-name";
 const existingImages = new Set<string>();
 
 export async function imageExists(dockerode: Dockerode, imageName: ImageName): Promise<boolean> {
-  return withFileLock(`testcontainers-node-image-${hash(imageName.string)}.lock`, async () => {
+  return withFileLock(`testcontainers-node-image-exists-${hash(imageName.string).substring(0, 12)}.lock`, async () => {
     if (existingImages.has(imageName.string)) {
       return true;
     }

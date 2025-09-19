@@ -79,25 +79,28 @@ export class DockerImageClient implements ImageClient {
   }
 
   async exists(imageName: ImageName): Promise<boolean> {
-    return withFileLock(`testcontainers-node-exists-${hash(imageName.string)}.lock`, async () => {
-      if (this.existingImages.has(imageName.string)) {
-        return true;
-      }
-      try {
-        log.debug(`Checking if image exists "${imageName.string}"...`);
-        await this.dockerode.getImage(imageName.string).inspect();
-        this.existingImages.add(imageName.string);
-        log.debug(`Checked if image exists "${imageName.string}"`);
-        return true;
-      } catch (err) {
-        if (err instanceof Error && err.message.toLowerCase().includes("no such image")) {
-          log.debug(`Checked if image exists "${imageName.string}"`);
-          return false;
+    return withFileLock(
+      `testcontainers-node-image-exists-${hash(imageName.string).substring(0, 12)}.lock`,
+      async () => {
+        if (this.existingImages.has(imageName.string)) {
+          return true;
         }
-        log.debug(`Failed to check if image exists "${imageName.string}"`);
-        throw err;
+        try {
+          log.debug(`Checking if image exists "${imageName.string}"...`);
+          await this.dockerode.getImage(imageName.string).inspect();
+          this.existingImages.add(imageName.string);
+          log.debug(`Checked if image exists "${imageName.string}"`);
+          return true;
+        } catch (err) {
+          if (err instanceof Error && err.message.toLowerCase().includes("no such image")) {
+            log.debug(`Checked if image exists "${imageName.string}"`);
+            return false;
+          }
+          log.debug(`Failed to check if image exists "${imageName.string}"`);
+          throw err;
+        }
       }
-    });
+    );
   }
 
   async pull(imageName: ImageName, opts?: { force: boolean; platform: string | undefined }): Promise<void> {
