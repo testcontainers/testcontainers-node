@@ -1,8 +1,7 @@
 import archiver from "archiver";
-import AsyncLock from "async-lock";
 import { Container, ContainerCreateOptions, HostConfig } from "dockerode";
 import { Readable } from "stream";
-import { containerLog, hash, log, toNanos } from "../common";
+import { containerLog, hash, log, toNanos, withFileLock } from "../common";
 import { ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "../container-runtime";
 import { CONTAINER_STATUSES } from "../container-runtime/clients/container/types";
 import { StartedNetwork } from "../network/network";
@@ -35,8 +34,6 @@ import { WaitStrategy } from "../wait-strategies/wait-strategy";
 import { GenericContainerBuilder } from "./generic-container-builder";
 import { inspectContainerUntilPortsExposed } from "./inspect-container-util-ports-exposed";
 import { StartedGenericContainer } from "./started-generic-container";
-
-const reusableContainerCreationLock = new AsyncLock();
 
 export class GenericContainer implements TestContainer {
   public static fromDockerfile(context: string, dockerfileName = "Dockerfile"): GenericContainerBuilder {
@@ -122,7 +119,7 @@ export class GenericContainer implements TestContainer {
     this.createOpts.Labels = { ...this.createOpts.Labels, [LABEL_TESTCONTAINERS_CONTAINER_HASH]: containerHash };
     log.debug(`Container reuse has been enabled with hash "${containerHash}"`);
 
-    return reusableContainerCreationLock.acquire(containerHash, async () => {
+    return withFileLock(`testcontainers-node-reuse-${containerHash.substring(0, 12)}.lock`, async () => {
       const container = await client.container.fetchByLabel(LABEL_TESTCONTAINERS_CONTAINER_HASH, containerHash, {
         status: CONTAINER_STATUSES.filter(
           (status) => status !== "removing" && status !== "dead" && status !== "restarting"

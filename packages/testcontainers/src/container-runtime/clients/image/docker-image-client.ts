@@ -1,18 +1,16 @@
 import dockerIgnore from "@balena/dockerignore";
-import AsyncLock from "async-lock";
 import byline from "byline";
 import Dockerode, { ImageBuildOptions, ImageInspectInfo } from "dockerode";
 import { existsSync, promises as fs } from "fs";
 import path from "path";
 import tar from "tar-fs";
-import { buildLog, log, pullLog } from "../../../common";
+import { buildLog, hash, log, pullLog, withFileLock } from "../../../common";
 import { getAuthConfig } from "../../auth/get-auth-config";
 import { ImageName } from "../../image-name";
 import { ImageClient } from "./image-client";
 
 export class DockerImageClient implements ImageClient {
   private readonly existingImages = new Set<string>();
-  private readonly imageExistsLock = new AsyncLock();
 
   constructor(
     protected readonly dockerode: Dockerode,
@@ -81,25 +79,28 @@ export class DockerImageClient implements ImageClient {
   }
 
   async exists(imageName: ImageName): Promise<boolean> {
-    return this.imageExistsLock.acquire(imageName.string, async () => {
-      if (this.existingImages.has(imageName.string)) {
-        return true;
-      }
-      try {
-        log.debug(`Checking if image exists "${imageName.string}"...`);
-        await this.dockerode.getImage(imageName.string).inspect();
-        this.existingImages.add(imageName.string);
-        log.debug(`Checked if image exists "${imageName.string}"`);
-        return true;
-      } catch (err) {
-        if (err instanceof Error && err.message.toLowerCase().includes("no such image")) {
-          log.debug(`Checked if image exists "${imageName.string}"`);
-          return false;
+    return withFileLock(
+      `testcontainers-node-image-exists-${hash(imageName.string).substring(0, 12)}.lock`,
+      async () => {
+        if (this.existingImages.has(imageName.string)) {
+          return true;
         }
-        log.debug(`Failed to check if image exists "${imageName.string}"`);
-        throw err;
+        try {
+          log.debug(`Checking if image exists "${imageName.string}"...`);
+          await this.dockerode.getImage(imageName.string).inspect();
+          this.existingImages.add(imageName.string);
+          log.debug(`Checked if image exists "${imageName.string}"`);
+          return true;
+        } catch (err) {
+          if (err instanceof Error && err.message.toLowerCase().includes("no such image")) {
+            log.debug(`Checked if image exists "${imageName.string}"`);
+            return false;
+          }
+          log.debug(`Failed to check if image exists "${imageName.string}"`);
+          throw err;
+        }
       }
-    });
+    );
   }
 
   async pull(imageName: ImageName, opts?: { force: boolean; platform: string | undefined }): Promise<void> {
