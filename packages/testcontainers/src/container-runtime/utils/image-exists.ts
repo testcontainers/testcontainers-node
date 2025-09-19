@@ -1,12 +1,11 @@
-import AsyncLock from "async-lock";
 import Dockerode from "dockerode";
+import { hash, withFileLock } from "../../common";
 import { ImageName } from "../image-name";
 
 const existingImages = new Set<string>();
-const imageCheckLock = new AsyncLock();
 
 export async function imageExists(dockerode: Dockerode, imageName: ImageName): Promise<boolean> {
-  return imageCheckLock.acquire(imageName.string, async () => {
+  return withFileLock(`testcontainers-node-image-${hash(imageName.string)}.lock`, async () => {
     if (existingImages.has(imageName.string)) {
       return true;
     }

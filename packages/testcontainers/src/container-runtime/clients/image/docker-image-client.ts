@@ -1,18 +1,16 @@
 import dockerIgnore from "@balena/dockerignore";
-import AsyncLock from "async-lock";
 import byline from "byline";
 import Dockerode, { ImageBuildOptions, ImageInspectInfo } from "dockerode";
 import { existsSync, promises as fs } from "fs";
 import path from "path";
 import tar from "tar-fs";
-import { buildLog, log, pullLog } from "../../../common";
+import { buildLog, hash, log, pullLog, withFileLock } from "../../../common";
 import { getAuthConfig } from "../../auth/get-auth-config";
 import { ImageName } from "../../image-name";
 import { ImageClient } from "./image-client";
 
 export class DockerImageClient implements ImageClient {
   private readonly existingImages = new Set<string>();
-  private readonly imageExistsLock = new AsyncLock();
 
   constructor(
     protected readonly dockerode: Dockerode,
@@ -81,7 +79,7 @@ export class DockerImageClient implements ImageClient {
   }
 
   async exists(imageName: ImageName): Promise<boolean> {
-    return this.imageExistsLock.acquire(imageName.string, async () => {
+    return withFileLock(`testcontainers-node-exists-${hash(imageName.string)}.lock`, async () => {
       if (this.existingImages.has(imageName.string)) {
         return true;
       }

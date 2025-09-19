@@ -1,8 +1,7 @@
 import archiver from "archiver";
-import AsyncLock from "async-lock";
 import Dockerode, { ContainerInspectInfo } from "dockerode";
 import { Readable } from "stream";
-import { containerLog, log } from "../common";
+import { containerLog, log, withFileLock } from "../common";
 import { ContainerRuntimeClient, getContainerRuntimeClient } from "../container-runtime";
 import { getReaper } from "../reaper/reaper";
 import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
@@ -18,7 +17,6 @@ import { StoppedGenericContainer } from "./stopped-generic-container";
 
 export class StartedGenericContainer implements StartedTestContainer {
   private stoppedContainer?: StoppedTestContainer;
-  private readonly stopContainerLock = new AsyncLock();
 
   constructor(
     private readonly container: Dockerode.Container,
@@ -33,7 +31,7 @@ export class StartedGenericContainer implements StartedTestContainer {
   protected containerIsStopping?(): Promise<void>;
 
   public async stop(options: Partial<StopOptions> = {}): Promise<StoppedTestContainer> {
-    return this.stopContainerLock.acquire("stop", async () => {
+    return withFileLock(`testcontainers-node-stop-${this.container.id}.lock`, async () => {
       if (this.stoppedContainer) {
         return this.stoppedContainer;
       }
