@@ -2,6 +2,7 @@ import { GetEventsOptions, ImageInspectInfo } from "dockerode";
 import { createServer, Server } from "http";
 import { createSocket } from "node:dgram";
 import fs from "node:fs";
+import { EOL } from "node:os";
 import path from "node:path";
 import { Readable } from "stream";
 import { Agent, request } from "undici";
@@ -14,7 +15,7 @@ import { StartedTestContainer } from "../test-container";
 export const getImage = (dirname: string, index = 0): string => {
   return fs
     .readFileSync(path.resolve(dirname, "..", "Dockerfile"), "utf-8")
-    .split("\n")
+    .split(EOL)
     [index].split(" ")[1];
 };
 
