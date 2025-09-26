@@ -32,6 +32,6 @@
     "testcontainers": "^11.5.1"
   },
   "devDependencies": {
-    "nano": "^11.0.0"
+    "nano": "^11.0.1"
   }
 }
