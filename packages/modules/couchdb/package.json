@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/couchdb",
-  "version": "11.5.1",
+  "version": "11.7.0",
   "license": "MIT",
   "keywords": [
     "couchdb",
@@ -29,7 +29,7 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "dependencies": {
-    "testcontainers": "^11.5.1"
+    "testcontainers": "^11.7.0"
   },
   "devDependencies": {
     "nano": "^11.0.1"
