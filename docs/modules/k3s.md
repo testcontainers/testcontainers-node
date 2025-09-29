@@ -1,6 +1,7 @@
-# K3s Module
+# K3s
 
-[K3s](https://k3s.io/) is a highly available, certified Kubernetes distribution designed for production workloads in unattended, resource-constrained, remote locations or inside IoT appliances.
+!!! warning
+    This container runs privileged, as it spawns its own containers. For this reason, this container will not work in certain rootless Docker, Docker-in-Docker, or other environments that disallow privileged containers.
 
 ## Install
 
@@ -10,17 +11,28 @@ npm install @testcontainers/k3s --save-dev
 
 ## Examples
 
-<!--codeinclude-->
-[Starting a K3s server:](../../packages/modules/k3s/src/k3s-container.test.ts) inside_block:starting_k3s
-<!--/codeinclude-->
+These examples use the following libraries:
+
+- [@kubernetes/client-node](https://www.npmjs.com/package/@kubernetes/client-node)
+
+        npm install @kubernetes/client-node
+
+Choose an image from the [container registry](https://hub.docker.com/r/rancher/k3s) and substitute `IMAGE`.
+
+### List nodes
 
 <!--codeinclude-->
-[Connecting to the server using the Kubernetes JavaScript client:](../../packages/modules/k3s/src/k3s-container.test.ts) inside_block:connecting_with_client
+[](../../packages/modules/k3s/src/k3s-container.test.ts) inside_block:k3sListNodes
+<!--/codeinclude-->
+ 
+### Start a pod
+
+<!--codeinclude-->
+[](../../packages/modules/k3s/src/k3s-container.test.ts) inside_block:k3sStartPod
 <!--/codeinclude-->
 
-## Known limitations
+### Aliased kubeconfig
 
-!!! warning
-    * K3sContainer runs as a privileged container and needs to be able to spawn its own containers. For these reasons,
-    K3sContainer will not work in certain rootless Docker, Docker-in-Docker, or other environments where privileged
-    containers are disallowed.
+<!--codeinclude-->
+[](../../packages/modules/k3s/src/k3s-container.test.ts) inside_block:k3sAliasedKubeConfig
+<!--/codeinclude-->

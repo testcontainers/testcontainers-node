@@ -1,6 +1,4 @@
-# MongoDB Module
-
-[MongoDB](https://www.mongodb.com/) is an open source NoSQL database management program. NoSQL is used as an alternative to traditional relational databases. NoSQL databases are quite useful for working with large sets of distributed data. MongoDB is a tool that can manage document-oriented information, store or retrieve information.
+# MongoDB
 
 ## Install
 
@@ -10,10 +8,22 @@ npm install @testcontainers/mongodb --save-dev
 
 ## Examples
 
-<!--codeinclude-->
-[Mongo 4.0.x:](../../packages/modules/mongodb/src/mongodb-container.test.ts) inside_block:connect4
-<!--/codeinclude-->
+These examples use the following libraries:
+
+- [mongoose](https://www.npmjs.com/package/mongoose)
+
+        npm install mongoose
+
+Choose an image from the [container registry](https://hub.docker.com/_/mongo) and substitute `IMAGE`.
+
+### Execute a query
 
 <!--codeinclude-->
-[MongoDB 6.0.x:](../../packages/modules/mongodb/src/mongodb-container.test.ts) inside_block:connect6
+[](../../packages/modules/mongodb/src/mongodb-container.test.ts) inside_block:connectMongo
+<!--/codeinclude-->
+
+### With credentials
+
+<!--codeinclude-->
+[](../../packages/modules/mongodb/src/mongodb-container.test.ts) inside_block:connectWithCredentials
 <!--/codeinclude-->

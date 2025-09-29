@@ -1,6 +1,4 @@
-# Valkey Module
-
-[Valkey](https://valkey.io/) is a distributed, in-memory, key-value store.
+# Valkey
 
 ## Install
 
@@ -10,32 +8,46 @@ npm install @testcontainers/valkey --save-dev
 
 ## Examples
 
+These examples use the following libraries:
+
+- [redis](https://www.npmjs.com/package/redis)
+
+        npm install redis
+
+Choose an image from the [container registry](https://hub.docker.com/r/valkey/valkey) and substitute `IMAGE`.
+
+### Set/get a value
+
 <!--codeinclude-->
-
-[Start container:](../../packages/modules/valkey/src/valkey-container.test.ts) inside_block:startContainer
-
+[](../../packages/modules/valkey/src/valkey-container.test.ts) inside_block:valkeyStartContainer
 <!--/codeinclude-->
 
+### With password
+
 <!--codeinclude-->
-
-[Connect valkey client to container:](../../packages/modules/valkey/src/valkey-container.test.ts) inside_block:simpleConnect
-
+[](../../packages/modules/valkey/src/valkey-container.test.ts) inside_block:valkeyWithPassword
 <!--/codeinclude-->
 
+### With username and password
+
 <!--codeinclude-->
-
-[Start container with password authentication:](../../packages/modules/valkey/src/valkey-container.test.ts) inside_block:startWithCredentials
-
+[](../../packages/modules/valkey/src/valkey-container.test.ts) inside_block:valkeyWithUsernameAndPassword
 <!--/codeinclude-->
 
+### With persistent data
+
 <!--codeinclude-->
-
-[Define volume for persistent/predefined data:](../../packages/modules/valkey/src/valkey-container.test.ts) inside_block:persistentData
-
+[](../../packages/modules/valkey/src/valkey-container.test.ts) inside_block:valkeyWithPersistentData
 <!--/codeinclude-->
 
+### With predefined data
+
 <!--codeinclude-->
+[](../../packages/modules/valkey/src/valkey-container.test.ts) inside_block:valkeyWithPredefinedData
+<!--/codeinclude-->
 
-[Execute a command inside the container:](../../packages/modules/valkey/src/valkey-container.test.ts) inside_block:executeCommand
+### Execute a command inside the container
 
+<!--codeinclude-->
+[](../../packages/modules/valkey/src/valkey-container.test.ts) inside_block:valkeyExecuteCommand
 <!--/codeinclude-->

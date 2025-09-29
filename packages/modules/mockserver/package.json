@@ -1,13 +1,8 @@
 {
   "name": "@testcontainers/mockserver",
-  "version": "11.3.2",
+  "version": "11.7.0",
   "description": "Mockserver module for Testcontainers",
   "main": "build/index.js",
-  "devDependencies": {
-    "@types/superagent": "^8.1.9",
-    "mockserver-client": "^5.15.0",
-    "superagent": "^10.2.2"
-  },
   "scripts": {
     "prepack": "shx cp ../../../README.md . && shx cp ../../../LICENSE .",
     "build": "tsc --project tsconfig.build.json"
@@ -34,6 +29,11 @@
     "access": "public"
   },
   "dependencies": {
-    "testcontainers": "^11.3.2"
+    "testcontainers": "^11.7.0"
+  },
+  "devDependencies": {
+    "@types/superagent": "^8.1.9",
+    "mockserver-client": "^5.15.0",
+    "superagent": "^10.2.3"
   }
 }

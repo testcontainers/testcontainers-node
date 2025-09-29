@@ -1,6 +1,8 @@
 import { GetEventsOptions, ImageInspectInfo } from "dockerode";
 import { createServer, Server } from "http";
+import { createSocket } from "node:dgram";
 import fs from "node:fs";
+import { EOL } from "node:os";
 import path from "node:path";
 import { Readable } from "stream";
 import { Agent, request } from "undici";
@@ -13,7 +15,7 @@ import { StartedTestContainer } from "../test-container";
 export const getImage = (dirname: string, index = 0): string => {
   return fs
     .readFileSync(path.resolve(dirname, "..", "Dockerfile"), "utf-8")
-    .split("\n")
+    .split(EOL)
     [index].split(" ")[1];
 };
 
@@ -28,6 +30,18 @@ export const checkContainerIsHealthyTls = async (container: StartedTestContainer
   const dispatcher = new Agent({ connect: { rejectUnauthorized: false } });
   const response = await request(`${url}/hello-world`, { dispatcher });
   expect(response.statusCode).toBe(200);
+};
+
+export const checkContainerIsHealthyUdp = async (container: StartedTestContainer): Promise<void> => {
+  const testMessage = "health_check";
+  await using client = createSocket("udp4");
+  client.send(Buffer.from(testMessage), container.getFirstMappedPort(), container.getHost());
+  const logs = await container.logs();
+  for await (const log of logs) {
+    if (log.includes(testMessage)) {
+      return;
+    }
+  }
 };
 
 export const checkEnvironmentContainerIsHealthy = async (

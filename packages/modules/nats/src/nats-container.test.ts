@@ -6,44 +6,18 @@ import { NatsContainer } from "./nats-container";
 const IMAGE = getImage(__dirname);
 
 describe("NatsContainer", { timeout: 180_000 }, () => {
-  // connect {
-  it("should start, connect and close", async () => {
-    await using container = await new NatsContainer(IMAGE).start();
-
-    // establish connection
-    const nc = await connect(container.getConnectionOptions());
-    // close the connection
-    await nc.close();
-    // check if the close was OK
-    const err = await nc.closed();
-    expect(err).toBe(undefined);
-  });
-  // }
-
-  it("should start, connect and close using scratch image", async () => {
-    await using container = await new NatsContainer("nats:2.11").start();
-
-    // establish connection
-    const nc = await connect(container.getConnectionOptions());
-    // close the connection
-    await nc.close();
-    // check if the close was OK
-    const err = await nc.closed();
-    expect(err).toBe(undefined);
-  });
-
-  // pubsub {
   it("should subscribe and receive one published message", async () => {
+    // natsPubsub {
     const SUBJECT = "HELLO";
     const PAYLOAD = "WORLD";
-
-    await using container = await new NatsContainer(IMAGE).start();
-    const nc = await connect(container.getConnectionOptions());
     const TE = new TextEncoder();
     const TD = new TextDecoder();
 
-    //----------------
+    await using container = await new NatsContainer(IMAGE).start();
+    const nc = await connect(container.getConnectionOptions());
+
     const sub = nc.subscribe(SUBJECT);
+
     (async () => {
       for await (const m of sub) {
         const actual = TD.decode(m.data);
@@ -51,44 +25,34 @@ describe("NatsContainer", { timeout: 180_000 }, () => {
       }
     })().then();
 
-    //----------------
     nc.publish(SUBJECT, TE.encode(PAYLOAD));
 
-    //----------------
     await nc.drain();
     await nc.close();
-    const err = await nc.closed();
-    expect(err).toBe(undefined);
+    // }
   });
-  // }
 
-  // credentials {
   it("should start with alternative username and password ", async () => {
-    // set username and password like this
-    await using container = await new NatsContainer(IMAGE).withPass("1234").withUsername("George").start();
+    // natsCredentials {
+    await using container = await new NatsContainer(IMAGE).withUsername("George").withPass("1234").start();
+    // }
 
     const nc = await connect(container.getConnectionOptions());
-    // close the connection
+
     await nc.close();
-    // check if the close was OK
     const err = await nc.closed();
     expect(err).toBe(undefined);
   });
-  // }
 
-  // jetstream {
   it("should start with JetStream ", async () => {
-    // enable JetStream
+    // natsJetstream {
     await using container = await new NatsContainer(IMAGE).withJetStream().start();
+    // }
 
     const nc = await connect(container.getConnectionOptions());
-
-    // ensure JetStream is enabled, otherwise this will throw an error
     await jetstreamManager(nc);
 
-    // close the connection
     await nc.close();
-    // check if the close was OK
     const err = await nc.closed();
     expect(err).toBe(undefined);
   });

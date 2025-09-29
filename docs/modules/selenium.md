@@ -1,8 +1,4 @@
-# Selenium Module
-
-[Selenium](https://www.selenium.dev/) If you want to create robust, browser-based regression automation suites and tests, scale and
-distribute scripts across many environments, then you want to use Selenium WebDriver, a
-collection of language specific bindings to drive a browser - the way it is meant to be driven.
+# Selenium
 
 ## Install
 
@@ -12,69 +8,28 @@ npm install @testcontainers/selenium --save-dev
 
 ## Examples
 
-Spin up a Chrome web browser and navigate to a URL:
+These examples use the following libraries:
 
-```javascript
-const { SeleniumContainer } = require("@testcontainers/selenium");
+- [selenium-webdriver](https://www.npmjs.com/package/selenium-webdriver)
 
-const container = await new SeleniumContainer("selenium/standalone-chrome:112.0")
-  .start();
+        npm install selenium-webdriver
+        npm install @types/selenium-webdriver --save-dev
 
-const driver = await new Builder()
-  .forBrowser(Browser.CHROME)
-  .usingServer(container.getServerUrl())
-  .build();
+Choose an image from the container registry and substitute `IMAGE`:
 
-await driver.get("https://testcontainers.com");
-await driver.quit();
-```
+- [AMD Standalone Chrome](https://hub.docker.com/r/selenium/standalone-chrome)
+- [AMD Standalone Firefox](https://hub.docker.com/r/selenium/standalone-firefox)
+- [ARM Standalone Chromium](https://hub.docker.com/r/seleniarm/standalone-chromium)
+- [ARM Standalone Firefox](https://hub.docker.com/r/seleniarm/standalone-firefox)
 
-You can use any Selenium supported web browser by providing the appropriate image and driver configuration, for example:
+### Navigate to a page
 
-```javascript
-const container = await new SeleniumContainer("selenium/standalone-edge:112.0")
-  .start();
+<!--codeinclude-->
+[](../../packages/modules/selenium/src/selenium-container.test.ts) inside_block:seleniumExample
+<!--/codeinclude-->
 
-const driver = await new Builder()
-  .forBrowser(Browser.EDGE)
-  ...
-  .build();
-```
+### Record a video
 
-A video recording of the browser session can be enabled and saved to disk once the container has been stopped:
-
-```javascript
-const container = await new SeleniumContainer("selenium/standalone-chrome:112.0")
-  .withRecording()
-  .start();
-...
-
-const stoppedContainer = await container.stop();
-await stoppedContainer.saveRecording("/tmp/videos/recording.mp4");
-```
-
-## Troubleshooting
-
-### ARM architecture
-
-Selenium images are not available for ARM architectures. Luckily, there are equivalent, ARM compatible images available via [Seleniarm](https://hub.docker.com/u/seleniarm):
-
-```
-seleniarm/standalone-chromium:112.0
-seleniarm/standalone-firefox:112.0
-```
-
-```javascript
-const { SeleniumContainer } = require("@testcontainers/selenium");
-
-const container = await new SeleniumContainer("seleniarm/standalone-chromium:112.0")
-  .start();
-
-const driver = await new Builder()
-  .forBrowser(Browser.CHROME)
-  .usingServer(container.getServerUrl())
-  .build();
-
-await driver.get("https://testcontainers.com");
-await driver.quit();
-```
+<!--codeinclude-->
+[](../../packages/modules/selenium/src/selenium-container.test.ts) inside_block:seleniumVideoExample
+<!--/codeinclude-->

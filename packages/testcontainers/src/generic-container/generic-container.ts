@@ -27,7 +27,7 @@ import {
 import { BoundPorts } from "../utils/bound-ports";
 import { createLabels, LABEL_TESTCONTAINERS_CONTAINER_HASH, LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
 import { mapInspectResult } from "../utils/map-inspect-result";
-import { getContainerPort, hasHostBinding, PortWithOptionalBinding } from "../utils/port";
+import { getContainerPort, getProtocol, hasHostBinding, PortWithOptionalBinding } from "../utils/port";
 import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
 import { Wait } from "../wait-strategies/wait";
 import { waitForContainer } from "../wait-strategies/wait-for-container";
@@ -142,13 +142,7 @@ export class GenericContainer implements TestContainer {
     if (!inspectResult.State.Running) {
       log.debug("Reused container is not running, attempting to start it");
       await client.container.start(container);
-      inspectResult = (
-        await inspectContainerUntilPortsExposed(
-          () => client.container.inspect(container),
-          this.exposedPorts,
-          container.id
-        )
-      ).inspectResult;
+      inspectResult = await inspectContainerUntilPortsExposed(() => client.container.inspect(container), container.id);
     }
 
     const mappedInspectResult = mapInspectResult(inspectResult);
@@ -202,11 +196,11 @@ export class GenericContainer implements TestContainer {
     await client.container.start(container);
     log.info(`Started container for image "${this.createOpts.Image}"`, { containerId: container.id });
 
-    const { inspectResult, mappedInspectResult } = await inspectContainerUntilPortsExposed(
+    const inspectResult = await inspectContainerUntilPortsExposed(
       () => client.container.inspect(container),
-      this.exposedPorts,
       container.id
     );
+    const mappedInspectResult = mapInspectResult(inspectResult);
     const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, mappedInspectResult).filter(
       this.exposedPorts
     );
@@ -370,7 +364,9 @@ export class GenericContainer implements TestContainer {
   public withExposedPorts(...ports: PortWithOptionalBinding[]): this {
     const exposedPorts: { [port: string]: Record<string, never> } = {};
     for (const exposedPort of ports) {
-      exposedPorts[`${getContainerPort(exposedPort).toString()}/tcp`] = {};
+      const containerPort = getContainerPort(exposedPort);
+      const protocol = getProtocol(exposedPort);
+      exposedPorts[`${containerPort}/${protocol}`] = {};
     }
 
     this.exposedPorts = [...this.exposedPorts, ...ports];
@@ -381,10 +377,12 @@ export class GenericContainer implements TestContainer {
 
     const portBindings: Record<string, Array<Record<string, string>>> = {};
     for (const exposedPort of ports) {
+      const protocol = getProtocol(exposedPort);
       if (hasHostBinding(exposedPort)) {
-        portBindings[`${exposedPort.container}/tcp`] = [{ HostPort: exposedPort.host.toString() }];
+        portBindings[`${exposedPort.container}/${protocol}`] = [{ HostPort: exposedPort.host.toString() }];
       } else {
-        portBindings[`${exposedPort}/tcp`] = [{ HostPort: "0" }];
+        const containerPort = getContainerPort(exposedPort);
+        portBindings[`${containerPort}/${protocol}`] = [{ HostPort: "0" }];
       }
     }
 
@@ -490,8 +488,8 @@ export class GenericContainer implements TestContainer {
   }
 
   public withResourcesQuota({ memory, cpu }: ResourcesQuota): this {
-    this.hostConfig.Memory = memory !== undefined ? memory * 1024 ** 3 : undefined;
-    this.hostConfig.NanoCpus = cpu !== undefined ? cpu * 10 ** 9 : undefined;
+    this.hostConfig.Memory = memory !== undefined ? Math.ceil(memory * 1024 ** 3) : undefined;
+    this.hostConfig.NanoCpus = cpu !== undefined ? Math.ceil(cpu * 10 ** 9) : undefined;
     return this;
   }
 

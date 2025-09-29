@@ -4,6 +4,7 @@ import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { LOCALSTACK_PORT, LocalstackContainer } from "./localstack-container";
 
 const IMAGE = getImage(__dirname);
+const AWSCLI_IMAGE = getImage(__dirname, 1);
 
 const runAwsCliAgainstDockerNetworkContainer = async (
   command: string,
@@ -17,8 +18,8 @@ const runAwsCliAgainstDockerNetworkContainer = async (
 };
 
 describe("LocalStackContainer", { timeout: 180_000 }, () => {
-  // createS3Bucket {
   it("should create a S3 bucket", async () => {
+    // localstackCreateS3Bucket {
     await using container = await new LocalstackContainer(IMAGE).start();
 
     const client = new S3Client({
@@ -30,17 +31,14 @@ describe("LocalStackContainer", { timeout: 180_000 }, () => {
         accessKeyId: "test",
       },
     });
-    const input = {
-      Bucket: "testcontainers",
-    };
+
+    const input = { Bucket: "testcontainers" };
     const command = new CreateBucketCommand(input);
 
-    const createBucketResponse = await client.send(command);
-    expect(createBucketResponse.$metadata.httpStatusCode).toEqual(200);
-    const headBucketResponse = await client.send(new HeadBucketCommand(input));
-    expect(headBucketResponse.$metadata.httpStatusCode).toEqual(200);
+    expect((await client.send(command)).$metadata.httpStatusCode).toEqual(200);
+    expect((await client.send(new HeadBucketCommand(input))).$metadata.httpStatusCode).toEqual(200);
+    // }
   });
-  // }
 
   it("should use custom network", async () => {
     await using network = await new Network().start();
@@ -50,7 +48,7 @@ describe("LocalStackContainer", { timeout: 180_000 }, () => {
       .withEnvironment({ SQS_ENDPOINT_STRATEGY: "path" })
       .start();
 
-    await using awsCliInDockerNetwork = await new GenericContainer("amazon/aws-cli:2.7.27")
+    await using awsCliInDockerNetwork = await new GenericContainer(AWSCLI_IMAGE)
       .withNetwork(network)
       .withEntrypoint(["bash"])
       .withCommand(["-c", "sleep infinity"])

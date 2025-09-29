@@ -1,32 +1,42 @@
 # Redpanda
 
-Testcontainers can be used to automatically instantiate and manage [Redpanda](https://redpanda.com/) containers.
-More precisely Testcontainers uses the official Docker images for [Redpanda](https://hub.docker.com/r/redpandadata/redpanda)
-
-!!! note
-    This module uses features provided in `docker.redpanda.com/redpandadata/redpanda`.
-
 ## Install
-
 
 ```bash
 npm install @testcontainers/redpanda --save-dev
 ```
 
-## Example
+## Examples
+
+These examples use the following libraries:
+
+- [kafkajs](https://www.npmjs.com/package/kafkajs)
+
+        npm install kafkajs
+
+Choose an image from the [container registry](https://hub.docker.com/r/redpandadata/redpanda) and substitute `IMAGE`.
+
+### Produce/consume a message
 
 <!--codeinclude-->
-[Connect:](../../packages/modules/redpanda/src/redpanda-container.test.ts) inside_block:connectToKafka
+[Code](../../packages/modules/redpanda/src/redpanda-container.test.ts) inside_block:connectToKafka
+[`assertMessageProducedAndConsumed`](../../packages/modules/redpanda/src/test-helper.ts) inside_block:redpandaTestHelper
 <!--/codeinclude-->
 
-<!--codeinclude-->
-[Schema registry:](../../packages/modules/redpanda/src/redpanda-container.test.ts) inside_block:connectToSchemaRegistry
-<!--/codeinclude-->
+### Connect to schema registry
 
 <!--codeinclude-->
-[Admin APIs:](../../packages/modules/redpanda/src/redpanda-container.test.ts) inside_block:connectToAdmin
+[](../../packages/modules/redpanda/src/redpanda-container.test.ts) inside_block:connectToSchemaRegistry
 <!--/codeinclude-->
 
+### Connect to admin
+
 <!--codeinclude-->
-[Rest Proxy:](../../packages/modules/redpanda/src/redpanda-container.test.ts) inside_block:connectToRestProxy
+[](../../packages/modules/redpanda/src/redpanda-container.test.ts) inside_block:connectToAdmin
+<!--/codeinclude-->
+
+### Connect to REST proxy
+
+<!--codeinclude-->
+[](../../packages/modules/redpanda/src/redpanda-container.test.ts) inside_block:connectToRestProxy
 <!--/codeinclude-->

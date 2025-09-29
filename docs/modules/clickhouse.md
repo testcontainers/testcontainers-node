@@ -1,6 +1,4 @@
-# ClickHouse Module
-
-[ClickHouse](https://clickhouse.com/) is a column-oriented database management system for online analytical processing (OLAP) that allows users to generate analytical reports using SQL queries in real-time.
+# ClickHouse
 
 ## Install
 
@@ -10,46 +8,34 @@ npm install @testcontainers/clickhouse --save-dev
 
 ## Examples
 
-<!--codeinclude-->
-[Connect and execute query:](../../packages/modules/clickhouse/src/clickhouse-container.test.ts) inside_block:connectWithOptions
-<!--/codeinclude-->
+These examples use the following libraries:
+
+- [@clickhouse/client](https://www.npmjs.com/package/@clickhouse/client)
+
+        npm install @clickhouse/client
+
+Choose an image from the [container registry](https://hub.docker.com/r/clickhouse/clickhouse-server) and substitute `IMAGE`.
+
+### Execute a query
 
 <!--codeinclude-->
-[Connect using URL and execute query:](../../packages/modules/clickhouse/src/clickhouse-container.test.ts) inside_block:connectWithUrl
+[](../../packages/modules/clickhouse/src/clickhouse-container.test.ts) inside_block:connectWithOptions
 <!--/codeinclude-->
+
+### Connect with URL
 
 <!--codeinclude-->
-[Connect with username and password and execute query:](../../packages/modules/clickhouse/src/clickhouse-container.test.ts) inside_block:connectWithUsernameAndPassword
+[](../../packages/modules/clickhouse/src/clickhouse-container.test.ts) inside_block:connectWithUrl
 <!--/codeinclude-->
+
+### With credentials
 
 <!--codeinclude-->
-[Set database:](../../packages/modules/clickhouse/src/clickhouse-container.test.ts) inside_block:setDatabase
+[](../../packages/modules/clickhouse/src/clickhouse-container.test.ts) inside_block:connectWithUsernameAndPassword
 <!--/codeinclude-->
+
+### With database
 
 <!--codeinclude-->
-[Set username:](../../packages/modules/clickhouse/src/clickhouse-container.test.ts) inside_block:setUsername
+[](../../packages/modules/clickhouse/src/clickhouse-container.test.ts) inside_block:setDatabase
 <!--/codeinclude-->
-
-### Connection Methods
-
-The module provides several methods to connect to the ClickHouse container:
-
-1. `getClientOptions()` - Returns a configuration object suitable for `@clickhouse/client`:
-   ```typescript
-   {
-     url: string; // HTTP URL with host and port
-     username: string; // Container username
-     password: string; // Container password
-     database: string; // Container database
-   }
-   ```
-2. `getConnectionUrl()` - Returns a complete HTTP URL including credentials and database:
-   ```
-   http://[username[:password]@][host[:port]]/database
-   ```
-3. `getHttpUrl()` - Returns the base HTTP URL without credentials:
-   ```
-   http://[host[:port]]
-   ```
-
-These methods can be used with the `@clickhouse/client` package or any other ClickHouse client.

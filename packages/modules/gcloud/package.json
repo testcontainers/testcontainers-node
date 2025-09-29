@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/gcloud",
-  "version": "11.3.2",
+  "version": "11.7.0",
   "license": "MIT",
   "author": "Anietie Asuquo <hello@anietieasuquo.com>",
   "keywords": [
@@ -37,17 +37,17 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "dependencies": {
-    "@grpc/grpc-js": "^1.13.4",
-    "testcontainers": "^11.3.2"
+    "@grpc/grpc-js": "^1.14.0",
+    "testcontainers": "^11.7.0"
   },
   "devDependencies": {
-    "@google-cloud/bigquery": "^8.1.0",
+    "@google-cloud/bigquery": "^8.1.1",
     "@google-cloud/datastore": "^9.2.1",
-    "@google-cloud/firestore": "7.11.3",
-    "@google-cloud/pubsub": "^5.1.0",
-    "@google-cloud/spanner": "^8.0.0",
-    "@google-cloud/storage": "^7.16.0",
-    "firebase-admin": "13.4.0",
-    "msw": "^2.7.3"
+    "@google-cloud/firestore": "7.11.4",
+    "@google-cloud/pubsub": "^5.2.0",
+    "@google-cloud/spanner": "^8.2.1",
+    "@google-cloud/storage": "^7.17.1",
+    "firebase-admin": "13.5.0",
+    "msw": "^2.11.3"
   }
 }

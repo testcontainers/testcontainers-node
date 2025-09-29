@@ -22,7 +22,13 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
     container: Dockerode.Container,
     boundPorts: BoundPorts
   ): Promise<void> {
-    for (const [, hostPort] of boundPorts.iterator()) {
+    for (const [portKey, hostPort] of boundPorts.iterator()) {
+      if (portKey.toLowerCase().endsWith("/udp")) {
+        log.debug(`Skipping wait for host port ${hostPort} (mapped from UDP port ${portKey})`, {
+          containerId: container.id,
+        });
+        continue;
+      }
       log.debug(`Waiting for host port ${hostPort}...`, { containerId: container.id });
       await this.waitForPort(container, hostPort, portCheck);
       log.debug(`Host port ${hostPort} ready`, { containerId: container.id });
@@ -36,13 +42,24 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
     boundPorts: BoundPorts
   ): Promise<void> {
     for (const [internalPort] of boundPorts.iterator()) {
+      if (internalPort.toLowerCase().endsWith("/udp")) {
+        log.debug(`Skipping wait for internal UDP port ${internalPort}`, {
+          containerId: container.id,
+        });
+        continue;
+      }
       log.debug(`Waiting for internal port ${internalPort}...`, { containerId: container.id });
       await this.waitForPort(container, internalPort, portCheck);
       log.debug(`Internal port ${internalPort} ready`, { containerId: container.id });
     }
+    log.debug(`Internal port wait strategy complete`, { containerId: container.id });
   }
 
-  private async waitForPort(container: Dockerode.Container, port: number, portCheck: PortCheck): Promise<void> {
+  private async waitForPort(
+    container: Dockerode.Container,
+    port: number | string,
+    portCheck: PortCheck
+  ): Promise<void> {
     await new IntervalRetry<boolean, Error>(100).retryUntil(
       () => portCheck.isBound(port),
       (isBound) => isBound,

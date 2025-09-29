@@ -1,6 +1,4 @@
-# Mockserver Module
-
-[MockServer](https://www.mock-server.com/#what-is-mockserver) allows you to mock any server or service via HTTP or HTTPS, such as a REST or RPC service.
+# Mockserver
 
 ## Install
 
@@ -10,12 +8,30 @@ npm install @testcontainers/mockserver --save-dev
 
 ## Examples
 
+These examples use the following libraries:
+
+- [mockserver-client](https://www.npmjs.com/package/mockserver-client)
+
+        npm install mockserver-client
+
+- [superagent](https://www.npmjs.com/package/superagent)
+
+        npm install superagent
+        npm install @types/superagent --save-dev
+
+Choose an image from the [container registry](https://hub.docker.com/r/mockserver/mockserver) and substitute `IMAGE`.
+
+### Mock HTTP request
+
 <!--codeinclude-->
-[Start container:](../../packages/modules/mockserver/src/mockserver-container.test.ts) inside_block:startContainer
+[](../../packages/modules/mockserver/src/mockserver-container.test.ts) inside_block:httpMockServer
 <!--/codeinclude-->
 
-MockServer includes built-in TLS support. To obtain an HTTPS URL, use the `getSecureUrl` method. Keep in mind that MockServer uses a self-signed certificate.
+### Mock HTTPS request
+
+!!! note
+    MockServer uses a self-signed certificate for HTTPS connections.
 
 <!--codeinclude-->
-[Using TLS:](../../packages/modules/mockserver/src/mockserver-container.test.ts) inside_block:httpsRequests
+[](../../packages/modules/mockserver/src/mockserver-container.test.ts) inside_block:mockServerHttps
 <!--/codeinclude-->

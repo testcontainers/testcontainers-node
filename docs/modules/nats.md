@@ -1,6 +1,4 @@
-# Nats Module
-
-[NATS](https://nats.io/) is a simple, secure and high performance open source messaging system for cloud native applications, IoT messaging, and microservices architectures.
+# Nats
 
 ## Install
 
@@ -10,18 +8,32 @@ npm install @testcontainers/nats --save-dev
 
 ## Examples
 
-<!--codeinclude-->
-[Connect:](../../packages/modules/nats/src/nats-container.test.ts) inside_block:connect
-<!--/codeinclude-->
+These examples use the following libraries:
+
+- [@nats-io/transport-node](https://www.npmjs.com/package/@nats-io/transport-node)
+
+        npm install @nats-io/transport-node
+
+- [@nats-io/jetstream](https://www.npmjs.com/package/@nats-io/jetstream)
+
+        npm install @nats-io/jetstream
+
+Choose an image from the [container registry](https://hub.docker.com/_/nats) and substitute `IMAGE`.
+
+### Produce/consume a message
 
 <!--codeinclude-->
-[Publish and subscribe:](../../packages/modules/nats/src/nats-container.test.ts) inside_block:pubsub
+[](../../packages/modules/nats/src/nats-container.test.ts) inside_block:natsPubsub
 <!--/codeinclude-->
 
-<!--codeinclude-->
-[Set credentials:](../../packages/modules/nats/src/nats-container.test.ts) inside_block:credentials
-<!--/codeinclude-->
+### With credentials
 
 <!--codeinclude-->
-[Enable JetStream:](../../packages/modules/nats/src/nats-container.test.ts) inside_block:jetstream
+[](../../packages/modules/nats/src/nats-container.test.ts) inside_block:natsCredentials
+<!--/codeinclude-->
+
+### With Jetstream
+
+<!--codeinclude-->
+[](../../packages/modules/nats/src/nats-container.test.ts) inside_block:natsJetstream
 <!--/codeinclude-->

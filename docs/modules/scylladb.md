@@ -1,8 +1,4 @@
-# ScyllaDB Module
-
-[ScyllaDB](https://www.scylladb.com/) is a distributed NoSQL wide-column database for data-intensive apps that require high performance and low latency. It was designed to be compatible with Apache Cassandra while achieving significantly higher throughputs and lower latencies.
-
-
+# ScyllaDB
 
 ## Install
 
@@ -12,10 +8,16 @@ npm install @testcontainers/scylladb --save-dev
 
 ## Examples
 
-<!--codeinclude-->
-[Connect:](../../packages/modules/scylladb/src/scylladb-container.test.ts) inside_block:connectWithDefaultCredentials
-<!--/codeinclude-->
+These examples use the following libraries:
+
+- [cassandra-driver](https://www.npmjs.com/package/cassandra-driver)
+
+        npm install cassandra-driver
+
+Choose an image from the [container registry](https://hub.docker.com/r/scylladb/scylla) and substitute `IMAGE`.
+
+### Execute a query
 
 <!--codeinclude-->
-[Insert & fetch data:](../../packages/modules/scylladb/src/scylladb-container.test.ts) inside_block:createAndFetchData
+[](../../packages/modules/scylladb/src/scylladb-container.test.ts) inside_block:connectWithDefaultCredentials
 <!--/codeinclude-->

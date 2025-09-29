@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/redpanda",
-  "version": "11.3.2",
+  "version": "11.7.0",
   "license": "MIT",
   "keywords": [
     "redpanda",
@@ -25,13 +25,12 @@
     "access": "public"
   },
   "scripts": {
-    "prepack": "shx cp ../../../README.md . && shx cp ../../../LICENSE .",
-    "build": "tsc --project tsconfig.build.json",
-    "postpack": "shx cp -r src/assets build/"
+    "prepack": "shx cp ../../../README.md . && shx cp ../../../LICENSE . && shx cp -r src/assets build",
+    "build": "tsc --project tsconfig.build.json"
   },
   "dependencies": {
     "handlebars": "^4.7.8",
-    "testcontainers": "^11.3.2"
+    "testcontainers": "^11.7.0"
   },
   "devDependencies": {
     "kafkajs": "^2.2.4"

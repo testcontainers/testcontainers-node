@@ -4,62 +4,41 @@ import { MongoDBContainer } from "./mongodb-container";
 
 const IMAGE = getImage(__dirname);
 
-describe("MongodbContainer", { timeout: 240_000 }, () => {
-  // connect4 {
-  it("should work using default version 4.0.1", async () => {
-    await using mongodbContainer = await new MongoDBContainer(IMAGE).start();
+describe("MongoDBContainer", { timeout: 240_000 }, () => {
+  it.each([IMAGE, "mongo:6.0.25", "mongo:4.4.29"])("should work with %s", async (image) => {
+    // connectMongo {
+    await using container = await new MongoDBContainer(image).start();
 
-    // directConnection: true is required as the testcontainer is created as a MongoDB Replica Set.
-    const db = mongoose.createConnection(mongodbContainer.getConnectionString(), { directConnection: true });
+    const db = mongoose.createConnection(container.getConnectionString(), { directConnection: true });
 
-    // You can also add the default connection flag as a query parameter
-    // const connectionString = `${mongodbContainer.getConnectionString()}?directConnection=true`;
-    // const db = mongoose.createConnection(connectionString);
-
-    const fooCollection = db.collection("foo");
     const obj = { value: 1 };
+    const collection = db.collection("test");
+    await collection.insertOne(obj);
 
-    const session = await db.startSession();
-    await session.withTransaction(async () => {
-      await fooCollection.insertOne(obj);
-    });
+    const result = await collection.findOne({ value: 1 });
+    expect(result).toEqual(obj);
 
-    expect(
-      await fooCollection.findOne({
-        value: 1,
-      })
-    ).toEqual(obj);
-
-    await mongoose.disconnect();
+    await db.close();
+    // }
   });
-  // }
 
-  // connect6 {
-  it("should work using version 6.0.1", async () => {
-    await using mongodbContainer = await new MongoDBContainer("mongo:6.0.1").start();
+  it("should connect with credentials", async () => {
+    // connectWithCredentials {
+    await using container = await new MongoDBContainer(IMAGE)
+      .withUsername("customUsername")
+      .withPassword("customPassword")
+      .start();
+    // }
 
-    // directConnection: true is required as the testcontainer is created as a MongoDB Replica Set.
-    const db = mongoose.createConnection(mongodbContainer.getConnectionString(), { directConnection: true });
+    const db = mongoose.createConnection(container.getConnectionString(), { directConnection: true });
 
-    // You can also add the default connection flag as a query parameter
-    // const connectionString = `${mongodbContainer.getConnectionString()}?directConnection=true`;
-    // const db = mongoose.createConnection(connectionString);
+    const result = await db.collection("test").insertOne({ title: "test" });
+    const resultId = result.insertedId.toString();
+    expect(resultId).toBeTruthy();
 
-    const fooCollection = db.collection("foo");
-    const obj = { value: 1 };
+    const rsStatus = await db.db?.admin().replSetGetStatus();
+    expect(rsStatus?.set).toBe("rs0");
 
-    const session = await db.startSession();
-    await session.withTransaction(async () => {
-      await fooCollection.insertOne(obj);
-    });
-
-    expect(
-      await fooCollection.findOne({
-        value: 1,
-      })
-    ).toEqual(obj);
-
-    await mongoose.disconnect();
+    await db.close();
   });
-  // }
 });

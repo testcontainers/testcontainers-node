@@ -1,6 +1,4 @@
-# GCloud Module
-
-Testcontainers module for the Google Cloud Platform's [Cloud SDK](https://cloud.google.com/sdk/).
+# GCloud
 
 ## Install
 
@@ -8,73 +6,112 @@ Testcontainers module for the Google Cloud Platform's [Cloud SDK](https://cloud.
 npm install @testcontainers/gcloud --save-dev
 ```
 
-The module supports multiple emulators. Use the following classes:
-
-Emulator | Class | Container Image
--|-|-
-Firestore (Native mode) | FirestoreEmulatorContainer | [gcr.io/google.com/cloudsdktool/google-cloud-cli:emulators](https://gcr.io/google.com/cloudsdktool/google-cloud-cli)
-Firestore (Datastore mode) | DatastoreEmulatorContainer | [gcr.io/google.com/cloudsdktool/google-cloud-cli:emulators](https://gcr.io/google.com/cloudsdktool/google-cloud-cli)
-Cloud PubSub | PubSubEmulatorContainer | [gcr.io/google.com/cloudsdktool/google-cloud-cli:emulators](https://gcr.io/google.com/cloudsdktool/google-cloud-cli)
-Cloud Storage | CloudStorageEmulatorContainer | [fsouza/fake-gcs-server:1.52.2](https://hub.docker.com/r/fsouza/fake-gcs-server)
-BigQuery | BigQueryEmulatorContainer | [ghcr.io/goccy/bigquery-emulator:0.6.6](https://ghcr.io/goccy/bigquery-emulator)
-Cloud Spanner | SpannerEmulatorContainer | [gcr.io/cloud-spanner-emulator/emulator:1.5.37](https://gcr.io/cloud-spanner-emulator/emulator:1.5.37)
-
 ## Examples
 
-### Firestore (Native mode)
+### Firestore
+
+These examples use the following libraries:
+
+- [@google-cloud/firestore](https://www.npmjs.com/package/@google-cloud/firestore)
+
+        npm install @google-cloud/firestore
+
+Choose an image from the [container registry](https://gcr.io/google.com/cloudsdktool/google-cloud-cli) and substitute `IMAGE`.
 
 <!--codeinclude-->
-[Starting a Firestore Emulator container with the default image](../../packages/modules/gcloud/src/firestore-emulator-container.test.ts) inside_block:firestore4
+[](../../packages/modules/gcloud/src/firestore-emulator-container.test.ts) inside_block:firestoreExample 
 <!--/codeinclude-->
 
+---
+ 
+### Datastore
+
+These examples use the following libraries:
+
+- [@google-cloud/datastore](https://www.npmjs.com/package/@google-cloud/datastore)
+
+        npm install @google-cloud/datastore
+
+Choose an image from the [container registry](https://gcr.io/google.com/cloudsdktool/google-cloud-cli) and substitute `IMAGE`.
+ 
 <!--codeinclude-->
-[Starting a Firestore Emulator container with a custom emulator image](../../packages/modules/gcloud/src/firestore-emulator-container.test.ts) inside_block:firestore5
+[](../../packages/modules/gcloud/src/datastore-emulator-container.test.ts) inside_block:datastoreExample
 <!--/codeinclude-->
-
-### Firestore (Datastore mode)
-
-<!--codeinclude-->
-[Starting a Datastore Emulator container with the default image](../../packages/modules/gcloud/src/datastore-emulator-container.test.ts) inside_block:datastore4
-<!--/codeinclude-->
-
-<!--codeinclude-->
-[Starting a Datastore Emulator container with a custom emulator image](../../packages/modules/gcloud/src/datastore-emulator-container.test.ts) inside_block:datastore5
-<!--/codeinclude-->
+ 
+---
 
 ### Cloud PubSub
 
+These examples use the following libraries:
+
+- [@google-cloud/pubsub](https://www.npmjs.com/package/@google-cloud/pubsub)
+
+        npm install @google-cloud/pubsub
+
+Choose an image from the [container registry](https://gcr.io/google.com/cloudsdktool/google-cloud-cli) and substitute `IMAGE`.
+
 <!--codeinclude-->
-[Starting a Cloud PubSub Emulator container with the default image](../../packages/modules/gcloud/src/pubsub-emulator-container.test.ts)
+[](../../packages/modules/gcloud/src/pubsub-emulator-container.test.ts) inside_block:pubsubExample
 <!--/codeinclude-->
+
+---
 
 ### Cloud Storage
 
-The Cloud Storage container uses a fake Cloud Storage server by [Francisco Souza](https://github.com/fsouza).
+These examples use the following libraries:
+
+- [@google-cloud/storage](https://www.npmjs.com/package/@google-cloud/storage)
+
+        npm install @google-cloud/storage
+
+Choose an image from the [container registry](https://hub.docker.com/r/fsouza/fake-gcs-server) and substitute `IMAGE`.
 
 <!--codeinclude-->
-[Starting a Cloud Storage Emulator container with the default image](../../packages/modules/gcloud/src/cloudstorage-emulator-container.test.ts) inside_block:cloud-storage
+[](../../packages/modules/gcloud/src/cloudstorage-emulator-container.test.ts) inside_block:cloudstorageExample
 <!--/codeinclude-->
 
-### BigQuery
-
-The BigQuery emulator is by [Masaaki Goshima](https://github.com/goccy) and uses [go-zetasqlite](https://github.com/goccy/go-zetasqlite).
-
-<!--codeinclude-->
-[Starting a BigQuery Emulator container with the default image](../../packages/modules/gcloud/src/bigquery-emulator-container.test.ts)
-<!--/codeinclude-->
+---
 
 ### Cloud Spanner
 
-The Cloud Spanner emulator container wraps Google's official emulator image.
+These examples use the following libraries:
 
+- [@google-cloud/spanner](https://www.npmjs.com/package/@google-cloud/spanner)
+
+        npm install @google-cloud/spanner
+
+Choose an image from the [container registry](https://gcr.io/cloud-spanner-emulator/emulator:1.5.37) and substitute `IMAGE`.
+
+#### Connect via client
+ 
 <!--codeinclude-->
-[Starting a Spanner Emulator container and exposing endpoints using explicitly configured client](../../packages/modules/gcloud/src/spanner-emulator-container.test.ts) inside_block:startupWithExplicitClient
+[](../../packages/modules/gcloud/src/spanner-emulator-container.test.ts) inside_block:startupWithExplicitClient
 <!--/codeinclude-->
 
-<!--codeinclude-->
-[Starting a Spanner Emulator container and exposing endpoints using projectId and SPANNER_EMULATOR_HOST](../../packages/modules/gcloud/src/spanner-emulator-container.test.ts) inside_block:startupWithEnvironmentVariable
-<!--/codeinclude-->
+#### Connect via environment 
 
 <!--codeinclude-->
-[Creating and deleting instance and database via helper](../../packages/modules/gcloud/src/spanner-emulator-helper.test.ts) inside_block:createAndDelete
+[](../../packages/modules/gcloud/src/spanner-emulator-container.test.ts) inside_block:startupWithEnvironmentVariable
+<!--/codeinclude-->
+
+#### Helper usage
+
+<!--codeinclude-->
+[](../../packages/modules/gcloud/src/spanner-emulator-helper.test.ts) inside_block:createAndDelete
+<!--/codeinclude-->
+
+---
+
+### BigQuery
+
+These examples use the following libraries:
+
+- [@google-cloud/bigquery](https://www.npmjs.com/package/@google-cloud/bigquery)
+
+        npm install @google-cloud/bigquery
+
+Choose an image from the [container registry](https://ghcr.io/goccy/bigquery-emulator) and substitute `IMAGE`.
+
+<!--codeinclude-->
+[](../../packages/modules/gcloud/src/bigquery-emulator-container.test.ts)  inside_block:bigqueryExample
 <!--/codeinclude-->

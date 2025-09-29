@@ -4,7 +4,7 @@
 
 Build and start your own Docker image:
 
-```javascript
+```js
 const { GenericContainer } = require("testcontainers");
 
 const container = await GenericContainer
@@ -16,7 +16,7 @@ const startedContainer = await container.start();
 
 Images are built by default with a randomly generated name and are deleted on exit. If you wish to keep the built images between test runs, you can provide a name and specify not to delete the image:
 
-```javascript
+```js
 const { GenericContainer } = require("testcontainers");
 
 const container = await GenericContainer
@@ -26,7 +26,7 @@ const container = await GenericContainer
 
 ### With buildkit
 
-```javascript
+```js
 const { GenericContainer } = require("testcontainers");
 
 const container = await GenericContainer
@@ -39,7 +39,7 @@ const container = await GenericContainer
 
 Testcontainers will automatically pull an image if it doesn't exist. This is configurable:
 
-```javascript
+```js
 const { GenericContainer, PullPolicy } = require("testcontainers");
 
 const container = await GenericContainer
@@ -50,7 +50,7 @@ const container = await GenericContainer
 
 Create a custom pull policy:
 
-```typescript
+```ts
 const { GenericContainer, ImagePullPolicy } = require("testcontainers");
 
 class CustomPullPolicy implements ImagePullPolicy {
@@ -67,7 +67,7 @@ const container = await GenericContainer
 
 ### With build arguments
 
-```javascript
+```js
 const container = await GenericContainer
   .fromDockerfile("/path/to/build-context")
   .withBuildArgs({ ARG: "VALUE" })
@@ -78,7 +78,7 @@ const container = await GenericContainer
 
 Stop the build at a specific stage by specifying a target:
 
-```javascript
+```js
 const container = await GenericContainer
   .fromDockerfile("/path/to/build-context")
   .withTarget('my-stage')
@@ -87,7 +87,7 @@ const container = await GenericContainer
 
 ### With custom Dockerfile
 
-```javascript
+```js
 const container = await GenericContainer
   .fromDockerfile("/path/to/build-context", "my-dockerfile")
   .build();
@@ -95,7 +95,7 @@ const container = await GenericContainer
 
 ### Without cache
 
-```javascript
+```js
 const container = await GenericContainer
   .fromDockerfile("/path/to/build-context")
   .withCache(false)
@@ -104,7 +104,7 @@ const container = await GenericContainer
 
 ### With platform
 
-```javascript
+```js
 const container = await GenericContainer
   .fromDockerfile("/path/to/build-context")
   .withPlatform("linux/amd64")

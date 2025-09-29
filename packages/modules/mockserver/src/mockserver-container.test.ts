@@ -6,12 +6,11 @@ import { MockserverContainer } from "./mockserver-container";
 const IMAGE = getImage(__dirname);
 
 describe("MockserverContainer", { timeout: 240_000 }, () => {
-  // startContainer {
   it("should start and accept mocks", async () => {
+    // httpMockServer {
     await using container = await new MockserverContainer(IMAGE).start();
-    const client = mockServerClient(container.getHost(), container.getMockserverPort());
-    const url = container.getUrl();
 
+    const client = mockServerClient(container.getHost(), container.getMockserverPort());
     await client.mockAnyResponse({
       httpRequest: {
         method: "GET",
@@ -25,12 +24,12 @@ describe("MockserverContainer", { timeout: 240_000 }, () => {
       },
     });
 
-    const response = await superagent.get(`${url}/foo`);
+    const response = await superagent.get(`${container.getUrl()}/foo`);
 
     expect(response.statusCode).toBe(200);
     expect(response.text).toBe("bar");
+    // }
   });
-  // }
 
   it("should return an https url", async () => {
     await using container = await new MockserverContainer(IMAGE).start();
@@ -38,11 +37,11 @@ describe("MockserverContainer", { timeout: 240_000 }, () => {
     expect(secureUrl.startsWith("https://")).to.equal(true, `${secureUrl} does not start with https://`);
   });
 
-  // httpsRequests {
   it("should respond to https requests", async () => {
+    // mockServerHttps {
     await using container = await new MockserverContainer(IMAGE).start();
-    const client = mockServerClient(container.getHost(), container.getMockserverPort());
 
+    const client = mockServerClient(container.getHost(), container.getMockserverPort());
     await client.mockAnyResponse({
       httpRequest: {
         method: "GET",
@@ -61,6 +60,6 @@ describe("MockserverContainer", { timeout: 240_000 }, () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.text).toBe("bar");
+    // }
   });
-  // }
 });

@@ -10,8 +10,10 @@ import { CommitOptions, ContentToCopy, DirectoryToCopy, ExecOptions, ExecResult,
 import { BoundPorts } from "../utils/bound-ports";
 import { LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
 import { mapInspectResult } from "../utils/map-inspect-result";
+import { PortWithOptionalBinding } from "../utils/port";
 import { waitForContainer } from "../wait-strategies/wait-for-container";
 import { WaitStrategy } from "../wait-strategies/wait-strategy";
+import { inspectContainerUntilPortsExposed } from "./inspect-container-util-ports-exposed";
 import { StoppedGenericContainer } from "./stopped-generic-container";
 
 export class StartedGenericContainer implements StartedTestContainer {
@@ -80,7 +82,10 @@ export class StartedGenericContainer implements StartedTestContainer {
     const resolvedOptions: RestartOptions = { timeout: 0, ...options };
     await client.container.restart(this.container, resolvedOptions);
 
-    this.inspectResult = await client.container.inspect(this.container);
+    this.inspectResult = await inspectContainerUntilPortsExposed(
+      () => client.container.inspect(this.container),
+      this.container.id
+    );
     const mappedInspectResult = mapInspectResult(this.inspectResult);
     const startTime = new Date(this.inspectResult.State.StartedAt);
 
@@ -91,7 +96,10 @@ export class StartedGenericContainer implements StartedTestContainer {
     }
 
     this.boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, mappedInspectResult).filter(
-      Array.from(this.boundPorts.iterator()).map((port) => port[0])
+      Array.from(this.boundPorts.iterator()).map((port) => {
+        const [portNumber, protocol] = port[0].split("/");
+        return `${portNumber}/${protocol}` as PortWithOptionalBinding;
+      })
     );
 
     await waitForContainer(client, this.container, this.waitStrategy, this.boundPorts, startTime);
@@ -132,8 +140,8 @@ export class StartedGenericContainer implements StartedTestContainer {
     return this.boundPorts.getFirstBinding();
   }
 
-  public getMappedPort(port: number): number {
-    return this.boundPorts.getBinding(port);
+  public getMappedPort(port: string | number, protocol: string = "tcp"): number {
+    return this.boundPorts.getBinding(port, protocol);
   }
 
   public getId(): string {

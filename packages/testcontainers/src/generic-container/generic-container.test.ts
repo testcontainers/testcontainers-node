@@ -5,10 +5,12 @@ import { getContainerRuntimeClient } from "../container-runtime";
 import { PullPolicy } from "../utils/pull-policy";
 import {
   checkContainerIsHealthy,
+  checkContainerIsHealthyUdp,
   getDockerEventStream,
   getRunningContainerNames,
   waitForDockerEvent,
 } from "../utils/test-helper";
+import { Wait } from "../wait-strategies/wait";
 import { GenericContainer } from "./generic-container";
 
 describe("GenericContainer", { timeout: 180_000 }, () => {
@@ -22,6 +24,17 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     expect(container.getFirstMappedPort()).toBe(container.getMappedPort(8080));
   });
 
+  it("should return first mapped port with regardless of protocol", async () => {
+    await using container = await new GenericContainer("mendhak/udp-listener")
+      .withWaitStrategy(Wait.forLogMessage("Listening on UDP port 5005"))
+      .withExposedPorts("5005/udp")
+      .start();
+
+    await checkContainerIsHealthyUdp(container);
+    expect(container.getFirstMappedPort()).toBe(container.getMappedPort("5005/udp"));
+    expect(container.getFirstMappedPort()).toBe(container.getMappedPort(5005, "udp"));
+  });
+
   it("should bind to specified host port", async () => {
     const hostPort = await getPort();
     await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
@@ -33,6 +46,22 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
 
     await checkContainerIsHealthy(container);
     expect(container.getMappedPort(8080)).toBe(hostPort);
+  });
+
+  it("should bind to specified host port with a different protocol", async () => {
+    const hostPort = await getPort();
+    await using container = await new GenericContainer("mendhak/udp-listener")
+      .withWaitStrategy(Wait.forLogMessage("Listening on UDP port 5005"))
+      .withExposedPorts({
+        container: 5005,
+        host: hostPort,
+        protocol: "udp",
+      })
+      .start();
+
+    await checkContainerIsHealthyUdp(container);
+    expect(container.getMappedPort("5005/udp")).toBe(hostPort);
+    expect(container.getMappedPort(5005, "udp")).toBe(hostPort);
   });
 
   it("should execute a command on a running container", async () => {

@@ -5,8 +5,8 @@ import { ScyllaContainer } from "./scylladb-container";
 const IMAGE = getImage(__dirname);
 
 describe("ScyllaDB", { timeout: 240_000 }, () => {
-  // connectWithDefaultCredentials {
   it("should connect and execute a query", async () => {
+    // connectWithDefaultCredentials {
     await using container = await new ScyllaContainer(IMAGE).start();
 
     const client = new Client({
@@ -21,8 +21,8 @@ describe("ScyllaDB", { timeout: 240_000 }, () => {
     expect(result.rows[0].cql_version).toBe("3.3.1");
 
     await client.shutdown();
+    // }
   });
-  // }
 
   // createAndFetchData {
   it("should create keyspace, a table, insert data, and retrieve it", async () => {

@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/neo4j",
-  "version": "11.3.2",
+  "version": "11.7.0",
   "license": "MIT",
   "keywords": [
     "neo4j",
@@ -29,9 +29,9 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "neo4j-driver": "^5.28.1"
+    "neo4j-driver": "^5.28.2"
   },
   "dependencies": {
-    "testcontainers": "^11.3.2"
+    "testcontainers": "^11.7.0"
   }
 }

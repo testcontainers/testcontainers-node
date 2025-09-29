@@ -5,8 +5,8 @@ import { ToxiProxyContainer, TPClient } from "./toxiproxy-container";
 const IMAGE = getImage(__dirname);
 
 describe("ToxiProxyContainer", { timeout: 240_000 }, () => {
-  // create_proxy {
   it("should create a proxy to an endpoint", async () => {
+    // create_proxy {
     await using network = await new Network().start();
     await using _ = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
@@ -23,11 +23,11 @@ describe("ToxiProxyContainer", { timeout: 240_000 }, () => {
 
     const response = await fetch(`http://${appProxy.host}:${appProxy.port}/hello-world`);
     expect(response.status).toBe(200);
+    // }
   });
-  // }
 
-  // enabled_disabled {
   it("should enable and disable a proxy", async () => {
+    // enabled_disabled {
     await using network = await new Network().start();
     await using _ = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
@@ -48,11 +48,11 @@ describe("ToxiProxyContainer", { timeout: 240_000 }, () => {
     await appProxy.setEnabled(true);
     const response = await fetch(`http://${appProxy.host}:${appProxy.port}/hello-world`);
     expect(response.status).toBe(200);
+    // }
   });
-  // }
 
-  // adding_toxic {
   it("should add a toxic to a proxy and then remove", async () => {
+    // adding_toxic {
     await using network = await new Network().start();
     await using _ = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
@@ -67,7 +67,6 @@ describe("ToxiProxyContainer", { timeout: 240_000 }, () => {
       upstream: "app:8080",
     });
 
-    // See https://github.com/ihsw/toxiproxy-node-client for details on the instance interface
     const toxic = await appProxy.instance.addToxic<TPClient.Latency>({
       attributes: {
         jitter: 50,
@@ -85,8 +84,8 @@ describe("ToxiProxyContainer", { timeout: 240_000 }, () => {
     expect(after - before).toBeGreaterThan(1000);
 
     await toxic.remove();
+    // }
   });
-  // }
 
   it("should create multiple proxies", async () => {
     await using network = await new Network().start();
