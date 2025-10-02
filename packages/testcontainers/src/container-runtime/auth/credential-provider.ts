@@ -1,7 +1,7 @@
 import { spawn } from "child_process";
 import { log } from "../../common";
 import { RegistryAuthLocator } from "./registry-auth-locator";
-import { AuthConfig, ContainerRuntimeConfig, CredentialProviderGetResponse } from "./types";
+import { AuthConfig, ContainerRuntimeConfig } from "./types";
 
 export abstract class CredentialProvider implements RegistryAuthLocator {
   abstract getName(): string;
@@ -17,32 +17,35 @@ export abstract class CredentialProvider implements RegistryAuthLocator {
     const programName = `docker-credential-${credentialProviderName}`;
     log.debug(`Executing Docker credential provider "${programName}"`);
 
-    const response = await this.runCredentialProvider(registry, programName);
-
-    return {
-      username: response.Username,
-      password: response.Secret,
-      registryAddress: response.ServerURL ?? registry,
-    };
+    return await this.runCredentialProvider(registry, programName);
   }
 
-  private runCredentialProvider(registry: string, providerName: string): Promise<CredentialProviderGetResponse> {
+  private runCredentialProvider(registry: string, providerName: string): Promise<AuthConfig | undefined> {
     return new Promise((resolve, reject) => {
       const sink = spawn(providerName, ["get"]);
 
       const chunks: string[] = [];
       sink.stdout.on("data", (chunk) => chunks.push(chunk));
 
+      sink.on("error", (err) => {
+        log.error(`Error from Docker credential provider: ${err}`);
+        sink.kill("SIGKILL");
+        reject(new Error(`Error from Docker credential provider: ${err}`));
+      });
+
       sink.on("close", (code) => {
         if (code !== 0) {
-          log.error(`An error occurred getting a credential: ${code}`);
-          return reject(new Error("An error occurred getting a credential"));
+          return resolve(undefined);
         }
 
         const response = chunks.join("");
         try {
           const parsedResponse = JSON.parse(response);
-          return resolve(parsedResponse);
+          return resolve({
+            username: parsedResponse.Username,
+            password: parsedResponse.Secret,
+            registryAddress: parsedResponse.ServerURL ?? registry,
+          });
         } catch (e) {
           log.error(`Unexpected response from Docker credential provider GET command: "${response}"`);
           return reject(new Error("Unexpected response from Docker credential provider GET command"));
