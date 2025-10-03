@@ -119,4 +119,47 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
     client.destroy();
     // }
   });
+
+  it("should start redis with custom command", async () => {
+    const container = new RedisContainer(IMAGE).withCommand(["redis-server", "--loglevel", "verbose"]);
+    const startedContainer = await container.start();
+
+    // @ts-expect-error - accessing private property for testing
+    expect(container.createOpts.Cmd).toEqual(["redis-server", "--loglevel", "verbose"]);
+
+    const client = createClient({ url: startedContainer.getConnectionUrl() });
+    await client.connect();
+
+    await client.set("key", "val");
+    expect(await client.get("key")).toBe("val");
+
+    client.destroy();
+  });
+
+  it("should start redis with custom command and keeping default args", async () => {
+    const sourcePath = fs.mkdtempSync("redis-");
+
+    const container = new RedisContainer(IMAGE)
+      .withCommand(["redis-server", "--loglevel", "verbose"])
+      .withPersistence(sourcePath);
+    const startedContainer = await container.start();
+
+    // @ts-expect-error - accessing private property for testing
+    expect(container.createOpts.Cmd).toEqual([
+      "redis-server",
+      "--loglevel",
+      "verbose",
+      "--save 1 1 ",
+      "--appendonly yes",
+    ]);
+
+    const client = createClient({ url: startedContainer.getConnectionUrl() });
+    await client.connect();
+
+    await client.set("key", "val");
+    expect(await client.get("key")).toBe("val");
+
+    client.destroy();
+    fs.rmSync(sourcePath, { force: true, recursive: true });
+  });
 });
