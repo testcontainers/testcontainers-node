@@ -48,7 +48,9 @@ export class RedisContainer extends GenericContainer {
         REDIS_ARGS: redisArgs.join(" "),
       }).withEntrypoint(["/entrypoint.sh"]);
     } else {
-      this.withCommand(["redis-server", ...redisArgs]);
+      const existingCmd = this.createOpts.Cmd || [];
+      const baseCmd = existingCmd.length ? existingCmd : ["redis-server"];
+      this.withCommand([...baseCmd, ...redisArgs]);
     }
     if (this.persistenceVolume) {
       this.withBindMounts([{ mode: "rw", source: this.persistenceVolume, target: "/data" }]);
