@@ -21,7 +21,7 @@ describe.sequential("CredentialProvider", () => {
   });
 
   it("should return the auth config for a registry", async () => {
-    mockSpawnReturns(
+    mockSpawnEmitsData(
       0,
       JSON.stringify({
         ServerURL: "registry",
@@ -40,7 +40,7 @@ describe.sequential("CredentialProvider", () => {
   });
 
   it("should default to the registry url when the server url is not returned", async () => {
-    mockSpawnReturns(
+    mockSpawnEmitsData(
       0,
       JSON.stringify({
         Username: "username",
@@ -61,8 +61,8 @@ describe.sequential("CredentialProvider", () => {
     expect(await credentialProvider.getAuthConfig("registry", containerRuntimeConfig)).toBeUndefined();
   });
 
-  it("should throw when get credentials fails", async () => {
-    mockSpawnReturns(
+  it("should return undefined when get credentials fails because we lookup optimistically", async () => {
+    mockSpawnEmitsData(
       1,
       JSON.stringify({
         ServerURL: "registry",
@@ -71,13 +71,19 @@ describe.sequential("CredentialProvider", () => {
       })
     );
 
+    expect(await credentialProvider.getAuthConfig("registry", containerRuntimeConfig)).toBeUndefined();
+  });
+
+  it("should throw when credential provider emits error", async () => {
+    mockSpawnEmitsError("ERROR");
+
     await expect(() => credentialProvider.getAuthConfig("registry", containerRuntimeConfig)).rejects.toThrow(
-      "An error occurred getting a credential"
+      "Error from Docker credential provider: Error: ERROR"
     );
   });
 
   it("should throw when get credentials output cannot be parsed", async () => {
-    mockSpawnReturns(0, "CANNOT_PARSE");
+    mockSpawnEmitsData(0, "CANNOT_PARSE");
 
     await expect(() => credentialProvider.getAuthConfig("registry", containerRuntimeConfig)).rejects.toThrow(
       "Unexpected response from Docker credential provider GET command"
@@ -85,7 +91,7 @@ describe.sequential("CredentialProvider", () => {
   });
 });
 
-function mockSpawnReturns(exitCode: number, stdout: string) {
+function mockSpawnEmitsData(exitCode: number, stdout: string) {
   const sink = new EventEmitter() as ChildProcess;
 
   sink.stdout = new Readable({
@@ -98,6 +104,21 @@ function mockSpawnReturns(exitCode: number, stdout: string) {
     write() {
       sink.stdout?.emit("data", stdout);
       sink.emit("close", exitCode);
+    },
+  });
+
+  mockSpawn.mockReturnValueOnce(sink);
+}
+
+function mockSpawnEmitsError(message: string) {
+  const sink = new EventEmitter() as ChildProcess;
+
+  sink.kill = () => true;
+  sink.stdout = new Readable({ read() {} });
+  sink.stdin = new Writable({
+    write(_chunk, _enc, cb) {
+      sink.emit("error", new Error(message));
+      cb?.();
     },
   });
 
