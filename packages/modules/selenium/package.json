@@ -29,8 +29,8 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "@types/selenium-webdriver": "^4.1.28",
-    "selenium-webdriver": "^4.35.0"
+    "@types/selenium-webdriver": "^4.35.1",
+    "selenium-webdriver": "^4.36.0"
   },
   "dependencies": {
     "testcontainers": "^11.7.1"
