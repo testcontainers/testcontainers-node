@@ -136,6 +136,22 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
     client.destroy();
   });
 
+  it("should start redis-stack with custom env", async () => {
+    const container = new RedisContainer(REDISSTACK_IMAGE).withEnvironment({ REDIS_ARGS: "--loglevel verbose" });
+    const startedContainer = await container.start();
+
+    // @ts-expect-error - accessing private property for testing
+    expect(container.createOpts.Env).toEqual(["REDIS_ARGS=--loglevel verbose"]);
+
+    const client = createClient({ url: startedContainer.getConnectionUrl() });
+    await client.connect();
+
+    await client.set("key", "val");
+    expect(await client.get("key")).toBe("val");
+
+    client.destroy();
+  });
+
   it("should start redis with custom command and keeping default args", async () => {
     const sourcePath = fs.mkdtempSync("redis-");
 
@@ -152,6 +168,27 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
       "--save 1 1 ",
       "--appendonly yes",
     ]);
+
+    const client = createClient({ url: startedContainer.getConnectionUrl() });
+    await client.connect();
+
+    await client.set("key", "val");
+    expect(await client.get("key")).toBe("val");
+
+    client.destroy();
+    fs.rmSync(sourcePath, { force: true, recursive: true });
+  });
+
+  it("should start redis-stack with custom env and keeping default args", async () => {
+    const sourcePath = fs.mkdtempSync("redis-");
+
+    const container = new RedisContainer(REDISSTACK_IMAGE)
+      .withEnvironment({ REDIS_ARGS: "--loglevel verbose" })
+      .withPersistence(sourcePath);
+    const startedContainer = await container.start();
+
+    // @ts-expect-error - accessing private property for testing
+    expect(container.createOpts.Env).toEqual(["REDIS_ARGS=--loglevel verbose --save 1 1  --appendonly yes"]);
 
     const client = createClient({ url: startedContainer.getConnectionUrl() });
     await client.connect();
