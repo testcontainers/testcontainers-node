@@ -1,7 +1,7 @@
-import archiver from "archiver";
 import AsyncLock from "async-lock";
 import Dockerode, { ContainerInspectInfo } from "dockerode";
 import { Readable } from "stream";
+import { buffer } from "stream/consumers";
 import { containerLog, log } from "../common";
 import { ContainerRuntimeClient, getContainerRuntimeClient } from "../container-runtime";
 import { getReaper } from "../reaper/reaper";
@@ -181,31 +181,64 @@ export class StartedGenericContainer implements StartedTestContainer {
 
   public async copyFilesToContainer(filesToCopy: FileToCopy[]): Promise<void> {
     log.debug(`Copying files to container...`, { containerId: this.container.id });
+    if (filesToCopy.length === 0) {
+      return;
+    }
+
     const client = await getContainerRuntimeClient();
-    const tar = archiver("tar");
-    filesToCopy.forEach(({ source, target }) => tar.file(source, { name: target }));
-    tar.finalize();
-    await client.container.putArchive(this.container, tar, "/");
+    const { packTar } = await import("modern-tar/fs");
+
+    const sources = filesToCopy.map((file) => ({
+      type: "file" as const,
+      source: file.source,
+      target: file.target,
+      mode: file.mode,
+    }));
+    const archive = packTar(sources);
+
+    await client.container.putArchive(this.container, archive, "/");
     log.debug(`Copied files to container`, { containerId: this.container.id });
   }
 
   public async copyDirectoriesToContainer(directoriesToCopy: DirectoryToCopy[]): Promise<void> {
     log.debug(`Copying directories to container...`, { containerId: this.container.id });
+    if (directoriesToCopy.length === 0) {
+      return;
+    }
+
     const client = await getContainerRuntimeClient();
-    const tar = archiver("tar");
-    directoriesToCopy.forEach(({ source, target }) => tar.directory(source, target));
-    tar.finalize();
-    await client.container.putArchive(this.container, tar, "/");
+    const { packTar } = await import("modern-tar/fs");
+
+    const sources = directoriesToCopy.map((dir) => ({
+      type: "directory" as const,
+      source: dir.source,
+      target: dir.target,
+      mode: dir.mode,
+    }));
+    const archive = packTar(sources);
+
+    await client.container.putArchive(this.container, archive, "/");
     log.debug(`Copied directories to container`, { containerId: this.container.id });
   }
 
   public async copyContentToContainer(contentsToCopy: ContentToCopy[]): Promise<void> {
     log.debug(`Copying content to container...`, { containerId: this.container.id });
+    if (contentsToCopy.length === 0) {
+      return;
+    }
+
+    const sources = await Promise.all(
+      contentsToCopy.map(async ({ content, target, mode }) => {
+        const processedContent = content instanceof Readable ? await buffer(content) : content;
+        return { type: "content" as const, content: processedContent, target, mode };
+      })
+    );
+
     const client = await getContainerRuntimeClient();
-    const tar = archiver("tar");
-    contentsToCopy.forEach(({ content, target, mode }) => tar.append(content, { name: target, mode: mode }));
-    tar.finalize();
-    await client.container.putArchive(this.container, tar, "/");
+    const { packTar } = await import("modern-tar/fs");
+    const archive = packTar(sources);
+
+    await client.container.putArchive(this.container, archive, "/");
     log.debug(`Copied content to container`, { containerId: this.container.id });
   }
 

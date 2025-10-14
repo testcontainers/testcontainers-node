@@ -1,6 +1,6 @@
 import { copyFile } from "fs/promises";
 import path from "path";
-import tar from "tar-fs";
+import { pipeline } from "stream/promises";
 import {
   AbstractStartedContainer,
   AbstractStoppedContainer,
@@ -128,19 +128,12 @@ export class StoppedSeleniumRecordingContainer extends StoppedSeleniumContainer 
 
     log.debug("Unpacking archive...", { containerId: ffmpegContainerId });
     const destinationDir = tmp.dirSync({ keep: false });
-    await this.extractTarStreamToDest(archiveStream, destinationDir.name);
+    const { unpackTar } = await import("modern-tar/fs");
+    await pipeline(archiveStream, unpackTar(destinationDir.name));
     log.debug("Unpacked archive", { containerId: ffmpegContainerId });
 
     const videoFile = path.resolve(destinationDir.name, "video.mp4");
     await copyFile(videoFile, target);
     log.debug(`Extracted video to "${target}"`, { containerId: ffmpegContainerId });
-  }
-
-  private async extractTarStreamToDest(tarStream: NodeJS.ReadableStream, dest: string): Promise<void> {
-    await new Promise<void>((resolve) => {
-      const destination = tar.extract(dest);
-      tarStream.pipe(destination);
-      destination.on("finish", resolve);
-    });
   }
 }

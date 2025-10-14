@@ -1,7 +1,7 @@
-import archiver from "archiver";
 import AsyncLock from "async-lock";
 import { Container, ContainerCreateOptions, HostConfig } from "dockerode";
 import { Readable } from "stream";
+import { buffer } from "stream/consumers";
 import { containerLog, hash, log, toNanos } from "../common";
 import { ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "../container-runtime";
 import { CONTAINER_STATUSES } from "../container-runtime/clients/container/types";
@@ -178,9 +178,30 @@ export class GenericContainer implements TestContainer {
       await client.container.connectToNetwork(container, network, this.networkAliases);
     }
 
-    if (this.filesToCopy.length > 0 || this.directoriesToCopy.length > 0 || this.contentsToCopy.length > 0) {
-      const archive = this.createArchiveToCopyToContainer();
-      archive.finalize();
+    const sources = [
+      ...this.filesToCopy.map((file) => ({
+        type: "file" as const,
+        source: file.source,
+        target: file.target,
+        mode: file.mode,
+      })),
+      ...this.directoriesToCopy.map((dir) => ({
+        type: "directory" as const,
+        source: dir.source,
+        target: dir.target,
+        mode: dir.mode,
+      })),
+      ...(await Promise.all(
+        this.contentsToCopy.map(async ({ content, target, mode }) => {
+          const data = content instanceof Readable ? await buffer(content) : content;
+          return { type: "content" as const, content: data, target, mode };
+        })
+      )),
+    ];
+
+    if (sources.length > 0) {
+      const { packTar } = await import("modern-tar/fs");
+      const archive = packTar(sources);
       await client.container.putArchive(container, archive, "/");
     }
 
@@ -253,22 +274,6 @@ export class GenericContainer implements TestContainer {
       const network = client.network.getById(portForwarderNetworkId);
       await client.container.connectToNetwork(container, network, []);
     }
-  }
-
-  private createArchiveToCopyToContainer(): archiver.Archiver {
-    const tar = archiver("tar");
-
-    for (const { source, target, mode } of this.filesToCopy) {
-      tar.file(source, { name: target, mode });
-    }
-    for (const { source, target, mode } of this.directoriesToCopy) {
-      tar.directory(source, target, { mode });
-    }
-    for (const { content, target, mode } of this.contentsToCopy) {
-      tar.append(content, { name: target, mode });
-    }
-
-    return tar;
   }
 
   protected containerStarted?(

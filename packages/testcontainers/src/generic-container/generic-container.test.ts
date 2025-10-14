@@ -411,7 +411,11 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
       .withExposedPorts(8080)
       .start();
 
-    expect((await container.exec(`stat -c "%a %n" /tmp/newdir/test.txt`)).output).toContain("777");
+    // Check directory permissions
+    expect((await container.exec(`stat -c "%a %n" /tmp/newdir`)).output).toContain("777");
+
+    // Verify files retain their original permissions
+    expect((await container.exec(`stat -c "%a %n" /tmp/newdir/test.txt`)).output).toContain("644");
   });
 
   it("should copy directory to started container", async () => {

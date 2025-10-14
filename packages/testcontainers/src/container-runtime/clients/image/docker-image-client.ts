@@ -4,7 +4,6 @@ import byline from "byline";
 import Dockerode, { ImageBuildOptions, ImageInspectInfo } from "dockerode";
 import { existsSync, promises as fs } from "fs";
 import path from "path";
-import tar from "tar-fs";
 import { buildLog, log, pullLog } from "../../../common";
 import { getAuthConfig } from "../../auth/get-auth-config";
 import { ImageName } from "../../image-name";
@@ -23,14 +22,14 @@ export class DockerImageClient implements ImageClient {
     try {
       log.debug(`Building image "${opts.t}" with context "${context}"...`);
       const isDockerIgnored = await this.createIsDockerIgnoredFunction(context);
-      const tarStream = tar.pack(context, {
-        ignore: (aPath) => {
-          const relativePath = path.relative(context, aPath);
-          if (relativePath === opts.dockerfile) {
-            return false;
-          } else {
-            return isDockerIgnored(relativePath);
+      const { packTar } = await import("modern-tar/fs");
+      const tarStream = packTar(context, {
+        filter: (path) => {
+          if (path === opts.dockerfile) {
+            return true;
           }
+
+          return !isDockerIgnored(path);
         },
       });
       await new Promise<void>((resolve) => {
