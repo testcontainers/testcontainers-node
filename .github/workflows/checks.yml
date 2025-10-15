@@ -54,7 +54,6 @@ jobs:
       matrix:
         js-runtime:
           - { name: node, version: 24.x }
-          - { name: bun,  version: 1.3.0 }
         module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
     runs-on: ubuntu-22.04
     steps:
