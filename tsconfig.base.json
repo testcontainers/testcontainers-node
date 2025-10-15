@@ -6,15 +6,19 @@
     "types": [
       "vitest/globals"
     ],
-    "module": "Node16",
+    "module": "commonjs",
     "declaration": true,
     "sourceMap": true,
     "strict": true,
-    "moduleResolution": "node16",
+    "moduleResolution": "node",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "noImplicitOverride": true,
-    "composite": true
+    "composite": true,
+    // Can be removed if we switch away from commonjs.
+    "paths": {
+      "modern-tar/fs": ["./node_modules/modern-tar/dist/fs/index.d.ts"]
+    }
   }
 }
