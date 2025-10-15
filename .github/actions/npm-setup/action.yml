@@ -74,7 +74,7 @@ runs:
       id: npm-cache
       with:
         path: ${{ env.CACHE_PATHS }}
-        key: ${{ inputs.runner }}-${{ inputs.js-runtime }}-${{ inputs.js-runtime-version }}-${{ inputs.workspace }}-${{ hashFiles('package-lock.json', 'bun.lockb') }}
+        key: ${{ inputs.runner }}-runtime-${{ inputs.js-runtime-version }}-${{ inputs.workspace }}-${{ hashFiles('package-lock.json') }}
 
     - name: Install dependencies
       if: steps.npm-cache.outputs.cache-hit != 'true'
