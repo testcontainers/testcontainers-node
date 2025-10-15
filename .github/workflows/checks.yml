@@ -131,7 +131,7 @@ jobs:
           js-runtime-version: ${{ matrix.js-runtime.version }}
           workspace: "testcontainers"
       - name: Build testcontainers
-        run: ${{ steps.npm-install.outputs.script_cmd }} run build --workspace packages/testcontainers
+        run: npm run build --workspace packages/testcontainers
       - name: Remove dev dependencies
         run: npm prune --omit=dev --workspace packages/testcontainers
       - name: Run CommonJS module smoke test
