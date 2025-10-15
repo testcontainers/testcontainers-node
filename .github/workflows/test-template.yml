@@ -58,6 +58,6 @@ jobs:
           workspace: "${{ inputs.workspace }}"
 
       - name: Run tests
-        run: ${{ steps.npm-install.outputs.run_script_cmd }} test:ci -- --coverage.include=${{ steps.npm-install.outputs.workspace_path }} ${{ steps.npm-install.outputs.workspace_path }}
+        run: ${{ steps.npm-install.outputs.script_cmd }} run test:ci -- --coverage.include=${{ steps.npm-install.outputs.workspace_path }} ${{ steps.npm-install.outputs.workspace_path }}
         env:
           CI: true

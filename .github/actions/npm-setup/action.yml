@@ -19,12 +19,12 @@ outputs:
   workspace_path:
     description: "Full path to the workspace directory"
     value: ${{ steps.set-env.outputs.workspace_path }}
-  run_cmd:
+  cmd:
     description: "Command prefix (e.g. 'node' or 'bun')"
-    value: ${{ steps.set-env.outputs.run_cmd }}
-  run_script_cmd:
+    value: ${{ steps.set-env.outputs.cmd }}
+  script_cmd:
     description: "Command prefix to run package scripts (e.g. 'npm run' or 'bun run')"
-    value: ${{ steps.set-env.outputs.run_script_cmd }}
+    value: ${{ steps.set-env.outputs.script_cmd }}
 
 runs:
   using: "composite"
@@ -63,11 +63,11 @@ runs:
         fi
 
         if [ "${{ inputs.js-runtime }}" = "node" ]; then
-          echo "run_cmd=node" >> "$GITHUB_OUTPUT"
-          echo "run_script_cmd=npm run" >> "$GITHUB_OUTPUT"
+          echo "cmd=node" >> "$GITHUB_OUTPUT"
+          echo "script_cmd=npm" >> "$GITHUB_OUTPUT"
         elif [ "${{ inputs.js-runtime }}" = "bun" ]; then
-          echo "run_cmd=bun" >> "$GITHUB_OUTPUT"
-          echo "run_script_cmd=bun run" >> "$GITHUB_OUTPUT"
+          echo "cmd=bun" >> "$GITHUB_OUTPUT"
+          echo "script_cmd=bun" >> "$GITHUB_OUTPUT"
         fi
 
     - uses: actions/cache/restore@v4

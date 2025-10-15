@@ -70,7 +70,7 @@ jobs:
       - name: Code linting
         env:
           WORKSPACE_PATH: ${{ steps.npm-install.outputs.workspace_path }}
-        run: ${{ steps.npm-install.outputs.run_script_cmd }} lint:ci
+        run: ${{ steps.npm-install.outputs.script_cmd }} run lint:ci
 
   compile:
     if: ${{ needs.detect-modules.outputs.modules_count > 0 }}
@@ -99,9 +99,9 @@ jobs:
           workspace: "${{ matrix.module }}"
       - name: Compile
         run: |
-          ${{ steps.npm-install.outputs.run_script_cmd }} build --ignore-scripts --workspace packages/testcontainers -- --project tsconfig.json
+          ${{ steps.npm-install.outputs.script_cmd }} build --ignore-scripts --workspace packages/testcontainers -- --project tsconfig.json
           if [ "${{ matrix.module }}" != "testcontainers" ]; then
-            ${{ steps.npm-install.outputs.run_script_cmd }} build --ignore-scripts --workspace ${{ steps.npm-install.outputs.workspace_path }} -- --project tsconfig.json --noEmit
+            ${{ steps.npm-install.outputs.script_cmd }} build --ignore-scripts --workspace ${{ steps.npm-install.outputs.workspace_path }} -- --project tsconfig.json --noEmit
           fi
 
   smoke-test:
@@ -132,15 +132,15 @@ jobs:
           js-runtime-version: ${{ matrix.js-runtime.version }}
           workspace: "testcontainers"
       - name: Build testcontainers
-        run: ${{ steps.npm-install.outputs.run_script_cmd }} run build --workspace packages/testcontainers
+        run: ${{ steps.npm-install.outputs.script_cmd }} build --workspace packages/testcontainers
       - name: Remove dev dependencies
         run: npm prune --omit=dev --workspace packages/testcontainers
       - name: Run CommonJS module smoke test
-        run: ${{ steps.npm-install.outputs.run_cmd }} packages/testcontainers/smoke-test.js
+        run: ${{ steps.npm-install.outputs.cmd }} packages/testcontainers/smoke-test.js
         env:
           DEBUG: "testcontainers*"
       - name: Run ES module smoke test
-        run: ${{ steps.npm-install.outputs.run_cmd }} packages/testcontainers/smoke-test.mjs
+        run: ${{ steps.npm-install.outputs.cmd }} packages/testcontainers/smoke-test.mjs
         env:
           DEBUG: "testcontainers*"
 
