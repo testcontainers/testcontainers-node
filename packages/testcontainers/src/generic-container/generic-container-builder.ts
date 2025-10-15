@@ -1,6 +1,7 @@
 import type { ImageBuildOptions } from "dockerode";
 import path from "path";
-import { log, RandomUuid, Uuid } from "../common";
+import type { Uuid } from "../common";
+import { log, RandomUuid } from "../common";
 import { getAuthConfig, getContainerRuntimeClient, ImageName } from "../container-runtime";
 import { getReaper } from "../reaper/reaper";
 import { AuthConfig, BuildArgs, RegistryConfig } from "../types";

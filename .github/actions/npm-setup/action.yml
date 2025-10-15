@@ -1,12 +1,15 @@
 name: "NPM Setup"
-description: "Sets up Node.js and installs NPM dependencies with caching"
+description: "Sets up JS runtime and installs NPM dependencies with caching"
 
 inputs:
   runner:
     description: "Runner to use"
     required: true
-  node-version:
-    description: "Node.js version to use"
+  js-runtime:
+    description: "JS runtime to use"
+    required: true
+  js-runtime-version:
+    description: "JS runtime version to use"
     required: true
   workspace:
     description: "Key for the cache"
@@ -16,14 +19,27 @@ outputs:
   workspace_path:
     description: "Full path to the workspace directory"
     value: ${{ steps.set-env.outputs.workspace_path }}
+  run_cmd:
+    description: "Command prefix (e.g. 'node' or 'bun')"
+    value: ${{ steps.set-env.outputs.run_cmd }}
+  run_script_cmd:
+    description: "Command prefix to run package scripts (e.g. 'npm run' or 'bun run')"
+    value: ${{ steps.set-env.outputs.run_script_cmd }}
 
 runs:
   using: "composite"
   steps:
-    - name: Install NodeJS ${{ inputs.node-version }}
+    - name: Install NodeJS ${{ inputs.js-runtime-version }}
+      if: ${{ inputs.js-runtime == 'node' }}
       uses: actions/setup-node@v4
       with:
-        node-version: ${{ inputs.node-version }}
+        node-version: ${{ inputs.js-runtime-version }}
+
+    - name: Install Bun ${{ inputs.js-runtime-version }}
+      if: ${{ inputs.js-runtime == 'bun' }}
+      uses: oven-sh/setup-bun@v2
+      with:
+        bun-version: ${{ inputs.js-runtime-version }}
 
     - name: Set cache configuration
       shell: bash
@@ -46,11 +62,19 @@ runs:
           echo "workspace_path=packages/modules/${{ inputs.workspace }}" >> "$GITHUB_OUTPUT"
         fi
 
+        if [ "${{ inputs.js-runtime }}" = "node" ]; then
+          echo "run_cmd=node" >> "$GITHUB_OUTPUT"
+          echo "run_script_cmd=npm run" >> "$GITHUB_OUTPUT"
+        elif [ "${{ inputs.js-runtime }}" = "bun" ]; then
+          echo "run_cmd=bun" >> "$GITHUB_OUTPUT"
+          echo "run_script_cmd=bun run" >> "$GITHUB_OUTPUT"
+        fi
+
     - uses: actions/cache/restore@v4
       id: npm-cache
       with:
         path: ${{ env.CACHE_PATHS }}
-        key: ${{ inputs.runner }}-node-${{ inputs.node-version }}-${{ inputs.workspace }}-${{ hashFiles('package-lock.json') }}
+        key: ${{ inputs.runner }}-${{ inputs.js-runtime }}-${{ inputs.js-runtime-version }}-${{ inputs.workspace }}-${{ hashFiles('package-lock.json', 'bun.lockb') }}
 
     - name: Install dependencies
       if: steps.npm-cache.outputs.cache-hit != 'true'
