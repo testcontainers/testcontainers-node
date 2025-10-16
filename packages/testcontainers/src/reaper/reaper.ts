@@ -32,7 +32,7 @@ export async function getReaper(client: ContainerRuntimeClient): Promise<Reaper>
     const reaperContainer = await findReaperContainer(client);
     sessionId = reaperContainer?.Labels[LABEL_TESTCONTAINERS_SESSION_ID] ?? new RandomUuid().nextUuid();
 
-    if (process.env.TESTCONTAINERS_RYUK_DISABLED === "true") {
+    if (process.env.TESTCONTAINERS_RYUK_DISABLED === "true" || process.versions.bun) {
       return new DisabledReaper(sessionId, "");
     } else if (reaperContainer) {
       return await useExistingReaper(reaperContainer, sessionId, client.info.containerRuntime.host);
