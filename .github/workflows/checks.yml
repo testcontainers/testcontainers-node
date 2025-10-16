@@ -143,7 +143,7 @@ jobs:
         env:
           DEBUG: "testcontainers*"
 
-  test:
+  test-docker:
     if: ${{ needs.detect-modules.outputs.modules_count > 0 }}
     name: Tests
     needs:
@@ -160,13 +160,37 @@ jobs:
           - { name: node, version: 24.x }
           - { name: bun,  version: 1.3.0 }
         module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
-        container-runtime: [docker, podman]
     uses: ./.github/workflows/test-template.yml
     with:
       runner: ubuntu-22.04
       js-runtime: ${{ matrix.js-runtime.name }}
       js-runtime-version: ${{ matrix.js-runtime.version }}
-      container-runtime: ${{ matrix.container-runtime }}
+      container-runtime: docker
+      workspace: "${{ matrix.module }}"
+
+  test-podman:
+    if: ${{ needs.detect-modules.outputs.modules_count > 0 }}
+    name: Tests
+    needs:
+      - detect-modules
+      - lint
+      - compile
+      - smoke-test
+    strategy:
+      fail-fast: false
+      matrix:
+        js-runtime:
+          - { name: node, version: 20.x }
+          - { name: node, version: 22.x }
+          - { name: node, version: 24.x }
+          - { name: bun,  version: 1.3.0 }
+        module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
+    uses: ./.github/workflows/test-template.yml
+    with:
+      runner: ubuntu-22.04
+      js-runtime: ${{ matrix.js-runtime.name }}
+      js-runtime-version: ${{ matrix.js-runtime.version }}
+      container-runtime: podman
       workspace: "${{ matrix.module }}"
 
   end:
@@ -177,7 +201,8 @@ jobs:
       - lint
       - compile
       - smoke-test
-      - test
+      - test-docker
+      - test-podman
     runs-on: ubuntu-22.04
     steps:
       - name: Check if any jobs failed
