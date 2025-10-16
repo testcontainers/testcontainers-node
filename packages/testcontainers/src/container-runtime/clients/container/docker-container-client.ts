@@ -291,9 +291,14 @@ export class DockerContainerClient implements ContainerClient {
       log.debug(`Removing container...`, { containerId: container.id });
       await container.remove({ v: opts?.removeVolumes });
       log.debug(`Removed container`, { containerId: container.id });
-    } catch (err) {
-      log.error(`Failed to remove container: ${err}`, { containerId: container.id });
-      throw err;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      if (err.statusCode === 404) {
+        log.warn(`Failed to remove container as it no longer exists: ${err}`, { containerId: container.id });
+      } else {
+        log.error(`Failed to remove container: ${err}`, { containerId: container.id });
+        throw err;
+      }
     }
   }
 
