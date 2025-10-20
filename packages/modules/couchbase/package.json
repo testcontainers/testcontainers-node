@@ -32,6 +32,6 @@
     "testcontainers": "^11.7.1"
   },
   "devDependencies": {
-    "couchbase": "4.5.0"
+    "couchbase": "4.6.0"
   }
 }
