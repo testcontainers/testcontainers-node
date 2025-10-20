@@ -29,7 +29,8 @@ async function createEmptyTmpFile(fileName: string): Promise<string> {
   try {
     await writeFile(file, "", { flag: "wx" });
   } catch (err) {
-    if (!err || typeof err !== "object" || !("code" in err) || err.code !== "EEXIST") {
+    const isExistError = err && typeof err === "object" && "code" in err && err.code === "EEXIST";
+    if (!isExistError) {
       throw err;
     }
   }

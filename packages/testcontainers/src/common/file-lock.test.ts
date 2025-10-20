@@ -121,11 +121,10 @@ describe("withFileLock", () => {
     const tmp = await import("tmp");
     const file = path.resolve(tmp.tmpdir, testFileName);
 
-    // Pre-create the lock file
+    // Pre-create the lock file (this simulates the file already existing)
     await writeFile(file, "", { flag: "w" });
-    expect(existsSync(file)).toBe(true);
 
-    // Should still work with existing file
+    // Should still work with existing file - the wx flag will fail, but EEXIST should be caught
     const result = await withFileLock(testFileName, () => {
       return "works-with-existing-file";
     });
