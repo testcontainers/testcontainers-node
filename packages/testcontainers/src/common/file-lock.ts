@@ -26,6 +26,12 @@ export async function withFileLock<T>(fileName: string, fn: () => T): Promise<T>
 async function createEmptyTmpFile(fileName: string): Promise<string> {
   const tmp = await import("tmp");
   const file = path.resolve(tmp.tmpdir, fileName);
-  await writeFile(file, "");
+  try {
+    await writeFile(file, "", { flag: "wx" });
+  } catch (err) {
+    if (!err || typeof err !== "object" || !("code" in err) || err.code !== "EEXIST") {
+      throw err;
+    }
+  }
   return file;
 }
