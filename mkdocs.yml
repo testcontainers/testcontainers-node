@@ -85,6 +85,7 @@ nav:
       - RabbitMQ: modules/rabbitmq.md
       - Redis: modules/redis.md
       - Redpanda: modules/redpanda.md
+      - S3Mock: modules/s3mock.md
       - ScyllaDB: modules/scylladb.md
       - Selenium: modules/selenium.md
       - ToxiProxy: modules/toxiproxy.md
