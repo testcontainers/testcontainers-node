@@ -31,7 +31,7 @@
   "devDependencies": {
     "@chroma-core/default-embed": "^0.1.8",
     "@chroma-core/ollama": "^0.1.7",
-    "chromadb": "^3.0.17"
+    "chromadb": "^3.1.0"
   },
   "dependencies": {
     "testcontainers": "^11.7.2"
