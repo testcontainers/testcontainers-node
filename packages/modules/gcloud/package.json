@@ -43,11 +43,11 @@
   "devDependencies": {
     "@google-cloud/bigquery": "^8.1.1",
     "@google-cloud/datastore": "^9.2.1",
-    "@google-cloud/firestore": "7.11.6",
+    "@google-cloud/firestore": "8.0.0",
     "@google-cloud/pubsub": "^5.2.0",
     "@google-cloud/spanner": "^8.2.2",
-    "@google-cloud/storage": "^7.17.2",
+    "@google-cloud/storage": "^7.17.3",
     "firebase-admin": "13.5.0",
-    "msw": "^2.11.5"
+    "msw": "^2.11.6"
   }
 }
