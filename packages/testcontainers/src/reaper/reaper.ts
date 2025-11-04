@@ -84,6 +84,9 @@ async function createNewReaper(sessionId: string, remoteSocketPath: string): Pro
   if (process.env["TESTCONTAINERS_RYUK_VERBOSE"]) {
     container.withEnvironment({ RYUK_VERBOSE: process.env["TESTCONTAINERS_RYUK_VERBOSE"] });
   }
+  if (process.env["TESTCONTAINERS_RYUK_RECONNECTION_TIMEOUT"]) {
+    container.withEnvironment({ RYUK_RECONNECTION_TIMEOUT: process.env["TESTCONTAINERS_RYUK_RECONNECTION_TIMEOUT"] });
+  }
   if (process.env["TESTCONTAINERS_RYUK_PRIVILEGED"] === "true") {
     container.withPrivilegedMode();
   }
