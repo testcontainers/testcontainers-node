@@ -1,2 +1,2 @@
-FROM couchbase/server:enterprise-7.0.3
-FROM couchbase/server:community-7.0.2
+FROM couchbase/server:enterprise-8.0.0
+FROM couchbase/server:community-8.0.0
