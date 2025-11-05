@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/opensearch",
-  "version": "11.7.2",
+  "version": "11.8.0",
   "license": "MIT",
   "keywords": [
     "opensearch",
@@ -33,7 +33,7 @@
     "@types/zxcvbn": "^4.4.5"
   },
   "dependencies": {
-    "testcontainers": "^11.7.2",
+    "testcontainers": "^11.8.0",
     "zxcvbn": "^4.4.2"
   }
 }
