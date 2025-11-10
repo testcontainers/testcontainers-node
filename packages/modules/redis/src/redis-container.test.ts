@@ -122,7 +122,7 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
 
   it("should start redis with custom command", async () => {
     const container = new RedisContainer(IMAGE).withCommand(["redis-server", "--loglevel", "verbose"]);
-    const startedContainer = await container.start();
+    await using startedContainer = await container.start();
 
     // @ts-expect-error - accessing private property for testing
     expect(container.createOpts.Cmd).toEqual(["redis-server", "--loglevel", "verbose"]);
@@ -138,7 +138,7 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
 
   it("should start redis-stack with custom env", async () => {
     const container = new RedisContainer(REDISSTACK_IMAGE).withEnvironment({ REDIS_ARGS: "--loglevel verbose" });
-    const startedContainer = await container.start();
+    await using startedContainer = await container.start();
 
     // @ts-expect-error - accessing private property for testing
     expect(container.createOpts.Env).toEqual(["REDIS_ARGS=--loglevel verbose"]);
@@ -158,7 +158,7 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
     const container = new RedisContainer(IMAGE)
       .withCommand(["redis-server", "--loglevel", "verbose"])
       .withPersistence(sourcePath);
-    const startedContainer = await container.start();
+    await using startedContainer = await container.start();
 
     // @ts-expect-error - accessing private property for testing
     expect(container.createOpts.Cmd).toEqual([
@@ -185,7 +185,7 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
     const container = new RedisContainer(REDISSTACK_IMAGE)
       .withEnvironment({ REDIS_ARGS: "--loglevel verbose" })
       .withPersistence(sourcePath);
-    const startedContainer = await container.start();
+    await using startedContainer = await container.start();
 
     // @ts-expect-error - accessing private property for testing
     expect(container.createOpts.Env).toEqual(["REDIS_ARGS=--loglevel verbose --save 1 1  --appendonly yes"]);

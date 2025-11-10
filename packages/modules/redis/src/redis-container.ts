@@ -44,8 +44,7 @@ export class RedisContainer extends GenericContainer {
       ...(this.persistenceVolume ? ["--save 1 1 ", "--appendonly yes"] : []),
     ];
     if (this.imageName.image.includes("redis-stack")) {
-      const existingRedisArgs =
-        (this.createOpts.Env || []).find((e) => e.startsWith("REDIS_ARGS="))?.split("=", 2)[1] || "";
+      const existingRedisArgs = this.environment["REDIS_ARGS"] ?? "";
 
       // merge with filter to remove empty items
       const mergedRedisArgs = [existingRedisArgs, ...redisArgs].filter(Boolean).join(" ");
