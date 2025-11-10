@@ -16,7 +16,7 @@ export class WeaviateContainer extends GenericContainer {
       Wait.forAll([
         Wait.forListeningPorts(),
         Wait.forHttp("/v1/.well-known/ready", WEAVIATE_HTTP_PORT),
-      ]).withStartupTimeout(5_000)
+      ]).withStartupTimeout(15_000)
     );
   }
 
