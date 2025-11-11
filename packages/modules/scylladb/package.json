@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/scylladb",
-  "version": "11.8.0",
+  "version": "11.8.1",
   "license": "MIT",
   "keywords": [
     "scylladb",
@@ -29,7 +29,7 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "dependencies": {
-    "testcontainers": "^11.8.0"
+    "testcontainers": "^11.8.1"
   },
   "devDependencies": {
     "cassandra-driver": "^4.8.0"
