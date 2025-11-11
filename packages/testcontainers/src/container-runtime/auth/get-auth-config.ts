@@ -55,7 +55,7 @@ export const getAuthConfig = async (registry: string): Promise<AuthConfig | unde
     }
   }
 
-  log.debug(`No registry auth locator found for registry "${registry}"`);
+  log.debug(`No auth config found for registry "${registry}"`);
   authsCache.set(registry, undefined);
   return undefined;
 };
