@@ -1,1 +1,1 @@
-FROM adobe/s3mock:4.9.1
+FROM adobe/s3mock:4.10.0
