@@ -11,6 +11,7 @@ export type UsernamePasswordAuthConfig = {
   registryAddress: string;
   username: string;
   password: string;
+  email?: string;
 };
 
 export type IdentityTokenAuthConfig = {
