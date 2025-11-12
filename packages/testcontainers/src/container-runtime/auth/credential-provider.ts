@@ -1,13 +1,13 @@
 import { spawn } from "child_process";
 import { log } from "../../common";
 import { RegistryAuthLocator } from "./registry-auth-locator";
-import { AuthConfig, ContainerRuntimeConfig, IdentityTokenAuthConfig, UsernamePasswordAuthConfig } from "./types";
-
-type CredentialProviderResponse = {
-  Username: string;
-  Secret: string;
-  ServerURL: string | undefined;
-};
+import {
+  AuthConfig,
+  ContainerRuntimeConfig,
+  CredentialProviderGetResponse,
+  IdentityTokenAuthConfig,
+  UsernamePasswordAuthConfig,
+} from "./types";
 
 export abstract class CredentialProvider implements RegistryAuthLocator {
   abstract getName(): string;
@@ -46,7 +46,7 @@ export abstract class CredentialProvider implements RegistryAuthLocator {
 
         const response = chunks.join("");
         try {
-          const credentialProviderResponse = JSON.parse(response) as CredentialProviderResponse;
+          const credentialProviderResponse = JSON.parse(response) as CredentialProviderGetResponse;
 
           const authConfig =
             credentialProviderResponse.Username === "<token>"
@@ -67,7 +67,7 @@ export abstract class CredentialProvider implements RegistryAuthLocator {
 
   private parseUsernamePasswordConfig(
     registry: string,
-    config: CredentialProviderResponse
+    config: CredentialProviderGetResponse
   ): UsernamePasswordAuthConfig {
     return {
       username: config.Username,
@@ -76,7 +76,7 @@ export abstract class CredentialProvider implements RegistryAuthLocator {
     };
   }
 
-  private parseIdentityTokenConfig(registry: string, config: CredentialProviderResponse): IdentityTokenAuthConfig {
+  private parseIdentityTokenConfig(registry: string, config: CredentialProviderGetResponse): IdentityTokenAuthConfig {
     return {
       registryAddress: config.ServerURL ?? registry,
       identityToken: config.Secret,

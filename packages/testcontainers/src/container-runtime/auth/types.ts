@@ -1,3 +1,9 @@
+export type CredentialProviderGetResponse = {
+  ServerURL?: string;
+  Username: string;
+  Secret: string;
+};
+
 export type Auth = {
   auth?: string;
   email?: string;
