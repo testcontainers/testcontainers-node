@@ -2,8 +2,9 @@ import type { ImageBuildOptions } from "dockerode";
 import path from "path";
 import { log, RandomUuid, Uuid } from "../common";
 import { getAuthConfig, getContainerRuntimeClient, ImageName } from "../container-runtime";
+import { AuthConfig } from "../container-runtime/auth/types";
 import { getReaper } from "../reaper/reaper";
-import { AuthConfig, BuildArgs, RegistryConfig } from "../types";
+import { BuildArgs, RegistryConfig } from "../types";
 import { getDockerfileImages } from "../utils/dockerfile-parser";
 import { createLabels, LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
 import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
@@ -81,6 +82,7 @@ export class GenericContainerBuilder {
       dockerfile: this.dockerfileName,
       buildargs: this.buildArgs,
       nocache: !this.cache,
+      // @ts-expect-error Dockerode types don't yet include identityToken
       registryconfig: registryConfig,
       labels,
       target: this.target,
@@ -115,14 +117,7 @@ export class GenericContainerBuilder {
     );
 
     return authConfigs
-      .map((authConfig) => {
-        return {
-          [authConfig.registryAddress]: {
-            username: authConfig.username,
-            password: authConfig.password,
-          },
-        };
-      })
+      .map((authConfig) => ({ [authConfig.registryAddress]: authConfig }))
       .reduce((prev, next) => ({ ...prev, ...next }), {} as RegistryConfig);
   }
 }

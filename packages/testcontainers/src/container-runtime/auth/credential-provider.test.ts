@@ -39,6 +39,24 @@ describe.sequential("CredentialProvider", () => {
     });
   });
 
+  it("should return the auth config for a registry using an identity token", async () => {
+    mockSpawnEmitsData(
+      0,
+      JSON.stringify({
+        ServerURL: "registry",
+        Username: "<token>",
+        Secret: "dGVzdAo=",
+      })
+    );
+
+    const credentials = await credentialProvider.getAuthConfig("registry", containerRuntimeConfig);
+
+    expect(credentials).toEqual({
+      registryAddress: "registry",
+      identityToken: "dGVzdAo=",
+    });
+  });
+
   it("should default to the registry url when the server url is not returned", async () => {
     mockSpawnEmitsData(
       0,

@@ -1,4 +1,5 @@
 import { Readable } from "stream";
+import { AuthConfig } from "./container-runtime/auth/types";
 import { ContainerCommitOptions } from "./container-runtime/clients/container/types";
 
 export type InspectResult = {
@@ -71,18 +72,8 @@ export type Labels = { [key: string]: string };
 export type HostPortBindings = Array<{ hostIp: string; hostPort: number }>;
 export type Ports = { [containerPortWithProtocol: string]: HostPortBindings };
 
-export type AuthConfig = {
-  username: string;
-  password: string;
-  registryAddress: string;
-  email?: string;
-};
-
 export type RegistryConfig = {
-  [registryAddress: string]: {
-    username: string;
-    password: string;
-  };
+  [registryAddress: string]: AuthConfig;
 };
 
 export type BuildArgs = { [key in string]: string };
