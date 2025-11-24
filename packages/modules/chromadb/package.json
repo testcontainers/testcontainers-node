@@ -29,8 +29,8 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "@chroma-core/default-embed": "^0.1.8",
-    "@chroma-core/ollama": "^0.1.7",
+    "@chroma-core/default-embed": "^0.1.9",
+    "@chroma-core/ollama": "^0.1.8",
     "chromadb": "^3.1.1"
   },
   "dependencies": {

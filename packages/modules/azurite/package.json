@@ -32,7 +32,7 @@
     "testcontainers": "^11.8.1"
   },
   "devDependencies": {
-    "@azure/data-tables": "^13.3.1",
+    "@azure/data-tables": "^13.3.2",
     "@azure/storage-blob": "^12.29.1",
     "@azure/storage-queue": "^12.28.1"
   }
