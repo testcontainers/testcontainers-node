@@ -101,7 +101,7 @@ describe.sequential("CassandraContainer", { timeout: 240_000 }, () => {
     // Insert a record
     const id = "d002cd08-401a-47d6-92d7-bb4204d092f8"; // Fixed UUID for testing
     const username = "Testy McTesterson";
-    client.execute("INSERT INTO test_keyspace.users (id, name) VALUES (?, ?)", [id, username]);
+    await client.execute("INSERT INTO test_keyspace.users (id, name) VALUES (?, ?)", [id, username]);
 
     // Fetch and verify the record
     const result = await client.execute("SELECT * FROM test_keyspace.users WHERE id = ?", [id], { prepare: true });

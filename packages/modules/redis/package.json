@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/redis",
-  "version": "11.5.1",
+  "version": "11.8.1",
   "license": "MIT",
   "keywords": [
     "redis",
@@ -29,9 +29,9 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "redis": "^5.8.1"
+    "redis": "^5.9.0"
   },
   "dependencies": {
-    "testcontainers": "^11.5.1"
+    "testcontainers": "^11.8.1"
   }
 }

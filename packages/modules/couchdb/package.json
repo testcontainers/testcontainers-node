@@ -1,0 +1,37 @@
+{
+  "name": "@testcontainers/couchdb",
+  "version": "11.8.1",
+  "license": "MIT",
+  "keywords": [
+    "couchdb",
+    "testing",
+    "docker",
+    "testcontainers"
+  ],
+  "description": "CouchDB module for Testcontainers",
+  "homepage": "https://github.com/testcontainers/testcontainers-node#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/testcontainers/testcontainers-node.git"
+  },
+  "bugs": {
+    "url": "https://github.com/testcontainers/testcontainers-node/issues"
+  },
+  "main": "build/index.js",
+  "files": [
+    "build"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "prepack": "shx cp ../../../README.md . && shx cp ../../../LICENSE .",
+    "build": "tsc --project tsconfig.build.json"
+  },
+  "dependencies": {
+    "testcontainers": "^11.8.1"
+  },
+  "devDependencies": {
+    "nano": "^11.0.3"
+  }
+}

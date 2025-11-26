@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/mongodb",
-  "version": "11.5.1",
+  "version": "11.8.1",
   "license": "MIT",
   "keywords": [
     "mongodb",
@@ -29,10 +29,10 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "mongoose": "^8.17.1"
+    "mongoose": "^8.19.3"
   },
   "dependencies": {
     "compare-versions": "^6.1.1",
-    "testcontainers": "^11.5.1"
+    "testcontainers": "^11.8.1"
   }
 }

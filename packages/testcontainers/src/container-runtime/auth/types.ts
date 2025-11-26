@@ -1,11 +1,7 @@
 export type CredentialProviderGetResponse = {
-  ServerURL: string;
+  ServerURL?: string;
   Username: string;
   Secret: string;
-};
-
-export type CredentialProviderListResponse = {
-  [registry: string]: string;
 };
 
 export type Auth = {
@@ -15,18 +11,18 @@ export type Auth = {
   password?: string;
 };
 
-export type AuthConfig = {
+export type AuthConfig = UsernamePasswordAuthConfig | IdentityTokenAuthConfig;
+
+export type UsernamePasswordAuthConfig = {
+  registryAddress: string;
   username: string;
   password: string;
-  registryAddress: string;
   email?: string;
 };
 
-export type RegistryConfig = {
-  [registryAddress: string]: {
-    username: string;
-    password: string;
-  };
+export type IdentityTokenAuthConfig = {
+  registryAddress: string;
+  identityToken: string;
 };
 
 export type ContainerRuntimeConfig = {

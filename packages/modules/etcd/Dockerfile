@@ -1,1 +1,1 @@
-FROM quay.io/coreos/etcd:v3.6.4
+FROM quay.io/coreos/etcd:v3.6.5

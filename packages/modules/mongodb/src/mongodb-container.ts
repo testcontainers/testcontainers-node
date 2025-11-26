@@ -49,26 +49,35 @@ export class MongoDBContainer extends GenericContainer {
 
   private withWaitForRsHealthCheck(): this {
     return this.withHealthCheck({
-      test: [
-        "CMD-SHELL",
-        this.buildMongoEvalCommand(
-          `'try { rs.initiate(); } catch (e){} while (db.runCommand({isMaster: 1}).ismaster==false) { sleep(100); }'`
-        ),
-      ],
-      interval: 250,
+      test: ["CMD-SHELL", this.buildMongoEvalCommand(this.getRsInitCmd())],
+      interval: 5000,
       timeout: 60000,
       retries: 1000,
     });
   }
 
   private buildMongoEvalCommand(command: string) {
-    const useMongosh = satisfies(this.imageName.tag, ">=5.0.0");
     const args = [];
-    if (useMongosh) args.push("mongosh");
+    if (this.isV5OrLater()) args.push("mongosh");
     else args.push("mongo", "admin");
     if (this.username && this.password) args.push("-u", this.username, "-p", this.password);
     args.push("--quiet", "--eval", command);
     return args.join(" ");
+  }
+
+  private getRsInitCmd() {
+    if (this.isV5OrLater())
+      return `'try { rs.status(); } catch (e) { rs.initiate(); } while (db.runCommand({isMaster: 1}).ismaster==false) { sleep(100); }'`;
+    else
+      return `'try { rs.initiate(); } catch (e) {} while (db.runCommand({isMaster: 1}).ismaster==false) { sleep(100); }'`;
+  }
+
+  private isV5OrLater() {
+    try {
+      return satisfies(this.imageName.tag, ">=5.0.0");
+    } catch {
+      return false;
+    }
   }
 }
 

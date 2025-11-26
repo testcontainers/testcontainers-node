@@ -1,2 +1,2 @@
-FROM chromadb/chroma:1.0.15
-FROM ollama/ollama:0.9.6
+FROM chromadb/chroma:1.3.3
+FROM ollama/ollama:0.12.10
