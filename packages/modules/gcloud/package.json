@@ -42,7 +42,7 @@
   },
   "devDependencies": {
     "@google-cloud/bigquery": "^8.1.1",
-    "@google-cloud/datastore": "^10.0.1",
+    "@google-cloud/datastore": "^9.2.1",
     "@google-cloud/firestore": "8.0.0",
     "@google-cloud/pubsub": "^5.2.0",
     "@google-cloud/spanner": "^8.3.1",
