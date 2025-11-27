@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "@balena/dockerignore": "^1.0.2",
-    "@types/dockerode": "^3.3.45",
+    "@types/dockerode": "^3.3.47",
     "archiver": "^7.0.1",
     "async-lock": "^1.4.1",
     "byline": "^5.0.0",

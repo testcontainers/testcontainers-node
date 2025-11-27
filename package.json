@@ -26,7 +26,7 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
     "husky": "^9.1.7",
-    "lint-staged": "^16.2.6",
+    "lint-staged": "^16.2.7",
     "ls-engines": "^0.9.3",
     "npm-check-updates": "^19.1.2",
     "prettier": "^3.6.2",
@@ -34,7 +34,7 @@
     "shx": "^0.4.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.46.3",
+    "typescript-eslint": "^8.47.0",
     "vitest": "^3.2.4"
   },
   "lint-staged": {
