@@ -1,21 +1,29 @@
-import { Kafka, KafkaConfig, logLevel } from "kafkajs";
+import { GlobalConfig, KafkaJS } from "@confluentinc/kafka-javascript";
 import { StartedKafkaContainer } from "./kafka-container";
 
 // kafkaTestHelper {
 export async function assertMessageProducedAndConsumed(
   container: StartedKafkaContainer,
-  additionalConfig: Partial<KafkaConfig> = {}
+  additionalKafkaConfig: Partial<KafkaJS.KafkaConfig> = {},
+  additionalGlobalConfig: Partial<GlobalConfig> = {}
 ) {
   const brokers = [`${container.getHost()}:${container.getMappedPort(9093)}`];
-  const kafka = new Kafka({ logLevel: logLevel.NOTHING, brokers: brokers, ...additionalConfig });
+  const kafka = new KafkaJS.Kafka({
+    kafkaJS: {
+      logLevel: KafkaJS.logLevel.ERROR,
+      brokers,
+      ...additionalKafkaConfig,
+    },
+    ...additionalGlobalConfig,
+  });
 
   const producer = kafka.producer();
   await producer.connect();
-  const consumer = kafka.consumer({ groupId: "test-group" });
+  const consumer = kafka.consumer({ kafkaJS: { groupId: "test-group", fromBeginning: true } });
   await consumer.connect();
 
   await producer.send({ topic: "test-topic", messages: [{ value: "test message" }] });
-  await consumer.subscribe({ topic: "test-topic", fromBeginning: true });
+  await consumer.subscribe({ topic: "test-topic" });
 
   const consumedMessage = await new Promise((resolve) =>
     consumer.run({

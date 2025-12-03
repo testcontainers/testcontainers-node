@@ -55,17 +55,20 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
 
     await using container = await new KafkaContainer(IMAGE).withSaslSslListener(saslConfig).start();
 
-    await assertMessageProducedAndConsumed(container, {
-      brokers: [`${container.getHost()}:${container.getMappedPort(9096)}`],
-      sasl: {
-        username: "app-user",
-        password: "userPassword",
-        mechanism: "scram-sha-512",
+    await assertMessageProducedAndConsumed(
+      container,
+      {
+        brokers: [`${container.getHost()}:${container.getMappedPort(9096)}`],
+        ssl: true,
       },
-      ssl: {
-        ca: [fs.readFileSync(path.resolve(certificatesDir, "kafka.client.truststore.pem"))],
-      },
-    });
+      {
+        "sasl.mechanism": "SCRAM-SHA-512",
+        "sasl.username": "app-user",
+        "sasl.password": "userPassword",
+        "security.protocol": "sasl_ssl",
+        "ssl.ca.location": path.resolve(certificatesDir, "kafka.client.truststore.pem"),
+      }
+    );
     // }
   });
 
