@@ -104,9 +104,8 @@ describe("OpenSearchContainer", { timeout: 180_000 }, () => {
   });
 
   it("should be reachable with security disabled", async () => {
-    // opensearchCustomPassword {
+    // opensearchDisableSecurity {
     await using container = await new OpenSearchContainer(IMAGE).withSecurityEnabled(false).start();
-    // }
 
     const client = new Client({
       node: container.getHttpUrl(),
@@ -115,6 +114,7 @@ describe("OpenSearchContainer", { timeout: 180_000 }, () => {
         password: container.getPassword(),
       },
     });
+    // }
 
     await client.indices.create({ index: "people" });
 
