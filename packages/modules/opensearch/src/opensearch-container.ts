@@ -12,10 +12,10 @@ export class OpenSearchContainer extends GenericContainer {
   private readonly username = "admin";
 
   // HTTPS + Basic Auth wait strategy
-  private readonly defaultWaitStrategy = Wait.forHttp("/", OPENSEARCH_HTTP_PORT)
-    .usingTls()
-    .allowInsecure()
-    .withBasicCredentials(this.username, this.password);
+  private readonly defaultWaitStrategy = Wait.forHttp("/", OPENSEARCH_HTTP_PORT).withBasicCredentials(
+    this.username,
+    this.password
+  );
 
   constructor(image: string) {
     super(image);
@@ -67,8 +67,12 @@ export class OpenSearchContainer extends GenericContainer {
       OPENSEARCH_INITIAL_ADMIN_PASSWORD: this.password,
     });
 
+    if (this.securityEnabled) {
+      this.defaultWaitStrategy.usingTls().allowInsecure();
+    }
+
     const started = await super.start();
-    return new StartedOpenSearchContainer(started, this.username, this.password);
+    return new StartedOpenSearchContainer(started, this.username, this.password, this.securityEnabled);
   }
 }
 
@@ -76,7 +80,8 @@ export class StartedOpenSearchContainer extends AbstractStartedContainer {
   constructor(
     override readonly startedTestContainer: StartedTestContainer,
     private readonly username: string,
-    private readonly password: string
+    private readonly password: string,
+    private readonly securityEnabled: boolean
   ) {
     super(startedTestContainer);
   }
@@ -86,9 +91,14 @@ export class StartedOpenSearchContainer extends AbstractStartedContainer {
     return this.getMappedPort(OPENSEARCH_HTTP_PORT);
   }
 
+  /** Get the URL schema needed for connecting to this container */
+  public getSchema(): string {
+    return this.securityEnabled ? "https" : "http";
+  }
+
   /** HTTPS endpoint URL */
   public getHttpUrl(): string {
-    return `https://${this.getHost()}:${this.getPort()}`;
+    return `${this.getSchema()}://${this.getHost()}:${this.getPort()}`;
   }
 
   /** Admin username (always 'admin' by default) */
