@@ -116,6 +116,9 @@ describe("OpenSearchContainer", { timeout: 180_000 }, () => {
     });
     // }
 
+    // Url should start with http not https.
+    expect(container.getHttpUrl()).toMatch(/^http:\/\/.*/);
+
     await client.indices.create({ index: "people" });
 
     const { body } = await client.indices.exists({ index: "people" });
