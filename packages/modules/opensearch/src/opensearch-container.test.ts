@@ -109,10 +109,7 @@ describe("OpenSearchContainer", { timeout: 180_000 }, () => {
 
     const client = new Client({
       node: container.getHttpUrl(),
-      auth: {
-        username: container.getUsername(),
-        password: container.getPassword(),
-      },
+      // no auth, or ssl required
     });
     // }
 
