@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "@types/selenium-webdriver": "^4.35.4",
-    "selenium-webdriver": "^4.38.0"
+    "selenium-webdriver": "^4.39.0"
   },
   "dependencies": {
     "testcontainers": "^11.9.0"
