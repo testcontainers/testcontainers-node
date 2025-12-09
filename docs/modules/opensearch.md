@@ -33,3 +33,9 @@ Choose an image from the [container registry](https://hub.docker.com/r/opensearc
 <!--codeinclude-->
 [](../../packages/modules/opensearch/src/opensearch-container.test.ts) inside_block:opensearchCustomPassword
 <!--/codeinclude-->
+
+### With security disabled
+
+<!--codeinclude-->
+[](../../packages/modules/opensearch/src/opensearch-container.test.ts) inside_block:opensearchDisableSecurity
+<!--/codeinclude-->
