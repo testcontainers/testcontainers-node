@@ -37,7 +37,7 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "dependencies": {
-    "@grpc/grpc-js": "^1.14.1",
+    "@grpc/grpc-js": "^1.14.2",
     "testcontainers": "^11.9.0"
   },
   "devDependencies": {
@@ -46,8 +46,8 @@
     "@google-cloud/firestore": "8.0.0",
     "@google-cloud/pubsub": "^5.2.0",
     "@google-cloud/spanner": "^8.2.2",
-    "@google-cloud/storage": "^7.17.3",
+    "@google-cloud/storage": "^7.18.0",
     "firebase-admin": "13.6.0",
-    "msw": "^2.12.3"
+    "msw": "^2.12.4"
   }
 }
