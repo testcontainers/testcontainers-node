@@ -97,5 +97,22 @@ describe("Auths", () => {
       };
       expect(await locator.getAuthConfig("https://registry.example.com", containerRuntimeConfig)).toEqual(authConfig);
     });
+
+    it("should use identity token when token and user and pass are provided", async () => {
+      const containerRuntimeConfig: ContainerRuntimeConfig = {
+        auths: {
+          "https://registry.example.com": {
+            identitytoken: "token-value",
+            username: "user",
+            password: "pass",
+          },
+        },
+      };
+      const authConfig: AuthConfig = {
+        identityToken: "token-value",
+        registryAddress: "https://registry.example.com",
+      };
+      expect(await locator.getAuthConfig("https://registry.example.com", containerRuntimeConfig)).toEqual(authConfig);
+    });
   });
 });
