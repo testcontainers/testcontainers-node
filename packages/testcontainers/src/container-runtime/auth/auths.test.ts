@@ -82,5 +82,20 @@ describe("Auths", () => {
       };
       expect(await locator.getAuthConfig("https://registry.example.com", containerRuntimeConfig)).toEqual(authConfig);
     });
+
+    it("should return credentials from identity token", async () => {
+      const containerRuntimeConfig: ContainerRuntimeConfig = {
+        auths: {
+          "https://registry.example.com": {
+            identitytoken: "token-value",
+          },
+        },
+      };
+      const authConfig: AuthConfig = {
+        identityToken: "token-value",
+        registryAddress: "https://registry.example.com",
+      };
+      expect(await locator.getAuthConfig("https://registry.example.com", containerRuntimeConfig)).toEqual(authConfig);
+    });
   });
 });
