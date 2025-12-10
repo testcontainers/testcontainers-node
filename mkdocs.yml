@@ -54,7 +54,7 @@ nav:
       - Advanced: features/advanced.md
   - Modules:
       - ArangoDB: modules/arangodb.md
-      - AzureServiceBusEmulator: modules/azureservicebus.md
+      - Azure Service Bus: modules/azureservicebus.md
       - Azurite: modules/azurite.md
       - Cassandra: modules/cassandra.md
       - ChromaDB: modules/chromadb.md

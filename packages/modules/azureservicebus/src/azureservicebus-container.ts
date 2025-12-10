@@ -14,7 +14,7 @@ const DEFAULT_SHARED_ACCESS_KEY_NAME = "RootManageSharedAccessKey";
 const DEFAULT_SHARED_ACCESS_KEY = "SAS_KEY_VALUE";
 const DEFAULT_MSSQL_ALIAS = "mssql";
 const DEFAULT_MSSQL_IMAGE = "mcr.microsoft.com/mssql/server:2022-CU14-ubuntu-22.04";
-const DEFAULT_MSSQL_PASSWORD = "P@ssword1!";
+const DEFAULT_MSSQL_PASSWORD = "P@ssword1!d3adb33f#";
 const CONTAINER_CONFIG_FILE = "/ServiceBus_Emulator/ConfigFiles/Config.json";
 
 export class ServiceBusContainer extends GenericContainer {
@@ -28,6 +28,8 @@ export class ServiceBusContainer extends GenericContainer {
     super(image);
 
     this.withExposedPorts(DEFAULT_PORT, DEFAULT_HTTP_PORT)
+      // The emulator image is minimal and does not include a shell, so the internal port checks will fail.
+      // The HTTP health check should be sufficient to determine when the emulator is ready.
       .withWaitStrategy(Wait.forHttp("/health", DEFAULT_HTTP_PORT).forStatusCode(200))
       .withEnvironment({
         SQL_WAIT_INTERVAL: "0", // We start the MSSQL container before the emulator
@@ -40,16 +42,28 @@ export class ServiceBusContainer extends GenericContainer {
   }
 
   public withMssqlContainer(container: GenericContainer): this {
+    if (this.mssqlImage !== DEFAULT_MSSQL_IMAGE) {
+      throw new Error("Cannot use both withMssqlImage() and withMssqlContainer()");
+    }
+
     this.mssqlContainer = container;
     return this;
   }
 
   public withMssqlImage(image: string): this {
+    if (this.mssqlContainer) {
+      throw new Error("Cannot use both withMssqlImage() and withMssqlContainer()");
+    }
+
     this.mssqlImage = image;
     return this;
   }
 
   public withMssqlPassword(password: string): this {
+    if (this.mssqlPassword !== DEFAULT_MSSQL_PASSWORD) {
+      throw new Error("Cannot use both withMssqlPassword() and withMssqlContainer()");
+    }
+
     this.mssqlPassword = password;
     return this;
   }
@@ -67,7 +81,6 @@ export class ServiceBusContainer extends GenericContainer {
       // This should match the behaviour of @testcontainers/mssqlserver, we
       // create the container manually here to avoid module dependencies.
       this.mssqlContainer = new GenericContainer(this.mssqlImage)
-        .withNetworkAliases(DEFAULT_MSSQL_ALIAS)
         .withEnvironment({
           ACCEPT_EULA: "Y",
           MSSQL_SA_PASSWORD: this.mssqlPassword,
@@ -76,7 +89,7 @@ export class ServiceBusContainer extends GenericContainer {
         .withWaitStrategy(Wait.forLogMessage(/.*Recovery is complete.*/, 1).withStartupTimeout(120_000));
     }
 
-    const mssql = await this.mssqlContainer.withNetwork(network).start();
+    const mssql = await this.mssqlContainer.withNetworkAliases(DEFAULT_MSSQL_ALIAS).withNetwork(network).start();
 
     if (this.config) {
       this.withCopyContentToContainer([
@@ -94,7 +107,16 @@ export class ServiceBusContainer extends GenericContainer {
       MSSQL_SA_PASSWORD: this.mssqlPassword,
     });
 
-    return new StartedServiceBusContainer(await super.start(), mssql, network);
+    try {
+      const serviceBus = await super.start();
+
+      return new StartedServiceBusContainer(serviceBus, mssql, network);
+    } catch (err) {
+      await mssql.stop();
+      await network.stop();
+
+      throw err;
+    }
   }
 }
 
@@ -120,7 +142,10 @@ export class StartedServiceBusContainer extends AbstractStartedContainer {
   }
 
   protected override async containerStopped(): Promise<void> {
-    await this.mssql.stop();
-    await this.network.stop();
+    try {
+      await this.mssql.stop();
+    } finally {
+      await this.network.stop();
+    }
   }
 }

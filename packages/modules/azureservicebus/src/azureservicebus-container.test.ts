@@ -5,7 +5,7 @@ import { ServiceBusContainer } from "./azureservicebus-container";
 
 const IMAGE = getImage(__dirname);
 
-describe("ServiceBusContainer", { timeout: 180_000 }, () => {
+describe("Azure Service Bus", { timeout: 180_000 }, () => {
   it("should connect and queue a message", async () => {
     // serviceBusConnect {
     await using container = await new ServiceBusContainer(IMAGE).acceptLicense().start();
@@ -89,6 +89,7 @@ describe("ServiceBusContainer", { timeout: 180_000 }, () => {
         ACCEPT_EULA: "Y",
         MSSQL_SA_PASSWORD: customPassword,
       })
+      .withNetworkAliases("your-network-alias")
       .withWaitStrategy(Wait.forLogMessage(/.*Recovery is complete.*/, 1).withStartupTimeout(120_000));
 
     await using container = await new ServiceBusContainer(IMAGE)

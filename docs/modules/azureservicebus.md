@@ -14,7 +14,7 @@ These examples use the following libraries:
 
         npm install @azure/service-bus
 
-Choose an image from the [container registry](https://hub.docker.com/r/microsoft/azure-messaging-servicebus-emulator) and substitute `IMAGE`.
+Choose an image from the [container registry](https://mcr.microsoft.com/en-us/artifact/mar/azure-messaging/servicebus-emulator) and substitute `IMAGE`.
 
 ### Send/receive queue messages
 
