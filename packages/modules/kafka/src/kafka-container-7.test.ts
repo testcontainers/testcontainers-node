@@ -35,7 +35,7 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
     const zooKeeperHost = "zookeeper";
     const zooKeeperPort = 2181;
 
-    await using _ = await new GenericContainer("confluentinc/cp-zookeeper:5.5.4")
+    await using _ = await new GenericContainer("confluentinc/cp-zookeeper:7.5.0")
       .withNetwork(network)
       .withNetworkAliases(zooKeeperHost)
       .withEnvironment({ ZOOKEEPER_CLIENT_PORT: zooKeeperPort.toString() })
