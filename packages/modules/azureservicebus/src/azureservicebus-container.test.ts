@@ -1,14 +1,15 @@
 import { ServiceBusClient } from "@azure/service-bus";
 import { GenericContainer, Wait } from "testcontainers";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
-import { ServiceBusContainer } from "./azureservicebus-container";
+import { AzureServiceBusContainer } from "./azureservicebus-container";
 
-const IMAGE = getImage(__dirname);
+const IMAGE = getImage(__dirname, 0);
+const MSSQL_IMAGE = getImage(__dirname, 1);
 
-describe("Azure Service Bus", { timeout: 180_000 }, () => {
+describe("AzureServiceBusContainer", { timeout: 180_000 }, () => {
   it("should connect and queue a message", async () => {
     // serviceBusConnect {
-    await using container = await new ServiceBusContainer(IMAGE).acceptLicense().start();
+    await using container = await new AzureServiceBusContainer(IMAGE).acceptLicense().start();
 
     const client = new ServiceBusClient(container.getConnectionString());
     const sender = client.createSender("queue.1");
@@ -59,7 +60,7 @@ describe("Azure Service Bus", { timeout: 180_000 }, () => {
       },
     });
 
-    await using container = await new ServiceBusContainer(IMAGE).acceptLicense().withConfig(config).start();
+    await using container = await new AzureServiceBusContainer(IMAGE).acceptLicense().withConfig(config).start();
 
     const client = new ServiceBusClient(container.getConnectionString());
     const sender = client.createSender(queueName);
@@ -84,7 +85,7 @@ describe("Azure Service Bus", { timeout: 180_000 }, () => {
     const customPassword = "MyC0mplexP@ssw0rd!";
 
     // @testcontainers/mssqlserver can be used as well
-    const mssqlContainer = new GenericContainer("mcr.microsoft.com/mssql/server:2022-latest")
+    const mssqlContainer = new GenericContainer(MSSQL_IMAGE)
       .withEnvironment({
         ACCEPT_EULA: "Y",
         MSSQL_SA_PASSWORD: customPassword,
@@ -92,7 +93,7 @@ describe("Azure Service Bus", { timeout: 180_000 }, () => {
       .withNetworkAliases("your-network-alias")
       .withWaitStrategy(Wait.forLogMessage(/.*Recovery is complete.*/, 1).withStartupTimeout(120_000));
 
-    await using container = await new ServiceBusContainer(IMAGE)
+    await using container = await new AzureServiceBusContainer(IMAGE)
       .acceptLicense()
       .withMssqlContainer(mssqlContainer)
       .withMssqlPassword(customPassword)
@@ -116,7 +117,7 @@ describe("Azure Service Bus", { timeout: 180_000 }, () => {
   });
 
   it("should connect containers to the same network", async () => {
-    await using serviceBusContainer = await new ServiceBusContainer(IMAGE).acceptLicense().start();
+    await using serviceBusContainer = await new AzureServiceBusContainer(IMAGE).acceptLicense().start();
 
     const servicebusNetworks = serviceBusContainer.getNetworkNames();
     const mssqlNetworks = serviceBusContainer.getMssqlContainer().getNetworkNames();

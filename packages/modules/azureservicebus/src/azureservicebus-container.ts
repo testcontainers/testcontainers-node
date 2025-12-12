@@ -17,7 +17,7 @@ const DEFAULT_MSSQL_IMAGE = "mcr.microsoft.com/mssql/server:2022-CU14-ubuntu-22.
 const DEFAULT_MSSQL_PASSWORD = "P@ssword1!d3adb33f#";
 const CONTAINER_CONFIG_FILE = "/ServiceBus_Emulator/ConfigFiles/Config.json";
 
-export class ServiceBusContainer extends GenericContainer {
+export class AzureServiceBusContainer extends GenericContainer {
   private acceptEula: string = "N";
   private mssqlContainer: GenericContainer | undefined;
   private mssqlImage: string = DEFAULT_MSSQL_IMAGE;
@@ -73,7 +73,7 @@ export class ServiceBusContainer extends GenericContainer {
     return this;
   }
 
-  public override async start(): Promise<StartedServiceBusContainer> {
+  public override async start(): Promise<StartedAzureServiceBusContainer> {
     const network = await new Network().start();
     this.withNetwork(network);
 
@@ -110,7 +110,7 @@ export class ServiceBusContainer extends GenericContainer {
     try {
       const serviceBus = await super.start();
 
-      return new StartedServiceBusContainer(serviceBus, mssql, network);
+      return new StartedAzureServiceBusContainer(serviceBus, mssql, network);
     } catch (err) {
       await mssql.stop();
       await network.stop();
@@ -120,7 +120,7 @@ export class ServiceBusContainer extends GenericContainer {
   }
 }
 
-export class StartedServiceBusContainer extends AbstractStartedContainer {
+export class StartedAzureServiceBusContainer extends AbstractStartedContainer {
   constructor(
     startedTestContainer: StartedTestContainer,
     private readonly mssql: StartedTestContainer,

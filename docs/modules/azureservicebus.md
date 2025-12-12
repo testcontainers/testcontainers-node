@@ -1,4 +1,4 @@
-# Azure Service Bus Emulator
+# Azure Service Bus
 
 ## Install
 
