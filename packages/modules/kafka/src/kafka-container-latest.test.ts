@@ -1,5 +1,5 @@
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 import { GenericContainer, Network } from "testcontainers";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { KafkaContainer, SaslSslListenerOptions } from "./kafka-container";
@@ -60,12 +60,13 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
       {
         brokers: [`${container.getHost()}:${container.getMappedPort(9096)}`],
         ssl: true,
+        sasl: {
+          mechanism: "scram-sha-512",
+          username: "app-user",
+          password: "userPassword",
+        },
       },
       {
-        "sasl.mechanism": "SCRAM-SHA-512",
-        "sasl.username": "app-user",
-        "sasl.password": "userPassword",
-        "security.protocol": "sasl_ssl",
         "ssl.ca.location": path.resolve(certificatesDir, "kafka.client.truststore.pem"),
       }
     );
