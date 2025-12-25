@@ -44,11 +44,21 @@ export class RedisContainer extends GenericContainer {
       ...(this.persistenceVolume ? ["--save 1 1 ", "--appendonly yes"] : []),
     ];
     if (this.imageName.image.includes("redis-stack")) {
+      const existingRedisArgs = this.environment["REDIS_ARGS"] ?? "";
+
+      // merge with filter to remove empty items
+      const mergedRedisArgs = [existingRedisArgs, ...redisArgs].filter(Boolean).join(" ");
+
+      // remove existing REDIS_ARGS to avoid duplicates
+      this.createOpts.Env = (this.createOpts.Env || []).filter((e) => !e.startsWith("REDIS_ARGS="));
+
       this.withEnvironment({
-        REDIS_ARGS: redisArgs.join(" "),
+        REDIS_ARGS: mergedRedisArgs,
       }).withEntrypoint(["/entrypoint.sh"]);
     } else {
-      this.withCommand(["redis-server", ...redisArgs]);
+      const existingCmd = this.createOpts.Cmd || [];
+      const baseCmd = existingCmd.length ? existingCmd : ["redis-server"];
+      this.withCommand([...baseCmd, ...redisArgs]);
     }
     if (this.persistenceVolume) {
       this.withBindMounts([{ mode: "rw", source: this.persistenceVolume, target: "/data" }]);

@@ -1,7 +1,13 @@
 import { spawn } from "child_process";
 import { log } from "../../common";
 import { RegistryAuthLocator } from "./registry-auth-locator";
-import { AuthConfig, ContainerRuntimeConfig } from "./types";
+import {
+  AuthConfig,
+  ContainerRuntimeConfig,
+  CredentialProviderGetResponse,
+  IdentityTokenAuthConfig,
+  UsernamePasswordAuthConfig,
+} from "./types";
 
 export abstract class CredentialProvider implements RegistryAuthLocator {
   abstract getName(): string;
@@ -40,12 +46,14 @@ export abstract class CredentialProvider implements RegistryAuthLocator {
 
         const response = chunks.join("");
         try {
-          const parsedResponse = JSON.parse(response);
-          return resolve({
-            username: parsedResponse.Username,
-            password: parsedResponse.Secret,
-            registryAddress: parsedResponse.ServerURL ?? registry,
-          });
+          const credentialProviderResponse = JSON.parse(response) as CredentialProviderGetResponse;
+
+          const authConfig =
+            credentialProviderResponse.Username === "<token>"
+              ? this.parseIdentityTokenConfig(registry, credentialProviderResponse)
+              : this.parseUsernamePasswordConfig(registry, credentialProviderResponse);
+
+          return resolve(authConfig);
         } catch (e) {
           log.error(`Unexpected response from Docker credential provider GET command: "${response}"`);
           return reject(new Error("Unexpected response from Docker credential provider GET command"));
@@ -55,5 +63,23 @@ export abstract class CredentialProvider implements RegistryAuthLocator {
       sink.stdin.write(`${registry}\n`);
       sink.stdin.end();
     });
+  }
+
+  private parseUsernamePasswordConfig(
+    registry: string,
+    config: CredentialProviderGetResponse
+  ): UsernamePasswordAuthConfig {
+    return {
+      username: config.Username,
+      password: config.Secret,
+      registryAddress: config.ServerURL ?? registry,
+    };
+  }
+
+  private parseIdentityTokenConfig(registry: string, config: CredentialProviderGetResponse): IdentityTokenAuthConfig {
+    return {
+      registryAddress: config.ServerURL ?? registry,
+      identityToken: config.Secret,
+    };
   }
 }

@@ -12,9 +12,9 @@ npm install @testcontainers/kafka --save-dev
 
 These examples use the following libraries:
 
-- [kafkajs](https://www.npmjs.com/package/kafkajs)
+- [@confluentinc/kafka-javascript](https://www.npmjs.com/package/@confluentinc/kafka-javascript)
 
-        npm install kafkajs
+        npm install @confluentinc/kafka-javascript
 
 Choose an image from the [container registry](https://hub.docker.com/r/confluentinc/cp-kafka) and substitute `IMAGE`.
 
@@ -38,9 +38,9 @@ Choose an image from the [container registry](https://hub.docker.com/r/confluent
 
 These examples use the following libraries:
 
-- [kafkajs](https://www.npmjs.com/package/kafkajs)
+- [@confluentinc/kafka-javascript](https://www.npmjs.com/package/@confluentinc/kafka-javascript)
 
-        npm install kafkajs
+        npm install @confluentinc/kafka-javascript
 
 Choose an image from the [container registry](https://hub.docker.com/r/confluentinc/cp-kafka) and substitute `IMAGE`.
 

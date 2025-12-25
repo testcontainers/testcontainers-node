@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/valkey",
-  "version": "11.8.0",
+  "version": "11.10.0",
   "license": "MIT",
   "keywords": [
     "valkey",
@@ -29,9 +29,9 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "redis": "^5.9.0"
+    "redis": "^5.10.0"
   },
   "dependencies": {
-    "testcontainers": "^11.8.0"
+    "testcontainers": "^11.10.0"
   }
 }

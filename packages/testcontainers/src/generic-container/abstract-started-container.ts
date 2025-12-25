@@ -12,7 +12,7 @@ export class AbstractStartedContainer implements StartedTestContainer {
       await this.containerStopping();
     }
 
-    const stoppedContainer = this.startedTestContainer.stop(options);
+    const stoppedContainer = await this.startedTestContainer.stop(options);
 
     if (this.containerStopped) {
       await this.containerStopped();
@@ -105,6 +105,6 @@ export class AbstractStartedContainer implements StartedTestContainer {
   }
 
   async [Symbol.asyncDispose]() {
-    await this.startedTestContainer[Symbol.asyncDispose]();
+    await this.stop();
   }
 }

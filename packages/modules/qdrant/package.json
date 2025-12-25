@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/qdrant",
-  "version": "11.8.0",
+  "version": "11.10.0",
   "license": "MIT",
   "keywords": [
     "qdrant",
@@ -29,9 +29,9 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "@qdrant/js-client-rest": "^1.15.1"
+    "@qdrant/js-client-rest": "^1.16.2"
   },
   "dependencies": {
-    "testcontainers": "^11.8.0"
+    "testcontainers": "^11.10.0"
   }
 }

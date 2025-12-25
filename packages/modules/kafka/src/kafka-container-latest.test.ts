@@ -1,5 +1,5 @@
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 import { GenericContainer, Network } from "testcontainers";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { KafkaContainer, SaslSslListenerOptions } from "./kafka-container";
@@ -55,17 +55,21 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
 
     await using container = await new KafkaContainer(IMAGE).withSaslSslListener(saslConfig).start();
 
-    await assertMessageProducedAndConsumed(container, {
-      brokers: [`${container.getHost()}:${container.getMappedPort(9096)}`],
-      sasl: {
-        username: "app-user",
-        password: "userPassword",
-        mechanism: "scram-sha-512",
+    await assertMessageProducedAndConsumed(
+      container,
+      {
+        brokers: [`${container.getHost()}:${container.getMappedPort(9096)}`],
+        ssl: true,
+        sasl: {
+          mechanism: "scram-sha-512",
+          username: "app-user",
+          password: "userPassword",
+        },
       },
-      ssl: {
-        ca: [fs.readFileSync(path.resolve(certificatesDir, "kafka.client.truststore.pem"))],
-      },
-    });
+      {
+        "ssl.ca.location": path.resolve(certificatesDir, "kafka.client.truststore.pem"),
+      }
+    );
     // }
   });
 
