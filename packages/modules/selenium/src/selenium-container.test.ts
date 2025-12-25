@@ -1,6 +1,6 @@
 import path from "path";
 import { Browser, Builder } from "selenium-webdriver";
-import { GenericContainer } from "testcontainers";
+import { GenericContainer, Network } from "testcontainers";
 import tmp from "tmp";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { SELENIUM_VIDEO_IMAGE, SeleniumContainer } from "./selenium-container";
@@ -44,5 +44,22 @@ describe.for(browsers)("SeleniumContainer", { timeout: 240_000 }, ([browser, ima
     const { exitCode } = await ffmpegContainer.exec(["ffprobe", `/tmp/${videoFileName}`]);
     expect(exitCode).toBe(0);
     // }
+  });
+
+  it(`should use provided network when recording for ${browser}`, async () => {
+    await using network = await new Network().start();
+
+    await using _webServer = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withNetwork(network)
+      .withNetworkAliases("webserver")
+      .withExposedPorts(8080)
+      .start();
+
+    const container = await new SeleniumContainer(image).withRecording().withNetwork(network).start();
+
+    const { exitCode } = await container.exec(["getent", "hosts", "webserver"]);
+    expect(exitCode).toBe(0);
+
+    await container.stop();
   });
 });
