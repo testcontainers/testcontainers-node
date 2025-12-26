@@ -77,20 +77,28 @@ export class SeleniumRecordingContainer extends SeleniumContainer {
     super(image);
   }
 
-  public override async start(): Promise<StartedSeleniumRecordingContainer> {
+  private async createNetworkIfNeeded(): Promise<StartedNetwork | undefined> {
+    if (this.networkMode) {
+      return undefined;
+    }
     const network = await new Network().start();
     this.withNetwork(network);
+    return network;
+  }
+
+  public override async start(): Promise<StartedSeleniumRecordingContainer> {
+    const internalNetwork = await this.createNetworkIfNeeded();
     this.withNetworkAliases(SELENIUM_NETWORK_ALIAS);
 
     const startedSeleniumContainer = await super.start();
 
     const startedFfmpegContainer = await new GenericContainer(SELENIUM_VIDEO_IMAGE)
-      .withNetwork(network)
+      .withNetworkMode(this.networkMode!)
       .withEnvironment({ DISPLAY_CONTAINER_NAME: SELENIUM_NETWORK_ALIAS })
       .withWaitStrategy(Wait.forLogMessage(/.*video-recording entered RUNNING state.*/))
       .start();
 
-    return new StartedSeleniumRecordingContainer(startedSeleniumContainer, startedFfmpegContainer, network);
+    return new StartedSeleniumRecordingContainer(startedSeleniumContainer, startedFfmpegContainer, internalNetwork);
   }
 }
 
@@ -98,7 +106,7 @@ export class StartedSeleniumRecordingContainer extends StartedSeleniumContainer 
   constructor(
     startedSeleniumContainer: StartedTestContainer,
     private readonly startedFfmpegContainer: StartedTestContainer,
-    private readonly network: StartedNetwork
+    private readonly internalNetwork?: StartedNetwork
   ) {
     super(startedSeleniumContainer);
   }
@@ -106,7 +114,9 @@ export class StartedSeleniumRecordingContainer extends StartedSeleniumContainer 
   override async stop(options?: Partial<StopOptions>): Promise<StoppedSeleniumRecordingContainer> {
     const stoppedSeleniumContainer = await super.stop(options);
     const stoppedFfmpegContainer = await this.startedFfmpegContainer.stop({ remove: false, timeout: 60_000 });
-    await this.network.stop();
+    if (this.internalNetwork) {
+      await this.internalNetwork.stop();
+    }
     return new StoppedSeleniumRecordingContainer(stoppedSeleniumContainer, stoppedFfmpegContainer);
   }
 }
