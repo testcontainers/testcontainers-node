@@ -55,11 +55,9 @@ describe.for(browsers)("SeleniumContainer", { timeout: 240_000 }, ([browser, ima
       .withExposedPorts(8080)
       .start();
 
-    const container = await new SeleniumContainer(image).withRecording().withNetwork(network).start();
+    await using container = await new SeleniumContainer(image).withRecording().withNetwork(network).start();
 
     const { exitCode } = await container.exec(["getent", "hosts", "webserver"]);
     expect(exitCode).toBe(0);
-
-    await container.stop();
   });
 });
