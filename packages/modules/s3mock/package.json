@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/s3mock",
-  "version": "11.10.0",
+  "version": "11.11.0",
   "license": "MIT",
   "keywords": [
     "s3mock",
@@ -30,7 +30,7 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "dependencies": {
-    "testcontainers": "^11.10.0"
+    "testcontainers": "^11.11.0"
   },
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.948.0"
