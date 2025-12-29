@@ -4,6 +4,7 @@ import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { K3sContainer } from "./k3s-container";
 
 const IMAGE = getImage(__dirname);
+const KUBECTL_IMAGE = getImage(__dirname, 1);
 
 describe("K3sContainer", { timeout: 120_000 }, () => {
   // K3sContainer runs as a privileged container
@@ -74,7 +75,7 @@ describe("K3sContainer", { timeout: 120_000 }, () => {
 
       const kubeConfig = container.getAliasedKubeConfig("k3s");
 
-      await using kubectlContainer = await new GenericContainer("rancher/kubectl:v1.31.2")
+      await using kubectlContainer = await new GenericContainer(KUBECTL_IMAGE)
         .withNetwork(network)
         .withCopyContentToContainer([{ content: kubeConfig, target: "/home/kubectl/.kube/config" }])
         .withCommand(["get", "namespaces"])

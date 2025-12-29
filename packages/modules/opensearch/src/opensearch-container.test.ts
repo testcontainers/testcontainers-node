@@ -102,4 +102,23 @@ describe("OpenSearchContainer", { timeout: 180_000 }, () => {
     const { body } = await client.indices.exists({ index: "people" });
     expect(body).toBe(true);
   });
+
+  it("should be reachable with security disabled", async () => {
+    // opensearchDisableSecurity {
+    await using container = await new OpenSearchContainer(IMAGE).withSecurityEnabled(false).start();
+
+    const client = new Client({
+      node: container.getHttpUrl(),
+      // no auth, or ssl required
+    });
+    // }
+
+    // Url should start with http not https.
+    expect(container.getHttpUrl()).toMatch(/^http:\/\/.*/);
+
+    await client.indices.create({ index: "people" });
+
+    const { body } = await client.indices.exists({ index: "people" });
+    expect(body).toBe(true);
+  });
 });

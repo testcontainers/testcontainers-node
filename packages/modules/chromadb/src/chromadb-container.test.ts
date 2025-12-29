@@ -1,4 +1,5 @@
-import { AdminClient, ChromaClient, OllamaEmbeddingFunction } from "chromadb";
+import { OllamaEmbeddingFunction } from "@chroma-core/ollama";
+import { AdminClient, ChromaClient } from "chromadb";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -7,11 +8,12 @@ import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { ChromaDBContainer } from "./chromadb-container";
 
 const IMAGE = getImage(__dirname);
+const OLLAMA_IMAGE = getImage(__dirname, 1);
 
 describe("ChromaDBContainer", { timeout: 360_000 }, () => {
   it("should connect", async () => {
     await using container = await new ChromaDBContainer(IMAGE).start();
-    const client = new ChromaClient({ path: container.getHttpUrl() });
+    const client = new ChromaClient({ ssl: false, host: container.getHost(), port: container.getMappedPort(8000) });
     expect(await client.heartbeat()).toBeDefined();
   });
 
@@ -19,7 +21,7 @@ describe("ChromaDBContainer", { timeout: 360_000 }, () => {
     // chromaCreateCollection {
     await using container = await new ChromaDBContainer(IMAGE).start();
 
-    const client = new ChromaClient({ path: container.getHttpUrl() });
+    const client = new ChromaClient({ ssl: false, host: container.getHost(), port: container.getMappedPort(8000) });
     const collection = await client.createCollection({ name: "test", metadata: { "hnsw:space": "cosine" } });
     expect(collection.name).toBe("test");
 
@@ -36,11 +38,11 @@ describe("ChromaDBContainer", { timeout: 360_000 }, () => {
     // queryCollectionWithEmbeddingFunction {
     await using container = await new ChromaDBContainer(IMAGE).start();
 
-    await using ollama = await new GenericContainer("ollama/ollama").withExposedPorts(11434).start();
+    await using ollama = await new GenericContainer(OLLAMA_IMAGE).withExposedPorts(11434).start();
     await ollama.exec(["ollama", "pull", "nomic-embed-text"]);
-    const client = new ChromaClient({ path: container.getHttpUrl() });
+    const client = new ChromaClient({ ssl: false, host: container.getHost(), port: container.getMappedPort(8000) });
     const embedder = new OllamaEmbeddingFunction({
-      url: `http://${ollama.getHost()}:${ollama.getMappedPort(11434)}/api/embeddings`,
+      url: `http://${ollama.getHost()}:${ollama.getMappedPort(11434)}`,
       model: "nomic-embed-text",
     });
 
@@ -73,7 +75,7 @@ describe("ChromaDBContainer", { timeout: 360_000 }, () => {
         .withBindMounts([{ source: sourcePath, target: "/data" }])
         .start();
 
-      const client = new ChromaClient({ path: container.getHttpUrl() });
+      const client = new ChromaClient({ ssl: false, host: container.getHost(), port: container.getMappedPort(8000) });
       const collection = await client.createCollection({ name: "test", metadata: { "hnsw:space": "cosine" } });
       expect(collection.name).toBe("test");
 
@@ -103,26 +105,25 @@ describe("ChromaDBContainer", { timeout: 360_000 }, () => {
       .start();
 
     const adminClient = new AdminClient({
-      tenant: tenant,
-      auth: {
-        provider: "token",
-        credentials: key,
-        tokenHeaderType: "X_CHROMA_TOKEN",
+      ssl: false,
+      host: container.getHost(),
+      port: container.getMappedPort(8000),
+      headers: {
+        "X-Chroma-Token": key,
       },
-      path: container.getHttpUrl(),
     });
 
     await adminClient.createTenant({ name: tenant });
-    await adminClient.createDatabase({ name: database, tenantName: tenant });
+    await adminClient.createDatabase({ name: database, tenant: tenant });
 
     const dbClient = new ChromaClient({
       tenant,
-      auth: {
-        provider: "token",
-        credentials: key,
-        tokenHeaderType: "X_CHROMA_TOKEN",
+      ssl: false,
+      host: container.getHost(),
+      port: container.getMappedPort(8000),
+      headers: {
+        "X-Chroma-Token": key,
       },
-      path: container.getHttpUrl(),
       database,
     });
 

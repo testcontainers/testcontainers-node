@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/mssqlserver",
-  "version": "11.5.0",
+  "version": "11.11.0",
   "license": "MIT",
   "keywords": [
     "mssqlserver",
@@ -31,10 +31,10 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "@types/mssql": "^9.1.7",
-    "mssql": "^11.0.1"
+    "@types/mssql": "^9.1.8",
+    "mssql": "^12.2.0"
   },
   "dependencies": {
-    "testcontainers": "^11.5.0"
+    "testcontainers": "^11.11.0"
   }
 }

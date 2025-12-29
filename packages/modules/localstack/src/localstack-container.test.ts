@@ -4,6 +4,7 @@ import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { LOCALSTACK_PORT, LocalstackContainer } from "./localstack-container";
 
 const IMAGE = getImage(__dirname);
+const AWSCLI_IMAGE = getImage(__dirname, 1);
 
 const runAwsCliAgainstDockerNetworkContainer = async (
   command: string,
@@ -47,7 +48,7 @@ describe("LocalStackContainer", { timeout: 180_000 }, () => {
       .withEnvironment({ SQS_ENDPOINT_STRATEGY: "path" })
       .start();
 
-    await using awsCliInDockerNetwork = await new GenericContainer("amazon/aws-cli:2.7.27")
+    await using awsCliInDockerNetwork = await new GenericContainer(AWSCLI_IMAGE)
       .withNetwork(network)
       .withEntrypoint(["bash"])
       .withCommand(["-c", "sleep infinity"])

@@ -54,6 +54,7 @@ nav:
       - Advanced: features/advanced.md
   - Modules:
       - ArangoDB: modules/arangodb.md
+      - Azure Service Bus: modules/azureservicebus.md
       - Azurite: modules/azurite.md
       - Cassandra: modules/cassandra.md
       - ChromaDB: modules/chromadb.md
@@ -61,6 +62,7 @@ nav:
       - CockroachDB: modules/cockroachdb.md
       - CosmosDB: modules/cosmosdb.md
       - Couchbase: modules/couchbase.md
+      - CouchDB: modules/couchdb.md
       - Elasticsearch: modules/elasticsearch.md
       - Etcd: modules/etcd.md
       - GCloud: modules/gcloud.md
@@ -84,6 +86,7 @@ nav:
       - RabbitMQ: modules/rabbitmq.md
       - Redis: modules/redis.md
       - Redpanda: modules/redpanda.md
+      - S3Mock: modules/s3mock.md
       - ScyllaDB: modules/scylladb.md
       - Selenium: modules/selenium.md
       - ToxiProxy: modules/toxiproxy.md

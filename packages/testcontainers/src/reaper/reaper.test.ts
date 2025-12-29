@@ -85,4 +85,14 @@ describe.sequential("Reaper", { timeout: 120_000 }, () => {
     const reaperContainer = client.container.getById(reaper.containerId);
     expect((await reaperContainer.inspect()).Config.Env).toContain("RYUK_VERBOSE=true");
   });
+
+  it("should propagate TESTCONTAINERS_RYUK_RECONNECTION_TIMEOUT into Reaper container", async () => {
+    vi.stubEnv("TESTCONTAINERS_RYUK_RECONNECTION_TIMEOUT", "30s");
+    vi.spyOn(client.container, "list").mockResolvedValue([]);
+
+    const reaper = await getReaper();
+
+    const reaperContainer = client.container.getById(reaper.containerId);
+    expect((await reaperContainer.inspect()).Config.Env).toContain("RYUK_RECONNECTION_TIMEOUT=30s");
+  });
 });

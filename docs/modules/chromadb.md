@@ -14,9 +14,13 @@ These examples use the following libraries:
 
         npm install chromadb
 
-- [ollama](https://www.npmjs.com/package/ollama)
+- [@chroma-core/default-embed](https://www.npmjs.com/package/@chroma-core/default-embed)
 
-        npm install ollama
+        npm install @chroma-core/default-embed
+
+- [@chroma-core/ollama](https://www.npmjs.com/package/@chroma-core/ollama)
+
+        npm install @chroma-core/ollama
 
 Choose an image from the [container registry](https://hub.docker.com/r/chromadb/chroma) and substitute `IMAGE`.
 

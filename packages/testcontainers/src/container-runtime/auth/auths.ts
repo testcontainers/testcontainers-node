@@ -1,6 +1,6 @@
 import { RegistryAuthLocator } from "./registry-auth-locator";
 import { registryMatches } from "./registry-matches";
-import { Auth, AuthConfig, ContainerRuntimeConfig } from "./types";
+import { Auth, AuthConfig, ContainerRuntimeConfig, UsernamePasswordAuthConfig } from "./types";
 
 export class Auths implements RegistryAuthLocator {
   public getName(): string {
@@ -13,7 +13,14 @@ export class Auths implements RegistryAuthLocator {
       return undefined;
     }
 
-    const authConfig: Partial<AuthConfig> = { registryAddress: registry };
+    if (auth.identitytoken) {
+      return {
+        registryAddress: registry,
+        identityToken: auth.identitytoken,
+      };
+    }
+
+    const authConfig: Partial<UsernamePasswordAuthConfig> = { registryAddress: registry };
 
     if (auth.email) {
       authConfig.email = auth.email;
