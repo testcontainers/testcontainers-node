@@ -27,7 +27,7 @@
     "eslint-plugin-prettier": "^5.5.4",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
-    "ls-engines": "^0.10.0",
+    "ls-engines": "^0.9.3",
     "npm-check-updates": "^19.2.0",
     "prettier": "^3.7.4",
     "prettier-plugin-organize-imports": "^4.3.0",
