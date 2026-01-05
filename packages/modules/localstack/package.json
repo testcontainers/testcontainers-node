@@ -33,6 +33,6 @@
     "testcontainers": "^11.11.0"
   },
   "devDependencies": {
-    "@aws-sdk/client-s3": "^3.958.0"
+    "@aws-sdk/client-s3": "^3.962.0"
   }
 }
