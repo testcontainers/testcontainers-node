@@ -4,7 +4,10 @@ on:
       runner:
         required: true
         type: string
-      node-version:
+      js-runtime:
+        required: true
+        type: string
+      js-runtime-version:
         required: true
         type: string
       container-runtime:
@@ -45,15 +48,16 @@ jobs:
       - name: Code checkout
         uses: actions/checkout@v5
 
-      - name: Install Node ${{ inputs.node-version }} and Dependencies
+      - name: Install ${{ inputs.js-runtime }} ${{ inputs.js-runtime-version }} and Dependencies
         id: npm-install
         uses: ./.github/actions/npm-setup
         with:
           runner: ${{ inputs.runner }}
-          node-version: ${{ inputs.node-version }}
+          js-runtime: ${{ inputs.js-runtime }}
+          js-runtime-version: ${{ inputs.js-runtime-version }}
           workspace: "${{ inputs.workspace }}"
 
       - name: Run tests
-        run: npm run test:ci -- --coverage.include=${{ steps.npm-install.outputs.workspace_path }} ${{ steps.npm-install.outputs.workspace_path }}
+        run: ${{ steps.npm-install.outputs.script_cmd }} run test:ci -- --coverage.include=${{ steps.npm-install.outputs.workspace_path }} ${{ steps.npm-install.outputs.workspace_path }}
         env:
           CI: true
