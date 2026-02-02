@@ -33,6 +33,6 @@
     "testcontainers": "^11.11.0"
   },
   "devDependencies": {
-    "@confluentinc/kafka-javascript": "^1.7.0"
+    "@confluentinc/kafka-javascript": "^1.8.0"
   }
 }
