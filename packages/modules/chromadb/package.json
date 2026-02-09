@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/chromadb",
-  "version": "11.10.0",
+  "version": "11.11.0",
   "license": "MIT",
   "keywords": [
     "chromadb",
@@ -31,9 +31,9 @@
   "devDependencies": {
     "@chroma-core/default-embed": "^0.1.9",
     "@chroma-core/ollama": "^0.1.8",
-    "chromadb": "^3.1.8"
+    "chromadb": "^3.2.0"
   },
   "dependencies": {
-    "testcontainers": "^11.10.0"
+    "testcontainers": "^11.11.0"
   }
 }

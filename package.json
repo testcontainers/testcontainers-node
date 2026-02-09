@@ -28,13 +28,13 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "ls-engines": "^0.9.3",
-    "npm-check-updates": "^19.2.0",
+    "npm-check-updates": "^19.3.0",
     "prettier": "^3.7.4",
     "prettier-plugin-organize-imports": "^4.3.0",
     "shx": "^0.4.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.49.0",
+    "typescript-eslint": "^8.50.1",
     "vitest": "^3.2.4"
   },
   "lint-staged": {
