@@ -29,7 +29,7 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "mongoose": "^9.1.6"
+    "mongoose": "^9.2.1"
   },
   "dependencies": {
     "compare-versions": "^6.1.1",
