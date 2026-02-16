@@ -10,7 +10,7 @@ jobs:
 
     steps:
       - name: Dispatch windows-test command
-        uses: peter-evans/slash-command-dispatch@v4
+        uses: peter-evans/slash-command-dispatch@v5
         with:
           token: ${{ secrets.REPO_TOKEN }}
           commands: windows-test

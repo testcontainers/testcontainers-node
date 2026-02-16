@@ -20,7 +20,7 @@ jobs:
     runs-on: ${{ inputs.runner }}
     steps:
       - name: Code checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Docker rootless setup
         if: ${{ inputs.container-runtime == 'docker-rootless' }}
@@ -43,7 +43,7 @@ jobs:
           runner: ${{ inputs.runner }}
 
       - name: Code checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Install Node ${{ inputs.node-version }} and Dependencies
         id: npm-install
