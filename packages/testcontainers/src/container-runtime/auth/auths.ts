@@ -13,6 +13,13 @@ export class Auths implements RegistryAuthLocator {
       return undefined;
     }
 
+    if (auth.identitytoken) {
+      return {
+        registryAddress: registry,
+        identityToken: auth.identitytoken,
+      };
+    }
+
     const authConfig: Partial<UsernamePasswordAuthConfig> = { registryAddress: registry };
 
     if (auth.email) {

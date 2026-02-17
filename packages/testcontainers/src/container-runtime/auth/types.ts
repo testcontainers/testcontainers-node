@@ -9,6 +9,7 @@ export type Auth = {
   email?: string;
   username?: string;
   password?: string;
+  identitytoken?: string;
 };
 
 export type AuthConfig = UsernamePasswordAuthConfig | IdentityTokenAuthConfig;

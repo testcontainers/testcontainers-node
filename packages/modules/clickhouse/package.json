@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/clickhouse",
-  "version": "11.8.1",
+  "version": "11.11.0",
   "license": "MIT",
   "keywords": [
     "clickhouse",
@@ -29,9 +29,9 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "@clickhouse/client": "^1.12.1"
+    "@clickhouse/client": "^1.17.0"
   },
   "dependencies": {
-    "testcontainers": "^11.8.1"
+    "testcontainers": "^11.11.0"
   }
 }

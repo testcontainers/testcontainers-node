@@ -91,8 +91,8 @@ export class CouchbaseContainer extends GenericContainer {
           ...(auth ? { Authorization: `Basic ${btoa(this.username + ":" + this.password)}` } : {}),
         },
       });
-    } catch (e) {
-      throw new Error(`Could not perform request against couchbase HTTP endpoint ${e}`);
+    } catch (cause) {
+      throw new Error("Could not perform request against couchbase HTTP endpoint", { cause });
     }
   }
 
@@ -192,8 +192,8 @@ export class CouchbaseContainer extends GenericContainer {
     let jsonResponse;
     try {
       jsonResponse = (await response.json()) as { isEnterprise: boolean };
-    } catch (e) {
-      throw new Error("Couchbase /pools did not return valid JSON");
+    } catch (cause) {
+      throw new Error("Couchbase /pools did not return valid JSON", { cause });
     }
 
     this.isEnterprise = jsonResponse.isEnterprise;
@@ -301,33 +301,46 @@ export class CouchbaseContainer extends GenericContainer {
 
     body.set("hostname", container.getHost());
     body.set("mgmt", container.getMappedPort(PORTS.MGMT_PORT).toString());
-    body.set("mgmtSSL", container.getMappedPort(PORTS.MGMT_SSL_PORT).toString());
+    if (this.isEnterprise) {
+      body.set("mgmtSSL", container.getMappedPort(PORTS.MGMT_SSL_PORT).toString());
+    }
 
     if (this.enabledServices.has(CouchbaseService.KV)) {
       body.set("kv", container.getMappedPort(PORTS.KV_PORT).toString());
-      body.set("kvSSL", container.getMappedPort(PORTS.KV_SSL_PORT).toString());
       body.set("capi", container.getMappedPort(PORTS.VIEW_PORT).toString());
-      body.set("capiSSL", container.getMappedPort(PORTS.VIEW_SSL_PORT).toString());
+
+      if (this.isEnterprise) {
+        body.set("kvSSL", container.getMappedPort(PORTS.KV_SSL_PORT).toString());
+        body.set("capiSSL", container.getMappedPort(PORTS.VIEW_SSL_PORT).toString());
+      }
     }
 
     if (this.enabledServices.has(CouchbaseService.QUERY)) {
       body.set("n1ql", container.getMappedPort(PORTS.QUERY_PORT).toString());
-      body.set("n1qlSSL", container.getMappedPort(PORTS.QUERY_SSL_PORT).toString());
+      if (this.isEnterprise) {
+        body.set("n1qlSSL", container.getMappedPort(PORTS.QUERY_SSL_PORT).toString());
+      }
     }
 
     if (this.enabledServices.has(CouchbaseService.SEARCH)) {
       body.set("fts", container.getMappedPort(PORTS.SEARCH_PORT).toString());
-      body.set("ftsSSL", container.getMappedPort(PORTS.SEARCH_SSL_PORT).toString());
+      if (this.isEnterprise) {
+        body.set("ftsSSL", container.getMappedPort(PORTS.SEARCH_SSL_PORT).toString());
+      }
     }
 
     if (this.enabledServices.has(CouchbaseService.ANALYTICS)) {
       body.set("cbas", container.getMappedPort(PORTS.ANALYTICS_PORT).toString());
-      body.set("cbasSSL", container.getMappedPort(PORTS.ANALYTICS_SSL_PORT).toString());
+      if (this.isEnterprise) {
+        body.set("cbasSSL", container.getMappedPort(PORTS.ANALYTICS_SSL_PORT).toString());
+      }
     }
 
     if (this.enabledServices.has(CouchbaseService.EVENTING)) {
       body.set("eventingAdminPort", container.getMappedPort(PORTS.EVENTING_PORT).toString());
-      body.set("eventingSSL", container.getMappedPort(PORTS.EVENTING_SSL_PORT).toString());
+      if (this.isEnterprise) {
+        body.set("eventingSSL", container.getMappedPort(PORTS.EVENTING_SSL_PORT).toString());
+      }
     }
 
     const response = await this.doHttpRequest(

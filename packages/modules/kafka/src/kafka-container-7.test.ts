@@ -1,5 +1,5 @@
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 import { GenericContainer, Network } from "testcontainers";
 import { KafkaContainer } from "./kafka-container";
 import { assertMessageProducedAndConsumed } from "./test-helper";
@@ -35,7 +35,7 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
     const zooKeeperHost = "zookeeper";
     const zooKeeperPort = 2181;
 
-    await using _ = await new GenericContainer("confluentinc/cp-zookeeper:5.5.4")
+    await using _ = await new GenericContainer("confluentinc/cp-zookeeper:7.5.0")
       .withNetwork(network)
       .withNetworkAliases(zooKeeperHost)
       .withEnvironment({ ZOOKEEPER_CLIENT_PORT: zooKeeperPort.toString() })
@@ -84,17 +84,21 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
         })
         .start();
 
-      await assertMessageProducedAndConsumed(container, {
-        brokers: [`${container.getHost()}:${container.getMappedPort(9096)}`],
-        sasl: {
-          username: "app-user",
-          password: "userPassword",
-          mechanism: "scram-sha-512",
+      await assertMessageProducedAndConsumed(
+        container,
+        {
+          brokers: [`${container.getHost()}:${container.getMappedPort(9096)}`],
+          ssl: true,
+          sasl: {
+            mechanism: "scram-sha-512",
+            username: "app-user",
+            password: "userPassword",
+          },
         },
-        ssl: {
-          ca: [fs.readFileSync(path.resolve(certificatesDir, "kafka.client.truststore.pem"))],
-        },
-      });
+        {
+          "ssl.ca.location": path.resolve(certificatesDir, "kafka.client.truststore.pem"),
+        }
+      );
       // }
     });
 
@@ -121,17 +125,21 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
         })
         .start();
 
-      await assertMessageProducedAndConsumed(container, {
-        brokers: [`${container.getHost()}:${container.getMappedPort(9096)}`],
-        sasl: {
-          username: "app-user",
-          password: "userPassword",
-          mechanism: "scram-sha-512",
+      await assertMessageProducedAndConsumed(
+        container,
+        {
+          brokers: [`${container.getHost()}:${container.getMappedPort(9096)}`],
+          ssl: true,
+          sasl: {
+            mechanism: "scram-sha-512",
+            username: "app-user",
+            password: "userPassword",
+          },
         },
-        ssl: {
-          ca: [fs.readFileSync(path.resolve(certificatesDir, "kafka.client.truststore.pem"))],
-        },
-      });
+        {
+          "ssl.ca.location": path.resolve(certificatesDir, "kafka.client.truststore.pem"),
+        }
+      );
     });
 
     it(`should connect within Docker network`, async () => {

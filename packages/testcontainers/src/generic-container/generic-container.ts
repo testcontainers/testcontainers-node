@@ -1,6 +1,7 @@
 import archiver from "archiver";
 import AsyncLock from "async-lock";
 import { Container, ContainerCreateOptions, HostConfig } from "dockerode";
+import { promises as fs } from "fs";
 import { Readable } from "stream";
 import { containerLog, hash, log, toNanos } from "../common";
 import { ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "../container-runtime";
@@ -13,6 +14,7 @@ import {
   ArchiveToCopy,
   BindMount,
   ContentToCopy,
+  CopyToContainerOptions,
   DirectoryToCopy,
   Environment,
   ExtraHost,
@@ -61,6 +63,7 @@ export class GenericContainer implements TestContainer {
   protected directoriesToCopy: DirectoryToCopy[] = [];
   protected contentsToCopy: ContentToCopy[] = [];
   protected archivesToCopy: ArchiveToCopy[] = [];
+  protected copyToContainerOptions: CopyToContainerOptions = {};
   protected healthCheck?: HealthCheck;
 
   constructor(image: string) {
@@ -179,13 +182,13 @@ export class GenericContainer implements TestContainer {
     }
 
     if (this.filesToCopy.length > 0 || this.directoriesToCopy.length > 0 || this.contentsToCopy.length > 0) {
-      const archive = this.createArchiveToCopyToContainer();
+      const archive = await this.createArchiveToCopyToContainer();
       archive.finalize();
-      await client.container.putArchive(container, archive, "/");
+      await client.container.putArchive(container, archive, "/", this.copyToContainerOptions);
     }
 
     for (const archive of this.archivesToCopy) {
-      await client.container.putArchive(container, archive.tar, archive.target);
+      await client.container.putArchive(container, archive.tar, archive.target, this.copyToContainerOptions);
     }
 
     log.info(`Starting container for image "${this.createOpts.Image}"...`, { containerId: container.id });
@@ -255,11 +258,17 @@ export class GenericContainer implements TestContainer {
     }
   }
 
-  private createArchiveToCopyToContainer(): archiver.Archiver {
+  private async createArchiveToCopyToContainer(): Promise<archiver.Archiver> {
     const tar = archiver("tar");
+    const filesToCopyWithStats = await Promise.all(
+      this.filesToCopy.map(async (fileToCopy) => ({
+        ...fileToCopy,
+        stats: await fs.stat(fileToCopy.source),
+      }))
+    );
 
-    for (const { source, target, mode } of this.filesToCopy) {
-      tar.file(source, { name: target, mode });
+    for (const { source, target, mode, stats } of filesToCopyWithStats) {
+      tar.file(source, { name: target, mode, stats });
     }
     for (const { source, target, mode } of this.directoriesToCopy) {
       tar.directory(source, target, { mode });
@@ -325,6 +334,11 @@ export class GenericContainer implements TestContainer {
         Soft: value.soft,
       })),
     ];
+    return this;
+  }
+
+  public withSecurityOpt(...securityOptions: string[]): this {
+    this.hostConfig.SecurityOpt = [...(this.hostConfig.SecurityOpt ?? []), ...securityOptions];
     return this;
   }
 
@@ -479,6 +493,14 @@ export class GenericContainer implements TestContainer {
 
   public withCopyArchivesToContainer(archivesToCopy: ArchiveToCopy[]): this {
     this.archivesToCopy = [...this.archivesToCopy, ...archivesToCopy];
+    return this;
+  }
+
+  public withCopyToContainerOptions(copyToContainerOptions: CopyToContainerOptions): this {
+    this.copyToContainerOptions = {
+      ...this.copyToContainerOptions,
+      ...copyToContainerOptions,
+    };
     return this;
   }
 

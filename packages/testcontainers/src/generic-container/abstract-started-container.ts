@@ -1,6 +1,15 @@
 import { Readable } from "stream";
 import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
-import { CommitOptions, ContentToCopy, DirectoryToCopy, ExecOptions, ExecResult, FileToCopy, Labels } from "../types";
+import {
+  CommitOptions,
+  ContentToCopy,
+  CopyToContainerOptions,
+  DirectoryToCopy,
+  ExecOptions,
+  ExecResult,
+  FileToCopy,
+  Labels,
+} from "../types";
 
 export class AbstractStartedContainer implements StartedTestContainer {
   constructor(protected readonly startedTestContainer: StartedTestContainer) {}
@@ -12,7 +21,7 @@ export class AbstractStartedContainer implements StartedTestContainer {
       await this.containerStopping();
     }
 
-    const stoppedContainer = this.startedTestContainer.stop(options);
+    const stoppedContainer = await this.startedTestContainer.stop(options);
 
     if (this.containerStopped) {
       await this.containerStopped();
@@ -88,8 +97,8 @@ export class AbstractStartedContainer implements StartedTestContainer {
     return this.startedTestContainer.copyContentToContainer(contentsToCopy);
   }
 
-  public copyArchiveToContainer(tar: Readable, target = "/"): Promise<void> {
-    return this.startedTestContainer.copyArchiveToContainer(tar, target);
+  public copyArchiveToContainer(tar: Readable, target = "/", options?: CopyToContainerOptions): Promise<void> {
+    return this.startedTestContainer.copyArchiveToContainer(tar, target, options);
   }
 
   public copyArchiveFromContainer(path: string): Promise<NodeJS.ReadableStream> {
@@ -105,6 +114,6 @@ export class AbstractStartedContainer implements StartedTestContainer {
   }
 
   async [Symbol.asyncDispose]() {
-    await this.startedTestContainer[Symbol.asyncDispose]();
+    await this.stop();
   }
 }
