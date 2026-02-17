@@ -19,5 +19,9 @@ export default defineConfig({
     alias: {
       testcontainers: path.resolve(__dirname, "packages/testcontainers/src"),
     },
+    coverage: {
+      include: ["packages/**/*.ts"],
+      exclude: ["**/*.test.ts"],
+    },
   },
 });

@@ -15,7 +15,6 @@
     "lint": "eslint --fix package.json \"packages/**/*.ts\"",
     "lint:ci": "eslint package.json \"${WORKSPACE_PATH}/**/*.ts\" --max-warnings=0",
     "update-deps": "npm-check-updates --workspaces --root -u",
-    "validate-engine": "ls-engines",
     "check-compiles": "npm run build --ignore-scripts --ws -- --project tsconfig.json --noEmit"
   },
   "devDependencies": {
@@ -27,14 +26,13 @@
     "eslint-plugin-prettier": "^5.5.5",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
-    "ls-engines": "^0.10.0",
     "npm-check-updates": "^19.3.2",
     "prettier": "^3.8.1",
     "prettier-plugin-organize-imports": "^4.3.0",
     "shx": "^0.4.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.55.0",
+    "typescript-eslint": "^8.56.0",
     "vitest": "^4.0.18"
   },
   "lint-staged": {

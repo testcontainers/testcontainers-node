@@ -91,8 +91,8 @@ export class CouchbaseContainer extends GenericContainer {
           ...(auth ? { Authorization: `Basic ${btoa(this.username + ":" + this.password)}` } : {}),
         },
       });
-    } catch (e) {
-      throw new Error(`Could not perform request against couchbase HTTP endpoint ${e}`);
+    } catch (cause) {
+      throw new Error("Could not perform request against couchbase HTTP endpoint", { cause });
     }
   }
 
@@ -192,8 +192,8 @@ export class CouchbaseContainer extends GenericContainer {
     let jsonResponse;
     try {
       jsonResponse = (await response.json()) as { isEnterprise: boolean };
-    } catch (e) {
-      throw new Error("Couchbase /pools did not return valid JSON");
+    } catch (cause) {
+      throw new Error("Couchbase /pools did not return valid JSON", { cause });
     }
 
     this.isEnterprise = jsonResponse.isEnterprise;
