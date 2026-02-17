@@ -59,3 +59,17 @@ Choose an image from the [container registry](https://hub.docker.com/r/microsoft
 <!--codeinclude-->
 [](../../packages/modules/azurite/src/azurite-container.test.ts) inside_block:customPorts
 <!--/codeinclude-->
+
+### With HTTPS (PEM certificate)
+
+<!--codeinclude-->
+[Code](../../packages/modules/azurite/src/azurite-container.test.ts) inside_block:httpsWithPem
+[`azurite-test-utils`](../../packages/modules/azurite/src/azurite-test-utils.ts) inside_block:azuriteTestUtils
+<!--/codeinclude-->
+
+### With OAuth (basic)
+
+<!--codeinclude-->
+[Code](../../packages/modules/azurite/src/azurite-container.test.ts) inside_block:withOAuth
+[`azurite-test-utils`](../../packages/modules/azurite/src/azurite-test-utils.ts) inside_block:azuriteTestUtils
+<!--/codeinclude-->

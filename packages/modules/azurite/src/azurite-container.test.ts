@@ -1,10 +1,15 @@
 import { TableClient, TableEntity } from "@azure/data-tables";
 import { BlobServiceClient, StorageSharedKeyCredential } from "@azure/storage-blob";
 import { QueueServiceClient } from "@azure/storage-queue";
+import fs from "node:fs";
+import path from "node:path";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { AzuriteContainer } from "./azurite-container";
+import { createOAuthToken, createTokenCredential, getTlsPipelineOptions } from "./azurite-test-utils";
 
 const IMAGE = getImage(__dirname);
+const TEST_CERT = fs.readFileSync(path.resolve(__dirname, "..", "test-certs", "azurite-test-cert.pem"), "utf8");
+const TEST_KEY = fs.readFileSync(path.resolve(__dirname, "..", "test-certs", "azurite-test-key.pem"), "utf8");
 
 describe("AzuriteContainer", { timeout: 240_000 }, () => {
   it("should upload and download blob with default credentials", async () => {
@@ -115,6 +120,54 @@ describe("AzuriteContainer", { timeout: 240_000 }, () => {
     const serviceClient = BlobServiceClient.fromConnectionString(connectionString);
     const containerClient = serviceClient.getContainerClient("test");
     await containerClient.createIfNotExists();
+  });
+
+  it("should be able to enable HTTPS with PEM certificate and key", async () => {
+    // httpsWithPem {
+    await using container = await new AzuriteContainer(IMAGE).withSsl(TEST_CERT, TEST_KEY).start();
+
+    const connectionString = container.getConnectionString();
+    expect(connectionString).toContain("DefaultEndpointsProtocol=https");
+    expect(connectionString).toContain("BlobEndpoint=https://");
+    expect(connectionString).toContain("QueueEndpoint=https://");
+    expect(connectionString).toContain("TableEndpoint=https://");
+
+    const serviceClient = BlobServiceClient.fromConnectionString(connectionString, getTlsPipelineOptions(TEST_CERT));
+    const containerClient = serviceClient.getContainerClient("test");
+    await containerClient.createIfNotExists();
+
+    const containerItem = await serviceClient.listContainers().next();
+    expect(containerItem.value?.name).toBe("test");
+    // }
+  });
+
+  it("should be able to enable OAuth basic authentication", async () => {
+    // withOAuth {
+    await using container = await new AzuriteContainer(IMAGE).withSsl(TEST_CERT, TEST_KEY).withOAuth().start();
+
+    const validServiceClient = new BlobServiceClient(
+      container.getBlobEndpoint(),
+      createTokenCredential(createOAuthToken("https://storage.azure.com")),
+      getTlsPipelineOptions(TEST_CERT)
+    );
+    const validContainerClient = validServiceClient.getContainerClient(`oauth-valid-${Date.now()}`);
+    await validContainerClient.create();
+    await validContainerClient.delete();
+
+    const invalidServiceClient = new BlobServiceClient(
+      container.getBlobEndpoint(),
+      createTokenCredential(createOAuthToken("https://invalidaccount.blob.core.windows.net")),
+      getTlsPipelineOptions(TEST_CERT)
+    );
+    const invalidContainerClient = invalidServiceClient.getContainerClient(`oauth-invalid-${Date.now()}`);
+    await expect(invalidContainerClient.create()).rejects.toThrow("Server failed to authenticate the request");
+    // }
+  });
+
+  it("should require HTTPS when enabling OAuth", async () => {
+    await expect(new AzuriteContainer(IMAGE).withOAuth().start()).rejects.toThrow(
+      "OAuth requires HTTPS endpoint. Configure SSL first with withSsl() or withSslPfx()."
+    );
   });
 
   it("should be able to use in-memory persistence", async () => {
