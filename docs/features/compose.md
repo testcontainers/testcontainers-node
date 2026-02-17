@@ -29,16 +29,18 @@ Provide a list of service names to only start those services:
 
 ```js
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
-  .up(["redis-1", "postgres-1"]);
+  .up(["redis", "postgres"]);
 ```
 
 ### With wait strategy
+
+`withWaitStrategy` expects **container names**, not service names. With Docker Compose v2, the default container name for the first replica is usually `<service>-1`.
 
 ```js
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
   .withWaitStrategy("redis-1", Wait.forLogMessage("Ready to accept connections"))
   .withWaitStrategy("postgres-1", Wait.forHealthCheck())
-  .up();
+  .up(["redis", "postgres"]);
 ```
 
 ### With a default wait strategy

@@ -12,6 +12,10 @@ It captures practical rules that prevent avoidable CI and PR churn.
 - If new learnings or misunderstandings are discovered, propose an `AGENTS.md` update in the same PR.
 - Tests should verify observable behavior changes, not only internal/config state.
   - Example: for a security option, assert a real secure/insecure behavior difference.
+- Vitest runs tests concurrently by default (`sequence.concurrent: true` in `vitest.config.ts`).
+  - Tests that rely on shared/global mocks (for example `vi.spyOn` on shared loggers/singletons) can be flaky due to interleaving or automatic mock resets.
+  - Prefer asserting observable behavior instead of shared global mock state when possible.
+  - If a test must depend on shared/global mock state, use `it.sequential(...)` or `describe.sequential(...)`.
 
 ## Permission and Escalation
 

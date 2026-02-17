@@ -150,6 +150,13 @@ export class DockerComposeEnvironment {
     );
     log.info(`Started containers "${startedContainerNames.join('", "')}"`);
 
+    const startedContainerNameSet = new Set(
+      startedContainers.map((startedContainer) =>
+        parseComposeContainerName(this.projectName, startedContainer.Names[0])
+      )
+    );
+    this.warnForUnusedWaitStrategies(startedContainerNameSet);
+
     const startedGenericContainers = (
       await Promise.all(
         startedContainers.map(async (startedContainer) => {
@@ -206,5 +213,16 @@ export class DockerComposeEnvironment {
       composeOptions,
       environment: this.environment,
     });
+  }
+
+  private warnForUnusedWaitStrategies(startedContainerNames: Set<string>): void {
+    const unusedWaitStrategyContainerNames = Object.keys(this.waitStrategy).filter(
+      (configuredContainerName) => !startedContainerNames.has(configuredContainerName)
+    );
+    if (unusedWaitStrategyContainerNames.length > 0) {
+      log.warn(
+        `No containers were started for the configured wait strategy names: "${unusedWaitStrategyContainerNames.join('", "')}". Wait strategies are matched against container names (for example "redis-1"), not service names.`
+      );
+    }
   }
 }
