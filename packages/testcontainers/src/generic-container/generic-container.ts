@@ -328,6 +328,11 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
+  public withSecurityOpt(...securityOptions: string[]): this {
+    this.hostConfig.SecurityOpt = [...(this.hostConfig.SecurityOpt ?? []), ...securityOptions];
+    return this;
+  }
+
   public withAddedCapabilities(...capabilities: string[]): this {
     this.hostConfig.CapAdd = [...(this.hostConfig.CapAdd ?? []), ...capabilities];
     return this;

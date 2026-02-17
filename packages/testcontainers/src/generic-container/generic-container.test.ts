@@ -271,6 +271,16 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     });
   }
 
+  it("should set security options", async () => {
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withSecurityOpt("no-new-privileges")
+      .withExposedPorts(8080)
+      .start();
+
+    const { output } = await container.exec(["sh", "-c", "awk '/^NoNewPrivs:/ { print $2 }' /proc/1/status"]);
+    expect(output.trim()).toBe("1");
+  });
+
   it("should add capabilities", async () => {
     await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withAddedCapabilities("IPC_LOCK")

@@ -245,6 +245,16 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+### With security options
+
+See [Security options](https://docs.docker.com/engine/reference/run/#security-configuration).
+
+```js
+const container = await new GenericContainer("alpine")
+  .withSecurityOpt("no-new-privileges")
+  .start();
+```
+
 ### With added capabilities
 
 See [capabilities](https://man7.org/linux/man-pages/man7/capabilities.7.html).
