@@ -138,7 +138,7 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
       .withWaitStrategy(unmatchedWaitStrategyName, Wait.forLogMessage("Listening on port 8080"))
       .up(["container"]);
 
-    await checkEnvironmentContainerIsHealthy(startedEnvironment, await composeContainerName("container"));
+    await checkEnvironmentContainerIsHealthy(startedEnvironment, "container-1");
 
     const warningMessages = warnSpy.mock.calls.map(([message]) => message);
     expect(
