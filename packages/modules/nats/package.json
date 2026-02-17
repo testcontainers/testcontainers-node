@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/nats",
-  "version": "11.11.0",
+  "version": "11.12.0",
   "license": "MIT",
   "keywords": [
     "nats",
@@ -29,7 +29,7 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "dependencies": {
-    "testcontainers": "^11.11.0"
+    "testcontainers": "^11.12.0"
   },
   "devDependencies": {
     "@nats-io/jetstream": "^3.3.1",

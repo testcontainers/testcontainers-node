@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/arangodb",
-  "version": "11.11.0",
+  "version": "11.12.0",
   "license": "MIT",
   "keywords": [
     "arangodb",
@@ -32,6 +32,6 @@
     "arangojs": "^10.2.2"
   },
   "dependencies": {
-    "testcontainers": "^11.11.0"
+    "testcontainers": "^11.12.0"
   }
 }
