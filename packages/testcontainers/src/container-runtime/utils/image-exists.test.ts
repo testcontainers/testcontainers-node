@@ -2,13 +2,16 @@ import Dockerode from "dockerode";
 import { ImageName } from "../image-name";
 
 const mockImageInspect = vi.fn();
+
 vi.mock("dockerode", () => {
   return {
-    default: vi.fn(() => ({
-      getImage: () => ({
-        inspect: mockImageInspect,
-      }),
-    })),
+    default: vi.fn(function DockerodeMock() {
+      return {
+        getImage: () => ({
+          inspect: mockImageInspect,
+        }),
+      };
+    }),
   };
 });
 
