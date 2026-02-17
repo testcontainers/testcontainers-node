@@ -244,4 +244,8 @@ export class StartedGenericContainer implements StartedTestContainer {
   async [Symbol.asyncDispose]() {
     await this.stop();
   }
+
+  private getWaitStrategy() {
+    return this.waitStrategy;
+  }
 }
