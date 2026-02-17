@@ -27,6 +27,7 @@ export interface TestContainer {
   withEntrypoint(entrypoint: string[]): this;
   withTmpFs(tmpFs: TmpFs): this;
   withUlimits(ulimits: Ulimits): this;
+  withSecurityOpt(...securityOptions: string[]): this;
   withAddedCapabilities(...capabilities: string[]): this;
   withDroppedCapabilities(...capabilities: string[]): this;
   withExposedPorts(...ports: PortWithOptionalBinding[]): this;
