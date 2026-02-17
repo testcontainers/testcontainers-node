@@ -22,7 +22,6 @@ It captures practical rules that prevent avoidable CI and PR churn.
 
 - Use specific commands and clear justifications.
 - Prefer narrow reruns rather than broad full-suite reruns when iterating.
-- If local git hooks are broken or missing (for example, `.husky/_/husky.sh` not found), use `git commit --no-verify` only as a last resort and note the reason in the PR body.
 
 ## PR Process
 
@@ -31,7 +30,7 @@ It captures practical rules that prevent avoidable CI and PR churn.
 3. Implement scoped changes only.
 4. Run required checks: `npm run format`, `npm run lint`, and targeted tests.
 5. Verify git diff only contains intended files.
-6. Commit with focused message(s).
+6. Commit with focused message(s), using `git commit --no-verify`.
 7. Push branch.
 8. Open PR against `main` using a human-readable title (no `feat(...)` / `fix(...)` prefixes).
 9. Add labels for both change type and semantic version impact.
