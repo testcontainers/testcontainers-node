@@ -1,6 +1,7 @@
 import archiver from "archiver";
 import AsyncLock from "async-lock";
 import { Container, ContainerCreateOptions, HostConfig } from "dockerode";
+import { promises as fs } from "fs";
 import { Readable } from "stream";
 import { containerLog, hash, log, toNanos } from "../common";
 import { ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "../container-runtime";
@@ -179,7 +180,7 @@ export class GenericContainer implements TestContainer {
     }
 
     if (this.filesToCopy.length > 0 || this.directoriesToCopy.length > 0 || this.contentsToCopy.length > 0) {
-      const archive = this.createArchiveToCopyToContainer();
+      const archive = await this.createArchiveToCopyToContainer();
       archive.finalize();
       await client.container.putArchive(container, archive, "/");
     }
@@ -255,11 +256,17 @@ export class GenericContainer implements TestContainer {
     }
   }
 
-  private createArchiveToCopyToContainer(): archiver.Archiver {
+  private async createArchiveToCopyToContainer(): Promise<archiver.Archiver> {
     const tar = archiver("tar");
+    const filesToCopyWithStats = await Promise.all(
+      this.filesToCopy.map(async (fileToCopy) => ({
+        ...fileToCopy,
+        stats: await fs.stat(fileToCopy.source),
+      }))
+    );
 
-    for (const { source, target, mode } of this.filesToCopy) {
-      tar.file(source, { name: target, mode });
+    for (const { source, target, mode, stats } of filesToCopyWithStats) {
+      tar.file(source, { name: target, mode, stats });
     }
     for (const { source, target, mode } of this.directoriesToCopy) {
       tar.directory(source, target, { mode });

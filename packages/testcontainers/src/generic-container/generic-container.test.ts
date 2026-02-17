@@ -6,6 +6,7 @@ import { PullPolicy } from "../utils/pull-policy";
 import {
   checkContainerIsHealthy,
   checkContainerIsHealthyUdp,
+  createTempSymlinkedFile,
   getDockerEventStream,
   getRunningContainerNames,
   waitForDockerEvent,
@@ -364,6 +365,23 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     expect((await container.exec(["cat", target])).output).toEqual(expect.stringContaining("hello world"));
   });
 
+  it("should follow symlink when copying file to container", async () => {
+    if (process.platform === "win32") {
+      return;
+    }
+
+    const content = `hello world ${new RandomUuid().nextUuid()}`;
+    const target = "/tmp/test.txt";
+    await using symlinkedFile = await createTempSymlinkedFile(content);
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withCopyFilesToContainer([{ source: symlinkedFile.symlink, target }])
+      .withExposedPorts(8080)
+      .start();
+
+    expect((await container.exec(["cat", target])).output).toEqual(expect.stringContaining(content));
+    expect((await container.exec(["sh", "-c", `[ -L ${target} ]`])).exitCode).toBe(1);
+  });
+
   it("should copy file to container with permissions", async () => {
     const source = path.resolve(fixtures, "docker", "test.txt");
     const target = "/tmp/test.txt";
@@ -387,6 +405,24 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await container.copyFilesToContainer([{ source, target }]);
 
     expect((await container.exec(["cat", target])).output).toEqual(expect.stringContaining("hello world"));
+  });
+
+  it("should follow symlink when copying file to started container", async () => {
+    if (process.platform === "win32") {
+      return;
+    }
+
+    const content = `hello world ${new RandomUuid().nextUuid()}`;
+    const target = "/tmp/test.txt";
+    await using symlinkedFile = await createTempSymlinkedFile(content);
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withExposedPorts(8080)
+      .start();
+
+    await container.copyFilesToContainer([{ source: symlinkedFile.symlink, target }]);
+
+    expect((await container.exec(["cat", target])).output).toEqual(expect.stringContaining(content));
+    expect((await container.exec(["sh", "-c", `[ -L ${target} ]`])).exitCode).toBe(1);
   });
 
   it("should copy directory to container", async () => {

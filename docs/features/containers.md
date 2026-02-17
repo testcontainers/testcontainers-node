@@ -160,6 +160,8 @@ container.copyContentToContainer([{
 container.copyArchiveToContainer(nodeReadable, "/some/nested/remotedir");
 ```
 
+When copying files, symbolic links in `source` are followed and the linked file content is copied into the container.
+
 An optional `mode` can be specified in octal for setting file permissions:
 
 ```js
