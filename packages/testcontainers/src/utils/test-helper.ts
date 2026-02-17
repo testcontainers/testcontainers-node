@@ -125,18 +125,39 @@ export const composeContainerName = async (serviceName: string, index = 1): Prom
 
 export const waitForDockerEvent = async (eventStream: Readable, eventName: string, times = 1) => {
   let currentTimes = 0;
+  let pendingData = "";
+
+  const parseDockerEvent = (eventData: string): { status?: string; Action?: string } | undefined => {
+    try {
+      return JSON.parse(eventData);
+    } catch {
+      return undefined;
+    }
+  };
+
   return new Promise<void>((resolve) => {
-    eventStream.on("data", (data) => {
-      try {
-        if (JSON.parse(data).status === eventName) {
+    const onData = (data: string | Buffer) => {
+      // Docker events can be emitted as ndjson or json-seq; normalize both to line-delimited JSON.
+      pendingData += data.toString().split(String.fromCharCode(30)).join("\n");
+
+      const lines = pendingData.split("\n");
+      pendingData = lines.pop() ?? "";
+
+      for (const line of lines) {
+        const event = parseDockerEvent(line);
+        const action = event?.status ?? event?.Action;
+
+        if (action === eventName) {
           if (++currentTimes === times) {
+            eventStream.off("data", onData);
             resolve();
+            return;
           }
         }
-      } catch (err) {
-        // ignored
       }
-    });
+    };
+
+    eventStream.on("data", onData);
   });
 };
 

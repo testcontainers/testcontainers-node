@@ -8,6 +8,8 @@ It captures practical rules that prevent avoidable CI and PR churn.
 ## Development Expectations
 
 - If a public API changes, update the relevant docs in the same PR.
+- If new types are made part of the public API, export them from the package's `index.ts` in the same PR.
+- If new learnings or misunderstandings are discovered, propose an `AGENTS.md` update in the same PR.
 - Tests should verify observable behavior changes, not only internal/config state.
   - Example: for a security option, assert a real secure/insecure behavior difference.
 
@@ -28,7 +30,7 @@ It captures practical rules that prevent avoidable CI and PR churn.
 3. Implement scoped changes only.
 4. Run required checks: `npm run format`, `npm run lint`, and targeted tests.
 5. Verify git diff only contains intended files.
-6. Commit with focused message(s).
+6. Commit with focused message(s), using `git commit --no-verify`.
 7. Push branch.
 8. Open PR against `main` using a human-readable title (no `feat(...)` / `fix(...)` prefixes).
 9. Add labels for both change type and semantic version impact.
