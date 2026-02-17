@@ -1,6 +1,7 @@
 import archiver from "archiver";
 import AsyncLock from "async-lock";
 import Dockerode, { ContainerInspectInfo } from "dockerode";
+import { promises as fs } from "fs";
 import { Readable } from "stream";
 import { containerLog, log } from "../common";
 import { ContainerRuntimeClient, getContainerRuntimeClient } from "../container-runtime";
@@ -183,7 +184,13 @@ export class StartedGenericContainer implements StartedTestContainer {
     log.debug(`Copying files to container...`, { containerId: this.container.id });
     const client = await getContainerRuntimeClient();
     const tar = archiver("tar");
-    filesToCopy.forEach(({ source, target }) => tar.file(source, { name: target }));
+    const filesToCopyWithStats = await Promise.all(
+      filesToCopy.map(async (fileToCopy) => ({
+        ...fileToCopy,
+        stats: await fs.stat(fileToCopy.source),
+      }))
+    );
+    filesToCopyWithStats.forEach(({ source, target, mode, stats }) => tar.file(source, { name: target, mode, stats }));
     tar.finalize();
     await client.container.putArchive(this.container, tar, "/");
     log.debug(`Copied files to container`, { containerId: this.container.id });
