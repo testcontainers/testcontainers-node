@@ -37,7 +37,7 @@ async function loadFromFile() {
   if (existsSync(file)) {
     log.debug(`Loading ".testcontainers.properties" file...`);
     const string = await readFile(file, { encoding: "utf-8" });
-    const properties = propertiesReader("").read(string);
+    const properties = propertiesReader({ sourceFile: "" }).read(string);
 
     const tcHost = properties.get("tc.host") as string;
     if (tcHost !== null) {

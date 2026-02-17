@@ -1,4 +1,4 @@
-FROM gcr.io/google.com/cloudsdktool/google-cloud-cli:550.0.0-emulators
-FROM fsouza/fake-gcs-server:1.52.3
+FROM gcr.io/google.com/cloudsdktool/google-cloud-cli:556.0.0-emulators
+FROM fsouza/fake-gcs-server:1.54.0
 FROM ghcr.io/goccy/bigquery-emulator:0.6.6
-FROM gcr.io/cloud-spanner-emulator/emulator:1.5.46
+FROM gcr.io/cloud-spanner-emulator/emulator:1.5.49
