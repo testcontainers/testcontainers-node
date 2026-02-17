@@ -1,5 +1,5 @@
-import { Client } from "pg";
 import path from "node:path";
+import { Client } from "pg";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { PostgreSqlContainer } from "./postgresql-container";
 
