@@ -199,6 +199,7 @@ const container = await new GenericContainer("alpine")
 ```
 
 - `copyUIDGID`: preserve UID/GID from tar archive entries.
+  Note: Podman may ignore this for archive copy in some cases, see [containers/podman#27538](https://github.com/containers/podman/issues/27538).
 - `noOverwriteDirNonDir`: fail if extraction would replace a file with a directory (or vice versa).
 
 ### Copy archive from container
