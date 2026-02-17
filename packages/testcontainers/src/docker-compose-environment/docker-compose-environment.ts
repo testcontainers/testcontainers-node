@@ -1,5 +1,6 @@
 import { ContainerInfo } from "dockerode";
-import { containerLog, log, RandomUuid, Uuid } from "../common";
+import type { Uuid } from "../common";
+import { containerLog, log, RandomUuid } from "../common";
 import { ComposeOptions, getContainerRuntimeClient, parseComposeContainerName } from "../container-runtime";
 import { StartedGenericContainer } from "../generic-container/started-generic-container";
 import { getReaper } from "../reaper/reaper";

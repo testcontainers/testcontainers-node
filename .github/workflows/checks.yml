@@ -52,22 +52,25 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        js-runtime:
+          - { name: node, version: 24.x }
         module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
     runs-on: ubuntu-22.04
     steps:
       - name: Code checkout
         uses: actions/checkout@v5
-      - name: Install Node and Dependencies
-        id: npm-install-modules
+      - name: Install ${{ matrix.js-runtime.name }} and Dependencies
+        id: npm-install
         uses: ./.github/actions/npm-setup
         with:
           runner: ubuntu-22.04
-          node-version: 24.x
+          js-runtime: ${{ matrix.js-runtime.name }}
+          js-runtime-version: ${{ matrix.js-runtime.version }}
           workspace: "${{ matrix.module }}"
       - name: Code linting
         env:
-          WORKSPACE_PATH: ${{ steps.npm-install-modules.outputs.workspace_path }}
-        run: npm run lint:ci
+          WORKSPACE_PATH: ${{ steps.npm-install.outputs.workspace_path }}
+        run: ${{ steps.npm-install.outputs.script_cmd }} run lint:ci
 
   compile:
     if: ${{ needs.detect-modules.outputs.modules_count > 0 }}
@@ -78,23 +81,26 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        js-runtime:
+          - { name: node, version: 24.x }
         module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
     runs-on: ubuntu-22.04
     steps:
       - name: Code checkout
         uses: actions/checkout@v5
-      - name: Install Node and Dependencies
+      - name: Install ${{ matrix.js-runtime.name }} and Dependencies
         id: npm-install
         uses: ./.github/actions/npm-setup
         with:
           runner: ubuntu-22.04
-          node-version: 24.x
+          js-runtime: ${{ matrix.js-runtime.name }}
+          js-runtime-version: ${{ matrix.js-runtime.version }}
           workspace: "${{ matrix.module }}"
       - name: Compile
         run: |
-          npm run build --ignore-scripts --workspace packages/testcontainers -- --project tsconfig.json
+          ${{ steps.npm-install.outputs.script_cmd }} run build --ignore-scripts --workspace packages/testcontainers -- --project tsconfig.json
           if [ "${{ matrix.module }}" != "testcontainers" ]; then
-            npm run build --ignore-scripts --workspace ${{ steps.npm-install.outputs.workspace_path }} -- --project tsconfig.json --noEmit
+            ${{ steps.npm-install.outputs.script_cmd }} run build --ignore-scripts --workspace ${{ steps.npm-install.outputs.workspace_path }} -- --project tsconfig.json --noEmit
           fi
 
   smoke-test:
@@ -107,31 +113,37 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [20.x, 22.x, 24.x]
+        js-runtime:
+          - { name: node, version: 20.x }
+          - { name: node, version: 22.x }
+          - { name: node, version: 24.x }
+          - { name: bun,  version: 1.3.0 }
     runs-on: ubuntu-22.04
     steps:
       - name: Code checkout
         uses: actions/checkout@v5
-      - name: Install Node ${{ matrix.node-version }} and Dependencies
+      - name: Install ${{ matrix.js-runtime.name }} ${{ matrix.js-runtime-version }} and Dependencies
+        id: npm-install
         uses: ./.github/actions/npm-setup
         with:
           runner: ubuntu-22.04
-          node-version: ${{ matrix.node-version }}
+          js-runtime: ${{ matrix.js-runtime.name }}
+          js-runtime-version: ${{ matrix.js-runtime.version }}
           workspace: "testcontainers"
       - name: Build testcontainers
         run: npm run build --workspace packages/testcontainers
       - name: Remove dev dependencies
         run: npm prune --omit=dev --workspace packages/testcontainers
       - name: Run CommonJS module smoke test
-        run: node packages/testcontainers/smoke-test.js
+        run: ${{ steps.npm-install.outputs.cmd }} packages/testcontainers/smoke-test.js
         env:
           DEBUG: "testcontainers*"
       - name: Run ES module smoke test
-        run: node packages/testcontainers/smoke-test.mjs
+        run: ${{ steps.npm-install.outputs.cmd }} packages/testcontainers/smoke-test.mjs
         env:
           DEBUG: "testcontainers*"
 
-  test:
+  test-docker:
     if: ${{ needs.detect-modules.outputs.modules_count > 0 }}
     name: Tests
     needs:
@@ -142,14 +154,43 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        js-runtime:
+          - { name: node, version: 20.x }
+          - { name: node, version: 22.x }
+          - { name: node, version: 24.x }
+          - { name: bun,  version: 1.3.0 }
         module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
-        node-version: [20.x, 22.x, 24.x]
-        container-runtime: [docker, podman]
     uses: ./.github/workflows/test-template.yml
     with:
       runner: ubuntu-22.04
-      node-version: ${{ matrix.node-version }}
-      container-runtime: ${{ matrix.container-runtime }}
+      js-runtime: ${{ matrix.js-runtime.name }}
+      js-runtime-version: ${{ matrix.js-runtime.version }}
+      container-runtime: docker
+      workspace: "${{ matrix.module }}"
+
+  test-podman:
+    if: ${{ needs.detect-modules.outputs.modules_count > 0 }}
+    name: Tests
+    needs:
+      - detect-modules
+      - lint
+      - compile
+      - smoke-test
+    strategy:
+      fail-fast: false
+      matrix:
+        js-runtime:
+          - { name: node, version: 20.x }
+          - { name: node, version: 22.x }
+          - { name: node, version: 24.x }
+          - { name: bun,  version: 1.3.0 }
+        module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
+    uses: ./.github/workflows/test-template.yml
+    with:
+      runner: ubuntu-22.04
+      js-runtime: ${{ matrix.js-runtime.name }}
+      js-runtime-version: ${{ matrix.js-runtime.version }}
+      container-runtime: podman
       workspace: "${{ matrix.module }}"
 
   end:
@@ -160,7 +201,8 @@ jobs:
       - lint
       - compile
       - smoke-test
-      - test
+      - test-docker
+      - test-podman
     runs-on: ubuntu-22.04
     steps:
       - name: Check if any jobs failed
