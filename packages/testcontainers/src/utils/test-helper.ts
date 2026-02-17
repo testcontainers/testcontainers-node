@@ -119,10 +119,6 @@ export const getVolumeNames = async (): Promise<string[]> => {
   return volumes.map((volume) => volume.Name);
 };
 
-export const composeContainerName = async (serviceName: string, index = 1): Promise<string> => {
-  return `${serviceName}-${index}`;
-};
-
 export const waitForDockerEvent = async (eventStream: Readable, eventName: string, times = 1) => {
   let currentTimes = 0;
   let pendingData = "";

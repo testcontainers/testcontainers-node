@@ -187,7 +187,7 @@ await environment.stop();
 
 ## Interacting with the containers
 
-Interact with the containers in your compose environment as you would any other Generic Container. Note that the container name suffix has changed from `_` to `-` between docker-compose v1 and v2 respectively.
+Interact with the containers in your compose environment as you would any other Generic Container. Compose-managed container names use the `<service-name>-<index>` format.
 
 ```js
 const container = environment.getContainer("alpine-1");
