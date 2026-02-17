@@ -34,7 +34,7 @@ export const createOAuthToken = (audience: string): string => {
 };
 
 export const createTokenCredential = (token: string): TokenCredential => ({
-  getToken: async (_scopes: string | string[]) => ({
+  getToken: async () => ({
     token,
     expiresOnTimestamp: Date.now() + 3600_000,
   }),
