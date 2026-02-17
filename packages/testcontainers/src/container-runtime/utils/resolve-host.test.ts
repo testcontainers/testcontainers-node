@@ -9,16 +9,19 @@ vi.mock("fs", () => ({
 
 const mockInspectNetwork = vi.fn();
 const mockGetNetwork = vi.fn();
+
 vi.mock("dockerode", () => {
   return {
-    default: vi.fn(() => ({
-      getNetwork: (...args: unknown[]) => {
-        mockGetNetwork.mockImplementation(() => ({
-          inspect: mockInspectNetwork,
-        }));
-        return mockGetNetwork(...args);
-      },
-    })),
+    default: vi.fn(function DockerodeMock() {
+      return {
+        getNetwork: (...args: unknown[]) => {
+          mockGetNetwork.mockImplementation(() => ({
+            inspect: mockInspectNetwork,
+          }));
+          return mockGetNetwork(...args);
+        },
+      };
+    }),
   };
 });
 
