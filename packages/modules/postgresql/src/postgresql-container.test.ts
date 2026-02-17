@@ -1,8 +1,12 @@
+import path from "node:path";
 import { Client } from "pg";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { PostgreSqlContainer } from "./postgresql-container";
 
 const IMAGE = getImage(__dirname);
+const SSL_CA_CERT = path.resolve(__dirname, "test-certs/ca.crt");
+const SSL_SERVER_CERT = path.resolve(__dirname, "test-certs/server.crt");
+const SSL_SERVER_KEY = path.resolve(__dirname, "test-certs/server.key");
 
 describe("PostgreSqlContainer", { timeout: 180_000 }, () => {
   it("should connect and return a query result", async () => {
@@ -109,5 +113,40 @@ describe("PostgreSqlContainer", { timeout: 180_000 }, () => {
     });
 
     await expect(() => container.start()).rejects.toThrow();
+  });
+
+  it("should connect with SSL", async () => {
+    // pgSslConnect {
+    await using container = await new PostgreSqlContainer(IMAGE)
+      .withSSLCert(SSL_CA_CERT, SSL_SERVER_CERT, SSL_SERVER_KEY)
+      .start();
+
+    const client = new Client({
+      host: container.getHost(),
+      port: container.getPort(),
+      database: container.getDatabase(),
+      user: container.getUsername(),
+      password: container.getPassword(),
+      ssl: {
+        rejectUnauthorized: false,
+      },
+    });
+    await client.connect();
+
+    const result = await client.query("SELECT ssl FROM pg_stat_ssl WHERE pid = pg_backend_pid()");
+    expect(result.rows[0]).toEqual({ ssl: true });
+
+    await client.end();
+    // }
+  });
+
+  it("should validate SSL certificate paths", () => {
+    const container = new PostgreSqlContainer(IMAGE);
+
+    expect(() => container.withSSL("", "server.key")).toThrow("SSL certificate file should not be empty.");
+    expect(() => container.withSSL("server.crt", "")).toThrow("SSL key file should not be empty.");
+    expect(() => container.withSSLCert("", "server.crt", "server.key")).toThrow(
+      "SSL CA certificate file should not be empty."
+    );
   });
 });
