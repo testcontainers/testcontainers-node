@@ -5,6 +5,7 @@ import {
   BindMount,
   CommitOptions,
   ContentToCopy,
+  CopyToContainerOptions,
   DirectoryToCopy,
   Environment,
   ExecOptions,
@@ -47,6 +48,7 @@ export interface TestContainer {
   withCopyDirectoriesToContainer(directoriesToCopy: DirectoryToCopy[]): this;
   withCopyContentToContainer(contentsToCopy: ContentToCopy[]): this;
   withCopyArchivesToContainer(archivesToCopy: ArchiveToCopy[]): this;
+  withCopyToContainerOptions(copyToContainerOptions: CopyToContainerOptions): this;
   withWorkingDir(workingDir: string): this;
   withResourcesQuota(resourcesQuota: ResourcesQuota): this;
   withSharedMemorySize(bytes: number): this;
@@ -80,7 +82,7 @@ export interface StartedTestContainer extends AsyncDisposable {
   getNetworkId(networkName: string): string;
   getIpAddress(networkName: string): string;
   copyArchiveFromContainer(path: string): Promise<NodeJS.ReadableStream>;
-  copyArchiveToContainer(tar: Readable, target?: string): Promise<void>;
+  copyArchiveToContainer(tar: Readable, target?: string, options?: CopyToContainerOptions): Promise<void>;
   copyDirectoriesToContainer(directoriesToCopy: DirectoryToCopy[]): Promise<void>;
   copyFilesToContainer(filesToCopy: FileToCopy[]): Promise<void>;
   copyContentToContainer(contentsToCopy: ContentToCopy[]): Promise<void>;
