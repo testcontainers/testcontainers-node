@@ -493,6 +493,23 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     expect(output).not.toContain("Dockerfile");
   });
 
+  it("should honour nested .dockerignore exclusion patterns", async () => {
+    const context = path.resolve(fixtures, "docker-with-dockerignore-nested-exclusions");
+    const container = await GenericContainer.fromDockerfile(context).build();
+    await using startedContainer = await container.withExposedPorts(8080).start();
+
+    const { output } = await startedContainer.exec(["find"]);
+
+    expect(output).toContain("index.js");
+    expect(output).toContain("example2.txt");
+    expect(output).toContain("example4.txt");
+    expect(output).toContain("example5.txt");
+    expect(output).not.toContain("./example1.txt");
+    expect(output).not.toContain("./example3");
+    expect(output).not.toContain("./example6");
+    expect(output).not.toContain("./example7");
+  });
+
   it("should stop the container", async () => {
     await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withName(`container-${new RandomUuid().nextUuid()}`)
