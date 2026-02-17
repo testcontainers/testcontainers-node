@@ -22,6 +22,7 @@ It captures practical rules that prevent avoidable CI and PR churn.
 
 - Use specific commands and clear justifications.
 - Prefer narrow reruns rather than broad full-suite reruns when iterating.
+- If local git hooks are broken or missing (for example, `.husky/_/husky.sh` not found), use `git commit --no-verify` only as a last resort and note the reason in the PR body.
 
 ## PR Process
 
