@@ -10,6 +10,7 @@ import Dockerode, {
 import { IncomingMessage } from "http";
 import { PassThrough, Readable } from "stream";
 import { execLog, log, streamToString, toSeconds } from "../../../common";
+import { CopyToContainerOptions } from "../../../types";
 import { ContainerClient } from "./container-client";
 import { ContainerCommitOptions, ContainerStatus, ExecOptions, ExecResult } from "./types";
 
@@ -72,10 +73,23 @@ export class DockerContainerClient implements ContainerClient {
     }
   }
 
-  async putArchive(container: Dockerode.Container, stream: Readable, path: string): Promise<void> {
+  async putArchive(
+    container: Dockerode.Container,
+    stream: Readable,
+    path: string,
+    options?: CopyToContainerOptions
+  ): Promise<void> {
     try {
       log.debug(`Putting archive to container...`, { containerId: container.id });
-      await streamToString(Readable.from(await container.putArchive(stream, { path })));
+      await streamToString(
+        Readable.from(
+          await container.putArchive(stream, {
+            path,
+            noOverwriteDirNonDir: options?.noOverwriteDirNonDir,
+            copyUIDGID: options?.copyUIDGID,
+          })
+        )
+      );
       log.debug(`Put archive to container`, { containerId: container.id });
     } catch (err) {
       log.error(`Failed to put archive to container: ${err}`, { containerId: container.id });

@@ -7,6 +7,7 @@ import Dockerode, {
   Network,
 } from "dockerode";
 import { Readable } from "stream";
+import { CopyToContainerOptions } from "../../../types";
 import { ContainerCommitOptions, ContainerStatus, ExecOptions, ExecResult } from "./types";
 
 export interface ContainerClient {
@@ -21,7 +22,12 @@ export interface ContainerClient {
   ): Promise<Container | undefined>;
 
   fetchArchive(container: Container, path: string): Promise<NodeJS.ReadableStream>;
-  putArchive(container: Dockerode.Container, stream: Readable, path: string): Promise<void>;
+  putArchive(
+    container: Dockerode.Container,
+    stream: Readable,
+    path: string,
+    options?: CopyToContainerOptions
+  ): Promise<void>;
   list(): Promise<ContainerInfo[]>;
   create(opts: ContainerCreateOptions): Promise<Container>;
   start(container: Container): Promise<void>;

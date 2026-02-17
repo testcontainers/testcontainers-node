@@ -2,7 +2,7 @@ import { GetEventsOptions, ImageInspectInfo } from "dockerode";
 import { createServer, Server } from "http";
 import { createSocket } from "node:dgram";
 import fs from "node:fs";
-import { EOL } from "node:os";
+import { EOL, tmpdir } from "node:os";
 import path from "node:path";
 import { Readable } from "stream";
 import { Agent, request } from "undici";
@@ -119,10 +119,6 @@ export const getVolumeNames = async (): Promise<string[]> => {
   return volumes.map((volume) => volume.Name);
 };
 
-export const composeContainerName = async (serviceName: string, index = 1): Promise<string> => {
-  return `${serviceName}-${index}`;
-};
-
 export const waitForDockerEvent = async (eventStream: Readable, eventName: string, times = 1) => {
   let currentTimes = 0;
   let pendingData = "";
@@ -202,3 +198,21 @@ export async function createTestServer(port: number): Promise<Server> {
   await new Promise<void>((resolve) => server.listen(port, resolve));
   return server;
 }
+
+export const createTempSymlinkedFile = async (
+  content: string
+): Promise<{ source: string; symlink: string } & AsyncDisposable> => {
+  const directory = await fs.promises.mkdtemp(path.join(tmpdir(), "testcontainers-"));
+  const source = path.join(directory, "source.txt");
+  const symlink = path.join(directory, "symlink.txt");
+  await fs.promises.writeFile(source, content);
+  await fs.promises.symlink(source, symlink);
+
+  return {
+    source,
+    symlink,
+    [Symbol.asyncDispose]: async () => {
+      await fs.promises.rm(directory, { recursive: true, force: true });
+    },
+  };
+};
