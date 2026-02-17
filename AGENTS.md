@@ -29,7 +29,7 @@ It captures practical rules that prevent avoidable CI and PR churn.
 2. Create a branch prefixed with `codex/`.
 3. Implement scoped changes only.
 4. Run required checks: `npm run format`, `npm run lint`, and targeted tests.
-5. Verify git diff only contains intended files. If changes are still being discussed, share the diff and get user approval before committing or pushing.
+5. Verify git diff only contains intended files. If changes are still being discussed, do not commit or push; share the diff and get user approval first.
 6. Commit with focused message(s), using `git commit --no-verify`.
 7. Push branch. Ask for explicit user permission before any force push.
 8. Open PR against `main` using a human-readable title (no `feat(...)` / `fix(...)` prefixes).
@@ -39,6 +39,7 @@ It captures practical rules that prevent avoidable CI and PR churn.
     - summary of changes
     - verification commands run
     - test results summary
+    - if semver impact is not `major`, evidence that the change is not breaking
     - `Closes #<issue>`
 
 ## Labels
