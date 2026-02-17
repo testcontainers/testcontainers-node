@@ -1,3 +1,4 @@
+import archiver from "archiver";
 import getPort from "get-port";
 import path from "path";
 import { RandomUuid } from "../common";
@@ -508,6 +509,53 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
 
     expect((await container.exec(["cat", target])).output).toEqual(expect.stringContaining(content));
   });
+
+  // https://github.com/containers/podman/issues/27538
+  if (!process.env.CI_PODMAN) {
+    it("should copy archive to started container with ownership when copyUIDGID is enabled", async () => {
+      const uid = 4242;
+      const gid = 4343;
+      const targetWithCopyOwnership = "/tmp/copy-archive-copyuidgid.txt";
+
+      await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+        .withExposedPorts(8080)
+        .start();
+
+      const tar = archiver("tar");
+      tar.append("hello world", { name: targetWithCopyOwnership.slice(1), uid, gid } as archiver.EntryData);
+      tar.finalize();
+
+      await container.copyArchiveToContainer(tar, "/", { copyUIDGID: true });
+
+      expect((await container.exec(["stat", "-c", "%u:%g", targetWithCopyOwnership])).output.trim()).toEqual(
+        `${uid}:${gid}`
+      );
+    });
+
+    it("should copy archives before start with ownership when copyUIDGID is enabled", async () => {
+      const uid = 4242;
+      const gid = 4343;
+      const targetWithCopyOwnership = "/tmp/with-copy-archives-copyuidgid.txt";
+      const tar = archiver("tar");
+      tar.append("hello world", { name: targetWithCopyOwnership.slice(1), uid, gid } as archiver.EntryData);
+      tar.finalize();
+
+      await using containerWithCopyOwnership = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+        .withCopyArchivesToContainer([
+          {
+            tar,
+            target: "/",
+          },
+        ])
+        .withCopyToContainerOptions({ copyUIDGID: true })
+        .withExposedPorts(8080)
+        .start();
+
+      expect(
+        (await containerWithCopyOwnership.exec(["stat", "-c", "%u:%g", targetWithCopyOwnership])).output.trim()
+      ).toEqual(`${uid}:${gid}`);
+    });
+  }
 
   it("should honour .dockerignore file", async () => {
     const context = path.resolve(fixtures, "docker-with-dockerignore");

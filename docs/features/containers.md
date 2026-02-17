@@ -137,6 +137,9 @@ const container = await new GenericContainer("alpine")
     tar: nodeReadable,
     target: "/some/nested/remotedir"
   }])
+  .withCopyToContainerOptions({
+    copyUIDGID: true
+  })
   .start();
 ```
 
@@ -157,7 +160,9 @@ container.copyContentToContainer([{
   content: "hello world",
   target: "/remote/file2.txt"
 }])
-container.copyArchiveToContainer(nodeReadable, "/some/nested/remotedir");
+container.copyArchiveToContainer(nodeReadable, "/some/nested/remotedir", {
+  copyUIDGID: true
+});
 ```
 
 When copying files, symbolic links in `source` are followed and the linked file content is copied into the container.
@@ -183,6 +188,21 @@ const container = await new GenericContainer("alpine")
   }])
   .start();
 ```
+
+Archive copy options can also be specified:
+
+```js
+const container = await new GenericContainer("alpine")
+  .withCopyToContainerOptions({
+    copyUIDGID: true,
+    noOverwriteDirNonDir: true
+  })
+  .start();
+```
+
+- `copyUIDGID`: preserve UID/GID from tar archive entries.
+  Note: Podman may ignore this for archive copy in some cases, see [containers/podman#27538](https://github.com/containers/podman/issues/27538).
+- `noOverwriteDirNonDir`: fail if extraction would replace a file with a directory (or vice versa).
 
 ### Copy archive from container
 

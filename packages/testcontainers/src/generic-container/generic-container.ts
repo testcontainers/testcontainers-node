@@ -14,6 +14,7 @@ import {
   ArchiveToCopy,
   BindMount,
   ContentToCopy,
+  CopyToContainerOptions,
   DirectoryToCopy,
   Environment,
   ExtraHost,
@@ -62,6 +63,7 @@ export class GenericContainer implements TestContainer {
   protected directoriesToCopy: DirectoryToCopy[] = [];
   protected contentsToCopy: ContentToCopy[] = [];
   protected archivesToCopy: ArchiveToCopy[] = [];
+  protected copyToContainerOptions: CopyToContainerOptions = {};
   protected healthCheck?: HealthCheck;
 
   constructor(image: string) {
@@ -182,11 +184,11 @@ export class GenericContainer implements TestContainer {
     if (this.filesToCopy.length > 0 || this.directoriesToCopy.length > 0 || this.contentsToCopy.length > 0) {
       const archive = await this.createArchiveToCopyToContainer();
       archive.finalize();
-      await client.container.putArchive(container, archive, "/");
+      await client.container.putArchive(container, archive, "/", this.copyToContainerOptions);
     }
 
     for (const archive of this.archivesToCopy) {
-      await client.container.putArchive(container, archive.tar, archive.target);
+      await client.container.putArchive(container, archive.tar, archive.target, this.copyToContainerOptions);
     }
 
     log.info(`Starting container for image "${this.createOpts.Image}"...`, { containerId: container.id });
@@ -491,6 +493,14 @@ export class GenericContainer implements TestContainer {
 
   public withCopyArchivesToContainer(archivesToCopy: ArchiveToCopy[]): this {
     this.archivesToCopy = [...this.archivesToCopy, ...archivesToCopy];
+    return this;
+  }
+
+  public withCopyToContainerOptions(copyToContainerOptions: CopyToContainerOptions): this {
+    this.copyToContainerOptions = {
+      ...this.copyToContainerOptions,
+      ...copyToContainerOptions,
+    };
     return this;
   }
 

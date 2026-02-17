@@ -7,7 +7,16 @@ import { containerLog, log } from "../common";
 import { ContainerRuntimeClient, getContainerRuntimeClient } from "../container-runtime";
 import { getReaper } from "../reaper/reaper";
 import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
-import { CommitOptions, ContentToCopy, DirectoryToCopy, ExecOptions, ExecResult, FileToCopy, Labels } from "../types";
+import {
+  CommitOptions,
+  ContentToCopy,
+  CopyToContainerOptions,
+  DirectoryToCopy,
+  ExecOptions,
+  ExecResult,
+  FileToCopy,
+  Labels,
+} from "../types";
 import { BoundPorts } from "../utils/bound-ports";
 import { LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
 import { mapInspectResult } from "../utils/map-inspect-result";
@@ -216,10 +225,10 @@ export class StartedGenericContainer implements StartedTestContainer {
     log.debug(`Copied content to container`, { containerId: this.container.id });
   }
 
-  public async copyArchiveToContainer(tar: Readable, target = "/"): Promise<void> {
+  public async copyArchiveToContainer(tar: Readable, target = "/", options?: CopyToContainerOptions): Promise<void> {
     log.debug(`Copying archive to container...`, { containerId: this.container.id });
     const client = await getContainerRuntimeClient();
-    await client.container.putArchive(this.container, tar, target);
+    await client.container.putArchive(this.container, tar, target, options);
     log.debug(`Copied archive to container`, { containerId: this.container.id });
   }
 
