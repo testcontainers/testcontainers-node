@@ -1,5 +1,5 @@
 import path from "path";
-import { RandomUuid } from "../common";
+import { log, RandomUuid } from "../common";
 import { randomUuid } from "../common/uuid";
 import { PullPolicy } from "../utils/pull-policy";
 import {
@@ -129,6 +129,23 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
       .up();
 
     await checkEnvironmentContainerIsHealthy(startedEnvironment, await composeContainerName("container"));
+  });
+
+  it("should warn when no started containers match configured wait strategy names", async () => {
+    const warnSpy = vi.spyOn(log, "warn");
+
+    await using startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml")
+      .withWaitStrategy("container", Wait.forLogMessage("Listening on port 8080"))
+      .up(["container"]);
+
+    await checkEnvironmentContainerIsHealthy(startedEnvironment, await composeContainerName("container"));
+
+    const warningMessages = warnSpy.mock.calls.map(([message]) => message);
+    expect(
+      warningMessages.some((warningMessage) =>
+        warningMessage.includes(`No containers were started for the configured wait strategy names: "container"`)
+      )
+    ).toBe(true);
   });
 
   it("should support failing health check wait strategy", async () => {
