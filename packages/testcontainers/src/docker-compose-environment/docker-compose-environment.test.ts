@@ -132,10 +132,11 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
   });
 
   it("should warn when no started containers match configured wait strategy names", async () => {
+    const unmatchedWaitStrategyName = "non-existent-container-name";
     const warnSpy = vi.spyOn(log, "warn");
 
     await using startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml")
-      .withWaitStrategy("container", Wait.forLogMessage("Listening on port 8080"))
+      .withWaitStrategy(unmatchedWaitStrategyName, Wait.forLogMessage("Listening on port 8080"))
       .up(["container"]);
 
     await checkEnvironmentContainerIsHealthy(startedEnvironment, await composeContainerName("container"));
@@ -143,7 +144,9 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
     const warningMessages = warnSpy.mock.calls.map(([message]) => message);
     expect(
       warningMessages.some((warningMessage) =>
-        warningMessage.includes(`No containers were started for the configured wait strategy names: "container"`)
+        warningMessage.includes(
+          `No containers were started for the configured wait strategy names: "${unmatchedWaitStrategyName}"`
+        )
       )
     ).toBe(true);
   });
