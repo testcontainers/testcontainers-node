@@ -13,6 +13,11 @@ const QUEUE_PORT = 10001;
 const TABLE_PORT = 10002;
 const DEFAULT_ACCOUNT_NAME = "devstoreaccount1";
 const DEFAULT_ACCOUNT_KEY = "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==";
+const PEM_CERT_PATH = "/azurite-cert.pem";
+const PEM_KEY_PATH = "/azurite-key.pem";
+const PFX_CERT_PATH = "/azurite-cert.pfx";
+
+type Protocol = "http" | "https";
 
 export class AzuriteContainer extends GenericContainer {
   constructor(image: string) {
@@ -38,6 +43,11 @@ export class AzuriteContainer extends GenericContainer {
   private skipApiVersionCheck = false;
   private inMemoryPersistence = false;
   private extentMemoryLimitInMegaBytes?: number = undefined;
+  private cert?: string = undefined;
+  private certPath?: string = undefined;
+  private key?: string = undefined;
+  private password?: string = undefined;
+  private oauthEnabled = false;
 
   /**
    * Sets a custom storage account name (default account will be disabled).
@@ -112,8 +122,48 @@ export class AzuriteContainer extends GenericContainer {
     return this;
   }
 
+  /**
+   * Configure SSL with a custom certificate and private key.
+   *
+   * @param cert The PEM certificate file content.
+   * @param key The PEM key file content.
+   */
+  public withSsl(cert: string, key: string): this {
+    this.cert = cert;
+    this.key = key;
+    this.password = undefined;
+    this.certPath = PEM_CERT_PATH;
+    return this;
+  }
+
+  /**
+   * Configure SSL with a custom certificate and password.
+   *
+   * @param cert The PFX certificate file content.
+   * @param password The password securing the certificate.
+   */
+  public withSslPfx(cert: string, password: string): this {
+    this.cert = cert;
+    this.key = undefined;
+    this.password = password;
+    this.certPath = PFX_CERT_PATH;
+    return this;
+  }
+
+  /**
+   * Enable OAuth authentication with basic mode.
+   */
+  public withOAuth(): this {
+    this.oauthEnabled = true;
+    return this;
+  }
+
   public override async start(): Promise<StartedAzuriteContainer> {
     const command = ["--blobHost", "0.0.0.0", "--queueHost", "0.0.0.0", "--tableHost", "0.0.0.0"];
+
+    if (this.oauthEnabled && this.cert === undefined) {
+      throw new Error("OAuth requires HTTPS endpoint. Configure SSL first with withSsl() or withSslPfx().");
+    }
 
     if (this.inMemoryPersistence) {
       command.push("--inMemoryPersistence");
@@ -127,6 +177,37 @@ export class AzuriteContainer extends GenericContainer {
       command.push("--skipApiVersionCheck");
     }
 
+    if (this.cert !== undefined && this.certPath !== undefined) {
+      const contentsToCopy = [
+        {
+          content: this.cert,
+          target: this.certPath,
+          mode: 0o644,
+        },
+      ];
+
+      if (this.key) {
+        contentsToCopy.push({
+          content: this.key,
+          target: PEM_KEY_PATH,
+          mode: 0o600,
+        });
+      }
+
+      this.withCopyContentToContainer(contentsToCopy);
+      command.push("--cert", this.certPath);
+
+      if (this.key) {
+        command.push("--key", PEM_KEY_PATH);
+      } else if (this.password !== undefined) {
+        command.push("--pwd", this.password);
+      }
+    }
+
+    if (this.oauthEnabled) {
+      command.push("--oauth", "basic");
+    }
+
     this.withCommand(command).withExposedPorts(this.blobPort, this.queuePort, this.tablePort);
 
     if (this.accountName !== DEFAULT_ACCOUNT_NAME || this.accountKey !== DEFAULT_ACCOUNT_KEY) {
@@ -135,6 +216,7 @@ export class AzuriteContainer extends GenericContainer {
       });
     }
 
+    const protocol: Protocol = this.cert === undefined ? "http" : "https";
     const startedContainer = await super.start();
 
     return new StartedAzuriteContainer(
@@ -143,7 +225,8 @@ export class AzuriteContainer extends GenericContainer {
       this.accountKey,
       this.blobPort,
       this.queuePort,
-      this.tablePort
+      this.tablePort,
+      protocol
     );
   }
 }
@@ -155,7 +238,8 @@ export class StartedAzuriteContainer extends AbstractStartedContainer {
     private readonly accountKey: string,
     private readonly blobPort: PortWithOptionalBinding,
     private readonly queuePort: PortWithOptionalBinding,
-    private readonly tablePort: PortWithOptionalBinding
+    private readonly tablePort: PortWithOptionalBinding,
+    private readonly protocol: Protocol
   ) {
     super(startedTestContainer);
   }
@@ -211,13 +295,13 @@ export class StartedAzuriteContainer extends AbstractStartedContainer {
    * @returns A connection string in the form of `DefaultEndpointsProtocol=[protocol];AccountName=[accountName];AccountKey=[accountKey];BlobEndpoint=[blobEndpoint];QueueEndpoint=[queueEndpoint];TableEndpoint=[tableEndpoint];`
    */
   public getConnectionString(): string {
-    return `DefaultEndpointsProtocol=http;AccountName=${this.accountName};AccountKey=${
+    return `DefaultEndpointsProtocol=${this.protocol};AccountName=${this.accountName};AccountKey=${
       this.accountKey
     };BlobEndpoint=${this.getBlobEndpoint()};QueueEndpoint=${this.getQueueEndpoint()};TableEndpoint=${this.getTableEndpoint()};`;
   }
 
   private getEndpoint(port: number, containerName: string): string {
-    const url = new URL(`http://${this.getHost()}`);
+    const url = new URL(`${this.protocol}://${this.getHost()}`);
     url.port = port.toString();
     url.pathname = containerName;
     return url.toString();

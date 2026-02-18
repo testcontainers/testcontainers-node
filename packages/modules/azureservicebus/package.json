@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/azureservicebus",
-  "version": "11.11.0",
+  "version": "11.12.0",
   "license": "MIT",
   "keywords": [
     "azure",
@@ -30,7 +30,7 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "dependencies": {
-    "testcontainers": "^11.11.0"
+    "testcontainers": "^11.12.0"
   },
   "devDependencies": {
     "@azure/service-bus": "^7.9.5"
