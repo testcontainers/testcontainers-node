@@ -37,6 +37,8 @@ It captures practical rules that prevent avoidable CI and PR churn.
 5. Verify git diff only contains intended files.
 6. Never commit, push, or post on GitHub (issues, PRs, or comments) without first sharing the proposed diff/message and getting explicit user approval.
 7. Commit with focused message(s), using `git commit --no-verify`.
+   - Never bypass signing (for example, do not use `--no-gpg-sign`).
+   - If signing fails (for example, passphrase/key issues), stop and ask the user to resolve signing, then retry.
 8. Push branch. Ask for explicit user permission before any force push.
 9. Open PR against `main` using a human-readable title (no `feat(...)` / `fix(...)` prefixes).
 10. Add labels for both change type and semantic version impact.
@@ -45,7 +47,7 @@ It captures practical rules that prevent avoidable CI and PR churn.
     - verification commands run
     - test results summary
     - if semver impact is not `major`, evidence that the change is not breaking
-    - `Closes #<issue>`
+    - `Closes #<issue>` only when the PR is intended to close a specific issue
 
 ## Labels
 
