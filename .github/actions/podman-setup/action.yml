@@ -6,6 +6,11 @@ runs:
     - name: Podman setup
       shell: bash
       run: |
+        mkdir -p ~/.config/containers
+        cat <<EOF > ~/.config/containers/containers.conf
+        [engine]
+        runtime = "runc"
+        EOF
         systemctl enable --now --user podman podman.socket
         podman info
         echo "DOCKER_HOST=unix://${XDG_RUNTIME_DIR}/podman/podman.sock" >> $GITHUB_ENV
