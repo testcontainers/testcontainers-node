@@ -6,6 +6,9 @@ runs:
     - name: Podman setup
       shell: bash
       run: |
+        sudo apt-get update
+        sudo apt-get install -y --only-upgrade podman golang-github-containers-common
+        dpkg-query -W podman golang-github-containers-common
         mkdir -p ~/.config/containers
         cat <<EOF > ~/.config/containers/containers.conf
         [engine]
