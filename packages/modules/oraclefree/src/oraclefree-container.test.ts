@@ -64,6 +64,7 @@ describe.sequential("OracleFreeContainer", { timeout: 240_000 }, () => {
   });
 
   it("should set the custom database and user", async () => {
+    // customDatabase {
     const customDatabase = "TESTDB";
     const customUsername = "CUSTOMUSER";
     const customPassword = "customPassword";
@@ -86,5 +87,6 @@ describe.sequential("OracleFreeContainer", { timeout: 240_000 }, () => {
     expect(resultUser.rows![0]).toEqual([customUsername]);
 
     await connection.close();
+    // }
   });
 });

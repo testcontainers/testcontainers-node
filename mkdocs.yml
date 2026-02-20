@@ -81,6 +81,7 @@ nav:
       - Neo4J: modules/neo4j.md
       - Ollama: modules/ollama.md
       - OpenSearch: modules/opensearch.md
+      - Oracle Free: modules/oraclefree.md
       - PostgreSQL: modules/postgresql.md
       - Qdrant: modules/qdrant.md
       - RabbitMQ: modules/rabbitmq.md
