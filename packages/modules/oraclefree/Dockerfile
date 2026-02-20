@@ -1,2 +1,1 @@
-FROM mcr.microsoft.com/azure-messaging/servicebus-emulator:2.0.0
-FROM mcr.microsoft.com/mssql/server:2025-latest
+FROM gvenzl/oracle-free:slim

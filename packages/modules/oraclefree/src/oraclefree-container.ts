@@ -1,17 +1,18 @@
 import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 
 const ORACLEDB_PORT = 1521;
+const DEFAULT_DATABASE = "FREEPDB1";
 
 export class OracleDbContainer extends GenericContainer {
 
   private username = "test"
   private password = "test"
-  private database = "FREEPDB1"; // default database in the container
+  private database?: string = undefined; // default database in the container
 
   constructor(image: string) {
     super(image);
     this.withExposedPorts(ORACLEDB_PORT);
-    this.withWaitStrategy(Wait.forLogMessage(".*DATABASE IS READY TO USE!.*\\s"));
+    this.withWaitStrategy(Wait.forLogMessage("DATABASE IS READY TO USE!"));
     this.withStartupTimeout(120_000);
   }
 
@@ -26,19 +27,25 @@ export class OracleDbContainer extends GenericContainer {
   }
 
   public withDatabase(database: string): this {
+    if (database === DEFAULT_DATABASE) throw new Error(`The default database "${DEFAULT_DATABASE}" cannot be used. Please choose a different name for the database.`);
     this.database = database;
     return this;
   }
 
   public override async start(): Promise<StartedOracleDbContainer> {
     this.withEnvironment({
-      ORACLEDB_PASSWORD: this.password,
+      ORACLE_PASSWORD: this.password,
       APP_USER: this.username,
-      APP_PASSWORD: this.password,
-      ORACLEDB_DATABASE: this.database,
+      APP_USER_PASSWORD: this.password,
     });
 
-    return new StartedOracleDbContainer(await super.start(), this.username, this.password, this.database);
+    if (this.database) {
+      this.withEnvironment({
+        ORACLE_DATABSE: this.database,
+      });
+    }
+
+    return new StartedOracleDbContainer(await super.start(), this.username, this.password, this.database ?? DEFAULT_DATABASE);
   }
 }
 

@@ -33,6 +33,7 @@
     "testcontainers": "^11.12.0"
   },
   "devDependencies": {
-    "@azure/service-bus": "^7.9.5"
+    "oracledb": "^6.10.0",
+    "@types/oracledb": "^6.10.0"
   }
 }
