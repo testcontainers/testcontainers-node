@@ -41,7 +41,7 @@ export class OracleDbContainer extends GenericContainer {
 
     if (this.database) {
       this.withEnvironment({
-        ORACLE_DATABSE: this.database,
+        ORACLE_DATABASE: this.database,
       });
     }
 
