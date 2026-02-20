@@ -11,9 +11,8 @@ const DEFAULT_DATABASE = "FREEPDB1";
  * Supports configuring application user credentials and optional custom database creation.
  */
 export class OracleDbContainer extends GenericContainer {
-
-  private username = "test"
-  private password = "test"
+  private username = "test";
+  private password = "test";
   private database?: string = undefined; // default database in the container
 
   constructor(image: string) {
@@ -41,7 +40,10 @@ export class OracleDbContainer extends GenericContainer {
    * @throws if attempting to use the image default database name.
    */
   public withDatabase(database: string): this {
-    if (database === DEFAULT_DATABASE) throw new Error(`The default database "${DEFAULT_DATABASE}" cannot be used. Please choose a different name for the database.`);
+    if (database === DEFAULT_DATABASE)
+      throw new Error(
+        `The default database "${DEFAULT_DATABASE}" cannot be used. Please choose a different name for the database.`
+      );
     this.database = database;
     return this;
   }
@@ -60,7 +62,12 @@ export class OracleDbContainer extends GenericContainer {
       });
     }
 
-    return new StartedOracleDbContainer(await super.start(), this.username, this.password, this.database ?? DEFAULT_DATABASE);
+    return new StartedOracleDbContainer(
+      await super.start(),
+      this.username,
+      this.password,
+      this.database ?? DEFAULT_DATABASE
+    );
   }
 }
 
