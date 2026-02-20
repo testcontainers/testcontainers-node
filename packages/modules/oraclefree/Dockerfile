@@ -1,1 +1,1 @@
-FROM gvenzl/oracle-free:slim
+FROM gvenzl/oracle-free:slim-faststart

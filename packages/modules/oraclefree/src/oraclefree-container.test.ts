@@ -80,7 +80,7 @@ describe.sequential("OracleFreeContainer", { timeout: 240_000 }, () => {
         });
 
         const result = await connection.execute("SELECT SYS_CONTEXT('USERENV', 'CON_NAME') FROM DUAL");
-        expect(result.rows![0]).toEqual([container.getDatabase()]);
+        expect(result.rows![0]).toEqual([customDatabase]);
 
         const resultUser = await connection.execute("SELECT USER FROM DUAL");
         expect(resultUser.rows![0]).toEqual([customUsername]);
