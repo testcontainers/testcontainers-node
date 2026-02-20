@@ -3,13 +3,13 @@
   "version": "11.12.0",
   "license": "MIT",
   "keywords": [
-    "azure",
-    "service-bus",
+    "oracle",
+    "database",
     "testing",
     "docker",
     "testcontainers"
   ],
-  "description": "Azure Service Bus module for Testcontainers",
+  "description": "Oracle DB Free module for Testcontainers",
   "homepage": "https://github.com/testcontainers/testcontainers-node#readme",
   "repository": {
     "type": "git",
