@@ -36,7 +36,7 @@ export async function createArchiveToCopyToContainer({
     throw error;
   }
 
-  const archive = tar.pack(stagingDirectory.name, { dereference: true, umask: 0 });
+  const archive = tar.pack(stagingDirectory.name, { dereference: true, umask: 0 } as tar.PackOptions);
   let cleanedUp = false;
   const cleanup = () => {
     if (cleanedUp) {

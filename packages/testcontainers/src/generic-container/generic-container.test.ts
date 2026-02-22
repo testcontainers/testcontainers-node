@@ -29,7 +29,7 @@ async function createArchiveWithOwnership(target: string, uid: number, gid: numb
       entries: [fileName],
       umask: 0,
       map: (header) => ({ ...header, name: archiveEntryName, uid, gid }),
-    });
+    } as tar.PackOptions);
 
     let cleanedUp = false;
     const cleanup = () => {
