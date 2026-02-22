@@ -1,5 +1,3 @@
-version: "3.5"
-
 services:
   service-a:
     image: cristianrgreco/testcontainer:1.1.14
