@@ -65,7 +65,7 @@ async function copyFileToStagingDirectory(
   await fs.cp(source, targetPath, { dereference: true });
 
   if (mode !== undefined) {
-    await fs.chmod(targetPath, mode);
+    await fs.chmod(targetPath, normalizeArchiveMode(mode));
   }
 }
 
@@ -86,7 +86,7 @@ async function copyDirectoryToStagingDirectory(
   );
 
   if (mode !== undefined) {
-    await setModeRecursively(targetPath, mode);
+    await setModeRecursively(targetPath, normalizeArchiveMode(mode));
   }
 }
 
@@ -101,7 +101,7 @@ async function copyContentToStagingDirectory(
   await writeContentToFile(content, targetPath);
 
   if (mode !== undefined) {
-    await fs.chmod(targetPath, mode);
+    await fs.chmod(targetPath, normalizeArchiveMode(mode));
   }
 }
 
@@ -139,4 +139,16 @@ function getArchiveTargetPath(stagingDirectory: string, target: string): string 
   }
 
   return path.resolve(stagingDirectory, ...relativeTarget.split("/"));
+}
+
+function normalizeArchiveMode(mode: number): number {
+  if (mode <= 0o777) {
+    return mode;
+  }
+
+  if (mode <= 0o7777 && /^[0-7]+$/u.test(String(mode))) {
+    return parseInt(String(mode), 8);
+  }
+
+  return mode;
 }
