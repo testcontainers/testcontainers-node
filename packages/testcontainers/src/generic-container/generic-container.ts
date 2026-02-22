@@ -1,7 +1,5 @@
-import archiver from "archiver";
 import AsyncLock from "async-lock";
 import { Container, ContainerCreateOptions, HostConfig } from "dockerode";
-import { promises as fs } from "fs";
 import { Readable } from "stream";
 import { containerLog, hash, log, toNanos } from "../common";
 import { ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "../container-runtime";
@@ -34,6 +32,7 @@ import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
 import { Wait } from "../wait-strategies/wait";
 import { waitForContainer } from "../wait-strategies/wait-for-container";
 import { WaitStrategy } from "../wait-strategies/wait-strategy";
+import { createArchiveToCopyToContainer } from "./create-archive-to-copy-to-container";
 import { GenericContainerBuilder } from "./generic-container-builder";
 import { inspectContainerUntilPortsExposed } from "./inspect-container-util-ports-exposed";
 import { StartedGenericContainer } from "./started-generic-container";
@@ -182,8 +181,11 @@ export class GenericContainer implements TestContainer {
     }
 
     if (this.filesToCopy.length > 0 || this.directoriesToCopy.length > 0 || this.contentsToCopy.length > 0) {
-      const archive = await this.createArchiveToCopyToContainer();
-      archive.finalize();
+      const archive = await createArchiveToCopyToContainer({
+        filesToCopy: this.filesToCopy,
+        directoriesToCopy: this.directoriesToCopy,
+        contentsToCopy: this.contentsToCopy,
+      });
       await client.container.putArchive(container, archive, "/", this.copyToContainerOptions);
     }
 
@@ -256,28 +258,6 @@ export class GenericContainer implements TestContainer {
       const network = client.network.getById(portForwarderNetworkId);
       await client.container.connectToNetwork(container, network, []);
     }
-  }
-
-  private async createArchiveToCopyToContainer(): Promise<archiver.Archiver> {
-    const tar = archiver("tar");
-    const filesToCopyWithStats = await Promise.all(
-      this.filesToCopy.map(async (fileToCopy) => ({
-        ...fileToCopy,
-        stats: await fs.stat(fileToCopy.source),
-      }))
-    );
-
-    for (const { source, target, mode, stats } of filesToCopyWithStats) {
-      tar.file(source, { name: target, mode, stats });
-    }
-    for (const { source, target, mode } of this.directoriesToCopy) {
-      tar.directory(source, target, { mode });
-    }
-    for (const { content, target, mode } of this.contentsToCopy) {
-      tar.append(content, { name: target, mode });
-    }
-
-    return tar;
   }
 
   protected containerStarted?(

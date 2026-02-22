@@ -1,6 +1,8 @@
-import archiver from "archiver";
+import { promises as fs } from "fs";
 import getPort from "get-port";
 import path from "path";
+import tar from "tar-fs";
+import tmp from "tmp";
 import { RandomUuid } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
 import { PullPolicy } from "../utils/pull-policy";
@@ -14,6 +16,41 @@ import {
 } from "../utils/test-helper";
 import { Wait } from "../wait-strategies/wait";
 import { GenericContainer } from "./generic-container";
+
+async function createArchiveWithOwnership(target: string, uid: number, gid: number) {
+  const stagingDirectory = tmp.dirSync({ unsafeCleanup: true });
+
+  try {
+    const fileName = "archive.txt";
+    await fs.writeFile(path.resolve(stagingDirectory.name, fileName), "hello world");
+    const archiveEntryName = target.startsWith("/") ? target.slice(1) : target;
+
+    const archive = tar.pack(stagingDirectory.name, {
+      entries: [fileName],
+      umask: 0,
+      map: (header) => ({ ...header, name: archiveEntryName, uid, gid }),
+    });
+
+    let cleanedUp = false;
+    const cleanup = () => {
+      if (cleanedUp) {
+        return;
+      }
+
+      cleanedUp = true;
+      stagingDirectory.removeCallback();
+    };
+
+    archive.once("end", cleanup);
+    archive.once("close", cleanup);
+    archive.once("error", cleanup);
+
+    return archive;
+  } catch (error) {
+    stagingDirectory.removeCallback();
+    throw error;
+  }
+}
 
 describe("GenericContainer", { timeout: 180_000 }, () => {
   const fixtures = path.resolve(__dirname, "..", "..", "fixtures", "docker");
@@ -521,9 +558,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
         .withExposedPorts(8080)
         .start();
 
-      const tar = archiver("tar");
-      tar.append("hello world", { name: targetWithCopyOwnership.slice(1), uid, gid } as archiver.EntryData);
-      tar.finalize();
+      const tar = await createArchiveWithOwnership(targetWithCopyOwnership, uid, gid);
 
       await container.copyArchiveToContainer(tar, "/", { copyUIDGID: true });
 
@@ -536,9 +571,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
       const uid = 4242;
       const gid = 4343;
       const targetWithCopyOwnership = "/tmp/with-copy-archives-copyuidgid.txt";
-      const tar = archiver("tar");
-      tar.append("hello world", { name: targetWithCopyOwnership.slice(1), uid, gid } as archiver.EntryData);
-      tar.finalize();
+      const tar = await createArchiveWithOwnership(targetWithCopyOwnership, uid, gid);
 
       await using containerWithCopyOwnership = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
         .withCopyArchivesToContainer([
