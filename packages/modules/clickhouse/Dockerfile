@@ -1,1 +1,1 @@
-FROM clickhouse/clickhouse-server:26.1-alpine
+FROM clickhouse/clickhouse-server:26.2-alpine
