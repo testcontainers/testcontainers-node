@@ -4,7 +4,7 @@ import { OracleDbContainer, StartedOracleDbContainer } from "./oraclefree-contai
 
 const IMAGE = getImage(__dirname);
 
-describe.sequential("OracleFreeContainer", { timeout: 240_000 }, () => {
+describe("OracleFreeContainer", { timeout: 240_000 }, () => {
   describe("default configuration", () => {
     let container: StartedOracleDbContainer;
 
@@ -35,21 +35,6 @@ describe.sequential("OracleFreeContainer", { timeout: 240_000 }, () => {
         user: container.getUsername(),
         password: container.getPassword(),
         connectString: container.getConnectionDescriptor(),
-      });
-
-      const result = await connection.execute("SELECT 1 FROM DUAL");
-      expect(result.rows![0]).toEqual([1]);
-
-      await connection.close();
-    });
-
-    it("should work with restarted container", async () => {
-      await container.restart();
-
-      const connection = await oracledb.getConnection({
-        user: container.getUsername(),
-        password: container.getPassword(),
-        connectString: container.getUrl(),
       });
 
       const result = await connection.execute("SELECT 1 FROM DUAL");
@@ -104,5 +89,21 @@ describe.sequential("OracleFreeContainer", { timeout: 240_000 }, () => {
 
     await connection.close();
     // }
+  });
+
+  it("should work with restarted container", async () => {
+    const container = await new OracleDbContainer(IMAGE).start();
+    await container.restart();
+
+    const connection = await oracledb.getConnection({
+      user: container.getUsername(),
+      password: container.getPassword(),
+      connectString: container.getUrl(),
+    });
+
+    const result = await connection.execute("SELECT 1 FROM DUAL");
+    expect(result.rows![0]).toEqual([1]);
+
+    await connection.close();
   });
 });
