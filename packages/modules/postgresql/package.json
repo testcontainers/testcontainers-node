@@ -31,7 +31,7 @@
   },
   "devDependencies": {
     "@types/pg": "^8.18.0",
-    "pg": "^8.19.0"
+    "pg": "^8.20.0"
   },
   "dependencies": {
     "testcontainers": "^11.12.0"
