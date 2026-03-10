@@ -30,7 +30,7 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "node-vault": "^0.10.9"
+    "@litehex/node-vault": "^1.1.4"
   },
   "dependencies": {
     "testcontainers": "^11.12.0"

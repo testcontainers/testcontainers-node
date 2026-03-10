@@ -1,4 +1,4 @@
-import vault from "node-vault";
+import { Client } from "@litehex/node-vault";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { VaultContainer } from "./vault-container";
 
@@ -10,21 +10,31 @@ describe("VaultContainer", { timeout: 180_000 }, () => {
     // inside_block:readWrite {
     await using container = await new VaultContainer(IMAGE).withVaultToken(VAULT_TOKEN).start();
 
-    const client = vault({
-      apiVersion: "v1",
+    const client = new Client({
       endpoint: container.getAddress(),
       token: container.getRootToken(),
     });
 
-    await client.write("secret/data/hello", {
+    const writeResult = await client.kv2.write({
+      mountPath: "secret",
+      path: "hello",
       data: {
         message: "world",
         other: "vault",
       },
     });
+    expect(writeResult.error).toBeUndefined();
 
-    const result = await client.read("secret/data/hello");
-    const data = result?.data?.data;
+    const readResult = await client.kv2.read({
+      mountPath: "secret",
+      path: "hello",
+    });
+
+    if (readResult.error) {
+      throw readResult.error;
+    }
+
+    const data = readResult.data.data.data;
 
     expect(data.message).toBe("world");
     expect(data.other).toBe("vault");
