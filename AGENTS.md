@@ -5,6 +5,16 @@
 This is a working guide for contributors and coding agents in this repository.
 It captures practical rules that prevent avoidable CI and PR churn.
 
+## Repository Layout
+
+- This repository is an npm workspaces monorepo.
+  - root package: `testcontainers-monorepo`
+  - workspaces: `packages/testcontainers` and `packages/modules/*`
+  - shared lockfile: root `package-lock.json` (workspace installs update this single file)
+- For workspace-scoped dependency changes, prefer targeted commands to reduce lockfile churn:
+  - `npm install -w @testcontainers/<module>`
+  - `npm uninstall -w @testcontainers/<module> <package>`
+
 ## Development Expectations
 
 - If a public API changes, update the relevant docs in the same PR.
@@ -41,6 +51,8 @@ It captures practical rules that prevent avoidable CI and PR churn.
    - If signing fails (for example, passphrase/key issues), stop and ask the user to resolve signing, then retry.
 8. Push branch. Ask for explicit user permission before any force push.
 9. Open PR against `main` using a human-readable title (no `feat(...)` / `fix(...)` prefixes).
+   - When using `gh` to create/edit PR descriptions, prefer `--body-file <path>` over inline `--body`.
+   - This avoids shell command substitution issues when the body contains backticks.
 10. Add labels for both change type and semantic version impact.
 11. Ensure PR body includes:
     - summary of changes
@@ -73,16 +85,6 @@ It captures practical rules that prevent avoidable CI and PR churn.
 - docs-only change: `documentation` + usually `patch`
 - dependency update: `dependencies` + impact label based on user-facing effect
 
-## Practical Note
+## Lockfile Hygiene
 
-- This repository is an npm workspaces monorepo:
-  - root package: `testcontainers-monorepo`
-  - workspaces: `packages/testcontainers` and `packages/modules/*`
-  - shared lockfile: root `package-lock.json` (workspace installs update this single file)
-- When changing one workspace dependency, prefer targeted commands to reduce lockfile churn:
-  - `npm install -w @testcontainers/<module>`
-  - `npm uninstall -w @testcontainers/<module> <package>`
-  - targeted tests via `npm run test -- <path-to-spec>`
 - Recheck `package-lock.json` after `npm install` for unrelated drift and revert unrelated changes.
-- When creating/editing PR descriptions with `gh`, do not inline backticks in shell command arguments.
-  - Prefer `--body-file <path>` with a heredoc-written file to avoid shell command substitution.
