@@ -21,7 +21,7 @@ It captures practical rules that prevent avoidable CI and PR churn.
 ## Permission and Escalation
 
 - `npm install` requires escalated permissions for outbound network access to npm registries.
-- `npm test` commands should b`e run with escalation so tests can access the Docker socket.
+- `npm test` commands should be run with escalation so tests can access the Docker socket.
 
 ### Escalation hygiene
 
@@ -75,4 +75,14 @@ It captures practical rules that prevent avoidable CI and PR churn.
 
 ## Practical Note
 
+- This repository is an npm workspaces monorepo:
+  - root package: `testcontainers-monorepo`
+  - workspaces: `packages/testcontainers` and `packages/modules/*`
+  - shared lockfile: root `package-lock.json` (workspace installs update this single file)
+- When changing one workspace dependency, prefer targeted commands to reduce lockfile churn:
+  - `npm install -w @testcontainers/<module>`
+  - `npm uninstall -w @testcontainers/<module> <package>`
+  - targeted tests via `npm run test -- <path-to-spec>`
 - Recheck `package-lock.json` after `npm install` for unrelated drift and revert unrelated changes.
+- When creating/editing PR descriptions with `gh`, do not inline backticks in shell command arguments.
+  - Prefer `--body-file <path>` with a heredoc-written file to avoid shell command substitution.
