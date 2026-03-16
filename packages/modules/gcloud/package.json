@@ -48,6 +48,6 @@
     "@google-cloud/spanner": "^8.6.0",
     "@google-cloud/storage": "^7.19.0",
     "firebase-admin": "13.7.0",
-    "msw": "^2.12.10"
+    "msw": "^2.12.11"
   }
 }
