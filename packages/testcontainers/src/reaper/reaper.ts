@@ -1,5 +1,6 @@
 import { ContainerInfo } from "dockerode";
 import { Socket } from "net";
+import { userInfo } from "os";
 import { IntervalRetry, log, RandomUuid, withFileLock } from "../common";
 import { ContainerRuntimeClient, ImageName } from "../container-runtime";
 import { GenericContainer } from "../generic-container/generic-container";
@@ -28,7 +29,8 @@ export async function getReaper(client: ContainerRuntimeClient): Promise<Reaper>
     return reaper;
   }
 
-  reaper = await withFileLock("testcontainers-node.lock", async () => {
+  const userId = userInfo().uid;
+  reaper = await withFileLock(`testcontainers-node-${userId}.lock`, async () => {
     const reaperContainers = await findReaperContainers(client);
 
     if (process.env.TESTCONTAINERS_RYUK_DISABLED === "true") {
