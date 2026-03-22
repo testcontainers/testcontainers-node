@@ -1,14 +1,17 @@
 # Issue GH-1274: LocalStack module docs/examples need updating for auth token requirement
 
+## ✅ 상태: PR 제출 완료
+
+> **2026-03-22**: [PR #1277](https://github.com/testcontainers/testcontainers-node/pull/1277) 제출. `docs/modules/localstack.md`에 auth token 필수화 안내 섹션 추가. 리뷰 대기 중.
+
 ## 기본 정보
 
 | 항목 | 내용 |
 |------|------|
 | 이슈 | [GH-1274](https://github.com/testcontainers/testcontainers-node/issues/1274) |
 | 제목 | LocalStack module docs/examples need updating for auth token requirement |
-| 작성일 | 2026-03-17 (5일 전) |
-| 라벨 | 없음 (신규) |
-| 클레임 | **없음** |
+| 작성일 | 2026-03-17 |
+| PR | [#1277](https://github.com/testcontainers/testcontainers-node/pull/1277) |
 | 긴급도 | 🔴 **2026-03-23부터 `latest` 태그 사용자 기준 breaking change** |
 | 모듈 | `packages/modules/localstack` |
 
