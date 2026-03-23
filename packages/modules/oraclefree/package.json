@@ -33,7 +33,7 @@
     "testcontainers": "^11.13.0"
   },
   "devDependencies": {
-    "@types/oracledb": "^6.10.0",
+    "@types/oracledb": "^6.10.2",
     "oracledb": "^6.10.0"
   }
 }

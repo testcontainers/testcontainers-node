@@ -30,7 +30,7 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "@types/pg": "^8.18.0",
+    "@types/pg": "^8.20.0",
     "pg": "^8.20.0"
   },
   "dependencies": {
