@@ -54,6 +54,7 @@ export class GenericContainer implements TestContainer {
   protected environment: Record<string, string> = {};
   protected exposedPorts: PortWithOptionalBinding[] = [];
   protected reuse = false;
+  protected autoCleanup = true;
   protected autoRemove = true;
   protected networkMode?: string;
   protected networkAliases: string[] = [];
@@ -112,7 +113,7 @@ export class GenericContainer implements TestContainer {
       return this.reuseOrStartContainer(client);
     }
 
-    if (!this.isReaper()) {
+    if (!this.isReaper() && this.autoCleanup) {
       const reaper = await getReaper(client);
       this.createOpts.Labels = { ...this.createOpts.Labels, [LABEL_TESTCONTAINERS_SESSION_ID]: reaper.sessionId };
     }
@@ -458,6 +459,11 @@ export class GenericContainer implements TestContainer {
 
   public withReuse(): this {
     this.reuse = true;
+    return this;
+  }
+
+  public withAutoCleanup(autoCleanup: boolean): this {
+    this.autoCleanup = autoCleanup;
     return this;
   }
 
