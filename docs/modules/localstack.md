@@ -38,7 +38,5 @@ Choose an image from the [container registry](https://hub.docker.com/r/localstac
 ### Create a S3 bucket
 
 <!--codeinclude-->
-
 [](../../packages/modules/localstack/src/localstack-container.test.ts) inside_block:localstackCreateS3Bucket
-
 <!--/codeinclude-->
