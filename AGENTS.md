@@ -52,6 +52,7 @@ It captures practical rules that prevent avoidable CI and PR churn.
    - If signing fails (for example, passphrase/key issues), stop and ask the user to resolve signing, then retry.
 8. Push branch. Ask for explicit user permission before any force push.
 9. Open PR against `main` using a human-readable title (no `feat(...)` / `fix(...)` prefixes, and no agent-identifying prefixes or suffixes).
+   - Default to a ready-for-review PR. Only open or keep a PR in draft when the user explicitly asks for a draft.
    - When using `gh` to create/edit PR descriptions, prefer `--body-file <path>` over inline `--body`.
    - This avoids shell command substitution issues when the body contains backticks.
 10. Add labels for both change type and semantic version impact.
