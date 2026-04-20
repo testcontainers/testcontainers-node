@@ -25,6 +25,7 @@ It captures practical rules that prevent avoidable CI and PR churn.
 - If a public API changes, update the relevant docs in the same PR.
 - If new types are made part of the public API, export them from the package's `index.ts` in the same PR.
 - If new learnings or misunderstandings are discovered, propose an `AGENTS.md` update in the same PR.
+- In docs Markdown, keep `<!--codeinclude-->` blocks tight with no blank lines between the markers and the include line, or the rendered snippet will contain blank lines between code lines.
 - Tests should verify observable behavior changes, not only internal/config state.
   - Example: for a security option, assert a real secure/insecure behavior difference.
 - Test-only helper files under `src` (for example `*-test-utils.ts`) must be explicitly excluded from package `tsconfig.build.json` so they are not emitted into `build` and accidentally published.
@@ -55,11 +56,9 @@ It captures practical rules that prevent avoidable CI and PR churn.
    - Never bypass signing (for example, do not use `--no-gpg-sign`).
    - If signing fails (for example, passphrase/key issues), stop and ask the user to resolve signing, then retry.
 8. Push branch. Ask for explicit user permission before any force push.
-9. Open PR against `main` using a human-readable title (no `feat(...)` / `fix(...)` prefixes, and no automated prefixes such as `[codex]`).
-   - Open the PR as ready for review by default.
-   - Only open a draft PR when the user explicitly asks for a draft, or when the PR is intentionally not ready for review.
-   - When using `gh` to create/edit PR descriptions, prefer `--body-file <path>` over inline `--body`.
-   - This avoids shell command substitution issues when the body contains backticks.
+9. Open PR against `main` using a human-readable title (no `feat(...)` / `fix(...)` prefixes, and no agent-identifying prefixes or suffixes).
+   - Default to a ready-for-review PR. Only open or keep a PR in draft when the user explicitly asks for a draft.
+   - When using `gh` to create/edit PR descriptions, prefer `--body-file <path>` over inline `--body`; this avoids shell command substitution issues when the body contains backticks.
 10. Add labels for both change type and semantic version impact.
 11. Ensure PR body includes:
     - summary of changes

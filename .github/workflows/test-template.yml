@@ -54,6 +54,6 @@ jobs:
           workspace: "${{ inputs.workspace }}"
 
       - name: Run tests
-        run: npm run test:ci -- --coverage.include=${{ steps.npm-install.outputs.workspace_path }} ${{ steps.npm-install.outputs.workspace_path }}
+        run: npm run test:ci -- --coverage.include="${{ steps.npm-install.outputs.workspace_path }}/**/*.ts" ${{ steps.npm-install.outputs.workspace_path }}
         env:
           CI: true
