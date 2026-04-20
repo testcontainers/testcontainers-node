@@ -31,8 +31,8 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "@types/mssql": "^9.1.11",
-    "mssql": "^12.2.1"
+    "@types/mssql": "^12.3.0",
+    "mssql": "^12.3.1"
   },
   "dependencies": {
     "testcontainers": "^11.14.0"
