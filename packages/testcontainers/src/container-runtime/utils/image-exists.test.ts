@@ -21,7 +21,7 @@ describe.sequential("imageExists", () => {
   });
 
   it("returns true when image exists", async () => {
-    const { imageExists } = await import("./image-exists");
+    const { imageExists } = await import("./image-exists.js");
     mockImageInspect.mockResolvedValue({});
 
     const imageName = ImageName.fromString("imageName");
@@ -31,7 +31,7 @@ describe.sequential("imageExists", () => {
   });
 
   it("returns previous result from cache", async () => {
-    const { imageExists } = await import("./image-exists");
+    const { imageExists } = await import("./image-exists.js");
     mockImageInspect.mockResolvedValue({});
 
     const imageName = ImageName.fromString("imageName");
@@ -43,7 +43,7 @@ describe.sequential("imageExists", () => {
   });
 
   it("returns false when image inspect fails because image does not exist", async () => {
-    const { imageExists } = await import("./image-exists");
+    const { imageExists } = await import("./image-exists.js");
     mockImageInspect.mockRejectedValue(new Error("no such image"));
 
     const imageName = ImageName.fromString("imageName");
@@ -53,7 +53,7 @@ describe.sequential("imageExists", () => {
   });
 
   it("throws when unable to inspect image", async () => {
-    const { imageExists } = await import("./image-exists");
+    const { imageExists } = await import("./image-exists.js");
     mockImageInspect.mockRejectedValue(new Error("unknown error"));
 
     const imageName = ImageName.fromString("imageName");

@@ -9,7 +9,7 @@ describe.sequential("Config", () => {
   let getContainerRuntimeConfig: GetContainerRuntimeConfig;
 
   beforeEach(async () => {
-    getContainerRuntimeConfig = (await import("./config")).getContainerRuntimeConfig;
+    getContainerRuntimeConfig = (await import("./config.js")).getContainerRuntimeConfig;
   });
 
   afterEach(() => {

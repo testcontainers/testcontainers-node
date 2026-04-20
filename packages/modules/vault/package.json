@@ -29,10 +29,10 @@
     "prepack": "shx cp ../../../README.md . && shx cp ../../../LICENSE .",
     "build": "tsc --project tsconfig.build.json"
   },
-  "devDependencies": {
-    "@litehex/node-vault": "^1.1.4"
-  },
   "dependencies": {
     "testcontainers": "^11.14.0"
+  },
+  "devDependencies": {
+    "node-vault": "^0.12.0"
   }
 }

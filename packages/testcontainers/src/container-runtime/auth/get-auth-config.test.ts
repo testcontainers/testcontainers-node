@@ -30,7 +30,7 @@ describe.sequential("get auth config", () => {
         },
       })
     );
-    const { getAuthConfig } = await import("./get-auth-config");
+    const { getAuthConfig } = await import("./get-auth-config.js");
     expect(await getAuthConfig("https://registry.example.com")).toEqual({
       username: "user",
       password: "pass",
@@ -54,7 +54,7 @@ describe.sequential("get auth config", () => {
         })
       )
     );
-    const { getAuthConfig } = await import("./get-auth-config");
+    const { getAuthConfig } = await import("./get-auth-config.js");
     expect(await getAuthConfig("https://registry.example.com")).toEqual({
       username: "user",
       password: "pass",
@@ -65,7 +65,7 @@ describe.sequential("get auth config", () => {
 
   it("should return empty auth when docker config file does not exist", async () => {
     mockExistsSync.mockReturnValue(false);
-    const { getAuthConfig } = await import("./get-auth-config");
+    const { getAuthConfig } = await import("./get-auth-config.js");
     expect(await getAuthConfig("https://registry.example.com")).toBeUndefined();
   });
 });

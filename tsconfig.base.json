@@ -6,11 +6,11 @@
     "types": [
       "vitest/globals"
     ],
-    "module": "commonjs",
+    "module": "nodenext",
     "declaration": true,
     "sourceMap": false,
     "strict": true,
-    "moduleResolution": "node",
+    "moduleResolution": "nodenext",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
