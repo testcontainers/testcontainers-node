@@ -5,6 +5,11 @@
 This is a working guide for contributors and coding agents in this repository.
 It captures practical rules that prevent avoidable CI and PR churn.
 
+## Instruction precedence
+
+- Repository-specific instructions in this file override generic coding-agent defaults, skills, and templates.
+- If a generic workflow conflicts with this file, follow this file.
+
 ## Repository Layout
 
 - This repository is an npm workspaces monorepo.
@@ -50,7 +55,9 @@ It captures practical rules that prevent avoidable CI and PR churn.
    - Never bypass signing (for example, do not use `--no-gpg-sign`).
    - If signing fails (for example, passphrase/key issues), stop and ask the user to resolve signing, then retry.
 8. Push branch. Ask for explicit user permission before any force push.
-9. Open PR against `main` using a human-readable title (no `feat(...)` / `fix(...)` prefixes).
+9. Open PR against `main` using a human-readable title (no `feat(...)` / `fix(...)` prefixes, and no automated prefixes such as `[codex]`).
+   - Open the PR as ready for review by default.
+   - Only open a draft PR when the user explicitly asks for a draft, or when the PR is intentionally not ready for review.
    - When using `gh` to create/edit PR descriptions, prefer `--body-file <path>` over inline `--body`.
    - This avoids shell command substitution issues when the body contains backticks.
 10. Add labels for both change type and semantic version impact.
