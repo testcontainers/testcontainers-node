@@ -8,7 +8,7 @@ import { ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "..
 import { CONTAINER_STATUSES } from "../container-runtime/clients/container/types";
 import { StartedNetwork } from "../network/network";
 import { PortForwarderInstance, SSHD_IMAGE } from "../port-forwarder/port-forwarder";
-import { getReaper, REAPER_IMAGE } from "../reaper/reaper";
+import { getReaper, getReaperImage } from "../reaper/reaper";
 import { StartedTestContainer, TestContainer } from "../test-container";
 import {
   ArchiveToCopy,
@@ -70,7 +70,7 @@ export class GenericContainer implements TestContainer {
   constructor(image: string) {
     this.imageName = ImageName.fromString(image);
     this.createOpts = { Image: this.imageName.string };
-    this.hostConfig = { AutoRemove: this.imageName.string === REAPER_IMAGE };
+    this.hostConfig = { AutoRemove: this.imageName.string === getReaperImage() };
   }
 
   private isHelperContainer() {
@@ -78,7 +78,7 @@ export class GenericContainer implements TestContainer {
   }
 
   private isReaper() {
-    return this.imageName.string === REAPER_IMAGE;
+    return this.imageName.string === getReaperImage();
   }
 
   protected beforeContainerCreated?(): Promise<void>;
