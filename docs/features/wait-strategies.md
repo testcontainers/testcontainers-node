@@ -10,9 +10,15 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+## Default wait strategy
+
+By default, Testcontainers waits for a container health check when one is defined by the image or configured with `withHealthCheck`. If no health check is defined, or the image disables health checks with `HEALTHCHECK NONE`, it waits up to 60 seconds for mapped network ports to be bound.
+
+You can override this selection with `withWaitStrategy`.
+
 ## Listening ports
 
-The default wait strategy used by Testcontainers. It will wait up to 60 seconds for the container's mapped network ports to be bound.
+Wait up to 60 seconds for the container's mapped network ports to be bound.
 
 ```js
 const { GenericContainer } = require("testcontainers");
@@ -75,10 +81,10 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
-Define your own health check. Note that time units are in seconds:
+Define your own health check. Testcontainers uses this as the default wait strategy unless you explicitly set another wait strategy. Note that time units are in milliseconds:
 
 ```js
-const { GenericContainer, Wait } = require("testcontainers");
+const { GenericContainer } = require("testcontainers");
 
 const container = await new GenericContainer("alpine")
   .withHealthCheck({
@@ -88,7 +94,6 @@ const container = await new GenericContainer("alpine")
     retries: 5,
     startPeriod: 1000,
   })
-  .withWaitStrategy(Wait.forHealthCheck())
   .start();
 ```
 

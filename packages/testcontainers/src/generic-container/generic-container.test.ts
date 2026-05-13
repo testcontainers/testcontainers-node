@@ -1,3 +1,4 @@
+import archiver from "archiver";
 import getPort from "get-port";
 import path from "path";
 import { RandomUuid } from "../common";
@@ -6,6 +7,7 @@ import { PullPolicy } from "../utils/pull-policy";
 import {
   checkContainerIsHealthy,
   checkContainerIsHealthyUdp,
+  createTempSymlinkedFile,
   getDockerEventStream,
   getRunningContainerNames,
   waitForDockerEvent,
@@ -271,6 +273,16 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     });
   }
 
+  it("should set security options", async () => {
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withSecurityOpt("no-new-privileges")
+      .withExposedPorts(8080)
+      .start();
+
+    const { output } = await container.exec(["sh", "-c", "awk '/^NoNewPrivs:/ { print $2 }' /proc/1/status"]);
+    expect(output.trim()).toBe("1");
+  });
+
   it("should add capabilities", async () => {
     await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withAddedCapabilities("IPC_LOCK")
@@ -364,6 +376,23 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     expect((await container.exec(["cat", target])).output).toEqual(expect.stringContaining("hello world"));
   });
 
+  it("should follow symlink when copying file to container", async () => {
+    if (process.platform === "win32") {
+      return;
+    }
+
+    const content = `hello world ${new RandomUuid().nextUuid()}`;
+    const target = "/tmp/test.txt";
+    await using symlinkedFile = await createTempSymlinkedFile(content);
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withCopyFilesToContainer([{ source: symlinkedFile.symlink, target }])
+      .withExposedPorts(8080)
+      .start();
+
+    expect((await container.exec(["cat", target])).output).toEqual(expect.stringContaining(content));
+    expect((await container.exec(["sh", "-c", `[ -L ${target} ]`])).exitCode).toBe(1);
+  });
+
   it("should copy file to container with permissions", async () => {
     const source = path.resolve(fixtures, "docker", "test.txt");
     const target = "/tmp/test.txt";
@@ -387,6 +416,24 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await container.copyFilesToContainer([{ source, target }]);
 
     expect((await container.exec(["cat", target])).output).toEqual(expect.stringContaining("hello world"));
+  });
+
+  it("should follow symlink when copying file to started container", async () => {
+    if (process.platform === "win32") {
+      return;
+    }
+
+    const content = `hello world ${new RandomUuid().nextUuid()}`;
+    const target = "/tmp/test.txt";
+    await using symlinkedFile = await createTempSymlinkedFile(content);
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withExposedPorts(8080)
+      .start();
+
+    await container.copyFilesToContainer([{ source: symlinkedFile.symlink, target }]);
+
+    expect((await container.exec(["cat", target])).output).toEqual(expect.stringContaining(content));
+    expect((await container.exec(["sh", "-c", `[ -L ${target} ]`])).exitCode).toBe(1);
   });
 
   it("should copy directory to container", async () => {
@@ -463,6 +510,53 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     expect((await container.exec(["cat", target])).output).toEqual(expect.stringContaining(content));
   });
 
+  // https://github.com/containers/podman/issues/27538
+  if (!process.env.CI_PODMAN) {
+    it("should copy archive to started container with ownership when copyUIDGID is enabled", async () => {
+      const uid = 4242;
+      const gid = 4343;
+      const targetWithCopyOwnership = "/tmp/copy-archive-copyuidgid.txt";
+
+      await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+        .withExposedPorts(8080)
+        .start();
+
+      const tar = archiver("tar");
+      tar.append("hello world", { name: targetWithCopyOwnership.slice(1), uid, gid } as archiver.EntryData);
+      tar.finalize();
+
+      await container.copyArchiveToContainer(tar, "/", { copyUIDGID: true });
+
+      expect((await container.exec(["stat", "-c", "%u:%g", targetWithCopyOwnership])).output.trim()).toEqual(
+        `${uid}:${gid}`
+      );
+    });
+
+    it("should copy archives before start with ownership when copyUIDGID is enabled", async () => {
+      const uid = 4242;
+      const gid = 4343;
+      const targetWithCopyOwnership = "/tmp/with-copy-archives-copyuidgid.txt";
+      const tar = archiver("tar");
+      tar.append("hello world", { name: targetWithCopyOwnership.slice(1), uid, gid } as archiver.EntryData);
+      tar.finalize();
+
+      await using containerWithCopyOwnership = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+        .withCopyArchivesToContainer([
+          {
+            tar,
+            target: "/",
+          },
+        ])
+        .withCopyToContainerOptions({ copyUIDGID: true })
+        .withExposedPorts(8080)
+        .start();
+
+      expect(
+        (await containerWithCopyOwnership.exec(["stat", "-c", "%u:%g", targetWithCopyOwnership])).output.trim()
+      ).toEqual(`${uid}:${gid}`);
+    });
+  }
+
   it("should honour .dockerignore file", async () => {
     const context = path.resolve(fixtures, "docker-with-dockerignore");
     const container = await GenericContainer.fromDockerfile(context).build();
@@ -481,6 +575,23 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     expect(output).not.toContain("example6.txt");
     expect(output).not.toContain("example7.txt");
     expect(output).not.toContain("Dockerfile");
+  });
+
+  it("should honour nested .dockerignore exclusion patterns", async () => {
+    const context = path.resolve(fixtures, "docker-with-dockerignore-nested-exclusions");
+    const container = await GenericContainer.fromDockerfile(context).build();
+    await using startedContainer = await container.withExposedPorts(8080).start();
+
+    const { output } = await startedContainer.exec(["find"]);
+
+    expect(output).toContain("index.js");
+    expect(output).toContain("example2.txt");
+    expect(output).toContain("example4.txt");
+    expect(output).toContain("example5.txt");
+    expect(output).not.toContain("./example1.txt");
+    expect(output).not.toContain("./example3");
+    expect(output).not.toContain("./example6");
+    expect(output).not.toContain("./example7");
   });
 
   it("should stop the container", async () => {

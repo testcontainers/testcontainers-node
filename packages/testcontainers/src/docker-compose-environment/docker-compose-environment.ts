@@ -7,6 +7,7 @@ import { Environment } from "../types";
 import { BoundPorts } from "../utils/bound-ports";
 import { mapInspectResult } from "../utils/map-inspect-result";
 import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
+import { hasHealthCheck } from "../wait-strategies/utils/health-check";
 import { Wait } from "../wait-strategies/wait";
 import { waitForContainer } from "../wait-strategies/wait-for-container";
 import { WaitStrategy } from "../wait-strategies/wait-strategy";
@@ -18,6 +19,7 @@ export class DockerComposeEnvironment {
 
   private projectName: string;
   private build = false;
+  private autoCleanup = true;
   private recreate = true;
   private environmentFile = "";
   private profiles: string[] = [];
@@ -36,6 +38,11 @@ export class DockerComposeEnvironment {
 
   public withBuild(): this {
     this.build = true;
+    return this;
+  }
+
+  public withAutoCleanup(autoCleanup: boolean): this {
+    this.autoCleanup = autoCleanup;
     return this;
   }
 
@@ -95,8 +102,10 @@ export class DockerComposeEnvironment {
   public async up(services?: Array<string>): Promise<StartedDockerComposeEnvironment> {
     log.info(`Starting DockerCompose environment "${this.projectName}"...`);
     const client = await getContainerRuntimeClient();
-    const reaper = await getReaper(client);
-    reaper.addComposeProject(this.projectName);
+    if (this.autoCleanup) {
+      const reaper = await getReaper(client);
+      reaper.addComposeProject(this.projectName);
+    }
 
     const {
       composeOptions: clientComposeOptions = [],
@@ -149,6 +158,13 @@ export class DockerComposeEnvironment {
       []
     );
     log.info(`Started containers "${startedContainerNames.join('", "')}"`);
+
+    const startedContainerNameSet = new Set(
+      startedContainers.map((startedContainer) =>
+        parseComposeContainerName(this.projectName, startedContainer.Names[0])
+      )
+    );
+    this.warnForUnusedWaitStrategies(startedContainerNameSet);
 
     const startedGenericContainers = (
       await Promise.all(
@@ -211,10 +227,20 @@ export class DockerComposeEnvironment {
       ? this.waitStrategy[containerName]
       : this.defaultWaitStrategy;
     if (containerWaitStrategy) return containerWaitStrategy;
-    const healthcheck = inspectResult.Config.Healthcheck;
-    if (healthcheck?.Test) {
+    if (hasHealthCheck(inspectResult.Config.Healthcheck)) {
       return Wait.forHealthCheck();
     }
     return Wait.forListeningPorts();
+  }
+
+  private warnForUnusedWaitStrategies(startedContainerNames: Set<string>): void {
+    const unusedWaitStrategyContainerNames = Object.keys(this.waitStrategy).filter(
+      (configuredContainerName) => !startedContainerNames.has(configuredContainerName)
+    );
+    if (unusedWaitStrategyContainerNames.length > 0) {
+      log.warn(
+        `No containers were started for the configured wait strategy names: "${unusedWaitStrategyContainerNames.join('", "')}". Wait strategies are matched against container names (for example "redis-1"), not service names.`
+      );
+    }
   }
 }

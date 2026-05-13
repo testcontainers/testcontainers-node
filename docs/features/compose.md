@@ -29,22 +29,25 @@ Provide a list of service names to only start those services:
 
 ```js
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
-  .up(["redis-1", "postgres-1"]);
+  .up(["redis", "postgres"]);
 ```
 
 ### With wait strategy
+
+`withWaitStrategy` expects **container names**, not service names. With Docker Compose v2, the default container name for the first replica is usually `<service>-1`.
 
 ```js
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
   .withWaitStrategy("redis-1", Wait.forLogMessage("Ready to accept connections"))
   .withWaitStrategy("postgres-1", Wait.forHealthCheck())
-  .up();
+  .up(["redis", "postgres"]);
 ```
 
 ### With a default wait strategy
 
-By default Testcontainers uses the "listening ports" wait strategy for all containers. If you'd like to override
-the default wait strategy for all services, you can do so:
+By default, Testcontainers waits for a service health check when one is defined in the Compose service or image. If no health check is defined, or the service disables health checks, it waits for listening ports.
+
+If you'd like to override the default wait strategy for all services, you can do so:
 
 ```js
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
@@ -142,6 +145,19 @@ const environment = await new DockerComposeEnvironment(composeFilePath, composeF
   .up();
 ```
 
+### With auto cleanup disabled
+
+By default Testcontainers registers the compose project with Ryuk so the stack is torn down automatically when the process exits. You can disable that registration for a specific compose stack:
+
+```js
+const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
+  .withProjectName("test")
+  .withAutoCleanup(false)
+  .up();
+```
+
+This only disables automatic cleanup. Explicit calls to `.down()`, `.stop()`, or `await using` disposal still tear the stack down as usual.
+
 ### With custom client options
 
 See [docker-compose](https://github.com/PDMLab/docker-compose/) library.
@@ -187,7 +203,7 @@ await environment.stop();
 
 ## Interacting with the containers
 
-Interact with the containers in your compose environment as you would any other Generic Container. Note that the container name suffix has changed from `_` to `-` between docker-compose v1 and v2 respectively.
+Interact with the containers in your compose environment as you would any other Generic Container. Compose-managed container names use the `<service-name>-<index>` format.
 
 ```js
 const container = environment.getContainer("alpine-1");

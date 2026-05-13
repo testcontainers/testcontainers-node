@@ -1,6 +1,6 @@
 export function parseComposeContainerName(projectName: string, containerName: string): string {
-  if (containerName.includes(projectName)) {
-    return containerName.substring(`/${projectName}_`.length);
+  if (containerName.startsWith(`/${projectName}-`)) {
+    return containerName.substring(`/${projectName}-`.length);
   } else if (containerName.startsWith("/")) {
     return containerName.substring(1);
   } else {

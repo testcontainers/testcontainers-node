@@ -1,17 +1,15 @@
 import path from "path";
-import { RandomUuid } from "../common";
+import { log, RandomUuid } from "../common";
 import { randomUuid } from "../common/uuid";
 import { PullPolicy } from "../utils/pull-policy";
 import {
   checkEnvironmentContainerIsHealthy,
-  composeContainerName,
   getDockerEventStream,
+  getHealthCheckStatus,
   getRunningContainerNames,
   getVolumeNames,
   waitForDockerEvent,
 } from "../utils/test-helper";
-import { HealthCheckWaitStrategy } from "../wait-strategies/health-check-wait-strategy";
-import { HostPortWaitStrategy } from "../wait-strategies/host-port-wait-strategy";
 import { Wait } from "../wait-strategies/wait";
 import { DockerComposeEnvironment } from "./docker-compose-environment";
 
@@ -26,7 +24,7 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
     await using startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml").up();
 
     await Promise.all(
-      [await composeContainerName("container"), await composeContainerName("another_container")].map(
+      ["container-1", "another_container-1"].map(
         async (containerName) => await checkEnvironmentContainerIsHealthy(startedEnvironment, containerName)
       )
     );
@@ -45,7 +43,7 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
     it("should work with buildkit", async () => {
       const buildkitFixtures = path.resolve(fixtures, "docker-compose-with-buildkit");
       await using startedEnvironment = await new DockerComposeEnvironment(buildkitFixtures, "docker-compose.yml").up();
-      await checkEnvironmentContainerIsHealthy(startedEnvironment, await composeContainerName("container"));
+      await checkEnvironmentContainerIsHealthy(startedEnvironment, "container-1");
     });
   }
 
@@ -65,12 +63,12 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
   it("should use pull policy for specific service", async () => {
     const env = new DockerComposeEnvironment(fixtures, "docker-compose-with-many-services.yml");
 
-    await using _ = await env.up(["service_2"]);
+    await using _ = await env.up(["service-b"]);
 
     {
       await using dockerEventStream = await getDockerEventStream();
       const dockerPullEventPromise = waitForDockerEvent(dockerEventStream.events, "pull");
-      await using _ = await env.withPullPolicy(PullPolicy.alwaysPull()).up(["service_2"]);
+      await using _ = await env.withPullPolicy(PullPolicy.alwaysPull()).up(["service-b"]);
       await dockerPullEventPromise;
     }
   });
@@ -82,7 +80,7 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
       "docker-compose.yml",
       "docker-compose-update.yml",
     ]).up();
-    await using container = startedEnvironment.getContainer(await composeContainerName("container"));
+    await using container = startedEnvironment.getContainer("container-1");
 
     const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
     const response = await fetch(`${url}/env`);
@@ -96,42 +94,51 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
       .withDefaultWaitStrategy(Wait.forHealthCheck())
       .up();
 
-    await checkEnvironmentContainerIsHealthy(startedEnvironment, await composeContainerName("container"));
+    await checkEnvironmentContainerIsHealthy(startedEnvironment, "container-1");
   });
 
+  // Podman compat inspect does not consistently expose Config.Healthcheck for compose-defined health checks.
   if (!process.env.CI_PODMAN) {
-    it("should use wait strategy Wait.forHealthCheck() if healthcheck is defined in service", async () => {
+    it("should wait for a healthcheck defined in a service", async () => {
       await using startedEnvironment = await new DockerComposeEnvironment(
         fixtures,
-        "docker-compose-with-healthcheck.yml"
+        "docker-compose-with-delayed-healthcheck.yml"
       ).up();
+      const container = startedEnvironment.getContainer("container-1");
 
-      await checkEnvironmentContainerIsHealthy(startedEnvironment, await composeContainerName("container"));
-
-      const waitStrategy = startedEnvironment.getContainer("container-1")["getWaitStrategy"]();
-      expect(waitStrategy).toBeInstanceOf(HealthCheckWaitStrategy);
-    });
-    it("should use wait strategy Wait.forListeningPorts() if healthcheck is NOT defined in service", async () => {
-      await using startedEnvironment = await new DockerComposeEnvironment(
-        fixtures,
-        "docker-compose-with-name.yml"
-      ).up();
-
-      await checkEnvironmentContainerIsHealthy(startedEnvironment, "custom_container_name");
-
-      const waitStrategy = startedEnvironment.getContainer("custom_container_name")["getWaitStrategy"]();
-      expect(waitStrategy).toBeInstanceOf(HostPortWaitStrategy);
+      expect(await getHealthCheckStatus(container)).toBe("healthy");
+      await checkEnvironmentContainerIsHealthy(startedEnvironment, "container-1");
     });
   }
 
+  it("should use listening ports if healthcheck is not defined in a service", async () => {
+    await using startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-name.yml").up();
+
+    await checkEnvironmentContainerIsHealthy(startedEnvironment, "custom_container_name");
+    expect(await getHealthCheckStatus(startedEnvironment.getContainer("custom_container_name"))).toBeUndefined();
+  });
+
+  it("should use listening ports if a service disables healthcheck", async () => {
+    await using startedEnvironment = await new DockerComposeEnvironment(
+      fixtures,
+      "docker-compose-with-disabled-healthcheck.yml"
+    )
+      .withStartupTimeout(1_000)
+      .up();
+    const container = startedEnvironment.getContainer("container-1");
+
+    await checkEnvironmentContainerIsHealthy(startedEnvironment, "container-1");
+    expect(await getHealthCheckStatus(container)).toBeUndefined();
+  });
+
   it("should support log message wait strategy", async () => {
     await using startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml")
-      .withWaitStrategy(await composeContainerName("container"), Wait.forLogMessage("Listening on port 8080"))
-      .withWaitStrategy(await composeContainerName("another_container"), Wait.forLogMessage("Listening on port 8080"))
+      .withWaitStrategy("container-1", Wait.forLogMessage("Listening on port 8080"))
+      .withWaitStrategy("another_container-1", Wait.forLogMessage("Listening on port 8080"))
       .up();
 
     await Promise.all(
-      [await composeContainerName("container"), await composeContainerName("another_container")].map(
+      ["container-1", "another_container-1"].map(
         async (containerName) => await checkEnvironmentContainerIsHealthy(startedEnvironment, containerName)
       )
     );
@@ -152,16 +159,36 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
 
   it("should support health check wait strategy", async () => {
     await using startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-healthcheck.yml")
-      .withWaitStrategy(await composeContainerName("container"), Wait.forHealthCheck())
+      .withWaitStrategy("container-1", Wait.forHealthCheck())
       .up();
 
-    await checkEnvironmentContainerIsHealthy(startedEnvironment, await composeContainerName("container"));
+    await checkEnvironmentContainerIsHealthy(startedEnvironment, "container-1");
+  });
+
+  it.sequential("should warn when no started containers match configured wait strategy names", async () => {
+    const unmatchedWaitStrategyName = "non-existent-container-name";
+    const warnSpy = vi.spyOn(log, "warn");
+
+    await using startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml")
+      .withWaitStrategy(unmatchedWaitStrategyName, Wait.forLogMessage("Listening on port 8080"))
+      .up(["container"]);
+
+    await checkEnvironmentContainerIsHealthy(startedEnvironment, "container-1");
+
+    const warningMessages = warnSpy.mock.calls.map(([message]) => message);
+    expect(
+      warningMessages.some((warningMessage) =>
+        warningMessage.includes(
+          `No containers were started for the configured wait strategy names: "${unmatchedWaitStrategyName}"`
+        )
+      )
+    ).toBe(true);
   });
 
   it("should support failing health check wait strategy", async () => {
     await expect(
       new DockerComposeEnvironment(fixtures, "docker-compose-with-healthcheck-unhealthy.yml")
-        .withWaitStrategy(await composeContainerName("container"), Wait.forHealthCheck())
+        .withWaitStrategy("container-1", Wait.forHealthCheck())
         .up()
     ).rejects.toThrow(`Health check failed: unhealthy`);
   });
@@ -169,12 +196,12 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
   it("should stop the container when the health check wait strategy times out", async () => {
     await expect(
       new DockerComposeEnvironment(fixtures, "docker-compose-with-healthcheck-with-start-period.yml")
-        .withWaitStrategy(await composeContainerName("container"), Wait.forHealthCheck())
+        .withWaitStrategy("container-1", Wait.forHealthCheck())
         .withStartupTimeout(0)
         .up()
     ).rejects.toThrow(`Health check not healthy after 0ms`);
 
-    expect(await getRunningContainerNames()).not.toContain("container_1");
+    expect(await getRunningContainerNames()).not.toContain("container-1");
   });
 
   it("should remove volumes when downing an environment", async () => {
@@ -196,7 +223,7 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
       .up();
 
     await Promise.all(
-      [await composeContainerName("container"), await composeContainerName("another_container")].map(
+      ["container-1", "another_container-1"].map(
         async (containerName) => await checkEnvironmentContainerIsHealthy(startedEnvironment, containerName)
       )
     );
@@ -207,7 +234,7 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
       .withEnvironment({ ENV_VAR: "ENV_VAR_VALUE" })
       .up();
 
-    await using container = startedEnvironment.getContainer(await composeContainerName("container"));
+    await using container = startedEnvironment.getContainer("container-1");
     const response = await fetch(`http://${container.getHost()}:${container.getMappedPort(8080)}/env`);
     const responseBody = (await response.json()) as { [key: string]: string };
     expect(responseBody["ENV_VAR"]).toBe("ENV_VAR_VALUE");
@@ -225,11 +252,11 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
     await using startedEnvironment = await new DockerComposeEnvironment(
       fixtures,
       "docker-compose-with-many-services.yml"
-    ).up(["service_2"]);
+    ).up(["service-b"]);
 
-    await checkEnvironmentContainerIsHealthy(startedEnvironment, await composeContainerName("service_2"));
-    expect(() => startedEnvironment.getContainer("service_1")).toThrow(
-      `Cannot get container "service_1" as it is not running`
+    await checkEnvironmentContainerIsHealthy(startedEnvironment, "service-b-1");
+    expect(() => startedEnvironment.getContainer("service-a")).toThrow(
+      `Cannot get container "service-a" as it is not running`
     );
   });
 
@@ -251,7 +278,7 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
 
     await using startedEnvironment = await new DockerComposeEnvironment(overrideFixtures, "docker-compose.yml").up();
 
-    await using container = startedEnvironment.getContainer(await composeContainerName("container"));
+    await using container = startedEnvironment.getContainer("container-1");
     const response = await fetch(`http://${container.getHost()}:${container.getMappedPort(8080)}/env`);
     const responseBody = (await response.json()) as { [key: string]: string };
     expect(responseBody["ENV_VAR"]).toBe("default");
@@ -264,7 +291,7 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
       .withEnvironmentFile(".env.override")
       .up();
 
-    await using container = startedEnvironment.getContainer(await composeContainerName("container"));
+    await using container = startedEnvironment.getContainer("container-1");
     const response = await fetch(`http://${container.getHost()}:${container.getMappedPort(8080)}/env`);
     const responseBody = (await response.json()) as { [key: string]: string };
     expect(responseBody["ENV_VAR"]).toBe("override");
@@ -276,7 +303,7 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
       .up();
 
     await Promise.all(
-      [await composeContainerName("container"), await composeContainerName("another_container")].map(
+      ["container-1", "another_container-1"].map(
         async (containerName) => await checkEnvironmentContainerIsHealthy(startedEnvironment, containerName)
       )
     );

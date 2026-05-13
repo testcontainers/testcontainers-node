@@ -1,6 +1,7 @@
 import archiver from "archiver";
 import AsyncLock from "async-lock";
-import { Container, ContainerCreateOptions, HostConfig } from "dockerode";
+import { Container, ContainerCreateOptions, ContainerInspectInfo, HostConfig } from "dockerode";
+import { promises as fs } from "fs";
 import { Readable } from "stream";
 import { containerLog, hash, log, toNanos } from "../common";
 import { ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "../container-runtime";
@@ -13,6 +14,7 @@ import {
   ArchiveToCopy,
   BindMount,
   ContentToCopy,
+  CopyToContainerOptions,
   DirectoryToCopy,
   Environment,
   ExtraHost,
@@ -29,6 +31,7 @@ import { createLabels, LABEL_TESTCONTAINERS_CONTAINER_HASH, LABEL_TESTCONTAINERS
 import { mapInspectResult } from "../utils/map-inspect-result";
 import { getContainerPort, getProtocol, hasHostBinding, PortWithOptionalBinding } from "../utils/port";
 import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
+import { hasHealthCheck } from "../wait-strategies/utils/health-check";
 import { Wait } from "../wait-strategies/wait";
 import { waitForContainer } from "../wait-strategies/wait-for-container";
 import { WaitStrategy } from "../wait-strategies/wait-strategy";
@@ -52,6 +55,7 @@ export class GenericContainer implements TestContainer {
   protected environment: Record<string, string> = {};
   protected exposedPorts: PortWithOptionalBinding[] = [];
   protected reuse = false;
+  protected autoCleanup = true;
   protected autoRemove = true;
   protected networkMode?: string;
   protected networkAliases: string[] = [];
@@ -61,6 +65,7 @@ export class GenericContainer implements TestContainer {
   protected directoriesToCopy: DirectoryToCopy[] = [];
   protected contentsToCopy: ContentToCopy[] = [];
   protected archivesToCopy: ArchiveToCopy[] = [];
+  protected copyToContainerOptions: CopyToContainerOptions = {};
   protected healthCheck?: HealthCheck;
 
   constructor(image: string) {
@@ -109,7 +114,7 @@ export class GenericContainer implements TestContainer {
       return this.reuseOrStartContainer(client);
     }
 
-    if (!this.isReaper()) {
+    if (!this.isReaper() && this.autoCleanup) {
       const reaper = await getReaper(client);
       this.createOpts.Labels = { ...this.createOpts.Labels, [LABEL_TESTCONTAINERS_SESSION_ID]: reaper.sessionId };
     }
@@ -117,13 +122,12 @@ export class GenericContainer implements TestContainer {
     return this.startContainer(client);
   }
 
-  private async selectWaitStrategy(client: ContainerRuntimeClient, container: Container): Promise<WaitStrategy> {
+  private selectWaitStrategy(inspectResult: ContainerInspectInfo): WaitStrategy {
     if (this.waitStrategy) return this.waitStrategy;
-    if (this.healthCheck) {
+    if (hasHealthCheck(this.healthCheck)) {
       return Wait.forHealthCheck();
     }
-    const containerInfo = await client.container.inspect(container);
-    if (containerInfo.Config.Healthcheck?.Test) {
+    if (hasHealthCheck(inspectResult.Config.Healthcheck)) {
       return Wait.forHealthCheck();
     }
     return Wait.forListeningPorts();
@@ -161,11 +165,10 @@ export class GenericContainer implements TestContainer {
     const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, mappedInspectResult).filter(
       this.exposedPorts
     );
+    const waitStrategy = this.selectWaitStrategy(inspectResult);
     if (this.startupTimeoutMs !== undefined) {
-      this.waitStrategy?.withStartupTimeout(this.startupTimeoutMs);
+      waitStrategy.withStartupTimeout(this.startupTimeoutMs);
     }
-
-    const waitStrategy = this.waitStrategy ?? Wait.forListeningPorts();
 
     await waitForContainer(client, container, waitStrategy, boundPorts);
 
@@ -183,8 +186,6 @@ export class GenericContainer implements TestContainer {
   private async startContainer(client: ContainerRuntimeClient): Promise<StartedTestContainer> {
     const container = await client.container.create({ ...this.createOpts, HostConfig: this.hostConfig });
 
-    this.waitStrategy = await this.selectWaitStrategy(client, container);
-
     if (!this.isHelperContainer() && PortForwarderInstance.isRunning()) {
       await this.connectContainerToPortForwarder(client, container);
     }
@@ -195,13 +196,13 @@ export class GenericContainer implements TestContainer {
     }
 
     if (this.filesToCopy.length > 0 || this.directoriesToCopy.length > 0 || this.contentsToCopy.length > 0) {
-      const archive = this.createArchiveToCopyToContainer();
+      const archive = await this.createArchiveToCopyToContainer();
       archive.finalize();
-      await client.container.putArchive(container, archive, "/");
+      await client.container.putArchive(container, archive, "/", this.copyToContainerOptions);
     }
 
     for (const archive of this.archivesToCopy) {
-      await client.container.putArchive(container, archive.tar, archive.target);
+      await client.container.putArchive(container, archive.tar, archive.target, this.copyToContainerOptions);
     }
 
     log.info(`Starting container for image "${this.createOpts.Image}"...`, { containerId: container.id });
@@ -221,10 +222,6 @@ export class GenericContainer implements TestContainer {
       this.exposedPorts
     );
 
-    if (this.startupTimeoutMs !== undefined) {
-      this.waitStrategy?.withStartupTimeout(this.startupTimeoutMs);
-    }
-
     if (containerLog.enabled() || this.logConsumer !== undefined) {
       if (this.logConsumer !== undefined) {
         this.logConsumer(await client.container.logs(container));
@@ -241,7 +238,10 @@ export class GenericContainer implements TestContainer {
       await this.containerStarting(mappedInspectResult, false);
     }
 
-    const waitStrategy = this.waitStrategy ?? Wait.forListeningPorts();
+    const waitStrategy = this.selectWaitStrategy(inspectResult);
+    if (this.startupTimeoutMs !== undefined) {
+      waitStrategy.withStartupTimeout(this.startupTimeoutMs);
+    }
 
     await waitForContainer(client, container, waitStrategy, boundPorts);
 
@@ -273,11 +273,17 @@ export class GenericContainer implements TestContainer {
     }
   }
 
-  private createArchiveToCopyToContainer(): archiver.Archiver {
+  private async createArchiveToCopyToContainer(): Promise<archiver.Archiver> {
     const tar = archiver("tar");
+    const filesToCopyWithStats = await Promise.all(
+      this.filesToCopy.map(async (fileToCopy) => ({
+        ...fileToCopy,
+        stats: await fs.stat(fileToCopy.source),
+      }))
+    );
 
-    for (const { source, target, mode } of this.filesToCopy) {
-      tar.file(source, { name: target, mode });
+    for (const { source, target, mode, stats } of filesToCopyWithStats) {
+      tar.file(source, { name: target, mode, stats });
     }
     for (const { source, target, mode } of this.directoriesToCopy) {
       tar.directory(source, target, { mode });
@@ -343,6 +349,11 @@ export class GenericContainer implements TestContainer {
         Soft: value.soft,
       })),
     ];
+    return this;
+  }
+
+  public withSecurityOpt(...securityOptions: string[]): this {
+    this.hostConfig.SecurityOpt = [...(this.hostConfig.SecurityOpt ?? []), ...securityOptions];
     return this;
   }
 
@@ -465,6 +476,11 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
+  public withAutoCleanup(autoCleanup: boolean): this {
+    this.autoCleanup = autoCleanup;
+    return this;
+  }
+
   public withAutoRemove(autoRemove: boolean): this {
     this.autoRemove = autoRemove;
     return this;
@@ -497,6 +513,14 @@ export class GenericContainer implements TestContainer {
 
   public withCopyArchivesToContainer(archivesToCopy: ArchiveToCopy[]): this {
     this.archivesToCopy = [...this.archivesToCopy, ...archivesToCopy];
+    return this;
+  }
+
+  public withCopyToContainerOptions(copyToContainerOptions: CopyToContainerOptions): this {
+    this.copyToContainerOptions = {
+      ...this.copyToContainerOptions,
+      ...copyToContainerOptions,
+    };
     return this;
   }
 

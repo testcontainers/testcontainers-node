@@ -22,17 +22,8 @@ export class DockerImageClient implements ImageClient {
   async build(context: string, opts: ImageBuildOptions): Promise<void> {
     try {
       log.debug(`Building image "${opts.t}" with context "${context}"...`);
-      const isDockerIgnored = await this.createIsDockerIgnoredFunction(context);
-      const tarStream = tar.pack(context, {
-        ignore: (aPath) => {
-          const relativePath = path.relative(context, aPath);
-          if (relativePath === opts.dockerfile) {
-            return false;
-          } else {
-            return isDockerIgnored(relativePath);
-          }
-        },
-      });
+      const tarPackOptions = await this.createTarPackOptions(context, opts.dockerfile ?? "Dockerfile");
+      const tarStream = tar.pack(context, tarPackOptions);
       await new Promise<void>((resolve) => {
         this.dockerode
           .buildImage(tarStream, opts)
@@ -54,18 +45,54 @@ export class DockerImageClient implements ImageClient {
     }
   }
 
-  private async createIsDockerIgnoredFunction(context: string): Promise<(path: string) => boolean> {
+  private async createTarPackOptions(context: string, dockerfileName: string): Promise<{ entries?: string[] }> {
     const dockerIgnoreFilePath = path.join(context, ".dockerignore");
     if (!existsSync(dockerIgnoreFilePath)) {
-      return () => false;
+      return {};
     }
 
     const dockerIgnorePatterns = await fs.readFile(dockerIgnoreFilePath, { encoding: "utf-8" });
     const instance = dockerIgnore({ ignorecase: false });
     instance.add(dockerIgnorePatterns);
-    const filter = instance.createFilter();
+    const allEntries = await this.listContextEntries(context);
+    const includedEntries = instance.filter(allEntries);
 
-    return (aPath: string) => !filter(aPath);
+    const dockerfilePath = this.normalizePathForDockerIgnore(path.normalize(dockerfileName));
+    if (!includedEntries.includes(dockerfilePath)) {
+      includedEntries.push(dockerfilePath);
+    }
+
+    return { entries: includedEntries };
+  }
+
+  private async listContextEntries(context: string): Promise<string[]> {
+    const entries: string[] = [];
+    const directoriesToVisit = [""];
+
+    while (directoriesToVisit.length > 0) {
+      const directory = directoriesToVisit.pop();
+      if (directory === undefined) {
+        continue;
+      }
+
+      const absoluteDirectory = directory.length > 0 ? path.join(context, directory) : context;
+      const directoryEntries = await fs.readdir(absoluteDirectory, { withFileTypes: true });
+
+      for (const directoryEntry of directoryEntries) {
+        const relativeEntry = directory.length > 0 ? path.join(directory, directoryEntry.name) : directoryEntry.name;
+        if (directoryEntry.isDirectory()) {
+          directoriesToVisit.push(relativeEntry);
+        } else {
+          entries.push(this.normalizePathForDockerIgnore(relativeEntry));
+        }
+      }
+    }
+
+    return entries;
+  }
+
+  private normalizePathForDockerIgnore(aPath: string): string {
+    return aPath.replace(/\\/gu, "/");
   }
 
   async inspect(imageName: ImageName): Promise<ImageInspectInfo> {

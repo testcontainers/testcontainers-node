@@ -4,7 +4,7 @@ import { RandomPortGenerator } from "../utils/port-generator";
 describe.sequential("Reaper", { timeout: 120_000 }, () => {
   let client: ContainerRuntimeClient;
 
-  const getReaper = async () => await (await import("./reaper")).getReaper(client);
+  const getReaper = async () => await (await import("./reaper.js")).getReaper(client);
 
   beforeEach(async () => {
     vi.resetModules();
@@ -51,6 +51,24 @@ describe.sequential("Reaper", { timeout: 120_000 }, () => {
     const reaper2 = await getReaper();
 
     expect(reaper2.containerId).toBe(reaper.containerId);
+  });
+
+  it("should create new reaper container when existing reaper cannot be reached", async () => {
+    const reaper = await getReaper();
+    vi.resetModules();
+    const unreachablePort = await new RandomPortGenerator().generatePort();
+    const reaperContainerInfo = (await client.container.list()).filter((c) => c.Id === reaper.containerId)[0];
+    reaperContainerInfo.Labels["TESTCONTAINERS_RYUK_TEST_LABEL"] = "false";
+    const reaperPort = reaperContainerInfo.Ports.find((port) => port.PrivatePort == 8080);
+    if (!reaperPort) {
+      throw new Error("Expected Reaper to map exposed port 8080");
+    }
+    reaperPort.PublicPort = unreachablePort;
+    vi.spyOn(client.container, "list").mockResolvedValue([reaperContainerInfo]);
+
+    const reaper2 = await getReaper();
+
+    expect(reaper2.containerId).not.toBe(reaper.containerId);
   });
 
   it("should use custom port when TESTCONTAINERS_RYUK_PORT is set", async () => {

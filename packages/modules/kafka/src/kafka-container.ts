@@ -19,7 +19,7 @@ const KAFKA_BROKER_PORT = 9092;
 const KAFKA_CONTROLLER_PORT = 9094;
 const DEFAULT_ZOOKEEPER_PORT = 2181;
 const DEFAULT_CLUSTER_ID = "4L6g3nShT-eMCtK--X86sw";
-const STARTER_SCRIPT = "/testcontainers_start.sh";
+const STARTER_SCRIPT = "/tmp/testcontainers_start.sh";
 const WAIT_FOR_SCRIPT_MESSAGE = "Waiting for script...";
 
 // https://docs.confluent.io/platform/7.0.0/release-notes/index.html#ak-raft-kraft

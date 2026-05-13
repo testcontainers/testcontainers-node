@@ -1,6 +1,7 @@
 import { writeFile } from "fs/promises";
 import path from "path";
 import lockFile from "proper-lockfile";
+import tmp from "tmp";
 import { log } from "./logger";
 
 export async function withFileLock<T>(fileName: string, fn: () => T): Promise<T> {
@@ -24,7 +25,6 @@ export async function withFileLock<T>(fileName: string, fn: () => T): Promise<T>
 }
 
 async function createEmptyTmpFile(fileName: string): Promise<string> {
-  const tmp = await import("tmp");
   const file = path.resolve(tmp.tmpdir, fileName);
   await writeFile(file, "");
   return file;

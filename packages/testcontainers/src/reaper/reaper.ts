@@ -1,5 +1,6 @@
 import { ContainerInfo } from "dockerode";
 import { Socket } from "net";
+import { userInfo } from "os";
 import { IntervalRetry, log, RandomUuid, withFileLock } from "../common";
 import { ContainerRuntimeClient, ImageName } from "../container-runtime";
 import { GenericContainer } from "../generic-container/generic-container";
@@ -28,31 +29,46 @@ export async function getReaper(client: ContainerRuntimeClient): Promise<Reaper>
     return reaper;
   }
 
-  reaper = await withFileLock("testcontainers-node.lock", async () => {
-    const reaperContainer = await findReaperContainer(client);
-    sessionId = reaperContainer?.Labels[LABEL_TESTCONTAINERS_SESSION_ID] ?? new RandomUuid().nextUuid();
+  const userId = userInfo().uid;
+  reaper = await withFileLock(`testcontainers-node-${userId}.lock`, async () => {
+    const reaperContainers = await findReaperContainers(client);
 
     if (process.env.TESTCONTAINERS_RYUK_DISABLED === "true") {
+      sessionId = new RandomUuid().nextUuid();
       return new DisabledReaper(sessionId, "");
-    } else if (reaperContainer) {
-      return await useExistingReaper(reaperContainer, sessionId, client.info.containerRuntime.host);
-    } else {
-      return await createNewReaper(sessionId, client.info.containerRuntime.remoteSocketPath);
     }
+
+    for (const reaperContainer of reaperContainers) {
+      const existingSessionId = reaperContainer.Labels[LABEL_TESTCONTAINERS_SESSION_ID] ?? new RandomUuid().nextUuid();
+      try {
+        sessionId = existingSessionId;
+        return await useExistingReaper(reaperContainer, sessionId, client.info.containerRuntime.host);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        log.warn(`Failed to reuse existing Reaper: ${message}. Trying another Reaper...`, {
+          containerId: reaperContainer.Id,
+        });
+      }
+    }
+
+    sessionId = new RandomUuid().nextUuid();
+    return await createNewReaper(sessionId, client.info.containerRuntime.remoteSocketPath);
   });
 
   reaper.addSession(sessionId);
   return reaper;
 }
 
-async function findReaperContainer(client: ContainerRuntimeClient): Promise<ContainerInfo | undefined> {
+async function findReaperContainers(client: ContainerRuntimeClient): Promise<ContainerInfo[]> {
   const containers = await client.container.list();
-  return containers.find(
-    (container) =>
-      container.State === "running" &&
-      container.Labels[LABEL_TESTCONTAINERS_RYUK] === "true" &&
-      container.Labels["TESTCONTAINERS_RYUK_TEST_LABEL"] !== "true"
-  );
+  return containers
+    .filter(
+      (container) =>
+        container.State === "running" &&
+        container.Labels[LABEL_TESTCONTAINERS_RYUK] === "true" &&
+        container.Labels["TESTCONTAINERS_RYUK_TEST_LABEL"] !== "true"
+    )
+    .sort((a, b) => b.Created - a.Created);
 }
 
 async function useExistingReaper(reaperContainer: ContainerInfo, sessionId: string, host: string): Promise<Reaper> {

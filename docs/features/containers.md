@@ -137,6 +137,9 @@ const container = await new GenericContainer("alpine")
     tar: nodeReadable,
     target: "/some/nested/remotedir"
   }])
+  .withCopyToContainerOptions({
+    copyUIDGID: true
+  })
   .start();
 ```
 
@@ -157,8 +160,12 @@ container.copyContentToContainer([{
   content: "hello world",
   target: "/remote/file2.txt"
 }])
-container.copyArchiveToContainer(nodeReadable, "/some/nested/remotedir");
+container.copyArchiveToContainer(nodeReadable, "/some/nested/remotedir", {
+  copyUIDGID: true
+});
 ```
+
+When copying files, symbolic links in `source` are followed and the linked file content is copied into the container.
 
 An optional `mode` can be specified in octal for setting file permissions:
 
@@ -181,6 +188,21 @@ const container = await new GenericContainer("alpine")
   }])
   .start();
 ```
+
+Archive copy options can also be specified:
+
+```js
+const container = await new GenericContainer("alpine")
+  .withCopyToContainerOptions({
+    copyUIDGID: true,
+    noOverwriteDirNonDir: true
+  })
+  .start();
+```
+
+- `copyUIDGID`: preserve UID/GID from tar archive entries.
+  Note: Podman may ignore this for archive copy in some cases, see [containers/podman#27538](https://github.com/containers/podman/issues/27538).
+- `noOverwriteDirNonDir`: fail if extraction would replace a file with a directory (or vice versa).
 
 ### Copy archive from container
 
@@ -242,6 +264,16 @@ const container = await new GenericContainer("alpine")
 ```js
 const container = await new GenericContainer("alpine")
   .withPrivilegedMode()
+  .start();
+```
+
+### With security options
+
+See [Security options](https://docs.docker.com/engine/reference/run/#security-configuration).
+
+```js
+const container = await new GenericContainer("alpine")
+  .withSecurityOpt("no-new-privileges")
   .start();
 ```
 
@@ -367,6 +399,16 @@ const container = await new GenericContainer("alpine")
 
 await container.stop({ remove: true }); // The container is stopped *AND* removed
 ```
+
+You can also disable automatic Ryuk cleanup for a specific container while leaving it enabled for the rest of the test session:
+
+```js
+const container = await new GenericContainer("alpine")
+  .withAutoCleanup(false)
+  .start();
+```
+
+This only affects automatic cleanup when the process exits unexpectedly or the container is otherwise left running. Explicit calls to `.stop()` still use the normal stop and removal behavior, so combine this with `.withAutoRemove(false)` or `.stop({ remove: false })` if you also want explicit stops to keep the container.
 
 Keep in mind that disabling ryuk (set `TESTCONTAINERS_RYUK_DISABLED` to `true`) **and** disabling automatic removal of containers will make containers persist after you're done working with them.
 

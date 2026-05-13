@@ -2,7 +2,7 @@ import { GetEventsOptions, ImageInspectInfo } from "dockerode";
 import { createServer, Server } from "http";
 import { createSocket } from "node:dgram";
 import fs from "node:fs";
-import { EOL } from "node:os";
+import { EOL, tmpdir } from "node:os";
 import path from "node:path";
 import { Readable } from "stream";
 import { Agent, request } from "undici";
@@ -11,6 +11,7 @@ import { getContainerRuntimeClient } from "../container-runtime";
 import { StartedDockerComposeEnvironment } from "../docker-compose-environment/started-docker-compose-environment";
 import { GenericContainer } from "../generic-container/generic-container";
 import { StartedTestContainer } from "../test-container";
+import { HealthCheckStatus } from "../types";
 
 export const getImage = (dirname: string, index = 0): string => {
   return fs
@@ -23,6 +24,12 @@ export const checkContainerIsHealthy = async (container: StartedTestContainer): 
   const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
   const response = await fetch(`${url}/hello-world`);
   expect(response.status).toBe(200);
+};
+
+export const getHealthCheckStatus = async (container: StartedTestContainer): Promise<HealthCheckStatus | undefined> => {
+  const client = await getContainerRuntimeClient();
+  const dockerContainer = client.container.getById(container.getId());
+  return (await client.container.inspect(dockerContainer)).State.Health?.Status as HealthCheckStatus | undefined;
 };
 
 export const checkContainerIsHealthyTls = async (container: StartedTestContainer): Promise<void> => {
@@ -119,24 +126,41 @@ export const getVolumeNames = async (): Promise<string[]> => {
   return volumes.map((volume) => volume.Name);
 };
 
-export const composeContainerName = async (serviceName: string, index = 1): Promise<string> => {
-  return `${serviceName}-${index}`;
-};
-
 export const waitForDockerEvent = async (eventStream: Readable, eventName: string, times = 1) => {
   let currentTimes = 0;
+  let pendingData = "";
+
+  const parseDockerEvent = (eventData: string): { status?: string; Action?: string } | undefined => {
+    try {
+      return JSON.parse(eventData);
+    } catch {
+      return undefined;
+    }
+  };
+
   return new Promise<void>((resolve) => {
-    eventStream.on("data", (data) => {
-      try {
-        if (JSON.parse(data).status === eventName) {
+    const onData = (data: string | Buffer) => {
+      // Docker events can be emitted as ndjson or json-seq; normalize both to line-delimited JSON.
+      pendingData += data.toString().split(String.fromCharCode(30)).join("\n");
+
+      const lines = pendingData.split("\n");
+      pendingData = lines.pop() ?? "";
+
+      for (const line of lines) {
+        const event = parseDockerEvent(line);
+        const action = event?.status ?? event?.Action;
+
+        if (action === eventName) {
           if (++currentTimes === times) {
+            eventStream.off("data", onData);
             resolve();
+            return;
           }
         }
-      } catch (err) {
-        // ignored
       }
-    });
+    };
+
+    eventStream.on("data", onData);
   });
 };
 
@@ -181,3 +205,21 @@ export async function createTestServer(port: number): Promise<Server> {
   await new Promise<void>((resolve) => server.listen(port, resolve));
   return server;
 }
+
+export const createTempSymlinkedFile = async (
+  content: string
+): Promise<{ source: string; symlink: string } & AsyncDisposable> => {
+  const directory = await fs.promises.mkdtemp(path.join(tmpdir(), "testcontainers-"));
+  const source = path.join(directory, "source.txt");
+  const symlink = path.join(directory, "symlink.txt");
+  await fs.promises.writeFile(source, content);
+  await fs.promises.symlink(source, symlink);
+
+  return {
+    source,
+    symlink,
+    [Symbol.asyncDispose]: async () => {
+      await fs.promises.rm(directory, { recursive: true, force: true });
+    },
+  };
+};

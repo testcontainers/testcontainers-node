@@ -41,6 +41,15 @@ Choose an image from the [container registry](https://hub.docker.com/_/postgres)
 [](../../packages/modules/postgresql/src/postgresql-container.test.ts) inside_block:pgSetUsername
 <!--/codeinclude-->
 
+### With SSL
+
+!!! note
+    `withSSL()` / `withSSLCert()` expect certificate/key files that already exist. They do not generate key material.
+
+<!--codeinclude-->
+[](../../packages/modules/postgresql/src/postgresql-container.test.ts) inside_block:pgSslConnect
+<!--/codeinclude-->
+
 ### Snapshots
 
 !!! warning

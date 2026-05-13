@@ -40,6 +40,21 @@ export type ContentToCopy = {
   mode?: number;
 };
 
+/**
+ * Options passed to Docker's put archive endpoint.
+ */
+export type CopyToContainerOptions = {
+  /**
+   * Fail extraction if it would replace an existing directory with a non-directory,
+   * or an existing non-directory with a directory.
+   */
+  noOverwriteDirNonDir?: boolean;
+  /**
+   * Preserve UID/GID from archive entries when copying into the container.
+   */
+  copyUIDGID?: boolean;
+};
+
 export type ArchiveToCopy = {
   tar: Readable;
   target: string;

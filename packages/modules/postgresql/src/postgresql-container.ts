@@ -1,11 +1,41 @@
 import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 
 const POSTGRES_PORT = 5432;
+const POSTGRES_SSL_PATH = "/tmp/testcontainers-node/postgres";
+const POSTGRES_SSL_CA_CERT_PATH = `${POSTGRES_SSL_PATH}/ca_cert.pem`;
+const POSTGRES_SSL_CERT_PATH = `${POSTGRES_SSL_PATH}/server.crt`;
+const POSTGRES_SSL_KEY_PATH = `${POSTGRES_SSL_PATH}/server.key`;
+const POSTGRES_SSL_ENTRYPOINT_PATH = "/usr/local/bin/docker-entrypoint-ssl.sh";
+const POSTGRES_SSL_ENTRYPOINT_CONTENT = `#!/bin/sh
+set -eu
+
+puid="$(id -u postgres)"
+pgid="$(id -g postgres)"
+
+if [ -z "$puid" ] || [ -z "$pgid" ]; then
+  echo "Unable to determine postgres uid/gid for SSL key material ownership"
+  exit 1
+fi
+
+for file in "${POSTGRES_SSL_CA_CERT_PATH}" "${POSTGRES_SSL_CERT_PATH}" "${POSTGRES_SSL_KEY_PATH}"; do
+  if [ -f "$file" ]; then
+    chown "$puid:$pgid" "$file"
+    chmod 600 "$file"
+  fi
+done
+
+exec /usr/local/bin/docker-entrypoint.sh "$@"
+`;
+
+type PostgreSqlSslConfig = {
+  caCertPath?: string;
+};
 
 export class PostgreSqlContainer extends GenericContainer {
   private database = "test";
   private username = "test";
   private password = "test";
+  private sslConfig?: PostgreSqlSslConfig;
 
   constructor(image: string) {
     super(image);
@@ -29,12 +59,63 @@ export class PostgreSqlContainer extends GenericContainer {
     return this;
   }
 
+  public withSSL(certFile: string, keyFile: string, caCertFile?: string): this {
+    if (!certFile) throw new Error("SSL certificate file should not be empty.");
+    if (!keyFile) throw new Error("SSL key file should not be empty.");
+    if (caCertFile !== undefined && !caCertFile) throw new Error("SSL CA certificate file should not be empty.");
+
+    const filesToCopy = [
+      { source: certFile, target: POSTGRES_SSL_CERT_PATH, mode: 0o600 },
+      { source: keyFile, target: POSTGRES_SSL_KEY_PATH, mode: 0o600 },
+    ];
+
+    if (caCertFile) {
+      filesToCopy.push({ source: caCertFile, target: POSTGRES_SSL_CA_CERT_PATH, mode: 0o600 });
+    }
+
+    this.sslConfig = {
+      caCertPath: caCertFile ? POSTGRES_SSL_CA_CERT_PATH : undefined,
+    };
+
+    this.withCopyFilesToContainer(filesToCopy)
+      .withCopyContentToContainer([
+        {
+          content: POSTGRES_SSL_ENTRYPOINT_CONTENT,
+          target: POSTGRES_SSL_ENTRYPOINT_PATH,
+          mode: 0o700,
+        },
+      ])
+      .withEntrypoint(["sh", POSTGRES_SSL_ENTRYPOINT_PATH]);
+
+    return this;
+  }
+
+  public withSSLCert(caCertFile: string, certFile: string, keyFile: string): this {
+    if (!caCertFile) throw new Error("SSL CA certificate file should not be empty.");
+    return this.withSSL(certFile, keyFile, caCertFile);
+  }
+
   public override async start(): Promise<StartedPostgreSqlContainer> {
     this.withEnvironment({
       POSTGRES_DB: this.database,
       POSTGRES_USER: this.username,
       POSTGRES_PASSWORD: this.password,
     });
+    if (this.sslConfig) {
+      const command = this.createOpts.Cmd;
+      if (!command || command[0] === "postgres") {
+        this.withCommand([
+          ...(command ?? ["postgres"]),
+          "-c",
+          "ssl=on",
+          "-c",
+          `ssl_cert_file=${POSTGRES_SSL_CERT_PATH}`,
+          "-c",
+          `ssl_key_file=${POSTGRES_SSL_KEY_PATH}`,
+          ...(this.sslConfig.caCertPath ? ["-c", `ssl_ca_file=${this.sslConfig.caCertPath}`] : []),
+        ]);
+      }
+    }
     if (!this.healthCheck) {
       this.withHealthCheck({
         test: [

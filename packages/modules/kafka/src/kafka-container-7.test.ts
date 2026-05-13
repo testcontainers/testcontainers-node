@@ -18,6 +18,14 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
     await using container = await new KafkaContainer(IMAGE).start();
 
     await assertMessageProducedAndConsumed(container);
+
+    const { exitCode } = await container.exec([
+      "sh",
+      "-c",
+      "test -f /tmp/testcontainers_start.sh && test ! -f /testcontainers_start.sh",
+    ]);
+
+    expect(exitCode).toBe(0);
   });
 
   it("should connect using in-built zoo-keeper and custom network", async () => {
