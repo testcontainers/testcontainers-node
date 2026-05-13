@@ -61,7 +61,7 @@ export class KafkaContainer extends GenericContainer {
   private zooKeeperHost?: string;
   private zooKeeperPort?: number;
   private saslSslConfig?: SaslSslListenerOptions;
-  private originalWaitinStrategy: WaitStrategy | undefined;
+  private originalWaitStrategy: WaitStrategy | undefined;
 
   constructor(image: string) {
     super(image);
@@ -81,7 +81,7 @@ export class KafkaContainer extends GenericContainer {
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: "0",
       KAFKA_CONFLUENT_SUPPORT_METRICS_ENABLE: "false",
     });
-    this.originalWaitinStrategy = this.waitStrategy;
+    this.originalWaitStrategy = this.waitStrategy;
   }
 
   public withZooKeeper(host: string, port: number): this {
@@ -138,7 +138,7 @@ export class KafkaContainer extends GenericContainer {
 
     // Change the wait strategy to wait for a log message from a fake starter script
     // so that we can put a real starter script in place at that moment
-    this.originalWaitinStrategy = this.waitStrategy;
+    this.originalWaitStrategy = this.waitStrategy;
     this.waitStrategy = Wait.forLogMessage(WAIT_FOR_SCRIPT_MESSAGE);
     this.withEntrypoint(["sh"]);
     this.withCommand([
@@ -193,12 +193,7 @@ export class KafkaContainer extends GenericContainer {
     const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, inspectResult).filter(
       this.exposedPorts
     );
-    await waitForContainer(
-      client,
-      dockerContainer,
-      this.originalWaitinStrategy ?? Wait.forListeningPorts(),
-      boundPorts
-    );
+    await waitForContainer(client, dockerContainer, this.originalWaitStrategy ?? Wait.forListeningPorts(), boundPorts);
 
     if (this.saslSslConfig && this.mode !== KafkaMode.KRAFT) {
       await this.createUser(container, this.saslSslConfig.sasl);

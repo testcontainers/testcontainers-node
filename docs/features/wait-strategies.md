@@ -71,7 +71,7 @@ const container = await new GenericContainer("alpine")
 
 ## Health check
 
-Wait until the container's health check is successful:
+Explicitly wait until the container's health check is successful. This is optional when the image already defines a health check because Testcontainers uses that as the default wait strategy:
 
 ```js
 const { GenericContainer, Wait } = require("testcontainers");

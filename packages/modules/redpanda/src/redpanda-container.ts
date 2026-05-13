@@ -21,7 +21,7 @@ const STARTER_SCRIPT = "/testcontainers_start.sh";
 const WAIT_FOR_SCRIPT_MESSAGE = "Waiting for script...";
 
 export class RedpandaContainer extends GenericContainer {
-  private originalWaitinStrategy: WaitStrategy | undefined;
+  private originalWaitStrategy: WaitStrategy | undefined;
 
   constructor(image: string) {
     super(image);
@@ -34,7 +34,7 @@ export class RedpandaContainer extends GenericContainer {
           target: "/etc/redpanda/.bootstrap.yaml",
         },
       ]);
-    this.originalWaitinStrategy = this.waitStrategy;
+    this.originalWaitStrategy = this.waitStrategy;
   }
 
   public override async start(): Promise<StartedRedpandaContainer> {
@@ -44,7 +44,7 @@ export class RedpandaContainer extends GenericContainer {
   protected override async beforeContainerCreated(): Promise<void> {
     // Change the wait strategy to wait for a log message from a fake starter script
     // so that we can put a real starter script in place at that moment
-    this.originalWaitinStrategy = this.waitStrategy;
+    this.originalWaitStrategy = this.waitStrategy;
     this.waitStrategy = Wait.forLogMessage(WAIT_FOR_SCRIPT_MESSAGE);
     this.withEntrypoint(["sh"]);
     this.withCommand([
@@ -71,12 +71,7 @@ export class RedpandaContainer extends GenericContainer {
     const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, inspectResult).filter(
       this.exposedPorts
     );
-    await waitForContainer(
-      client,
-      dockerContainer,
-      this.originalWaitinStrategy ?? Wait.forListeningPorts(),
-      boundPorts
-    );
+    await waitForContainer(client, dockerContainer, this.originalWaitStrategy ?? Wait.forListeningPorts(), boundPorts);
   }
 
   private renderRedpandaFile(host: string, port: number): string {

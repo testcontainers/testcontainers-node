@@ -32,6 +32,24 @@ describe("GenericContainer default wait strategy", { timeout: 180_000 }, () => {
     await checkContainerIsHealthy(container);
   });
 
+  it("should prefer a healthcheck configured with withHealthCheck over an image healthcheck", async () => {
+    const context = path.resolve(fixtures, "docker-with-delayed-health-check");
+    const genericContainer = await GenericContainer.fromDockerfile(context).build();
+    await using container = await genericContainer
+      .withExposedPorts(8080)
+      .withCommand(["sh", "-c", "rm -f /tmp/ready /tmp/custom-ready; touch /tmp/custom-ready; node index.js"])
+      .withHealthCheck({
+        test: ["CMD-SHELL", "test -f /tmp/custom-ready"],
+        interval: 1_000,
+        timeout: 1_000,
+        retries: 10,
+      })
+      .start();
+
+    expect(await getHealthCheckStatus(container)).toBe("healthy");
+    await checkContainerIsHealthy(container);
+  });
+
   // Podman compat inspect does not consistently expose Config.Healthcheck for built images.
   if (!process.env.CI_PODMAN) {
     it("should wait for a healthcheck defined in the image", async () => {

@@ -90,9 +90,9 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
   });
 
   it("should support default wait strategy", async () => {
-    await using startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-healthcheck.yml")
-      .withDefaultWaitStrategy(Wait.forHealthCheck())
-      .up();
+    await using startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml")
+      .withDefaultWaitStrategy(Wait.forLogMessage("Listening on port 8080"))
+      .up(["container"]);
 
     await checkEnvironmentContainerIsHealthy(startedEnvironment, "container-1");
   });

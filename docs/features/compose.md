@@ -51,7 +51,7 @@ If you'd like to override the default wait strategy for all services, you can do
 
 ```js
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
-  .withDefaultWaitStrategy(Wait.forHealthCheck())
+  .withDefaultWaitStrategy(Wait.forListeningPorts())
   .up();
 ```
 
