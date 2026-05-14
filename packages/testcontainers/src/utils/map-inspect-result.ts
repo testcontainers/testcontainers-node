@@ -39,7 +39,7 @@ function mapPorts(inspectInfo: ContainerInspectInfo): Ports {
 function mapHealthCheckStatus(inspectResult: ContainerInspectInfo): HealthCheckStatus {
   const health = inspectResult.State.Health;
 
-  if (health === undefined) {
+  if (health === undefined || health.Status === "") {
     return "none";
   } else {
     return health.Status as HealthCheckStatus;

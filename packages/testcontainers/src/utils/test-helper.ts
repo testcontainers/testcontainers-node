@@ -29,7 +29,9 @@ export const checkContainerIsHealthy = async (container: StartedTestContainer): 
 export const getHealthCheckStatus = async (container: StartedTestContainer): Promise<HealthCheckStatus | undefined> => {
   const client = await getContainerRuntimeClient();
   const dockerContainer = client.container.getById(container.getId());
-  return (await client.container.inspect(dockerContainer)).State.Health?.Status as HealthCheckStatus | undefined;
+  const status = (await client.container.inspect(dockerContainer)).State.Health?.Status;
+
+  return status === undefined || status === "" ? undefined : (status as HealthCheckStatus);
 };
 
 export const checkContainerIsHealthyTls = async (container: StartedTestContainer): Promise<void> => {
