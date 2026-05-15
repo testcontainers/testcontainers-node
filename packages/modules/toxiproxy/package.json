@@ -30,6 +30,6 @@
   },
   "dependencies": {
     "testcontainers": "^11.14.0",
-    "toxiproxy-node-client": "^4.0.0"
+    "toxiproxy-node-client": "^4.1.0"
   }
 }
