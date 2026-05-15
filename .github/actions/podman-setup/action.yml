@@ -3,17 +3,14 @@ description: "Sets up Podman"
 runs:
   using: "composite"
   steps:
-    - name: Podman setup
+    - name: Install Podman
+      uses: redhat-actions/podman-install@main
+      with:
+        podman-version-input: 5.6.2
+
+    - name: Configure Podman
       shell: bash
       run: |
-        sudo apt-get update
-        sudo apt-get install -y --only-upgrade podman golang-github-containers-common
-        dpkg-query -W podman golang-github-containers-common
-        mkdir -p ~/.config/containers
-        cat <<EOF > ~/.config/containers/containers.conf
-        [engine]
-        runtime = "runc"
-        EOF
         systemctl enable --now --user podman podman.socket
         podman info
         echo "DOCKER_HOST=unix://${XDG_RUNTIME_DIR}/podman/podman.sock" >> $GITHUB_ENV
