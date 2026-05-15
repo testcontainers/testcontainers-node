@@ -19,20 +19,20 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@eslint/json": "^1.0.1",
-    "@vitest/coverage-v8": "^4.0.18",
-    "eslint": "^10.0.0",
+    "@eslint/json": "^1.2.0",
+    "@vitest/coverage-v8": "^4.1.5",
+    "eslint": "^10.3.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
     "husky": "^9.1.7",
-    "lint-staged": "^16.2.7",
-    "npm-check-updates": "^19.3.2",
-    "prettier": "^3.8.1",
+    "lint-staged": "^17.0.4",
+    "npm-check-updates": "^22.1.1",
+    "prettier": "^3.8.3",
     "prettier-plugin-organize-imports": "^4.3.0",
     "shx": "^0.4.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.56.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.59.2",
     "vitest": "^4.0.18"
   },
   "lint-staged": {
@@ -42,6 +42,6 @@
     ]
   },
   "engines": {
-    "node": ">= 20"
+    "node": ">= 22.22"
   }
 }

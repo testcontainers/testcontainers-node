@@ -8,7 +8,7 @@ import { ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "..
 import { CONTAINER_STATUSES } from "../container-runtime/clients/container/types";
 import { StartedNetwork } from "../network/network";
 import { PortForwarderInstance, SSHD_IMAGE } from "../port-forwarder/port-forwarder";
-import { getReaper, REAPER_IMAGE } from "../reaper/reaper";
+import { getReaper, getReaperImage } from "../reaper/reaper";
 import { StartedTestContainer, TestContainer } from "../test-container";
 import {
   ArchiveToCopy,
@@ -54,6 +54,7 @@ export class GenericContainer implements TestContainer {
   protected environment: Record<string, string> = {};
   protected exposedPorts: PortWithOptionalBinding[] = [];
   protected reuse = false;
+  protected autoCleanup = true;
   protected autoRemove = true;
   protected networkMode?: string;
   protected networkAliases: string[] = [];
@@ -69,7 +70,7 @@ export class GenericContainer implements TestContainer {
   constructor(image: string) {
     this.imageName = ImageName.fromString(image);
     this.createOpts = { Image: this.imageName.string };
-    this.hostConfig = { AutoRemove: this.imageName.string === REAPER_IMAGE };
+    this.hostConfig = { AutoRemove: this.imageName.string === getReaperImage() };
   }
 
   private isHelperContainer() {
@@ -77,7 +78,7 @@ export class GenericContainer implements TestContainer {
   }
 
   private isReaper() {
-    return this.imageName.string === REAPER_IMAGE;
+    return this.imageName.string === getReaperImage();
   }
 
   protected beforeContainerCreated?(): Promise<void>;
@@ -112,7 +113,7 @@ export class GenericContainer implements TestContainer {
       return this.reuseOrStartContainer(client);
     }
 
-    if (!this.isReaper()) {
+    if (!this.isReaper() && this.autoCleanup) {
       const reaper = await getReaper(client);
       this.createOpts.Labels = { ...this.createOpts.Labels, [LABEL_TESTCONTAINERS_SESSION_ID]: reaper.sessionId };
     }
@@ -458,6 +459,11 @@ export class GenericContainer implements TestContainer {
 
   public withReuse(): this {
     this.reuse = true;
+    return this;
+  }
+
+  public withAutoCleanup(autoCleanup: boolean): this {
+    this.autoCleanup = autoCleanup;
     return this;
   }
 

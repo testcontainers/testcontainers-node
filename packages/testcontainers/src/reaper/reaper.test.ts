@@ -4,7 +4,7 @@ import { RandomPortGenerator } from "../utils/port-generator";
 describe.sequential("Reaper", { timeout: 120_000 }, () => {
   let client: ContainerRuntimeClient;
 
-  const getReaper = async () => await (await import("./reaper")).getReaper(client);
+  const getReaper = async () => await (await import("./reaper.js")).getReaper(client);
 
   beforeEach(async () => {
     vi.resetModules();

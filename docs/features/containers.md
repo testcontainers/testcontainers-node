@@ -400,6 +400,16 @@ const container = await new GenericContainer("alpine")
 await container.stop({ remove: true }); // The container is stopped *AND* removed
 ```
 
+You can also disable automatic Ryuk cleanup for a specific container while leaving it enabled for the rest of the test session:
+
+```js
+const container = await new GenericContainer("alpine")
+  .withAutoCleanup(false)
+  .start();
+```
+
+This only affects automatic cleanup when the process exits unexpectedly or the container is otherwise left running. Explicit calls to `.stop()` still use the normal stop and removal behavior, so combine this with `.withAutoRemove(false)` or `.stop({ remove: false })` if you also want explicit stops to keep the container.
+
 Keep in mind that disabling ryuk (set `TESTCONTAINERS_RYUK_DISABLED` to `true`) **and** disabling automatic removal of containers will make containers persist after you're done working with them.
 
 

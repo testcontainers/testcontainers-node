@@ -144,6 +144,19 @@ const environment = await new DockerComposeEnvironment(composeFilePath, composeF
   .up();
 ```
 
+### With auto cleanup disabled
+
+By default Testcontainers registers the compose project with Ryuk so the stack is torn down automatically when the process exits. You can disable that registration for a specific compose stack:
+
+```js
+const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
+  .withProjectName("test")
+  .withAutoCleanup(false)
+  .up();
+```
+
+This only disables automatic cleanup. Explicit calls to `.down()`, `.stop()`, or `await using` disposal still tear the stack down as usual.
+
 ### With custom client options
 
 See [docker-compose](https://github.com/PDMLab/docker-compose/) library.

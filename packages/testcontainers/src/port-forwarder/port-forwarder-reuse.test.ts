@@ -6,16 +6,16 @@ describe.sequential("Port Forwarder reuse", { timeout: 180_000 }, () => {
   const portGen = new RandomPortGenerator();
 
   it("should expose additional ports", async () => {
-    const { TestContainers: TC1 } = await import("../test-containers");
-    const { PortForwarderInstance: PFI1 } = await import("../port-forwarder/port-forwarder");
+    const { TestContainers: TC1 } = await import("../test-containers.js");
+    const { PortForwarderInstance: PFI1 } = await import("../port-forwarder/port-forwarder.js");
     const port1 = await portGen.generatePort();
     const server1 = await createTestServer(port1);
     await TC1.exposeHostPorts(port1);
     const portForwarder1ContainerId = (await PFI1.getInstance()).getContainerId();
 
     vi.resetModules();
-    const { TestContainers: TC2 } = await import("../test-containers");
-    const { PortForwarderInstance: PFI2 } = await import("../port-forwarder/port-forwarder");
+    const { TestContainers: TC2 } = await import("../test-containers.js");
+    const { PortForwarderInstance: PFI2 } = await import("../port-forwarder/port-forwarder.js");
     const port2 = await portGen.generatePort();
     const server2 = await createTestServer(port2);
     await TC2.exposeHostPorts(port2);
@@ -37,14 +37,14 @@ describe.sequential("Port Forwarder reuse", { timeout: 180_000 }, () => {
     const port = await portGen.generatePort();
     const server = await createTestServer(port);
 
-    const { TestContainers: TC1 } = await import("../test-containers");
-    const { PortForwarderInstance: PFI1 } = await import("../port-forwarder/port-forwarder");
+    const { TestContainers: TC1 } = await import("../test-containers.js");
+    const { PortForwarderInstance: PFI1 } = await import("../port-forwarder/port-forwarder.js");
     await TC1.exposeHostPorts(port);
     const portForwarder1ContainerId = (await PFI1.getInstance()).getContainerId();
 
     vi.resetModules();
-    const { TestContainers: TC2 } = await import("../test-containers");
-    const { PortForwarderInstance: PFI2 } = await import("../port-forwarder/port-forwarder");
+    const { TestContainers: TC2 } = await import("../test-containers.js");
+    const { PortForwarderInstance: PFI2 } = await import("../port-forwarder/port-forwarder.js");
     await TC2.exposeHostPorts(port);
     const portForwarder2ContainerId = (await PFI2.getInstance()).getContainerId();
 

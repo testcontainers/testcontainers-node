@@ -18,6 +18,7 @@ export class DockerComposeEnvironment {
 
   private projectName: string;
   private build = false;
+  private autoCleanup = true;
   private recreate = true;
   private environmentFile = "";
   private profiles: string[] = [];
@@ -36,6 +37,11 @@ export class DockerComposeEnvironment {
 
   public withBuild(): this {
     this.build = true;
+    return this;
+  }
+
+  public withAutoCleanup(autoCleanup: boolean): this {
+    this.autoCleanup = autoCleanup;
     return this;
   }
 
@@ -95,8 +101,10 @@ export class DockerComposeEnvironment {
   public async up(services?: Array<string>): Promise<StartedDockerComposeEnvironment> {
     log.info(`Starting DockerCompose environment "${this.projectName}"...`);
     const client = await getContainerRuntimeClient();
-    const reaper = await getReaper(client);
-    reaper.addComposeProject(this.projectName);
+    if (this.autoCleanup) {
+      const reaper = await getReaper(client);
+      reaper.addComposeProject(this.projectName);
+    }
 
     const {
       composeOptions: clientComposeOptions = [],

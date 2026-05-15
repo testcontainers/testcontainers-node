@@ -1,14 +1,24 @@
 import { ContainerInfo } from "dockerode";
 import { Socket } from "net";
+import { userInfo } from "os";
 import { IntervalRetry, log, RandomUuid, withFileLock } from "../common";
 import { ContainerRuntimeClient, ImageName } from "../container-runtime";
 import { GenericContainer } from "../generic-container/generic-container";
 import { LABEL_TESTCONTAINERS_RYUK, LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
 import { Wait } from "../wait-strategies/wait";
 
-export const REAPER_IMAGE = process.env["RYUK_CONTAINER_IMAGE"]
-  ? ImageName.fromString(process.env["RYUK_CONTAINER_IMAGE"]).string
-  : ImageName.fromString("testcontainers/ryuk:0.14.0").string;
+/**
+ * Resolve the Ryuk reaper image name. Read lazily so that callers (and tests)
+ * can set `process.env.RYUK_CONTAINER_IMAGE` _after_ this module is imported —
+ * including via `.env` files loaded by `dotenv` at runtime.
+ *
+ * See https://github.com/testcontainers/testcontainers-node/issues/1310.
+ */
+export function getReaperImage(): string {
+  return process.env["RYUK_CONTAINER_IMAGE"]
+    ? ImageName.fromString(process.env["RYUK_CONTAINER_IMAGE"]).string
+    : ImageName.fromString("testcontainers/ryuk:0.14.0").string;
+}
 
 export interface Reaper {
   sessionId: string;
@@ -28,7 +38,8 @@ export async function getReaper(client: ContainerRuntimeClient): Promise<Reaper>
     return reaper;
   }
 
-  reaper = await withFileLock("testcontainers-node.lock", async () => {
+  const userId = userInfo().uid;
+  reaper = await withFileLock(`testcontainers-node-${userId}.lock`, async () => {
     const reaperContainers = await findReaperContainers(client);
 
     if (process.env.TESTCONTAINERS_RYUK_DISABLED === "true") {
@@ -85,7 +96,7 @@ async function useExistingReaper(reaperContainer: ContainerInfo, sessionId: stri
 async function createNewReaper(sessionId: string, remoteSocketPath: string): Promise<Reaper> {
   log.debug(`Creating new Reaper for session "${sessionId}" with socket path "${remoteSocketPath}"...`);
 
-  const container = new GenericContainer(REAPER_IMAGE)
+  const container = new GenericContainer(getReaperImage())
     .withName(`testcontainers-ryuk-${sessionId}`)
     .withExposedPorts(
       process.env["TESTCONTAINERS_RYUK_PORT"]
