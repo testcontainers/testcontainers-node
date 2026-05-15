@@ -23,29 +23,37 @@ jobs:
     name: Detect packages to check
     runs-on: ubuntu-22.04
     outputs:
-      modules: ${{ steps.set-modified-modules.outputs.modules }}
-      modules_count: ${{ steps.set-modified-modules-count.outputs.modules_count }}
+      modules: ${{ steps.detect.outputs.modules }}
+      modules_count: ${{ steps.detect.outputs.modules_count }}
+      has_testcontainers: ${{ steps.detect.outputs.has_testcontainers }}
     steps:
       - name: Check out code
         uses: actions/checkout@v5
-      - id: changed-files
-        name: Get changed files
-        uses: tj-actions/changed-files@ed68ef82c095e0d48ec87eccea555d944a631a4c # v46.0.5
-      - id: set-modified-modules
-        name: Set all modified modules
+        with:
+          fetch-depth: 0
+      - id: detect
+        name: Detect changed packages
         env:
-          ALL_CHANGED_FILES: "${{ steps.changed-files.outputs.all_changed_files }}"
-        run: echo "modules=$(./.github/scripts/changed-modules.sh)" >> $GITHUB_OUTPUT
-      - id: set-modified-modules-count
-        name: Set all modified modules count
-        run: echo "modules_count=$(echo ${{ toJSON(steps.set-modified-modules.outputs.modules) }} | jq '. | length')" >> $GITHUB_OUTPUT
-      - name: Print out the modules to be used
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
-          echo "${{ steps.set-modified-modules-count.outputs.modules_count }} modules in the build"
-          echo "${{ steps.set-modified-modules.outputs.modules }}"
+          changed_files="${RUNNER_TEMP}/changed-files.txt"
+
+          git diff --name-only "${BASE_SHA}" "${HEAD_SHA}" > "${changed_files}"
+
+          modules="$(node ./.github/scripts/changed-modules.mjs < "${changed_files}")"
+          modules_count="$(jq 'length' <<< "${modules}")"
+          has_testcontainers="$(jq 'index("testcontainers") != null' <<< "${modules}")"
+
+          echo "modules=${modules}" >> "${GITHUB_OUTPUT}"
+          echo "modules_count=${modules_count}" >> "${GITHUB_OUTPUT}"
+          echo "has_testcontainers=${has_testcontainers}" >> "${GITHUB_OUTPUT}"
+
+          echo "${modules_count} packages in the build"
+          echo "${modules}"
 
   lint:
-    if: ${{ needs.detect-modules.outputs.modules_count > 0 }}
+    if: ${{ needs.detect-modules.outputs.modules_count != '0' }}
     name: "Lint"
     needs:
       - detect-modules
@@ -70,7 +78,7 @@ jobs:
         run: npm run lint:ci
 
   compile:
-    if: ${{ needs.detect-modules.outputs.modules_count > 0 }}
+    if: ${{ needs.detect-modules.outputs.modules_count != '0' }}
     name: Compile
     needs:
       - detect-modules
@@ -98,7 +106,7 @@ jobs:
           fi
 
   smoke-test:
-    if: ${{ needs.detect-modules.outputs.modules_count > 0 }}
+    if: ${{ needs.detect-modules.outputs.has_testcontainers == 'true' }}
     needs:
       - detect-modules
       - lint
@@ -132,13 +140,12 @@ jobs:
           DEBUG: "testcontainers*"
 
   test:
-    if: ${{ needs.detect-modules.outputs.modules_count > 0 }}
+    if: ${{ needs.detect-modules.outputs.modules_count != '0' }}
     name: Tests
     needs:
       - detect-modules
       - lint
       - compile
-      - smoke-test
     strategy:
       fail-fast: false
       matrix:
@@ -153,7 +160,7 @@ jobs:
       workspace: "${{ matrix.module }}"
 
   end:
-    if: ${{ needs.detect-modules.outputs.modules_count > 0 }}
+    if: ${{ always() && needs.detect-modules.outputs.modules_count != '0' }}
     name: Checks complete
     needs:
       - detect-modules
@@ -164,6 +171,6 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Check if any jobs failed
-        if: ${{ failure() || cancelled() }}
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
         run: exit 1
       - run: echo "All tests completed successfully!"

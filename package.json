@@ -11,8 +11,8 @@
     "docs:serve": "docker compose up",
     "test": "vitest run",
     "test:ci": "npm run test -- --coverage",
-    "format": "prettier --write package.json \"packages/**/*.ts\" \".github/**/*.yml\"",
-    "lint": "eslint --fix package.json \"packages/**/*.ts\"",
+    "format": "prettier --write package.json \"packages/**/*.ts\" \".github/**/*.yml\" \".github/**/*.mjs\"",
+    "lint": "eslint --fix package.json \"packages/**/*.ts\" \".github/**/*.mjs\"",
     "lint:ci": "eslint package.json \"${WORKSPACE_PATH}/**/*.ts\" --max-warnings=0",
     "update-deps": "npm-check-updates --workspaces --root -u",
     "check-compiles": "npm run build --ignore-scripts --ws -- --project tsconfig.json --noEmit"

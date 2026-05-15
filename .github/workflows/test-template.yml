@@ -22,28 +22,9 @@ jobs:
       - name: Code checkout
         uses: actions/checkout@v5
 
-      - name: Docker rootless setup
-        if: ${{ inputs.container-runtime == 'docker-rootless' }}
-        uses: ./.github/actions/docker-rootless-setup
-
       - name: Podman setup
         if: ${{ inputs.container-runtime == 'podman' }}
         uses: ./.github/actions/podman-setup
-
-      - name: Colima setup
-        if: ${{ inputs.container-runtime == 'colima' }}
-        uses: ./.github/actions/colima-setup
-        with:
-          runner: ${{ inputs.runner }}
-
-      - name: Rancher Desktop setup
-        if: ${{ inputs.container-runtime == 'rancher-desktop' }}
-        uses: ./.github/actions/rancher-desktop-setup
-        with:
-          runner: ${{ inputs.runner }}
-
-      - name: Code checkout
-        uses: actions/checkout@v5
 
       - name: Install Node ${{ inputs.node-version }} and Dependencies
         id: npm-install
