@@ -20,7 +20,7 @@ jobs:
     runs-on: ${{ inputs.runner }}
     steps:
       - name: Code checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Podman setup
         if: ${{ inputs.container-runtime == 'podman' }}

@@ -41,18 +41,26 @@ runs:
         } >> "$GITHUB_OUTPUT"
 
     - name: Install NodeJS ${{ inputs.node-version }}
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v6
       with:
         node-version: ${{ inputs.node-version }}
+        package-manager-cache: false
 
-    - name: Cache dependencies
-      uses: actions/cache@v4
+    - name: Restore dependencies cache
+      uses: actions/cache/restore@v4
       id: npm-cache
       with:
         path: ${{ steps.set-workspace.outputs.cache_paths }}
-        key: ${{ inputs.runner }}-node-${{ inputs.node-version }}-${{ inputs.workspace }}-${{ hashFiles('package-lock.json') }}
+        key: npm-v2-${{ inputs.runner }}-node-${{ inputs.node-version }}-${{ inputs.workspace }}-${{ hashFiles('package-lock.json') }}
 
     - name: Install dependencies
       if: steps.npm-cache.outputs.cache-hit != 'true'
       shell: bash
       run: npm ci --workspace "${WORKSPACE_PATH}" --include-workspace-root
+
+    - name: Save dependencies cache
+      if: steps.npm-cache.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: ${{ steps.set-workspace.outputs.cache_paths }}
+        key: ${{ steps.npm-cache.outputs.cache-primary-key }}

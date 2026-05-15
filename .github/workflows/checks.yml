@@ -18,6 +18,9 @@ concurrency:
   group: "${{ github.workflow }}-${{ github.head_ref || github.sha }}"
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   detect-modules:
     name: Detect packages to check
@@ -28,7 +31,7 @@ jobs:
       has_testcontainers: ${{ steps.detect.outputs.has_testcontainers }}
     steps:
       - name: Check out code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - id: detect
@@ -64,7 +67,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Code checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Install Node and Dependencies
         id: npm-install-modules
         uses: ./.github/actions/npm-setup
@@ -90,7 +93,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Code checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Install Node and Dependencies
         id: npm-install
         uses: ./.github/actions/npm-setup
@@ -119,7 +122,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Code checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Install Node ${{ matrix.node-version }} and Dependencies
         uses: ./.github/actions/npm-setup
         with:
