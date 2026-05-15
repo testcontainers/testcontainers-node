@@ -1,19 +1,89 @@
+import { ContainerInspectInfo, ImageInspectInfo } from "dockerode";
 import path from "path";
 import { randomUuid } from "../common/uuid";
+import { ContainerRuntimeClient } from "../container-runtime";
 import { checkContainerIsHealthy, getHealthCheckStatus } from "../utils/test-helper";
+import { HealthCheckWaitStrategy } from "../wait-strategies/health-check-wait-strategy";
+import { HostPortWaitStrategy } from "../wait-strategies/host-port-wait-strategy";
 import { Wait } from "../wait-strategies/wait";
 import { GenericContainer } from "./generic-container";
 
 const fixtures = path.resolve(__dirname, "..", "..", "fixtures", "docker");
 
-describe("GenericContainer default wait strategy", { timeout: 180_000 }, () => {
-  it("should use listening ports if healthcheck is not defined in the image", async () => {
-    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
-      .withExposedPorts(8080)
-      .start();
+class TestGenericContainer extends GenericContainer {
+  public selectWaitStrategyForTest(client: ContainerRuntimeClient, inspectResult: ContainerInspectInfo) {
+    return this.selectWaitStrategy(client, inspectResult);
+  }
+}
 
-    await checkContainerIsHealthy(container);
-    expect(await getHealthCheckStatus(container)).toBeUndefined();
+const containerInspectResult = (healthcheck?: { Test: string[] }): ContainerInspectInfo =>
+  ({
+    Config: {
+      Hostname: "hostname",
+      Labels: {},
+      Healthcheck: healthcheck,
+    },
+    State: {
+      Status: "running",
+      Running: true,
+      StartedAt: "2026-05-14T10:00:00.000Z",
+      FinishedAt: "0001-01-01T00:00:00.000Z",
+    },
+    NetworkSettings: {
+      Ports: {},
+      Networks: {},
+    },
+  }) as unknown as ContainerInspectInfo;
+
+const client = (imageInspectResult: ImageInspectInfo): ContainerRuntimeClient =>
+  ({
+    image: {
+      inspect: vi.fn().mockResolvedValue(imageInspectResult),
+    },
+  }) as unknown as ContainerRuntimeClient;
+
+describe("GenericContainer default wait strategy", { timeout: 180_000 }, () => {
+  it("should select listening ports when no healthcheck is configured", async () => {
+    await expect(
+      new TestGenericContainer("image:latest").selectWaitStrategyForTest(
+        client({} as ImageInspectInfo),
+        containerInspectResult()
+      )
+    ).resolves.toBeInstanceOf(HostPortWaitStrategy);
+  });
+
+  it("should select image healthcheck when container inspect omits healthcheck config", async () => {
+    const imageInspectResult = {
+      Config: {
+        Healthcheck: {
+          Test: ["CMD-SHELL", "test -f /tmp/ready"],
+        },
+      },
+    } as unknown as ImageInspectInfo;
+
+    await expect(
+      new TestGenericContainer("image:latest").selectWaitStrategyForTest(
+        client(imageInspectResult),
+        containerInspectResult()
+      )
+    ).resolves.toBeInstanceOf(HealthCheckWaitStrategy);
+  });
+
+  it("should select listening ports when the container disables image healthchecks", async () => {
+    const imageInspectResult = {
+      Config: {
+        Healthcheck: {
+          Test: ["CMD-SHELL", "test -f /tmp/ready"],
+        },
+      },
+    } as unknown as ImageInspectInfo;
+
+    await expect(
+      new TestGenericContainer("image:latest").selectWaitStrategyForTest(
+        client(imageInspectResult),
+        containerInspectResult({ Test: ["NONE"] })
+      )
+    ).resolves.toBeInstanceOf(HostPortWaitStrategy);
   });
 
   it("should wait for a healthcheck configured with withHealthCheck", async () => {

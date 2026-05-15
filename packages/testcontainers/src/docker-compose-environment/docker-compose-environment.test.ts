@@ -89,7 +89,7 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
     expect(responseBody["IS_OVERRIDDEN"]).toBe("true");
   });
 
-  it("should support default wait strategy", async () => {
+  it("should support configuring a default wait strategy", async () => {
     await using startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml")
       .withDefaultWaitStrategy(Wait.forLogMessage("Listening on port 8080"))
       .up(["container"]);
@@ -106,13 +106,6 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
 
     expect(await getHealthCheckStatus(container)).toBe("healthy");
     await checkEnvironmentContainerIsHealthy(startedEnvironment, "container-1");
-  });
-
-  it("should use listening ports if healthcheck is not defined in a service", async () => {
-    await using startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-name.yml").up();
-
-    await checkEnvironmentContainerIsHealthy(startedEnvironment, "custom_container_name");
-    expect(await getHealthCheckStatus(startedEnvironment.getContainer("custom_container_name"))).toBeUndefined();
   });
 
   it("should use listening ports if a service disables healthcheck", async () => {

@@ -31,13 +31,7 @@ import { createLabels, LABEL_TESTCONTAINERS_CONTAINER_HASH, LABEL_TESTCONTAINERS
 import { mapInspectResult } from "../utils/map-inspect-result";
 import { getContainerPort, getProtocol, hasHostBinding, PortWithOptionalBinding } from "../utils/port";
 import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
-import {
-  hasDisabledHealthCheckConfig,
-  hasHealthCheck,
-  hasHealthCheckConfig,
-  hasHealthCheckStatus,
-} from "../wait-strategies/utils/health-check";
-import { Wait } from "../wait-strategies/wait";
+import { selectWaitStrategy } from "../wait-strategies/utils/wait-strategy-selector";
 import { waitForContainer } from "../wait-strategies/wait-for-container";
 import { WaitStrategy } from "../wait-strategies/wait-strategy";
 import { GenericContainerBuilder } from "./generic-container-builder";
@@ -132,29 +126,13 @@ export class GenericContainer implements TestContainer {
     inspectResult: ContainerInspectInfo,
     waitStrategy: WaitStrategy | undefined = this.waitStrategy
   ): Promise<WaitStrategy> {
-    if (waitStrategy) return waitStrategy;
-    if (hasHealthCheck(this.healthCheck)) {
-      return Wait.forHealthCheck();
-    }
-    if (hasDisabledHealthCheckConfig(inspectResult)) {
-      return Wait.forListeningPorts();
-    }
-    if (hasHealthCheckConfig(inspectResult) || hasHealthCheckStatus(inspectResult)) {
-      return Wait.forHealthCheck();
-    }
-    if (await this.imageHasHealthCheck(client)) {
-      return Wait.forHealthCheck();
-    }
-    return Wait.forListeningPorts();
-  }
-
-  private async imageHasHealthCheck(client: ContainerRuntimeClient): Promise<boolean> {
-    try {
-      return hasHealthCheckConfig(await client.image.inspect(this.imageName));
-    } catch (err) {
-      log.debug(`Failed to inspect image "${this.imageName.string}" for health check config: ${err}`);
-      return false;
-    }
+    return selectWaitStrategy({
+      client,
+      inspectResult,
+      waitStrategy,
+      healthCheck: this.healthCheck,
+      imageNames: [this.imageName.string],
+    });
   }
 
   private async reuseOrStartContainer(client: ContainerRuntimeClient) {
