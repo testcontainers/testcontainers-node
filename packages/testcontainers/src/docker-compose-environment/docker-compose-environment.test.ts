@@ -97,19 +97,16 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
     await checkEnvironmentContainerIsHealthy(startedEnvironment, "container-1");
   });
 
-  // Podman compat inspect does not consistently expose Config.Healthcheck for compose-defined health checks.
-  if (!process.env.CI_PODMAN) {
-    it("should wait for a healthcheck defined in a service", async () => {
-      await using startedEnvironment = await new DockerComposeEnvironment(
-        fixtures,
-        "docker-compose-with-delayed-healthcheck.yml"
-      ).up();
-      const container = startedEnvironment.getContainer("container-1");
+  it("should wait for a healthcheck defined in a service", async () => {
+    await using startedEnvironment = await new DockerComposeEnvironment(
+      fixtures,
+      "docker-compose-with-delayed-healthcheck.yml"
+    ).up();
+    const container = startedEnvironment.getContainer("container-1");
 
-      expect(await getHealthCheckStatus(container)).toBe("healthy");
-      await checkEnvironmentContainerIsHealthy(startedEnvironment, "container-1");
-    });
-  }
+    expect(await getHealthCheckStatus(container)).toBe("healthy");
+    await checkEnvironmentContainerIsHealthy(startedEnvironment, "container-1");
+  });
 
   it("should use listening ports if healthcheck is not defined in a service", async () => {
     await using startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-name.yml").up();

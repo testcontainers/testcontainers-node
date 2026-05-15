@@ -31,7 +31,12 @@ import { createLabels, LABEL_TESTCONTAINERS_CONTAINER_HASH, LABEL_TESTCONTAINERS
 import { mapInspectResult } from "../utils/map-inspect-result";
 import { getContainerPort, getProtocol, hasHostBinding, PortWithOptionalBinding } from "../utils/port";
 import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
-import { hasHealthCheck } from "../wait-strategies/utils/health-check";
+import {
+  hasDisabledHealthCheckConfig,
+  hasHealthCheck,
+  hasHealthCheckConfig,
+  hasHealthCheckStatus,
+} from "../wait-strategies/utils/health-check";
 import { Wait } from "../wait-strategies/wait";
 import { waitForContainer } from "../wait-strategies/wait-for-container";
 import { WaitStrategy } from "../wait-strategies/wait-strategy";
@@ -122,15 +127,34 @@ export class GenericContainer implements TestContainer {
     return this.startContainer(client);
   }
 
-  private selectWaitStrategy(inspectResult: ContainerInspectInfo): WaitStrategy {
-    if (this.waitStrategy) return this.waitStrategy;
+  protected async selectWaitStrategy(
+    client: ContainerRuntimeClient,
+    inspectResult: ContainerInspectInfo,
+    waitStrategy: WaitStrategy | undefined = this.waitStrategy
+  ): Promise<WaitStrategy> {
+    if (waitStrategy) return waitStrategy;
     if (hasHealthCheck(this.healthCheck)) {
       return Wait.forHealthCheck();
     }
-    if (hasHealthCheck(inspectResult.Config.Healthcheck)) {
+    if (hasDisabledHealthCheckConfig(inspectResult)) {
+      return Wait.forListeningPorts();
+    }
+    if (hasHealthCheckConfig(inspectResult) || hasHealthCheckStatus(inspectResult)) {
+      return Wait.forHealthCheck();
+    }
+    if (await this.imageHasHealthCheck(client)) {
       return Wait.forHealthCheck();
     }
     return Wait.forListeningPorts();
+  }
+
+  private async imageHasHealthCheck(client: ContainerRuntimeClient): Promise<boolean> {
+    try {
+      return hasHealthCheckConfig(await client.image.inspect(this.imageName));
+    } catch (err) {
+      log.debug(`Failed to inspect image "${this.imageName.string}" for health check config: ${err}`);
+      return false;
+    }
   }
 
   private async reuseOrStartContainer(client: ContainerRuntimeClient) {
@@ -165,7 +189,7 @@ export class GenericContainer implements TestContainer {
     const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, mappedInspectResult).filter(
       this.exposedPorts
     );
-    const waitStrategy = this.selectWaitStrategy(inspectResult);
+    const waitStrategy = await this.selectWaitStrategy(client, inspectResult);
     if (this.startupTimeoutMs !== undefined) {
       waitStrategy.withStartupTimeout(this.startupTimeoutMs);
     }
@@ -238,7 +262,7 @@ export class GenericContainer implements TestContainer {
       await this.containerStarting(mappedInspectResult, false);
     }
 
-    const waitStrategy = this.selectWaitStrategy(inspectResult);
+    const waitStrategy = await this.selectWaitStrategy(client, inspectResult);
     if (this.startupTimeoutMs !== undefined) {
       waitStrategy.withStartupTimeout(this.startupTimeoutMs);
     }

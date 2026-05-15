@@ -68,10 +68,15 @@ export class RedpandaContainer extends GenericContainer {
 
     const client = await getContainerRuntimeClient();
     const dockerContainer = client.container.getById(container.getId());
+    const dockerInspectResult = await client.container.inspect(dockerContainer);
     const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, inspectResult).filter(
       this.exposedPorts
     );
-    await waitForContainer(client, dockerContainer, this.originalWaitStrategy ?? Wait.forListeningPorts(), boundPorts);
+    const waitStrategy = await this.selectWaitStrategy(client, dockerInspectResult, this.originalWaitStrategy);
+    if (this.startupTimeoutMs !== undefined) {
+      waitStrategy.withStartupTimeout(this.startupTimeoutMs);
+    }
+    await waitForContainer(client, dockerContainer, waitStrategy, boundPorts);
   }
 
   private renderRedpandaFile(host: string, port: number): string {

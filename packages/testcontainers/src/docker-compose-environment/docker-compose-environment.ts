@@ -1,13 +1,23 @@
 import { ContainerInfo, ContainerInspectInfo } from "dockerode";
 import { containerLog, log, RandomUuid, Uuid } from "../common";
-import { ComposeOptions, getContainerRuntimeClient, parseComposeContainerName } from "../container-runtime";
+import {
+  ComposeOptions,
+  ContainerRuntimeClient,
+  getContainerRuntimeClient,
+  ImageName,
+  parseComposeContainerName,
+} from "../container-runtime";
 import { StartedGenericContainer } from "../generic-container/started-generic-container";
 import { getReaper } from "../reaper/reaper";
 import { Environment } from "../types";
 import { BoundPorts } from "../utils/bound-ports";
 import { mapInspectResult } from "../utils/map-inspect-result";
 import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
-import { hasHealthCheck } from "../wait-strategies/utils/health-check";
+import {
+  hasDisabledHealthCheckConfig,
+  hasHealthCheckConfig,
+  hasHealthCheckStatus,
+} from "../wait-strategies/utils/health-check";
 import { Wait } from "../wait-strategies/wait";
 import { waitForContainer } from "../wait-strategies/wait-for-container";
 import { WaitStrategy } from "../wait-strategies/wait-strategy";
@@ -175,7 +185,7 @@ export class DockerComposeEnvironment {
           const inspectResult = await client.container.inspect(container);
           const mappedInspectResult = mapInspectResult(inspectResult);
           const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, mappedInspectResult);
-          const waitStrategy = this.selectWaitStrategy(containerName, inspectResult);
+          const waitStrategy = await this.selectWaitStrategy(client, containerName, inspectResult);
           if (this.startupTimeoutMs !== undefined) {
             waitStrategy.withStartupTimeout(this.startupTimeoutMs);
           }
@@ -222,15 +232,50 @@ export class DockerComposeEnvironment {
     });
   }
 
-  private selectWaitStrategy(containerName: string, inspectResult: ContainerInspectInfo): WaitStrategy {
+  private async selectWaitStrategy(
+    client: ContainerRuntimeClient,
+    containerName: string,
+    inspectResult: ContainerInspectInfo
+  ): Promise<WaitStrategy> {
     const containerWaitStrategy = this.waitStrategy[containerName]
       ? this.waitStrategy[containerName]
       : this.defaultWaitStrategy;
     if (containerWaitStrategy) return containerWaitStrategy;
-    if (hasHealthCheck(inspectResult.Config.Healthcheck)) {
+    if (hasDisabledHealthCheckConfig(inspectResult)) {
+      return Wait.forListeningPorts();
+    }
+    if (hasHealthCheckConfig(inspectResult) || hasHealthCheckStatus(inspectResult)) {
+      return Wait.forHealthCheck();
+    }
+    if (await this.imageHasHealthCheck(client, inspectResult)) {
       return Wait.forHealthCheck();
     }
     return Wait.forListeningPorts();
+  }
+
+  private async imageHasHealthCheck(
+    client: ContainerRuntimeClient,
+    inspectResult: ContainerInspectInfo
+  ): Promise<boolean> {
+    const imageNames = Array.from(
+      new Set(
+        [inspectResult.Config.Image, inspectResult.Image].filter(
+          (imageName): imageName is string => imageName !== undefined && imageName !== ""
+        )
+      )
+    );
+
+    for (const imageName of imageNames) {
+      try {
+        if (hasHealthCheckConfig(await client.image.inspect(ImageName.fromString(imageName)))) {
+          return true;
+        }
+      } catch (err) {
+        log.debug(`Failed to inspect image "${imageName}" for health check config: ${err}`);
+      }
+    }
+
+    return false;
   }
 
   private warnForUnusedWaitStrategies(startedContainerNames: Set<string>): void {
