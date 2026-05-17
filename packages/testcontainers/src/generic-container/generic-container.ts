@@ -1,6 +1,6 @@
 import archiver from "archiver";
 import AsyncLock from "async-lock";
-import { Container, ContainerCreateOptions, HostConfig } from "dockerode";
+import { Container, ContainerCreateOptions, ContainerInspectInfo, HostConfig } from "dockerode";
 import { promises as fs } from "fs";
 import { Readable } from "stream";
 import { containerLog, hash, log, toNanos } from "../common";
@@ -121,6 +121,20 @@ export class GenericContainer implements TestContainer {
     return this.startContainer(client);
   }
 
+  protected async selectWaitStrategy(
+    client: ContainerRuntimeClient,
+    inspectResult: ContainerInspectInfo,
+    waitStrategy: WaitStrategy | undefined = this.waitStrategy
+  ): Promise<WaitStrategy> {
+    return selectWaitStrategy({
+      client,
+      inspectResult,
+      waitStrategy,
+      healthCheck: this.healthCheck,
+      imageNames: [this.imageName.string],
+    });
+  }
+
   private async reuseOrStartContainer(client: ContainerRuntimeClient) {
     const containerHash = hash(JSON.stringify(this.createOpts));
     this.createOpts.Labels = { ...this.createOpts.Labels, [LABEL_TESTCONTAINERS_CONTAINER_HASH]: containerHash };
@@ -153,13 +167,7 @@ export class GenericContainer implements TestContainer {
     const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, mappedInspectResult).filter(
       this.exposedPorts
     );
-    const waitStrategy = await selectWaitStrategy({
-      client,
-      inspectResult,
-      waitStrategy: this.waitStrategy,
-      healthCheck: this.healthCheck,
-      imageNames: [this.imageName.string],
-    });
+    const waitStrategy = await this.selectWaitStrategy(client, inspectResult);
     if (this.startupTimeoutMs !== undefined) {
       waitStrategy.withStartupTimeout(this.startupTimeoutMs);
     }
@@ -232,13 +240,7 @@ export class GenericContainer implements TestContainer {
       await this.containerStarting(mappedInspectResult, false);
     }
 
-    const waitStrategy = await selectWaitStrategy({
-      client,
-      inspectResult,
-      waitStrategy: this.waitStrategy,
-      healthCheck: this.healthCheck,
-      imageNames: [this.imageName.string],
-    });
+    const waitStrategy = await this.selectWaitStrategy(client, inspectResult);
     if (this.startupTimeoutMs !== undefined) {
       waitStrategy.withStartupTimeout(this.startupTimeoutMs);
     }
