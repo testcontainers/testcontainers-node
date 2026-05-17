@@ -49,7 +49,7 @@ It captures practical rules that prevent avoidable CI and PR churn.
 1. Start from `main`.
 2. Create a branch prefixed with `codex/`.
 3. Implement scoped changes only.
-4. Run required checks: `npm run format`, `npm run lint`, and targeted tests.
+4. Run required checks: `npm run format`, `npm run lint`, `npm run check-compiles` when touching `packages/testcontainers` APIs consumed by modules, and targeted tests.
 5. Verify git diff only contains intended files.
 6. Never commit, push, or post on GitHub (issues, PRs, or comments) without first sharing the proposed diff/message and getting explicit user approval.
 7. Commit with focused message(s), using `git commit --no-verify`.
