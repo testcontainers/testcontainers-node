@@ -1,20 +1,9 @@
 import { ContainerInspectInfo, ImageInspectInfo } from "dockerode";
-import { ContainerRuntimeClient } from "../container-runtime";
-import { HealthCheckWaitStrategy } from "../wait-strategies/health-check-wait-strategy";
-import { HostPortWaitStrategy } from "../wait-strategies/host-port-wait-strategy";
-import { Wait } from "../wait-strategies/wait";
-import { WaitStrategy } from "../wait-strategies/wait-strategy";
-import { GenericContainer } from "./generic-container";
-
-class TestGenericContainer extends GenericContainer {
-  public selectWaitStrategyForTest(
-    client: ContainerRuntimeClient,
-    inspectResult: ContainerInspectInfo,
-    waitStrategy?: WaitStrategy
-  ) {
-    return this.selectWaitStrategy(client, inspectResult, waitStrategy);
-  }
-}
+import { ContainerRuntimeClient } from "../../container-runtime";
+import { HealthCheckWaitStrategy } from "../health-check-wait-strategy";
+import { HostPortWaitStrategy } from "../host-port-wait-strategy";
+import { Wait } from "../wait";
+import { selectWaitStrategy } from "./wait-strategy-selector";
 
 type ContainerInspectResultOptions = {
   healthcheck?: { Test: string[] };
@@ -68,38 +57,41 @@ const clientWithImageInspectFailure = (): ContainerRuntimeClient =>
     },
   }) as unknown as ContainerRuntimeClient;
 
-describe("GenericContainer default wait strategy", () => {
+describe("wait strategy selector", () => {
   it("should use an explicitly defined wait strategy", async () => {
     const runtimeClient = client(imageInspectResultWithHealthCheck());
     const waitStrategy = Wait.forLogMessage("ready");
 
     await expect(
-      new TestGenericContainer("image:latest")
-        .withHealthCheck({
+      selectWaitStrategy({
+        client: runtimeClient,
+        inspectResult: containerInspectResult({
+          healthcheck: {
+            Test: ["CMD-SHELL", "test -f /tmp/ready"],
+          },
+        }),
+        waitStrategy,
+        healthCheck: {
           test: ["CMD-SHELL", "test -f /tmp/ready"],
-        })
-        .selectWaitStrategyForTest(
-          runtimeClient,
-          containerInspectResult({
-            healthcheck: {
-              Test: ["CMD-SHELL", "test -f /tmp/ready"],
-            },
-          }),
-          waitStrategy
-        )
+        },
+        imageNames: ["image:latest"],
+      })
     ).resolves.toBe(waitStrategy);
     expect(runtimeClient.image.inspect).not.toHaveBeenCalled();
   });
 
-  it("should select a healthcheck configured with withHealthCheck", async () => {
+  it("should select a user-configured healthcheck", async () => {
     const runtimeClient = client({} as ImageInspectInfo);
 
     await expect(
-      new TestGenericContainer("image:latest")
-        .withHealthCheck({
+      selectWaitStrategy({
+        client: runtimeClient,
+        inspectResult: containerInspectResult(),
+        healthCheck: {
           test: ["CMD-SHELL", "test -f /tmp/ready"],
-        })
-        .selectWaitStrategyForTest(runtimeClient, containerInspectResult())
+        },
+        imageNames: ["image:latest"],
+      })
     ).resolves.toBeInstanceOf(HealthCheckWaitStrategy);
     expect(runtimeClient.image.inspect).not.toHaveBeenCalled();
   });
@@ -108,14 +100,15 @@ describe("GenericContainer default wait strategy", () => {
     const runtimeClient = client({} as ImageInspectInfo);
 
     await expect(
-      new TestGenericContainer("image:latest").selectWaitStrategyForTest(
-        runtimeClient,
-        containerInspectResult({
+      selectWaitStrategy({
+        client: runtimeClient,
+        inspectResult: containerInspectResult({
           healthcheck: {
             Test: ["CMD-SHELL", "test -f /tmp/ready"],
           },
-        })
-      )
+        }),
+        imageNames: ["image:latest"],
+      })
     ).resolves.toBeInstanceOf(HealthCheckWaitStrategy);
     expect(runtimeClient.image.inspect).not.toHaveBeenCalled();
   });
@@ -124,38 +117,42 @@ describe("GenericContainer default wait strategy", () => {
     const runtimeClient = client({} as ImageInspectInfo);
 
     await expect(
-      new TestGenericContainer("image:latest").selectWaitStrategyForTest(
-        runtimeClient,
-        containerInspectResult({ healthcheckStatus: "starting" })
-      )
+      selectWaitStrategy({
+        client: runtimeClient,
+        inspectResult: containerInspectResult({ healthcheckStatus: "starting" }),
+        imageNames: ["image:latest"],
+      })
     ).resolves.toBeInstanceOf(HealthCheckWaitStrategy);
     expect(runtimeClient.image.inspect).not.toHaveBeenCalled();
   });
 
   it("should select listening ports when no healthcheck is configured", async () => {
     await expect(
-      new TestGenericContainer("image:latest").selectWaitStrategyForTest(
-        client({} as ImageInspectInfo),
-        containerInspectResult()
-      )
+      selectWaitStrategy({
+        client: client({} as ImageInspectInfo),
+        inspectResult: containerInspectResult(),
+        imageNames: ["image:latest"],
+      })
     ).resolves.toBeInstanceOf(HostPortWaitStrategy);
   });
 
   it("should select image healthcheck when container inspect omits healthcheck config", async () => {
     await expect(
-      new TestGenericContainer("image:latest").selectWaitStrategyForTest(
-        client(imageInspectResultWithHealthCheck()),
-        containerInspectResult()
-      )
+      selectWaitStrategy({
+        client: client(imageInspectResultWithHealthCheck()),
+        inspectResult: containerInspectResult(),
+        imageNames: ["image:latest"],
+      })
     ).resolves.toBeInstanceOf(HealthCheckWaitStrategy);
   });
 
   it("should select listening ports when image inspect fails", async () => {
     await expect(
-      new TestGenericContainer("image:latest").selectWaitStrategyForTest(
-        clientWithImageInspectFailure(),
-        containerInspectResult()
-      )
+      selectWaitStrategy({
+        client: clientWithImageInspectFailure(),
+        inspectResult: containerInspectResult(),
+        imageNames: ["image:latest"],
+      })
     ).resolves.toBeInstanceOf(HostPortWaitStrategy);
   });
 
@@ -163,10 +160,11 @@ describe("GenericContainer default wait strategy", () => {
     const runtimeClient = client(imageInspectResultWithHealthCheck());
 
     await expect(
-      new TestGenericContainer("image:latest").selectWaitStrategyForTest(
-        runtimeClient,
-        containerInspectResult({ healthcheck: { Test: ["NONE"] } })
-      )
+      selectWaitStrategy({
+        client: runtimeClient,
+        inspectResult: containerInspectResult({ healthcheck: { Test: ["NONE"] } }),
+        imageNames: ["image:latest"],
+      })
     ).resolves.toBeInstanceOf(HostPortWaitStrategy);
     expect(runtimeClient.image.inspect).not.toHaveBeenCalled();
   });
