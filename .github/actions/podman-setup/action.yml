@@ -6,13 +6,22 @@ runs:
     - name: Install Podman
       uses: redhat-actions/podman-install@5bc2ecc87c737059124c295845be51ee7297fb89
       with:
-        ubuntu-repository: kubic
-        ubuntu-version: "24.04"
+        ubuntu-repository: questing
 
     - name: Configure Podman
       shell: bash
       run: |
-        sudo systemctl enable --now podman.socket
+        PODMAN_VERSION="$(podman --version | awk '{print $3}')"
+        if [[ "${PODMAN_VERSION}" != 5.* ]]; then
+          echo "Expected Podman 5.x, got ${PODMAN_VERSION}"
+          exit 1
+        fi
+
+        sudo mkdir -p /etc/systemd/system/podman.socket.d
+        printf '[Socket]\nSocketUser=%s\nSocketMode=0600\n' "$(id -un)" | sudo tee /etc/systemd/system/podman.socket.d/runner.conf
+        sudo systemctl daemon-reload
+        sudo systemctl enable podman.socket
+        sudo systemctl restart podman.socket
         podman --url=unix:///run/podman/podman.sock info
         echo "DOCKER_HOST=unix:///run/podman/podman.sock" >> $GITHUB_ENV
         echo "CI_PODMAN=true" >> $GITHUB_ENV
