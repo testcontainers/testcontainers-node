@@ -1,4 +1,5 @@
-import archiver from "archiver";
+import { pack } from "@archiver/tar-stream";
+import { Readable } from "stream";
 import getPort from "get-port";
 import path from "path";
 import { RandomUuid } from "../common";
@@ -521,9 +522,10 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
         .withExposedPorts(8080)
         .start();
 
-      const tar = archiver("tar");
-      tar.append("hello world", { name: targetWithCopyOwnership.slice(1), uid, gid } as archiver.EntryData);
-      tar.finalize();
+      const tarPack = pack();
+      tarPack.entry({ name: targetWithCopyOwnership.slice(1), uid, gid }, "hello world");
+      tarPack.finalize();
+      const tar = Readable.from(tarPack as unknown as AsyncIterable<Buffer>);
 
       await container.copyArchiveToContainer(tar, "/", { copyUIDGID: true });
 
@@ -536,9 +538,10 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
       const uid = 4242;
       const gid = 4343;
       const targetWithCopyOwnership = "/tmp/with-copy-archives-copyuidgid.txt";
-      const tar = archiver("tar");
-      tar.append("hello world", { name: targetWithCopyOwnership.slice(1), uid, gid } as archiver.EntryData);
-      tar.finalize();
+      const tarPack = pack();
+      tarPack.entry({ name: targetWithCopyOwnership.slice(1), uid, gid }, "hello world");
+      tarPack.finalize();
+      const tar = Readable.from(tarPack as unknown as AsyncIterable<Buffer>);
 
       await using containerWithCopyOwnership = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
         .withCopyArchivesToContainer([
