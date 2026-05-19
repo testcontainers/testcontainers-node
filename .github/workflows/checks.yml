@@ -42,7 +42,7 @@ jobs:
         run: |
           changed_files="${RUNNER_TEMP}/changed-files.txt"
 
-          git diff --name-only "${BASE_SHA}" "${HEAD_SHA}" > "${changed_files}"
+          git diff --name-only "${BASE_SHA}...${HEAD_SHA}" > "${changed_files}"
 
           modules="$(node ./.github/scripts/changed-modules.mjs < "${changed_files}")"
           modules_count="$(jq 'length' <<< "${modules}")"
