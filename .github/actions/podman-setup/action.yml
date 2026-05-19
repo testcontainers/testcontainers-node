@@ -4,15 +4,14 @@ runs:
   using: "composite"
   steps:
     - name: Install Podman
-      uses: redhat-actions/podman-install@main
+      uses: redhat-actions/podman-install@5bc2ecc87c737059124c295845be51ee7297fb89
       with:
-        podman-version-input: 5.4.2
+        ubuntu-repository: noble
 
     - name: Configure Podman
       shell: bash
       run: |
         sudo systemctl enable --now podman.socket
-        sudo chgrp "$(id -gn)" /run/podman/podman.sock
         podman --url=unix:///run/podman/podman.sock info
         echo "DOCKER_HOST=unix:///run/podman/podman.sock" >> $GITHUB_ENV
         echo "CI_PODMAN=true" >> $GITHUB_ENV
