@@ -11,8 +11,7 @@ runs:
     - name: Configure Podman
       shell: bash
       run: |
-        systemctl enable --now --user podman podman.socket
-        podman info
-        echo "DOCKER_HOST=unix://${XDG_RUNTIME_DIR}/podman/podman.sock" >> $GITHUB_ENV
-        echo "CI_ROOTLESS=true" >> $GITHUB_ENV
+        sudo systemctl enable --now podman.socket
+        podman --url=unix:///run/podman/podman.sock info
+        echo "DOCKER_HOST=unix:///run/podman/podman.sock" >> $GITHUB_ENV
         echo "CI_PODMAN=true" >> $GITHUB_ENV
