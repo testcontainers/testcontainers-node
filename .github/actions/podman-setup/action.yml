@@ -6,7 +6,8 @@ runs:
     - name: Install Podman
       uses: redhat-actions/podman-install@5bc2ecc87c737059124c295845be51ee7297fb89
       with:
-        ubuntu-repository: noble
+        ubuntu-repository: kubic
+        ubuntu-version: "24.04"
 
     - name: Configure Podman
       shell: bash
