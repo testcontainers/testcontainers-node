@@ -28,7 +28,6 @@ describe("HealthCheckWaitStrategy", { timeout: 180_000 }, () => {
         retries: 5,
         startPeriod: 1000,
       })
-      .withWaitStrategy(Wait.forHealthCheck())
       .start();
 
     await checkContainerIsHealthy(container);
@@ -44,7 +43,6 @@ describe("HealthCheckWaitStrategy", { timeout: 180_000 }, () => {
         .withName(containerName)
         .withExposedPorts(8080)
         .withHealthCheck({ test: ["CMD-SHELL", "exit 1"], interval: 1, timeout: 3, retries: 3 })
-        .withWaitStrategy(Wait.forHealthCheck())
         .start()
     ).rejects.toThrowError("Health check failed");
 
@@ -60,7 +58,6 @@ describe("HealthCheckWaitStrategy", { timeout: 180_000 }, () => {
       customGenericContainer
         .withName(containerName)
         .withExposedPorts(8080)
-        .withWaitStrategy(Wait.forHealthCheck())
         .withHealthCheck({ test: ["CMD-SHELL", "sleep 10"], timeout: 10_000 })
         .withStartupTimeout(0)
         .start()
@@ -79,7 +76,6 @@ describe("HealthCheckWaitStrategy", { timeout: 180_000 }, () => {
         retries: 5,
         startPeriod: 1000,
       })
-      .withWaitStrategy(Wait.forHealthCheck())
       .start();
 
     await checkContainerIsHealthy(container);

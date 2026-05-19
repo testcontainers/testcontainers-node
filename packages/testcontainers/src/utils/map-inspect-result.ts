@@ -1,5 +1,6 @@
 import { ContainerInspectInfo } from "dockerode";
 import { HealthCheckStatus, InspectResult, NetworkSettings, Ports } from "../types";
+import { getHealthCheckStatusFromInspect } from "../wait-strategies/utils/health-check";
 
 export function mapInspectResult(inspectResult: ContainerInspectInfo): InspectResult {
   const finishedAt = new Date(inspectResult.State.FinishedAt);
@@ -37,12 +38,12 @@ function mapPorts(inspectInfo: ContainerInspectInfo): Ports {
 }
 
 function mapHealthCheckStatus(inspectResult: ContainerInspectInfo): HealthCheckStatus {
-  const health = inspectResult.State.Health;
+  const status = getHealthCheckStatusFromInspect(inspectResult);
 
-  if (health === undefined) {
+  if (status === undefined) {
     return "none";
   } else {
-    return health.Status as HealthCheckStatus;
+    return status;
   }
 }
 
