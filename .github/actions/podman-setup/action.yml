@@ -12,6 +12,7 @@ runs:
       shell: bash
       run: |
         sudo systemctl enable --now podman.socket
+        sudo chgrp "$(id -gn)" /run/podman/podman.sock
         podman --url=unix:///run/podman/podman.sock info
         echo "DOCKER_HOST=unix:///run/podman/podman.sock" >> $GITHUB_ENV
         echo "CI_PODMAN=true" >> $GITHUB_ENV
