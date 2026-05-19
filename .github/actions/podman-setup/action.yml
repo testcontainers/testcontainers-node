@@ -17,11 +17,15 @@ runs:
           exit 1
         fi
 
+        PODMAN_SOCKET="$(sudo podman info --format '{{.Host.RemoteSocket.Path}}')"
+
         sudo mkdir -p /etc/systemd/system/podman.socket.d
-        printf '[Socket]\nSocketUser=%s\nSocketMode=0600\n' "$(id -un)" | sudo tee /etc/systemd/system/podman.socket.d/runner.conf
+        printf '[Socket]\nSocketUser=%s\nSocketMode=0600\nRemoveOnStop=yes\n' "$(id -un)" | sudo tee /etc/systemd/system/podman.socket.d/runner.conf
         sudo systemctl daemon-reload
-        sudo systemctl enable podman.socket
-        sudo systemctl restart podman.socket
-        podman --url=unix:///run/podman/podman.sock info
-        echo "DOCKER_HOST=unix:///run/podman/podman.sock" >> $GITHUB_ENV
+        sudo systemctl stop podman.service podman.socket || true
+        sudo rm -f "${PODMAN_SOCKET}"
+        sudo systemctl enable --now podman.socket
+        ls -l "${PODMAN_SOCKET}"
+        podman --url="unix://${PODMAN_SOCKET}" info
+        echo "DOCKER_HOST=unix://${PODMAN_SOCKET}" >> $GITHUB_ENV
         echo "CI_PODMAN=true" >> $GITHUB_ENV
