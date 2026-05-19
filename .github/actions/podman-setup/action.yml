@@ -17,13 +17,13 @@ runs:
           exit 1
         fi
 
-        PODMAN_SOCKET="$(sudo podman info --format '{{.Host.RemoteSocket.Path}}')"
+        PODMAN_SOCKET="${RUNNER_TEMP:-/tmp}/podman.sock"
 
         sudo mkdir -p /etc/systemd/system/podman.socket.d
-        printf '[Socket]\nSocketUser=%s\nSocketMode=0600\nRemoveOnStop=yes\n' "$(id -un)" | sudo tee /etc/systemd/system/podman.socket.d/runner.conf
-        sudo systemctl daemon-reload
         sudo systemctl stop podman.service podman.socket || true
         sudo rm -f "${PODMAN_SOCKET}"
+        printf '[Socket]\nListenStream=\nListenStream=%s\nSocketUser=%s\nSocketMode=0600\nRemoveOnStop=yes\n' "${PODMAN_SOCKET}" "$(id -un)" | sudo tee /etc/systemd/system/podman.socket.d/runner.conf
+        sudo systemctl daemon-reload
         sudo systemctl enable --now podman.socket
         ls -l "${PODMAN_SOCKET}"
         podman --url="unix://${PODMAN_SOCKET}" info
