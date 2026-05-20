@@ -151,6 +151,7 @@ jobs:
       - compile
     strategy:
       fail-fast: false
+      max-parallel: 20
       matrix:
         module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
         node-version: [22.x, 24.x]

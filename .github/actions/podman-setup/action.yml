@@ -3,10 +3,9 @@ description: "Sets up Podman"
 runs:
   using: "composite"
   steps:
-    - name: Install Podman
-      uses: redhat-actions/podman-install@5bc2ecc87c737059124c295845be51ee7297fb89
-      with:
-        ubuntu-repository: questing
+    - name: Verify Podman
+      shell: bash
+      run: podman --version
 
     - name: Configure Podman
       shell: bash
