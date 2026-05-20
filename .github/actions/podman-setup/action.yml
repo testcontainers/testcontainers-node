@@ -3,20 +3,15 @@ description: "Sets up Podman"
 runs:
   using: "composite"
   steps:
-    - name: Install Podman
-      uses: redhat-actions/podman-install@5bc2ecc87c737059124c295845be51ee7297fb89
-      with:
-        ubuntu-repository: questing
+    - name: Verify Podman
+      shell: bash
+      run: podman --version
 
     - name: Configure Podman
       shell: bash
       run: |
-        PODMAN_SOCKET="${RUNNER_TEMP:-/tmp}/podman.sock"
-
-        sudo mkdir -p /etc/systemd/system/podman.socket.d
-        printf '[Socket]\nListenStream=\nListenStream=%s\nSocketUser=%s\nSocketMode=0600\n' "${PODMAN_SOCKET}" "$(id -un)" | sudo tee /etc/systemd/system/podman.socket.d/runner.conf
-        sudo systemctl daemon-reload
-        sudo systemctl restart podman.socket
+        sudo systemctl start podman.socket
+        PODMAN_SOCKET="$(sudo podman info --format '{{ .Host.RemoteSocket.Path }}')"
         podman --url="unix://${PODMAN_SOCKET}" info
         echo "DOCKER_HOST=unix://${PODMAN_SOCKET}" >> $GITHUB_ENV
         echo "CI_PODMAN=true" >> $GITHUB_ENV
