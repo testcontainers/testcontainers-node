@@ -10,9 +10,12 @@ runs:
     - name: Configure Podman
       shell: bash
       run: |
-        sudo systemctl start podman.socket
-        PODMAN_SOCKET="/run/podman/podman.sock"
-        sudo chown "$(id -u):$(id -g)" "${PODMAN_SOCKET}"
+        PODMAN_SOCKET="${RUNNER_TEMP:-/tmp}/podman.sock"
+
+        sudo mkdir -p /etc/systemd/system/podman.socket.d
+        printf '[Socket]\nListenStream=\nListenStream=%s\nSocketUser=%s\nSocketMode=0600\n' "${PODMAN_SOCKET}" "$(id -un)" | sudo tee /etc/systemd/system/podman.socket.d/runner.conf
+        sudo systemctl daemon-reload
+        sudo systemctl restart podman.socket
         podman --url="unix://${PODMAN_SOCKET}" info
         echo "DOCKER_HOST=unix://${PODMAN_SOCKET}" >> $GITHUB_ENV
         echo "CI_PODMAN=true" >> $GITHUB_ENV
