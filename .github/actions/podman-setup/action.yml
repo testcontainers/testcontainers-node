@@ -12,6 +12,7 @@ runs:
       run: |
         sudo systemctl start podman.socket
         PODMAN_SOCKET="$(sudo podman info --format '{{ .Host.RemoteSocket.Path }}')"
+        sudo chown "$(id -u):$(id -g)" "${PODMAN_SOCKET}"
         podman --url="unix://${PODMAN_SOCKET}" info
         echo "DOCKER_HOST=unix://${PODMAN_SOCKET}" >> $GITHUB_ENV
         echo "CI_PODMAN=true" >> $GITHUB_ENV
