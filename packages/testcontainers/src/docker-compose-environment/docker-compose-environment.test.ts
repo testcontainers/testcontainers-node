@@ -5,6 +5,7 @@ import { PullPolicy } from "../utils/pull-policy";
 import {
   checkEnvironmentContainerIsHealthy,
   getDockerEventStream,
+  getHealthCheckStatus,
   getRunningContainerNames,
   getVolumeNames,
   waitForDockerEvent,
@@ -88,11 +89,22 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
     expect(responseBody["IS_OVERRIDDEN"]).toBe("true");
   });
 
-  it("should support default wait strategy", async () => {
-    await using startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-healthcheck.yml")
-      .withDefaultWaitStrategy(Wait.forHealthCheck())
-      .up();
+  it("should support configuring a default wait strategy", async () => {
+    await using startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose.yml")
+      .withDefaultWaitStrategy(Wait.forLogMessage("Listening on port 8080"))
+      .up(["container"]);
 
+    await checkEnvironmentContainerIsHealthy(startedEnvironment, "container-1");
+  });
+
+  it("should wait for a healthcheck defined in a service", async () => {
+    await using startedEnvironment = await new DockerComposeEnvironment(
+      fixtures,
+      "docker-compose-with-delayed-healthcheck.yml"
+    ).up();
+    const container = startedEnvironment.getContainer("container-1");
+
+    expect(await getHealthCheckStatus(container)).toBe("healthy");
     await checkEnvironmentContainerIsHealthy(startedEnvironment, "container-1");
   });
 

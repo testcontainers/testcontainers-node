@@ -276,7 +276,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
   it("should set security options", async () => {
     await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withSecurityOpt("no-new-privileges")
-      .withExposedPorts(8080)
+      .withCommand(["sleep", "60"])
       .start();
 
     const { output } = await container.exec(["sh", "-c", "awk '/^NoNewPrivs:/ { print $2 }' /proc/1/status"]);

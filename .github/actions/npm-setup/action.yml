@@ -9,57 +9,58 @@ inputs:
     description: "Node.js version to use"
     required: true
   workspace:
-    description: "Key for the cache"
+    description: "Workspace to install"
     required: true
 
 outputs:
   workspace_path:
     description: "Full path to the workspace directory"
-    value: ${{ steps.set-env.outputs.workspace_path }}
+    value: ${{ steps.set-workspace.outputs.workspace_path }}
 
 runs:
   using: "composite"
   steps:
-    - name: Install NodeJS ${{ inputs.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ inputs.node-version }}
-
-    - name: Set cache configuration
+    - name: Set workspace path
       shell: bash
-      id: set-env
+      id: set-workspace
       run: |
         if [ "${{ inputs.workspace }}" = "testcontainers" ]; then
-          echo "CACHE_PATHS<<EOF" >> $GITHUB_ENV
-          echo "node_modules" >> $GITHUB_ENV
-          echo "packages/testcontainers/node_modules" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-          echo "WORKSPACE_PATH=packages/testcontainers" >> $GITHUB_ENV
-          echo "workspace_path=packages/testcontainers" >> "$GITHUB_OUTPUT"
+          workspace_path="packages/testcontainers"
+          cache_paths=$'node_modules\npackages/testcontainers/node_modules'
         else
-          echo "CACHE_PATHS<<EOF" >> $GITHUB_ENV
-          echo "node_modules" >> $GITHUB_ENV
-          echo "packages/testcontainers/node_modules" >> $GITHUB_ENV
-          echo "packages/modules/${{ inputs.workspace }}/node_modules" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-          echo "WORKSPACE_PATH=packages/modules/${{ inputs.workspace }}" >> $GITHUB_ENV
-          echo "workspace_path=packages/modules/${{ inputs.workspace }}" >> "$GITHUB_OUTPUT"
+          workspace_path="packages/modules/${{ inputs.workspace }}"
+          cache_paths=$'node_modules\npackages/testcontainers/node_modules\n'"${workspace_path}/node_modules"
         fi
 
-    - uses: actions/cache/restore@v4
+        echo "WORKSPACE_PATH=${workspace_path}" >> "$GITHUB_ENV"
+        echo "workspace_path=${workspace_path}" >> "$GITHUB_OUTPUT"
+        {
+          echo "cache_paths<<EOF"
+          echo "${cache_paths}"
+          echo "EOF"
+        } >> "$GITHUB_OUTPUT"
+
+    - name: Install NodeJS ${{ inputs.node-version }}
+      uses: actions/setup-node@v6
+      with:
+        node-version: ${{ inputs.node-version }}
+        package-manager-cache: false
+
+    - name: Restore dependencies cache
+      uses: actions/cache/restore@v4
       id: npm-cache
       with:
-        path: ${{ env.CACHE_PATHS }}
-        key: ${{ inputs.runner }}-node-${{ inputs.node-version }}-${{ inputs.workspace }}-${{ hashFiles('package-lock.json') }}
+        path: ${{ steps.set-workspace.outputs.cache_paths }}
+        key: npm-v2-${{ inputs.runner }}-node-${{ inputs.node-version }}-${{ inputs.workspace }}-${{ hashFiles('package-lock.json') }}
 
     - name: Install dependencies
       if: steps.npm-cache.outputs.cache-hit != 'true'
       shell: bash
-      run: npm ci --workspace ${{ env.WORKSPACE_PATH }} --include-workspace-root
+      run: npm ci --workspace "${WORKSPACE_PATH}" --include-workspace-root
 
-    - name: Cache npm
+    - name: Save dependencies cache
       if: steps.npm-cache.outputs.cache-hit != 'true'
       uses: actions/cache/save@v4
       with:
-        path: ${{ env.CACHE_PATHS }}
+        path: ${{ steps.set-workspace.outputs.cache_paths }}
         key: ${{ steps.npm-cache.outputs.cache-primary-key }}

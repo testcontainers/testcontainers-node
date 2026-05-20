@@ -7,7 +7,7 @@ import { Environment } from "../types";
 import { BoundPorts } from "../utils/bound-ports";
 import { mapInspectResult } from "../utils/map-inspect-result";
 import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
-import { Wait } from "../wait-strategies/wait";
+import { selectWaitStrategy } from "../wait-strategies/utils/wait-strategy-selector";
 import { waitForContainer } from "../wait-strategies/wait-for-container";
 import { WaitStrategy } from "../wait-strategies/wait-strategy";
 import { StartedDockerComposeEnvironment } from "./started-docker-compose-environment";
@@ -24,7 +24,7 @@ export class DockerComposeEnvironment {
   private profiles: string[] = [];
   private environment: Environment = {};
   private pullPolicy: ImagePullPolicy = PullPolicy.defaultPolicy();
-  private defaultWaitStrategy: WaitStrategy = Wait.forListeningPorts();
+  private defaultWaitStrategy: WaitStrategy | undefined;
   private waitStrategy: { [containerName: string]: WaitStrategy } = {};
   private startupTimeoutMs?: number;
   private clientOptions: Partial<ComposeOptions> = {};
@@ -174,9 +174,11 @@ export class DockerComposeEnvironment {
           const inspectResult = await client.container.inspect(container);
           const mappedInspectResult = mapInspectResult(inspectResult);
           const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, mappedInspectResult);
-          const waitStrategy = this.waitStrategy[containerName]
-            ? this.waitStrategy[containerName]
-            : this.defaultWaitStrategy;
+          const waitStrategy = await selectWaitStrategy({
+            client,
+            inspectResult,
+            waitStrategy: this.waitStrategy[containerName] ?? this.defaultWaitStrategy,
+          });
           if (this.startupTimeoutMs !== undefined) {
             waitStrategy.withStartupTimeout(this.startupTimeoutMs);
           }

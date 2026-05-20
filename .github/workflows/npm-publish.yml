@@ -1,44 +1,86 @@
 name: Node.js Package
 
+run-name: ${{ github.event_name == 'workflow_dispatch' && format('Dry run publish {0}', inputs.version) || format('Publish {0}', github.event.release.tag_name) }}
+
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to rehearse, with or without v prefix. Example: 12.0.1"
+        required: true
+        type: string
 
 jobs:
   publish:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
-          ref: main
+          ref: ${{ github.event_name == 'release' && 'main' || github.ref }}
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24.x
           registry-url: "https://registry.npmjs.org"
+          package-manager-cache: false
 
       - name: Configure Git
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
 
-      - name: Update versions
+      - name: Resolve version
+        id: version
+        env:
+          RELEASE_TAG_NAME: ${{ github.event.release.tag_name }}
+          VERSION_INPUT: ${{ inputs.version }}
         run: |
-          npm version ${{ github.event.release.tag_name }} --ws --allow-same-version
-          for module in packages/modules/*; do npm install testcontainers@${{ github.event.release.tag_name }} --save -w $module; done
-          sed -i -E "s/(sonar.projectVersion)=.+/\1=${{ github.event.release.tag_name }}/" sonar-project.properties
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="$VERSION_INPUT"
+          else
+            TAG="$RELEASE_TAG_NAME"
+          fi
+
+          VERSION="${TAG#v}"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Update versions
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          npm version "$VERSION" --ws --allow-same-version --no-git-tag-version
+
+          for module in packages/modules/*; do
+            npm pkg set "dependencies.testcontainers=^$VERSION" -w "$module"
+          done
+
+          npm install --package-lock-only --ignore-scripts
+
+          sed -i -E "s/(sonar.projectVersion)=.+/\1=$TAG/" sonar-project.properties
 
       - name: Build packages
         run: |
           npm ci
           npm run build --ws
 
-      - name: Git commit and push
-        run: |
-          git commit -am "${{ github.event.release.tag_name }}"
-          git push
+      - name: Git commit
+        if: ${{ github.event_name == 'release' }}
+        run: git commit -am "${{ steps.version.outputs.tag }}"
+
+      - name: Git push
+        if: ${{ github.event_name == 'release' }}
+        run: git push
+
+      - name: Dry run publish
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: npm publish --ws --dry-run
 
       - name: Publish packages to NPM
+        if: ${{ github.event_name == 'release' }}
         run: npm publish --ws
         env:
           NODE_AUTH_TOKEN: ${{ secrets.npm_token }}

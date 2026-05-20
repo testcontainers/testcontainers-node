@@ -45,12 +45,13 @@ const environment = await new DockerComposeEnvironment(composeFilePath, composeF
 
 ### With a default wait strategy
 
-By default Testcontainers uses the "listening ports" wait strategy for all containers. If you'd like to override
-the default wait strategy for all services, you can do so:
+By default, Testcontainers waits for a service health check when one is defined in the Compose service or image. If no health check is defined, or the service disables health checks, it waits for listening ports.
+
+If you'd like to override the default wait strategy for all services, you can do so:
 
 ```js
 const environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
-  .withDefaultWaitStrategy(Wait.forHealthCheck())
+  .withDefaultWaitStrategy(Wait.forListeningPorts())
   .up();
 ```
 

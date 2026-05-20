@@ -29,6 +29,9 @@ It captures practical rules that prevent avoidable CI and PR churn.
 - Tests should verify observable behavior changes, not only internal/config state.
   - Example: for a security option, assert a real secure/insecure behavior difference.
 - Test-only helper files under `src` (for example `*-test-utils.ts`) must be explicitly excluded from package `tsconfig.build.json` so they are not emitted into `build` and accidentally published.
+- For substantial changes to GitHub Actions, runner images, Node/npm versions, or release/publish automation, consider running the manual `Node.js Package` workflow as a dry-run publish sanity check.
+  - Select the PR branch as the workflow ref to test publish workflow changes before merging.
+  - Use a representative version input, for example the next planned semver.
 - Vitest runs tests concurrently by default (`sequence.concurrent: true` in `vitest.config.ts`).
   - Tests that rely on shared/global mocks (for example `vi.spyOn` on shared loggers/singletons) can be flaky due to interleaving or automatic mock resets.
   - Prefer asserting observable behavior instead of shared global mock state when possible.
@@ -49,7 +52,7 @@ It captures practical rules that prevent avoidable CI and PR churn.
 1. Start from `main`.
 2. Create a branch prefixed with `codex/`.
 3. Implement scoped changes only.
-4. Run required checks: `npm run format`, `npm run lint`, and targeted tests.
+4. Run required checks: `npm run format`, `npm run lint`, `npm run check-compiles` when touching `packages/testcontainers` APIs consumed by modules, and targeted tests.
 5. Verify git diff only contains intended files.
 6. Never commit, push, or post on GitHub (issues, PRs, or comments) without first sharing the proposed diff/message and getting explicit user approval.
 7. Commit with focused message(s), using `git commit --no-verify`.

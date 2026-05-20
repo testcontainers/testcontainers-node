@@ -11,6 +11,8 @@ import { getContainerRuntimeClient } from "../container-runtime";
 import { StartedDockerComposeEnvironment } from "../docker-compose-environment/started-docker-compose-environment";
 import { GenericContainer } from "../generic-container/generic-container";
 import { StartedTestContainer } from "../test-container";
+import { HealthCheckStatus } from "../types";
+import { getHealthCheckStatusFromInspect } from "../wait-strategies/utils/health-check";
 
 export const getImage = (dirname: string, index = 0): string => {
   return fs
@@ -23,6 +25,13 @@ export const checkContainerIsHealthy = async (container: StartedTestContainer): 
   const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
   const response = await fetch(`${url}/hello-world`);
   expect(response.status).toBe(200);
+};
+
+export const getHealthCheckStatus = async (container: StartedTestContainer): Promise<HealthCheckStatus | undefined> => {
+  const client = await getContainerRuntimeClient();
+  const dockerContainer = client.container.getById(container.getId());
+
+  return getHealthCheckStatusFromInspect(await client.container.inspect(dockerContainer));
 };
 
 export const checkContainerIsHealthyTls = async (container: StartedTestContainer): Promise<void> => {

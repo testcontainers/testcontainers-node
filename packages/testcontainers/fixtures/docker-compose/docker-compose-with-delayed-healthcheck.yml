@@ -1,0 +1,13 @@
+version: "3.5"
+
+services:
+  container:
+    image: cristianrgreco/testcontainer:1.1.14
+    command: ["sh", "-c", "rm -f /tmp/ready; (sleep 4; touch /tmp/ready) & node index.js"]
+    ports:
+      - 8080
+    healthcheck:
+      test: "test -f /tmp/ready"
+      interval: 1s
+      timeout: 1s
+      retries: 10
