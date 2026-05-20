@@ -1,6 +1,6 @@
 import archiver from "archiver";
 import AsyncLock from "async-lock";
-import { Container, ContainerCreateOptions, HostConfig } from "dockerode";
+import { Container, ContainerCreateOptions, ContainerInspectInfo, HostConfig } from "dockerode";
 import { promises as fs } from "fs";
 import { Readable } from "stream";
 import { containerLog, hash, log, toNanos } from "../common";
@@ -31,7 +31,7 @@ import { createLabels, LABEL_TESTCONTAINERS_CONTAINER_HASH, LABEL_TESTCONTAINERS
 import { mapInspectResult } from "../utils/map-inspect-result";
 import { getContainerPort, getProtocol, hasHostBinding, PortWithOptionalBinding } from "../utils/port";
 import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
-import { Wait } from "../wait-strategies/wait";
+import { selectWaitStrategy } from "../wait-strategies/utils/wait-strategy-selector";
 import { waitForContainer } from "../wait-strategies/wait-for-container";
 import { WaitStrategy } from "../wait-strategies/wait-strategy";
 import { GenericContainerBuilder } from "./generic-container-builder";
@@ -50,7 +50,7 @@ export class GenericContainer implements TestContainer {
 
   protected imageName: ImageName;
   protected startupTimeoutMs?: number;
-  protected waitStrategy: WaitStrategy = Wait.forListeningPorts();
+  protected waitStrategy: WaitStrategy | undefined;
   protected environment: Record<string, string> = {};
   protected exposedPorts: PortWithOptionalBinding[] = [];
   protected reuse = false;
@@ -121,6 +121,20 @@ export class GenericContainer implements TestContainer {
     return this.startContainer(client);
   }
 
+  protected async selectWaitStrategy(
+    client: ContainerRuntimeClient,
+    inspectResult: ContainerInspectInfo,
+    waitStrategy: WaitStrategy | undefined = this.waitStrategy
+  ): Promise<WaitStrategy> {
+    return selectWaitStrategy({
+      client,
+      inspectResult,
+      waitStrategy,
+      healthCheck: this.healthCheck,
+      imageNames: [this.imageName.string],
+    });
+  }
+
   private async reuseOrStartContainer(client: ContainerRuntimeClient) {
     const containerHash = hash(JSON.stringify(this.createOpts));
     this.createOpts.Labels = { ...this.createOpts.Labels, [LABEL_TESTCONTAINERS_CONTAINER_HASH]: containerHash };
@@ -153,11 +167,12 @@ export class GenericContainer implements TestContainer {
     const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, mappedInspectResult).filter(
       this.exposedPorts
     );
+    const waitStrategy = await this.selectWaitStrategy(client, inspectResult);
     if (this.startupTimeoutMs !== undefined) {
-      this.waitStrategy.withStartupTimeout(this.startupTimeoutMs);
+      waitStrategy.withStartupTimeout(this.startupTimeoutMs);
     }
 
-    await waitForContainer(client, container, this.waitStrategy, boundPorts);
+    await waitForContainer(client, container, waitStrategy, boundPorts);
 
     return new StartedGenericContainer(
       container,
@@ -165,7 +180,7 @@ export class GenericContainer implements TestContainer {
       inspectResult,
       boundPorts,
       inspectResult.Name,
-      this.waitStrategy,
+      waitStrategy,
       this.autoRemove
     );
   }
@@ -209,10 +224,6 @@ export class GenericContainer implements TestContainer {
       this.exposedPorts
     );
 
-    if (this.startupTimeoutMs !== undefined) {
-      this.waitStrategy.withStartupTimeout(this.startupTimeoutMs);
-    }
-
     if (containerLog.enabled() || this.logConsumer !== undefined) {
       if (this.logConsumer !== undefined) {
         this.logConsumer(await client.container.logs(container));
@@ -229,7 +240,12 @@ export class GenericContainer implements TestContainer {
       await this.containerStarting(mappedInspectResult, false);
     }
 
-    await waitForContainer(client, container, this.waitStrategy, boundPorts);
+    const waitStrategy = await this.selectWaitStrategy(client, inspectResult);
+    if (this.startupTimeoutMs !== undefined) {
+      waitStrategy.withStartupTimeout(this.startupTimeoutMs);
+    }
+
+    await waitForContainer(client, container, waitStrategy, boundPorts);
 
     const startedContainer = new StartedGenericContainer(
       container,
@@ -237,7 +253,7 @@ export class GenericContainer implements TestContainer {
       inspectResult,
       boundPorts,
       inspectResult.Name,
-      this.waitStrategy,
+      waitStrategy,
       this.autoRemove
     );
 

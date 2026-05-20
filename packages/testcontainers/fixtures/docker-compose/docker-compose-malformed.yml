@@ -1,11 +1,1 @@
-version: 3
-
-services:
-  container:
-    image: cristianrgreco/testcontainer:1.1.14
-    ports:
-      - 8080
-  another-container:
-    image: cristianrgreco/testcontainer:1.1.14
-    ports:
-      - 8080
+MALFORMED

@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/gcloud",
-  "version": "11.14.0",
+  "version": "12.0.0",
   "license": "MIT",
   "author": "Anietie Asuquo <hello@anietieasuquo.com>",
   "keywords": [
@@ -38,16 +38,16 @@
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.14.3",
-    "testcontainers": "^11.14.0"
+    "testcontainers": "^12.0.0"
   },
   "devDependencies": {
-    "@google-cloud/bigquery": "^8.3.0",
+    "@google-cloud/bigquery": "^8.3.1",
     "@google-cloud/datastore": "^9.2.1",
-    "@google-cloud/firestore": "8.5.0",
+    "@google-cloud/firestore": "8.6.0",
     "@google-cloud/pubsub": "^5.3.0",
     "@google-cloud/spanner": "^8.7.1",
     "@google-cloud/storage": "^7.19.0",
-    "firebase-admin": "13.9.0",
-    "msw": "^2.14.5"
+    "firebase-admin": "13.10.0",
+    "msw": "^2.14.6"
   }
 }

@@ -14,7 +14,7 @@ const TEST_KEY = fs.readFileSync(path.resolve(__dirname, "..", "test-certs", "az
 describe("AzuriteContainer", { timeout: 240_000 }, () => {
   it("should upload and download blob with default credentials", async () => {
     // uploadAndDownloadBlob {
-    await using container = await new AzuriteContainer(IMAGE).start();
+    await using container = await new AzuriteContainer(IMAGE).withSkipApiVersionCheck().start();
 
     const connectionString = container.getConnectionString();
     const serviceClient = BlobServiceClient.fromConnectionString(connectionString);
@@ -33,7 +33,7 @@ describe("AzuriteContainer", { timeout: 240_000 }, () => {
 
   it("should add to queue with default credentials", async () => {
     // sendAndReceiveQueue {
-    await using container = await new AzuriteContainer(IMAGE).start();
+    await using container = await new AzuriteContainer(IMAGE).withSkipApiVersionCheck().start();
 
     const connectionString = container.getConnectionString();
     const serviceClient = QueueServiceClient.fromConnectionString(connectionString);
@@ -51,7 +51,7 @@ describe("AzuriteContainer", { timeout: 240_000 }, () => {
 
   it("should add to table with default credentials", async () => {
     // createAndInsertOnTable {
-    await using container = await new AzuriteContainer(IMAGE).start();
+    await using container = await new AzuriteContainer(IMAGE).withSkipApiVersionCheck().start();
 
     const connectionString = container.getConnectionString();
     const tableName = "person";
@@ -78,6 +78,7 @@ describe("AzuriteContainer", { timeout: 240_000 }, () => {
     const accountKey = Buffer.from("test-key").toString("base64");
 
     await using container = await new AzuriteContainer(IMAGE)
+      .withSkipApiVersionCheck()
       .withAccountName(accountName)
       .withAccountKey(accountKey)
       .start();
@@ -102,6 +103,7 @@ describe("AzuriteContainer", { timeout: 240_000 }, () => {
     const tablePort = 15000;
 
     await using container = await new AzuriteContainer(IMAGE)
+      .withSkipApiVersionCheck()
       .withBlobPort({ container: 10001, host: blobPort })
       .withQueuePort({ container: 10002, host: queuePort })
       .withTablePort({ container: 10003, host: tablePort })
@@ -124,7 +126,10 @@ describe("AzuriteContainer", { timeout: 240_000 }, () => {
 
   it("should be able to enable HTTPS with PEM certificate and key", async () => {
     // httpsWithPem {
-    await using container = await new AzuriteContainer(IMAGE).withSsl(TEST_CERT, TEST_KEY).start();
+    await using container = await new AzuriteContainer(IMAGE)
+      .withSkipApiVersionCheck()
+      .withSsl(TEST_CERT, TEST_KEY)
+      .start();
 
     const connectionString = container.getConnectionString();
     expect(connectionString).toContain("DefaultEndpointsProtocol=https");
@@ -143,7 +148,11 @@ describe("AzuriteContainer", { timeout: 240_000 }, () => {
 
   it("should be able to enable OAuth basic authentication", async () => {
     // withOAuth {
-    await using container = await new AzuriteContainer(IMAGE).withSsl(TEST_CERT, TEST_KEY).withOAuth().start();
+    await using container = await new AzuriteContainer(IMAGE)
+      .withSkipApiVersionCheck()
+      .withSsl(TEST_CERT, TEST_KEY)
+      .withOAuth()
+      .start();
 
     const validServiceClient = new BlobServiceClient(
       container.getBlobEndpoint(),
@@ -172,7 +181,10 @@ describe("AzuriteContainer", { timeout: 240_000 }, () => {
 
   it("should be able to use in-memory persistence", async () => {
     // inMemoryPersistence {
-    await using container = await new AzuriteContainer(IMAGE).withInMemoryPersistence().start();
+    await using container = await new AzuriteContainer(IMAGE)
+      .withSkipApiVersionCheck()
+      .withInMemoryPersistence()
+      .start();
 
     const blobName = "hello.txt";
 
