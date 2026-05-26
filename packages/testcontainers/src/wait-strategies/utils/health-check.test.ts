@@ -24,6 +24,16 @@ describe("health check utils", () => {
     expect(hasHealthCheckConfig(inspectResult)).toBe(true);
   });
 
+  it("should detect Podman image health check config from HealthCheck field", () => {
+    const inspectResult = {
+      HealthCheck: {
+        Test: ["CMD-SHELL", "test -f /tmp/ready"],
+      },
+    } as unknown as ImageInspectInfo;
+
+    expect(hasHealthCheckConfig(inspectResult)).toBe(true);
+  });
+
   it("should ignore disabled health check config", () => {
     const inspectResult = {
       Config: {
