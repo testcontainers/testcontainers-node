@@ -29,6 +29,7 @@ It captures practical rules that prevent avoidable CI and PR churn.
 - Tests should verify observable behavior changes, not only internal/config state.
   - Example: for a security option, assert a real secure/insecure behavior difference.
 - Test-only helper files under `src` (for example `*-test-utils.ts`) must be explicitly excluded from package `tsconfig.build.json` so they are not emitted into `build` and accidentally published.
+- Compatibility tests for older major versions should live in separate version-specific test files (for example `<module>-5.test.ts`), instead of being mixed into the latest-image test file.
 - For substantial changes to GitHub Actions, runner images, Node/npm versions, or release/publish automation, consider running the manual `Node.js Package` workflow as a dry-run publish sanity check.
   - Select the PR branch as the workflow ref to test publish workflow changes before merging.
   - Use a representative version input, for example the next planned semver.
@@ -55,6 +56,7 @@ It captures practical rules that prevent avoidable CI and PR churn.
 4. Run required checks: `npm run format`, `npm run lint`, `npm run check-compiles` when touching `packages/testcontainers` APIs consumed by modules, and targeted tests.
 5. Verify git diff only contains intended files.
 6. Never commit, push, or post on GitHub (issues, PRs, or comments) without first sharing the proposed diff/message and getting explicit user approval.
+   - If `gh auth status` reports or times out on unrelated hosts/accounts, do not treat that as blocking. Confirm the GitHub host needed for the current repository is authenticated and has the required scopes.
 7. Commit with focused message(s), using `git commit --no-verify`.
    - Never bypass signing (for example, do not use `--no-gpg-sign`).
    - If signing fails (for example, passphrase/key issues), stop and ask the user to resolve signing, then retry.

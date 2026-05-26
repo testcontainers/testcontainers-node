@@ -87,6 +87,8 @@ export class GenericContainer implements TestContainer {
 
   protected containerStarting?(inspectResult: InspectResult, reused: boolean): Promise<void>;
 
+  protected getDefaultWaitStrategy?(): WaitStrategy;
+
   public async start(): Promise<StartedTestContainer> {
     const client = await getContainerRuntimeClient();
     await client.image.pull(this.imageName, {
@@ -132,6 +134,7 @@ export class GenericContainer implements TestContainer {
       waitStrategy,
       healthCheck: this.healthCheck,
       imageNames: [this.imageName.string],
+      defaultWaitStrategy: this.getDefaultWaitStrategy?.(),
     });
   }
 

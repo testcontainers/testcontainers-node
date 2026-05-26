@@ -1,4 +1,4 @@
-import { AbstractStartedContainer, GenericContainer, Wait } from "testcontainers";
+import { AbstractStartedContainer, GenericContainer, Wait, WaitStrategy } from "testcontainers";
 
 export class StartedMockserverContainer extends AbstractStartedContainer {
   getMockserverPort(): number {
@@ -20,12 +20,16 @@ export class MockserverContainer extends GenericContainer {
   constructor(image: string) {
     super(image);
 
-    this.withWaitStrategy(Wait.forAll([Wait.forLogMessage(/started on port: 1080/)])).withStartupTimeout(120_000);
+    this.withStartupTimeout(120_000);
   }
 
   override async start(): Promise<StartedMockserverContainer> {
     this.withExposedPorts(MOCKSERVER_PORT);
 
     return new StartedMockserverContainer(await super.start());
+  }
+
+  protected override getDefaultWaitStrategy(): WaitStrategy {
+    return Wait.forLogMessage(/started on port: 1080/);
   }
 }
