@@ -582,6 +582,24 @@ class CustomStartedContainer extends AbstractStartedContainer {
 }
 ```
 
+### Default wait strategy for custom containers
+
+Custom containers can define a fallback wait strategy by overriding `getDefaultWaitStrategy`. Testcontainers uses this when the user has not explicitly set a wait strategy and neither the container nor its image defines a health check:
+
+```ts
+import { GenericContainer, Wait, WaitStrategy } from "testcontainers";
+
+class CustomContainer extends GenericContainer {
+  constructor() {
+    super("custom/image:1.0.0");
+  }
+
+  protected override getDefaultWaitStrategy(): WaitStrategy {
+    return Wait.forLogMessage("ready");
+  }
+}
+```
+
 ## Exposing container ports
 
 Specify which container ports you want accessible by the host:
