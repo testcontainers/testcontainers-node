@@ -43,6 +43,13 @@ const imageInspectResultWithHealthCheck = (): ImageInspectInfo =>
     },
   }) as unknown as ImageInspectInfo;
 
+const imageInspectResultWithPodmanHealthCheck = (): ImageInspectInfo =>
+  ({
+    HealthCheck: {
+      Test: ["CMD-SHELL", "test -f /tmp/ready"],
+    },
+  }) as unknown as ImageInspectInfo;
+
 const client = (imageInspectResult: ImageInspectInfo): ContainerRuntimeClient =>
   ({
     image: {
@@ -140,6 +147,16 @@ describe("wait strategy selector", () => {
     await expect(
       selectWaitStrategy({
         client: client(imageInspectResultWithHealthCheck()),
+        inspectResult: containerInspectResult(),
+        imageNames: ["image:latest"],
+      })
+    ).resolves.toBeInstanceOf(HealthCheckWaitStrategy);
+  });
+
+  it("should select Podman image healthcheck when container inspect omits healthcheck config", async () => {
+    await expect(
+      selectWaitStrategy({
+        client: client(imageInspectResultWithPodmanHealthCheck()),
         inspectResult: containerInspectResult(),
         imageNames: ["image:latest"],
       })
