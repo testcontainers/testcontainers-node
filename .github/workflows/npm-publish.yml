@@ -47,6 +47,18 @@ jobs:
           echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
+      - name: Verify npm publish token
+        if: ${{ github.event_name == 'release' }}
+        run: |
+          if npm whoami > /dev/null 2>&1; then
+            echo "npm publish token is valid"
+          else
+            echo "::error::npm publish token is invalid, expired, or missing required registry access"
+            exit 1
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
+
       - name: Update versions
         env:
           TAG: ${{ steps.version.outputs.tag }}
