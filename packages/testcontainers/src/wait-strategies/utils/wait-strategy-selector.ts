@@ -17,6 +17,7 @@ type WaitStrategySelectorOptions = {
   waitStrategy?: WaitStrategy;
   healthCheck?: HealthCheck;
   imageNames?: string[];
+  defaultWaitStrategy?: WaitStrategy;
 };
 
 export const selectWaitStrategy = async ({
@@ -25,13 +26,14 @@ export const selectWaitStrategy = async ({
   waitStrategy,
   healthCheck,
   imageNames = getImageNames(inspectResult),
+  defaultWaitStrategy = Wait.forListeningPorts(),
 }: WaitStrategySelectorOptions): Promise<WaitStrategy> => {
   if (waitStrategy) return waitStrategy;
   if (hasHealthCheck(healthCheck)) return Wait.forHealthCheck();
   if (hasDisabledHealthCheckConfig(inspectResult)) return Wait.forListeningPorts();
   if (hasHealthCheckConfig(inspectResult) || hasHealthCheckStatus(inspectResult)) return Wait.forHealthCheck();
   if (await imageHasHealthCheck(client, imageNames)) return Wait.forHealthCheck();
-  return Wait.forListeningPorts();
+  return defaultWaitStrategy;
 };
 
 const getImageNames = (inspectResult: ContainerInspectInfo): string[] => {

@@ -143,6 +143,19 @@ describe("wait strategy selector", () => {
     ).resolves.toBeInstanceOf(HostPortWaitStrategy);
   });
 
+  it("should select the default wait strategy when no healthcheck is configured", async () => {
+    const defaultWaitStrategy = Wait.forLogMessage("ready");
+
+    await expect(
+      selectWaitStrategy({
+        client: client({} as ImageInspectInfo),
+        inspectResult: containerInspectResult(),
+        imageNames: ["image:latest"],
+        defaultWaitStrategy,
+      })
+    ).resolves.toBe(defaultWaitStrategy);
+  });
+
   it("should select image healthcheck when container inspect omits healthcheck config", async () => {
     await expect(
       selectWaitStrategy({
