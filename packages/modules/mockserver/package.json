@@ -32,8 +32,8 @@
     "testcontainers": "^12.0.0"
   },
   "devDependencies": {
-    "@types/superagent": "^8.1.9",
-    "mockserver-client": "^5.15.0",
+    "@types/superagent": "^8.1.10",
+    "mockserver-client": "^6.0.0",
     "superagent": "^10.3.0"
   }
 }
