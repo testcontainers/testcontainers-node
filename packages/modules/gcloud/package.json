@@ -37,7 +37,7 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "dependencies": {
-    "@grpc/grpc-js": "^1.14.3",
+    "@grpc/grpc-js": "^1.14.4",
     "testcontainers": "^12.0.0"
   },
   "devDependencies": {
