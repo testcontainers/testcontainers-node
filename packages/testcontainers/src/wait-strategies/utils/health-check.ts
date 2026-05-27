@@ -8,11 +8,14 @@ type HealthCheckInspectInfo = ContainerInspectInfo | ImageInspectInfo;
 type InspectWithHealthCheckConfig = {
   Config?: {
     Healthcheck?: HealthConfig;
+    HealthCheck?: HealthConfig;
   };
   ContainerConfig?: {
     Healthcheck?: HealthConfig;
+    HealthCheck?: HealthConfig;
   };
   Healthcheck?: HealthConfig;
+  HealthCheck?: HealthConfig;
 };
 type InspectWithHealthCheckState = {
   State: ContainerInspectInfo["State"] & {
@@ -64,8 +67,11 @@ export const getHealthCheckConfig = (inspectResult: HealthCheckInspectInfo): Hea
 
   return (
     inspectWithHealthCheckConfig.Config?.Healthcheck ??
+    inspectWithHealthCheckConfig.Config?.HealthCheck ??
     inspectWithHealthCheckConfig.ContainerConfig?.Healthcheck ??
-    inspectWithHealthCheckConfig.Healthcheck
+    inspectWithHealthCheckConfig.ContainerConfig?.HealthCheck ??
+    inspectWithHealthCheckConfig.Healthcheck ??
+    inspectWithHealthCheckConfig.HealthCheck
   );
 };
 
