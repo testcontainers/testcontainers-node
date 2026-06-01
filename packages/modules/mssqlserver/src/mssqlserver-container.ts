@@ -31,7 +31,7 @@ export class MSSQLServerContainer extends GenericContainer {
 
   public withWaitForMessage(message: string | RegExp): this {
     this.message = message;
-    return this;
+    return this.withWaitStrategy(Wait.forLogMessage(this.message, 1));
   }
 
   public override async start(): Promise<StartedMSSQLServerContainer> {
