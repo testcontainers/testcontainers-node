@@ -1,8 +1,10 @@
 import couchbase, { Bucket, Cluster } from "couchbase";
+import getPort from "get-port";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { BucketDefinition } from "./bucket-definition";
 import { CouchbaseContainer } from "./couchbase-container";
 import { CouchbaseService } from "./couchbase-service";
+import PORTS from "./ports";
 
 const ENTERPRISE_IMAGE = getImage(__dirname, 0);
 const COMMUNITY_IMAGE = getImage(__dirname, 1);
@@ -85,5 +87,43 @@ describe("CouchbaseContainer", { timeout: 180_000 }, () => {
     await expect(() => container.start()).rejects.toThrowError(
       "The Eventing Service is only supported with the Enterprise version"
     );
+  });
+
+  it("should start with analytics service enabled", async () => {
+    await using container = await new CouchbaseContainer(ENTERPRISE_IMAGE)
+      .withEnabledServices(CouchbaseService.KV, CouchbaseService.ANALYTICS)
+      .start();
+
+    expect(container.getConnectionString()).toContain("couchbase://");
+  });
+
+  it("should create and use a bucket with KV service only", async () => {
+    const bucketDefinition = new BucketDefinition("kvbucket").withPrimaryIndex(false);
+    await using container = await new CouchbaseContainer(COMMUNITY_IMAGE)
+      .withEnabledServices(CouchbaseService.KV)
+      .withBucket(bucketDefinition)
+      .withStartupTimeout(30_000)
+      .start();
+
+    const cluster = await couchbase.Cluster.connect(container.getConnectionString(), {
+      username: container.getUsername(),
+      password: container.getPassword(),
+    });
+
+    const coll = cluster.bucket(bucketDefinition.getName()).defaultCollection();
+    await coll.upsert("testdoc", { foo: "bar" });
+    expect((await coll.get("testdoc")).content).toEqual({ foo: "bar" });
+
+    await cluster.close();
+  });
+
+  it("should preserve fixed host port binding", async () => {
+    const hostPort = await getPort();
+    await using container = await new CouchbaseContainer(COMMUNITY_IMAGE)
+      .withEnabledServices(CouchbaseService.KV)
+      .withExposedPorts({ container: PORTS.MGMT_PORT, host: hostPort })
+      .start();
+
+    expect(container.getMappedPort(PORTS.MGMT_PORT)).toBe(hostPort);
   });
 });

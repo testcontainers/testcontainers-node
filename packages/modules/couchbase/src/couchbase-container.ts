@@ -34,9 +34,7 @@ export class CouchbaseContainer extends GenericContainer {
 
   constructor(image: string) {
     super(image);
-    this.withExposedPorts(...this.getPortsToExpose()).withWaitStrategy(
-      Wait.forLogMessage("Starting Couchbase Server -- Web UI available at http://<ip>:8091")
-    );
+    this.withWaitStrategy(Wait.forLogMessage("Starting Couchbase Server -- Web UI available at http://<ip>:8091"));
   }
 
   withCredentials(username: string, password: string) {
@@ -427,7 +425,7 @@ export class CouchbaseContainer extends GenericContainer {
           BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, inspectResult)
         );
 
-      if (this.enabledServices.has(CouchbaseService.KV)) {
+      if (this.enabledServices.has(CouchbaseService.QUERY)) {
         await new IntervalRetry<Response | undefined, Error>(1000).retryUntil(
           async () => {
             try {
@@ -574,6 +572,8 @@ export class CouchbaseContainer extends GenericContainer {
   }
 
   public override async start(): Promise<StartedCouchbaseContainer> {
+    const exposedPorts = this.createOpts.ExposedPorts ?? {};
+    this.withExposedPorts(...this.getPortsToExpose().filter((port) => exposedPorts[`${port}/tcp`] === undefined));
     return new StartedCouchbaseContainer(await super.start(), this.username, this.password);
   }
 }
