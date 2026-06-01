@@ -26,7 +26,8 @@
   },
   "scripts": {
     "prepack": "shx cp ../../../README.md . && shx cp ../../../LICENSE .",
-    "build": "tsc --project tsconfig.build.json"
+    "build": "tsc --project tsconfig.build.json",
+    "postbuild": "shx cp src/import.sh build"
   },
   "devDependencies": {
     "redis": "^5.12.1"

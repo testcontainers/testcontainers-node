@@ -77,6 +77,19 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
     // }
   });
 
+  it("should load initial data once", async () => {
+    await using container = await new RedisContainer(IMAGE)
+      .withInitialData(path.join(__dirname, "initCount.redis"))
+      .start();
+
+    const client = createClient({ url: container.getConnectionUrl() });
+    await client.connect();
+
+    expect(await client.get("import-count")).toBe("1");
+
+    client.destroy();
+  });
+
   it("should start with credentials and login", async () => {
     // redisStartWithCredentials {
     const password = "testPassword";

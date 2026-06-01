@@ -78,7 +78,6 @@ export class RedisContainer extends GenericContainer {
       ]);
     }
     const startedRedisContainer = new StartedRedisContainer(await super.start(), this.password);
-    if (this.initialImportScriptFile) await this.importInitialData(startedRedisContainer);
     return startedRedisContainer;
   }
 
