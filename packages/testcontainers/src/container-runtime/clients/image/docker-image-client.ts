@@ -24,19 +24,19 @@ export class DockerImageClient implements ImageClient {
       log.debug(`Building image "${opts.t}" with context "${context}"...`);
       const tarPackOptions = await this.createTarPackOptions(context, opts.dockerfile ?? "Dockerfile");
       const tarStream = tar.pack(context, tarPackOptions);
-      await new Promise<void>((resolve) => {
-        this.dockerode
-          .buildImage(tarStream, opts)
-          .then((stream) => byline(stream))
-          .then((stream) => {
-            stream.setEncoding("utf-8");
-            stream.on("data", (line) => {
-              if (buildLog.enabled()) {
-                buildLog.trace(line, { imageName: opts.t });
-              }
-            });
-            stream.on("end", () => resolve());
-          });
+      const buildStream = await this.dockerode.buildImage(tarStream, opts);
+      await new Promise<void>((resolve, reject) => {
+        buildStream.on("error", reject);
+
+        const lineStream = byline(buildStream);
+        lineStream.setEncoding("utf-8");
+        lineStream.on("data", (line) => {
+          if (buildLog.enabled()) {
+            buildLog.trace(line, { imageName: opts.t });
+          }
+        });
+        lineStream.on("error", reject);
+        lineStream.on("end", resolve);
       });
       log.debug(`Built image "${opts.t}" with context "${context}"`);
     } catch (err) {
