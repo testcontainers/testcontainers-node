@@ -572,7 +572,8 @@ export class CouchbaseContainer extends GenericContainer {
   }
 
   public override async start(): Promise<StartedCouchbaseContainer> {
-    this.withExposedPorts(...this.getPortsToExpose());
+    const exposedPorts = this.createOpts.ExposedPorts ?? {};
+    this.withExposedPorts(...this.getPortsToExpose().filter((port) => exposedPorts[`${port}/tcp`] === undefined));
     return new StartedCouchbaseContainer(await super.start(), this.username, this.password);
   }
 }

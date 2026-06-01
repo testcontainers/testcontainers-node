@@ -1,8 +1,10 @@
 import couchbase, { Bucket, Cluster } from "couchbase";
+import getPort from "get-port";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { BucketDefinition } from "./bucket-definition";
 import { CouchbaseContainer } from "./couchbase-container";
 import { CouchbaseService } from "./couchbase-service";
+import PORTS from "./ports";
 
 const ENTERPRISE_IMAGE = getImage(__dirname, 0);
 const COMMUNITY_IMAGE = getImage(__dirname, 1);
@@ -113,5 +115,15 @@ describe("CouchbaseContainer", { timeout: 180_000 }, () => {
     expect((await coll.get("testdoc")).content).toEqual({ foo: "bar" });
 
     await cluster.close();
+  });
+
+  it("should preserve fixed host port binding", async () => {
+    const hostPort = await getPort();
+    await using container = await new CouchbaseContainer(COMMUNITY_IMAGE)
+      .withEnabledServices(CouchbaseService.KV)
+      .withExposedPorts({ container: PORTS.MGMT_PORT, host: hostPort })
+      .start();
+
+    expect(container.getMappedPort(PORTS.MGMT_PORT)).toBe(hostPort);
   });
 });
