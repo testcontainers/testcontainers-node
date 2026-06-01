@@ -104,9 +104,9 @@ describe("AzuriteContainer", { timeout: 240_000 }, () => {
 
     await using container = await new AzuriteContainer(IMAGE)
       .withSkipApiVersionCheck()
-      .withBlobPort({ container: 10001, host: blobPort })
-      .withQueuePort({ container: 10002, host: queuePort })
-      .withTablePort({ container: 10003, host: tablePort })
+      .withBlobPort({ container: 11000, host: blobPort })
+      .withQueuePort({ container: 11001, host: queuePort })
+      .withTablePort({ container: 11002, host: tablePort })
       .start();
 
     expect(container.getBlobPort()).toBe(blobPort);
@@ -122,6 +122,14 @@ describe("AzuriteContainer", { timeout: 240_000 }, () => {
     const serviceClient = BlobServiceClient.fromConnectionString(connectionString);
     const containerClient = serviceClient.getContainerClient("test");
     await containerClient.createIfNotExists();
+
+    const queueServiceClient = QueueServiceClient.fromConnectionString(connectionString);
+    await queueServiceClient.createQueue("test-queue");
+
+    const tableClient = TableClient.fromConnectionString(connectionString, "testTable", {
+      allowInsecureConnection: true,
+    });
+    await tableClient.createTable();
   });
 
   it("should be able to enable HTTPS with PEM certificate and key", async () => {
