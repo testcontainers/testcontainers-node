@@ -86,4 +86,32 @@ describe("CouchbaseContainer", { timeout: 180_000 }, () => {
       "The Eventing Service is only supported with the Enterprise version"
     );
   });
+
+  it("should start with analytics service enabled", async () => {
+    await using container = await new CouchbaseContainer(ENTERPRISE_IMAGE)
+      .withEnabledServices(CouchbaseService.KV, CouchbaseService.ANALYTICS)
+      .start();
+
+    expect(container.getConnectionString()).toContain("couchbase://");
+  });
+
+  it("should create and use a bucket with KV service only", async () => {
+    const bucketDefinition = new BucketDefinition("kvbucket").withPrimaryIndex(false);
+    await using container = await new CouchbaseContainer(COMMUNITY_IMAGE)
+      .withEnabledServices(CouchbaseService.KV)
+      .withBucket(bucketDefinition)
+      .withStartupTimeout(30_000)
+      .start();
+
+    const cluster = await couchbase.Cluster.connect(container.getConnectionString(), {
+      username: container.getUsername(),
+      password: container.getPassword(),
+    });
+
+    const coll = cluster.bucket(bucketDefinition.getName()).defaultCollection();
+    await coll.upsert("testdoc", { foo: "bar" });
+    expect((await coll.get("testdoc")).content).toEqual({ foo: "bar" });
+
+    await cluster.close();
+  });
 });
