@@ -29,7 +29,6 @@ It captures practical rules that prevent avoidable CI and PR churn.
 - Tests should verify observable behavior changes, not only internal/config state.
   - Example: for a security option, assert a real secure/insecure behavior difference.
 - Test-only helper files under `src` (for example `*-test-utils.ts`) must be explicitly excluded from package `tsconfig.build.json` so they are not emitted into `build` and accidentally published.
-- Runtime assets required by compiled code must be copied during the normal build lifecycle, not only during `prepack`, so local workspace builds produce usable output.
 - For substantial changes to GitHub Actions, runner images, Node/npm versions, or release/publish automation, consider running the manual `Node.js Package` workflow as a dry-run publish sanity check.
   - Select the PR branch as the workflow ref to test publish workflow changes before merging.
   - Use a representative version input, for example the next planned semver.
