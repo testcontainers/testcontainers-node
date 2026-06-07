@@ -54,20 +54,17 @@ export class BoundPorts {
 
   public filter(ports: PortWithOptionalBinding[]): BoundPorts {
     const boundPorts = new BoundPorts();
-    const containerPortsWithProtocol = new Map<number, string>();
+    const containerPortsWithProtocol = new Set<string>();
     ports.forEach((port) => {
       const containerPort = getContainerPort(port);
-      const protocol = getProtocol(port);
-      containerPortsWithProtocol.set(containerPort, protocol);
+      const protocol = getProtocol(port).toLowerCase();
+      containerPortsWithProtocol.add(`${containerPort}/${protocol}`);
     });
 
     for (const [internalPortWithProtocol, hostPort] of this.iterator()) {
       const [internalPortStr, protocol] = internalPortWithProtocol.split("/");
       const internalPort = parseInt(internalPortStr, 10);
-      if (
-        containerPortsWithProtocol.has(internalPort) &&
-        containerPortsWithProtocol.get(internalPort)?.toLowerCase() === protocol?.toLowerCase()
-      ) {
+      if (containerPortsWithProtocol.has(`${internalPort}/${protocol?.toLowerCase()}`)) {
         boundPorts.setBinding(internalPortWithProtocol, hostPort);
       }
     }
