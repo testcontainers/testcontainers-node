@@ -159,7 +159,20 @@ export class AzuriteContainer extends GenericContainer {
   }
 
   public override async start(): Promise<StartedAzuriteContainer> {
-    const command = ["--blobHost", "0.0.0.0", "--queueHost", "0.0.0.0", "--tableHost", "0.0.0.0"];
+    const command = [
+      "--blobHost",
+      "0.0.0.0",
+      "--blobPort",
+      getContainerPort(this.blobPort).toString(),
+      "--queueHost",
+      "0.0.0.0",
+      "--queuePort",
+      getContainerPort(this.queuePort).toString(),
+      "--tableHost",
+      "0.0.0.0",
+      "--tablePort",
+      getContainerPort(this.tablePort).toString(),
+    ];
 
     if (this.oauthEnabled && this.cert === undefined) {
       throw new Error("OAuth requires HTTPS endpoint. Configure SSL first with withSsl() or withSslPfx().");
