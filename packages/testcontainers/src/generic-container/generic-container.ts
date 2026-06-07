@@ -425,6 +425,13 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
+  protected hasExposedPort(port: PortWithOptionalBinding): boolean {
+    const containerPort = getContainerPort(port);
+    const protocol = getProtocol(port);
+
+    return Object.hasOwn(this.createOpts.ExposedPorts ?? {}, `${containerPort}/${protocol}`);
+  }
+
   public withBindMounts(bindMounts: BindMount[]): this {
     this.hostConfig.Binds = bindMounts
       .map((bindMount) => ({ mode: "rw", ...bindMount }))
