@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/gcloud",
-  "version": "12.0.0",
+  "version": "12.0.1",
   "license": "MIT",
   "author": "Anietie Asuquo <hello@anietieasuquo.com>",
   "keywords": [
@@ -37,8 +37,8 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "dependencies": {
-    "@grpc/grpc-js": "^1.14.3",
-    "testcontainers": "^12.0.0"
+    "@grpc/grpc-js": "^1.14.4",
+    "testcontainers": "^12.0.1"
   },
   "devDependencies": {
     "@google-cloud/bigquery": "^8.3.1",

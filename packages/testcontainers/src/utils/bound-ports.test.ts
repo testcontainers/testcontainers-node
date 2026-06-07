@@ -107,6 +107,10 @@ describe("BoundPorts", () => {
       filtered = boundPorts.filter(["8080/udp"]);
       expect(filtered.getBinding(8080, "udp")).toBe(2000);
       expect(() => filtered.getBinding(8080, "tcp")).toThrowError("No port binding found for :8080/tcp");
+
+      filtered = boundPorts.filter(["8080/tcp", "8080/udp"]);
+      expect(filtered.getBinding(8080, "tcp")).toBe(1000);
+      expect(filtered.getBinding(8080, "udp")).toBe(2000);
     });
 
     it("should handle case-insensitive protocols", () => {

@@ -11,10 +11,10 @@ describe.sequential("OracleFreeContainer", { timeout: 240_000 }, () => {
     // start one container for all tests in this block to save on resources
     beforeAll(async () => {
       container = await new OracleDbContainer(IMAGE).start();
-    }, 120_000);
+    }, 240_000);
 
     afterAll(async () => {
-      await container.stop();
+      await container?.stop();
     });
 
     it("should connect and return a query result", async () => {

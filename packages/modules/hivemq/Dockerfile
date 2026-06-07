@@ -1,1 +1,1 @@
-FROM hivemq/hivemq-ce:2025.5
+FROM hivemq/hivemq-ce:2026.5
