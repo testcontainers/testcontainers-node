@@ -118,7 +118,7 @@ export class CouchbaseContainer extends GenericContainer {
     if (this.enabledServices.has(CouchbaseService.EVENTING)) {
       exposedPorts.push(PORTS.EVENTING_PORT, PORTS.EVENTING_SSL_PORT);
     }
-    return exposedPorts;
+    return exposedPorts.filter((port) => !this.hasExposedPort(port));
   }
 
   private constructWaitStrategies() {
@@ -572,8 +572,7 @@ export class CouchbaseContainer extends GenericContainer {
   }
 
   public override async start(): Promise<StartedCouchbaseContainer> {
-    const exposedPorts = this.createOpts.ExposedPorts ?? {};
-    this.withExposedPorts(...this.getPortsToExpose().filter((port) => exposedPorts[`${port}/tcp`] === undefined));
+    this.withExposedPorts(...this.getPortsToExpose());
     return new StartedCouchbaseContainer(await super.start(), this.username, this.password);
   }
 }
