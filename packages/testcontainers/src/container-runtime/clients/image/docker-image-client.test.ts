@@ -11,10 +11,19 @@ describe("DockerImageClient", () => {
       }),
       modem: {
         followProgress: vi.fn(
-          (stream: Readable, onFinished: (error: Error | null) => void, onProgress: (event: unknown) => void) => {
-            stream.on("data", (line) => onProgress(JSON.parse(line.toString())));
-            stream.on("error", onFinished);
-            stream.on("end", () => onFinished(null));
+          (
+            stream: Readable,
+            onFinished: (error: Error | null, output: unknown[]) => void,
+            onProgress: (event: unknown) => void
+          ) => {
+            const output: unknown[] = [];
+            stream.on("data", (line) => {
+              const event = JSON.parse(line.toString());
+              output.push(event);
+              onProgress(event);
+            });
+            stream.on("error", (error) => onFinished(error, output));
+            stream.on("end", () => onFinished(null, output));
           }
         ),
       },
