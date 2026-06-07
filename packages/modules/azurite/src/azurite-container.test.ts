@@ -3,6 +3,7 @@ import { BlobServiceClient, StorageSharedKeyCredential } from "@azure/storage-bl
 import { QueueServiceClient } from "@azure/storage-queue";
 import fs from "node:fs";
 import path from "node:path";
+import { RandomPortGenerator } from "testcontainers";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { AzuriteContainer } from "./azurite-container";
 import { createOAuthToken, createTokenCredential, getTlsPipelineOptions } from "./azurite-test-utils";
@@ -98,9 +99,10 @@ describe("AzuriteContainer", { timeout: 240_000 }, () => {
 
   it("should be able to specify custom ports", async () => {
     // customPorts {
-    const blobPort = 13000;
-    const queuePort = 14000;
-    const tablePort = 15000;
+    const portGenerator = new RandomPortGenerator();
+    const blobPort = await portGenerator.generatePort();
+    const queuePort = await portGenerator.generatePort();
+    const tablePort = await portGenerator.generatePort();
 
     await using container = await new AzuriteContainer(IMAGE)
       .withSkipApiVersionCheck()
@@ -115,10 +117,11 @@ describe("AzuriteContainer", { timeout: 240_000 }, () => {
     // }
 
     const connectionString = container.getConnectionString();
-    expect(connectionString).toContain("13000");
-    expect(connectionString).toContain("14000");
-    expect(connectionString).toContain("15000");
+    expect(connectionString).toContain(`:${blobPort}/`);
+    expect(connectionString).toContain(`:${queuePort}/`);
+    expect(connectionString).toContain(`:${tablePort}/`);
 
+    // Exercise each service because Azurite configures their listener ports independently.
     const serviceClient = BlobServiceClient.fromConnectionString(connectionString);
     const containerClient = serviceClient.getContainerClient("test");
     await containerClient.createIfNotExists();
