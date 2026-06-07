@@ -86,4 +86,12 @@ describe("MSSQLServerContainer", { timeout: 180_000 }, () => {
     expect(exitCode).toBe(0);
     expect(output).toContain("Express Edition");
   });
+
+  it("should use custom wait message", async () => {
+    await using _ = await new MSSQLServerContainer("alpine")
+      .withCommand(["/bin/sh", "-c", 'echo "custom ready"; sleep 5'])
+      .withWaitForMessage("custom ready")
+      .withStartupTimeout(1_000)
+      .start();
+  });
 });
