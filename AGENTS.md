@@ -28,6 +28,10 @@ It captures practical rules that prevent avoidable CI and PR churn.
 - In docs Markdown, keep `<!--codeinclude-->` blocks tight with no blank lines between the markers and the include line, or the rendered snippet will contain blank lines between code lines.
 - Tests should verify observable behavior changes, not only internal/config state.
   - Example: for a security option, assert a real secure/insecure behavior difference.
+- When adding a regression test for a bug fix, follow a red-green-refactor workflow.
+  - Run the focused test against the pre-fix implementation and confirm it fails for the expected reason.
+  - Apply the implementation change, rerun the same test, and confirm it passes.
+  - Report the red-green evidence in the PR verification summary.
 - Test-only helper files under `src` (for example `*-test-utils.ts`) must be explicitly excluded from package `tsconfig.build.json` so they are not emitted into `build` and accidentally published.
 - For substantial changes to GitHub Actions, runner images, Node/npm versions, or release/publish automation, consider running the manual `Node.js Package` workflow as a dry-run publish sanity check.
   - Select the PR branch as the workflow ref to test publish workflow changes before merging.

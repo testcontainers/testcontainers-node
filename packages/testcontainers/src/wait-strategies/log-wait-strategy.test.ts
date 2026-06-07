@@ -26,7 +26,7 @@ describe("LogWaitStrategy", { timeout: 180_000 }, () => {
     const start = new Date();
     await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withCommand(["/bin/sh", "-c", 'sleep 2; echo "Ready"'])
-      .withWaitStrategy(Wait.forLogMessage("Ready"))
+      .withWaitStrategy(Wait.forLogMessage(/Ready/g))
       .start();
 
     expect(new Date().getTime() - start.getTime()).toBeGreaterThanOrEqual(2_000);

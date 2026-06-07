@@ -28,6 +28,9 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
 
       const comparisonFn: (line: string) => boolean = (line: string) => {
         if (this.message instanceof RegExp) {
+          if (this.message.global || this.message.sticky) {
+            this.message.lastIndex = 0;
+          }
           return this.message.test(line);
         } else {
           return line.includes(this.message);
