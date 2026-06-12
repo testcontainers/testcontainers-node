@@ -665,10 +665,8 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     expect(container.getHostname()).toEqual("hostname");
   });
 
-  // failing to build an image hangs within the DockerImageClient.build method,
-  // that change might be larger so leave it out of this commit but skip the failing test
-  it.skip("should throw an error for a target stage that does not exist", async () => {
+  it("should throw an error for a target stage that does not exist", async () => {
     const context = path.resolve(fixtures, "docker-multi-stage");
-    await GenericContainer.fromDockerfile(context).withTarget("invalid").build();
+    await expect(GenericContainer.fromDockerfile(context).withTarget("invalid").build()).rejects.toThrow();
   });
 });
