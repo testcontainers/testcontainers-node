@@ -1,4 +1,4 @@
-import mariadb from "mariadb";
+import { createConnection } from "mariadb";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { MariaDbContainer } from "./mariadb-container";
 
@@ -9,7 +9,7 @@ describe("MariaDbContainer", { timeout: 240_000 }, () => {
     // mariaDbConnect {
     await using container = await new MariaDbContainer(IMAGE).start();
 
-    const client = await mariadb.createConnection({
+    const client = await createConnection({
       host: container.getHost(),
       port: container.getPort(),
       database: container.getDatabase(),
@@ -57,7 +57,7 @@ describe("MariaDbContainer", { timeout: 240_000 }, () => {
     // mariaDbSetDatabase {
     await using container = await new MariaDbContainer(IMAGE).withDatabase("customDatabase").start();
 
-    const client = await mariadb.createConnection({
+    const client = await createConnection({
       host: container.getHost(),
       port: container.getPort(),
       database: container.getDatabase(),
@@ -76,7 +76,7 @@ describe("MariaDbContainer", { timeout: 240_000 }, () => {
     // mariaDbSetUsername {
     await using container = await new MariaDbContainer(IMAGE).withUsername("customUsername").start();
 
-    const client = await mariadb.createConnection({
+    const client = await createConnection({
       host: container.getHost(),
       port: container.getPort(),
       database: container.getDatabase(),
@@ -95,7 +95,7 @@ describe("MariaDbContainer", { timeout: 240_000 }, () => {
     await using container = await new MariaDbContainer(IMAGE).start();
     await container.restart();
 
-    const client = await mariadb.createConnection({
+    const client = await createConnection({
       host: container.getHost(),
       port: container.getPort(),
       database: container.getDatabase(),
