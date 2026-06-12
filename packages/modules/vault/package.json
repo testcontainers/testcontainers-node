@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/vault",
-  "version": "12.0.1",
+  "version": "12.0.2",
   "license": "MIT",
   "keywords": [
     "vault",
@@ -30,7 +30,7 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "dependencies": {
-    "testcontainers": "^12.0.1"
+    "testcontainers": "^12.0.2"
   },
   "devDependencies": {
     "node-vault": "^0.12.0"
