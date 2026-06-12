@@ -1,1 +1,1 @@
-FROM neo4j:5.26.26
+FROM neo4j:5.26.27
