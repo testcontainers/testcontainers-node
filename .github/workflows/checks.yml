@@ -118,7 +118,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [22.x, 24.x]
+        node-version: [22.x, 24.x, 26.x]
     runs-on: ubuntu-24.04
     steps:
       - name: Code checkout
@@ -154,7 +154,7 @@ jobs:
       max-parallel: 20
       matrix:
         module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
-        node-version: [22.x, 24.x]
+        node-version: [22.x, 24.x, 26.x]
         container-runtime: [docker, podman]
     uses: ./.github/workflows/test-template.yml
     with:
