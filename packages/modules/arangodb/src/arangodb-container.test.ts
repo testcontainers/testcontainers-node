@@ -9,7 +9,8 @@ describe("ArangoDBContainer", { timeout: 180_000 }, () => {
     // example {
     await using container = await new ArangoDBContainer(IMAGE).start();
 
-    const db = new Database({ url: container.getHttpUrl() });
+    // With agentOptions, arangojs lets undici manage content-length headers.
+    const db = new Database({ url: container.getHttpUrl(), agentOptions: {} });
     db.database("_system");
     db.useBasicAuth(container.getUsername(), container.getPassword());
 
