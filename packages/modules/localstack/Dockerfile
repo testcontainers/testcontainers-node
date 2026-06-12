@@ -1,2 +1,2 @@
 FROM localstack/localstack:4.14.0
-FROM amazon/aws-cli:2.34.62
+FROM amazon/aws-cli:2.35.3

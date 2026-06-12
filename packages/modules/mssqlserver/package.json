@@ -32,7 +32,7 @@
   },
   "devDependencies": {
     "@types/mssql": "^12.3.0",
-    "mssql": "^12.5.4"
+    "mssql": "^12.5.5"
   },
   "dependencies": {
     "testcontainers": "^12.0.1"
