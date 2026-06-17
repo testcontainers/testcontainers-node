@@ -1,14 +1,12 @@
 import { GenericContainer } from "../generic-container/generic-container";
-import { RandomPortGenerator } from "../utils/port-generator";
+import { getRandomPort } from "../utils/port-generator";
 import { createTestServer } from "../utils/test-helper";
 
 describe.sequential("Port Forwarder reuse", { timeout: 180_000 }, () => {
-  const portGen = new RandomPortGenerator();
-
   it("should expose additional ports", async () => {
     const { TestContainers: TC1 } = await import("../test-containers.js");
     const { PortForwarderInstance: PFI1 } = await import("../port-forwarder/port-forwarder.js");
-    const port1 = await portGen.generatePort();
+    const port1 = await getRandomPort();
     const server1 = await createTestServer(port1);
     await TC1.exposeHostPorts(port1);
     const portForwarder1ContainerId = (await PFI1.getInstance()).getContainerId();
@@ -16,7 +14,7 @@ describe.sequential("Port Forwarder reuse", { timeout: 180_000 }, () => {
     vi.resetModules();
     const { TestContainers: TC2 } = await import("../test-containers.js");
     const { PortForwarderInstance: PFI2 } = await import("../port-forwarder/port-forwarder.js");
-    const port2 = await portGen.generatePort();
+    const port2 = await getRandomPort();
     const server2 = await createTestServer(port2);
     await TC2.exposeHostPorts(port2);
     const portForwarder2ContainerId = (await PFI2.getInstance()).getContainerId();
@@ -34,7 +32,7 @@ describe.sequential("Port Forwarder reuse", { timeout: 180_000 }, () => {
   });
 
   it("should reuse same ports", async () => {
-    const port = await portGen.generatePort();
+    const port = await getRandomPort();
     const server = await createTestServer(port);
 
     const { TestContainers: TC1 } = await import("../test-containers.js");

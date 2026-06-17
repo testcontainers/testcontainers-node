@@ -1,5 +1,5 @@
 import couchbase, { Bucket, Cluster } from "couchbase";
-import getPort from "get-port";
+import { getRandomPort } from "testcontainers";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { BucketDefinition } from "./bucket-definition";
 import { CouchbaseContainer } from "./couchbase-container";
@@ -118,7 +118,7 @@ describe("CouchbaseContainer", { timeout: 180_000 }, () => {
   });
 
   it("should preserve fixed host port binding", async () => {
-    const hostPort = await getPort();
+    const hostPort = await getRandomPort();
     await using container = await new CouchbaseContainer(COMMUNITY_IMAGE)
       .withEnabledServices(CouchbaseService.KV)
       .withExposedPorts({ container: PORTS.MGMT_PORT, host: hostPort })

@@ -1,7 +1,5 @@
-import archiver from "archiver";
 import AsyncLock from "async-lock";
 import Dockerode, { ContainerInspectInfo } from "dockerode";
-import { promises as fs } from "fs";
 import { Readable } from "stream";
 import { containerLog, log } from "../common";
 import { ContainerRuntimeClient, getContainerRuntimeClient } from "../container-runtime";
@@ -21,6 +19,7 @@ import { BoundPorts } from "../utils/bound-ports";
 import { LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
 import { mapInspectResult } from "../utils/map-inspect-result";
 import { PortWithOptionalBinding } from "../utils/port";
+import { createTarArchive } from "../utils/tar-archive";
 import { waitForContainer } from "../wait-strategies/wait-for-container";
 import { WaitStrategy } from "../wait-strategies/wait-strategy";
 import { inspectContainerUntilPortsExposed } from "./inspect-container-util-ports-exposed";
@@ -192,15 +191,7 @@ export class StartedGenericContainer implements StartedTestContainer {
   public async copyFilesToContainer(filesToCopy: FileToCopy[]): Promise<void> {
     log.debug(`Copying files to container...`, { containerId: this.container.id });
     const client = await getContainerRuntimeClient();
-    const tar = archiver("tar");
-    const filesToCopyWithStats = await Promise.all(
-      filesToCopy.map(async (fileToCopy) => ({
-        ...fileToCopy,
-        stats: await fs.stat(fileToCopy.source),
-      }))
-    );
-    filesToCopyWithStats.forEach(({ source, target, mode, stats }) => tar.file(source, { name: target, mode, stats }));
-    tar.finalize();
+    const tar = await createTarArchive({ filesToCopy });
     await client.container.putArchive(this.container, tar, "/");
     log.debug(`Copied files to container`, { containerId: this.container.id });
   }
@@ -208,9 +199,7 @@ export class StartedGenericContainer implements StartedTestContainer {
   public async copyDirectoriesToContainer(directoriesToCopy: DirectoryToCopy[]): Promise<void> {
     log.debug(`Copying directories to container...`, { containerId: this.container.id });
     const client = await getContainerRuntimeClient();
-    const tar = archiver("tar");
-    directoriesToCopy.forEach(({ source, target }) => tar.directory(source, target));
-    tar.finalize();
+    const tar = await createTarArchive({ directoriesToCopy });
     await client.container.putArchive(this.container, tar, "/");
     log.debug(`Copied directories to container`, { containerId: this.container.id });
   }
@@ -218,9 +207,7 @@ export class StartedGenericContainer implements StartedTestContainer {
   public async copyContentToContainer(contentsToCopy: ContentToCopy[]): Promise<void> {
     log.debug(`Copying content to container...`, { containerId: this.container.id });
     const client = await getContainerRuntimeClient();
-    const tar = archiver("tar");
-    contentsToCopy.forEach(({ content, target, mode }) => tar.append(content, { name: target, mode: mode }));
-    tar.finalize();
+    const tar = await createTarArchive({ contentsToCopy });
     await client.container.putArchive(this.container, tar, "/");
     log.debug(`Copied content to container`, { containerId: this.container.id });
   }

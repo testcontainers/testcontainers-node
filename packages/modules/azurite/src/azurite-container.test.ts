@@ -3,7 +3,7 @@ import { BlobServiceClient, StorageSharedKeyCredential } from "@azure/storage-bl
 import { QueueServiceClient } from "@azure/storage-queue";
 import fs from "node:fs";
 import path from "node:path";
-import { RandomPortGenerator } from "testcontainers";
+import { getRandomPort } from "testcontainers";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { AzuriteContainer } from "./azurite-container";
 import { createOAuthToken, createTokenCredential, getTlsPipelineOptions } from "./azurite-test-utils";
@@ -99,10 +99,9 @@ describe("AzuriteContainer", { timeout: 240_000 }, () => {
 
   it("should be able to specify custom ports", async () => {
     // customPorts {
-    const portGenerator = new RandomPortGenerator();
-    const blobPort = await portGenerator.generatePort();
-    const queuePort = await portGenerator.generatePort();
-    const tablePort = await portGenerator.generatePort();
+    const blobPort = await getRandomPort();
+    const queuePort = await getRandomPort();
+    const tablePort = await getRandomPort();
 
     await using container = await new AzuriteContainer(IMAGE)
       .withSkipApiVersionCheck()

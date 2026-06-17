@@ -1,5 +1,5 @@
 import { ContainerRuntimeClient, getContainerRuntimeClient } from "../container-runtime";
-import { RandomPortGenerator } from "../utils/port-generator";
+import { getRandomPort } from "../utils/port-generator";
 
 describe.sequential("Reaper", { timeout: 120_000 }, () => {
   let client: ContainerRuntimeClient;
@@ -56,7 +56,7 @@ describe.sequential("Reaper", { timeout: 120_000 }, () => {
   it("should create new reaper container when existing reaper cannot be reached", async () => {
     const reaper = await getReaper();
     vi.resetModules();
-    const unreachablePort = await new RandomPortGenerator().generatePort();
+    const unreachablePort = await getRandomPort();
     const reaperContainerInfo = (await client.container.list()).filter((c) => c.Id === reaper.containerId)[0];
     reaperContainerInfo.Labels["TESTCONTAINERS_RYUK_TEST_LABEL"] = "false";
     const reaperPort = reaperContainerInfo.Ports.find((port) => port.PrivatePort == 8080);
@@ -72,7 +72,7 @@ describe.sequential("Reaper", { timeout: 120_000 }, () => {
   });
 
   it("should use custom port when TESTCONTAINERS_RYUK_PORT is set", async () => {
-    const customPort = (await new RandomPortGenerator().generatePort()).toString();
+    const customPort = (await getRandomPort()).toString();
     vi.stubEnv("TESTCONTAINERS_RYUK_PORT", customPort);
     vi.spyOn(client.container, "list").mockResolvedValue([]);
 

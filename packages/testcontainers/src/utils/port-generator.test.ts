@@ -1,4 +1,4 @@
-import { FixedPortGenerator, RandomPortGenerator } from "./port-generator";
+import { FixedPortGenerator, getRandomPort } from "./port-generator";
 
 describe("PortGenerator", () => {
   describe("FixedPortGenerator", () => {
@@ -10,12 +10,10 @@ describe("PortGenerator", () => {
     });
   });
 
-  describe("RandomPortGenerator", () => {
+  describe("getRandomPort", () => {
     it("should generate a random available port", async () => {
-      const randomPortGenerator = new RandomPortGenerator();
-
-      const port1 = await randomPortGenerator.generatePort();
-      const port2 = await randomPortGenerator.generatePort();
+      const port1 = await getRandomPort();
+      const port2 = await getRandomPort();
 
       expect(port1).toBeDefined();
       expect(port2).toBeDefined();

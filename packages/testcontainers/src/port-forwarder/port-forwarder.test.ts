@@ -1,14 +1,12 @@
 import { GenericContainer } from "../generic-container/generic-container";
 import { Network } from "../network/network";
 import { TestContainers } from "../test-containers";
-import { RandomPortGenerator } from "../utils/port-generator";
+import { getRandomPort } from "../utils/port-generator";
 import { createTestServer } from "../utils/test-helper";
 
 describe("PortForwarder", { timeout: 180_000 }, () => {
-  const portGen = new RandomPortGenerator();
-
   it("should expose host ports to the container", async () => {
-    const randomPort = await portGen.generatePort();
+    const randomPort = await getRandomPort();
     await using _ = await createTestServer(randomPort);
     await TestContainers.exposeHostPorts(randomPort);
 
@@ -19,7 +17,7 @@ describe("PortForwarder", { timeout: 180_000 }, () => {
   });
 
   it("should expose host ports to the container with custom network", async () => {
-    const randomPort = await portGen.generatePort();
+    const randomPort = await getRandomPort();
     await using _ = await createTestServer(randomPort);
     await TestContainers.exposeHostPorts(randomPort);
 
@@ -33,7 +31,7 @@ describe("PortForwarder", { timeout: 180_000 }, () => {
   });
 
   it("should expose host ports to the container with custom network and network alias", async () => {
-    const randomPort = await portGen.generatePort();
+    const randomPort = await getRandomPort();
     await using _ = await createTestServer(randomPort);
     await TestContainers.exposeHostPorts(randomPort);
 

@@ -1,11 +1,4 @@
-import {
-  AbstractStartedContainer,
-  GenericContainer,
-  PortGenerator,
-  RandomPortGenerator,
-  StartedTestContainer,
-  Wait,
-} from "testcontainers";
+import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait, getRandomPort } from "testcontainers";
 
 type Protocol = "http" | "https";
 
@@ -21,11 +14,9 @@ export class AzureCosmosDbEmulatorContainer extends GenericContainer {
   private protocol: Protocol = DEFAULT_PROTOCOL;
   private telemetryEnabled = DEFAULT_TELEMETRY_ENABLED;
   private explorerEnabled = DEFAULT_EXPLORER_ENABLED;
-  private portGenerator: PortGenerator;
 
   constructor(image: string) {
     super(image);
-    this.portGenerator = new RandomPortGenerator();
     this.withWaitStrategy(Wait.forLogMessage(COSMOS_READY_LOG_MESSAGE));
   }
 
@@ -40,7 +31,7 @@ export class AzureCosmosDbEmulatorContainer extends GenericContainer {
   }
 
   public override async start(): Promise<StartedAzureCosmosDbEmulatorContainer> {
-    const port = await this.portGenerator.generatePort();
+    const port = await getRandomPort();
     this.withExposedPorts({
       host: port,
       container: port,

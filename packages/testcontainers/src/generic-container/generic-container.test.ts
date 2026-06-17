@@ -1,8 +1,8 @@
-import archiver from "archiver";
-import getPort from "get-port";
 import path from "path";
+import * as tarStream from "tar-stream";
 import { RandomUuid } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
+import { getRandomPort } from "../utils/port-generator";
 import { PullPolicy } from "../utils/pull-policy";
 import {
   checkContainerIsHealthy,
@@ -38,7 +38,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
   });
 
   it("should bind to specified host port", async () => {
-    const hostPort = await getPort();
+    const hostPort = await getRandomPort();
     await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts({
         container: 8080,
@@ -51,7 +51,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
   });
 
   it("should bind to specified host port with a different protocol", async () => {
-    const hostPort = await getPort();
+    const hostPort = await getRandomPort();
     await using container = await new GenericContainer("mendhak/udp-listener")
       .withWaitStrategy(Wait.forLogMessage("Listening on UDP port 5005"))
       .withExposedPorts({
@@ -473,6 +473,19 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     expect((await container.exec("cat /tmp/test.txt")).output).toEqual(expect.stringContaining("hello world"));
   });
 
+  it("should copy directory to started container with permissions", async () => {
+    const source = path.resolve(fixtures, "docker");
+    const target = "/tmp/started-newdir";
+    const mode = parseInt("0777", 8);
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withExposedPorts(8080)
+      .start();
+
+    await container.copyDirectoriesToContainer([{ source, target, mode }]);
+
+    expect((await container.exec(`stat -c "%a %n" /tmp/started-newdir/test.txt`)).output).toContain("777");
+  });
+
   it("should copy content to container", async () => {
     const content = "hello world";
     const target = "/tmp/test.txt";
@@ -521,9 +534,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
         .withExposedPorts(8080)
         .start();
 
-      const tar = archiver("tar");
-      tar.append("hello world", { name: targetWithCopyOwnership.slice(1), uid, gid } as archiver.EntryData);
-      tar.finalize();
+      const tar = createArchiveWithOwnership(targetWithCopyOwnership, uid, gid);
 
       await container.copyArchiveToContainer(tar, "/", { copyUIDGID: true });
 
@@ -536,9 +547,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
       const uid = 4242;
       const gid = 4343;
       const targetWithCopyOwnership = "/tmp/with-copy-archives-copyuidgid.txt";
-      const tar = archiver("tar");
-      tar.append("hello world", { name: targetWithCopyOwnership.slice(1), uid, gid } as archiver.EntryData);
-      tar.finalize();
+      const tar = createArchiveWithOwnership(targetWithCopyOwnership, uid, gid);
 
       await using containerWithCopyOwnership = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
         .withCopyArchivesToContainer([
@@ -672,3 +681,27 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await GenericContainer.fromDockerfile(context).withTarget("invalid").build();
   });
 });
+
+const createArchiveWithOwnership = (target: string, uid: number, gid: number) => {
+  const content = "hello world";
+  const tar = tarStream.pack();
+
+  tar.entry(
+    {
+      name: target.slice(1),
+      uid,
+      gid,
+      size: Buffer.byteLength(content),
+    },
+    content,
+    (err) => {
+      if (err) {
+        tar.destroy(err);
+      } else {
+        tar.finalize();
+      }
+    }
+  );
+
+  return tar;
+};
