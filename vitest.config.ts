@@ -16,7 +16,6 @@ export default defineConfig({
     exclude: [
       ...configDefaults.exclude,
       "packages/testcontainers/smoke-test.jest.test.js",
-      "packages/testcontainers/smoke-test.vitest.test.mjs",
     ],
     sequence: {
       concurrent: true,
