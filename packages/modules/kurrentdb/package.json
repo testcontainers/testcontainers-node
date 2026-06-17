@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/kurrentdb",
-  "version": "12.0.2",
+  "version": "12.0.3",
   "license": "MIT",
   "keywords": [
     "kurrentdb",
@@ -32,6 +32,6 @@
     "@kurrent/kurrentdb-client": "^1.3.0"
   },
   "dependencies": {
-    "testcontainers": "^12.0.2"
+    "testcontainers": "^12.0.3"
   }
 }
