@@ -1,4 +1,4 @@
-import { TarArchive, type Archiver } from "archiver";
+import archiver from "archiver";
 import AsyncLock from "async-lock";
 import { Container, ContainerCreateOptions, ContainerInspectInfo, HostConfig } from "dockerode";
 import { promises as fs } from "fs";
@@ -275,8 +275,8 @@ export class GenericContainer implements TestContainer {
     }
   }
 
-  private async createArchiveToCopyToContainer(): Promise<Archiver> {
-    const tar = new TarArchive();
+  private async createArchiveToCopyToContainer(): Promise<archiver.Archiver> {
+    const tar = archiver("tar");
     const filesToCopyWithStats = await Promise.all(
       this.filesToCopy.map(async (fileToCopy) => ({
         ...fileToCopy,
