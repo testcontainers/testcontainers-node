@@ -146,7 +146,7 @@ jobs:
         env:
           DEBUG: "testcontainers*"
       - name: Run Vitest runtime smoke test
-        run: npm exec --yes --package vitest@4.1.8 -- vitest run packages/testcontainers/smoke-test.vitest.test.mjs --config packages/testcontainers/smoke-test.vitest.config.mjs --maxWorkers=1
+        run: npm exec --yes --package vitest@4.1.8 -- vitest run smoke-test.vitest.test.mjs --root packages/testcontainers --globals --maxWorkers=1
         env:
           DEBUG: "testcontainers*"
 
