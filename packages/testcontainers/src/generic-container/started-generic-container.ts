@@ -1,4 +1,4 @@
-import { TarArchive } from "archiver";
+import archiver from "archiver";
 import AsyncLock from "async-lock";
 import Dockerode, { ContainerInspectInfo } from "dockerode";
 import { promises as fs } from "fs";
@@ -192,7 +192,7 @@ export class StartedGenericContainer implements StartedTestContainer {
   public async copyFilesToContainer(filesToCopy: FileToCopy[]): Promise<void> {
     log.debug(`Copying files to container...`, { containerId: this.container.id });
     const client = await getContainerRuntimeClient();
-    const tar = new TarArchive();
+    const tar = archiver("tar");
     const filesToCopyWithStats = await Promise.all(
       filesToCopy.map(async (fileToCopy) => ({
         ...fileToCopy,
@@ -208,7 +208,7 @@ export class StartedGenericContainer implements StartedTestContainer {
   public async copyDirectoriesToContainer(directoriesToCopy: DirectoryToCopy[]): Promise<void> {
     log.debug(`Copying directories to container...`, { containerId: this.container.id });
     const client = await getContainerRuntimeClient();
-    const tar = new TarArchive();
+    const tar = archiver("tar");
     directoriesToCopy.forEach(({ source, target }) => tar.directory(source, target));
     tar.finalize();
     await client.container.putArchive(this.container, tar, "/");
@@ -218,7 +218,7 @@ export class StartedGenericContainer implements StartedTestContainer {
   public async copyContentToContainer(contentsToCopy: ContentToCopy[]): Promise<void> {
     log.debug(`Copying content to container...`, { containerId: this.container.id });
     const client = await getContainerRuntimeClient();
-    const tar = new TarArchive();
+    const tar = archiver("tar");
     contentsToCopy.forEach(({ content, target, mode }) => tar.append(content, { name: target, mode: mode }));
     tar.finalize();
     await client.container.putArchive(this.container, tar, "/");

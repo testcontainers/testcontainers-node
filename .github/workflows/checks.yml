@@ -141,6 +141,14 @@ jobs:
         run: node packages/testcontainers/smoke-test.mjs
         env:
           DEBUG: "testcontainers*"
+      - name: Run Jest CommonJS runtime smoke test
+        run: npm exec --yes --package jest@30.4.2 -- jest packages/testcontainers/smoke-test.jest.test.js --runInBand --no-cache
+        env:
+          DEBUG: "testcontainers*"
+      - name: Run Vitest runtime smoke test
+        run: npm exec --yes --package vitest@4.1.8 -- vitest run packages/testcontainers/smoke-test.vitest.test.mjs --config packages/testcontainers/smoke-test.vitest.config.mjs --maxWorkers=1
+        env:
+          DEBUG: "testcontainers*"
 
   test:
     if: ${{ needs.detect-modules.outputs.modules_count != '0' }}
