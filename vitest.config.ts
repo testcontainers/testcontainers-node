@@ -1,5 +1,5 @@
 import * as path from "path";
-import { defineConfig } from "vitest/config";
+import { configDefaults, defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
@@ -13,6 +13,11 @@ export default defineConfig({
     restoreMocks: true,
     unstubEnvs: true,
     retry: process.env.CI ? 3 : 0,
+    exclude: [
+      ...configDefaults.exclude,
+      "packages/testcontainers/smoke-test.jest.test.js",
+      "packages/testcontainers/smoke-test.vitest.test.mjs",
+    ],
     sequence: {
       concurrent: true,
     },

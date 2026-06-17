@@ -142,11 +142,13 @@ jobs:
         env:
           DEBUG: "testcontainers*"
       - name: Run Jest CommonJS runtime smoke test
-        run: npm exec --yes --package jest@30.4.2 -- jest packages/testcontainers/smoke-test.jest.test.js --runInBand --no-cache
+        run: npm exec --yes --package jest@30.4.2 -- jest smoke-test.jest.test.js --runInBand --no-cache
+        working-directory: packages/testcontainers
         env:
           DEBUG: "testcontainers*"
       - name: Run Vitest runtime smoke test
-        run: npm exec --yes --package vitest@4.1.8 -- vitest run smoke-test.vitest.test.mjs --root packages/testcontainers --globals --maxWorkers=1
+        run: npm exec --yes --package vitest@4.1.8 -- vitest run smoke-test.vitest.test.mjs --globals --maxWorkers=1
+        working-directory: packages/testcontainers
         env:
           DEBUG: "testcontainers*"
 
