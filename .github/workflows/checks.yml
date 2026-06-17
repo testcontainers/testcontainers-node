@@ -142,8 +142,7 @@ jobs:
         env:
           DEBUG: "testcontainers*"
       - name: Run Jest CommonJS runtime smoke test
-        run: npm exec --yes --package jest@30.4.2 -- jest smoke-test.jest.test.js --runInBand --no-cache
-        working-directory: packages/testcontainers
+        run: npm exec --yes --package jest@30.4.2 -- jest --testMatch "**/smoke-test.jest.js" --runInBand --no-cache
         env:
           DEBUG: "testcontainers*"
 
