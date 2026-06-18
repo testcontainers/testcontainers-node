@@ -60,6 +60,35 @@ describe("createTarArchive", () => {
       await fs.rm(outside, { recursive: true, force: true });
     }
   });
+
+  it("should normalize absolute symlink targets inside copied directories", async () => {
+    const source = await fs.mkdtemp(path.join(tmpdir(), "testcontainers-tar-archive-"));
+    const nested = path.join(source, "nested");
+    const target = path.join(source, "target.txt");
+    const symlink = path.join(nested, "linked-target.txt");
+
+    try {
+      await fs.mkdir(nested);
+      await fs.writeFile(target, "hello world");
+      const symlinkCreated = await createSymlinkOrSkip(target, symlink, "file");
+      if (!symlinkCreated) {
+        return;
+      }
+
+      const archive = await createTarArchive({
+        directoriesToCopy: [{ source, target: "/tmp/copied" }],
+      });
+
+      const entries = await getTarEntries(archive);
+
+      expect(entries.find((entry) => entry.name === "tmp/copied/nested/linked-target.txt")).toMatchObject({
+        linkname: "../target.txt",
+        type: "symlink",
+      });
+    } finally {
+      await fs.rm(source, { recursive: true, force: true });
+    }
+  });
 });
 
 const createSymlinkOrSkip = async (target: string, symlinkPath: string, type: "dir" | "file"): Promise<boolean> => {

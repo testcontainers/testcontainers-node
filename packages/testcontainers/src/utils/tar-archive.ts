@@ -20,6 +20,11 @@ type TarArchiveEntry =
       content: Buffer;
     };
 
+type DirectoryArchiveContext = {
+  rootSource: string;
+  rootTarget: string;
+};
+
 export const createTarArchive = async (options: TarArchiveOptions): Promise<Readable> => {
   const entries = await collectTarArchiveEntries(options);
   const tar = tarStream.pack();
@@ -39,7 +44,10 @@ const collectTarArchiveEntries = async (options: TarArchiveOptions): Promise<Tar
   }
 
   for (const directoryToCopy of options.directoriesToCopy ?? []) {
-    await addDirectoryEntries(entries, directoryToCopy.source, directoryToCopy.target, directoryToCopy.mode, false);
+    await addDirectoryEntries(entries, directoryToCopy.source, directoryToCopy.target, directoryToCopy.mode, false, {
+      rootSource: path.resolve(directoryToCopy.source),
+      rootTarget: normalizeTarPath(directoryToCopy.target),
+    });
   }
 
   for (const contentToCopy of options.contentsToCopy ?? []) {
@@ -66,11 +74,12 @@ const addDirectoryEntries = async (
   source: string,
   target: string,
   mode: number | undefined,
-  includeSelf: boolean
+  includeSelf: boolean,
+  context: DirectoryArchiveContext
 ): Promise<void> => {
   const stats = await fs.lstat(source);
   if (stats.isSymbolicLink()) {
-    entries.push(await createSymlinkArchiveEntry(source, target, stats, mode));
+    entries.push(await createSymlinkArchiveEntry(source, target, stats, mode, context));
     return;
   }
 
@@ -85,9 +94,9 @@ const addDirectoryEntries = async (
     const entryStats = await fs.lstat(sourcePath);
 
     if (directoryEntry.isSymbolicLink()) {
-      entries.push(await createSymlinkArchiveEntry(sourcePath, targetPath, entryStats, mode));
+      entries.push(await createSymlinkArchiveEntry(sourcePath, targetPath, entryStats, mode, context));
     } else if (entryStats.isDirectory()) {
-      await addDirectoryEntries(entries, sourcePath, targetPath, mode, true);
+      await addDirectoryEntries(entries, sourcePath, targetPath, mode, true, context);
     } else if (entryStats.isFile()) {
       entries.push(createFileArchiveEntryFromStats(sourcePath, targetPath, mode, entryStats));
     }
@@ -134,13 +143,14 @@ const createSymlinkArchiveEntry = async (
   source: string,
   target: string,
   stats: Stats,
-  mode: number | undefined
+  mode: number | undefined,
+  context: DirectoryArchiveContext
 ): Promise<TarArchiveEntry> => ({
   content: Buffer.alloc(0),
   header: {
     name: normalizeTarPath(target),
     type: "symlink",
-    linkname: await fs.readlink(source),
+    linkname: await getSymlinkLinkname(source, target, context),
     mode: getEntryMode(stats, mode),
     mtime: stats.mtime,
     uid: stats.uid,
@@ -148,6 +158,26 @@ const createSymlinkArchiveEntry = async (
     size: 0,
   },
 });
+
+const getSymlinkLinkname = async (
+  source: string,
+  target: string,
+  context: DirectoryArchiveContext
+): Promise<string> => {
+  const linkname = await fs.readlink(source);
+  if (!path.isAbsolute(linkname)) {
+    return normalizeTarLinkname(linkname);
+  }
+
+  const resolvedLinkTarget = path.resolve(linkname);
+  if (!isPathInside(context.rootSource, resolvedLinkTarget)) {
+    return normalizeTarLinkname(linkname);
+  }
+
+  const sourceRelativeLinkTarget = path.relative(context.rootSource, resolvedLinkTarget);
+  const archiveLinkTarget = joinTarPaths(context.rootTarget, sourceRelativeLinkTarget);
+  return path.posix.relative(path.posix.dirname(normalizeTarPath(target)), archiveLinkTarget) || ".";
+};
 
 const addFileToArchive = async (tar: tarStream.Pack, source: string, header: tarStream.Headers): Promise<void> => {
   await new Promise<void>((resolve, reject) => {
@@ -196,6 +226,17 @@ const toBuffer = async (content: Content): Promise<Buffer> => {
 
 const getEntryMode = (stats: Stats, mode?: number): number => mode ?? stats.mode & 0o7777;
 
-const joinTarPaths = (base: string, child: string): string => path.posix.join(normalizeTarPath(base), child);
+const joinTarPaths = (base: string, child: string): string =>
+  path.posix.join(normalizeTarPath(base), normalizeTarPath(child));
 
 const normalizeTarPath = (entryPath: string): string => entryPath.replace(/\\/g, "/").replace(/^\/+/, "");
+
+const normalizeTarLinkname = (linkname: string): string => linkname.replace(/\\/g, "/");
+
+const isPathInside = (parent: string, child: string): boolean => {
+  const relativePath = path.relative(parent, child);
+  return (
+    relativePath === "" ||
+    (relativePath !== ".." && !relativePath.startsWith(`..${path.sep}`) && !path.isAbsolute(relativePath))
+  );
+};
