@@ -32,6 +32,9 @@ describe("CouchbaseContainer", { timeout: 180_000 }, () => {
     });
 
     const bucket = cluster.bucket(bucketDefinition.getName());
+    await bucket.waitUntilReady(10_000, {
+      serviceTypes: [couchbase.ServiceType.KeyValue],
+    });
 
     const coll = bucket.defaultCollection();
     await coll.upsert("testdoc", { foo: "bar" });
@@ -56,6 +59,10 @@ describe("CouchbaseContainer", { timeout: 180_000 }, () => {
       });
 
       const bucket = cluster.bucket(bucketDefinition.getName());
+      await bucket.waitUntilReady(10_000, {
+        serviceTypes: [couchbase.ServiceType.KeyValue],
+      });
+
       const coll = bucket.defaultCollection();
 
       await coll.upsert("testdoc", { foo: "bar" });
@@ -110,7 +117,12 @@ describe("CouchbaseContainer", { timeout: 180_000 }, () => {
       password: container.getPassword(),
     });
 
-    const coll = cluster.bucket(bucketDefinition.getName()).defaultCollection();
+    const bucket = cluster.bucket(bucketDefinition.getName());
+    await bucket.waitUntilReady(10_000, {
+      serviceTypes: [couchbase.ServiceType.KeyValue],
+    });
+
+    const coll = bucket.defaultCollection();
     await coll.upsert("testdoc", { foo: "bar" });
     expect((await coll.get("testdoc")).content).toEqual({ foo: "bar" });
 
