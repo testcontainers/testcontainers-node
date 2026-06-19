@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@types/superagent": "^8.1.10",
-    "mockserver-client": "^6.1.0",
+    "mockserver-client": "^7.0.0",
     "superagent": "^10.3.0"
   }
 }
