@@ -31,7 +31,7 @@ jobs:
       has_testcontainers: ${{ steps.detect.outputs.has_testcontainers }}
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - id: detect
@@ -67,7 +67,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Code checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Install Node and Dependencies
         id: npm-install-modules
         uses: ./.github/actions/npm-setup
@@ -93,7 +93,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Code checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Install Node and Dependencies
         id: npm-install
         uses: ./.github/actions/npm-setup
@@ -122,7 +122,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Code checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Install Node ${{ matrix.node-version }} and Dependencies
         uses: ./.github/actions/npm-setup
         with:
