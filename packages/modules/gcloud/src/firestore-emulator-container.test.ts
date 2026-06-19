@@ -1,4 +1,5 @@
-import admin from "firebase-admin";
+import { initializeApp } from "firebase-admin/app";
+import { getFirestore } from "firebase-admin/firestore";
 import { randomUuid } from "testcontainers";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { FirestoreEmulatorContainer } from "./firestore-emulator-container";
@@ -12,7 +13,8 @@ describe("FirestoreEmulatorContainer", { timeout: 240_000 }, () => {
       // firestoreExample {
       await using container = await new FirestoreEmulatorContainer(image).start();
 
-      const firestore = admin.initializeApp({ projectId: "test-project" }, `test-app-${randomUuid()}`).firestore();
+      const app = initializeApp({ projectId: "test-project" }, `test-app-${randomUuid()}`);
+      const firestore = getFirestore(app);
       firestore.settings({
         host: container.getEmulatorEndpoint(),
         ssl: false,
