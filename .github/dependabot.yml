@@ -22,6 +22,10 @@ updates:
       - dependency-name: "@types/archiver"
         update-types:
           - "version-update:semver-major"
+      # get-port v6+ is ESM-only; keep CommonJS-compatible major versions.
+      - dependency-name: "get-port"
+        update-types:
+          - "version-update:semver-major"
 
   - package-ecosystem: "docker"
     directories:
