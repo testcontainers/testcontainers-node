@@ -14,6 +14,14 @@ updates:
       dependencies:
         patterns:
           - "*"
+    ignore:
+      # archiver v8 is ESM-only; keep CommonJS-compatible major versions.
+      - dependency-name: "archiver"
+        update-types:
+          - "version-update:semver-major"
+      - dependency-name: "@types/archiver"
+        update-types:
+          - "version-update:semver-major"
 
   - package-ecosystem: "docker"
     directories:
