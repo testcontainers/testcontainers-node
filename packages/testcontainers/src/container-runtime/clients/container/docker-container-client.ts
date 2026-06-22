@@ -9,6 +9,7 @@ import Dockerode, {
 } from "dockerode";
 import { IncomingMessage } from "http";
 import { PassThrough, Readable } from "stream";
+import { finished } from "stream/promises";
 import { execLog, log, streamToString, toSeconds } from "../../../common";
 import { CopyToContainerOptions } from "../../../types";
 import { ContainerClient } from "./container-client";
@@ -253,11 +254,25 @@ export class DockerContainerClient implements ContainerClient {
       processStream(stdoutStream, stdoutChunks);
       processStream(stderrStream, stderrChunks);
 
-      await new Promise((res, rej) => {
-        stream.on("end", res);
-        stream.on("error", rej);
-      });
-      stream.destroy();
+      try {
+        // Wait for the raw multiplexed stream to end. `demuxStream` only forwards "data"
+        // from the raw stream into the PassThroughs; it never ends them, so we end them
+        // ourselves once the raw stream is done.
+        await new Promise<void>((res, rej) => {
+          stream.on("end", res);
+          stream.on("error", rej);
+        });
+
+        // Crucially, wait for the demuxed stdout/stderr PassThrough streams to fully flush
+        // before reading the chunk arrays. Those arrays are filled by the PassThroughs'
+        // "data" handlers, which can still be draining buffered frames when the raw stream
+        // emits "end" — reading them too early truncates the captured output.
+        stdoutStream.end();
+        stderrStream.end();
+        await Promise.all([finished(stdoutStream), finished(stderrStream)]);
+      } finally {
+        stream.destroy();
+      }
 
       const inspectResult = await exec.inspect();
       const exitCode = inspectResult.ExitCode ?? -1;
