@@ -17,6 +17,7 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
   private readonly predicates: Array<(response: Response) => Promise<boolean>> = [];
   private _allowInsecure = false;
   private readTimeoutMs = 1000;
+  private insecureAgent?: Agent;
 
   constructor(
     private readonly path: string,
@@ -57,8 +58,8 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
     return this;
   }
 
-  public withReadTimeout(startupTimeoutMs: number): this {
-    this.readTimeoutMs = startupTimeoutMs;
+  public withReadTimeout(readTimeoutMs: number): this {
+    this.readTimeoutMs = readTimeoutMs;
     return this;
   }
 
@@ -80,60 +81,64 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
     const client = await getContainerRuntimeClient();
     const { abortOnContainerExit } = this.options;
 
-    await new IntervalRetry<Response | undefined, Error>(this.readTimeoutMs).retryUntil(
-      async () => {
-        try {
-          const url = `${this.protocol}://${client.info.containerRuntime.host}:${boundPorts.getBinding(this.port)}${
-            this.path
-          }`;
+    try {
+      await new IntervalRetry<Response | undefined, Error>(this.readTimeoutMs).retryUntil(
+        async () => {
+          try {
+            const url = `${this.protocol}://${client.info.containerRuntime.host}:${boundPorts.getBinding(this.port)}${
+              this.path
+            }`;
 
-          if (abortOnContainerExit) {
-            const containerStatus = (await client.container.inspect(container)).State.Status;
+            if (abortOnContainerExit) {
+              const containerStatus = (await client.container.inspect(container)).State.Status;
 
-            if (containerStatus === exitStatus) {
-              containerExited = true;
-              return;
+              if (containerStatus === exitStatus) {
+                containerExited = true;
+                return;
+              }
             }
+
+            return undiciResponseToFetchResponse(
+              await request(url, {
+                method: this.method,
+                signal: AbortSignal.timeout(this.readTimeoutMs),
+                headers: this.headers,
+                dispatcher: this.getAgent(),
+              })
+            );
+          } catch {
+            return undefined;
+          }
+        },
+        async (response) => {
+          if (abortOnContainerExit && containerExited) {
+            return true;
           }
 
-          return undiciResponseToFetchResponse(
-            await request(url, {
-              method: this.method,
-              signal: AbortSignal.timeout(this.readTimeoutMs),
-              headers: this.headers,
-              dispatcher: this.getAgent(),
-            })
-          );
-        } catch {
-          return undefined;
-        }
-      },
-      async (response) => {
-        if (abortOnContainerExit && containerExited) {
-          return true;
-        }
-
-        if (response === undefined) {
-          return false;
-        } else if (!this.predicates.length) {
-          return response.ok;
-        } else {
-          for (const predicate of this.predicates) {
-            const result = await predicate(response);
-            if (!result) {
-              return false;
+          if (response === undefined) {
+            return false;
+          } else if (!this.predicates.length) {
+            return response.ok;
+          } else {
+            for (const predicate of this.predicates) {
+              const result = await predicate(response);
+              if (!result) {
+                return false;
+              }
             }
+            return true;
           }
-          return true;
-        }
-      },
-      () => {
-        const message = `URL ${this.path} not accessible after ${this.startupTimeoutMs}ms`;
-        log.error(message, { containerId: container.id });
-        throw new Error(message);
-      },
-      this.startupTimeoutMs
-    );
+        },
+        () => {
+          const message = `URL ${this.path} not accessible after ${this.startupTimeoutMs}ms`;
+          log.error(message, { containerId: container.id });
+          throw new Error(message);
+        },
+        this.startupTimeoutMs
+      );
+    } finally {
+      await this.closeAgent();
+    }
 
     if (abortOnContainerExit && containerExited) {
       return this.handleContainerExit(container);
@@ -166,12 +171,26 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
   }
 
   private getAgent(): Agent | undefined {
-    if (this._allowInsecure) {
-      return new Agent({
+    if (!this._allowInsecure) {
+      return undefined;
+    }
+
+    if (!this.insecureAgent) {
+      this.insecureAgent = new Agent({
         connect: {
           rejectUnauthorized: false,
         },
       });
+    }
+
+    return this.insecureAgent;
+  }
+
+  private async closeAgent(): Promise<void> {
+    if (this.insecureAgent) {
+      const agent = this.insecureAgent;
+      this.insecureAgent = undefined;
+      await agent.close();
     }
   }
 }
