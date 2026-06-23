@@ -74,6 +74,25 @@ describe.sequential("HttpWaitStrategy insecure agent lifecycle", () => {
     expect(agentInstances[0].destroyed).toBe(true);
   });
 
+  it("creates a separate insecure agent per wait so concurrent waits stay isolated", async () => {
+    vi.mocked(request).mockImplementation(async () => passingResponse());
+
+    // A single strategy instance can drive multiple concurrent waits (e.g. a compose
+    // default wait strategy passed to every service). Each wait must get its own agent
+    // so one finishing wait cannot destroy a dispatcher another wait is still using.
+    const strategy = new HttpWaitStrategy("/health", 8443, {})
+      .usingTls()
+      .allowInsecure()
+      .withReadTimeout(10)
+      .withStartupTimeout(5000);
+
+    await Promise.all([strategy.waitUntilReady(container, boundPorts), strategy.waitUntilReady(container, boundPorts)]);
+
+    expect(vi.mocked(Agent)).toHaveBeenCalledTimes(2);
+    expect(agentInstances).toHaveLength(2);
+    expect(agentInstances.every((agent) => agent.destroyed)).toBe(true);
+  });
+
   it("never constructs an agent when allowInsecure is not set", async () => {
     vi.mocked(request).mockImplementation(async () => passingResponse());
 

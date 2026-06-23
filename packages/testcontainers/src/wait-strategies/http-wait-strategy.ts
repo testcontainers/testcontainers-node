@@ -17,7 +17,6 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
   private readonly predicates: Array<(response: Response) => Promise<boolean>> = [];
   private _allowInsecure = false;
   private readTimeoutMs = 1000;
-  private insecureAgent?: Agent;
 
   constructor(
     private readonly path: string,
@@ -80,6 +79,11 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
     let containerExited = false;
     const client = await getContainerRuntimeClient();
     const { abortOnContainerExit } = this.options;
+    // Scope the insecure agent to this invocation rather than the strategy instance: a single
+    // strategy object can drive multiple concurrent waits (e.g. a compose default wait strategy
+    // passed to every service), and a shared dispatcher would let one finished wait destroy the
+    // agent another wait is still using.
+    const agent = this.createInsecureAgent();
 
     try {
       await new IntervalRetry<Response | undefined, Error>(this.readTimeoutMs).retryUntil(
@@ -103,7 +107,7 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
                 method: this.method,
                 signal: AbortSignal.timeout(this.readTimeoutMs),
                 headers: this.headers,
-                dispatcher: this.getAgent(),
+                dispatcher: agent,
               })
             );
           } catch {
@@ -137,7 +141,10 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
         this.startupTimeoutMs
       );
     } finally {
-      await this.closeAgent();
+      // Force-close rather than graceful close(): status-only predicates never consume the
+      // response body, so close() could hang waiting for those connections to be released.
+      // The wait has finished by this point, so there is nothing left worth draining.
+      await agent?.destroy();
     }
 
     if (abortOnContainerExit && containerExited) {
@@ -170,30 +177,15 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
     throw new Error(message);
   }
 
-  private getAgent(): Agent | undefined {
+  private createInsecureAgent(): Agent | undefined {
     if (!this._allowInsecure) {
       return undefined;
     }
 
-    if (!this.insecureAgent) {
-      this.insecureAgent = new Agent({
-        connect: {
-          rejectUnauthorized: false,
-        },
-      });
-    }
-
-    return this.insecureAgent;
-  }
-
-  private async closeAgent(): Promise<void> {
-    if (this.insecureAgent) {
-      const agent = this.insecureAgent;
-      this.insecureAgent = undefined;
-      // Force-close rather than graceful close(): status-only predicates never consume the
-      // response body, so close() could hang waiting for those connections to be released.
-      // The wait has finished by this point, so there is nothing left worth draining.
-      await agent.destroy();
-    }
+    return new Agent({
+      connect: {
+        rejectUnauthorized: false,
+      },
+    });
   }
 }
