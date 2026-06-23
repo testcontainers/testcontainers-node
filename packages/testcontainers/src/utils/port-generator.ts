@@ -14,10 +14,10 @@ export class FixedPortGenerator implements PortGenerator {
 
   constructor(private readonly ports: number[]) {}
 
-  public generatePort(): Promise<number> {
+  public async generatePort(): Promise<number> {
     if (this.portIndex >= this.ports.length) {
       throw new Error("FixedPortGenerator has no more ports available");
     }
-    return Promise.resolve(this.ports[this.portIndex++]);
+    return this.ports[this.portIndex++];
   }
 }

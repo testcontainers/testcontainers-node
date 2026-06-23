@@ -9,11 +9,13 @@ describe("PortGenerator", () => {
       await expect(fixedPortGenerator.generatePort()).resolves.toBe(1001);
     });
 
-    it("should throw when no more ports are available", async () => {
+    it("should reject when no more ports are available", async () => {
       const fixedPortGenerator = new FixedPortGenerator([1000]);
 
       await expect(fixedPortGenerator.generatePort()).resolves.toBe(1000);
-      expect(() => fixedPortGenerator.generatePort()).toThrowError("FixedPortGenerator has no more ports available");
+      await expect(fixedPortGenerator.generatePort()).rejects.toThrowError(
+        "FixedPortGenerator has no more ports available"
+      );
     });
   });
 
