@@ -190,7 +190,10 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
     if (this.insecureAgent) {
       const agent = this.insecureAgent;
       this.insecureAgent = undefined;
-      await agent.close();
+      // Force-close rather than graceful close(): status-only predicates never consume the
+      // response body, so close() could hang waiting for those connections to be released.
+      // The wait has finished by this point, so there is nothing left worth draining.
+      await agent.destroy();
     }
   }
 }
