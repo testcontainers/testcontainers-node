@@ -10,6 +10,8 @@ describe("MosquittoContainer", { timeout: 240_000 }, () => {
     // mosquittoConnect {
     await using container = await new MosquittoContainer(IMAGE).start();
 
+    expect(container.getConnectionString()).toBe(`mqtt://${container.getHost()}:${container.getPort()}`);
+
     const mqttClient = await mqtt.connectAsync(container.getConnectionString());
 
     const firstMessagePromise = new Promise<{ topic: string; message: Buffer }>((resolve, reject) => {
@@ -29,7 +31,14 @@ describe("MosquittoContainer", { timeout: 240_000 }, () => {
 
   it("should connect to Mosquitto via MQTT.js (with credentials)", async () => {
     // mosquittoConnectWithCredentials {
-    await using container = await new MosquittoContainer(IMAGE).withUsername("testuser").withPassword("testpass").start();
+    await using container = await new MosquittoContainer(IMAGE)
+      .withUsername("testuser")
+      .withPassword("testpass")
+      .start();
+
+    expect(container.getConnectionString()).toBe(
+      `mqtt://testuser:testpass@${container.getHost()}:${container.getPort()}`
+    );
 
     const mqttClient = await mqtt.connectAsync(container.getConnectionString());
 

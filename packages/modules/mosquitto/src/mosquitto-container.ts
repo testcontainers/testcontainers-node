@@ -10,7 +10,9 @@ export class MosquittoContainer extends GenericContainer {
 
   constructor(image: string) {
     super(image);
-    this.withExposedPorts(MQTT_PORT).withWaitStrategy(Wait.forLogMessage(/mosquitto version .* starting/i)).withStartupTimeout(120_000);
+    this.withExposedPorts(MQTT_PORT)
+      .withWaitStrategy(Wait.forLogMessage(/running mosquitto as user/i))
+      .withStartupTimeout(120_000);
   }
 
   public withUsername(username: string): this {
@@ -31,7 +33,7 @@ export class MosquittoContainer extends GenericContainer {
         .withEntrypoint(["/bin/sh"])
         .withCommand([
           "-c",
-          `mosquitto_passwd -b -c "${PASSWORD_FILE_PATH}" "$MQTT_USER" "$MQTT_PASS" && exec mosquitto -c "${CONFIG_PATH}"`,
+          `mosquitto_passwd -b -c "${PASSWORD_FILE_PATH}" "$MQTT_USER" "$MQTT_PASS" && chown mosquitto:mosquitto "${PASSWORD_FILE_PATH}" && exec mosquitto -c "${CONFIG_PATH}"`,
         ]);
     } else {
       const config = `listener ${MQTT_PORT}\nallow_anonymous true\n`;
