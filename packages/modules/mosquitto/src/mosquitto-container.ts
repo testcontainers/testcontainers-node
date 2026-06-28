@@ -1,0 +1,67 @@
+import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
+
+const MQTT_PORT = 1883;
+const CONFIG_PATH = "/mosquitto/config/mosquitto.conf";
+const PASSWORD_FILE_PATH = "/mosquitto/config/passwords";
+
+export class MosquittoContainer extends GenericContainer {
+  private username?: string;
+  private password?: string;
+
+  constructor(image: string) {
+    super(image);
+    this.withExposedPorts(MQTT_PORT).withWaitStrategy(Wait.forLogMessage(/mosquitto version .* starting/i)).withStartupTimeout(120_000);
+  }
+
+  public withUsername(username: string): this {
+    this.username = username;
+    return this;
+  }
+
+  public withPassword(password: string): this {
+    this.password = password;
+    return this;
+  }
+
+  public override async start(): Promise<StartedMosquittoContainer> {
+    if (this.username !== undefined && this.password !== undefined) {
+      const config = `listener ${MQTT_PORT}\npassword_file ${PASSWORD_FILE_PATH}\n`;
+      this.withCopyContentToContainer([{ content: config, target: CONFIG_PATH }])
+        .withEnvironment({ MQTT_USER: this.username, MQTT_PASS: this.password })
+        .withEntrypoint(["/bin/sh"])
+        .withCommand([
+          "-c",
+          `mosquitto_passwd -b -c "${PASSWORD_FILE_PATH}" "$MQTT_USER" "$MQTT_PASS" && exec mosquitto -c "${CONFIG_PATH}"`,
+        ]);
+    } else {
+      const config = `listener ${MQTT_PORT}\nallow_anonymous true\n`;
+      this.withCopyContentToContainer([{ content: config, target: CONFIG_PATH }]);
+    }
+
+    return new StartedMosquittoContainer(await super.start(), this.username, this.password);
+  }
+}
+
+export class StartedMosquittoContainer extends AbstractStartedContainer {
+  private readonly port: number;
+
+  constructor(
+    startedTestContainer: StartedTestContainer,
+    private readonly username?: string,
+    private readonly password?: string
+  ) {
+    super(startedTestContainer);
+    this.port = startedTestContainer.getMappedPort(MQTT_PORT);
+  }
+
+  public getPort(): number {
+    return this.port;
+  }
+
+  public getConnectionString(): string {
+    if (this.username && this.password) {
+      return `mqtt://${encodeURIComponent(this.username)}:${encodeURIComponent(this.password)}@${this.getHost()}:${this.getPort()}`;
+    }
+    return `mqtt://${this.getHost()}:${this.getPort()}`;
+  }
+}
