@@ -25,5 +25,5 @@ Choose an image from the [container registry](https://hub.docker.com/r/eclipse-m
 ### Produce/consume a message (with credentials)
 
 <!--codeinclude-->
-[](../../packages/modules/mosquitto/src/mosquitto-container.test.ts) inside_block:mosquittoConnectWithCredentials
+[](../../packages/modules/mosquitto/src/mosquitto-container-auth.test.ts) inside_block:mosquittoConnectWithCredentials
 <!--/codeinclude-->

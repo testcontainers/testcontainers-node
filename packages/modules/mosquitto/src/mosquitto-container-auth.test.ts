@@ -6,11 +6,16 @@ import { MosquittoContainer } from "./mosquitto-container";
 const IMAGE = getImage(__dirname);
 
 describe("MosquittoContainer", { timeout: 240_000 }, () => {
-  it("should connect to Mosquitto via MQTT.js (anonymous)", async () => {
-    // mosquittoConnect {
-    await using container = await new MosquittoContainer(IMAGE).start();
+  it("should connect to Mosquitto via MQTT.js (with credentials)", async () => {
+    // mosquittoConnectWithCredentials {
+    await using container = await new MosquittoContainer(IMAGE)
+      .withUsername("testuser")
+      .withPassword("testpass")
+      .start();
 
-    expect(container.getConnectionString()).toBe(`mqtt://${container.getHost()}:${container.getPort()}`);
+    expect(container.getConnectionString()).toBe(
+      `mqtt://testuser:testpass@${container.getHost()}:${container.getPort()}`
+    );
 
     const mqttClient = await mqtt.connectAsync(container.getConnectionString());
 
@@ -19,11 +24,11 @@ describe("MosquittoContainer", { timeout: 240_000 }, () => {
       mqttClient.once("error", (err) => reject(err));
     });
 
-    await mqttClient.subscribeAsync("test");
-    await mqttClient.publishAsync("test", "Test Message");
+    await mqttClient.subscribeAsync("secure");
+    await mqttClient.publishAsync("secure", "Secure Message");
 
     const { message } = await firstMessagePromise;
-    expect(message.toString()).toEqual("Test Message");
+    expect(message.toString()).toEqual("Secure Message");
 
     mqttClient.end();
     // }
