@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/azurite",
-  "version": "12.0.3",
+  "version": "12.0.4",
   "license": "MIT",
   "keywords": [
     "azurite",
@@ -29,7 +29,7 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "dependencies": {
-    "testcontainers": "^12.0.3"
+    "testcontainers": "^12.0.4"
   },
   "devDependencies": {
     "@azure/data-tables": "^13.3.2",
