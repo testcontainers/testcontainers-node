@@ -49,19 +49,16 @@ export class MosquittoContainer extends GenericContainer {
 }
 
 export class StartedMosquittoContainer extends AbstractStartedContainer {
-  private readonly port: number;
-
   constructor(
     startedTestContainer: StartedTestContainer,
     private readonly username?: string,
     private readonly password?: string
   ) {
     super(startedTestContainer);
-    this.port = startedTestContainer.getMappedPort(MQTT_PORT);
   }
 
-  public getPort(): number {
-    return this.port;
+   public getPort(): number {
+    return this.getMappedPort(MQTT_PORT);
   }
 
   public getConnectionString(): string {
