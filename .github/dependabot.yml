@@ -5,6 +5,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+      day: "monday"
     cooldown:
       default-days: 7
     labels:
@@ -32,6 +33,7 @@ updates:
       - "/packages/modules/*"
     schedule:
       interval: "weekly"
+      day: "monday"
     labels:
       - "dependencies"
       - "docker"
@@ -44,6 +46,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+      day: "monday"
     labels:
       - "dependencies"
       - "github_actions"
@@ -56,6 +59,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+      day: "monday"
     labels:
       - "dependencies"
       - "devcontainers"
@@ -68,6 +72,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+      day: "monday"
     labels:
       - "dependencies"
       - "docker_compose"
@@ -80,6 +85,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+      day: "monday"
     labels:
       - "dependencies"
       - "pip"
