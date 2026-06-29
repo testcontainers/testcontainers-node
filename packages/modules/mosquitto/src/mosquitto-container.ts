@@ -57,7 +57,7 @@ export class StartedMosquittoContainer extends AbstractStartedContainer {
     super(startedTestContainer);
   }
 
-   public getPort(): number {
+  public getPort(): number {
     return this.getMappedPort(MQTT_PORT);
   }
 
