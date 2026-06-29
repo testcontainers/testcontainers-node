@@ -10,9 +10,7 @@ export class MosquittoContainer extends GenericContainer {
 
   constructor(image: string) {
     super(image);
-    this.withExposedPorts(MQTT_PORT)
-      .withWaitStrategy(Wait.forLogMessage(/running mosquitto as user/i))
-      .withStartupTimeout(120_000);
+    this.withExposedPorts(MQTT_PORT).withWaitStrategy(Wait.forListeningPorts()).withStartupTimeout(120_000);
   }
 
   public withUsername(username: string): this {
