@@ -28,6 +28,10 @@ export class MosquittoContainer extends GenericContainer {
   }
 
   public override async start(): Promise<StartedMosquittoContainer> {
+    if ((this.username === undefined) !== (this.password === undefined)) {
+      throw new Error("Both username and password must be set together.");
+    }
+
     if (this.username !== undefined && this.password !== undefined) {
       const config = `listener ${MQTT_PORT}\npassword_file ${PASSWORD_FILE_PATH}\n`;
       this.withCopyContentToContainer([{ content: config, target: CONFIG_PATH }])
