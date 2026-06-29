@@ -9,6 +9,7 @@ import Dockerode, {
 } from "dockerode";
 import { IncomingMessage } from "http";
 import { PassThrough, Readable } from "stream";
+import { finished } from "stream/promises";
 import { execLog, log, streamToString, toSeconds } from "../../../common";
 import { CopyToContainerOptions } from "../../../types";
 import { ContainerClient } from "./container-client";
@@ -253,11 +254,18 @@ export class DockerContainerClient implements ContainerClient {
       processStream(stdoutStream, stdoutChunks);
       processStream(stderrStream, stderrChunks);
 
-      await new Promise((res, rej) => {
-        stream.on("end", res);
-        stream.on("error", rej);
-      });
-      stream.destroy();
+      try {
+        await new Promise<void>((res, rej) => {
+          stream.on("end", res);
+          stream.on("error", rej);
+        });
+
+        stdoutStream.end();
+        stderrStream.end();
+        await Promise.all([finished(stdoutStream), finished(stderrStream)]);
+      } finally {
+        stream.destroy();
+      }
 
       const inspectResult = await exec.inspect();
       const exitCode = inspectResult.ExitCode ?? -1;
