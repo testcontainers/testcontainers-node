@@ -79,10 +79,8 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
     let containerExited = false;
     const client = await getContainerRuntimeClient();
     const { abortOnContainerExit } = this.options;
-    // Scope the insecure agent to this invocation rather than the strategy instance: a single
-    // strategy object can drive multiple concurrent waits (e.g. a compose default wait strategy
-    // passed to every service), and a shared dispatcher would let one finished wait destroy the
-    // agent another wait is still using.
+    // Scoped per invocation: one strategy instance can drive concurrent waits, so a shared
+    // agent would let one finished wait destroy a dispatcher another is still using.
     const agent = this.createInsecureAgent();
 
     try {
@@ -141,9 +139,8 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
         this.startupTimeoutMs
       );
     } finally {
-      // Force-close rather than graceful close(): status-only predicates never consume the
-      // response body, so close() could hang waiting for those connections to be released.
-      // The wait has finished by this point, so there is nothing left worth draining.
+      // Force-close: status-only predicates never read the body, so a graceful close() could
+      // hang waiting on unreleased connections. Nothing left to drain once the wait is done.
       await agent?.destroy();
     }
 

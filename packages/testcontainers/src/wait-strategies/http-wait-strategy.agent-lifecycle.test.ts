@@ -2,13 +2,10 @@ import { Readable } from "stream";
 import { Agent, request } from "undici";
 import { HttpWaitStrategy } from "./http-wait-strategy";
 
-// Tracks every undici Agent the strategy constructs. Hoisted so it is initialised
-// before the mock factories below run.
+// Hoisted so it is initialised before the mock factory below runs.
 const { agentInstances } = vi.hoisted(() => ({ agentInstances: [] as import("undici").Agent[] }));
 
-// Spy on the Agent constructor and stub `request` so these tests exercise the wait
-// strategy without any real HTTP or container runtime. Mocking at the top level
-// (hoisted) ensures HttpWaitStrategy binds these mocks when it is imported.
+// Spy on the Agent constructor and stub `request` so the tests run without real HTTP.
 vi.mock("undici", async (importOriginal) => {
   const actual = await importOriginal<typeof import("undici")>();
   return {
@@ -51,7 +48,7 @@ describe.sequential("HttpWaitStrategy insecure agent lifecycle", () => {
     let attempts = 0;
     vi.mocked(request).mockImplementation(async () => {
       attempts++;
-      // Fail the first couple of attempts so the retry loop runs more than once.
+      // Fail the first attempts so the retry loop runs more than once.
       if (attempts < 3) {
         throw new Error("connection refused");
       }
@@ -67,19 +64,14 @@ describe.sequential("HttpWaitStrategy insecure agent lifecycle", () => {
     await strategy.waitUntilReady(container, boundPorts);
 
     expect(attempts).toBeGreaterThan(1);
-    // A single Agent is constructed and reused across every retry attempt...
     expect(vi.mocked(Agent)).toHaveBeenCalledTimes(1);
     expect(agentInstances).toHaveLength(1);
-    // ...and it is disposed once the wait completes.
     expect(agentInstances[0].destroyed).toBe(true);
   });
 
   it("creates a separate insecure agent per wait so concurrent waits stay isolated", async () => {
     vi.mocked(request).mockImplementation(async () => passingResponse());
 
-    // A single strategy instance can drive multiple concurrent waits (e.g. a compose
-    // default wait strategy passed to every service). Each wait must get its own agent
-    // so one finishing wait cannot destroy a dispatcher another wait is still using.
     const strategy = new HttpWaitStrategy("/health", 8443, {})
       .usingTls()
       .allowInsecure()
