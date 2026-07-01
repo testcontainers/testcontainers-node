@@ -50,10 +50,10 @@ describe("MongoDBAtlasLocalContainer", { timeout: 240_000 }, () => {
     // }
 
     expect(container.getConnectionString()).toBe(
-      `mongodb://customUsername:customPassword@${container.getHost()}:${container.getMappedPort(27017)}/`
+      `mongodb://customUsername:customPassword@${container.getHost()}:${container.getMappedPort(27017)}/?authSource=admin`
     );
     expect(container.getDatabaseConnectionString()).toBe(
-      `mongodb://customUsername:customPassword@${container.getHost()}:${container.getMappedPort(27017)}/test`
+      `mongodb://customUsername:customPassword@${container.getHost()}:${container.getMappedPort(27017)}/test?authSource=admin`
     );
   });
 
@@ -61,6 +61,24 @@ describe("MongoDBAtlasLocalContainer", { timeout: 240_000 }, () => {
     await using container = await new MongoDBAtlasLocalContainer(IMAGE).start();
 
     const db = mongoose.createConnection(container.getConnectionString(), { directConnection: true });
+
+    const obj = { value: 1 };
+    const collection = db.collection("test");
+    await collection.insertOne(obj);
+
+    const result = await collection.findOne({ value: 1 });
+    expect(result).toEqual(obj);
+
+    await db.close();
+  });
+
+  it("should connect to mongodb atlas local with credentials", async () => {
+    await using container = await new MongoDBAtlasLocalContainer(IMAGE)
+      .withUsername("customUsername")
+      .withPassword("customPassword")
+      .start();
+
+    const db = mongoose.createConnection(container.getDatabaseConnectionString(), { directConnection: true });
 
     const obj = { value: 1 };
     const collection = db.collection("test");

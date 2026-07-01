@@ -64,6 +64,7 @@ export class StartedMongoDBAtlasLocalContainer extends AbstractStartedContainer 
     if (this.username && this.password) {
       url.username = this.username;
       url.password = this.password;
+      url.searchParams.set("authSource", "admin");
     }
 
     return url.toString();
