@@ -91,8 +91,8 @@ describe("MongoDBAtlasLocalContainer", { timeout: 240_000 }, () => {
     await db.close();
   });
 
-  // createAtlasIndexAndSearchIt {
   it("should create an atlas search index and search it", async () => {
+    // createAtlasIndexAndSearchIt {
     await using atlasLocalContainer = await new MongoDBAtlasLocalContainer(IMAGE).start();
 
     const db = mongoose.createConnection(atlasLocalContainer.getConnectionString(), {
@@ -151,6 +151,6 @@ describe("MongoDBAtlasLocalContainer", { timeout: 240_000 }, () => {
     } finally {
       await db.close();
     }
+    // }
   });
-  // }
 });
