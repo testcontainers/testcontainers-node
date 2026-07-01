@@ -28,6 +28,8 @@ export class MongoDBAtlasLocalContainer extends GenericContainer {
 
   public override async start(): Promise<StartedMongoDBAtlasLocalContainer> {
     if (this.username && this.password) {
+      // Note: the Atlas Local image uses MONGODB_INITDB_* (vs MONGO_INITDB_* in mongodb-container.ts).
+      // This difference is intentional — do not "fix" it to match the sibling file.
       this.withEnvironment({
         MONGODB_INITDB_ROOT_USERNAME: this.username,
         MONGODB_INITDB_ROOT_PASSWORD: this.password,
