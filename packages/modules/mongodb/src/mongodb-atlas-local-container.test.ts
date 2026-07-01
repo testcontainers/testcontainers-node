@@ -1,8 +1,9 @@
 import mongoose from "mongoose";
 import { IntervalRetry } from "../../../testcontainers/src/common";
+import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { MongoDBAtlasLocalContainer } from "./mongodb-atlas-local-container";
 
-const IMAGE = "mongodb/mongodb-atlas-local:8.2.2";
+const IMAGE = getImage(__dirname, 1);
 const ATLAS_SEARCH_INDEX = {
   mappings: {
     dynamic: false,
