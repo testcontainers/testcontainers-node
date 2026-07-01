@@ -6,7 +6,7 @@
 npm install @testcontainers/mongodb --save-dev
 ```
 
-## Examples
+## MongoDBContainer
 
 These examples use the following libraries:
 
@@ -28,7 +28,7 @@ Choose an image from the [container registry](https://hub.docker.com/_/mongo) an
 [](../../packages/modules/mongodb/src/mongodb-container.test.ts) inside_block:connectWithCredentials
 <!--/codeinclude-->
 
-## MongoDB Atlas Local
+## MongoDBAtlasLocalContainer
 
 The MongoDB Atlas Local image combines the MongoDB database engine with MongoT for Atlas Search.
 
