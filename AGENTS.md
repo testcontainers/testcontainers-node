@@ -117,6 +117,21 @@ When reviewing a PR (your own or someone else's), the review is not only about t
 - Check that labels (change type and semver impact) are present and correct.
 - Check that docs were updated alongside any public API change.
 
+Before posting any review feedback to GitHub, share the proposed comments with the user and get
+explicit approval (this is the review-specific case of PR Process step 6). Present the full set of
+comments for a quick sanity check first; do not post directly, even when explicitly asked to
+review a PR.
+
+When writing review comments, keep each one terse and actionable for the PR author:
+
+- State the problem, at most a sentence of context if it helps, and what to do instead. Skip
+  restated background, meta-commentary, and severity labels the author does not need.
+- Anchor comments inline on the relevant line rather than dumping everything in the review body.
+  Keep the summary body to the few must-address points plus any high-level design note.
+- Only claim something violates convention after checking the rest of the repo. Prefer scoping a
+  comment to a concrete inconsistency (for example "the other blocks in this file do X") over a
+  broad assertion that may be wrong.
+
 ## Labels
 
 ### Change type
