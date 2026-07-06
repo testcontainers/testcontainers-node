@@ -1,1 +1,1 @@
-FROM nats:2.14.2-alpine
+FROM nats:2.14.3-alpine
