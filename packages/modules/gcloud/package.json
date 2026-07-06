@@ -45,9 +45,9 @@
     "@google-cloud/datastore": "^10.1.1",
     "@google-cloud/firestore": "8.6.0",
     "@google-cloud/pubsub": "^5.3.1",
-    "@google-cloud/spanner": "^8.7.1",
+    "@google-cloud/spanner": "^8.8.0",
     "@google-cloud/storage": "^7.21.0",
-    "firebase-admin": "14.0.0",
+    "firebase-admin": "14.1.0",
     "msw": "^2.14.6"
   }
 }
