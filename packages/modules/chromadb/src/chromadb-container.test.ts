@@ -1,5 +1,4 @@
-import { OllamaEmbeddingFunction } from "@chroma-core/ollama";
-import { AdminClient, ChromaClient } from "chromadb";
+import { AdminClient, ChromaClient, type EmbeddingFunction } from "chromadb";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -41,10 +40,24 @@ describe("ChromaDBContainer", { timeout: 360_000 }, () => {
     await using ollama = await new GenericContainer(OLLAMA_IMAGE).withExposedPorts(11434).start();
     await ollama.exec(["ollama", "pull", "nomic-embed-text"]);
     const client = new ChromaClient({ ssl: false, host: container.getHost(), port: container.getMappedPort(8000) });
-    const embedder = new OllamaEmbeddingFunction({
-      url: `http://${ollama.getHost()}:${ollama.getMappedPort(11434)}`,
-      model: "nomic-embed-text",
-    });
+    const ollamaUrl = `http://${ollama.getHost()}:${ollama.getMappedPort(11434)}`;
+    const embedder: EmbeddingFunction = {
+      name: "ollama",
+      defaultSpace: () => "cosine",
+      supportedSpaces: () => ["cosine", "l2", "ip"],
+      generate: async (texts) => {
+        const response = await fetch(`${ollamaUrl}/api/embed`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ model: "nomic-embed-text", input: texts }),
+        });
+        if (!response.ok) {
+          throw new Error(`Failed to generate embeddings: ${response.status} ${response.statusText}`);
+        }
+        const result = (await response.json()) as { embeddings: number[][] };
+        return result.embeddings;
+      },
+    };
 
     const collection = await client.createCollection({
       name: "test",

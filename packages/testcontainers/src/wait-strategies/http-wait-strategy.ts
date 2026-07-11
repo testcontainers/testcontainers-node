@@ -57,8 +57,8 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
     return this;
   }
 
-  public withReadTimeout(startupTimeoutMs: number): this {
-    this.readTimeoutMs = startupTimeoutMs;
+  public withReadTimeout(readTimeoutMs: number): this {
+    this.readTimeoutMs = readTimeoutMs;
     return this;
   }
 
@@ -79,61 +79,70 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
     let containerExited = false;
     const client = await getContainerRuntimeClient();
     const { abortOnContainerExit } = this.options;
+    // Scoped per invocation: one strategy instance can drive concurrent waits, so a shared
+    // agent would let one finished wait destroy a dispatcher another is still using.
+    const agent = this.createInsecureAgent();
 
-    await new IntervalRetry<Response | undefined, Error>(this.readTimeoutMs).retryUntil(
-      async () => {
-        try {
-          const url = `${this.protocol}://${client.info.containerRuntime.host}:${boundPorts.getBinding(this.port)}${
-            this.path
-          }`;
+    try {
+      await new IntervalRetry<Response | undefined, Error>(this.readTimeoutMs).retryUntil(
+        async () => {
+          try {
+            const url = `${this.protocol}://${client.info.containerRuntime.host}:${boundPorts.getBinding(this.port)}${
+              this.path
+            }`;
 
-          if (abortOnContainerExit) {
-            const containerStatus = (await client.container.inspect(container)).State.Status;
+            if (abortOnContainerExit) {
+              const containerStatus = (await client.container.inspect(container)).State.Status;
 
-            if (containerStatus === exitStatus) {
-              containerExited = true;
-              return;
+              if (containerStatus === exitStatus) {
+                containerExited = true;
+                return;
+              }
             }
+
+            return undiciResponseToFetchResponse(
+              await request(url, {
+                method: this.method,
+                signal: AbortSignal.timeout(this.readTimeoutMs),
+                headers: this.headers,
+                dispatcher: agent,
+              })
+            );
+          } catch {
+            return undefined;
+          }
+        },
+        async (response) => {
+          if (abortOnContainerExit && containerExited) {
+            return true;
           }
 
-          return undiciResponseToFetchResponse(
-            await request(url, {
-              method: this.method,
-              signal: AbortSignal.timeout(this.readTimeoutMs),
-              headers: this.headers,
-              dispatcher: this.getAgent(),
-            })
-          );
-        } catch {
-          return undefined;
-        }
-      },
-      async (response) => {
-        if (abortOnContainerExit && containerExited) {
-          return true;
-        }
-
-        if (response === undefined) {
-          return false;
-        } else if (!this.predicates.length) {
-          return response.ok;
-        } else {
-          for (const predicate of this.predicates) {
-            const result = await predicate(response);
-            if (!result) {
-              return false;
+          if (response === undefined) {
+            return false;
+          } else if (!this.predicates.length) {
+            return response.ok;
+          } else {
+            for (const predicate of this.predicates) {
+              const result = await predicate(response);
+              if (!result) {
+                return false;
+              }
             }
+            return true;
           }
-          return true;
-        }
-      },
-      () => {
-        const message = `URL ${this.path} not accessible after ${this.startupTimeoutMs}ms`;
-        log.error(message, { containerId: container.id });
-        throw new Error(message);
-      },
-      this.startupTimeoutMs
-    );
+        },
+        () => {
+          const message = `URL ${this.path} not accessible after ${this.startupTimeoutMs}ms`;
+          log.error(message, { containerId: container.id });
+          throw new Error(message);
+        },
+        this.startupTimeoutMs
+      );
+    } finally {
+      // Force-close: status-only predicates never read the body, so a graceful close() could
+      // hang waiting on unreleased connections. Nothing left to drain once the wait is done.
+      await agent?.destroy();
+    }
 
     if (abortOnContainerExit && containerExited) {
       return this.handleContainerExit(container);
@@ -165,13 +174,15 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
     throw new Error(message);
   }
 
-  private getAgent(): Agent | undefined {
-    if (this._allowInsecure) {
-      return new Agent({
-        connect: {
-          rejectUnauthorized: false,
-        },
-      });
+  private createInsecureAgent(): Agent | undefined {
+    if (!this._allowInsecure) {
+      return undefined;
     }
+
+    return new Agent({
+      connect: {
+        rejectUnauthorized: false,
+      },
+    });
   }
 }

@@ -5,6 +5,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+      day: "monday"
     cooldown:
       default-days: 7
     labels:
@@ -14,12 +15,25 @@ updates:
       dependencies:
         patterns:
           - "*"
+    ignore:
+      # archiver v8 is ESM-only; keep CommonJS-compatible major versions.
+      - dependency-name: "archiver"
+        update-types:
+          - "version-update:semver-major"
+      - dependency-name: "@types/archiver"
+        update-types:
+          - "version-update:semver-major"
+      # get-port v6+ is ESM-only; keep CommonJS-compatible major versions.
+      - dependency-name: "get-port"
+        update-types:
+          - "version-update:semver-major"
 
   - package-ecosystem: "docker"
     directories:
       - "/packages/modules/*"
     schedule:
       interval: "weekly"
+      day: "monday"
     labels:
       - "dependencies"
       - "docker"
@@ -32,6 +46,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+      day: "monday"
     labels:
       - "dependencies"
       - "github_actions"
@@ -44,6 +59,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+      day: "monday"
     labels:
       - "dependencies"
       - "devcontainers"
@@ -56,6 +72,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+      day: "monday"
     labels:
       - "dependencies"
       - "docker_compose"
@@ -68,6 +85,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+      day: "monday"
     labels:
       - "dependencies"
       - "pip"

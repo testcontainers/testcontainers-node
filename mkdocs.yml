@@ -75,6 +75,7 @@ nav:
       - MinIO: modules/minio.md
       - Mockserver: modules/mockserver.md
       - MongoDB: modules/mongodb.md
+      - Mosquitto: modules/mosquitto.md
       - MSSQLServer: modules/mssqlserver.md
       - MySQL: modules/mysql.md
       - Nats: modules/nats.md
