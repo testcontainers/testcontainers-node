@@ -146,25 +146,44 @@ jobs:
         env:
           DEBUG: "testcontainers*"
 
-  test:
+  test-docker:
     if: ${{ needs.detect-modules.outputs.modules_count != '0' }}
-    name: Tests
+    name: Tests (Docker)
     needs:
       - detect-modules
       - lint
       - compile
     strategy:
       fail-fast: false
-      max-parallel: 20
+      max-parallel: 10
       matrix:
         module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
         node-version: [22.x, 24.x, 26.x]
-        container-runtime: [docker, podman]
     uses: ./.github/workflows/test-template.yml
     with:
       runner: ubuntu-24.04
       node-version: ${{ matrix.node-version }}
-      container-runtime: ${{ matrix.container-runtime }}
+      container-runtime: docker
+      workspace: "${{ matrix.module }}"
+
+  test-podman:
+    if: ${{ needs.detect-modules.outputs.modules_count != '0' }}
+    name: Tests (Podman)
+    needs:
+      - detect-modules
+      - lint
+      - compile
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
+        node-version: [22.x, 24.x, 26.x]
+    uses: ./.github/workflows/test-template.yml
+    with:
+      runner: ubuntu-24.04
+      node-version: ${{ matrix.node-version }}
+      container-runtime: podman
       workspace: "${{ matrix.module }}"
 
   end:
@@ -175,7 +194,8 @@ jobs:
       - lint
       - compile
       - smoke-test
-      - test
+      - test-docker
+      - test-podman
     runs-on: ubuntu-24.04
     steps:
       - name: Check if any jobs failed
