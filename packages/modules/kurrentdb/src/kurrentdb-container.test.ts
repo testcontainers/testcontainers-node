@@ -28,7 +28,7 @@ describe.sequential("KurrentDbContainer", { timeout: 240_000 }, () => {
           id: "28ab6bca-d9ae-418b-a1af-eb65dd653c38",
           isJson: true,
           metadata: { someMetadata: "bar" },
-          revision: 0,
+          revision: 0n,
           streamId: "User-1",
           type: "UserCreated",
         }),
