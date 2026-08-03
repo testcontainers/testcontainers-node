@@ -14,6 +14,8 @@
     "lint": "eslint --fix package.json \"packages/**/*.ts\" \".github/**/*.mjs\"",
     "lint:ci": "eslint package.json \"${WORKSPACE_PATH}/**/*.ts\" --max-warnings=0",
     "update-deps": "npm-check-updates --workspaces --root -u",
+    "check-engines:root": "npm exec --yes --package=ls-engines@0.10.1 -- ls-engines --mode ideal --dev --no-current",
+    "check-engines:testcontainers": "npm exec --yes --workspace=testcontainers --package=ls-engines@0.10.1 -- ls-engines --mode ideal --no-current",
     "check-compiles": "tsc -b packages/testcontainers packages/modules/*"
   },
   "devDependencies": {
