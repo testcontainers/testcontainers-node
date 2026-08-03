@@ -55,5 +55,8 @@
     "@types/properties-reader": "^2.1.3",
     "@types/tar-fs": "^2.0.4",
     "@types/tmp": "^0.2.6"
+  },
+  "engines": {
+    "node": ">= 22.22"
   }
 }
