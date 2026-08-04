@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/hivemq",
-  "version": "12.0.4",
+  "version": "12.1.0",
   "license": "MIT",
   "keywords": [
     "hivemq",
@@ -32,6 +32,6 @@
     "mqtt": "^5.15.2"
   },
   "dependencies": {
-    "testcontainers": "^12.0.4"
+    "testcontainers": "^12.1.0"
   }
 }

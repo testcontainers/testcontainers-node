@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/mosquitto",
-  "version": "12.0.3",
+  "version": "12.1.0",
   "license": "MIT",
   "keywords": [
     "mosquitto",
@@ -33,6 +33,6 @@
     "mqtt": "^5.15.2"
   },
   "dependencies": {
-    "testcontainers": "^12.0.3"
+    "testcontainers": "^12.1.0"
   }
 }
