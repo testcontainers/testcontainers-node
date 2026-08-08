@@ -1,5 +1,5 @@
 import { basename } from "node:path";
-import tar from "tar-stream";
+import { buffer } from "node:stream/consumers";
 import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 
 // TODO: Implement GenericContainer.withCgroupnsMode
@@ -26,8 +26,20 @@ export class K3sContainer extends GenericContainer {
 
   public override async start(): Promise<StartedK3sContainer> {
     const container = await super.start();
-    const tarStream = await container.copyArchiveFromContainer(KUBE_CONFIG_PATH);
-    const rawKubeConfig = await extractFromTarStream(tarStream, basename(KUBE_CONFIG_PATH));
+    const kubeConfigName = basename(KUBE_CONFIG_PATH);
+    // Docker returns only the small kubeconfig here, so use Modern TAR's buffered API directly.
+    const [{ unpackTar }, archive] = await Promise.all([
+      import("modern-tar"),
+      container.copyArchiveFromContainer(KUBE_CONFIG_PATH).then(buffer),
+    ]);
+    const [entry] = await unpackTar(archive, {
+      strict: true,
+      filter: (header) => header.type === "file" && header.name === kubeConfigName,
+    });
+    if (!entry?.data?.length) {
+      throw new Error(`Failed to extract ${kubeConfigName} from archive`);
+    }
+    const rawKubeConfig = new TextDecoder().decode(entry.data);
     return new StartedK3sContainer(container, rawKubeConfig);
   }
 
@@ -58,30 +70,6 @@ export class StartedK3sContainer extends AbstractStartedContainer {
     const serverUrl = `https://${networkAlias}:${KUBE_SECURE_PORT}`;
     return kubeConfigWithServerUrl(this.rawKubeConfig, serverUrl);
   }
-}
-
-async function extractFromTarStream(tarStream: NodeJS.ReadableStream, entryName: string): Promise<string> {
-  const extract = tar.extract();
-  tarStream.pipe(extract);
-
-  let extracted = undefined;
-  for await (const entry of extract) {
-    const { header } = entry;
-    if (header.type === "file" && header.name === entryName) {
-      const chunks = [];
-      for await (const chunk of entry) {
-        chunks.push(chunk);
-      }
-      extracted = Buffer.concat(chunks).toString("utf-8");
-    } else {
-      entry.resume();
-    }
-  }
-
-  if (!extracted) {
-    throw new Error(`Failed to extract ${entryName} from archive`);
-  }
-  return extracted;
 }
 
 function kubeConfigWithServerUrl(kubeConfig: string, server: string): string {
