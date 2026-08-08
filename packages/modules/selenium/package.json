@@ -33,6 +33,7 @@
     "selenium-webdriver": "^4.46.0"
   },
   "dependencies": {
+    "modern-tar": "^0.8.4",
     "testcontainers": "^12.1.0"
   }
 }

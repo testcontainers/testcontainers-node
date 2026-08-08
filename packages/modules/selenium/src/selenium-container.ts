@@ -1,6 +1,6 @@
-import { copyFile } from "fs/promises";
-import path from "path";
-import tar from "tar-fs";
+import { mkdtemp, rename, rm } from "node:fs/promises";
+import path from "node:path";
+import { pipeline } from "node:stream/promises";
 import {
   AbstractStartedContainer,
   AbstractStoppedContainer,
@@ -13,7 +13,6 @@ import {
   StoppedTestContainer,
   Wait,
 } from "testcontainers";
-import tmp from "tmp";
 
 const SELENIUM_PORT = 4444;
 const VNC_PORT = 5900;
@@ -131,26 +130,28 @@ export class StoppedSeleniumRecordingContainer extends StoppedSeleniumContainer 
 
   async saveRecording(target: string): Promise<void> {
     const ffmpegContainerId = this.stoppedFfmpegContainer.getId();
+    const temporaryDirectory = await mkdtemp(path.join(path.dirname(target), ".testcontainers-"));
 
-    log.debug("Extracting archive from container...", { containerId: ffmpegContainerId });
-    const archiveStream = await this.stoppedFfmpegContainer.copyArchiveFromContainer("/videos/video.mp4");
-    log.debug("Extracted archive from container", { containerId: ffmpegContainerId });
+    try {
+      log.debug("Extracting archive from container...", { containerId: ffmpegContainerId });
+      const [{ unpackTar }, archive] = await Promise.all([
+        import("modern-tar/fs"),
+        this.stoppedFfmpegContainer.copyArchiveFromContainer("/videos/video.mp4"),
+      ]);
+      await pipeline(
+        archive,
+        unpackTar(temporaryDirectory, {
+          strict: true,
+          filter: (header) => header.type === "file" && header.name === "video.mp4",
+        })
+      );
+      log.debug("Extracted archive from container", { containerId: ffmpegContainerId });
 
-    log.debug("Unpacking archive...", { containerId: ffmpegContainerId });
-    const destinationDir = tmp.dirSync({ keep: false });
-    await this.extractTarStreamToDest(archiveStream, destinationDir.name);
-    log.debug("Unpacked archive", { containerId: ffmpegContainerId });
-
-    const videoFile = path.resolve(destinationDir.name, "video.mp4");
-    await copyFile(videoFile, target);
-    log.debug(`Extracted video to "${target}"`, { containerId: ffmpegContainerId });
-  }
-
-  private async extractTarStreamToDest(tarStream: NodeJS.ReadableStream, dest: string): Promise<void> {
-    await new Promise<void>((resolve) => {
-      const destination = tar.extract(dest);
-      tarStream.pipe(destination);
-      destination.on("finish", resolve);
-    });
+      // Publish only a complete archive entry, without copying the video a second time.
+      await rename(path.join(temporaryDirectory, "video.mp4"), target);
+      log.debug(`Extracted video to "${target}"`, { containerId: ffmpegContainerId });
+    } finally {
+      await rm(temporaryDirectory, { recursive: true, force: true });
+    }
   }
 }
