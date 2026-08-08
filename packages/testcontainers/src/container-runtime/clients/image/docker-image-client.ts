@@ -2,9 +2,8 @@ import dockerIgnore from "@balena/dockerignore";
 import AsyncLock from "async-lock";
 import byline from "byline";
 import Dockerode, { ImageBuildOptions, ImageInspectInfo } from "dockerode";
-import { existsSync, promises as fs } from "fs";
-import path from "path";
-import tar from "tar-fs";
+import { existsSync, promises as fs } from "node:fs";
+import path from "node:path";
 import { buildLog, log, pullLog } from "../../../common";
 import { getAuthConfig } from "../../auth/get-auth-config";
 import { ImageName } from "../../image-name";
@@ -22,8 +21,20 @@ export class DockerImageClient implements ImageClient {
   async build(context: string, opts: ImageBuildOptions): Promise<void> {
     try {
       log.debug(`Building image "${opts.t}" with context "${context}"...`);
-      const tarPackOptions = await this.createTarPackOptions(context, opts.dockerfile ?? "Dockerfile");
-      const tarStream = tar.pack(context, tarPackOptions);
+
+      const contextRoot = path.resolve(context);
+      const [{ packTar }, entries] = await Promise.all([
+        import("modern-tar/fs"),
+        this.listIncludedContextEntries(contextRoot, opts.dockerfile ?? "Dockerfile"),
+      ]);
+      const tarStream = packTar(
+        entries?.map((target) => ({
+          type: "file" as const,
+          source: path.join(contextRoot, target),
+          target,
+        })) ?? contextRoot
+      );
+
       await new Promise<void>((resolve) => {
         this.dockerode
           .buildImage(tarStream, opts)
@@ -45,28 +56,25 @@ export class DockerImageClient implements ImageClient {
     }
   }
 
-  private async createTarPackOptions(context: string, dockerfileName: string): Promise<{ entries?: string[] }> {
+  private async listIncludedContextEntries(context: string, dockerfileName: string): Promise<string[] | undefined> {
     const dockerIgnoreFilePath = path.join(context, ".dockerignore");
     if (!existsSync(dockerIgnoreFilePath)) {
-      return {};
+      return undefined;
     }
-
-    const dockerIgnorePatterns = await fs.readFile(dockerIgnoreFilePath, { encoding: "utf-8" });
-    const instance = dockerIgnore({ ignorecase: false });
-    instance.add(dockerIgnorePatterns);
-    const allEntries = await this.listContextEntries(context);
-    const includedEntries = instance.filter(allEntries);
 
     const dockerfilePath = this.normalizePathForDockerIgnore(path.normalize(dockerfileName));
-    if (!includedEntries.includes(dockerfilePath)) {
-      includedEntries.push(dockerfilePath);
+    const relativeDockerfile = path.relative(context, path.resolve(context, dockerfilePath));
+    if (
+      path.isAbsolute(dockerfileName) ||
+      relativeDockerfile === ".." ||
+      relativeDockerfile.startsWith(`..${path.sep}`) ||
+      path.isAbsolute(relativeDockerfile)
+    ) {
+      throw new Error(`${dockerfileName} is not a valid path`);
     }
 
-    return { entries: includedEntries };
-  }
-
-  private async listContextEntries(context: string): Promise<string[]> {
-    const entries: string[] = [];
+    const dockerIgnorePatterns = fs.readFile(dockerIgnoreFilePath, { encoding: "utf-8" });
+    const allEntries: string[] = [];
     const directoriesToVisit = [""];
 
     while (directoriesToVisit.length > 0) {
@@ -83,12 +91,19 @@ export class DockerImageClient implements ImageClient {
         if (directoryEntry.isDirectory()) {
           directoriesToVisit.push(relativeEntry);
         } else {
-          entries.push(this.normalizePathForDockerIgnore(relativeEntry));
+          allEntries.push(this.normalizePathForDockerIgnore(relativeEntry));
         }
       }
     }
 
-    return entries;
+    const instance = dockerIgnore({ ignorecase: false });
+    instance.add(await dockerIgnorePatterns);
+    const includedEntries = instance.filter(allEntries);
+    if (!includedEntries.includes(dockerfilePath)) {
+      includedEntries.push(dockerfilePath);
+    }
+
+    return includedEntries;
   }
 
   private normalizePathForDockerIgnore(aPath: string): string {
