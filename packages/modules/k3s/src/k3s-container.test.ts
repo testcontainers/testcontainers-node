@@ -5,11 +5,13 @@ import { K3sContainer } from "./k3s-container";
 
 const IMAGE = getImage(__dirname);
 const KUBECTL_IMAGE = getImage(__dirname, 1);
+// https://github.com/oven-sh/bun/issues/7332
+const bunKubernetesClientUnsupported = Boolean(process.env.CI_BUN);
 
 describe("K3sContainer", { timeout: 120_000 }, () => {
   // K3sContainer runs as a privileged container
   if (!process.env["CI_ROOTLESS"]) {
-    it("should start and have listable node", async () => {
+    it.skipIf(bunKubernetesClientUnsupported)("should start and have listable node", async () => {
       // k3sListNodes {
       await using container = await new K3sContainer(IMAGE).start();
 
@@ -23,7 +25,7 @@ describe("K3sContainer", { timeout: 120_000 }, () => {
       // }
     });
 
-    it("should start a pod", async () => {
+    it.skipIf(bunKubernetesClientUnsupported)("should start a pod", async () => {
       // k3sStartPod {
       await using container = await new K3sContainer(IMAGE).start();
 

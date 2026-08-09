@@ -4,9 +4,11 @@ import { OpenSearchContainer } from "./opensearch-container";
 
 const IMAGE = getImage(__dirname);
 const images = ["opensearchproject/opensearch:2.19.2", IMAGE];
+// https://github.com/oven-sh/bun/issues/7332
+const bunTlsClientUnsupported = Boolean(process.env.CI_BUN);
 
 describe("OpenSearchContainer", { timeout: 180_000 }, () => {
-  it.each(images)("should create an index with %s", async (image) => {
+  it.skipIf(bunTlsClientUnsupported).each(images)("should create an index with %s", async (image) => {
     // opensearchCreateIndex {
     await using container = await new OpenSearchContainer(image).start();
 
@@ -28,7 +30,7 @@ describe("OpenSearchContainer", { timeout: 180_000 }, () => {
     // }
   });
 
-  it("should index a document", async () => {
+  it.skipIf(bunTlsClientUnsupported)("should index a document", async () => {
     // opensearchIndexDocument {
     await using container = await new OpenSearchContainer(IMAGE).start();
 
@@ -56,7 +58,7 @@ describe("OpenSearchContainer", { timeout: 180_000 }, () => {
     // }
   });
 
-  it("should work with restarted container", async () => {
+  it.skipIf(bunTlsClientUnsupported)("should work with restarted container", async () => {
     await using container = await new OpenSearchContainer(IMAGE).start();
     await container.restart();
 
@@ -81,7 +83,7 @@ describe("OpenSearchContainer", { timeout: 180_000 }, () => {
     expect(() => new OpenSearchContainer(IMAGE).withPassword("weakpwd")).toThrowError(/Password "weakpwd" is too weak/);
   });
 
-  it("should set custom password", async () => {
+  it.skipIf(bunTlsClientUnsupported)("should set custom password", async () => {
     // opensearchCustomPassword {
     await using container = await new OpenSearchContainer(IMAGE).withPassword("Str0ng!Passw0rd2025").start();
     // }
