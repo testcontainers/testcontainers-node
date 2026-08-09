@@ -60,3 +60,6 @@ jobs:
         env:
           CI: true
           BUN_CI: true
+          # Concurrent Ryuk usage leaves Bun alive after the core suite completes.
+          # https://github.com/oven-sh/bun/issues/23776
+          TESTCONTAINERS_RYUK_DISABLED: ${{ inputs.workspace == 'testcontainers' && 'true' || '' }}
