@@ -6,7 +6,8 @@ const IMAGE = getImage(__dirname);
 const images = ["elasticsearch:7.17.28", "elasticsearch:8.18.1", IMAGE];
 
 // https://github.com/oven-sh/bun/issues/24824
-describe.skipIf(Boolean(process.env.CI_BUN))("ElasticsearchContainer", { timeout: 180_000 }, () => {
+describe("ElasticsearchContainer", { timeout: 180_000 }, () => {
+  if (process.env.BUN_CI) return;
   it.each(images)("should create an index with %s", async (image) => {
     // createIndex {
     await using container = await new ElasticsearchContainer(image).start();

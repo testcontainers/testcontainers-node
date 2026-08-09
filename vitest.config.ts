@@ -1,16 +1,5 @@
 import * as path from "path";
-import { configDefaults, defineConfig } from "vitest/config";
-const bunTestExclusions = process.env.CI_BUN
-  ? [
-      // https://github.com/oven-sh/bun/issues/19337
-      "packages/modules/kafka/**/*.test.ts",
-      "packages/modules/redpanda/**/*.test.ts",
-      // https://github.com/oven-sh/bun/issues/12730
-      "packages/modules/couchbase/**/*.test.ts",
-      // https://github.com/oven-sh/bun/issues/32501
-      "packages/modules/mongodb/**/*.test.ts",
-    ]
-  : [];
+import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
@@ -19,7 +8,6 @@ export default defineConfig({
       DEBUG: "testcontainers*",
     },
     passWithNoTests: true,
-    exclude: [...configDefaults.exclude, ...bunTestExclusions],
     silent: "passed-only",
     mockReset: true,
     restoreMocks: true,

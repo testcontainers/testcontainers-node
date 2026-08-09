@@ -23,6 +23,7 @@ jobs:
   test:
     name: "Run"
     runs-on: ${{ inputs.runner }}
+    timeout-minutes: 20
     steps:
       - name: Code checkout
         uses: actions/checkout@v7
@@ -58,4 +59,4 @@ jobs:
         run: bun run --bun vitest run ${{ steps.npm-install.outputs.workspace_path }}
         env:
           CI: true
-          CI_BUN: true
+          BUN_CI: true

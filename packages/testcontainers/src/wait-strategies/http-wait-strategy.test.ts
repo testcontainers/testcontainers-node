@@ -162,7 +162,7 @@ describe("HttpWaitStrategy", { timeout: 180_000 }, () => {
     });
 
     // https://github.com/oven-sh/bun/issues/14498
-    if (!process.env.CI_BUN) {
+    if (!process.env.BUN_CI) {
       it("allow self-signed certificates", async () => {
         await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
           .withExposedPorts(8443)
