@@ -5,8 +5,13 @@ on:
         required: true
         type: string
       node-version:
-        required: true
+        required: false
         type: string
+        default: 24.x
+      bun-version:
+        required: false
+        type: string
+        default: ""
       container-runtime:
         required: true
         type: string
@@ -34,7 +39,23 @@ jobs:
           node-version: ${{ inputs.node-version }}
           workspace: "${{ inputs.workspace }}"
 
-      - name: Run tests
+      - name: Install Bun ${{ inputs.bun-version }}
+        if: ${{ inputs.bun-version != '' }}
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ inputs.bun-version }}
+
+      - name: Run tests with Node
+        if: ${{ inputs.bun-version == '' }}
         run: npm run test:ci -- --coverage.include="${{ steps.npm-install.outputs.workspace_path }}/**/*.ts" ${{ steps.npm-install.outputs.workspace_path }}
         env:
           CI: true
+
+      # Vitest's V8 coverage provider requires node:inspector coverage APIs that Bun does not support.
+      # https://github.com/oven-sh/bun/issues/4145
+      - name: Run tests with Bun
+        if: ${{ inputs.bun-version != '' }}
+        run: bun run --bun vitest run ${{ steps.npm-install.outputs.workspace_path }}
+        env:
+          CI: true
+          CI_BUN: true
