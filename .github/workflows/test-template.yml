@@ -56,7 +56,9 @@ jobs:
       # https://github.com/oven-sh/bun/issues/4145
       - name: Run tests with Bun
         if: ${{ inputs.bun-version != '' }}
-        run: bun run --bun vitest run ${{ steps.npm-install.outputs.workspace_path }}
+        # Bun can hang after Vitest's default fork workers complete.
+        # https://github.com/oven-sh/bun/issues/11268
+        run: bun run --bun vitest run --pool=threads ${{ steps.npm-install.outputs.workspace_path }}
         env:
           CI: true
           BUN_CI: true
