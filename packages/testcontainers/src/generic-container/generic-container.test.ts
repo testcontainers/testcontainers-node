@@ -1,5 +1,5 @@
-import archiver from "archiver";
 import getPort from "get-port";
+import { Readable } from "node:stream";
 import path from "path";
 import { RandomUuid } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
@@ -499,7 +499,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
   });
 
   it("should copy content to started container", async () => {
-    const content = "hello world";
+    const content = Readable.from(["hello", " world"]);
     const target = "/tmp/test.txt";
     await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
@@ -507,11 +507,28 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
 
     await container.copyContentToContainer([{ content, target }]);
 
-    expect((await container.exec(["cat", target])).output).toEqual(expect.stringContaining(content));
+    expect((await container.exec(["cat", target])).output).toEqual(expect.stringContaining("hello world"));
   });
 
   // https://github.com/containers/podman/issues/27538
   if (!process.env.CI_PODMAN) {
+    it("should copy filesystem sources with root ownership when copyUIDGID is enabled", async () => {
+      const fileTarget = "/tmp/copy-file-copyuidgid.txt";
+      const directoryTarget = "/tmp/copy-directory-copyuidgid";
+
+      await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+        .withCopyFilesToContainer([{ source: path.resolve(fixtures, "docker", "test.txt"), target: fileTarget }])
+        .withCopyDirectoriesToContainer([{ source: path.resolve(fixtures, "docker"), target: directoryTarget }])
+        .withCopyToContainerOptions({ copyUIDGID: true })
+        .withExposedPorts(8080)
+        .start();
+
+      expect((await container.exec(["stat", "-c", "%u:%g", fileTarget])).output.trim()).toEqual("0:0");
+      expect((await container.exec(["stat", "-c", "%u:%g", `${directoryTarget}/test.txt`])).output.trim()).toEqual(
+        "0:0"
+      );
+    });
+
     it("should copy archive to started container with ownership when copyUIDGID is enabled", async () => {
       const uid = 4242;
       const gid = 4343;
@@ -521,9 +538,10 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
         .withExposedPorts(8080)
         .start();
 
-      const tar = archiver("tar");
-      tar.append("hello world", { name: targetWithCopyOwnership.slice(1), uid, gid } as archiver.EntryData);
-      tar.finalize();
+      const { packTar } = await import("modern-tar/fs");
+      const tar = packTar([
+        { type: "content", content: "hello world", target: targetWithCopyOwnership.slice(1), uid, gid },
+      ]);
 
       await container.copyArchiveToContainer(tar, "/", { copyUIDGID: true });
 
@@ -536,9 +554,10 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
       const uid = 4242;
       const gid = 4343;
       const targetWithCopyOwnership = "/tmp/with-copy-archives-copyuidgid.txt";
-      const tar = archiver("tar");
-      tar.append("hello world", { name: targetWithCopyOwnership.slice(1), uid, gid } as archiver.EntryData);
-      tar.finalize();
+      const { packTar } = await import("modern-tar/fs");
+      const tar = packTar([
+        { type: "content", content: "hello world", target: targetWithCopyOwnership.slice(1), uid, gid },
+      ]);
 
       await using containerWithCopyOwnership = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
         .withCopyArchivesToContainer([

@@ -32,13 +32,13 @@
   "dependencies": {
     "@balena/dockerignore": "^1.0.2",
     "@types/dockerode": "^4.0.1",
-    "archiver": "^7.0.1",
     "async-lock": "^1.4.1",
     "byline": "^5.0.0",
     "debug": "^4.4.3",
     "docker-compose": "^1.4.2",
     "dockerode": "^5.0.1",
     "get-port": "^5.1.1",
+    "modern-tar": "^0.8.4",
     "proper-lockfile": "^4.1.2",
     "properties-reader": "^3.0.1",
     "ssh-remote-port-forward": "^1.0.4",
@@ -47,7 +47,6 @@
     "undici": "^8.9.0"
   },
   "devDependencies": {
-    "@types/archiver": "^7.0.0",
     "@types/async-lock": "^1.4.2",
     "@types/byline": "^4.2.36",
     "@types/debug": "^4.1.13",
