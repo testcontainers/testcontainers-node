@@ -161,13 +161,16 @@ describe("HttpWaitStrategy", { timeout: 180_000 }, () => {
       ).rejects.toThrow();
     });
 
-    it("allow self-signed certificates", async () => {
-      await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
-        .withExposedPorts(8443)
-        .withWaitStrategy(Wait.forHttp("/hello-world", 8443).usingTls().allowInsecure())
-        .start();
+    // https://github.com/oven-sh/bun/issues/14498
+    if (!process.env.BUN_CI) {
+      it("allow self-signed certificates", async () => {
+        await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+          .withExposedPorts(8443)
+          .withWaitStrategy(Wait.forHttp("/hello-world", 8443).usingTls().allowInsecure())
+          .start();
 
-      await checkContainerIsHealthyTls(container);
-    });
+        await checkContainerIsHealthyTls(container);
+      });
+    }
   });
 });

@@ -10,6 +10,8 @@ const ENTERPRISE_IMAGE = getImage(__dirname, 0);
 const COMMUNITY_IMAGE = getImage(__dirname, 1);
 
 describe("CouchbaseContainer", { timeout: 180_000 }, () => {
+  // https://github.com/oven-sh/bun/issues/12730
+  if (process.env.BUN_CI) return;
   const flushBucketAndCheckExists = async (
     cluster: Cluster,
     bucket: Bucket,

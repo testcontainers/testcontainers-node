@@ -3,6 +3,9 @@ import { RandomPortGenerator } from "../utils/port-generator";
 import { createTestServer } from "../utils/test-helper";
 
 describe.sequential("Port Forwarder reuse", { timeout: 180_000 }, () => {
+  // Bun keeps the reusable SSH forwarder's socket alive after the suite completes.
+  // https://github.com/oven-sh/bun/issues/4145
+  if (process.env.BUN_CI) return;
   const portGen = new RandomPortGenerator();
 
   it("should expose additional ports", async () => {
