@@ -194,6 +194,11 @@ export class DockerContainerClient implements ContainerClient {
         actualLogStream.socket?.unref();
 
         const demuxedStream = await this.demuxStream(container.id, actualLogStream);
+        if (proxyStream.destroyed) {
+          demuxedStream.destroy();
+          return;
+        }
+        proxyStream.once("close", () => demuxedStream.destroy());
         demuxedStream.pipe(proxyStream);
         demuxedStream.on("error", (err) => proxyStream.emit("error", err));
         demuxedStream.on("end", () => proxyStream.end());
