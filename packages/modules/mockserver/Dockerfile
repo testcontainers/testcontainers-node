@@ -1,1 +1,1 @@
-FROM mockserver/mockserver:7.4.0
+FROM mockserver/mockserver:7.5.0
