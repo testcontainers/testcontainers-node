@@ -71,11 +71,19 @@ export class InternalPortCheck implements PortCheck {
     // If a command is not found, the child process created to execute it returns a status of 127.
     // If a command is found but is not executable, the return status is 126.
     const shellExists = commandResults.some((result) => result.exitCode !== 126 && result.exitCode !== 127);
-    if (!isBound && !shellExists && !this.isDistroless) {
-      this.isDistroless = true;
-      log.error(`The HostPortWaitStrategy will not work on a distroless image, use an alternate wait strategy`, {
-        containerId: this.container.id,
-      });
+    if (!isBound && !shellExists) {
+      // No shell to run the probe commands (a distroless image) — this check can never observe the
+      // port as bound on its own. HostPortWaitStrategy runs this check in parallel with
+      // HostPortCheck (the host-side check, which needs no shell and already works against
+      // distroless images), so defer to it here instead of returning `false` and letting the
+      // caller's retry loop spin until it times out and rejects the whole wait.
+      if (!this.isDistroless) {
+        this.isDistroless = true;
+        log.debug(`No shell available in the container (distroless image) — deferring to the host port check`, {
+          containerId: this.container.id,
+        });
+      }
+      return true;
     }
 
     if (!isBound && log.enabled()) {

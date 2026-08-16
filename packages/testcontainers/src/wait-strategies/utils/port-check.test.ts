@@ -103,23 +103,25 @@ describe.sequential("PortCheck", () => {
       ]);
     });
 
-    it("should error log when the port-check will fail due to missing shells (distroless)", async () => {
+    it("should return true and debug log when the port-check has no shell to run (distroless)", async () => {
       mockContainerExec
         .mockReturnValueOnce(Promise.resolve({ output: "ERROR 1", exitCode: 126 }))
         .mockReturnValueOnce(Promise.resolve({ output: "ERROR 2", exitCode: 126 }))
         .mockReturnValueOnce(Promise.resolve({ output: "ERROR 2", exitCode: 126 }));
 
-      await portCheck.isBound(8080);
+      const result = await portCheck.isBound(8080);
 
-      expect(mockLogger.error.mock.calls).toEqual([
+      expect(result).toBe(true);
+      expect(mockLogger.debug.mock.calls).toEqual([
         [
-          "The HostPortWaitStrategy will not work on a distroless image, use an alternate wait strategy",
+          "No shell available in the container (distroless image) — deferring to the host port check",
           { containerId: "containerId" },
         ],
       ]);
+      expect(mockLogger.error).not.toHaveBeenCalled();
     });
 
-    it("should error log the distroless image once", async () => {
+    it("should debug log the distroless image once", async () => {
       mockContainerExec
         .mockReturnValueOnce(Promise.resolve({ output: "ERROR 1", exitCode: 126 }))
         .mockReturnValueOnce(Promise.resolve({ output: "ERROR 2", exitCode: 126 }))
@@ -128,18 +130,18 @@ describe.sequential("PortCheck", () => {
         .mockReturnValueOnce(Promise.resolve({ output: "ERROR 2", exitCode: 126 }))
         .mockReturnValueOnce(Promise.resolve({ output: "ERROR 2", exitCode: 126 }));
 
-      await portCheck.isBound(8080);
-      await portCheck.isBound(8080);
+      expect(await portCheck.isBound(8080)).toBe(true);
+      expect(await portCheck.isBound(8080)).toBe(true);
 
-      expect(mockLogger.error.mock.calls).toEqual([
+      expect(mockLogger.debug.mock.calls).toEqual([
         [
-          "The HostPortWaitStrategy will not work on a distroless image, use an alternate wait strategy",
+          "No shell available in the container (distroless image) — deferring to the host port check",
           { containerId: "containerId" },
         ],
       ]);
     });
 
-    it("should error log the distroless image once, regardless of logs enabled or not", async () => {
+    it("should debug log the distroless image once, regardless of logs enabled or not", async () => {
       // Make sure logging is disabled explicitly here
       mockLogger.enabled.mockImplementation(() => false);
 
@@ -151,27 +153,28 @@ describe.sequential("PortCheck", () => {
         .mockReturnValueOnce(Promise.resolve({ output: "ERROR 2", exitCode: 126 }))
         .mockReturnValueOnce(Promise.resolve({ output: "ERROR 2", exitCode: 126 }));
 
-      await portCheck.isBound(8080);
-      await portCheck.isBound(8080);
+      expect(await portCheck.isBound(8080)).toBe(true);
+      expect(await portCheck.isBound(8080)).toBe(true);
 
-      expect(mockLogger.error.mock.calls).toEqual([
+      expect(mockLogger.debug.mock.calls).toEqual([
         [
-          "The HostPortWaitStrategy will not work on a distroless image, use an alternate wait strategy",
+          "No shell available in the container (distroless image) — deferring to the host port check",
           { containerId: "containerId" },
         ],
       ]);
     });
 
-    it.for([126, 127])("should error log the distroless image when exit code is %i", async (code) => {
+    it.for([126, 127])("should return true and debug log when exit code is %i (no shell)", async (code) => {
       mockContainerExec.mockReturnValueOnce(Promise.resolve({ output: "ERROR 1", exitCode: code }));
       mockContainerExec.mockReturnValueOnce(Promise.resolve({ output: "ERROR 2", exitCode: code }));
       mockContainerExec.mockReturnValueOnce(Promise.resolve({ output: "ERROR 3", exitCode: code }));
 
-      await portCheck.isBound(8080);
+      const result = await portCheck.isBound(8080);
 
-      expect(mockLogger.error.mock.calls).toEqual([
+      expect(result).toBe(true);
+      expect(mockLogger.debug.mock.calls).toEqual([
         [
-          "The HostPortWaitStrategy will not work on a distroless image, use an alternate wait strategy",
+          "No shell available in the container (distroless image) — deferring to the host port check",
           { containerId: "containerId" },
         ],
       ]);
