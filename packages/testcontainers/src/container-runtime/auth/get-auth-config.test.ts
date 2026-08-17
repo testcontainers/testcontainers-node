@@ -1,7 +1,7 @@
 import type { Mock } from "vitest";
 
-vi.mock("fs");
-vi.mock("fs/promises");
+vi.mock("node:fs");
+vi.mock("node:fs/promises");
 
 describe("get auth config", { concurrent: false }, () => {
   let mockExistsSync: Mock;

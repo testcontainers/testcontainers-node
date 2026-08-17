@@ -6,7 +6,7 @@ import type { ContainerRuntimeConfig } from "./types";
 
 const mockExec = vi.fn();
 const mockSpawn = vi.fn();
-vi.mock("child_process", () => ({
+vi.mock("node:child_process", () => ({
   exec: (...args: unknown[]) => mockExec(...args),
   spawn: (...args: unknown[]) => mockSpawn(...args),
 }));
