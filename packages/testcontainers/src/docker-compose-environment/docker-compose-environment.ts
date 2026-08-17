@@ -210,7 +210,14 @@ export class DockerComposeEnvironment {
         })
       )
     ).reduce<{ [containerName: string]: StartedGenericContainer }>((map, startedGenericContainer) => {
-      map[startedGenericContainer.getName()] = startedGenericContainer;
+      // defineProperty rather than assignment: a container named "__proto__" would otherwise
+      // set the prototype instead of creating an own property.
+      Object.defineProperty(map, startedGenericContainer.getName(), {
+        value: startedGenericContainer,
+        writable: true,
+        enumerable: true,
+        configurable: true,
+      });
       return map;
     }, {});
 
