@@ -1,4 +1,4 @@
-import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
+import { AbstractStartedContainer, GenericContainer, type StartedTestContainer, Wait } from "testcontainers";
 import * as TPClient from "toxiproxy-node-client";
 
 const CONTROL_PORT = 8474;
@@ -65,7 +65,6 @@ export class StartedToxiProxyContainer extends AbstractStartedContainer {
     }
 
     // Find the first available port
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const port = Object.entries(usedPorts).find(([_, used]) => !used);
     if (!port) {
       throw new Error("No available ports left");

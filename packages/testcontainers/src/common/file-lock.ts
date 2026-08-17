@@ -1,5 +1,5 @@
-import { writeFile } from "fs/promises";
-import path from "path";
+import { writeFile } from "node:fs/promises";
+import path from "node:path";
 import lockFile from "proper-lockfile";
 import tmp from "tmp";
 import { log } from "./logger";
@@ -7,7 +7,7 @@ import { log } from "./logger";
 export async function withFileLock<T>(fileName: string, fn: () => T): Promise<T> {
   const file = await createEmptyTmpFile(fileName);
 
-  let releaseLockFn;
+  let releaseLockFn: (() => Promise<void>) | undefined;
   try {
     log.debug(`Acquiring lock file "${file}"...`);
     releaseLockFn = await lockFile.lock(file, {

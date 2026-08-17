@@ -1,29 +1,29 @@
-const fs = require("fs");
-const http = require("http");
-const https = require("https");
+const fs = require("node:fs");
+const http = require("node:http");
+const https = require("node:https");
 const express = require("express");
 
 const app = express();
 
-app.get("/hello-world", (req, res) => {
+app.get("/hello-world", (_req, res) => {
   res.status(200).send("hello-world");
 });
 
-app.get("/hello-world-delay", (req, res) => {
+app.get("/hello-world-delay", (_req, res) => {
   setTimeout(() => {
     res.status(200).send("hello-world");
   }, 3000);
 });
 
-app.post("/hello-world-post", (req, res) => {
+app.post("/hello-world-post", (_req, res) => {
   res.status(200).send("hello-world");
 });
 
-app.get("/env", (req, res) => {
+app.get("/env", (_req, res) => {
   res.status(200).json(process.env);
 });
 
-app.get("/cmd", (req, res) => {
+app.get("/cmd", (_req, res) => {
   res.status(200).json(process.argv);
 });
 
@@ -40,7 +40,7 @@ app.get("/auth", (req, res) => {
 });
 
 app.get("/header-or-400/:headerName", (req, res) => {
-  if (req.headers[req.params["headerName"]] !== undefined) {
+  if (req.headers[req.params.headerName] !== undefined) {
     res.status(200).end();
   } else {
     res.status(400).end();

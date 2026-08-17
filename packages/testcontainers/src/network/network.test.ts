@@ -1,4 +1,4 @@
-import { ContainerRuntimeClient, getContainerRuntimeClient } from "../container-runtime";
+import { type ContainerRuntimeClient, getContainerRuntimeClient } from "../container-runtime";
 import { GenericContainer } from "../generic-container/generic-container";
 import { Network } from "./network";
 

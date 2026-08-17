@@ -1,16 +1,16 @@
-import fs from "fs";
+import fs from "node:fs";
+import path from "node:path";
 import { compile } from "handlebars";
-import path from "path";
 import {
   AbstractStartedContainer,
   BoundPorts,
   GenericContainer,
   getContainerRuntimeClient,
-  InspectResult,
-  StartedTestContainer,
+  type InspectResult,
+  type StartedTestContainer,
   Wait,
+  type WaitStrategy,
   waitForContainer,
-  WaitStrategy,
 } from "testcontainers";
 
 const REDPANDA_PORT = 9092;
@@ -91,10 +91,6 @@ export class RedpandaContainer extends GenericContainer {
 }
 
 export class StartedRedpandaContainer extends AbstractStartedContainer {
-  constructor(startedTestContainer: StartedTestContainer) {
-    super(startedTestContainer);
-  }
-
   public getBootstrapServers(): string {
     return `${this.getHost()}:${this.getMappedPort(REDPANDA_PORT)}`;
   }

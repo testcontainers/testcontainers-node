@@ -1,5 +1,5 @@
 import type { TokenCredential } from "@azure/core-auth";
-import { BlobServiceClient } from "@azure/storage-blob";
+import type { BlobServiceClient } from "@azure/storage-blob";
 
 // azuriteTestUtils {
 type BlobClientPipelineOptions = NonNullable<Parameters<typeof BlobServiceClient.fromConnectionString>[1]>;

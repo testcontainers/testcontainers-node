@@ -3,8 +3,8 @@ import {
   GenericContainer,
   getContainerPort,
   hasHostBinding,
-  PortWithOptionalBinding,
-  StartedTestContainer,
+  type PortWithOptionalBinding,
+  type StartedTestContainer,
   Wait,
 } from "testcontainers";
 

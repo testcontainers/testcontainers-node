@@ -3,15 +3,15 @@ const express = require("express");
 const app = express();
 const port = 8080;
 
-app.get("/hello-world", (req, res) => {
+app.get("/hello-world", (_req, res) => {
   res.status(200).send("hello-world");
 });
 
-app.get("/env", (req, res) => {
+app.get("/env", (_req, res) => {
   res.status(200).json(process.env);
 });
 
-app.get("/cmd", (req, res) => {
+app.get("/cmd", (_req, res) => {
   res.status(200).json(process.argv);
 });
 

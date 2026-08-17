@@ -1,6 +1,6 @@
-import { existsSync } from "fs";
-import { ContainerRuntimeClientStrategy } from "./strategy";
-import { ContainerRuntimeClientStrategyResult } from "./types";
+import { existsSync } from "node:fs";
+import type { ContainerRuntimeClientStrategy } from "./strategy";
+import type { ContainerRuntimeClientStrategyResult } from "./types";
 
 export class UnixSocketStrategy implements ContainerRuntimeClientStrategy {
   constructor(private readonly platform: NodeJS.Platform = process.platform) {}

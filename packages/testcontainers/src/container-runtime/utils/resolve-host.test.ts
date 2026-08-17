@@ -1,5 +1,5 @@
 import Dockerode from "dockerode";
-import { ContainerRuntimeClientStrategyResult } from "../strategies/types";
+import type { ContainerRuntimeClientStrategyResult } from "../strategies/types";
 import { resolveHost } from "./resolve-host";
 
 const mockExistsSync = vi.fn();

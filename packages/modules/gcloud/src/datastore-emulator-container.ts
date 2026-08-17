@@ -1,4 +1,4 @@
-import { AbstractStartedContainer, StartedTestContainer } from "testcontainers";
+import { AbstractStartedContainer } from "testcontainers";
 import { AbstractGcloudEmulator } from "./abstract-gcloud-emulator";
 
 const EMULATOR_PORT = 8080;
@@ -15,10 +15,6 @@ export class DatastoreEmulatorContainer extends AbstractGcloudEmulator {
 }
 
 export class StartedDatastoreEmulatorContainer extends AbstractStartedContainer {
-  constructor(startedTestContainer: StartedTestContainer) {
-    super(startedTestContainer);
-  }
-
   /**
    * @return a <code>host:port</code> pair corresponding to the address on which the emulator is
    * reachable from the test host machine.

@@ -1,8 +1,8 @@
-import { Container, ContainerCreateOptions, ContainerInspectInfo } from "dockerode";
-import { Readable } from "stream";
-import { ContainerRuntimeClient } from "../container-runtime";
+import { Readable } from "node:stream";
+import type { Container, ContainerCreateOptions, ContainerInspectInfo } from "dockerode";
+import type { ContainerRuntimeClient } from "../container-runtime";
 import { LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
-import { WaitStrategy } from "../wait-strategies/wait-strategy";
+import type { WaitStrategy } from "../wait-strategies/wait-strategy";
 import { GenericContainer } from "./generic-container";
 
 let mockClient: ContainerRuntimeClient;

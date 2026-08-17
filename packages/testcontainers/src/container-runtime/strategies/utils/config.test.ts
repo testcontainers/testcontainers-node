@@ -1,4 +1,4 @@
-import { GetContainerRuntimeConfig } from "./config";
+import type { GetContainerRuntimeConfig } from "./config";
 
 const mockExistsSync = vi.fn();
 vi.mock("fs", () => ({ existsSync: mockExistsSync }));

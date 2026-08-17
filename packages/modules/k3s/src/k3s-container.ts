@@ -1,6 +1,6 @@
 import { basename } from "node:path";
 import tar from "tar-stream";
-import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
+import { AbstractStartedContainer, GenericContainer, type StartedTestContainer, Wait } from "testcontainers";
 
 // TODO: Implement GenericContainer.withCgroupnsMode
 // https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/71160
@@ -64,7 +64,7 @@ async function extractFromTarStream(tarStream: NodeJS.ReadableStream, entryName:
   const extract = tar.extract();
   tarStream.pipe(extract);
 
-  let extracted = undefined;
+  let extracted: string | undefined;
   for await (const entry of extract) {
     const { header } = entry;
     if (header.type === "file" && header.name === entryName) {

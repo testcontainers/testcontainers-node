@@ -1,4 +1,4 @@
-import { ContainerRuntimeClientStrategyResult } from "../strategies/types";
+import type { ContainerRuntimeClientStrategyResult } from "../strategies/types";
 import { getRemoteContainerRuntimeSocketPath } from "./remote-container-runtime-socket-path";
 
 test("should return TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE when provided", () => {

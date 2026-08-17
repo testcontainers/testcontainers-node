@@ -25,7 +25,7 @@ describe("OllamaContainer", { timeout: 180_000 }, () => {
     const body = (await response.json()) as { models: { name: string }[] };
     expect(body.models[0].name).toContain("all-minilm");
 
-    const newImageName = "tc-ollama-allminilm-" + randomUuid().substring(4);
+    const newImageName = `tc-ollama-allminilm-${randomUuid().substring(4)}`;
     await container.commitToImage(newImageName);
 
     await using newContainer = await new OllamaContainer(newImageName).start();

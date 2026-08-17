@@ -1,5 +1,5 @@
-import path from "path";
-import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
+import path from "node:path";
+import { AbstractStartedContainer, GenericContainer, type StartedTestContainer, Wait } from "testcontainers";
 
 const REDIS_PORT = 6379;
 
@@ -44,7 +44,7 @@ export class RedisContainer extends GenericContainer {
       ...(this.persistenceVolume ? ["--save 1 1 ", "--appendonly yes"] : []),
     ];
     if (this.imageName.image.includes("redis-stack")) {
-      const existingRedisArgs = this.environment["REDIS_ARGS"] ?? "";
+      const existingRedisArgs = this.environment.REDIS_ARGS ?? "";
 
       // merge with filter to remove empty items
       const mergedRedisArgs = [existingRedisArgs, ...redisArgs].filter(Boolean).join(" ");
@@ -83,7 +83,7 @@ export class RedisContainer extends GenericContainer {
 
   private async importInitialData(container: StartedTestContainer) {
     const re = await container.exec(`/tmp/import.sh ${this.password}`);
-    if (re.exitCode != 0 || re.output.includes("ERR"))
+    if (re.exitCode !== 0 || re.output.includes("ERR"))
       throw Error(`Could not import initial data from ${this.initialImportScriptFile}: ${re.output}`);
   }
 }
@@ -115,7 +115,7 @@ export class StartedRedisContainer extends AbstractStartedContainer {
   public async executeCliCmd(cmd: string, additionalFlags: string[] = []): Promise<string> {
     const result = await this.startedTestContainer.exec([
       "redis-cli",
-      ...(this.password != "" ? [`-a ${this.password}`] : []),
+      ...(this.password !== "" ? [`-a ${this.password}`] : []),
       `${cmd}`,
       ...additionalFlags,
     ]);
