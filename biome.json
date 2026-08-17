@@ -6,7 +6,7 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!**/build", "!package-lock.json", "!docs"]
+    "includes": ["**", "!**/build", "!package-lock.json", "!docs", "!packages/testcontainers/fixtures"]
   },
   "formatter": {
     "enabled": true,
