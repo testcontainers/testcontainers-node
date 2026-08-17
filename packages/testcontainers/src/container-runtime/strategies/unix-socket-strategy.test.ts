@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { UnixSocketStrategy } from "./unix-socket-strategy";
 
-vi.mock("fs");
+vi.mock("node:fs");
 const mockExistsSync = vi.mocked(existsSync);
 
 describe.sequential("UnixSocketStrategy", () => {

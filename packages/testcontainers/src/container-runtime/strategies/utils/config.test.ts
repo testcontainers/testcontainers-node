@@ -1,9 +1,9 @@
 import type { GetContainerRuntimeConfig } from "./config";
 
 const mockExistsSync = vi.fn();
-vi.mock("fs", () => ({ existsSync: mockExistsSync }));
+vi.mock("node:fs", () => ({ existsSync: mockExistsSync }));
 const mockReadFile = vi.fn();
-vi.mock("fs/promises", () => ({ readFile: mockReadFile }));
+vi.mock("node:fs/promises", () => ({ readFile: mockReadFile }));
 
 describe.sequential("Config", () => {
   let getContainerRuntimeConfig: GetContainerRuntimeConfig;

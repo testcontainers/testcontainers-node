@@ -3,7 +3,7 @@ import type { ContainerRuntimeClientStrategyResult } from "../strategies/types";
 import { resolveHost } from "./resolve-host";
 
 const mockExistsSync = vi.fn();
-vi.mock("fs", () => ({
+vi.mock("node:fs", () => ({
   existsSync: () => mockExistsSync(),
 }));
 
