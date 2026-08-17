@@ -1,15 +1,15 @@
-import { ContainerInfo } from "dockerode";
-import { containerLog, log, RandomUuid, Uuid } from "../common";
-import { ComposeOptions, getContainerRuntimeClient, parseComposeContainerName } from "../container-runtime";
+import type { ContainerInfo } from "dockerode";
+import { containerLog, log, RandomUuid, type Uuid } from "../common";
+import { type ComposeOptions, getContainerRuntimeClient, parseComposeContainerName } from "../container-runtime";
 import { StartedGenericContainer } from "../generic-container/started-generic-container";
 import { getReaper } from "../reaper/reaper";
-import { Environment } from "../types";
+import type { Environment } from "../types";
 import { BoundPorts } from "../utils/bound-ports";
 import { mapInspectResult } from "../utils/map-inspect-result";
-import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
+import { type ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
 import { selectWaitStrategy } from "../wait-strategies/utils/wait-strategy-selector";
 import { waitForContainer } from "../wait-strategies/wait-for-container";
-import { WaitStrategy } from "../wait-strategies/wait-strategy";
+import type { WaitStrategy } from "../wait-strategies/wait-strategy";
 import { StartedDockerComposeEnvironment } from "./started-docker-compose-environment";
 
 export class DockerComposeEnvironment {
@@ -131,7 +131,9 @@ export class DockerComposeEnvironment {
     if (this.environmentFile) {
       composeOptions.push("--env-file", this.environmentFile);
     }
-    this.profiles.forEach((profile) => composeOptions.push("--profile", profile));
+    this.profiles.forEach((profile) => {
+      composeOptions.push("--profile", profile);
+    });
 
     if (this.pullPolicy.shouldPull()) {
       await client.compose.pull(options, services);
@@ -149,12 +151,8 @@ export class DockerComposeEnvironment {
     const startedContainers = (await client.container.list()).filter(
       (container) => container.Labels["com.docker.compose.project"] === this.projectName
     );
-    const startedContainerNames = startedContainers.reduce(
-      (containerNames: string[], startedContainer: ContainerInfo) => [
-        ...containerNames,
-        startedContainer.Names.join(", "),
-      ],
-      []
+    const startedContainerNames = startedContainers.map((startedContainer: ContainerInfo) =>
+      startedContainer.Names.join(", ")
     );
     log.info(`Started containers "${startedContainerNames.join('", "')}"`);
 
@@ -211,9 +209,9 @@ export class DockerComposeEnvironment {
           );
         })
       )
-    ).reduce((map, startedGenericContainer) => {
-      const containerName = startedGenericContainer.getName();
-      return { ...map, [containerName]: startedGenericContainer };
+    ).reduce<{ [containerName: string]: StartedGenericContainer }>((map, startedGenericContainer) => {
+      map[startedGenericContainer.getName()] = startedGenericContainer;
+      return map;
     }, {});
 
     log.info(`DockerCompose environment started`);

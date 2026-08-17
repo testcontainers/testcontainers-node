@@ -1,10 +1,10 @@
 import {
   AbstractStartedContainer,
-  Content,
+  type Content,
   GenericContainer,
   Network,
-  StartedNetwork,
-  StartedTestContainer,
+  type StartedNetwork,
+  type StartedTestContainer,
   Wait,
 } from "testcontainers";
 

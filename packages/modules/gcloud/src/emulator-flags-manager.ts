@@ -16,7 +16,7 @@ export class EmulatorFlagsManager {
   }
 
   private flagToString(name: string, value: string): string {
-    return `${name}${value ? "=" + value : ""}`;
+    return `${name}${value ? `=${value}` : ""}`;
   }
 
   /**
@@ -24,7 +24,7 @@ export class EmulatorFlagsManager {
    * @returns string with all flag names and values, concatenated in same order they were added.
    */
   public expandFlags(): string {
-    return `${Object.keys(this.flags).reduce((p, c) => p + " " + this.flagToString(c, this.flags[c]), "")}`;
+    return `${Object.keys(this.flags).reduce((p, c) => `${p} ${this.flagToString(c, this.flags[c])}`, "")}`;
   }
 
   /**

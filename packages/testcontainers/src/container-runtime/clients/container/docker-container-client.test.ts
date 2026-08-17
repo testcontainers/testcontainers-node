@@ -1,4 +1,4 @@
-import { PassThrough, Readable } from "stream";
+import { PassThrough, type Readable } from "node:stream";
 import { DockerContainerClient } from "./docker-container-client";
 
 describe("DockerContainerClient", () => {
@@ -32,12 +32,12 @@ describe("DockerContainerClient", () => {
             setImmediate(() => stdout.uncork());
           },
         },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // biome-ignore lint/suspicious/noExplicitAny: partial dockerode stub for this test
       } as any;
 
       const client = new DockerContainerClient(dockerode);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // biome-ignore lint/suspicious/noExplicitAny: partial container stub for this test
       const result = await client.exec(container as any, ["echo", "hi"]);
 
       expect(result.exitCode).toBe(0);

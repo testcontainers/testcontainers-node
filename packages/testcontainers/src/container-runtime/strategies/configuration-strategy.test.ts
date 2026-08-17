@@ -1,4 +1,4 @@
-import { readFile } from "fs/promises";
+import { readFile } from "node:fs/promises";
 import { ConfigurationStrategy } from "./configuration-strategy";
 import { getContainerRuntimeConfig } from "./utils/config";
 

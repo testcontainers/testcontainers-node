@@ -1,5 +1,5 @@
-import Dockerode from "dockerode";
-import { BoundPorts } from "../utils/bound-ports";
+import type Dockerode from "dockerode";
+import type { BoundPorts } from "../utils/bound-ports";
 
 export interface WaitStrategy {
   waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts, startTime?: Date): Promise<void>;

@@ -1,5 +1,5 @@
-import { ContainerInspectInfo, HealthConfig, ImageInspectInfo } from "dockerode";
-import { HealthCheck, HealthCheckStatus } from "../../types";
+import type { ContainerInspectInfo, HealthConfig, ImageInspectInfo } from "dockerode";
+import type { HealthCheck, HealthCheckStatus } from "../../types";
 
 const DISABLED_HEALTH_CHECK_TEST = "NONE";
 

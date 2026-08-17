@@ -1,4 +1,4 @@
-import { AbstractStartedContainer, GenericContainer, StartedTestContainer } from "testcontainers";
+import { AbstractStartedContainer, GenericContainer, type StartedTestContainer } from "testcontainers";
 
 const MARIADB_PORT = 3306;
 

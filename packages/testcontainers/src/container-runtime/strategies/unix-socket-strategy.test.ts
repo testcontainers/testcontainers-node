@@ -1,4 +1,4 @@
-import { existsSync } from "fs";
+import { existsSync } from "node:fs";
 import { UnixSocketStrategy } from "./unix-socket-strategy";
 
 vi.mock("fs");

@@ -1,4 +1,4 @@
-import { ContainerRuntimeClient, getContainerRuntimeClient } from "../container-runtime";
+import { type ContainerRuntimeClient, getContainerRuntimeClient } from "../container-runtime";
 import { RandomPortGenerator } from "../utils/port-generator";
 
 describe.sequential("Reaper", { timeout: 120_000 }, () => {
@@ -45,7 +45,7 @@ describe.sequential("Reaper", { timeout: 120_000 }, () => {
     const reaper = await getReaper();
     vi.resetModules();
     const reaperContainerInfo = (await client.container.list()).filter((c) => c.Id === reaper.containerId)[0];
-    reaperContainerInfo.Labels["TESTCONTAINERS_RYUK_TEST_LABEL"] = "false";
+    reaperContainerInfo.Labels.TESTCONTAINERS_RYUK_TEST_LABEL = "false";
     vi.spyOn(client.container, "list").mockResolvedValue([reaperContainerInfo]);
 
     const reaper2 = await getReaper();
@@ -58,8 +58,8 @@ describe.sequential("Reaper", { timeout: 120_000 }, () => {
     vi.resetModules();
     const unreachablePort = await new RandomPortGenerator().generatePort();
     const reaperContainerInfo = (await client.container.list()).filter((c) => c.Id === reaper.containerId)[0];
-    reaperContainerInfo.Labels["TESTCONTAINERS_RYUK_TEST_LABEL"] = "false";
-    const reaperPort = reaperContainerInfo.Ports.find((port) => port.PrivatePort == 8080);
+    reaperContainerInfo.Labels.TESTCONTAINERS_RYUK_TEST_LABEL = "false";
+    const reaperPort = reaperContainerInfo.Ports.find((port) => port.PrivatePort === 8080);
     if (!reaperPort) {
       throw new Error("Expected Reaper to map exposed port 8080");
     }

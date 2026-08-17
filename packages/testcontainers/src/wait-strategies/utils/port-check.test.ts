@@ -1,4 +1,4 @@
-import { Container } from "dockerode";
+import type { Container } from "dockerode";
 import { log } from "../../common";
 import { ContainerRuntimeClient } from "../../container-runtime";
 import { InternalPortCheck } from "./port-check";
@@ -9,6 +9,7 @@ const mockLogger = vi.mocked(log);
 const mockContainerExec = vi.fn();
 vi.mock("../../container-runtime", () => {
   return {
+    // biome-ignore lint/complexity/useArrowFunction: must be constructable, the test calls `new ContainerRuntimeClient()`
     ContainerRuntimeClient: function () {
       return {
         container: {
@@ -27,8 +28,7 @@ describe.sequential("PortCheck", () => {
 
     beforeEach(async () => {
       mockContainer = { id: "containerId" } as Container;
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
+      // @ts-expect-error
       client = new ContainerRuntimeClient();
       portCheck = new InternalPortCheck(client, mockContainer);
       mockLogger.enabled.mockImplementation(() => true);

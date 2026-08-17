@@ -8,7 +8,5 @@
     }
   },
   "exclude": ["build"],
-  "references": [
-    { "path": "../../testcontainers" }
-  ]
+  "references": [{ "path": "../../testcontainers" }]
 }

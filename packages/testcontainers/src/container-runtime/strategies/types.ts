@@ -1,4 +1,4 @@
-import { DockerOptions } from "dockerode";
+import type { DockerOptions } from "dockerode";
 
 export type ContainerRuntimeClientStrategyResult = {
   uri: string;

@@ -1,4 +1,4 @@
-import { ComposeDownOptions, ComposeOptions, getContainerRuntimeClient } from "../container-runtime";
+import { type ComposeDownOptions, type ComposeOptions, getContainerRuntimeClient } from "../container-runtime";
 import { DownedDockerComposeEnvironment } from "./downed-docker-compose-environment";
 
 export class StoppedDockerComposeEnvironment {

@@ -1,6 +1,6 @@
-import { Readable } from "stream";
-import { Dispatcher } from "undici";
-import BodyReadable from "undici/types/readable";
+import { Readable } from "node:stream";
+import type { Dispatcher } from "undici";
+import type BodyReadable from "undici/types/readable";
 import { undiciResponseToFetchResponse } from "./undici-response-parser";
 
 test("converts undici response to fetch response", async () => {

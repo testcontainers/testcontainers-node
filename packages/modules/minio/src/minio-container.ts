@@ -1,4 +1,4 @@
-import { AbstractStartedContainer, GenericContainer, Wait, type StartedTestContainer } from "testcontainers";
+import { AbstractStartedContainer, GenericContainer, type StartedTestContainer, Wait } from "testcontainers";
 
 const MINIO_PORT = 9000;
 const MINIO_UI_PORT = 9001;

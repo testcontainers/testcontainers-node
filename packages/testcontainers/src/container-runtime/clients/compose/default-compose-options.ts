@@ -1,7 +1,7 @@
-import { IDockerComposeOptions } from "docker-compose";
-import { EOL } from "os";
+import { EOL } from "node:os";
+import type { IDockerComposeOptions } from "docker-compose";
 import { composeLog, isNotEmptyString } from "../../../common";
-import { ComposeOptions } from "./types";
+import type { ComposeOptions } from "./types";
 
 export function defaultComposeOptions(
   environment: NodeJS.ProcessEnv,
@@ -17,7 +17,9 @@ export function defaultComposeOptions(
             .toString()
             .split(EOL)
             .filter(isNotEmptyString)
-            .forEach((line) => log.trace(line.trim()));
+            .forEach((line) => {
+              log.trace(line.trim());
+            });
         }
       : undefined,
     cwd: options.filePath,

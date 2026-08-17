@@ -1,4 +1,4 @@
-import { ContainerInspectInfo, ImageInspectInfo } from "dockerode";
+import type { ContainerInspectInfo, ImageInspectInfo } from "dockerode";
 import { getHealthCheckStatusFromInspect, hasDisabledHealthCheckConfig, hasHealthCheckConfig } from "./health-check";
 
 describe("health check utils", () => {

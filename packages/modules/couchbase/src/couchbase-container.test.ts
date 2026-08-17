@@ -1,4 +1,4 @@
-import couchbase, { Bucket, Cluster } from "couchbase";
+import couchbase, { type Bucket, type Cluster } from "couchbase";
 import getPort from "get-port";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { BucketDefinition } from "./bucket-definition";

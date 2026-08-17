@@ -1,5 +1,5 @@
 import { GenericContainer } from "../generic-container/generic-container";
-import { StartupCheckStrategy, StartupStatus } from "./startup-check-strategy";
+import { StartupCheckStrategy, type StartupStatus } from "./startup-check-strategy";
 
 describe("StartupCheckStrategy", { timeout: 180_000 }, () => {
   it("should wait until ready", async () => {

@@ -1,4 +1,4 @@
-import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
+import { AbstractStartedContainer, GenericContainer, type StartedTestContainer, Wait } from "testcontainers";
 
 /** Default Oracle listener port. */
 const ORACLEDB_PORT = 1521;

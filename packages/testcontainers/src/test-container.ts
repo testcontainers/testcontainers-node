@@ -1,6 +1,6 @@
-import { Readable } from "stream";
-import { StartedNetwork } from "./network/network";
-import {
+import type { Readable } from "node:stream";
+import type { StartedNetwork } from "./network/network";
+import type {
   ArchiveToCopy,
   BindMount,
   CommitOptions,
@@ -17,9 +17,9 @@ import {
   TmpFs,
   Ulimits,
 } from "./types";
-import { PortWithOptionalBinding } from "./utils/port";
-import { ImagePullPolicy } from "./utils/pull-policy";
-import { WaitStrategy } from "./wait-strategies/wait-strategy";
+import type { PortWithOptionalBinding } from "./utils/port";
+import type { ImagePullPolicy } from "./utils/pull-policy";
+import type { WaitStrategy } from "./wait-strategies/wait-strategy";
 
 export interface TestContainer {
   start(): Promise<StartedTestContainer>;
