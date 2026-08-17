@@ -30,7 +30,7 @@
     "postbuild": "shx cp src/import.sh build"
   },
   "devDependencies": {
-    "redis": "^6.1.0"
+    "redis": "^6.2.0"
   },
   "dependencies": {
     "testcontainers": "^12.1.0"

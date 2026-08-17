@@ -41,10 +41,10 @@
     "testcontainers": "^12.1.0"
   },
   "devDependencies": {
-    "@google-cloud/bigquery": "^8.3.1",
-    "@google-cloud/datastore": "^10.1.1",
-    "@google-cloud/firestore": "8.7.0",
-    "@google-cloud/pubsub": "^5.3.1",
+    "@google-cloud/bigquery": "^9.0.1",
+    "@google-cloud/datastore": "^11.0.0",
+    "@google-cloud/firestore": "8.7.1",
+    "@google-cloud/pubsub": "^6.0.0",
     "@google-cloud/spanner": "^8.10.0",
     "@google-cloud/storage": "^7.21.0",
     "firebase-admin": "14.2.0",
