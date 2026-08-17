@@ -18,7 +18,8 @@ class PortForwarder {
     private readonly containerId: string,
     private readonly networkId: string,
     private readonly ipAddress: string,
-    readonly _networkName: string
+    // biome-ignore lint/correctness/noUnusedPrivateClassMembers: kept private; unused but part of the internal constructor contract
+    private readonly networkName: string
   ) {}
 
   public async exposeHostPort(port: number): Promise<void> {

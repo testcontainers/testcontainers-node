@@ -6,7 +6,8 @@ export class CredsStore extends CredentialProvider {
     return "CredsStore";
   }
 
-  public getCredentialProviderName(_registry: string, dockerConfig: ContainerRuntimeConfig): string | undefined {
+  // biome-ignore lint/correctness/noUnusedFunctionParameters: inherited CredentialProvider signature, name is part of the published API
+  public getCredentialProviderName(registry: string, dockerConfig: ContainerRuntimeConfig): string | undefined {
     if (dockerConfig.credsStore !== undefined && dockerConfig.credsStore.length > 0) {
       return dockerConfig.credsStore;
     }
