@@ -67,6 +67,7 @@ nav:
       - Etcd: modules/etcd.md
       - GCloud: modules/gcloud.md
       - HiveMQ: modules/hivemq.md
+      - InfluxDB: modules/influxdb.md
       - K3s: modules/k3s.md
       - Kafka: modules/kafka.md
       - KurrentDB: modules/kurrentdb.md
