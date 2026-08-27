@@ -1,4 +1,4 @@
-import { BigQuery, TableSchema } from "@google-cloud/bigquery";
+import { BigQuery, type TableSchema } from "@google-cloud/bigquery";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { BigQueryEmulatorContainer } from "./bigquery-emulator-container";
 

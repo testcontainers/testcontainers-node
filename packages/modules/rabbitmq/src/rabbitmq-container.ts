@@ -1,4 +1,4 @@
-import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
+import { AbstractStartedContainer, GenericContainer, Wait } from "testcontainers";
 
 const AMQP_PORT = 5672;
 const AMQPS_PORT = 5671;
@@ -25,10 +25,6 @@ export class RabbitMQContainer extends GenericContainer {
 }
 
 export class StartedRabbitMQContainer extends AbstractStartedContainer {
-  constructor(startedTestContainer: StartedTestContainer) {
-    super(startedTestContainer);
-  }
-
   public getAmqpUrl(): string {
     return `amqp://${this.getHost()}:${this.getMappedPort(AMQP_PORT)}`;
   }

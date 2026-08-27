@@ -1,4 +1,4 @@
-import Dockerode from "dockerode";
+import type Dockerode from "dockerode";
 import { IntervalRetry, log } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
 import { AbstractWaitStrategy } from "./wait-strategy";

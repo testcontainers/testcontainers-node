@@ -1,14 +1,15 @@
-import Dockerode, { ContainerInfo } from "dockerode";
-import { createSshConnection, SshConnection } from "ssh-remote-port-forward";
+import type Dockerode from "dockerode";
+import type { ContainerInfo } from "dockerode";
+import { createSshConnection, type SshConnection } from "ssh-remote-port-forward";
 import { log, withFileLock } from "../common";
-import { ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "../container-runtime";
+import { type ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "../container-runtime";
 import { GenericContainer } from "../generic-container/generic-container";
 import { getReaper } from "../reaper/reaper";
 import { LABEL_TESTCONTAINERS_SESSION_ID, LABEL_TESTCONTAINERS_SSHD } from "../utils/labels";
-import { PortWithOptionalBinding } from "../utils/port";
+import type { PortWithOptionalBinding } from "../utils/port";
 
-export const SSHD_IMAGE = process.env["SSHD_CONTAINER_IMAGE"]
-  ? ImageName.fromString(process.env["SSHD_CONTAINER_IMAGE"]).string
+export const SSHD_IMAGE = process.env.SSHD_CONTAINER_IMAGE
+  ? ImageName.fromString(process.env.SSHD_CONTAINER_IMAGE).string
   : ImageName.fromString("testcontainers/sshd:1.4.0").string;
 
 class PortForwarder {
@@ -17,6 +18,7 @@ class PortForwarder {
     private readonly containerId: string,
     private readonly networkId: string,
     private readonly ipAddress: string,
+    // biome-ignore lint/correctness/noUnusedPrivateClassMembers: kept private; unused but part of the internal constructor contract
     private readonly networkName: string
   ) {}
 
@@ -39,6 +41,7 @@ class PortForwarder {
   }
 }
 
+// biome-ignore lint/complexity/noStaticOnlyClass: singleton holder with private static state
 export class PortForwarderInstance {
   private static readonly USERNAME = "root";
   private static readonly PASSWORD = "root";
@@ -46,26 +49,30 @@ export class PortForwarderInstance {
   private static instance: Promise<PortForwarder>;
 
   public static isRunning(): boolean {
-    return this.instance !== undefined;
+    return PortForwarderInstance.instance !== undefined;
   }
 
   public static async getInstance(): Promise<PortForwarder> {
-    if (!this.instance) {
+    if (!PortForwarderInstance.instance) {
       await withFileLock("testcontainers-node-sshd.lock", async () => {
         const client = await getContainerRuntimeClient();
         const reaper = await getReaper(client);
         const sessionId = reaper.sessionId;
-        const portForwarderContainer = await this.findPortForwarderContainer(client, sessionId);
+        const portForwarderContainer = await PortForwarderInstance.findPortForwarderContainer(client, sessionId);
 
         if (portForwarderContainer) {
-          this.instance = this.reuseInstance(client, portForwarderContainer, sessionId);
+          PortForwarderInstance.instance = PortForwarderInstance.reuseInstance(
+            client,
+            portForwarderContainer,
+            sessionId
+          );
         } else {
-          this.instance = this.createInstance();
+          PortForwarderInstance.instance = PortForwarderInstance.createInstance();
         }
-        await this.instance;
+        await PortForwarderInstance.instance;
       });
     }
-    return this.instance;
+    return PortForwarderInstance.instance;
   }
 
   private static async findPortForwarderContainer(
@@ -90,7 +97,7 @@ export class PortForwarderInstance {
     log.debug(`Reusing existing PortForwarder for session "${sessionId}"...`);
 
     const host = client.info.containerRuntime.host;
-    const port = container.Ports.find((port) => port.PrivatePort == 22)?.PublicPort;
+    const port = container.Ports.find((port) => port.PrivatePort === 22)?.PublicPort;
     if (!port) {
       throw new Error("Expected PortForwarder to map exposed port 22");
     }
@@ -121,14 +128,14 @@ export class PortForwarderInstance {
     const client = await getContainerRuntimeClient();
     const reaper = await getReaper(client);
 
-    const containerPort: PortWithOptionalBinding = process.env["TESTCONTAINERS_SSHD_PORT"]
-      ? { container: 22, host: Number(process.env["TESTCONTAINERS_SSHD_PORT"]) }
+    const containerPort: PortWithOptionalBinding = process.env.TESTCONTAINERS_SSHD_PORT
+      ? { container: 22, host: Number(process.env.TESTCONTAINERS_SSHD_PORT) }
       : 22;
 
     const container = await new GenericContainer(SSHD_IMAGE)
       .withName(`testcontainers-port-forwarder-${reaper.sessionId}`)
       .withExposedPorts(containerPort)
-      .withEnvironment({ PASSWORD: this.PASSWORD })
+      .withEnvironment({ PASSWORD: PortForwarderInstance.PASSWORD })
       .withLabels({ [LABEL_TESTCONTAINERS_SSHD]: "true" })
       .start();
 
@@ -136,7 +143,12 @@ export class PortForwarderInstance {
     const port = container.getMappedPort(22);
 
     log.debug(`Connecting to Port Forwarder on "${host}:${port}"...`);
-    const connection = await createSshConnection({ host, port, username: this.USERNAME, password: this.PASSWORD });
+    const connection = await createSshConnection({
+      host,
+      port,
+      username: PortForwarderInstance.USERNAME,
+      password: PortForwarderInstance.PASSWORD,
+    });
     log.debug(`Connected to Port Forwarder on "${host}:${port}"`);
     connection.unref();
 

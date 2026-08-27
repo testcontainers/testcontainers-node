@@ -1,4 +1,4 @@
-import { Mock } from "vitest";
+import type { Mock } from "vitest";
 import { AbstractStartedContainer, GenericContainer } from "../index";
 
 describe.sequential("AbstractStartedContainer", { timeout: 60_000 }, () => {

@@ -1,5 +1,5 @@
-import { ImageBuildOptions, ImageInspectInfo } from "dockerode";
-import { ImageName } from "../../image-name";
+import type { ImageBuildOptions, ImageInspectInfo } from "dockerode";
+import type { ImageName } from "../../image-name";
 
 export interface ImageClient {
   build(context: string, opts: ImageBuildOptions): Promise<void>;

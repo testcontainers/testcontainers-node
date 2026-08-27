@@ -1,4 +1,4 @@
-import { ContainerInspectInfo } from "dockerode";
+import type { ContainerInspectInfo } from "dockerode";
 import { mapInspectResult } from "./map-inspect-result";
 
 const inspectResult = (health?: { Status: string }): ContainerInspectInfo =>

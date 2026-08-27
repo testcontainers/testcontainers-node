@@ -1,4 +1,4 @@
-import path from "path";
+import path from "node:path";
 import { RandomUuid } from "../common";
 import { GenericContainer } from "../generic-container/generic-container";
 import { checkContainerIsHealthy, getRunningContainerNames } from "../utils/test-helper";

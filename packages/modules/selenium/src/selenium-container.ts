@@ -1,5 +1,5 @@
-import { copyFile } from "fs/promises";
-import path from "path";
+import { copyFile } from "node:fs/promises";
+import path from "node:path";
 import tar from "tar-fs";
 import {
   AbstractStartedContainer,
@@ -7,10 +7,10 @@ import {
   GenericContainer,
   log,
   Network,
-  StartedNetwork,
-  StartedTestContainer,
-  StopOptions,
-  StoppedTestContainer,
+  type StartedNetwork,
+  type StartedTestContainer,
+  type StopOptions,
+  type StoppedTestContainer,
   Wait,
 } from "testcontainers";
 import tmp from "tmp";
@@ -67,16 +67,13 @@ export class StartedSeleniumContainer extends AbstractStartedContainer {
 }
 
 export class StoppedSeleniumContainer extends AbstractStoppedContainer {
+  // biome-ignore lint/correctness/noUnusedPrivateClassMembers: dropping `private` would expose this field in the published declaration
   constructor(private readonly stoppedSeleniumContainer: StoppedTestContainer) {
     super(stoppedSeleniumContainer);
   }
 }
 
 export class SeleniumRecordingContainer extends SeleniumContainer {
-  constructor(image: string) {
-    super(image);
-  }
-
   private async createNetworkIfNeeded(): Promise<StartedNetwork | undefined> {
     if (this.networkMode) {
       return undefined;
@@ -93,6 +90,7 @@ export class SeleniumRecordingContainer extends SeleniumContainer {
     const startedSeleniumContainer = await super.start();
 
     const startedFfmpegContainer = await new GenericContainer(SELENIUM_VIDEO_IMAGE)
+      // biome-ignore lint/style/noNonNullAssertion: createNetworkIfNeeded guarantees a network mode is set
       .withNetworkMode(this.networkMode!)
       .withEnvironment({ DISPLAY_CONTAINER_NAME: SELENIUM_NETWORK_ALIAS })
       .withWaitStrategy(Wait.forLogMessage(/.*video-recording entered RUNNING state.*/))

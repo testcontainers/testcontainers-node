@@ -1,7 +1,7 @@
-import Dockerode from "dockerode";
-import { Socket } from "net";
+import { Socket } from "node:net";
+import type Dockerode from "dockerode";
 import { log } from "../../common";
-import { ContainerRuntimeClient } from "../../container-runtime";
+import type { ContainerRuntimeClient } from "../../container-runtime";
 
 export interface PortCheck {
   isBound(port: number | string): Promise<boolean>;

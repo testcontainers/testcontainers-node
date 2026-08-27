@@ -1,5 +1,5 @@
-import { Readable } from "stream";
-import { Dispatcher } from "undici";
+import { Readable } from "node:stream";
+import type { Dispatcher } from "undici";
 
 /**
  * Converts an undici response to a fetch response.

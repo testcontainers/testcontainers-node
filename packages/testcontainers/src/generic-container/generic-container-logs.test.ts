@@ -40,7 +40,7 @@ describe("GenericContainer logs", { timeout: 180_000 }, () => {
 
     await new Promise((resolve) => setTimeout(resolve, pauseMs));
 
-    const inSleepTimestamp = new Date().getTime() - pauseMs + 1000;
+    const inSleepTimestamp = Date.now() - pauseMs + 1000;
     const since = Math.floor(inSleepTimestamp / 1000);
 
     const stream = await container.logs({ since });

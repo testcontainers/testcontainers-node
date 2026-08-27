@@ -1,13 +1,13 @@
+import path from "node:path";
 import type { ImageBuildOptions } from "dockerode";
-import path from "path";
-import { log, RandomUuid, Uuid } from "../common";
+import { log, RandomUuid, type Uuid } from "../common";
 import { getAuthConfig, getContainerRuntimeClient, ImageName } from "../container-runtime";
-import { AuthConfig } from "../container-runtime/auth/types";
+import type { AuthConfig } from "../container-runtime/auth/types";
 import { getReaper } from "../reaper/reaper";
-import { BuildArgs, RegistryConfig } from "../types";
+import type { BuildArgs, RegistryConfig } from "../types";
 import { getDockerfileImages } from "../utils/dockerfile-parser";
 import { createLabels, LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
-import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
+import { type ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
 import { GenericContainer } from "./generic-container";
 
 export type BuildOptions = {
@@ -116,8 +116,8 @@ export class GenericContainerBuilder {
       })
     );
 
-    return authConfigs
-      .map((authConfig) => ({ [authConfig.registryAddress]: authConfig }))
-      .reduce((prev, next) => ({ ...prev, ...next }), {} as RegistryConfig);
+    return Object.fromEntries(
+      authConfigs.map((authConfig) => [authConfig.registryAddress, authConfig])
+    ) as RegistryConfig;
   }
 }

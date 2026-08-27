@@ -1,4 +1,4 @@
-import sql, { config } from "mssql";
+import sql, { type config } from "mssql";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { MSSQLServerContainer } from "./mssqlserver-container";
 

@@ -1,16 +1,16 @@
+import { promises as fs } from "node:fs";
+import type { Readable } from "node:stream";
 import archiver from "archiver";
 import AsyncLock from "async-lock";
-import { Container, ContainerCreateOptions, ContainerInspectInfo, HostConfig } from "dockerode";
-import { promises as fs } from "fs";
-import { Readable } from "stream";
+import type { Container, ContainerCreateOptions, ContainerInspectInfo, HostConfig } from "dockerode";
 import { containerLog, hash, log, toNanos } from "../common";
-import { ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "../container-runtime";
+import { type ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "../container-runtime";
 import { CONTAINER_STATUSES } from "../container-runtime/clients/container/types";
-import { StartedNetwork } from "../network/network";
+import type { StartedNetwork } from "../network/network";
 import { PortForwarderInstance, SSHD_IMAGE } from "../port-forwarder/port-forwarder";
 import { getReaper, getReaperImage } from "../reaper/reaper";
-import { StartedTestContainer, TestContainer } from "../test-container";
-import {
+import type { StartedTestContainer, TestContainer } from "../test-container";
+import type {
   ArchiveToCopy,
   BindMount,
   ContentToCopy,
@@ -29,11 +29,11 @@ import {
 import { BoundPorts } from "../utils/bound-ports";
 import { createLabels, LABEL_TESTCONTAINERS_CONTAINER_HASH, LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
 import { mapInspectResult } from "../utils/map-inspect-result";
-import { getContainerPort, getProtocol, hasHostBinding, PortWithOptionalBinding } from "../utils/port";
-import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
+import { getContainerPort, getProtocol, hasHostBinding, type PortWithOptionalBinding } from "../utils/port";
+import { type ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
 import { selectWaitStrategy } from "../wait-strategies/utils/wait-strategy-selector";
 import { waitForContainer } from "../wait-strategies/wait-for-container";
-import { WaitStrategy } from "../wait-strategies/wait-strategy";
+import type { WaitStrategy } from "../wait-strategies/wait-strategy";
 import { GenericContainerBuilder } from "./generic-container-builder";
 import { inspectContainerUntilPortsExposed } from "./inspect-container-util-ports-exposed";
 import { StartedGenericContainer } from "./started-generic-container";

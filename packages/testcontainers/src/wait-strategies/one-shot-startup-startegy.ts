@@ -1,5 +1,6 @@
-import Dockerode, { ContainerInspectInfo } from "dockerode";
-import { StartupCheckStrategy, StartupStatus } from "./startup-check-strategy";
+import type Dockerode from "dockerode";
+import type { ContainerInspectInfo } from "dockerode";
+import { StartupCheckStrategy, type StartupStatus } from "./startup-check-strategy";
 
 export class OneShotStartupCheckStrategy extends StartupCheckStrategy {
   DOCKER_TIMESTAMP_ZERO = "0001-01-01T00:00:00Z";

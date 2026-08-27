@@ -1,7 +1,6 @@
 import { RandomUuid } from "../common";
 import { AbstractStartedContainer } from "../generic-container/abstract-started-container";
 import { GenericContainer } from "../generic-container/generic-container";
-import { StartedTestContainer } from "../test-container";
 
 export class SocatContainer extends GenericContainer {
   private targets: { [exposePort: number]: string } = {};
@@ -28,8 +27,4 @@ export class SocatContainer extends GenericContainer {
   }
 }
 
-export class StartedSocatContainer extends AbstractStartedContainer {
-  constructor(startedTestcontainers: StartedTestContainer) {
-    super(startedTestcontainers);
-  }
-}
+export class StartedSocatContainer extends AbstractStartedContainer {}

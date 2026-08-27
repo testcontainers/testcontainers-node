@@ -1,6 +1,6 @@
+import path from "node:path";
 import archiver from "archiver";
 import getPort from "get-port";
-import path from "path";
 import { RandomUuid } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
 import { PullPolicy } from "../utils/pull-policy";
@@ -220,8 +220,8 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
 
   it("should set labels", async () => {
     const labels = {
-      ["label-1"]: "value-1",
-      ["label-2"]: "value-2",
+      "label-1": "value-1",
+      "label-2": "value-2",
     };
 
     await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
@@ -261,7 +261,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     expect(exitCode2).toBe(0);
   });
 
-  if (!process.env["CI_ROOTLESS"]) {
+  if (!process.env.CI_ROOTLESS) {
     it("should set ulimits", async () => {
       await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
         .withUlimits({ memlock: { hard: -1, soft: -1 } })
@@ -396,7 +396,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
   it("should copy file to container with permissions", async () => {
     const source = path.resolve(fixtures, "docker", "test.txt");
     const target = "/tmp/test.txt";
-    const mode = parseInt("0777", 8);
+    const mode = 0o0777;
 
     await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withCopyFilesToContainer([{ source, target, mode }])
@@ -451,7 +451,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
   it("should copy directory to container with permissions", async () => {
     const source = path.resolve(fixtures, "docker");
     const target = "/tmp/newdir";
-    const mode = parseInt("0777", 8);
+    const mode = 0o0777;
 
     await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withCopyDirectoriesToContainer([{ source, target, mode }])
@@ -488,7 +488,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
   it("should copy content to container with permissions", async () => {
     const content = "hello world";
     const target = "/tmp/test.txt";
-    const mode = parseInt("0777", 8);
+    const mode = 0o0777;
 
     await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withCopyContentToContainer([{ content, target, mode }])

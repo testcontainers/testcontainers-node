@@ -1,9 +1,9 @@
-import { ContainerInspectInfo } from "dockerode";
+import type { ContainerInspectInfo } from "dockerode";
 import { log } from "../../common";
-import { ContainerRuntimeClient, ImageName } from "../../container-runtime";
-import { HealthCheck } from "../../types";
+import { type ContainerRuntimeClient, ImageName } from "../../container-runtime";
+import type { HealthCheck } from "../../types";
 import { Wait } from "../wait";
-import { WaitStrategy } from "../wait-strategy";
+import type { WaitStrategy } from "../wait-strategy";
 import {
   hasDisabledHealthCheckConfig,
   hasHealthCheck,

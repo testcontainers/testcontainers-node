@@ -1,5 +1,11 @@
 import { CreateBucketCommand, HeadBucketCommand, S3Client } from "@aws-sdk/client-s3";
-import { GenericContainer, LABEL_TESTCONTAINERS_SESSION_ID, log, Network, StartedTestContainer } from "testcontainers";
+import {
+  GenericContainer,
+  LABEL_TESTCONTAINERS_SESSION_ID,
+  log,
+  Network,
+  type StartedTestContainer,
+} from "testcontainers";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { LOCALSTACK_PORT, LocalstackContainer } from "./localstack-container";
 

@@ -1,17 +1,17 @@
-import { GetEventsOptions, ImageInspectInfo } from "dockerode";
-import { createServer, Server } from "http";
 import { createSocket } from "node:dgram";
 import fs from "node:fs";
+import { createServer, type Server } from "node:http";
 import { EOL, tmpdir } from "node:os";
 import path from "node:path";
-import { Readable } from "stream";
+import type { Readable } from "node:stream";
+import type { GetEventsOptions, ImageInspectInfo } from "dockerode";
 import { Agent, request } from "undici";
 import { IntervalRetry } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
-import { StartedDockerComposeEnvironment } from "../docker-compose-environment/started-docker-compose-environment";
-import { GenericContainer } from "../generic-container/generic-container";
-import { StartedTestContainer } from "../test-container";
-import { HealthCheckStatus } from "../types";
+import type { StartedDockerComposeEnvironment } from "../docker-compose-environment/started-docker-compose-environment";
+import type { GenericContainer } from "../generic-container/generic-container";
+import type { StartedTestContainer } from "../test-container";
+import type { HealthCheckStatus } from "../types";
 import { getHealthCheckStatusFromInspect } from "../wait-strategies/utils/health-check";
 
 export const getImage = (dirname: string, index = 0): string => {
@@ -77,10 +77,7 @@ export const getDockerEventStream = async (opts: GetEventsOptions = {}): Promise
 export const getRunningContainerNames = async (): Promise<string[]> => {
   const dockerode = (await getContainerRuntimeClient()).container.dockerode;
   const containers = await dockerode.listContainers();
-  return containers
-    .map((container) => container.Names)
-    .reduce((result, containerNames) => [...result, ...containerNames], [])
-    .map((containerName) => containerName.replace("/", ""));
+  return containers.flatMap((container) => container.Names).map((containerName) => containerName.replace("/", ""));
 };
 
 export const getStoppedContainerNames = async (): Promise<string[]> => {
@@ -88,8 +85,7 @@ export const getStoppedContainerNames = async (): Promise<string[]> => {
   const containers = await dockerode.listContainers({ all: true });
   return containers
     .filter((container) => container.State === "exited")
-    .map((container) => container.Names)
-    .reduce((result, containerNames) => [...result, ...containerNames], [])
+    .flatMap((container) => container.Names)
     .map((containerName) => containerName.replace("/", ""));
 };
 
@@ -111,7 +107,7 @@ export const checkImageExists = async (imageName: string): Promise<boolean> => {
   try {
     await dockerode.getImage(imageName.toString()).inspect();
     return true;
-  } catch (err) {
+  } catch (_err) {
     return false;
   }
 };
@@ -200,7 +196,7 @@ export async function stopStartingContainer(container: GenericContainer, name: s
 }
 
 export async function createTestServer(port: number): Promise<Server> {
-  const server = createServer((req, res) => {
+  const server = createServer((_req, res) => {
     res.writeHead(200);
     res.end("hello world");
   });

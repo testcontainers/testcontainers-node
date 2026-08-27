@@ -1,4 +1,4 @@
-import { ContainerRuntimeClientStrategyResult } from "./types";
+import type { ContainerRuntimeClientStrategyResult } from "./types";
 
 export interface ContainerRuntimeClientStrategy {
   getName(): string;

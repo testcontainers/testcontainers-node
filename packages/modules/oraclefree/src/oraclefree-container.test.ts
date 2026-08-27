@@ -1,6 +1,6 @@
 import oracledb from "oracledb";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
-import { OracleDbContainer, StartedOracleDbContainer } from "./oraclefree-container";
+import { OracleDbContainer, type StartedOracleDbContainer } from "./oraclefree-container";
 
 const IMAGE = getImage(__dirname);
 
@@ -25,7 +25,7 @@ describe.sequential("OracleFreeContainer", { timeout: 240_000 }, () => {
       });
 
       const result = await connection.execute("SELECT 1 FROM DUAL");
-      expect(result.rows![0]).toEqual([1]);
+      expect(result.rows?.[0]).toEqual([1]);
 
       await connection.close();
     });
@@ -38,7 +38,7 @@ describe.sequential("OracleFreeContainer", { timeout: 240_000 }, () => {
       });
 
       const result = await connection.execute("SELECT 1 FROM DUAL");
-      expect(result.rows![0]).toEqual([1]);
+      expect(result.rows?.[0]).toEqual([1]);
 
       await connection.close();
     });
@@ -51,7 +51,7 @@ describe.sequential("OracleFreeContainer", { timeout: 240_000 }, () => {
       });
 
       const result = await connection.execute("SELECT SYS_CONTEXT('USERENV', 'CON_NAME') FROM DUAL");
-      expect(result.rows![0]).toEqual(["FREEPDB1"]);
+      expect(result.rows?.[0]).toEqual(["FREEPDB1"]);
 
       await connection.close();
     });
@@ -82,10 +82,10 @@ describe.sequential("OracleFreeContainer", { timeout: 240_000 }, () => {
     });
 
     const result = await connection.execute("SELECT SYS_CONTEXT('USERENV', 'CON_NAME') FROM DUAL");
-    expect(result.rows![0]).toEqual([customDatabase]);
+    expect(result.rows?.[0]).toEqual([customDatabase]);
 
     const resultUser = await connection.execute("SELECT USER FROM DUAL");
-    expect(resultUser.rows![0]).toEqual([customUsername]);
+    expect(resultUser.rows?.[0]).toEqual([customUsername]);
 
     await connection.close();
     // }
@@ -102,7 +102,7 @@ describe.sequential("OracleFreeContainer", { timeout: 240_000 }, () => {
     });
 
     const result = await connection.execute("SELECT 1 FROM DUAL");
-    expect(result.rows![0]).toEqual([1]);
+    expect(result.rows?.[0]).toEqual([1]);
 
     await connection.close();
   });
