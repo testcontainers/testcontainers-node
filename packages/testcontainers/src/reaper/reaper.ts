@@ -4,8 +4,9 @@ import { userInfo } from "os";
 import { IntervalRetry, log, RandomUuid, withFileLock } from "../common";
 import { ContainerRuntimeClient, ImageName } from "../container-runtime";
 import { GenericContainer } from "../generic-container/generic-container";
-import { LABEL_TESTCONTAINERS_RYUK, LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
+import { LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
 import { Wait } from "../wait-strategies/wait";
+import { isAdoptableReaperContainer } from "./reaper-discovery";
 
 /**
  * Resolve the Ryuk reaper image name. Read lazily so that callers (and tests)
@@ -68,16 +69,9 @@ export async function getReaper(client: ContainerRuntimeClient): Promise<Reaper>
   return reaper;
 }
 
-async function findReaperContainers(client: ContainerRuntimeClient): Promise<ContainerInfo[]> {
+export async function findReaperContainers(client: ContainerRuntimeClient): Promise<ContainerInfo[]> {
   const containers = await client.container.list();
-  return containers
-    .filter(
-      (container) =>
-        container.State === "running" &&
-        container.Labels[LABEL_TESTCONTAINERS_RYUK] === "true" &&
-        container.Labels["TESTCONTAINERS_RYUK_TEST_LABEL"] !== "true"
-    )
-    .sort((a, b) => b.Created - a.Created);
+  return containers.filter(isAdoptableReaperContainer).sort((a, b) => b.Created - a.Created);
 }
 
 async function useExistingReaper(reaperContainer: ContainerInfo, sessionId: string, host: string): Promise<Reaper> {
