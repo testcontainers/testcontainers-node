@@ -4,6 +4,7 @@ import { log, pullLog } from "../../common";
 import { getAuthConfig } from "../auth/get-auth-config";
 import { ImageName } from "../image-name";
 import { imageExists } from "./image-exists";
+import { useLocalImage } from "./use-local-image";
 
 export type PullImageOptions = {
   imageName: ImageName;
@@ -16,6 +17,9 @@ export const pullImage = async (
   options: PullImageOptions
 ): Promise<void> => {
   try {
+    if (await useLocalImage(dockerode, options.imageName)) {
+      return;
+    }
     if (!options.force && (await imageExists(dockerode, options.imageName))) {
       log.debug(`Not pulling image "${options.imageName.string}" as it already exists`);
       return;

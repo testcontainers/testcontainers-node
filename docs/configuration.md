@@ -46,3 +46,15 @@ Configuration of Testcontainers and its behaviours:
 | TESTCONTAINERS_REUSE_ENABLE              | true                       | Enable reusable containers                               |
 | TESTCONTAINERS_RYUK_VERBOSE              | true                       | Sets RYUK_VERBOSE env var in ryuk container              |
 | TESTCONTAINERS_RYUK_RECONNECTION_TIMEOUT | 30s                        | Sets RYUK_RECONNECTION_TIMEOUT env var in ryuk container |
+
+## Disable image pulls
+
+Set `TESTCONTAINERS_PULL_POLICY=never` to require locally available images when
+starting containers, including helpers such as Ryuk and SSHd. Preload the required
+images into the selected Docker daemon before running tests. If an image cannot be
+inspected locally, startup fails before registry authentication or an image pull.
+This setting takes precedence over `withPullPolicy`, including `alwaysPull()`.
+When unset, existing pull behavior is unchanged.
+
+This restricts Testcontainers' image-pull operations; it does not disable container
+network access or control pulls performed by Docker builds or Docker Compose.

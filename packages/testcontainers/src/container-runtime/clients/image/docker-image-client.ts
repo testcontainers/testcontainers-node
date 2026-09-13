@@ -8,6 +8,7 @@ import tar from "tar-fs";
 import { buildLog, log, pullLog } from "../../../common";
 import { getAuthConfig } from "../../auth/get-auth-config";
 import { ImageName } from "../../image-name";
+import { useLocalImage } from "../../utils/use-local-image";
 import { ImageClient } from "./image-client";
 
 export class DockerImageClient implements ImageClient {
@@ -131,6 +132,9 @@ export class DockerImageClient implements ImageClient {
 
   async pull(imageName: ImageName, opts?: { force: boolean; platform: string | undefined }): Promise<void> {
     try {
+      if (await useLocalImage(this.dockerode, imageName)) {
+        return;
+      }
       if (!opts?.force && (await this.exists(imageName))) {
         log.debug(`Image "${imageName.string}" already exists`);
         return;
