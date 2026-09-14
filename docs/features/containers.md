@@ -28,6 +28,19 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+To use only an image that is already available locally, use `PullPolicy.neverPull()`:
+
+```js
+const { GenericContainer, PullPolicy } = require("testcontainers");
+
+const container = await new GenericContainer("my-app:local")
+  .withPullPolicy(PullPolicy.neverPull())
+  .start();
+```
+
+Startup fails if the image is missing locally, without attempting to pull it from a registry.
+This policy only prevents pulling the specified image. Testcontainers may still pull Ryuk.
+
 Create a custom pull policy:
 
 ```ts
@@ -43,6 +56,8 @@ const container = await new GenericContainer("alpine")
   .withPullPolicy(new CustomPullPolicy())
   .start();
 ```
+
+Custom policies can forbid pulling by returning `true` from `neverPull()` and `false` from `shouldPull()`; returning `true` from both throws an error.
 
 ### With a command
 

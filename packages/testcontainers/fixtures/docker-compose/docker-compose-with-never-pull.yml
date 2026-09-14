@@ -1,0 +1,10 @@
+services:
+  container:
+    image: ${TEST_IMAGE}
+    pull_policy: always
+    ports:
+      - 8080
+  other:
+    image: ${OTHER_IMAGE}
+    ports:
+      - 8080

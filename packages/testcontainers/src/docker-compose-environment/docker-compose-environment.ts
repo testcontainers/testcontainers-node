@@ -6,7 +6,7 @@ import { getReaper } from "../reaper/reaper";
 import { Environment } from "../types";
 import { BoundPorts } from "../utils/bound-ports";
 import { mapInspectResult } from "../utils/map-inspect-result";
-import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
+import { ImagePullPolicy, PullPolicy, resolvePullPolicy } from "../utils/pull-policy";
 import { selectWaitStrategy } from "../wait-strategies/utils/wait-strategy-selector";
 import { waitForContainer } from "../wait-strategies/wait-for-container";
 import { WaitStrategy } from "../wait-strategies/wait-strategy";
@@ -120,8 +120,16 @@ export class DockerComposeEnvironment {
     };
 
     const commandOptions = [...clientCommandOptions];
+
+    const pullPolicy = resolvePullPolicy(this.pullPolicy);
     if (this.build) {
+      if (pullPolicy === "never") {
+        throw new Error("Never-pull policies cannot be combined with Compose builds");
+      }
       commandOptions.push("--build");
+    }
+    if (pullPolicy === "never") {
+      commandOptions.push("--pull", "never", "--no-build");
     }
     if (!this.recreate) {
       commandOptions.push("--no-recreate");
@@ -133,7 +141,7 @@ export class DockerComposeEnvironment {
     }
     this.profiles.forEach((profile) => composeOptions.push("--profile", profile));
 
-    if (this.pullPolicy.shouldPull()) {
+    if (pullPolicy === "always") {
       await client.compose.pull(options, services);
     }
     await client.compose.up(

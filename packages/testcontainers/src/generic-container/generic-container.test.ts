@@ -2,11 +2,13 @@ import archiver from "archiver";
 import getPort from "get-port";
 import path from "path";
 import { RandomUuid } from "../common";
+import * as containerRuntime from "../container-runtime";
 import { getContainerRuntimeClient } from "../container-runtime";
 import { PullPolicy } from "../utils/pull-policy";
 import {
   checkContainerIsHealthy,
   checkContainerIsHealthyUdp,
+  createTempImageTag,
   createTempSymlinkedFile,
   getDockerEventStream,
   getRunningContainerNames,
@@ -342,6 +344,58 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
       await using _ = await container.withPullPolicy(PullPolicy.alwaysPull()).start();
       await dockerPullEventPromise;
     }
+  });
+
+  it("should start a local image without pulling with a never-pull policy", async () => {
+    await using image = await createTempImageTag("cristianrgreco/testcontainer:1.1.14");
+    await using dockerEventStream = await getDockerEventStream();
+    const dockerPullEventPromise = waitForDockerEvent(dockerEventStream.events, "pull", 1, image.name);
+    const dockerStartEventPromise = waitForDockerEvent(dockerEventStream.events, "start", 1, image.name);
+    let hasPulled = false;
+    dockerPullEventPromise.then(() => (hasPulled = true));
+
+    await using container = await new GenericContainer(image.name)
+      .withPullPolicy(PullPolicy.neverPull())
+      .withExposedPorts(8080)
+      .start();
+
+    await checkContainerIsHealthy(container);
+    await dockerStartEventPromise;
+    expect(hasPulled).toBe(false);
+  });
+
+  it("should fail without pulling when a local image is missing", { concurrent: false }, async () => {
+    const client = await getContainerRuntimeClient();
+    const pullSpy = vi.spyOn(client.image, "pull");
+    const image = `localhost/testcontainers-missing-${new RandomUuid().nextUuid()}:latest`;
+
+    await expect(new GenericContainer(image).withPullPolicy(PullPolicy.neverPull()).start()).rejects.toMatchObject({
+      statusCode: 404,
+    });
+    expect(pullSpy).not.toHaveBeenCalled();
+  });
+
+  it("should propagate image inspection failures without pulling", { concurrent: false }, async () => {
+    const client = await getContainerRuntimeClient();
+    const error = new Error("Image inspection failed");
+    vi.spyOn(client.image, "inspect").mockRejectedValueOnce(error);
+    const pullSpy = vi.spyOn(client.image, "pull");
+
+    await expect(
+      new GenericContainer("cristianrgreco/testcontainer:1.1.14").withPullPolicy(PullPolicy.neverPull()).start()
+    ).rejects.toBe(error);
+    expect(pullSpy).not.toHaveBeenCalled();
+  });
+
+  it("should reject conflicting pull settings before contacting the runtime", { concurrent: false }, async () => {
+    const clientSpy = vi.spyOn(containerRuntime, "getContainerRuntimeClient");
+
+    await expect(
+      new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+        .withPullPolicy({ shouldPull: () => true, neverPull: () => true })
+        .start()
+    ).rejects.toThrow("Image pull policy cannot enable both shouldPull() and neverPull()");
+    expect(clientSpy).not.toHaveBeenCalled();
   });
 
   it("should set the IPC mode", async () => {

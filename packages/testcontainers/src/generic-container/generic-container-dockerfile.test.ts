@@ -1,5 +1,6 @@
 import path from "path";
 import { RandomUuid } from "../common";
+import * as containerRuntime from "../container-runtime";
 import { getContainerRuntimeClient, ImageName } from "../container-runtime";
 import { getReaper } from "../reaper/reaper";
 import { LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
@@ -92,6 +93,36 @@ describe("GenericContainer Dockerfile", { timeout: 180_000 }, () => {
       expect(hasResolved).toBeFalsy();
     });
   }
+
+  for (const buildkit of [false, true]) {
+    it(
+      `should reject never-pull before contacting the runtime with buildkit=${buildkit}`,
+      { concurrent: false },
+      async () => {
+        const clientSpy = vi.spyOn(containerRuntime, "getContainerRuntimeClient");
+        const builder = GenericContainer.fromDockerfile(path.resolve(fixtures, "docker")).withPullPolicy(
+          PullPolicy.neverPull()
+        );
+        if (buildkit) {
+          builder.withBuildkit();
+        }
+
+        await expect(builder.build()).rejects.toThrow("Never-pull policies are not supported for Dockerfile builds");
+        expect(clientSpy).not.toHaveBeenCalled();
+      }
+    );
+  }
+
+  it("should reject conflicting pull settings before contacting the runtime", { concurrent: false }, async () => {
+    const clientSpy = vi.spyOn(containerRuntime, "getContainerRuntimeClient");
+
+    await expect(
+      GenericContainer.fromDockerfile(path.resolve(fixtures, "docker"))
+        .withPullPolicy({ shouldPull: () => true, neverPull: () => true })
+        .build()
+    ).rejects.toThrow("Image pull policy cannot enable both shouldPull() and neverPull()");
+    expect(clientSpy).not.toHaveBeenCalled();
+  });
 
   it("should build and start with custom file name", async () => {
     const context = path.resolve(fixtures, "docker-with-custom-filename");
