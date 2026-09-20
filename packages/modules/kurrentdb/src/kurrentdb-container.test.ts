@@ -4,7 +4,7 @@ import { KurrentDbContainer } from "./kurrentdb-container";
 
 const IMAGE = getImage(__dirname);
 
-describe.sequential("KurrentDbContainer", { timeout: 240_000 }, () => {
+describe("KurrentDbContainer", { concurrent: false, timeout: 240_000 }, () => {
   it("should execute write and read", async () => {
     // startContainer {
     await using container = await new KurrentDbContainer(IMAGE).start();
