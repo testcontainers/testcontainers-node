@@ -1,2 +1,2 @@
-FROM influxdb:2.7
-FROM influxdb:1.11
+FROM influxdb:2.9
+FROM influxdb:1.13
