@@ -1,6 +1,6 @@
-import { Readable } from "stream";
-import { AuthConfig } from "./container-runtime/auth/types";
-import { ContainerCommitOptions } from "./container-runtime/clients/container/types";
+import type { Readable } from "node:stream";
+import type { AuthConfig } from "./container-runtime/auth/types";
+import type { ContainerCommitOptions } from "./container-runtime/clients/container/types";
 
 export type InspectResult = {
   name: string;

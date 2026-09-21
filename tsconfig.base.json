@@ -3,9 +3,7 @@
     "incremental": true,
     "lib": ["ES2023"],
     "target": "ES2023",
-    "types": [
-      "vitest/globals"
-    ],
+    "types": ["vitest/globals"],
     "module": "nodenext",
     "declaration": true,
     "sourceMap": false,

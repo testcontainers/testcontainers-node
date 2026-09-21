@@ -5,11 +5,11 @@ describe.sequential("get auth config", () => {
   let mockReadFile: Mock;
 
   beforeEach(async () => {
-    vi.mock("fs");
-    const { existsSync } = await import("fs");
+    vi.mock("node:fs");
+    const { existsSync } = await import("node:fs");
     mockExistsSync = existsSync as Mock;
-    vi.mock("fs/promises");
-    const { readFile } = await import("fs/promises");
+    vi.mock("node:fs/promises");
+    const { readFile } = await import("node:fs/promises");
     mockReadFile = readFile as Mock;
   });
 

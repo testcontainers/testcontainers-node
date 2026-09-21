@@ -1,4 +1,4 @@
-import path from "path";
+import path from "node:path";
 import { RandomUuid } from "../common";
 import { getContainerRuntimeClient, ImageName } from "../container-runtime";
 import { getReaper } from "../reaper/reaper";

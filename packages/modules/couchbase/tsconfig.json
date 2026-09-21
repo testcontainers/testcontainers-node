@@ -4,14 +4,10 @@
     "rootDir": "src",
     "outDir": "build",
     "paths": {
-      "testcontainers": [
-        "../../testcontainers/src"
-      ]
+      "testcontainers": ["../../testcontainers/src"]
     }
   },
-  "exclude": [
-    "build"
-  ],
+  "exclude": ["build"],
   "references": [
     {
       "path": "../../testcontainers"

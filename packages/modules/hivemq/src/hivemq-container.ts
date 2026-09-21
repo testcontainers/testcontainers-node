@@ -1,5 +1,5 @@
-import path from "path";
-import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
+import path from "node:path";
+import { AbstractStartedContainer, GenericContainer, type StartedTestContainer, Wait } from "testcontainers";
 
 const START_LOG_MESSAGE_REGEX = /(.*)Started HiveMQ in(.*)/i;
 const HIVEMQ_BASE_PATH = "/opt/hivemq";

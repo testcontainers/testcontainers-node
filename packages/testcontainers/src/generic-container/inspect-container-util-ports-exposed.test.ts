@@ -1,4 +1,4 @@
-import { ContainerInspectInfo } from "dockerode";
+import type { ContainerInspectInfo } from "dockerode";
 import { inspectContainerUntilPortsExposed } from "./inspect-container-util-ports-exposed";
 
 function mockInspectResult(

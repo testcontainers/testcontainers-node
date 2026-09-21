@@ -2,16 +2,16 @@ import { satisfies } from "compare-versions";
 import {
   AbstractStartedContainer,
   BoundPorts,
-  Content,
+  type Content,
   GenericContainer,
   getContainerRuntimeClient,
-  InspectResult,
+  type InspectResult,
   RandomUuid,
-  StartedTestContainer,
-  Uuid,
+  type StartedTestContainer,
+  type Uuid,
   Wait,
+  type WaitStrategy,
   waitForContainer,
-  WaitStrategy,
 } from "testcontainers";
 
 const KAFKA_PORT = 9093;
@@ -126,12 +126,11 @@ export class KafkaContainer extends GenericContainer {
       // Kraft
       this.withEnvironment({
         CLUSTER_ID: DEFAULT_CLUSTER_ID,
-        KAFKA_NODE_ID: this.environment["KAFKA_BROKER_ID"],
-        KAFKA_LISTENER_SECURITY_PROTOCOL_MAP:
-          this.environment["KAFKA_LISTENER_SECURITY_PROTOCOL_MAP"] + ",CONTROLLER:PLAINTEXT",
-        KAFKA_LISTENERS: `${this.environment["KAFKA_LISTENERS"]},CONTROLLER://0.0.0.0:${KAFKA_CONTROLLER_PORT}`,
+        KAFKA_NODE_ID: this.environment.KAFKA_BROKER_ID,
+        KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: `${this.environment.KAFKA_LISTENER_SECURITY_PROTOCOL_MAP},CONTROLLER:PLAINTEXT`,
+        KAFKA_LISTENERS: `${this.environment.KAFKA_LISTENERS},CONTROLLER://0.0.0.0:${KAFKA_CONTROLLER_PORT}`,
         KAFKA_PROCESS_ROLES: "broker,controller",
-        KAFKA_CONTROLLER_QUORUM_VOTERS: `${this.environment["KAFKA_BROKER_ID"]}@${network}:${KAFKA_CONTROLLER_PORT}`,
+        KAFKA_CONTROLLER_QUORUM_VOTERS: `${this.environment.KAFKA_BROKER_ID}@${network}:${KAFKA_CONTROLLER_PORT}`,
         KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER",
       });
     }
@@ -261,7 +260,7 @@ export class KafkaContainer extends GenericContainer {
       // At the time of writing kafka-configs displays a warning stating that the 'zookeeper' flag is deprecated in favor of 'bootstrap-server'.
       // Unfortunately, 'bootstrap-server' can only be used to set quotas and not to create a user.
       "--zookeeper",
-      this.environment["KAFKA_ZOOKEEPER_CONNECT"],
+      this.environment.KAFKA_ZOOKEEPER_CONNECT,
       "--entity-type",
       "users",
       "--entity-name",
@@ -286,7 +285,7 @@ export class KafkaContainer extends GenericContainer {
   private commandKraftCreateUser(saslOptions: SaslSslListenerOptions): string {
     return (
       "echo 'kafka-storage format --ignore-formatted " +
-      `-t "${this.environment["CLUSTER_ID"]}" ` +
+      `-t "${this.environment.CLUSTER_ID}" ` +
       "-c /etc/kafka/kafka.properties " +
       `--add-scram "${saslOptions.sasl.mechanism}=[name=${saslOptions.sasl.user.name},password=${saslOptions.sasl.user.password}]"' >> /etc/confluent/docker/configure\n`
     );
@@ -296,13 +295,13 @@ export class KafkaContainer extends GenericContainer {
     let command = "sed -i '/KAFKA_ZOOKEEPER_CONNECT/d' /etc/confluent/docker/configure\n";
     command +=
       "echo 'kafka-storage format --ignore-formatted " +
-      `-t "${this.environment["CLUSTER_ID"]}" ` +
+      `-t "${this.environment.CLUSTER_ID}" ` +
       "-c /etc/kafka/kafka.properties' >> /etc/confluent/docker/configure\n";
     return command;
   }
 
   private commandZookeeper(): string {
-    let command = "echo 'clientPort=" + DEFAULT_ZOOKEEPER_PORT + "' > zookeeper.properties\n";
+    let command = `echo 'clientPort=${DEFAULT_ZOOKEEPER_PORT}' > zookeeper.properties\n`;
     command += "echo 'dataDir=/var/lib/zookeeper/data' >> zookeeper.properties\n";
     command += "echo 'dataLogDir=/var/lib/zookeeper/log' >> zookeeper.properties\n";
     command += "zookeeper-server-start zookeeper.properties &\n";
@@ -310,8 +309,4 @@ export class KafkaContainer extends GenericContainer {
   }
 }
 
-export class StartedKafkaContainer extends AbstractStartedContainer {
-  constructor(startedTestContainer: StartedTestContainer) {
-    super(startedTestContainer);
-  }
-}
+export class StartedKafkaContainer extends AbstractStartedContainer {}

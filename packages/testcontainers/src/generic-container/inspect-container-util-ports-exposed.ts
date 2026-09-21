@@ -1,4 +1,4 @@
-import { ContainerInspectInfo } from "dockerode";
+import type { ContainerInspectInfo } from "dockerode";
 import { IntervalRetry, log } from "../common";
 
 export async function inspectContainerUntilPortsExposed(

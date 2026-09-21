@@ -1,5 +1,5 @@
-import { CosmosClient, PartitionKeyKind } from "@azure/cosmos";
 import https from "node:https";
+import { CosmosClient, PartitionKeyKind } from "@azure/cosmos";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { AzureCosmosDbEmulatorContainer } from "./azure-cosmosdb-emulator-container";
 

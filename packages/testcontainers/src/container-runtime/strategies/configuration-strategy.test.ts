@@ -1,9 +1,9 @@
-import { readFile } from "fs/promises";
+import { readFile } from "node:fs/promises";
 import { ConfigurationStrategy } from "./configuration-strategy";
 import { getContainerRuntimeConfig } from "./utils/config";
 
 vi.mock("./utils/config");
-vi.mock("fs/promises");
+vi.mock("node:fs/promises");
 
 const mockGetContainerRuntimeConfig = vi.mocked(getContainerRuntimeConfig);
 const mockReadFile = vi.mocked(readFile);

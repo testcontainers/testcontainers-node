@@ -29,9 +29,9 @@ describe("LogWaitStrategy", { timeout: 180_000 }, () => {
       .withWaitStrategy(Wait.forLogMessage(/Ready/g))
       .start();
 
-    expect(new Date().getTime() - start.getTime()).toBeGreaterThanOrEqual(2_000);
+    expect(Date.now() - start.getTime()).toBeGreaterThanOrEqual(2_000);
     await container.restart();
-    expect(new Date().getTime() - start.getTime()).toBeGreaterThanOrEqual(4_000);
+    expect(Date.now() - start.getTime()).toBeGreaterThanOrEqual(4_000);
   });
 
   it("should stop the container when the log message wait strategy times out", async () => {

@@ -1,5 +1,5 @@
-import { Mock } from "vitest";
-import { AbstractStartedContainer, GenericContainer, InspectResult, StartedTestContainer } from "../index";
+import type { Mock } from "vitest";
+import { AbstractStartedContainer, GenericContainer, type InspectResult, type StartedTestContainer } from "../index";
 
 describe.sequential("GenericContainer lifecycle", { timeout: 180_000 }, () => {
   let beforeContainerCreated: Mock;
@@ -59,13 +59,13 @@ describe.sequential("GenericContainer lifecycle", { timeout: 180_000 }, () => {
       containerCreated(containerId);
     }
 
-    protected override async containerStarting(inspectResult: InspectResult, reused: boolean): Promise<void> {
+    protected override async containerStarting(_inspectResult: InspectResult, reused: boolean): Promise<void> {
       containerStarting(reused);
     }
 
     protected override async containerStarted(
-      container: StartedTestContainer,
-      inspectResult: InspectResult,
+      _container: StartedTestContainer,
+      _inspectResult: InspectResult,
       reused: boolean
     ): Promise<void> {
       containerStarted(reused);

@@ -1,5 +1,5 @@
-import Dockerode from "dockerode";
-import { PassThrough, Readable } from "stream";
+import { PassThrough, type Readable } from "node:stream";
+import type Dockerode from "dockerode";
 import { log } from "../../common";
 
 export async function demuxStream(dockerode: Dockerode, stream: Readable): Promise<Readable> {

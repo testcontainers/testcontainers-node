@@ -8,7 +8,7 @@ const KUBECTL_IMAGE = getImage(__dirname, 1);
 
 describe("K3sContainer", { timeout: 120_000 }, () => {
   // K3sContainer runs as a privileged container
-  if (!process.env["CI_ROOTLESS"]) {
+  if (!process.env.CI_ROOTLESS) {
     it("should start and have listable node", async () => {
       // k3sListNodes {
       await using container = await new K3sContainer(IMAGE).start();

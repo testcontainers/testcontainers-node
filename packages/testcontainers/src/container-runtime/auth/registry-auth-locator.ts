@@ -1,4 +1,4 @@
-import { AuthConfig, ContainerRuntimeConfig } from "./types";
+import type { AuthConfig, ContainerRuntimeConfig } from "./types";
 
 export interface RegistryAuthLocator {
   getName(): string;

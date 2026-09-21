@@ -1,5 +1,5 @@
-import Dockerode from "dockerode";
-import { Readable } from "stream";
+import type { Readable } from "node:stream";
+import type Dockerode from "dockerode";
 import { log } from "../../common";
 import { demuxStream } from "./demux-stream";
 

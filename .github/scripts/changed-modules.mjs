@@ -18,7 +18,7 @@ const allPackagesPaths = [
   /^packages\/testcontainers\//,
   /^package(-lock)?\.json$/,
   /^tsconfig\.base\.json$/,
-  /^eslint\.config\.js$/,
+  /^biome\.json$/,
   /^vitest\.config\.ts$/,
   /^\.npmrc$/,
   /^\.github\/actions\//,

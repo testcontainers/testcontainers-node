@@ -1,8 +1,0 @@
-{
-  "printWidth": 120,
-  "trailingComma": "es5",
-  "plugins": [
-    "prettier-plugin-organize-imports"
-  ],
-  "endOfLine": "auto"
-}

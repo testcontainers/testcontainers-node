@@ -1,7 +1,7 @@
 import compose from "docker-compose";
 import { log, pullLog, toSeconds } from "../../../common";
 import { defaultComposeOptions } from "./default-compose-options";
-import { ComposeDownOptions, ComposeOptions } from "./types";
+import type { ComposeDownOptions, ComposeOptions } from "./types";
 
 export interface ComposeClient {
   up(options: ComposeOptions, services?: Array<string>): Promise<void>;
@@ -13,7 +13,7 @@ export interface ComposeClient {
 export async function getComposeClient(environment: NodeJS.ProcessEnv): Promise<ComposeClient> {
   try {
     return new DockerComposeClient(environment);
-  } catch (err) {
+  } catch (_err) {
     return new MissingComposeClient();
   }
 }
@@ -89,8 +89,6 @@ class DockerComposeClient implements ComposeClient {
 }
 
 class MissingComposeClient implements ComposeClient {
-  constructor() {}
-
   up(): Promise<void> {
     throw new Error("Compose is not installed");
   }
@@ -108,7 +106,7 @@ class MissingComposeClient implements ComposeClient {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// biome-ignore lint/suspicious/noExplicitAny: docker-compose rejects with a non-Error shape
 async function handleAndRethrow(err: any, handle: (error: Error) => Promise<void>): Promise<never> {
   const error = err instanceof Error ? err : new Error(err.err.trim());
   await handle(error);

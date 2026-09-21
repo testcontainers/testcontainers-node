@@ -1,7 +1,7 @@
-import { existsSync } from "fs";
-import { readFile } from "fs/promises";
-import { homedir } from "os";
-import path from "path";
+import { existsSync } from "node:fs";
+import { readFile } from "node:fs/promises";
+import { homedir } from "node:os";
+import path from "node:path";
 import propertiesReader from "properties-reader";
 import { log } from "../../../common";
 
@@ -68,14 +68,14 @@ async function loadFromFile() {
 function loadFromEnv(env: NodeJS.ProcessEnv) {
   const dockerClientConfig: ContainerRuntimeConfig = {};
 
-  if (env["DOCKER_HOST"] !== undefined) {
-    dockerClientConfig.dockerHost = env["DOCKER_HOST"];
+  if (env.DOCKER_HOST !== undefined) {
+    dockerClientConfig.dockerHost = env.DOCKER_HOST;
   }
-  if (env["DOCKER_TLS_VERIFY"] !== undefined) {
-    dockerClientConfig.dockerTlsVerify = env["DOCKER_TLS_VERIFY"];
+  if (env.DOCKER_TLS_VERIFY !== undefined) {
+    dockerClientConfig.dockerTlsVerify = env.DOCKER_TLS_VERIFY;
   }
-  if (env["DOCKER_CERT_PATH"] !== undefined) {
-    dockerClientConfig.dockerCertPath = env["DOCKER_CERT_PATH"];
+  if (env.DOCKER_CERT_PATH !== undefined) {
+    dockerClientConfig.dockerCertPath = env.DOCKER_CERT_PATH;
   }
 
   return dockerClientConfig;

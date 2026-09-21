@@ -2,6 +2,7 @@ import { log } from "./common";
 import { getContainerRuntimeClient } from "./container-runtime";
 import { PortForwarderInstance } from "./port-forwarder/port-forwarder";
 
+// biome-ignore lint/complexity/noStaticOnlyClass: public API surface, kept as a class for backwards compatibility
 export class TestContainers {
   public static async exposeHostPorts(...ports: number[]): Promise<void> {
     const portForwarder = await PortForwarderInstance.getInstance();
@@ -9,7 +10,7 @@ export class TestContainers {
     await Promise.all(
       ports.map((port) =>
         portForwarder.exposeHostPort(port).catch(async (err) => {
-          if (await this.isHostPortExposed(portForwarder.getContainerId(), port)) {
+          if (await TestContainers.isHostPortExposed(portForwarder.getContainerId(), port)) {
             log.debug(`Host port ${port} is already exposed`);
           } else {
             throw err;

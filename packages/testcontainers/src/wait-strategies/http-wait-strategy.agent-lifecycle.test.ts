@@ -1,4 +1,4 @@
-import { Readable } from "stream";
+import { Readable } from "node:stream";
 import { Agent, request } from "undici";
 import { HttpWaitStrategy } from "./http-wait-strategy";
 
@@ -10,6 +10,7 @@ vi.mock("undici", async (importOriginal) => {
   const actual = await importOriginal<typeof import("undici")>();
   return {
     ...actual,
+    // biome-ignore lint/complexity/useArrowFunction: must be constructable, the code under test calls `new Agent()`
     Agent: vi.fn(function (...args: ConstructorParameters<typeof actual.Agent>) {
       const agent = new actual.Agent(...args);
       agentInstances.push(agent);

@@ -1,6 +1,6 @@
-import { Readable } from "stream";
-import { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
-import {
+import type { Readable } from "node:stream";
+import type { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
+import type {
   CommitOptions,
   ContentToCopy,
   CopyToContainerOptions,

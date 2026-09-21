@@ -1,9 +1,9 @@
 import {
   AbstractStartedContainer,
   GenericContainer,
-  PortGenerator,
+  type PortGenerator,
   RandomPortGenerator,
-  StartedTestContainer,
+  type StartedTestContainer,
   Wait,
 } from "testcontainers";
 

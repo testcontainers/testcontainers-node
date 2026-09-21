@@ -1,4 +1,4 @@
-import debug, { IDebugger } from "debug";
+import debug, { type IDebugger } from "debug";
 
 type Options = {
   containerId?: string;

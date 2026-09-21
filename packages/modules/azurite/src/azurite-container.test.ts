@@ -1,8 +1,8 @@
-import { TableClient, TableEntity } from "@azure/data-tables";
-import { BlobServiceClient, StorageSharedKeyCredential } from "@azure/storage-blob";
-import { QueueServiceClient } from "@azure/storage-queue";
 import fs from "node:fs";
 import path from "node:path";
+import { TableClient, type TableEntity } from "@azure/data-tables";
+import { BlobServiceClient, StorageSharedKeyCredential } from "@azure/storage-blob";
+import { QueueServiceClient } from "@azure/storage-queue";
 import { RandomPortGenerator } from "testcontainers";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { AzuriteContainer } from "./azurite-container";

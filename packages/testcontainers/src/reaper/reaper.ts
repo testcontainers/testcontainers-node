@@ -1,8 +1,8 @@
-import { ContainerInfo } from "dockerode";
-import { Socket } from "net";
-import { userInfo } from "os";
+import { Socket } from "node:net";
+import { userInfo } from "node:os";
+import type { ContainerInfo } from "dockerode";
 import { IntervalRetry, log, RandomUuid, withFileLock } from "../common";
-import { ContainerRuntimeClient, ImageName } from "../container-runtime";
+import { type ContainerRuntimeClient, ImageName } from "../container-runtime";
 import { GenericContainer } from "../generic-container/generic-container";
 import { LABEL_TESTCONTAINERS_RYUK, LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
 import { Wait } from "../wait-strategies/wait";
@@ -15,8 +15,8 @@ import { Wait } from "../wait-strategies/wait";
  * See https://github.com/testcontainers/testcontainers-node/issues/1310.
  */
 export function getReaperImage(): string {
-  return process.env["RYUK_CONTAINER_IMAGE"]
-    ? ImageName.fromString(process.env["RYUK_CONTAINER_IMAGE"]).string
+  return process.env.RYUK_CONTAINER_IMAGE
+    ? ImageName.fromString(process.env.RYUK_CONTAINER_IMAGE).string
     : ImageName.fromString("testcontainers/ryuk:0.14.0").string;
 }
 
@@ -75,7 +75,7 @@ async function findReaperContainers(client: ContainerRuntimeClient): Promise<Con
       (container) =>
         container.State === "running" &&
         container.Labels[LABEL_TESTCONTAINERS_RYUK] === "true" &&
-        container.Labels["TESTCONTAINERS_RYUK_TEST_LABEL"] !== "true"
+        container.Labels.TESTCONTAINERS_RYUK_TEST_LABEL !== "true"
     )
     .sort((a, b) => b.Created - a.Created);
 }
@@ -83,7 +83,7 @@ async function findReaperContainers(client: ContainerRuntimeClient): Promise<Con
 async function useExistingReaper(reaperContainer: ContainerInfo, sessionId: string, host: string): Promise<Reaper> {
   log.debug(`Reusing existing Reaper for session "${sessionId}"...`);
 
-  const reaperPort = reaperContainer.Ports.find((port) => port.PrivatePort == 8080)?.PublicPort;
+  const reaperPort = reaperContainer.Ports.find((port) => port.PrivatePort === 8080)?.PublicPort;
   if (!reaperPort) {
     throw new Error("Expected Reaper to map exposed port 8080");
   }
@@ -99,23 +99,23 @@ async function createNewReaper(sessionId: string, remoteSocketPath: string): Pro
   const container = new GenericContainer(getReaperImage())
     .withName(`testcontainers-ryuk-${sessionId}`)
     .withExposedPorts(
-      process.env["TESTCONTAINERS_RYUK_PORT"]
-        ? { container: 8080, host: parseInt(process.env["TESTCONTAINERS_RYUK_PORT"]) }
+      process.env.TESTCONTAINERS_RYUK_PORT
+        ? { container: 8080, host: parseInt(process.env.TESTCONTAINERS_RYUK_PORT, 10) }
         : 8080
     )
     .withBindMounts([{ source: remoteSocketPath, target: "/var/run/docker.sock" }])
     .withLabels({ [LABEL_TESTCONTAINERS_SESSION_ID]: sessionId })
     .withWaitStrategy(Wait.forLogMessage(/.*Started.*/));
-  if (process.env["TESTCONTAINERS_RYUK_VERBOSE"]) {
-    container.withEnvironment({ RYUK_VERBOSE: process.env["TESTCONTAINERS_RYUK_VERBOSE"] });
+  if (process.env.TESTCONTAINERS_RYUK_VERBOSE) {
+    container.withEnvironment({ RYUK_VERBOSE: process.env.TESTCONTAINERS_RYUK_VERBOSE });
   }
-  if (process.env["TESTCONTAINERS_RYUK_RECONNECTION_TIMEOUT"]) {
-    container.withEnvironment({ RYUK_RECONNECTION_TIMEOUT: process.env["TESTCONTAINERS_RYUK_RECONNECTION_TIMEOUT"] });
+  if (process.env.TESTCONTAINERS_RYUK_RECONNECTION_TIMEOUT) {
+    container.withEnvironment({ RYUK_RECONNECTION_TIMEOUT: process.env.TESTCONTAINERS_RYUK_RECONNECTION_TIMEOUT });
   }
-  if (process.env["TESTCONTAINERS_RYUK_PRIVILEGED"] === "true") {
+  if (process.env.TESTCONTAINERS_RYUK_PRIVILEGED === "true") {
     container.withPrivilegedMode();
   }
-  if (process.env["TESTCONTAINERS_RYUK_TEST_LABEL"] === "true") {
+  if (process.env.TESTCONTAINERS_RYUK_TEST_LABEL === "true") {
     container.withLabels({ TESTCONTAINERS_RYUK_TEST_LABEL: "true" });
   }
 

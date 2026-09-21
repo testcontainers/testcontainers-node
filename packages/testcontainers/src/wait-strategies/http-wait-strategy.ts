@@ -1,8 +1,8 @@
-import Dockerode from "dockerode";
+import type Dockerode from "dockerode";
 import { Agent, request } from "undici";
 import { IntervalRetry, log } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
-import { BoundPorts } from "../utils/bound-ports";
+import type { BoundPorts } from "../utils/bound-ports";
 import { undiciResponseToFetchResponse } from "./utils/undici-response-parser";
 import { AbstractWaitStrategy } from "./wait-strategy";
 
@@ -165,7 +165,7 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
       });
 
       message = `Container exited during HTTP healthCheck, last ${tail} logs: ${lastLogs.join("\n")}`;
-    } catch (err) {
+    } catch (_err) {
       message = "Container exited during HTTP healthCheck, failed to get last logs";
     }
 

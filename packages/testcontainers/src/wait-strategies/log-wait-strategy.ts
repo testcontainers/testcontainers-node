@@ -1,8 +1,8 @@
 import byline from "byline";
-import Dockerode from "dockerode";
+import type Dockerode from "dockerode";
 import { log } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
-import { BoundPorts } from "../utils/bound-ports";
+import type { BoundPorts } from "../utils/bound-ports";
 import { AbstractWaitStrategy } from "./wait-strategy";
 
 export type Log = string;
@@ -15,6 +15,7 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
     super();
   }
 
+  // biome-ignore lint/correctness/noUnusedFunctionParameters: inherited WaitStrategy signature, name is part of the published API
   public async waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts, startTime?: Date): Promise<void> {
     log.debug(`Waiting for log message "${this.message}"...`, { containerId: container.id });
     const client = await getContainerRuntimeClient();

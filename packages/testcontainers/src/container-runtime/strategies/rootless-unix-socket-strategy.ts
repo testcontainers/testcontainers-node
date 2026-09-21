@@ -1,9 +1,9 @@
-import { existsSync } from "fs";
-import os from "os";
-import path from "path";
+import { existsSync } from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { isDefined } from "../../common";
-import { ContainerRuntimeClientStrategy } from "./strategy";
-import { ContainerRuntimeClientStrategyResult } from "./types";
+import type { ContainerRuntimeClientStrategy } from "./strategy";
+import type { ContainerRuntimeClientStrategyResult } from "./types";
 
 export class RootlessUnixSocketStrategy implements ContainerRuntimeClientStrategy {
   constructor(
@@ -42,7 +42,7 @@ export class RootlessUnixSocketStrategy implements ContainerRuntimeClientStrateg
   }
 
   private getSocketPathFromEnv(): string | undefined {
-    const xdgRuntimeDir = this.env["XDG_RUNTIME_DIR"];
+    const xdgRuntimeDir = this.env.XDG_RUNTIME_DIR;
 
     if (xdgRuntimeDir !== undefined) {
       return path.join(xdgRuntimeDir, "docker.sock");

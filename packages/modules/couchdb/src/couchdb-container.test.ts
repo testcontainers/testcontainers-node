@@ -35,7 +35,7 @@ describe("CouchDBContainer", { timeout: 240_000 }, () => {
     // }
   });
 
-  it("should use custom credentials", async function () {
+  it("should use custom credentials", async () => {
     // customCredentials {
     await using container = await new CouchDBContainer(IMAGE).withUsername("admin").withPassword("foo").start();
 

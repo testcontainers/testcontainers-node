@@ -1,5 +1,5 @@
-import { GlobalConfig, KafkaJS } from "@confluentinc/kafka-javascript";
-import { StartedKafkaContainer } from "./kafka-container";
+import { type GlobalConfig, KafkaJS } from "@confluentinc/kafka-javascript";
+import type { StartedKafkaContainer } from "./kafka-container";
 
 // kafkaTestHelper {
 export async function assertMessageProducedAndConsumed(

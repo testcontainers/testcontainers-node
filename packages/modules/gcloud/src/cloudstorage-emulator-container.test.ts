@@ -1,6 +1,6 @@
+import type { ReadableStream } from "node:stream/web";
 import { Storage } from "@google-cloud/storage";
 import { setupServer } from "msw/node";
-import { ReadableStream } from "node:stream/web";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { CloudStorageEmulatorContainer } from "./cloudstorage-emulator-container";
 
@@ -96,7 +96,7 @@ describe.sequential("CloudStorageEmulatorContainer", { timeout: 240_000 }, () =>
 
     const [requestInfo] = executedRequests;
 
-    const expectedRequestUrl = container.getEmulatorEndpoint() + "/_internal/config";
+    const expectedRequestUrl = `${container.getEmulatorEndpoint()}/_internal/config`;
     expect(requestInfo.url).toContain(expectedRequestUrl);
     expect(requestInfo.method).toBe("PUT");
 

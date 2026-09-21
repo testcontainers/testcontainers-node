@@ -1,6 +1,6 @@
 import { GenericContainer, Network } from "testcontainers";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
-import { ToxiProxyContainer, TPClient } from "./toxiproxy-container";
+import { ToxiProxyContainer, type TPClient } from "./toxiproxy-container";
 
 const IMAGE = getImage(__dirname);
 
@@ -118,7 +118,7 @@ describe("ToxiProxyContainer", { timeout: 240_000 }, () => {
 
     for (let i = 0; i < 32; i++) {
       await toxiproxyContainer.createProxy({
-        name: "test-" + i,
+        name: `test-${i}`,
         upstream: `google.com:80`,
       });
     }

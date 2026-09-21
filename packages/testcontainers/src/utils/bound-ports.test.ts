@@ -1,5 +1,5 @@
-import { HostIp } from "../container-runtime";
-import { InspectResult } from "../types";
+import type { HostIp } from "../container-runtime";
+import type { InspectResult } from "../types";
 import { BoundPorts, resolveHostPortBinding } from "./bound-ports";
 
 describe("BoundPorts", () => {

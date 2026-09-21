@@ -1,4 +1,4 @@
-import Dockerode from "dockerode";
+import type Dockerode from "dockerode";
 import { log } from "../../common";
 
 export const startContainer = async (container: Dockerode.Container): Promise<void> => {

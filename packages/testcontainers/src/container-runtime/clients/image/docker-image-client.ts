@@ -1,14 +1,15 @@
+import { existsSync, promises as fs } from "node:fs";
+import path from "node:path";
 import dockerIgnore from "@balena/dockerignore";
 import AsyncLock from "async-lock";
 import byline from "byline";
-import Dockerode, { ImageBuildOptions, ImageInspectInfo } from "dockerode";
-import { existsSync, promises as fs } from "fs";
-import path from "path";
+import type Dockerode from "dockerode";
+import type { ImageBuildOptions, ImageInspectInfo } from "dockerode";
 import tar from "tar-fs";
 import { buildLog, log, pullLog } from "../../../common";
 import { getAuthConfig } from "../../auth/get-auth-config";
-import { ImageName } from "../../image-name";
-import { ImageClient } from "./image-client";
+import type { ImageName } from "../../image-name";
+import type { ImageClient } from "./image-client";
 
 export class DockerImageClient implements ImageClient {
   private readonly existingImages = new Set<string>();

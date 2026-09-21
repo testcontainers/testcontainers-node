@@ -1,4 +1,4 @@
-import { AbstractStartedContainer, GenericContainer, Wait, type StartedTestContainer } from "testcontainers";
+import { AbstractStartedContainer, GenericContainer, type StartedTestContainer, Wait } from "testcontainers";
 
 const CASSANDRA_PORT = 9042;
 

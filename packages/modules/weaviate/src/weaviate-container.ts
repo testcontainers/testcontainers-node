@@ -1,4 +1,4 @@
-import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
+import { AbstractStartedContainer, GenericContainer, Wait } from "testcontainers";
 
 const WEAVIATE_HTTP_PORT = 8080;
 const WEAVIATE_GRPC_PORT = 50051;
@@ -26,10 +26,6 @@ export class WeaviateContainer extends GenericContainer {
 }
 
 export class StartedWeaviateContainer extends AbstractStartedContainer {
-  constructor(startedTestContainer: StartedTestContainer) {
-    super(startedTestContainer);
-  }
-
   public getHttpHostAddress(): string {
     return `${this.getHost()}:${this.getMappedPort(WEAVIATE_HTTP_PORT)}`;
   }

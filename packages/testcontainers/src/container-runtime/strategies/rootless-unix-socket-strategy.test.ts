@@ -1,9 +1,9 @@
-import { existsSync } from "fs";
-import os from "os";
-import path from "path";
+import { existsSync } from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { RootlessUnixSocketStrategy } from "./rootless-unix-socket-strategy";
 
-vi.mock("fs", () => ({ existsSync: vi.fn() }));
+vi.mock("node:fs", () => ({ existsSync: vi.fn() }));
 
 describe.sequential("RootlessUnixSocketStrategy", () => {
   const mockExistsSync = vi.mocked(existsSync);

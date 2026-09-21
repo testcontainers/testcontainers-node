@@ -1,5 +1,5 @@
-import { ContainerInspectInfo, ImageInspectInfo } from "dockerode";
-import { ContainerRuntimeClient } from "../../container-runtime";
+import type { ContainerInspectInfo, ImageInspectInfo } from "dockerode";
+import type { ContainerRuntimeClient } from "../../container-runtime";
 import { HealthCheckWaitStrategy } from "../health-check-wait-strategy";
 import { HostPortWaitStrategy } from "../host-port-wait-strategy";
 import { Wait } from "../wait";

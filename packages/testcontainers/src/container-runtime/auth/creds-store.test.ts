@@ -1,5 +1,5 @@
 import { CredsStore } from "./creds-store";
-import { AuthConfig, ContainerRuntimeConfig } from "./types";
+import type { AuthConfig, ContainerRuntimeConfig } from "./types";
 
 describe("CredsStore", () => {
   const locator = new CredsStore();

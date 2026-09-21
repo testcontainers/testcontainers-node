@@ -1,4 +1,8 @@
-import Dockerode, {
+import type { IncomingMessage } from "node:http";
+import { PassThrough, Readable } from "node:stream";
+import { finished } from "node:stream/promises";
+import type Dockerode from "dockerode";
+import type {
   Container,
   ContainerCreateOptions,
   ContainerInfo,
@@ -7,13 +11,10 @@ import Dockerode, {
   ExecCreateOptions,
   Network,
 } from "dockerode";
-import { IncomingMessage } from "http";
-import { PassThrough, Readable } from "stream";
-import { finished } from "stream/promises";
 import { execLog, log, streamToString, toSeconds } from "../../../common";
-import { CopyToContainerOptions } from "../../../types";
-import { ContainerClient } from "./container-client";
-import { ContainerCommitOptions, ContainerStatus, ExecOptions, ExecResult } from "./types";
+import type { CopyToContainerOptions } from "../../../types";
+import type { ContainerClient } from "./container-client";
+import type { ContainerCommitOptions, ContainerStatus, ExecOptions, ExecResult } from "./types";
 
 export class DockerContainerClient implements ContainerClient {
   constructor(public readonly dockerode: Dockerode) {}
@@ -147,7 +148,7 @@ export class DockerContainerClient implements ContainerClient {
       log.debug(`Stopping container...`, { containerId: container.id });
       await container.stop({ t: toSeconds(opts?.timeout ?? 0) });
       log.debug(`Stopped container`, { containerId: container.id });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // biome-ignore lint/suspicious/noExplicitAny: dockerode errors carry an untyped statusCode
     } catch (err: any) {
       if (err.statusCode === 304) {
         log.debug(`Container already stopped`, { containerId: container.id });

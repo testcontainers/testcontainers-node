@@ -1,4 +1,4 @@
-import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
+import { AbstractStartedContainer, GenericContainer, type StartedTestContainer, Wait } from "testcontainers";
 
 const CLIENT_PORT = 4222;
 const ROUTING_PORT_FOR_CLUSTERING = 6222;
@@ -60,10 +60,10 @@ export class NatsContainer extends GenericContainer {
       return name;
     }
 
-    if (name.length == 1) {
-      return "-" + name;
+    if (name.length === 1) {
+      return `-${name}`;
     } else {
-      return "--" + name;
+      return `--${name}`;
     }
   }
 

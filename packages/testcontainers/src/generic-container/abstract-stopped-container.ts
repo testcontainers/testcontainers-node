@@ -1,4 +1,4 @@
-import { StoppedTestContainer } from "../test-container";
+import type { StoppedTestContainer } from "../test-container";
 
 export class AbstractStoppedContainer implements StoppedTestContainer {
   constructor(protected readonly stoppedTestContainer: StoppedTestContainer) {}

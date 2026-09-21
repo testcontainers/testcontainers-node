@@ -1,4 +1,4 @@
-import { KurrentDBClient, StreamSubscription } from "@kurrent/kurrentdb-client";
+import { KurrentDBClient, type StreamSubscription } from "@kurrent/kurrentdb-client";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { KurrentDbContainer } from "./kurrentdb-container";
 

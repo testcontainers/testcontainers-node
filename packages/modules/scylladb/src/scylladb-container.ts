@@ -1,4 +1,4 @@
-import { AbstractStartedContainer, GenericContainer, type StartedTestContainer } from "testcontainers";
+import { AbstractStartedContainer, GenericContainer } from "testcontainers";
 
 const SCYLLA_PORT = 9042;
 
@@ -21,10 +21,6 @@ export class ScyllaContainer extends GenericContainer {
 }
 
 export class StartedScyllaContainer extends AbstractStartedContainer {
-  constructor(startedTestContainer: StartedTestContainer) {
-    super(startedTestContainer);
-  }
-
   public getPort(): number {
     return this.startedTestContainer.getMappedPort(SCYLLA_PORT);
   }

@@ -57,7 +57,7 @@ export class ImageName {
   }
 
   public static fromString(string: string): ImageName {
-    const registry = this.getRegistry(string);
+    const registry = ImageName.getRegistry(string);
     const stringWithoutRegistry = registry ? string.split("/").slice(1).join("/") : string;
 
     if (stringWithoutRegistry.includes("@")) {
@@ -74,7 +74,7 @@ export class ImageName {
   private static getRegistry(string: string): string | undefined {
     const parts = string.split("/");
 
-    if (parts.length > 1 && this.isRegistry(parts[0])) {
+    if (parts.length > 1 && ImageName.isRegistry(parts[0])) {
       return parts[0];
     }
   }

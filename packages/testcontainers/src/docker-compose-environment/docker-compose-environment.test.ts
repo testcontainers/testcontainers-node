@@ -1,4 +1,4 @@
-import path from "path";
+import path from "node:path";
 import { log, RandomUuid } from "../common";
 import { randomUuid } from "../common/uuid";
 import { PullPolicy } from "../utils/pull-policy";
@@ -86,7 +86,7 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
     const response = await fetch(`${url}/env`);
     const responseBody = (await response.json()) as { [key: string]: string };
 
-    expect(responseBody["IS_OVERRIDDEN"]).toBe("true");
+    expect(responseBody.IS_OVERRIDDEN).toBe("true");
   });
 
   it("should support configuring a default wait strategy", async () => {
@@ -214,7 +214,7 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
     await using container = startedEnvironment.getContainer("container-1");
     const response = await fetch(`http://${container.getHost()}:${container.getMappedPort(8080)}/env`);
     const responseBody = (await response.json()) as { [key: string]: string };
-    expect(responseBody["ENV_VAR"]).toBe("ENV_VAR_VALUE");
+    expect(responseBody.ENV_VAR).toBe("ENV_VAR_VALUE");
   });
 
   it("should throw error when you get container that does not exist", async () => {
@@ -258,7 +258,7 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
     await using container = startedEnvironment.getContainer("container-1");
     const response = await fetch(`http://${container.getHost()}:${container.getMappedPort(8080)}/env`);
     const responseBody = (await response.json()) as { [key: string]: string };
-    expect(responseBody["ENV_VAR"]).toBe("default");
+    expect(responseBody.ENV_VAR).toBe("default");
   });
 
   it("should load the values in the environment file if the environment file option is set", async () => {
@@ -271,7 +271,7 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
     await using container = startedEnvironment.getContainer("container-1");
     const response = await fetch(`http://${container.getHost()}:${container.getMappedPort(8080)}/env`);
     const responseBody = (await response.json()) as { [key: string]: string };
-    expect(responseBody["ENV_VAR"]).toBe("override");
+    expect(responseBody.ENV_VAR).toBe("override");
   });
 
   it("should start containers with a profile if profile option is set", async () => {
