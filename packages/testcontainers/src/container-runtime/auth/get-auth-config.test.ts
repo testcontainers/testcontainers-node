@@ -1,14 +1,15 @@
 import type { Mock } from "vitest";
 
-describe.sequential("get auth config", () => {
+vi.mock("fs");
+vi.mock("fs/promises");
+
+describe("get auth config", { concurrent: false }, () => {
   let mockExistsSync: Mock;
   let mockReadFile: Mock;
 
   beforeEach(async () => {
-    vi.mock("fs");
     const { existsSync } = await import("fs");
     mockExistsSync = existsSync as Mock;
-    vi.mock("fs/promises");
     const { readFile } = await import("fs/promises");
     mockReadFile = readFile as Mock;
   });

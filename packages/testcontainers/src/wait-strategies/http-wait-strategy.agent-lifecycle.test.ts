@@ -37,7 +37,7 @@ const passingResponse = () =>
   ({ statusCode: 200, headers: {}, body: Readable.from(["ok"]) }) as unknown as Awaited<ReturnType<typeof request>>;
 
 // Sequential: the tests share the module-level Agent spy and instance list.
-describe.sequential("HttpWaitStrategy insecure agent lifecycle", () => {
+describe("HttpWaitStrategy insecure agent lifecycle", { concurrent: false }, () => {
   beforeEach(() => {
     agentInstances.length = 0;
     vi.mocked(Agent).mockClear();
