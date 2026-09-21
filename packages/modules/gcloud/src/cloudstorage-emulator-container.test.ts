@@ -30,7 +30,7 @@ async function getRequestBodyFromReadableStream(stream: ReadableStream<Uint8Arra
   return fullString;
 }
 
-describe.sequential("CloudStorageEmulatorContainer", { timeout: 240_000 }, () => {
+describe("CloudStorageEmulatorContainer", { concurrent: false, timeout: 240_000 }, () => {
   const server = setupServer();
 
   beforeAll(() => {

@@ -142,7 +142,7 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
     await checkEnvironmentContainerIsHealthy(startedEnvironment, "container-1");
   });
 
-  it.sequential("should warn when no started containers match configured wait strategy names", async () => {
+  it("should warn when no started containers match configured wait strategy names", { concurrent: false }, async () => {
     const unmatchedWaitStrategyName = "non-existent-container-name";
     const warnSpy = vi.spyOn(log, "warn");
 

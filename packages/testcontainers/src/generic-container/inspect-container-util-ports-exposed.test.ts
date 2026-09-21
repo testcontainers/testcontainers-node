@@ -15,7 +15,7 @@ function mockInspectResult(
   } as ContainerInspectInfo;
 }
 
-describe.sequential("inspectContainerUntilPortsExposed", () => {
+describe("inspectContainerUntilPortsExposed", { concurrent: false }, () => {
   it("returns the inspect result when all ports are exposed", async () => {
     const data = mockInspectResult(
       { "8080/tcp": [], "8081/udp": [] },

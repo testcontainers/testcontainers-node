@@ -2,7 +2,7 @@ import { randomUuid } from "../common/uuid";
 import { checkContainerIsHealthy } from "../utils/test-helper";
 import { GenericContainer } from "./generic-container";
 
-describe("GenericContainer reuse", { timeout: 180_000 }, () => {
+describe("GenericContainer reuse", { concurrent: false, timeout: 180_000 }, () => {
   it("should not reuse the container by default", async () => {
     const name = `there_can_only_be_one_${randomUuid()}`;
     await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")

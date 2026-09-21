@@ -1,7 +1,7 @@
 import { Mock } from "vitest";
 import { AbstractStartedContainer, GenericContainer, InspectResult, StartedTestContainer } from "../index";
 
-describe.sequential("GenericContainer lifecycle", { timeout: 180_000 }, () => {
+describe("GenericContainer lifecycle", { concurrent: false, timeout: 180_000 }, () => {
   let beforeContainerCreated: Mock;
   let containerCreated: Mock;
   let containerStarting: Mock;
