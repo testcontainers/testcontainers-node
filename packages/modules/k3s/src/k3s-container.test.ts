@@ -9,64 +9,67 @@ const KUBECTL_IMAGE = getImage(__dirname, 1);
 describe("K3sContainer", { timeout: 120_000 }, () => {
   // K3sContainer runs as a privileged container
   if (!process.env["CI_ROOTLESS"]) {
-    it("should start and have listable node", async () => {
-      // k3sListNodes {
-      await using container = await new K3sContainer(IMAGE).start();
+    // https://github.com/oven-sh/bun/issues/7332
+    if (!process.env.BUN_CI)
+      it("should start and have listable node", async () => {
+        // k3sListNodes {
+        await using container = await new K3sContainer(IMAGE).start();
 
-      const kubeConfig = new k8s.KubeConfig();
-      kubeConfig.loadFromString(container.getKubeConfig());
+        const kubeConfig = new k8s.KubeConfig();
+        kubeConfig.loadFromString(container.getKubeConfig());
 
-      const client = kubeConfig.makeApiClient(k8s.CoreV1Api);
-      const nodeList = await client.listNode();
+        const client = kubeConfig.makeApiClient(k8s.CoreV1Api);
+        const nodeList = await client.listNode();
 
-      expect(nodeList.items).toHaveLength(1);
-      // }
-    });
+        expect(nodeList.items).toHaveLength(1);
+        // }
+      });
 
-    it("should start a pod", async () => {
-      // k3sStartPod {
-      await using container = await new K3sContainer(IMAGE).start();
+    if (!process.env.BUN_CI)
+      it("should start a pod", async () => {
+        // k3sStartPod {
+        await using container = await new K3sContainer(IMAGE).start();
 
-      const kubeConfig = new k8s.KubeConfig();
-      kubeConfig.loadFromString(container.getKubeConfig());
+        const kubeConfig = new k8s.KubeConfig();
+        kubeConfig.loadFromString(container.getKubeConfig());
 
-      const pod = {
-        metadata: {
-          name: "helloworld",
-        },
-        spec: {
-          containers: [
-            {
-              name: "helloworld",
-              image: "testcontainers/helloworld:1.1.0",
-              ports: [
-                {
-                  containerPort: 8080,
-                },
-              ],
-              readinessProbe: {
-                tcpSocket: {
-                  port: 8080,
+        const pod = {
+          metadata: {
+            name: "helloworld",
+          },
+          spec: {
+            containers: [
+              {
+                name: "helloworld",
+                image: "testcontainers/helloworld:1.1.0",
+                ports: [
+                  {
+                    containerPort: 8080,
+                  },
+                ],
+                readinessProbe: {
+                  tcpSocket: {
+                    port: 8080,
+                  },
                 },
               },
-            },
-          ],
-        },
-      };
+            ],
+          },
+        };
 
-      const client = kubeConfig.makeApiClient(k8s.CoreV1Api);
-      await client.createNamespacedPod({ namespace: "default", body: pod });
+        const client = kubeConfig.makeApiClient(k8s.CoreV1Api);
+        await client.createNamespacedPod({ namespace: "default", body: pod });
 
-      await vi.waitFor(async () => {
-        const { status } = await client.readNamespacedPodStatus({ namespace: "default", name: "helloworld" });
+        await vi.waitFor(async () => {
+          const { status } = await client.readNamespacedPodStatus({ namespace: "default", name: "helloworld" });
 
-        return (
-          status?.phase === "Running" &&
-          status?.conditions?.some((cond) => cond.type === "Ready" && cond.status === "True")
-        );
-      }, 60_000);
-      // }
-    });
+          return (
+            status?.phase === "Running" &&
+            status?.conditions?.some((cond) => cond.type === "Ready" && cond.status === "True")
+          );
+        }, 60_000);
+        // }
+      });
 
     it("should expose kubeconfig for a network alias", async () => {
       // k3sAliasedKubeConfig {

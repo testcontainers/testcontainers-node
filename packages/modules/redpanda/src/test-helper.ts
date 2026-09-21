@@ -1,11 +1,12 @@
-import { KafkaJS } from "@confluentinc/kafka-javascript";
 import { StartedRedpandaContainer } from "./redpanda-container";
 
 // redpandaTestHelper {
 export async function assertMessageProducedAndConsumed(container: StartedRedpandaContainer) {
-  const kafka = new KafkaJS.Kafka({
+  // Static loading crashes Bun before BUN_CI can skip the dependent tests.
+  const { KafkaJS: KafkaJSClient } = await import("@confluentinc/kafka-javascript");
+  const kafka = new KafkaJSClient.Kafka({
     kafkaJS: {
-      logLevel: KafkaJS.logLevel.NOTHING,
+      logLevel: KafkaJSClient.logLevel.NOTHING,
       brokers: [container.getBootstrapServers()],
     },
   });

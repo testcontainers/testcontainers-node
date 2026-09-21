@@ -7,6 +7,8 @@ import { assertMessageProducedAndConsumed } from "./test-helper";
 const IMAGE = "confluentinc/cp-kafka:7.9.1";
 
 describe("KafkaContainer", { timeout: 240_000 }, () => {
+  // https://github.com/oven-sh/bun/issues/19337
+  if (process.env.BUN_CI) return;
   it("should connect using in-built zoo-keeper", async () => {
     // connectBuiltInZK {
     await using container = await new KafkaContainer(IMAGE).start();

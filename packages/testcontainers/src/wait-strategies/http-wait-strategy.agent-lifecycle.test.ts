@@ -38,6 +38,8 @@ const passingResponse = () =>
 
 // Sequential: the tests share the module-level Agent spy and instance list.
 describe.sequential("HttpWaitStrategy insecure agent lifecycle", () => {
+  // https://github.com/oven-sh/bun/issues/10428
+  if (process.env.BUN_CI) return;
   beforeEach(() => {
     agentInstances.length = 0;
     vi.mocked(Agent).mockClear();

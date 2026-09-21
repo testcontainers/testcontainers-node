@@ -1,4 +1,4 @@
-import { GlobalConfig, KafkaJS } from "@confluentinc/kafka-javascript";
+import type { GlobalConfig, KafkaJS } from "@confluentinc/kafka-javascript";
 import { StartedKafkaContainer } from "./kafka-container";
 
 // kafkaTestHelper {
@@ -7,10 +7,12 @@ export async function assertMessageProducedAndConsumed(
   additionalKafkaConfig: Partial<KafkaJS.KafkaConfig> = {},
   additionalGlobalConfig: Partial<GlobalConfig> = {}
 ) {
+  // Static loading crashes Bun before BUN_CI can skip the dependent tests.
+  const { KafkaJS: KafkaJSClient } = await import("@confluentinc/kafka-javascript");
   const brokers = [`${container.getHost()}:${container.getMappedPort(9093)}`];
-  const kafka = new KafkaJS.Kafka({
+  const kafka = new KafkaJSClient.Kafka({
     kafkaJS: {
-      logLevel: KafkaJS.logLevel.ERROR,
+      logLevel: KafkaJSClient.logLevel.ERROR,
       brokers,
       ...additionalKafkaConfig,
     },

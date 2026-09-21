@@ -3,6 +3,9 @@ import { Wait } from "../wait-strategies/wait";
 import { GenericContainer } from "./generic-container";
 
 describe("GenericContainer logs", { timeout: 180_000 }, () => {
+  // Bun retains a Docker follow-stream after the suite completes.
+  // https://github.com/oven-sh/bun/issues/23776
+  if (process.env.BUN_CI) return;
   it("should stream logs from a container before start", async () => {
     const line = await new Promise((resolve) => {
       return new GenericContainer("cristianrgreco/testcontainer:1.1.14")

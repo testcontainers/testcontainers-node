@@ -2,6 +2,9 @@ import { ContainerRuntimeClient, getContainerRuntimeClient } from "../container-
 import { RandomPortGenerator } from "../utils/port-generator";
 
 describe.sequential("Reaper", { timeout: 120_000 }, () => {
+  // The Bun core job disables Ryuk because its open stream prevents the process from exiting.
+  // https://github.com/oven-sh/bun/issues/23776
+  if (process.env.BUN_CI) return;
   let client: ContainerRuntimeClient;
 
   const getReaper = async () => await (await import("./reaper.js")).getReaper(client);

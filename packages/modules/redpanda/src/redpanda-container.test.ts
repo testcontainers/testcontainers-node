@@ -5,6 +5,8 @@ import { assertMessageProducedAndConsumed } from "./test-helper";
 const IMAGE = getImage(__dirname);
 
 describe("RedpandaContainer", { timeout: 240_000 }, () => {
+  // https://github.com/oven-sh/bun/issues/19337
+  if (process.env.BUN_CI) return;
   it("should connect", async () => {
     // connectToKafka {
     await using container = await new RedpandaContainer(IMAGE).start();

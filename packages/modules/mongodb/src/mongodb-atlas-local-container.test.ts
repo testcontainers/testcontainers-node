@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import { IntervalRetry } from "../../../testcontainers/src/common";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { MongoDBAtlasLocalContainer } from "./mongodb-atlas-local-container";
@@ -24,6 +23,9 @@ const ATLAS_SEARCH_INDEX = {
 };
 
 describe("MongoDBAtlasLocalContainer", { timeout: 240_000 }, () => {
+  // Static loading uses node:v8 APIs unsupported by Bun before this suite can return.
+  // https://github.com/oven-sh/bun/issues/32501
+  if (process.env.BUN_CI) return;
   it("should provide a connection string", async () => {
     // connectAtlasLocal {
     await using container = await new MongoDBAtlasLocalContainer(IMAGE).start();
@@ -61,7 +63,9 @@ describe("MongoDBAtlasLocalContainer", { timeout: 240_000 }, () => {
   it("should connect to mongodb atlas local", async () => {
     await using container = await new MongoDBAtlasLocalContainer(IMAGE).start();
 
-    const db = mongoose.createConnection(container.getConnectionString(), { directConnection: true });
+    const db = (await import("mongoose")).default.createConnection(container.getConnectionString(), {
+      directConnection: true,
+    });
 
     const obj = { value: 1 };
     const collection = db.collection("test");
@@ -79,7 +83,9 @@ describe("MongoDBAtlasLocalContainer", { timeout: 240_000 }, () => {
       .withPassword("customPassword")
       .start();
 
-    const db = mongoose.createConnection(container.getDatabaseConnectionString(), { directConnection: true });
+    const db = (await import("mongoose")).default.createConnection(container.getDatabaseConnectionString(), {
+      directConnection: true,
+    });
 
     const obj = { value: 1 };
     const collection = db.collection("test");
@@ -95,7 +101,7 @@ describe("MongoDBAtlasLocalContainer", { timeout: 240_000 }, () => {
     // createAtlasIndexAndSearchIt {
     await using atlasLocalContainer = await new MongoDBAtlasLocalContainer(IMAGE).start();
 
-    const db = mongoose.createConnection(atlasLocalContainer.getConnectionString(), {
+    const db = (await import("mongoose")).default.createConnection(atlasLocalContainer.getConnectionString(), {
       dbName: "test",
       directConnection: true,
     });
