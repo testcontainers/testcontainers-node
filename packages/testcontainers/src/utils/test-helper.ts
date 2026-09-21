@@ -6,8 +6,8 @@ import { EOL, tmpdir } from "node:os";
 import path from "node:path";
 import { Readable } from "stream";
 import { Agent, request } from "undici";
-import { IntervalRetry, RandomUuid } from "../common";
-import { getContainerRuntimeClient, ImageName } from "../container-runtime";
+import { IntervalRetry } from "../common";
+import { getContainerRuntimeClient } from "../container-runtime";
 import { StartedDockerComposeEnvironment } from "../docker-compose-environment/started-docker-compose-environment";
 import { GenericContainer } from "../generic-container/generic-container";
 import { StartedTestContainer } from "../test-container";
@@ -128,21 +128,11 @@ export const getVolumeNames = async (): Promise<string[]> => {
   return volumes.map((volume) => volume.Name);
 };
 
-export const waitForDockerEvent = async (eventStream: Readable, eventName: string, times = 1, imageName?: string) => {
-  type DockerEvent = {
-    status?: string;
-    Action?: string;
-    Type?: string;
-    Actor?: { Attributes?: { name?: string; image?: string } };
-  };
-
-  const stripDockerHubPrefix = (name?: string): string | undefined => name?.replace(/^docker\.io\//, "");
-
-  const expectedImage = stripDockerHubPrefix(imageName);
+export const waitForDockerEvent = async (eventStream: Readable, eventName: string, times = 1) => {
   let currentTimes = 0;
   let pendingData = "";
 
-  const parseDockerEvent = (eventData: string): DockerEvent | undefined => {
+  const parseDockerEvent = (eventData: string): { status?: string; Action?: string } | undefined => {
     try {
       return JSON.parse(eventData);
     } catch {
@@ -161,11 +151,8 @@ export const waitForDockerEvent = async (eventStream: Readable, eventName: strin
       for (const line of lines) {
         const event = parseDockerEvent(line);
         const action = event?.status ?? event?.Action;
-        const imageAttribute = event?.Type === "image" ? "name" : "image";
-        const eventImage = event?.Actor?.Attributes?.[imageAttribute];
-        const matchesImage = expectedImage === undefined || stripDockerHubPrefix(eventImage) === expectedImage;
 
-        if (action === eventName && matchesImage) {
+        if (action === eventName) {
           if (++currentTimes === times) {
             eventStream.off("data", onData);
             resolve();
@@ -184,24 +171,6 @@ export async function getImageLabelsByName(imageName: string): Promise<{ [label:
   const imageInfo = await dockerode.getImage(imageName).inspect();
   return imageInfo.Config.Labels;
 }
-
-export const createTempImageTag = async (source: string): Promise<{ name: string } & AsyncDisposable> => {
-  const client = await getContainerRuntimeClient();
-  const sourceImage = ImageName.fromString(source);
-  await client.image.pull(sourceImage);
-  const image = new ImageName(sourceImage.registry, sourceImage.image, `testcontainers-${new RandomUuid().nextUuid()}`);
-  await client.container.dockerode.getImage(sourceImage.string).tag({
-    repo: [image.registry, image.image].filter(Boolean).join("/"),
-    tag: image.tag,
-  });
-
-  return {
-    name: image.string,
-    [Symbol.asyncDispose]: async () => {
-      await deleteImageByName(image.string);
-    },
-  };
-};
 
 export async function deleteImageByName(imageName: string): Promise<void> {
   const dockerode = (await getContainerRuntimeClient()).container.dockerode;

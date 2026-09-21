@@ -30,7 +30,7 @@ import { BoundPorts } from "../utils/bound-ports";
 import { createLabels, LABEL_TESTCONTAINERS_CONTAINER_HASH, LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
 import { mapInspectResult } from "../utils/map-inspect-result";
 import { getContainerPort, getProtocol, hasHostBinding, PortWithOptionalBinding } from "../utils/port";
-import { ImagePullPolicy, PullPolicy, resolvePullPolicy } from "../utils/pull-policy";
+import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
 import { selectWaitStrategy } from "../wait-strategies/utils/wait-strategy-selector";
 import { waitForContainer } from "../wait-strategies/wait-for-container";
 import { WaitStrategy } from "../wait-strategies/wait-strategy";
@@ -88,13 +88,15 @@ export class GenericContainer implements TestContainer {
   protected containerStarting?(inspectResult: InspectResult, reused: boolean): Promise<void>;
 
   public async start(): Promise<StartedTestContainer> {
-    const pullPolicy = resolvePullPolicy(this.pullPolicy);
+    const shouldPull = this.pullPolicy.shouldPull();
     const client = await getContainerRuntimeClient();
-    if (pullPolicy === "never") {
-      await client.image.inspect(this.imageName);
+    if (shouldPull === "never") {
+      if (!(await client.image.exists(this.imageName))) {
+        throw new Error(`Image "${this.imageName.string}" does not exist locally and pull policy is "never"`);
+      }
     } else {
       await client.image.pull(this.imageName, {
-        force: pullPolicy === "always",
+        force: shouldPull,
         platform: this.createOpts.platform,
       });
     }

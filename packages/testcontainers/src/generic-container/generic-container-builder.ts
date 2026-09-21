@@ -7,7 +7,7 @@ import { getReaper } from "../reaper/reaper";
 import { BuildArgs, RegistryConfig } from "../types";
 import { getDockerfileImages } from "../utils/dockerfile-parser";
 import { createLabels, LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
-import { ImagePullPolicy, PullPolicy, resolvePullPolicy } from "../utils/pull-policy";
+import { ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
 import { GenericContainer } from "./generic-container";
 
 export type BuildOptions = {
@@ -62,9 +62,9 @@ export class GenericContainerBuilder {
     image = `localhost/${this.uuid.nextUuid()}:${this.uuid.nextUuid()}`,
     options: BuildOptions = { deleteOnExit: true }
   ): Promise<GenericContainer> {
-    const pullPolicy = resolvePullPolicy(this.pullPolicy);
+    const shouldPull = this.pullPolicy.shouldPull();
     // https://github.com/docker/buildx/issues/1889
-    if (pullPolicy === "never") {
+    if (shouldPull === "never") {
       throw new Error(
         "Never-pull policies are not supported for Dockerfile builds: the Docker build API cannot forbid image pulls"
       );
@@ -98,7 +98,7 @@ export class GenericContainerBuilder {
       version: this.buildkit ? "2" : "1",
     };
 
-    if (pullPolicy === "always") {
+    if (shouldPull === true) {
       buildOptions.pull = true;
     }
 

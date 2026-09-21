@@ -47,7 +47,7 @@ Create a custom pull policy:
 const { GenericContainer, ImagePullPolicy } = require("testcontainers");
 
 class CustomPullPolicy implements ImagePullPolicy {
-  public shouldPull(): boolean {
+  public shouldPull(): boolean | "never" {
     return true;
   }
 }
@@ -57,7 +57,7 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
-Custom policies can forbid pulling by returning `true` from `neverPull()` and `false` from `shouldPull()`; returning `true` from both throws an error.
+Custom policies can forbid pulling by returning `"never"` from `shouldPull()`.
 
 ### With a command
 

@@ -67,7 +67,7 @@ const environment = await new DockerComposeEnvironment(composeFilePath, composeF
   .up();
 ```
 
-To start services using only locally available images, use `PullPolicy.neverPull()`:
+To prevent Compose from pulling service images, use `PullPolicy.neverPull()`:
 
 ```js
 const { DockerComposeEnvironment, PullPolicy } = require("testcontainers");
@@ -77,7 +77,7 @@ const environment = await new DockerComposeEnvironment(composeFilePath, composeF
   .up();
 ```
 
-This passes `--pull never --no-build` to Compose, overriding pull and build settings for service images. Startup fails if a required image is missing locally. Combining this policy with `withBuild()` or an enabled `--build` option throws an error. Helper images such as Ryuk are unaffected.
+This passes `--pull never` to Compose and skips the explicit pull step. Startup fails if a required image is missing locally and cannot be built. Helper images such as Ryuk are unaffected.
 
 Create a custom pull policy:
 
@@ -85,7 +85,7 @@ Create a custom pull policy:
 const { GenericContainer, ImagePullPolicy } = require("testcontainers");
 
 class CustomPullPolicy implements ImagePullPolicy {
-  public shouldPull(): boolean {
+  public shouldPull(): boolean | "never" {
     return true;
   }
 }

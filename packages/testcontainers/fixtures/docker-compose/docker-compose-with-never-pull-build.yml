@@ -1,7 +1,0 @@
-services:
-  container:
-    image: ${TEST_IMAGE}
-    build:
-      context: ../docker/docker
-    ports:
-      - 8080
