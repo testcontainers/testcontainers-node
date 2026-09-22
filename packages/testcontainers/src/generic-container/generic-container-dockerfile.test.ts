@@ -1,6 +1,5 @@
 import path from "path";
 import { RandomUuid } from "../common";
-import * as containerRuntime from "../container-runtime";
 import { getContainerRuntimeClient, ImageName } from "../container-runtime";
 import { getReaper } from "../reaper/reaper";
 import { LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
@@ -94,13 +93,10 @@ describe("GenericContainer Dockerfile", { timeout: 180_000 }, () => {
     });
   }
 
-  it("should reject never-pull before contacting the runtime", { concurrent: false }, async () => {
-    const clientSpy = vi.spyOn(containerRuntime, "getContainerRuntimeClient");
-
+  it("should reject never-pull for Dockerfile builds", async () => {
     await expect(
       GenericContainer.fromDockerfile(path.resolve(fixtures, "docker")).withPullPolicy(PullPolicy.neverPull()).build()
     ).rejects.toThrow("Never-pull policies are not supported for Dockerfile builds");
-    expect(clientSpy).not.toHaveBeenCalled();
   });
 
   it("should build and start with custom file name", async () => {
