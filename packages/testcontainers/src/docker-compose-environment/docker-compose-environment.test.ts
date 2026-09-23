@@ -1,6 +1,7 @@
 import path from "path";
 import { log, RandomUuid } from "../common";
 import { randomUuid } from "../common/uuid";
+import { getContainerRuntimeClient } from "../container-runtime";
 import { PullPolicy } from "../utils/pull-policy";
 import {
   checkEnvironmentContainerIsHealthy,
@@ -71,6 +72,22 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
       await using _ = await env.withPullPolicy(PullPolicy.alwaysPull()).up(["service-b"]);
       await dockerPullEventPromise;
     }
+  });
+
+  it("should fail without pulling when a service image is missing", { concurrent: false }, async () => {
+    const client = await getContainerRuntimeClient();
+    const pullSpy = vi.spyOn(client.compose, "pull");
+    const upSpy = vi.spyOn(client.compose, "up");
+    const image = `localhost/testcontainers-missing-${randomUuid()}:latest`;
+
+    await expect(
+      new DockerComposeEnvironment(fixtures, "docker-compose-with-never-pull.yml")
+        .withEnvironment({ TEST_IMAGE: image })
+        .withPullPolicy(PullPolicy.neverPull())
+        .up()
+    ).rejects.toThrow(/No such image|image not known/i);
+    expect(pullSpy).not.toHaveBeenCalled();
+    expect(upSpy).toHaveBeenCalledWith(expect.objectContaining({ commandOptions: ["--pull", "never"] }), undefined);
   });
 
   it("should start environment with multiple compose files", async () => {

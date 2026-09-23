@@ -1,0 +1,4 @@
+services:
+  container:
+    image: ${TEST_IMAGE}
+    pull_policy: always
