@@ -1,6 +1,6 @@
 import { InfluxDB, Point } from "@influxdata/influxdb-client";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
-import { InfluxDB2Container } from "./index";
+import { InfluxDB2Container } from "./influxdb2-container";
 
 const IMAGE = getImage(__dirname);
 
@@ -12,6 +12,7 @@ describe("InfluxDB2Container", { timeout: 240_000 }, () => {
   });
 
   it("should write and query with the default admin token", async () => {
+    // writeAndQueryInfluxDB2 {
     await using container = await new InfluxDB2Container(IMAGE).start();
     const influxDB = new InfluxDB({ url: container.getUrl(), token: container.getAdminToken() });
     const writeApi = influxDB.getWriteApi(container.getOrganization(), container.getBucket());
@@ -24,6 +25,7 @@ describe("InfluxDB2Container", { timeout: 240_000 }, () => {
         `from(bucket: "${container.getBucket()}") |> range(start: -1h) |> filter(fn: (r) => r._measurement == "temperature")`
       );
     expect(rows).toEqual([expect.objectContaining({ _value: 23.5, location: "room1" })]);
+    // }
   });
 
   it("should apply custom credentials, organization, bucket, token, and retention", async () => {
