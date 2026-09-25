@@ -1,6 +1,6 @@
 import { ImageName } from "./image-name";
 
-describe.sequential("ContainerImage", () => {
+describe("ContainerImage", { concurrent: false }, () => {
   it("should return whether two image names are equal", () => {
     const imageName = new ImageName("registry", "image", "tag");
 
@@ -10,7 +10,7 @@ describe.sequential("ContainerImage", () => {
     expect(imageName.equals(new ImageName("anotherRegistry", "image", "tag"))).toBe(false);
   });
 
-  describe.sequential("string", () => {
+  describe("string", { concurrent: false }, () => {
     it("should work with registry", () => {
       const imageName = new ImageName("registry", "image", "tag");
       expect(imageName.string).toBe("registry/image:tag");
@@ -67,7 +67,7 @@ describe.sequential("ContainerImage", () => {
     );
   });
 
-  describe.sequential("fromString", () => {
+  describe("fromString", { concurrent: false }, () => {
     it("should work", () => {
       const imageName = ImageName.fromString("image:latest");
 
@@ -154,7 +154,7 @@ describe.sequential("ContainerImage", () => {
     });
   });
 
-  describe.sequential.each([
+  describe.each([
     { customRegistry: "custom.com/registry", expectedRegistry: "custom.com", expectedImagePrefix: "registry/" },
     { customRegistry: "custom.com/registry/", expectedRegistry: "custom.com", expectedImagePrefix: "registry/" },
     { customRegistry: "custom.com", expectedRegistry: "custom.com", expectedImagePrefix: "" },
@@ -166,6 +166,7 @@ describe.sequential("ContainerImage", () => {
     },
   ])(
     "fromString with TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX set to $customRegistry",
+    { concurrent: false },
     ({ customRegistry, expectedRegistry, expectedImagePrefix }) => {
       beforeEach(() => {
         vi.stubEnv("TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX", customRegistry);

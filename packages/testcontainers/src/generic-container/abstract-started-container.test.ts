@@ -1,7 +1,7 @@
 import { Mock } from "vitest";
 import { AbstractStartedContainer, GenericContainer } from "../index";
 
-describe.sequential("AbstractStartedContainer", { timeout: 60_000 }, () => {
+describe("AbstractStartedContainer", { concurrent: false, timeout: 60_000 }, () => {
   let containerStopping: Mock;
   let containerStopped: Mock;
 

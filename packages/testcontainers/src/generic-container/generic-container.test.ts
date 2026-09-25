@@ -344,6 +344,33 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     }
   });
 
+  it("should start a local image without pulling with a never-pull policy", { concurrent: false }, async () => {
+    const image = "cristianrgreco/testcontainer:1.1.14";
+    // Prepare the image and Ryuk before observing pulls for the tested startup.
+    await using _ = await new GenericContainer(image).withExposedPorts(8080).start();
+    const client = await getContainerRuntimeClient();
+    const pullSpy = vi.spyOn(client.image, "pull");
+
+    await using container = await new GenericContainer(image)
+      .withPullPolicy(PullPolicy.neverPull())
+      .withExposedPorts(8080)
+      .start();
+
+    await checkContainerIsHealthy(container);
+    expect(pullSpy).not.toHaveBeenCalled();
+  });
+
+  it("should fail without pulling when a local image is missing", { concurrent: false }, async () => {
+    const client = await getContainerRuntimeClient();
+    const pullSpy = vi.spyOn(client.image, "pull");
+    const image = `localhost/testcontainers-missing-${new RandomUuid().nextUuid()}:latest`;
+
+    await expect(new GenericContainer(image).withPullPolicy(PullPolicy.neverPull()).start()).rejects.toThrow(
+      `Image "${image}" does not exist locally and pull policy is "never"`
+    );
+    expect(pullSpy).not.toHaveBeenCalled();
+  });
+
   it("should set the IPC mode", async () => {
     await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withIpcMode("host")
