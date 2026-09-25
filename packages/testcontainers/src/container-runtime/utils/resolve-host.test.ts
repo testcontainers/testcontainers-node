@@ -30,7 +30,7 @@ vi.mock("./run-in-container", () => ({
   runInContainer: () => runInContainerMock(),
 }));
 
-describe.sequential("resolveHost", () => {
+describe("resolveHost", { concurrent: false }, () => {
   it("should return TESTCONTAINERS_HOST_OVERRIDE from environment", async () => {
     const strategyResult = {
       uri: "tcp://another:2375",
