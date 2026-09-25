@@ -27,7 +27,7 @@ describe("SpannerEmulatorContainer", { timeout: 240_000 }, () => {
     // }
   });
 
-  describe.sequential("Shared state", () => {
+  describe("Shared state", { concurrent: false }, () => {
     afterEach(() => {
       process.env.SPANNER_EMULATOR_HOST = "";
     });

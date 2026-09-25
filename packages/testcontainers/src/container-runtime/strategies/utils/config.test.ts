@@ -5,7 +5,7 @@ vi.mock("fs", () => ({ existsSync: mockExistsSync }));
 const mockReadFile = vi.fn();
 vi.mock("fs/promises", () => ({ readFile: mockReadFile }));
 
-describe.sequential("Config", () => {
+describe("Config", { concurrent: false }, () => {
   let getContainerRuntimeConfig: GetContainerRuntimeConfig;
 
   beforeEach(async () => {

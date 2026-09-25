@@ -88,11 +88,18 @@ export class GenericContainer implements TestContainer {
   protected containerStarting?(inspectResult: InspectResult, reused: boolean): Promise<void>;
 
   public async start(): Promise<StartedTestContainer> {
+    const shouldPull = this.pullPolicy.shouldPull();
     const client = await getContainerRuntimeClient();
-    await client.image.pull(this.imageName, {
-      force: this.pullPolicy.shouldPull(),
-      platform: this.createOpts.platform,
-    });
+    if (shouldPull === "never") {
+      if (!(await client.image.exists(this.imageName))) {
+        throw new Error(`Image "${this.imageName.string}" does not exist locally and pull policy is "never"`);
+      }
+    } else {
+      await client.image.pull(this.imageName, {
+        force: shouldPull,
+        platform: this.createOpts.platform,
+      });
+    }
 
     if (this.beforeContainerCreated) {
       await this.beforeContainerCreated();
