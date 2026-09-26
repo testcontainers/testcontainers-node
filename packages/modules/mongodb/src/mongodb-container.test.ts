@@ -5,7 +5,12 @@ import { MongoDBContainer } from "./mongodb-container";
 const IMAGE = getImage(__dirname);
 
 describe("MongoDBContainer", { timeout: 240_000 }, () => {
-  it.each([IMAGE, "mongo:6.0.25", "mongo:4.4.29"])("should work with %s", async (image) => {
+  it.each([
+    IMAGE,
+    "mongo:6.0.25",
+    "mongo:4.4.29",
+    "mongo:8.2.12@sha256:e0ce8c35124d4a9f9785532d1f268f39e9728ffa1cb38f46fa482436424c4bd3",
+  ])("should work with %s", async (image) => {
     // connectMongo {
     await using container = await new MongoDBContainer(image).start();
 

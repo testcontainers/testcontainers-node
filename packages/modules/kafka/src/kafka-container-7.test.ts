@@ -228,6 +228,14 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
     );
   });
 
+  it("should read the version from an image pinned by tag and digest", async () => {
+    expect(() =>
+      new KafkaContainer(
+        "confluentinc/cp-kafka:6.2.14@sha256:1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd"
+      ).withKraft()
+    ).toThrow("Provided Confluent Platform's version 6.2.14 is not supported in Kraft mode (must be 7.0.0 or above)");
+  });
+
   it("should connect using kraft and custom network", async () => {
     await using network = await new Network().start();
     await using container = await new KafkaContainer(IMAGE).withKraft().withNetwork(network).start();
