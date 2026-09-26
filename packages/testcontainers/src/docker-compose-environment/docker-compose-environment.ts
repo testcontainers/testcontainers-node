@@ -120,8 +120,13 @@ export class DockerComposeEnvironment {
     };
 
     const commandOptions = [...clientCommandOptions];
+
     if (this.build) {
       commandOptions.push("--build");
+    }
+    const shouldPull = this.pullPolicy.shouldPull();
+    if (shouldPull === "never") {
+      commandOptions.push("--pull", "never");
     }
     if (!this.recreate) {
       commandOptions.push("--no-recreate");
@@ -133,7 +138,7 @@ export class DockerComposeEnvironment {
     }
     this.profiles.forEach((profile) => composeOptions.push("--profile", profile));
 
-    if (this.pullPolicy.shouldPull()) {
+    if (shouldPull === true) {
       await client.compose.pull(options, services);
     }
     await client.compose.up(

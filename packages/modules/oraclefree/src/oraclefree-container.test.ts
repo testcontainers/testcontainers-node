@@ -4,7 +4,7 @@ import { OracleDbContainer, StartedOracleDbContainer } from "./oraclefree-contai
 
 const IMAGE = getImage(__dirname);
 
-describe.sequential("OracleFreeContainer", { timeout: 240_000 }, () => {
+describe("OracleFreeContainer", { concurrent: false, timeout: 240_000 }, () => {
   describe("default configuration", () => {
     let container: StartedOracleDbContainer;
 

@@ -8,6 +8,10 @@ test("always pull policy should return true", () => {
   expect(PullPolicy.alwaysPull().shouldPull()).toBe(true);
 });
 
+test('never pull policy should return "never"', () => {
+  expect(PullPolicy.neverPull().shouldPull()).toBe("never");
+});
+
 test("should be able to create a custom pull policy", () => {
   class CustomPullPolicy implements ImagePullPolicy {
     public shouldPull(): boolean {
