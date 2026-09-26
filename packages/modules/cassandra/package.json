@@ -32,6 +32,6 @@
     "testcontainers": "^12.1.0"
   },
   "devDependencies": {
-    "cassandra-driver": "^4.9.0"
+    "cassandra-driver": "^4.10.0"
   }
 }
