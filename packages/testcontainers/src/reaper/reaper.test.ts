@@ -1,7 +1,7 @@
 import { ContainerRuntimeClient, getContainerRuntimeClient } from "../container-runtime";
 import { RandomPortGenerator } from "../utils/port-generator";
 
-describe.sequential("Reaper", { timeout: 120_000 }, () => {
+describe("Reaper", { concurrent: false, timeout: 120_000 }, () => {
   let client: ContainerRuntimeClient;
 
   const getReaper = async () => await (await import("./reaper.js")).getReaper(client);

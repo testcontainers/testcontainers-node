@@ -15,7 +15,7 @@ vi.mock("dockerode", () => {
   };
 });
 
-describe.sequential("imageExists", () => {
+describe("imageExists", { concurrent: false }, () => {
   afterEach(() => {
     vi.resetModules();
   });

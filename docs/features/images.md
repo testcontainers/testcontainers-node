@@ -65,6 +65,10 @@ const container = await GenericContainer
   .build();
 ```
 
+`PullPolicy.neverPull()` and custom never-pull policies throw an error for Dockerfile builds, with or without BuildKit: the Docker build API cannot forbid base image pulls ([docker/buildx#1889](https://github.com/docker/buildx/issues/1889)).
+
+For an already built image, use [a container with a never-pull policy](containers.md#with-a-pull-policy).
+
 ### With build arguments
 
 ```js

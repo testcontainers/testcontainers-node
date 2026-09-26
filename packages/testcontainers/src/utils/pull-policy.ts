@@ -1,5 +1,5 @@
 export interface ImagePullPolicy {
-  shouldPull(): boolean;
+  shouldPull(): boolean | "never";
 }
 
 class DefaultPullPolicy implements ImagePullPolicy {
@@ -14,6 +14,12 @@ class AlwaysPullPolicy implements ImagePullPolicy {
   }
 }
 
+class NeverPullPolicy implements ImagePullPolicy {
+  public shouldPull(): "never" {
+    return "never";
+  }
+}
+
 export class PullPolicy {
   public static defaultPolicy(): ImagePullPolicy {
     return new DefaultPullPolicy();
@@ -21,5 +27,9 @@ export class PullPolicy {
 
   public static alwaysPull(): ImagePullPolicy {
     return new AlwaysPullPolicy();
+  }
+
+  public static neverPull(): ImagePullPolicy {
+    return new NeverPullPolicy();
   }
 }
