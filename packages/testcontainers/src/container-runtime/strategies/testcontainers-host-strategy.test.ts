@@ -5,7 +5,7 @@ vi.mock("./utils/config", () => ({
   getContainerRuntimeConfig: () => mockGetContainerRuntimeConfig(),
 }));
 
-describe.sequential("TestcontainersHostStrategy", () => {
+describe("TestcontainersHostStrategy", { concurrent: false }, () => {
   it("should return undefined when tc.host property is not set", async () => {
     mockGetContainerRuntimeConfig.mockResolvedValue({});
 

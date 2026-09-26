@@ -93,6 +93,12 @@ describe("GenericContainer Dockerfile", { timeout: 180_000 }, () => {
     });
   }
 
+  it("should reject never-pull for Dockerfile builds", async () => {
+    await expect(
+      GenericContainer.fromDockerfile(path.resolve(fixtures, "docker")).withPullPolicy(PullPolicy.neverPull()).build()
+    ).rejects.toThrow("Never-pull policies are not supported for Dockerfile builds");
+  });
+
   it("should build and start with custom file name", async () => {
     const context = path.resolve(fixtures, "docker-with-custom-filename");
     const container = await GenericContainer.fromDockerfile(context, "Dockerfile-A").build();

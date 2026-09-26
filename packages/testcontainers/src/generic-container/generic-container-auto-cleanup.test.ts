@@ -18,7 +18,7 @@ vi.mock("../reaper/reaper", async () => ({
   getReaper: vi.fn(async (client: ContainerRuntimeClient) => await mockGetReaper(client)),
 }));
 
-describe.sequential("GenericContainer auto cleanup", () => {
+describe("GenericContainer auto cleanup", { concurrent: false }, () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockGetReaper = vi.fn();

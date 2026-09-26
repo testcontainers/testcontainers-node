@@ -14,7 +14,7 @@ These examples use the following libraries:
 
         npm install minio
 
-Choose an image from the [container registry](https://hub.docker.com/r/minio/minio) and substitute `IMAGE`.
+Choose an image from the [container registry](https://images.chainguard.dev/directory/image/minio/versions) and substitute `IMAGE`.
 
 ### Upload a file
 
