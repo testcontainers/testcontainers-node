@@ -8,8 +8,13 @@ export class ImageName {
   constructor(
     public readonly registry: string | undefined,
     public readonly image: string,
-    public readonly tag: string
+    public readonly tag: string,
+    public readonly digest?: string
   ) {
+    if (!this.digest && this.tag.startsWith("sha256:")) {
+      // A digest-only reference (image@sha256:...) keeps the digest as its tag.
+      this.digest = this.tag;
+    }
     if (!this.registry && process.env.TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX) {
       const prefix = process.env.TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX;
 
@@ -31,11 +36,12 @@ export class ImageName {
       }
       log.info(message);
     }
+    const tagAndDigest = this.digest ? `${this.tag}@${this.digest}` : this.tag;
     if (this.registry) {
       if (this.tag.startsWith("sha256:")) {
         this.string = `${this.registry}/${this.image}@${this.tag}`;
       } else {
-        this.string = `${this.registry}/${this.image}:${this.tag}`;
+        this.string = `${this.registry}/${this.image}:${tagAndDigest}`;
       }
     } else if (this.tag === "latest" && ImageName.hexRE.test(this.image)) {
       // 64 byte hex string. This refers to an image sha256 directly.
@@ -48,26 +54,32 @@ export class ImageName {
     } else if (this.tag.startsWith("sha256:")) {
       this.string = `${this.image}@${this.tag}`;
     } else {
-      this.string = `${this.image}:${this.tag}`;
+      this.string = `${this.image}:${tagAndDigest}`;
     }
   }
 
   public equals(other: ImageName): boolean {
-    return this.registry === other.registry && this.image === other.image && this.tag === other.tag;
+    return (
+      this.registry === other.registry &&
+      this.image === other.image &&
+      this.tag === other.tag &&
+      this.digest === other.digest
+    );
   }
 
   public static fromString(string: string): ImageName {
     const registry = this.getRegistry(string);
     const stringWithoutRegistry = registry ? string.split("/").slice(1).join("/") : string;
 
-    if (stringWithoutRegistry.includes("@")) {
-      const [image, tag] = stringWithoutRegistry.split("@");
-      return new ImageName(registry, image, tag);
-    } else if (stringWithoutRegistry.includes(":")) {
-      const [image, tag] = stringWithoutRegistry.split(":");
-      return new ImageName(registry, image, tag);
+    const [imageAndTag, digest] = stringWithoutRegistry.split("@");
+
+    if (imageAndTag.includes(":")) {
+      const [image, tag] = imageAndTag.split(":");
+      return new ImageName(registry, image, tag, digest);
+    } else if (digest) {
+      return new ImageName(registry, imageAndTag, digest);
     } else {
-      return new ImageName(registry, stringWithoutRegistry, "latest");
+      return new ImageName(registry, imageAndTag, "latest");
     }
   }
 
