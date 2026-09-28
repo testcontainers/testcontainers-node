@@ -29,7 +29,7 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "@types/selenium-webdriver": "^4.35.6",
+    "@types/selenium-webdriver": "^4.35.7",
     "selenium-webdriver": "^4.49.0"
   },
   "dependencies": {
