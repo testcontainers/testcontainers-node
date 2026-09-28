@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/influxdb",
-  "version": "12.1.0",
+  "version": "12.2.0",
   "license": "MIT",
   "keywords": [
     "influxdb",
@@ -34,6 +34,6 @@
     "@influxdata/influxdb-client": "^1.35.0"
   },
   "dependencies": {
-    "testcontainers": "^12.1.0"
+    "testcontainers": "^12.2.0"
   }
 }
