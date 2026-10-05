@@ -21,16 +21,16 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@eslint/json": "^2.1.0",
-    "@vitest/coverage-v8": "^5.0.1",
+    "@vitest/coverage-v8": "^5.0.2",
     "eslint": "^10.11.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.6",
     "npm-check-updates": "^23.1.0",
-    "prettier": "^3.9.8",
+    "prettier": "^3.9.9",
     "prettier-plugin-organize-imports": "^4.3.0",
     "shx": "^0.4.0",
-    "typescript": "^6.0.3",
-    "typescript-eslint": "^8.70.0",
+    "typescript": "^7.0.2",
+    "typescript-eslint": "^8.70.1",
     "vitest": "^5.0.0"
   },
   "engines": {
