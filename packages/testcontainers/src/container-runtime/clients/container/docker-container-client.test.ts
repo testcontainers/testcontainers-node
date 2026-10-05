@@ -12,11 +12,11 @@ describe("DockerContainerClient", () => {
       };
       const dockerode = {
         modem: { demuxStream },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // biome-ignore lint/suspicious/noExplicitAny: partial dockerode stub for this test
       } as any;
       const client = new DockerContainerClient(dockerode);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // biome-ignore lint/suspicious/noExplicitAny: partial container stub for this test
       const stream = await client.logs(container as any);
       await vi.waitFor(() => expect(demuxStream).toHaveBeenCalledOnce());
       stream.destroy();
