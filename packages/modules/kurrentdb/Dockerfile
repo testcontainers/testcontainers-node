@@ -1,1 +1,1 @@
-FROM kurrentplatform/kurrentdb:26.1
+FROM kurrentplatform/kurrentdb:26.2
