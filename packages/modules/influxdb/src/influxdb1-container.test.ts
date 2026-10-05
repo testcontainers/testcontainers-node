@@ -1,7 +1,6 @@
-import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { InfluxDB1Container } from "./influxdb1-container";
 
-const IMAGE = getImage(__dirname, 1);
+const IMAGE = "influxdb:1.13";
 
 const basicAuth = (username: string, password: string) =>
   `Basic ${Buffer.from(`${username}:${password}`).toString("base64")}`;
