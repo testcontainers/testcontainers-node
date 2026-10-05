@@ -1,7 +1,7 @@
-import Dockerode from "dockerode";
+import type Dockerode from "dockerode";
 import { log } from "../common";
-import { BoundPorts } from "../utils/bound-ports";
-import { AbstractWaitStrategy, WaitStrategy } from "./wait-strategy";
+import type { BoundPorts } from "../utils/bound-ports";
+import { AbstractWaitStrategy, type WaitStrategy } from "./wait-strategy";
 
 export class CompositeWaitStrategy extends AbstractWaitStrategy {
   private deadline?: number;
@@ -42,7 +42,9 @@ export class CompositeWaitStrategy extends AbstractWaitStrategy {
   public override withStartupTimeout(startupTimeoutMs: number): this {
     this.waitStrategies
       .filter((waitStrategy) => !waitStrategy.isStartupTimeoutSet())
-      .forEach((waitStrategy) => waitStrategy.withStartupTimeout(startupTimeoutMs));
+      .forEach((waitStrategy) => {
+        waitStrategy.withStartupTimeout(startupTimeoutMs);
+      });
     return this;
   }
 

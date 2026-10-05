@@ -1,5 +1,5 @@
-import { ContainerInfo } from "dockerode";
-import { ContainerRuntimeClient } from "../container-runtime";
+import type { ContainerInfo } from "dockerode";
+import type { ContainerRuntimeClient } from "../container-runtime";
 import { DockerComposeEnvironment } from "./docker-compose-environment";
 
 let mockClient: ContainerRuntimeClient;

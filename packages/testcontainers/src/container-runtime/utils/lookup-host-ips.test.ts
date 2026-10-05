@@ -1,8 +1,8 @@
-import { HostIp } from "../clients/types";
+import type { HostIp } from "../clients/types";
 import { lookupHostIps } from "./lookup-host-ips";
 
 const mockDnsLookup = vi.fn();
-vi.mock("dns/promises", () => {
+vi.mock("node:dns/promises", () => {
   return {
     lookup: () => mockDnsLookup(),
   };

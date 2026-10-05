@@ -64,9 +64,7 @@ export class SpannerEmulatorHelper {
    * Creates a new Spanner instance in the emulator.
    */
   public async createInstance(instanceId: string, options?: IInstance): Promise<unknown> {
-    const [operation] = await (
-      await this.instanceAdminClient()
-    ).createInstance({
+    const [operation] = await (await this.instanceAdminClient()).createInstance({
       instanceId,
       parent: (await this.instanceAdminClient()).projectPath(this.emulator.getProjectId()),
       instance: options,
@@ -86,9 +84,7 @@ export class SpannerEmulatorHelper {
    * Creates a new database under the specified instance in the emulator.
    */
   public async createDatabase(instanceId: string, databaseId: string): Promise<unknown> {
-    const [operation] = await (
-      await this.databaseAdminClient()
-    ).createDatabase({
+    const [operation] = await (await this.databaseAdminClient()).createDatabase({
       parent: (await this.databaseAdminClient()).instancePath(this.emulator.getProjectId(), instanceId),
       createStatement: `CREATE DATABASE \`${databaseId}\``,
     });

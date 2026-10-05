@@ -1,4 +1,4 @@
-import Dockerode from "dockerode";
+import type Dockerode from "dockerode";
 import { getContainerRuntimeClient } from "../clients/client";
 import { runInContainer } from "./run-in-container";
 

@@ -1,4 +1,4 @@
-import crypto from "crypto";
+import crypto from "node:crypto";
 import { hash } from "./hash";
 
 export interface Uuid {

@@ -1,4 +1,6 @@
-import Dockerode, {
+import type { Readable } from "node:stream";
+import type Dockerode from "dockerode";
+import type {
   Container,
   ContainerCreateOptions,
   ContainerInfo,
@@ -6,9 +8,8 @@ import Dockerode, {
   ContainerLogsOptions,
   Network,
 } from "dockerode";
-import { Readable } from "stream";
-import { CopyToContainerOptions } from "../../../types";
-import { ContainerCommitOptions, ContainerStatus, ExecOptions, ExecResult } from "./types";
+import type { CopyToContainerOptions } from "../../../types";
+import type { ContainerCommitOptions, ContainerStatus, ExecOptions, ExecResult } from "./types";
 
 export interface ContainerClient {
   dockerode: Dockerode;

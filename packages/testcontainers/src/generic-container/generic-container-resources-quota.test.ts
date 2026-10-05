@@ -1,4 +1,4 @@
-import { ContainerRuntimeClient, getContainerRuntimeClient } from "../container-runtime";
+import { type ContainerRuntimeClient, getContainerRuntimeClient } from "../container-runtime";
 import { GenericContainer } from "./generic-container";
 
 describe("GenericContainer resources quota", { timeout: 180_000 }, () => {
@@ -8,7 +8,7 @@ describe("GenericContainer resources quota", { timeout: 180_000 }, () => {
     client = await getContainerRuntimeClient();
   });
 
-  if (!process.env["CI_ROOTLESS"]) {
+  if (!process.env.CI_ROOTLESS) {
     it("should set resources quota", async () => {
       await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
         .withResourcesQuota({ cpu: 1, memory: 0.5 })
@@ -44,7 +44,7 @@ describe("GenericContainer resources quota", { timeout: 180_000 }, () => {
     expect(containerInfo.HostConfig.NanoCpus).toEqual(0);
   });
 
-  if (!process.env["CI_ROOTLESS"]) {
+  if (!process.env.CI_ROOTLESS) {
     it("should round values to match target int64 type", async () => {
       await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
         .withResourcesQuota({ cpu: 0.3, memory: 0.2 })
@@ -58,7 +58,7 @@ describe("GenericContainer resources quota", { timeout: 180_000 }, () => {
     });
   }
 
-  if (!process.env["CI_ROOTLESS"]) {
+  if (!process.env.CI_ROOTLESS) {
     it("should set resources quota cpu only, memory should be 0", async () => {
       await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
         .withResourcesQuota({ cpu: 1 })

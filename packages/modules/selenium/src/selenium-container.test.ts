@@ -1,4 +1,4 @@
-import path from "path";
+import path from "node:path";
 import { Browser, Builder } from "selenium-webdriver";
 import { GenericContainer, Network } from "testcontainers";
 import tmp from "tmp";

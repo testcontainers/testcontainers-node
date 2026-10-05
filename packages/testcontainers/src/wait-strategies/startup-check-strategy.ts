@@ -1,4 +1,4 @@
-import Dockerode from "dockerode";
+import type Dockerode from "dockerode";
 import { IntervalRetry, log } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
 import { AbstractWaitStrategy } from "./wait-strategy";
@@ -6,10 +6,6 @@ import { AbstractWaitStrategy } from "./wait-strategy";
 export type StartupStatus = "PENDING" | "SUCCESS" | "FAIL";
 
 export abstract class StartupCheckStrategy extends AbstractWaitStrategy {
-  constructor() {
-    super();
-  }
-
   public abstract checkStartupState(dockerClient: Dockerode, containerId: string): Promise<StartupStatus>;
 
   public override async waitUntilReady(container: Dockerode.Container): Promise<void> {

@@ -1,4 +1,4 @@
-import { ContainerRuntimeClientStrategyResult } from "../strategies/types";
+import type { ContainerRuntimeClientStrategyResult } from "../strategies/types";
 
 export const getRemoteContainerRuntimeSocketPath = (
   containerRuntimeStrategyResult: ContainerRuntimeClientStrategyResult,
@@ -7,8 +7,8 @@ export const getRemoteContainerRuntimeSocketPath = (
   env: NodeJS.ProcessEnv = process.env
 ): string => {
   if (containerRuntimeStrategyResult.allowUserOverrides) {
-    if (env["TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE"] !== undefined) {
-      return env["TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE"];
+    if (env.TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE !== undefined) {
+      return env.TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE;
     }
   }
 

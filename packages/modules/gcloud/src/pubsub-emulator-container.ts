@@ -1,4 +1,4 @@
-import { AbstractStartedContainer, StartedTestContainer, Wait } from "testcontainers";
+import { AbstractStartedContainer, type StartedTestContainer, Wait } from "testcontainers";
 import { AbstractGcloudEmulator } from "./abstract-gcloud-emulator";
 
 const EMULATOR_PORT = 8085;

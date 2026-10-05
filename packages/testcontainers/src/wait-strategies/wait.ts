@@ -1,12 +1,13 @@
 import { CompositeWaitStrategy } from "./composite-wait-strategy";
 import { HealthCheckWaitStrategy } from "./health-check-wait-strategy";
 import { HostPortWaitStrategy } from "./host-port-wait-strategy";
-import { HttpWaitStrategy, HttpWaitStrategyOptions } from "./http-wait-strategy";
-import { Log, LogWaitStrategy } from "./log-wait-strategy";
+import { HttpWaitStrategy, type HttpWaitStrategyOptions } from "./http-wait-strategy";
+import { type Log, LogWaitStrategy } from "./log-wait-strategy";
 import { OneShotStartupCheckStrategy } from "./one-shot-startup-startegy";
 import { ShellWaitStrategy } from "./shell-wait-strategy";
-import { WaitStrategy } from "./wait-strategy";
+import type { WaitStrategy } from "./wait-strategy";
 
+// biome-ignore lint/complexity/noStaticOnlyClass: public API surface, kept as a class for backwards compatibility
 export class Wait {
   public static forAll(waitStrategies: WaitStrategy[]): CompositeWaitStrategy {
     return new CompositeWaitStrategy(waitStrategies);

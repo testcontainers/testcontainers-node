@@ -5,7 +5,6 @@ import {
   getReaper,
   LABEL_TESTCONTAINERS_SESSION_ID,
   log,
-  StartedTestContainer,
   Wait,
 } from "testcontainers";
 
@@ -20,7 +19,7 @@ export class LocalstackContainer extends GenericContainer {
 
   private resolveHostname(): void {
     const envVar = "LOCALSTACK_HOST";
-    let hostnameExternalReason;
+    let hostnameExternalReason: string;
     if (this.environment[envVar]) {
       // do nothing
       hostnameExternalReason = "explicitly as environment variable";
@@ -44,7 +43,7 @@ export class LocalstackContainer extends GenericContainer {
     const reaper = await getReaper(client);
 
     this.withEnvironment({
-      LAMBDA_DOCKER_FLAGS: `${this.environment["LAMBDA_DOCKER_FLAGS"] ?? ""} -l ${LABEL_TESTCONTAINERS_SESSION_ID}=${reaper.sessionId}`,
+      LAMBDA_DOCKER_FLAGS: `${this.environment.LAMBDA_DOCKER_FLAGS ?? ""} -l ${LABEL_TESTCONTAINERS_SESSION_ID}=${reaper.sessionId}`,
     });
   }
 
@@ -59,10 +58,6 @@ export class LocalstackContainer extends GenericContainer {
 }
 
 export class StartedLocalStackContainer extends AbstractStartedContainer {
-  constructor(startedTestContainer: StartedTestContainer) {
-    super(startedTestContainer);
-  }
-
   public getPort(): number {
     return this.startedTestContainer.getMappedPort(LOCALSTACK_PORT);
   }

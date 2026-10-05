@@ -1,4 +1,4 @@
-import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
+import { AbstractStartedContainer, GenericContainer, type StartedTestContainer, Wait } from "testcontainers";
 
 const POSTGRES_PORT = 5432;
 const POSTGRES_SSL_PATH = "/tmp/testcontainers-node/postgres";
