@@ -17,9 +17,7 @@ class PortForwarder {
     private readonly sshConnection: SshConnection,
     private readonly containerId: string,
     private readonly networkId: string,
-    private readonly ipAddress: string,
-    // biome-ignore lint/correctness/noUnusedPrivateClassMembers: kept private; unused but part of the internal constructor contract
-    private readonly networkName: string
+    private readonly ipAddress: string
   ) {}
 
   public async exposeHostPort(port: number): Promise<void> {
@@ -119,7 +117,7 @@ export class PortForwarderInstance {
     const networkId = container.NetworkSettings.Networks[networkName].NetworkID;
     const ipAddress = container.NetworkSettings.Networks[networkName].IPAddress;
 
-    return new PortForwarder(connection, containerId, networkId, ipAddress, networkName);
+    return new PortForwarder(connection, containerId, networkId, ipAddress);
   }
 
   private static async createInstance(): Promise<PortForwarder> {
@@ -157,6 +155,6 @@ export class PortForwarderInstance {
     const networkId = container.getNetworkId(networkName);
     const ipAddress = container.getIpAddress(networkName);
 
-    return new PortForwarder(connection, containerId, networkId, ipAddress, networkName);
+    return new PortForwarder(connection, containerId, networkId, ipAddress);
   }
 }

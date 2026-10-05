@@ -78,8 +78,14 @@ export class CouchbaseContainer extends GenericContainer {
     return this;
   }
 
-  // biome-ignore lint/suspicious/noExplicitAny: request bodies vary per Couchbase endpoint
-  private async doHttpRequest(host: string, port: number, path: string, method: string, body: any, auth = false) {
+  private async doHttpRequest(
+    host: string,
+    port: number,
+    path: string,
+    method: string,
+    body: RequestInit["body"],
+    auth = false
+  ) {
     try {
       return await fetch(`http://${host}:${port}${path}`, {
         method,

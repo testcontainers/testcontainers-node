@@ -66,12 +66,7 @@ export class StartedSeleniumContainer extends AbstractStartedContainer {
   }
 }
 
-export class StoppedSeleniumContainer extends AbstractStoppedContainer {
-  // biome-ignore lint/correctness/noUnusedPrivateClassMembers: dropping `private` would expose this field in the published declaration
-  constructor(private readonly stoppedSeleniumContainer: StoppedTestContainer) {
-    super(stoppedSeleniumContainer);
-  }
-}
+export class StoppedSeleniumContainer extends AbstractStoppedContainer {}
 
 export class SeleniumRecordingContainer extends SeleniumContainer {
   private async createNetworkIfNeeded(): Promise<StartedNetwork | undefined> {

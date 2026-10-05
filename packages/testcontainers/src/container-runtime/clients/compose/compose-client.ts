@@ -1,4 +1,4 @@
-import compose from "docker-compose";
+import compose, { type IDockerComposeResult } from "docker-compose";
 import { log, pullLog, toSeconds } from "../../../common";
 import { defaultComposeOptions } from "./default-compose-options";
 import type { ComposeDownOptions, ComposeOptions } from "./types";
@@ -106,9 +106,8 @@ class MissingComposeClient implements ComposeClient {
   }
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: docker-compose rejects with a non-Error shape
-async function handleAndRethrow(err: any, handle: (error: Error) => Promise<void>): Promise<never> {
-  const error = err instanceof Error ? err : new Error(err.err.trim());
+async function handleAndRethrow(err: unknown, handle: (error: Error) => Promise<void>): Promise<never> {
+  const error = err instanceof Error ? err : new Error((err as IDockerComposeResult).err.trim());
   await handle(error);
   throw error;
 }

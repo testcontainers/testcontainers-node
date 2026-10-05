@@ -148,9 +148,8 @@ export class DockerContainerClient implements ContainerClient {
       log.debug(`Stopping container...`, { containerId: container.id });
       await container.stop({ t: toSeconds(opts?.timeout ?? 0) });
       log.debug(`Stopped container`, { containerId: container.id });
-      // biome-ignore lint/suspicious/noExplicitAny: dockerode errors carry an untyped statusCode
-    } catch (err: any) {
-      if (err.statusCode === 304) {
+    } catch (err) {
+      if ((err as { statusCode?: number }).statusCode === 304) {
         log.debug(`Container already stopped`, { containerId: container.id });
       } else {
         log.error(`Failed to stop container: ${err}`, { containerId: container.id });
