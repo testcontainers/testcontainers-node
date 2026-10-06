@@ -47,7 +47,7 @@
     "@google-cloud/pubsub": "^6.1.0",
     "@google-cloud/spanner": "^9.0.0",
     "@google-cloud/storage": "^8.2.0",
-    "firebase-admin": "14.4.0",
+    "firebase-admin": "14.5.0",
     "msw": "^2.15.0"
   }
 }
