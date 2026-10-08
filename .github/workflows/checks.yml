@@ -108,6 +108,31 @@ jobs:
             npm run build --ignore-scripts --workspace ${{ steps.npm-install.outputs.workspace_path }} -- --project tsconfig.json --noEmit
           fi
 
+  package:
+    if: ${{ needs.detect-modules.outputs.modules_count != '0' }}
+    name: Package
+    needs:
+      - detect-modules
+      - lint
+    strategy:
+      fail-fast: false
+      matrix:
+        module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Code checkout
+        uses: actions/checkout@v7
+      - name: Install Node and Dependencies
+        uses: ./.github/actions/npm-setup
+        with:
+          runner: ubuntu-24.04
+          node-version: 24.x
+          workspace: "${{ matrix.module }}"
+      - name: Check package
+        env:
+          MODULE: ${{ matrix.module }}
+        run: npm run check-packages -- "${MODULE}"
+
   smoke-test:
     if: ${{ needs.detect-modules.outputs.has_testcontainers == 'true' }}
     needs:
@@ -208,6 +233,7 @@ jobs:
       - detect-modules
       - lint
       - compile
+      - package
       - smoke-test
       - smoke-test-bun
       - test
