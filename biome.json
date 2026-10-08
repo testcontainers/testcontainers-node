@@ -22,7 +22,10 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "preset": "recommended"
+      "preset": "recommended",
+      "nursery": {
+        "noFloatingPromises": "error"
+      }
     }
   },
   "assist": {
