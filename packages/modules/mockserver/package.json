@@ -2,6 +2,7 @@
   "name": "@testcontainers/mockserver",
   "version": "12.2.0",
   "description": "Mockserver module for Testcontainers",
+  "type": "commonjs",
   "main": "build/index.js",
   "scripts": {
     "prepack": "shx cp ../../../README.md . && shx cp ../../../LICENSE .",

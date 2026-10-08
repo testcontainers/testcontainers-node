@@ -18,6 +18,7 @@
   "bugs": {
     "url": "https://github.com/testcontainers/testcontainers-node/issues"
   },
+  "type": "commonjs",
   "main": "build/index.js",
   "files": [
     "build"
