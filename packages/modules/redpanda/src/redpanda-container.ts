@@ -17,8 +17,9 @@ const REDPANDA_PORT = 9092;
 const REDPANDA_ADMIN_PORT = 9644;
 const SCHEMA_REGISTRY_PORT = 8081;
 const REST_PROXY_PORT = 8082;
-const STARTER_SCRIPT = "/testcontainers_start.sh";
-const WAIT_FOR_SCRIPT_MESSAGE = "Waiting for script...";
+const REDPANDA_CONFIG = "/etc/redpanda/redpanda.yaml";
+const REDPANDA_CONFIG_MARKER = "# Injected by testcontainers";
+const WAIT_FOR_CONFIG_MESSAGE = "Waiting for config...";
 
 export class RedpandaContainer extends GenericContainer {
   private originalWaitStrategy: WaitStrategy | undefined;
@@ -42,14 +43,14 @@ export class RedpandaContainer extends GenericContainer {
   }
 
   protected override async beforeContainerCreated(): Promise<void> {
-    // Change the wait strategy to wait for a log message from a fake starter script
-    // so that we can put a real starter script in place at that moment
+    // Change the wait strategy to wait for a log message from a fake starter,
+    // which starts Redpanda only once the config with the mapped Kafka port is in place
     this.originalWaitStrategy = this.waitStrategy;
-    this.waitStrategy = Wait.forLogMessage(WAIT_FOR_SCRIPT_MESSAGE);
+    this.waitStrategy = Wait.forLogMessage(WAIT_FOR_CONFIG_MESSAGE);
     this.withEntrypoint(["sh"]);
     this.withCommand([
       "-c",
-      `echo '${WAIT_FOR_SCRIPT_MESSAGE}'; while [ ! -f ${STARTER_SCRIPT} ]; do sleep 0.1; done; ${STARTER_SCRIPT}`,
+      `echo '${WAIT_FOR_CONFIG_MESSAGE}'; until grep -q '${REDPANDA_CONFIG_MARKER}' ${REDPANDA_CONFIG}; do sleep 0.1; done; exec rpk redpanda start --mode dev-container --smp=1 --memory=1G`,
     ]);
   }
 
@@ -57,12 +58,10 @@ export class RedpandaContainer extends GenericContainer {
     container: StartedTestContainer,
     inspectResult: InspectResult
   ): Promise<void> {
-    const command = "#!/bin/bash\nrpk redpanda start --mode dev-container --smp=1 --memory=1G";
-    await container.copyContentToContainer([{ content: command, target: STARTER_SCRIPT, mode: 0o777 }]);
     await container.copyContentToContainer([
       {
         content: this.renderRedpandaFile(container.getHost(), container.getMappedPort(REDPANDA_PORT)),
-        target: "/etc/redpanda/redpanda.yaml",
+        target: REDPANDA_CONFIG,
       },
     ]);
 

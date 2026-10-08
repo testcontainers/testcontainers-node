@@ -1,8 +1,25 @@
+import { setTimeout } from "node:timers/promises";
+import type { InspectResult, StartedTestContainer } from "testcontainers";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { RedpandaContainer } from "./redpanda-container";
 import { assertMessageProducedAndConsumed } from "./test-helper";
 
 const IMAGE = getImage(__dirname);
+
+// Delays every copy into the container, as a busy Docker host does.
+class SlowCopyRedpandaContainer extends RedpandaContainer {
+  protected override async containerStarted(
+    container: StartedTestContainer,
+    inspectResult: InspectResult
+  ): Promise<void> {
+    const copyContentToContainer = container.copyContentToContainer.bind(container);
+    container.copyContentToContainer = async (contentsToCopy) => {
+      await setTimeout(1_000);
+      return copyContentToContainer(contentsToCopy);
+    };
+    await super.containerStarted(container, inspectResult);
+  }
+}
 
 describe("RedpandaContainer", { timeout: 240_000 }, () => {
   it("should connect", async () => {
@@ -11,6 +28,12 @@ describe("RedpandaContainer", { timeout: 240_000 }, () => {
 
     await assertMessageProducedAndConsumed(container);
     // }
+  });
+
+  it("should connect when the config reaches the container late", async () => {
+    await using container = await new SlowCopyRedpandaContainer(IMAGE).start();
+
+    await assertMessageProducedAndConsumed(container);
   });
 
   it("should connect to schema registry", async () => {
