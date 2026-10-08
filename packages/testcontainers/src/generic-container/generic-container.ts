@@ -7,7 +7,9 @@ import { containerLog, hash, log, toNanos } from "../common";
 import { type ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "../container-runtime";
 import { CONTAINER_STATUSES } from "../container-runtime/clients/container/types";
 import type { StartedNetwork } from "../network/network";
+// biome-ignore lint/suspicious/noImportCycles: Ryuk and sshd run as GenericContainers; only dereferenced at runtime
 import { PortForwarderInstance, SSHD_IMAGE } from "../port-forwarder/port-forwarder";
+// biome-ignore lint/suspicious/noImportCycles: Ryuk and sshd run as GenericContainers; only dereferenced at runtime
 import { getReaper, getReaperImage } from "../reaper/reaper";
 import type { StartedTestContainer, TestContainer } from "../test-container";
 import type {
@@ -34,8 +36,10 @@ import { type ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
 import { selectWaitStrategy } from "../wait-strategies/utils/wait-strategy-selector";
 import { waitForContainer } from "../wait-strategies/wait-for-container";
 import type { WaitStrategy } from "../wait-strategies/wait-strategy";
+// biome-ignore lint/suspicious/noImportCycles: fromDockerfile() and build() construct each other; only dereferenced at runtime
 import { GenericContainerBuilder } from "./generic-container-builder";
 import { inspectContainerUntilPortsExposed } from "./inspect-container-util-ports-exposed";
+// biome-ignore lint/suspicious/noImportCycles: Ryuk and sshd run as GenericContainers; only dereferenced at runtime
 import { StartedGenericContainer } from "./started-generic-container";
 
 const reusableContainerCreationLock = new AsyncLock();

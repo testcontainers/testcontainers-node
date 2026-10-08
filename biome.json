@@ -22,9 +22,38 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "preset": "recommended"
+      "preset": "recommended",
+      "suspicious": {
+        "noImportCycles": "error"
+      }
     }
   },
+  "overrides": [
+    {
+      "includes": ["packages/modules/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": [
+                      "testcontainers/**",
+                      "**/testcontainers/src/**",
+                      "!**/testcontainers/src/utils/test-helper"
+                    ],
+                    "message": "Modules must import from the public \"testcontainers\" entry point, not its internals."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
   "assist": {
     "enabled": true,
     "actions": {

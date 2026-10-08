@@ -3,6 +3,7 @@ import { userInfo } from "node:os";
 import type { ContainerInfo } from "dockerode";
 import { IntervalRetry, log, RandomUuid, withFileLock } from "../common";
 import { type ContainerRuntimeClient, ImageName } from "../container-runtime";
+// biome-ignore lint/suspicious/noImportCycles: Ryuk and sshd run as GenericContainers; only dereferenced at runtime
 import { GenericContainer } from "../generic-container/generic-container";
 import { LABEL_TESTCONTAINERS_RYUK, LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
 import { Wait } from "../wait-strategies/wait";

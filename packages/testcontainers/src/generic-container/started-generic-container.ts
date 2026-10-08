@@ -6,6 +6,7 @@ import type Dockerode from "dockerode";
 import type { ContainerInspectInfo } from "dockerode";
 import { containerLog, log } from "../common";
 import { type ContainerRuntimeClient, getContainerRuntimeClient } from "../container-runtime";
+// biome-ignore lint/suspicious/noImportCycles: Ryuk and sshd run as GenericContainers; only dereferenced at runtime
 import { getReaper } from "../reaper/reaper";
 import type { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
 import type {
