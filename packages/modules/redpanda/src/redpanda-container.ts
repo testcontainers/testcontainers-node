@@ -18,6 +18,7 @@ const REDPANDA_ADMIN_PORT = 9644;
 const SCHEMA_REGISTRY_PORT = 8081;
 const REST_PROXY_PORT = 8082;
 const REDPANDA_CONFIG = "/etc/redpanda/redpanda.yaml";
+const REDPANDA_CONFIG_STAGING = `${REDPANDA_CONFIG}.testcontainers`;
 const REDPANDA_CONFIG_MARKER = "# Injected by testcontainers";
 const WAIT_FOR_CONFIG_MESSAGE = "Waiting for config...";
 
@@ -58,12 +59,19 @@ export class RedpandaContainer extends GenericContainer {
     container: StartedTestContainer,
     inspectResult: InspectResult
   ): Promise<void> {
+    // Docker writes a copied file in place, so the starter could read the marker before the rest.
+    // A rename on the same filesystem publishes the whole file at once.
     await container.copyContentToContainer([
       {
         content: this.renderRedpandaFile(container.getHost(), container.getMappedPort(REDPANDA_PORT)),
-        target: REDPANDA_CONFIG,
+        target: REDPANDA_CONFIG_STAGING,
       },
     ]);
+    const { exitCode, output } = await container.exec(["mv", REDPANDA_CONFIG_STAGING, REDPANDA_CONFIG]);
+
+    if (exitCode !== 0) {
+      throw new Error(`Redpanda container configuration failed with exit code ${exitCode}: ${output}`);
+    }
 
     const client = await getContainerRuntimeClient();
     const dockerContainer = client.container.getById(container.getId());

@@ -6,7 +6,7 @@ import { assertMessageProducedAndConsumed } from "./test-helper";
 
 const IMAGE = getImage(__dirname);
 
-// Delays every copy into the container, as a busy Docker host does.
+// Writes each copied file in two parts with a pause between them, as a busy Docker host can.
 class SlowCopyRedpandaContainer extends RedpandaContainer {
   protected override async containerStarted(
     container: StartedTestContainer,
@@ -14,8 +14,12 @@ class SlowCopyRedpandaContainer extends RedpandaContainer {
   ): Promise<void> {
     const copyContentToContainer = container.copyContentToContainer.bind(container);
     container.copyContentToContainer = async (contentsToCopy) => {
-      await setTimeout(1_000);
-      return copyContentToContainer(contentsToCopy);
+      for (const { content, target, mode } of contentsToCopy) {
+        const [firstLine] = String(content).split("\n", 1);
+        await copyContentToContainer([{ content: `${firstLine}\n`, target, mode }]);
+        await setTimeout(1_000);
+        await copyContentToContainer([{ content, target, mode }]);
+      }
     };
     await super.containerStarted(container, inspectResult);
   }
@@ -30,7 +34,7 @@ describe("RedpandaContainer", { timeout: 240_000 }, () => {
     // }
   });
 
-  it("should connect when the config reaches the container late", async () => {
+  it("should connect when the config reaches the container late and in parts", async () => {
     await using container = await new SlowCopyRedpandaContainer(IMAGE).start();
 
     await assertMessageProducedAndConsumed(container);
