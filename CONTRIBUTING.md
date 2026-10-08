@@ -34,6 +34,7 @@ Then access the docs at [http://localhost:8000](http://localhost:8000).
 * Ensure that you have Python 3.11.0 or higher.
 * Set up a virtualenv and run `pip install -r requirements.txt` in the `testcontainers-node` root directory.
 * Once Python dependencies have been installed, run `mkdocs serve` to start a local auto-updating MkDocs server.
+* Run `mkdocs build --strict` to check for broken links, anchors and code includes. CI runs the same build on every pull request.
 
 #### PR preview deployments
 
