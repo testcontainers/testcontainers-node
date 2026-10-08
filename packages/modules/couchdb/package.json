@@ -34,5 +34,8 @@
   },
   "devDependencies": {
     "nano": "^11.0.7"
+  },
+  "engines": {
+    "node": ">= 22.22"
   }
 }

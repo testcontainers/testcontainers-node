@@ -36,5 +36,8 @@
     "@types/superagent": "^8.1.11",
     "mockserver-client": "^8.0.0",
     "superagent": "^10.4.1"
+  },
+  "engines": {
+    "node": ">= 22.22"
   }
 }

@@ -34,5 +34,8 @@
   },
   "devDependencies": {
     "mariadb": "3.5.4"
+  },
+  "engines": {
+    "node": ">= 22.22"
   }
 }

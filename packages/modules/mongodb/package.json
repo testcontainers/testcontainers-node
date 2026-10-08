@@ -35,5 +35,8 @@
   "dependencies": {
     "compare-versions": "^6.1.1",
     "testcontainers": "^12.2.0"
+  },
+  "engines": {
+    "node": ">= 22.22"
   }
 }

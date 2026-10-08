@@ -35,5 +35,8 @@
   },
   "devDependencies": {
     "node-vault": "^0.12.0"
+  },
+  "engines": {
+    "node": ">= 22.22"
   }
 }

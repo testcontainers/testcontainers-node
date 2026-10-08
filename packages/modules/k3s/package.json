@@ -34,5 +34,8 @@
   },
   "devDependencies": {
     "@kubernetes/client-node": "^2.0.0"
+  },
+  "engines": {
+    "node": ">= 22.22"
   }
 }

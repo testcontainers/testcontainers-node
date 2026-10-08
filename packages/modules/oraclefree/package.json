@@ -36,5 +36,8 @@
   "devDependencies": {
     "@types/oracledb": "^7.0.3",
     "oracledb": "^7.0.1"
+  },
+  "engines": {
+    "node": ">= 22.22"
   }
 }

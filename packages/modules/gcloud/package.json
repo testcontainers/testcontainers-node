@@ -50,5 +50,8 @@
     "@google-cloud/storage": "^8.2.0",
     "firebase-admin": "14.5.0",
     "msw": "^2.15.0"
+  },
+  "engines": {
+    "node": ">= 22.22"
   }
 }

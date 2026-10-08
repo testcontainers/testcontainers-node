@@ -36,5 +36,8 @@
   "dependencies": {
     "testcontainers": "^12.2.0",
     "zxcvbn": "^4.4.2"
+  },
+  "engines": {
+    "node": ">= 22.22"
   }
 }
