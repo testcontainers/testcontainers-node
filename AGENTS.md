@@ -86,7 +86,7 @@ reviewers can follow the reasoning.
 1. Start from `main`.
 2. Create a branch prefixed with `<agent-name>/` (for example `claude/fix-exec-output-truncation`). The PR title must not carry such prefixes (see step 9).
 3. Implement scoped changes only.
-4. Run required checks: `npm run format`, `npm run lint`, `npm run check-compiles` when touching `packages/testcontainers` APIs consumed by modules, and targeted tests.
+4. Run required checks: `npm run format`, `npm run lint`, `npm run knip`, `npm run check-compiles` when touching `packages/testcontainers` APIs consumed by modules, and targeted tests.
    - When working in a fresh git worktree, dependencies are not installed (`node_modules` is absent), so verification commands (tests, `lint`, `format`, `check-compiles`) will fail with "Cannot find module" errors. Run `npm ci` once before verifying. `npm ci` only populates `node_modules` and must not modify `package-lock.json`; if it does, treat that as drift to investigate.
 5. Verify git diff only contains intended files.
 6. Never commit, push, or post on GitHub (issues, PRs, or comments) without first sharing the proposed diff/message and getting explicit user approval.

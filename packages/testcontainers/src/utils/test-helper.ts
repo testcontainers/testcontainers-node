@@ -80,42 +80,11 @@ export const getRunningContainerNames = async (): Promise<string[]> => {
   return containers.flatMap((container) => container.Names).map((containerName) => containerName.replace("/", ""));
 };
 
-export const getStoppedContainerNames = async (): Promise<string[]> => {
-  const dockerode = (await getContainerRuntimeClient()).container.dockerode;
-  const containers = await dockerode.listContainers({ all: true });
-  return containers
-    .filter((container) => container.State === "exited")
-    .flatMap((container) => container.Names)
-    .map((containerName) => containerName.replace("/", ""));
-};
-
-export const getContainerIds = async (): Promise<string[]> => {
-  const dockerode = (await getContainerRuntimeClient()).container.dockerode;
-  const containers = await dockerode.listContainers({ all: true });
-  return containers.map((container) => container.Id);
-};
-
 export const getImageInfo = async (imageName: string): Promise<ImageInspectInfo> => {
   const dockerode = (await getContainerRuntimeClient()).container.dockerode;
   const image = dockerode.getImage(imageName);
   const imageInfo = await image.inspect();
   return imageInfo;
-};
-
-export const checkImageExists = async (imageName: string): Promise<boolean> => {
-  const dockerode = (await getContainerRuntimeClient()).container.dockerode;
-  try {
-    await dockerode.getImage(imageName.toString()).inspect();
-    return true;
-  } catch (_err) {
-    return false;
-  }
-};
-
-export const getRunningNetworkIds = async (): Promise<string[]> => {
-  const dockerode = (await getContainerRuntimeClient()).container.dockerode;
-  const networks = await dockerode.listNetworks();
-  return networks.map((network) => network.Id);
 };
 
 export const getVolumeNames = async (): Promise<string[]> => {
