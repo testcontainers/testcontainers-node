@@ -12,7 +12,7 @@
     "test:ci": "npm run test -- --coverage",
     "format": "biome format --write .",
     "lint": "biome check --write .",
-    "lint:ci": "biome ci --error-on-warnings package.json \"${WORKSPACE_PATH}\"",
+    "lint:ci": "biome ci --error-on-warnings .",
     "knip": "knip",
     "update-deps": "npm-check-updates --workspaces --root -u",
     "check-engines:root": "npm exec --yes --package=ls-engines@0.10.1 -- ls-engines --mode ideal --dev --no-current",
