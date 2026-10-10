@@ -78,18 +78,18 @@ describe("GenericContainer Dockerfile", { timeout: 180_000 }, () => {
     it("should not pull existing image without pull policy", async () => {
       const client = await getContainerRuntimeClient();
       await client.image.pull(new ImageName("docker.io", "node", "10-alpine"));
+      // Base the build on a tag that only exists locally, so the build fails if it pulls.
+      const localTag = `local-${uuidGen.nextUuid()}`;
+      await client.container.dockerode.getImage("node:10-alpine").tag({ repo: "node", tag: localTag });
 
-      const dockerfile = path.resolve(fixtures, "docker");
-      const containerSpec = GenericContainer.fromDockerfile(dockerfile);
+      const context = path.resolve(fixtures, "docker-with-buildargs");
+      const containerSpec = GenericContainer.fromDockerfile(context).withBuildArgs({ VERSION: localTag });
 
-      await containerSpec.build();
-      await using dockerEventStream = await getDockerEventStream();
-      const dockerPullEventPromise = waitForDockerEvent(dockerEventStream.events, "pull");
-      let hasResolved = false;
-      dockerPullEventPromise.then(() => (hasResolved = true));
-      await containerSpec.build();
-
-      expect(hasResolved).toBeFalsy();
+      try {
+        await expect(containerSpec.build()).resolves.toBeDefined();
+      } finally {
+        await deleteImageByName(`node:${localTag}`);
+      }
     });
   }
 

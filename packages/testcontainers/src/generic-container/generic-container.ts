@@ -206,8 +206,10 @@ export class GenericContainer implements TestContainer {
 
     if (this.filesToCopy.length > 0 || this.directoriesToCopy.length > 0 || this.contentsToCopy.length > 0) {
       const archive = await this.createArchiveToCopyToContainer();
-      archive.finalize();
-      await client.container.putArchive(container, archive, "/", this.copyToContainerOptions);
+      await Promise.all([
+        archive.finalize(),
+        client.container.putArchive(container, archive, "/", this.copyToContainerOptions),
+      ]);
     }
 
     for (const archive of this.archivesToCopy) {
