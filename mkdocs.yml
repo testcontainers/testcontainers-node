@@ -23,7 +23,8 @@ extra_css:
 
 plugins:
   - search
-  - codeinclude
+  - codeinclude:
+      block_throw: true
   - markdownextradata
 
 markdown_extensions:
@@ -97,3 +98,9 @@ nav:
       - Vault: modules/vault.md
       - Weaviate: modules/weaviate.md
   - Configuration: configuration.md
+
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+  anchors: warn
