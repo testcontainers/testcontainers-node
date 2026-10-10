@@ -1,6 +1,6 @@
+import crypto from "node:crypto";
+import path from "node:path";
 import { QdrantClient } from "@qdrant/js-client-rest";
-import crypto from "crypto";
-import path from "path";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { QdrantContainer } from "./qdrant-container";
 
@@ -36,7 +36,7 @@ describe("QdrantContainer", { timeout: 100_000 }, () => {
 
     const client = new QdrantClient({
       url: `http://${container.getRestHostAddress()}`,
-      apiKey: "INVALID_KEY_" + crypto.randomUUID(),
+      apiKey: `INVALID_KEY_${crypto.randomUUID()}`,
     });
 
     await expect(client.getCollections()).rejects.toThrow("Unauthorized");
@@ -61,7 +61,7 @@ describe("QdrantContainer", { timeout: 100_000 }, () => {
 
     const client = new QdrantClient({
       url: `http://${container.getRestHostAddress()}`,
-      apiKey: "INVALID_KEY_" + crypto.randomUUID(),
+      apiKey: `INVALID_KEY_${crypto.randomUUID()}`,
     });
 
     await expect(client.getCollections()).rejects.toThrow("Unauthorized");

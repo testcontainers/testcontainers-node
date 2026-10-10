@@ -1,7 +1,7 @@
-import { AdminClient, ChromaClient, type EmbeddingFunction } from "chromadb";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { AdminClient, ChromaClient, type EmbeddingFunction } from "chromadb";
 import { GenericContainer } from "testcontainers";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { ChromaDBContainer } from "./chromadb-container";

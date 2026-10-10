@@ -1,17 +1,17 @@
 import {
   AbstractStartedContainer,
   BoundPorts,
-  ContainerRuntimeClient,
+  type ContainerRuntimeClient,
   GenericContainer,
   getContainerRuntimeClient,
-  InspectResult,
+  type InspectResult,
   IntervalRetry,
   log,
-  StartedTestContainer,
+  type StartedTestContainer,
   Wait,
-  WaitStrategy,
+  type WaitStrategy,
 } from "testcontainers";
-import { BucketDefinition } from "./bucket-definition";
+import type { BucketDefinition } from "./bucket-definition";
 import { CouchbaseService } from "./couchbase-service";
 import PORTS from "./ports";
 
@@ -78,15 +78,21 @@ export class CouchbaseContainer extends GenericContainer {
     return this;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private async doHttpRequest(host: string, port: number, path: string, method: string, body: any, auth = false) {
+  private async doHttpRequest(
+    host: string,
+    port: number,
+    path: string,
+    method: string,
+    body: RequestInit["body"],
+    auth = false
+  ) {
     try {
       return await fetch(`http://${host}:${port}${path}`, {
         method,
         body,
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
-          ...(auth ? { Authorization: `Basic ${btoa(this.username + ":" + this.password)}` } : {}),
+          ...(auth ? { Authorization: `Basic ${btoa(`${this.username}:${this.password}`)}` } : {}),
         },
       });
     } catch (cause) {
@@ -187,7 +193,7 @@ export class CouchbaseContainer extends GenericContainer {
       undefined,
       true
     );
-    let jsonResponse;
+    let jsonResponse: { isEnterprise: boolean };
     try {
       jsonResponse = (await response.json()) as { isEnterprise: boolean };
     } catch (cause) {
@@ -401,7 +407,7 @@ export class CouchbaseContainer extends GenericContainer {
         .forResponsePredicate((response) => {
           try {
             const jsonResponse = JSON.parse(response);
-            const services = jsonResponse["nodesExt"][0].services;
+            const services = jsonResponse.nodesExt[0].services;
             const serviceNames = Object.keys(services);
 
             let found = false;
@@ -447,7 +453,7 @@ export class CouchbaseContainer extends GenericContainer {
               await this.checkResponse(response, `Could not poll query service state for bucket: ${bucket.getName()}`);
 
               return response;
-            } catch (e) {
+            } catch (_e) {
               return undefined;
             }
           },
@@ -471,7 +477,7 @@ export class CouchbaseContainer extends GenericContainer {
       if (bucket.hasPrimaryIndex()) {
         if (this.enabledServices.has(CouchbaseService.QUERY)) {
           const body = new URLSearchParams();
-          body.set("statement", "CREATE PRIMARY INDEX on `" + bucket.getName() + "`"); //TODO: check here!
+          body.set("statement", `CREATE PRIMARY INDEX on \`${bucket.getName()}\``); //TODO: check here!
 
           const response = await this.doHttpRequest(
             startedTestContainer.getHost(),
@@ -508,7 +514,7 @@ export class CouchbaseContainer extends GenericContainer {
                 );
 
                 return response;
-              } catch (e) {
+              } catch (_e) {
                 return undefined;
               }
             },

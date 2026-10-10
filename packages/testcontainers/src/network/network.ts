@@ -1,6 +1,6 @@
-import Dockerode from "dockerode";
-import { log, RandomUuid, Uuid } from "../common";
-import { ContainerRuntimeClient, getContainerRuntimeClient } from "../container-runtime";
+import type Dockerode from "dockerode";
+import { log, RandomUuid, type Uuid } from "../common";
+import { type ContainerRuntimeClient, getContainerRuntimeClient } from "../container-runtime";
 import { getReaper } from "../reaper/reaper";
 import { createLabels, LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
 

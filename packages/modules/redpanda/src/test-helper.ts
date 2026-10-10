@@ -1,5 +1,5 @@
 import { KafkaJS } from "@confluentinc/kafka-javascript";
-import { StartedRedpandaContainer } from "./redpanda-container";
+import type { StartedRedpandaContainer } from "./redpanda-container";
 
 // redpandaTestHelper {
 export async function assertMessageProducedAndConsumed(container: StartedRedpandaContainer) {

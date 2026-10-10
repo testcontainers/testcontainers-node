@@ -1,5 +1,5 @@
 import { Auths } from "./auths";
-import { AuthConfig, ContainerRuntimeConfig } from "./types";
+import type { AuthConfig, ContainerRuntimeConfig } from "./types";
 
 describe("Auths", () => {
   const locator = new Auths();

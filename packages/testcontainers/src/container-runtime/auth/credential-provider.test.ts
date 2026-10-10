@@ -1,12 +1,12 @@
-import { ChildProcess } from "child_process";
-import EventEmitter from "events";
-import { Readable, Writable } from "stream";
+import type { ChildProcess } from "node:child_process";
+import EventEmitter from "node:events";
+import { Readable, Writable } from "node:stream";
 import { CredentialProvider } from "./credential-provider";
-import { ContainerRuntimeConfig } from "./types";
+import type { ContainerRuntimeConfig } from "./types";
 
 const mockExec = vi.fn();
 const mockSpawn = vi.fn();
-vi.mock("child_process", () => ({
+vi.mock("node:child_process", () => ({
   exec: (...args: unknown[]) => mockExec(...args),
   spawn: (...args: unknown[]) => mockSpawn(...args),
 }));

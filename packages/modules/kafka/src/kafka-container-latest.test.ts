@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { GenericContainer, Network } from "testcontainers";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
-import { KafkaContainer, SaslSslListenerOptions } from "./kafka-container";
+import { KafkaContainer, type SaslSslListenerOptions } from "./kafka-container";
 import { assertMessageProducedAndConsumed } from "./test-helper";
 
 const IMAGE = getImage(__dirname);

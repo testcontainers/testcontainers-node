@@ -1,23 +1,23 @@
-import Dockerode, { DockerOptions } from "dockerode";
+import Dockerode, { type DockerOptions } from "dockerode";
 import { isDefined, isEmptyString, log } from "../../common";
 import { LIB_VERSION } from "../../version";
 import { ConfigurationStrategy } from "../strategies/configuration-strategy";
 import { NpipeSocketStrategy } from "../strategies/npipe-socket-strategy";
 import { RootlessUnixSocketStrategy } from "../strategies/rootless-unix-socket-strategy";
-import { ContainerRuntimeClientStrategy } from "../strategies/strategy";
+import type { ContainerRuntimeClientStrategy } from "../strategies/strategy";
 import { TestcontainersHostStrategy } from "../strategies/testcontainers-host-strategy";
 import { UnixSocketStrategy } from "../strategies/unix-socket-strategy";
 import { lookupHostIps } from "../utils/lookup-host-ips";
 import { getRemoteContainerRuntimeSocketPath } from "../utils/remote-container-runtime-socket-path";
 import { resolveHost } from "../utils/resolve-host";
-import { ComposeClient, getComposeClient } from "./compose/compose-client";
-import { ContainerClient } from "./container/container-client";
+import { type ComposeClient, getComposeClient } from "./compose/compose-client";
+import type { ContainerClient } from "./container/container-client";
 import { DockerContainerClient } from "./container/docker-container-client";
 import { DockerImageClient } from "./image/docker-image-client";
-import { ImageClient } from "./image/image-client";
+import type { ImageClient } from "./image/image-client";
 import { DockerNetworkClient } from "./network/docker-network-client";
-import { NetworkClient } from "./network/network-client";
-import { ContainerRuntimeInfo, Info, NodeInfo } from "./types";
+import type { NetworkClient } from "./network/network-client";
+import type { ContainerRuntimeInfo, Info, NodeInfo } from "./types";
 
 export class ContainerRuntimeClient {
   constructor(

@@ -1,4 +1,4 @@
-import { AbstractStartedContainer, GenericContainer, StartedTestContainer, Wait } from "testcontainers";
+import { AbstractStartedContainer, GenericContainer, type StartedTestContainer, Wait } from "testcontainers";
 
 const COCKROACH_PORT = 26257;
 const COCKROACH_HTTP_PORT = 26258;

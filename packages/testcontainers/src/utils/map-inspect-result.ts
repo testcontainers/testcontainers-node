@@ -1,5 +1,5 @@
-import { ContainerInspectInfo } from "dockerode";
-import { HealthCheckStatus, InspectResult, NetworkSettings, Ports } from "../types";
+import type { ContainerInspectInfo } from "dockerode";
+import type { HealthCheckStatus, InspectResult, NetworkSettings, Ports } from "../types";
 import { getHealthCheckStatusFromInspect } from "../wait-strategies/utils/health-check";
 
 export function mapInspectResult(inspectResult: ContainerInspectInfo): InspectResult {
@@ -22,19 +22,21 @@ export function mapInspectResult(inspectResult: ContainerInspectInfo): InspectRe
 }
 
 function mapPorts(inspectInfo: ContainerInspectInfo): Ports {
-  return Object.entries(inspectInfo.NetworkSettings.Ports)
-    .filter(([, hostPorts]) => hostPorts !== null)
-    .map(([containerPortAndProtocol, hostPorts]) => {
-      const [port, protocol] = containerPortAndProtocol.split("/");
-      const containerPort = parseInt(port);
-      return {
-        [`${containerPort}/${protocol}`]: hostPorts.map((hostPort) => ({
-          hostIp: hostPort.HostIp,
-          hostPort: parseInt(hostPort.HostPort),
-        })),
-      };
-    })
-    .reduce((acc, curr) => ({ ...acc, ...curr }), {});
+  return Object.fromEntries(
+    Object.entries(inspectInfo.NetworkSettings.Ports)
+      .filter(([, hostPorts]) => hostPorts !== null)
+      .map(([containerPortAndProtocol, hostPorts]) => {
+        const [port, protocol] = containerPortAndProtocol.split("/");
+        const containerPort = parseInt(port, 10);
+        return [
+          `${containerPort}/${protocol}`,
+          hostPorts.map((hostPort) => ({
+            hostIp: hostPort.HostIp,
+            hostPort: parseInt(hostPort.HostPort, 10),
+          })),
+        ];
+      })
+  );
 }
 
 function mapHealthCheckStatus(inspectResult: ContainerInspectInfo): HealthCheckStatus {
@@ -48,12 +50,13 @@ function mapHealthCheckStatus(inspectResult: ContainerInspectInfo): HealthCheckS
 }
 
 function mapNetworkSettings(inspectResult: ContainerInspectInfo): { [networkName: string]: NetworkSettings } {
-  return Object.entries(inspectResult.NetworkSettings.Networks)
-    .map(([networkName, network]) => ({
-      [networkName]: {
+  return Object.fromEntries(
+    Object.entries(inspectResult.NetworkSettings.Networks).map(([networkName, network]) => [
+      networkName,
+      {
         networkId: network.NetworkID,
         ipAddress: network.IPAddress,
       },
-    }))
-    .reduce((prev, next) => ({ ...prev, ...next }), {});
+    ])
+  );
 }

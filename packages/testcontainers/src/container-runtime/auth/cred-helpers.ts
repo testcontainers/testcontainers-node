@@ -1,5 +1,5 @@
 import { CredentialProvider } from "./credential-provider";
-import { ContainerRuntimeConfig } from "./types";
+import type { ContainerRuntimeConfig } from "./types";
 
 export class CredHelpers extends CredentialProvider {
   public getName(): string {

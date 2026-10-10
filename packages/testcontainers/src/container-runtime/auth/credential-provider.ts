@@ -1,7 +1,7 @@
-import { spawn } from "child_process";
+import { spawn } from "node:child_process";
 import { log } from "../../common";
-import { RegistryAuthLocator } from "./registry-auth-locator";
-import {
+import type { RegistryAuthLocator } from "./registry-auth-locator";
+import type {
   AuthConfig,
   ContainerRuntimeConfig,
   CredentialProviderGetResponse,
@@ -54,7 +54,7 @@ export abstract class CredentialProvider implements RegistryAuthLocator {
               : this.parseUsernamePasswordConfig(registry, credentialProviderResponse);
 
           return resolve(authConfig);
-        } catch (e) {
+        } catch (_e) {
           log.error(`Unexpected response from Docker credential provider GET command: "${response}"`);
           return reject(new Error("Unexpected response from Docker credential provider GET command"));
         }

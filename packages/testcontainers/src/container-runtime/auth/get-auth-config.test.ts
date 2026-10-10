@@ -1,16 +1,16 @@
 import type { Mock } from "vitest";
 
-vi.mock("fs");
-vi.mock("fs/promises");
+vi.mock("node:fs");
+vi.mock("node:fs/promises");
 
 describe("get auth config", { concurrent: false }, () => {
   let mockExistsSync: Mock;
   let mockReadFile: Mock;
 
   beforeEach(async () => {
-    const { existsSync } = await import("fs");
+    const { existsSync } = await import("node:fs");
     mockExistsSync = existsSync as Mock;
-    const { readFile } = await import("fs/promises");
+    const { readFile } = await import("node:fs/promises");
     mockReadFile = readFile as Mock;
   });
 

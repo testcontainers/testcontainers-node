@@ -20,6 +20,7 @@ class NeverPullPolicy implements ImagePullPolicy {
   }
 }
 
+// biome-ignore lint/complexity/noStaticOnlyClass: public API surface, kept as a class for backwards compatibility
 export class PullPolicy {
   public static defaultPolicy(): ImagePullPolicy {
     return new DefaultPullPolicy();

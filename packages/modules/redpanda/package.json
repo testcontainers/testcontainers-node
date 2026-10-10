@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/redpanda",
-  "version": "12.1.0",
+  "version": "12.2.0",
   "license": "MIT",
   "keywords": [
     "redpanda",
@@ -30,8 +30,8 @@
     "postbuild": "shx cp -r src/assets build"
   },
   "dependencies": {
-    "handlebars": "^4.7.9",
-    "testcontainers": "^12.1.0"
+    "handlebars": "^4.7.10",
+    "testcontainers": "^12.2.0"
   },
   "devDependencies": {
     "@confluentinc/kafka-javascript": "^1.10.1"

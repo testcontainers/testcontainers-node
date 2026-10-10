@@ -1,4 +1,4 @@
-import { Environment } from "testcontainers/src/types";
+import type { Environment } from "testcontainers/src/types";
 import weaviate from "weaviate-ts-client";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { WeaviateContainer } from "./weaviate-container";
@@ -53,7 +53,9 @@ describe("WeaviateContainer", { timeout: 100_000 }, () => {
     const res = await client.misc.metaGetter().do();
     expect(res.version).toBeDefined();
     expect(res.modules).toBeDefined();
-    enableModules.forEach((module) => expect(res.modules[module]).toBeDefined());
+    enableModules.forEach((module) => {
+      expect(res.modules[module]).toBeDefined();
+    });
     // }
   });
 });

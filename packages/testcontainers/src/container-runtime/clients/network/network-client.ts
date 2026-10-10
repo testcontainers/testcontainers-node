@@ -1,4 +1,4 @@
-import { Network, NetworkCreateOptions } from "dockerode";
+import type { Network, NetworkCreateOptions } from "dockerode";
 
 export interface NetworkClient {
   getById(id: string): Network;

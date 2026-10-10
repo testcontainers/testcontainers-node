@@ -1,4 +1,4 @@
-import Dockerode from "dockerode";
+import type Dockerode from "dockerode";
 import { log, streamToString } from "../../common";
 import { ImageName } from "../image-name";
 import { attachContainer } from "./attach-container";

@@ -1,4 +1,5 @@
-import { PassThrough, Readable } from "stream";
+import { PassThrough, type Readable } from "node:stream";
+import type Dockerode from "dockerode";
 import { DockerContainerClient } from "./docker-container-client";
 
 describe("DockerContainerClient", () => {
@@ -12,12 +13,10 @@ describe("DockerContainerClient", () => {
       };
       const dockerode = {
         modem: { demuxStream },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any;
+      } as unknown as Dockerode;
       const client = new DockerContainerClient(dockerode);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const stream = await client.logs(container as any);
+      const stream = await client.logs(container as unknown as Dockerode.Container);
       await vi.waitFor(() => expect(demuxStream).toHaveBeenCalledOnce());
       stream.destroy();
 
@@ -55,13 +54,11 @@ describe("DockerContainerClient", () => {
             setImmediate(() => stdout.uncork());
           },
         },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any;
+      } as unknown as Dockerode;
 
       const client = new DockerContainerClient(dockerode);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await client.exec(container as any, ["echo", "hi"]);
+      const result = await client.exec(container as unknown as Dockerode.Container, ["echo", "hi"]);
 
       expect(result.exitCode).toBe(0);
       expect(result.stdout).toBe(payload);

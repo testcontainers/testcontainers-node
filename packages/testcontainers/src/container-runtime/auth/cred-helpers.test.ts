@@ -1,5 +1,5 @@
 import { CredHelpers } from "./cred-helpers";
-import { AuthConfig, ContainerRuntimeConfig } from "./types";
+import type { AuthConfig, ContainerRuntimeConfig } from "./types";
 
 describe("CredHelpers", () => {
   const locator = new CredHelpers();
