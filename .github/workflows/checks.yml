@@ -74,32 +74,24 @@ jobs:
         run: npm run knip
 
   compile:
+    # Runs once for the whole repository instead of per module: a project-references build type-checks every
+    # package, tests included, in a few seconds.
     if: ${{ needs.detect-modules.outputs.modules_count != '0' }}
     name: Compile
     needs:
       - detect-modules
       - lint
-    strategy:
-      fail-fast: false
-      matrix:
-        module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
     runs-on: ubuntu-24.04
     steps:
       - name: Code checkout
         uses: actions/checkout@v7
       - name: Install Node and Dependencies
-        id: npm-install
         uses: ./.github/actions/npm-setup
         with:
           runner: ubuntu-24.04
           node-version: 24.x
-          workspace: "${{ matrix.module }}"
       - name: Compile
-        run: |
-          npm run build --ignore-scripts --workspace packages/testcontainers -- --project tsconfig.json
-          if [ "${{ matrix.module }}" != "testcontainers" ]; then
-            npm run build --ignore-scripts --workspace ${{ steps.npm-install.outputs.workspace_path }} -- --project tsconfig.json --noEmit
-          fi
+        run: npm run check-compiles
 
   smoke-test:
     if: ${{ needs.detect-modules.outputs.has_testcontainers == 'true' }}
