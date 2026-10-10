@@ -80,6 +80,22 @@ jobs:
           WORKSPACE_PATH: ${{ steps.npm-install-modules.outputs.workspace_path }}
         run: npm run lint:ci
 
+  knip:
+    # Knip analyses every workspace together and reads the manifests of their installed dependencies, so it runs
+    # once with every workspace installed instead of per module.
+    name: Knip
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Code checkout
+        uses: actions/checkout@v7
+      - name: Install Node and Dependencies
+        uses: ./.github/actions/npm-setup
+        with:
+          runner: ubuntu-24.04
+          node-version: 24.x
+      - name: Find unused files, exports and dependencies
+        run: npm run knip
+
   compile:
     if: ${{ needs.detect-modules.outputs.modules_count != '0' }}
     name: Compile
@@ -207,6 +223,7 @@ jobs:
     needs:
       - detect-modules
       - lint
+      - knip
       - compile
       - smoke-test
       - smoke-test-bun
