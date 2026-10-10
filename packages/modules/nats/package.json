@@ -17,6 +17,7 @@
   "bugs": {
     "url": "https://github.com/testcontainers/testcontainers-node/issues"
   },
+  "type": "commonjs",
   "main": "build/index.js",
   "files": [
     "build"
@@ -34,5 +35,8 @@
   "devDependencies": {
     "@nats-io/jetstream": "^3.4.0",
     "@nats-io/transport-node": "^3.4.0"
+  },
+  "engines": {
+    "node": ">= 22.22"
   }
 }

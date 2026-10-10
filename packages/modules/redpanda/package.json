@@ -17,6 +17,7 @@
   "bugs": {
     "url": "https://github.com/testcontainers/testcontainers-node/issues"
   },
+  "type": "commonjs",
   "main": "build/index.js",
   "files": [
     "build"
@@ -35,5 +36,8 @@
   },
   "devDependencies": {
     "@confluentinc/kafka-javascript": "^1.10.1"
+  },
+  "engines": {
+    "node": ">= 22.22"
   }
 }

@@ -18,6 +18,7 @@
   "bugs": {
     "url": "https://github.com/testcontainers/testcontainers-node/issues"
   },
+  "type": "commonjs",
   "main": "build/index.js",
   "files": [
     "build"
@@ -35,5 +36,8 @@
   },
   "dependencies": {
     "testcontainers": "^12.2.0"
+  },
+  "engines": {
+    "node": ">= 22.22"
   }
 }

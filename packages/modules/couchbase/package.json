@@ -17,6 +17,7 @@
   "bugs": {
     "url": "https://github.com/testcontainers/testcontainers-node/issues"
   },
+  "type": "commonjs",
   "main": "build/index.js",
   "files": [
     "build"
@@ -34,5 +35,8 @@
   "devDependencies": {
     "couchbase": "^4.7.1",
     "get-port": "^5.1.1"
+  },
+  "engines": {
+    "node": ">= 22.22"
   }
 }

@@ -16,7 +16,8 @@
     "update-deps": "npm-check-updates --workspaces --root -u",
     "check-engines:root": "npm exec --yes --package=ls-engines@0.10.1 -- ls-engines --mode ideal --dev --no-current",
     "check-engines:testcontainers": "npm exec --yes --workspace=testcontainers --package=ls-engines@0.10.1 -- ls-engines --mode ideal --no-current",
-    "check-compiles": "tsc -b packages/testcontainers packages/modules/*"
+    "check-compiles": "tsc -b packages/testcontainers packages/modules/*",
+    "check-packages": "npm exec --yes --package=publint@0.3.25 --package=@arethetypeswrong/cli@0.18.5 -- node .github/scripts/check-packages.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.14",
