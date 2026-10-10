@@ -1,4 +1,4 @@
-type Environment = { [key in string]: string };
+import type { Environment } from "../../../types";
 
 export type ExecOptions = { workingDir: string; user: string; env: Environment; log: boolean };
 
