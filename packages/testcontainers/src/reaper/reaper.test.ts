@@ -1,4 +1,5 @@
 import { type ContainerRuntimeClient, getContainerRuntimeClient } from "../container-runtime";
+import { LABEL_TESTCONTAINERS_LANG } from "../utils/labels";
 import { RandomPortGenerator } from "../utils/port-generator";
 
 describe("Reaper", { concurrent: false, timeout: 120_000 }, () => {
@@ -51,6 +52,19 @@ describe("Reaper", { concurrent: false, timeout: 120_000 }, () => {
     const reaper2 = await getReaper();
 
     expect(reaper2.containerId).toBe(reaper.containerId);
+  });
+
+  it("should not reuse existing reaper container created by another language", async () => {
+    const reaper = await getReaper();
+    vi.resetModules();
+    const reaperContainerInfo = (await client.container.list()).filter((c) => c.Id === reaper.containerId)[0];
+    reaperContainerInfo.Labels.TESTCONTAINERS_RYUK_TEST_LABEL = "false";
+    reaperContainerInfo.Labels[LABEL_TESTCONTAINERS_LANG] = "python";
+    vi.spyOn(client.container, "list").mockResolvedValue([reaperContainerInfo]);
+
+    const reaper2 = await getReaper();
+
+    expect(reaper2.containerId).not.toBe(reaper.containerId);
   });
 
   it("should create new reaper container when existing reaper cannot be reached", async () => {
