@@ -1,9 +1,5 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema-jsonc.json",
-  // The packages have no `exports` map, so consumers can deep-import any file under `build/` (for example
-  // `testcontainers/build/types`). Removing an `export` can break them even when it's not in `index.ts`, so only
-  // report exports that aren't used anywhere, not exports that are only used in their own file.
-  "ignoreExportsUsedInFile": true,
   "workspaces": {
     ".": {
       // Loaded by a <script> tag in docs/site/theme/main.html, not imported by any module.
@@ -13,16 +9,7 @@
       // Run by Jest in the Checks workflow via `--testMatch`, which knip can't trace back to a file.
       "entry": ["smoke-test.jest.js"],
       // Docker build contexts that tests copy into images, never imported.
-      "ignoreFiles": ["fixtures/**"],
-      "ignoreIssues": {
-        // Consumers deep-import types from `testcontainers/build/types`, so unused types here may still be in use.
-        "src/types.ts": ["types"],
-        // The label names are shared by every Testcontainers implementation. They're only used here as computed
-        // keys, which knip doesn't count as use within the file.
-        "src/utils/labels.ts": ["exports"],
-        // Re-exports `ComposeExecutableOptions`, which is reachable via `testcontainers/build/container-runtime`.
-        "src/container-runtime/index.ts": ["exports"]
-      }
+      "ignoreFiles": ["fixtures/**"]
     },
     "packages/modules/chromadb": {
       // chromadb dynamic-imports it as the default embedding function when a collection doesn't set one.

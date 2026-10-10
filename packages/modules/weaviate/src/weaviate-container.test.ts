@@ -1,4 +1,4 @@
-import type { Environment } from "testcontainers/src/types";
+import type { Environment } from "testcontainers";
 import weaviate from "weaviate-ts-client";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { WeaviateContainer } from "./weaviate-container";
