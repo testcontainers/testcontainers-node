@@ -114,6 +114,7 @@ jobs:
           runner: ubuntu-24.04
           node-version: ${{ matrix.node-version }}
           workspace: "testcontainers"
+          workspace-only: true
       - name: Build testcontainers
         run: npm run build --workspace packages/testcontainers
       - name: Remove dev dependencies
@@ -148,6 +149,7 @@ jobs:
           runner: ubuntu-24.04
           node-version: 24.x
           workspace: "testcontainers"
+          workspace-only: true
       - name: Build testcontainers
         run: npm run build --workspace packages/testcontainers
       - name: Remove dev dependencies
