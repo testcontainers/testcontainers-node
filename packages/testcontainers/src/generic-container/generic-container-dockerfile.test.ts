@@ -1,4 +1,5 @@
 import path from "node:path";
+import { setTimeout as delay } from "node:timers/promises";
 import { RandomUuid } from "../common";
 import { getContainerRuntimeClient, ImageName } from "../container-runtime";
 import { getReaper } from "../reaper/reaper";
@@ -75,7 +76,8 @@ describe("GenericContainer Dockerfile", { timeout: 180_000 }, () => {
       await dockerPullEventPromise;
     });
 
-    it("should not pull existing image without pull policy", async () => {
+    // Docker events are daemon-wide, so run apart from this file's other tests, which pull the same image.
+    it("should not pull existing image without pull policy", { concurrent: false }, async () => {
       const client = await getContainerRuntimeClient();
       await client.image.pull(new ImageName("docker.io", "node", "10-alpine"));
 
@@ -84,13 +86,11 @@ describe("GenericContainer Dockerfile", { timeout: 180_000 }, () => {
 
       await containerSpec.build();
       await using dockerEventStream = await getDockerEventStream();
-      const dockerPullEventPromise = waitForDockerEvent(dockerEventStream.events, "pull");
-      let hasResolved = false;
-      // waitForDockerEvent never rejects; only record whether a pull event arrived.
-      void dockerPullEventPromise.then(() => (hasResolved = true));
+      const pulled = waitForDockerEvent(dockerEventStream.events, "pull").then(() => true);
       await containerSpec.build();
 
-      expect(hasResolved).toBeFalsy();
+      // Events arrive on a separate stream, so give a late pull event time to be delivered before asserting.
+      expect(await Promise.race([pulled, delay(500, false)])).toBe(false);
     });
   }
 
