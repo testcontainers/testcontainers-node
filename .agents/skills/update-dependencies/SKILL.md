@@ -46,7 +46,7 @@ Dependabot (`.github/dependabot.yml`) opens grouped weekly PRs for npm, module D
 
 ## Committing on a Dependabot PR
 
-- Push fix-ups to the Dependabot branch itself, one change per commit. Show the commit before pushing (AGENTS.md).
+- Push fix-ups to the Dependabot branch itself, one change per commit. Show the commit before pushing, never bypass signing, and ask before any force push (AGENTS.md).
 - Once you push, Dependabot stops rebasing the PR, and `@dependabot recreate` would discard your commit.
 - If a newer grouped PR supersedes a red one, close the old one rather than fixing both.
 
@@ -54,7 +54,7 @@ Dependabot (`.github/dependabot.yml`) opens grouped weekly PRs for npm, module D
 
 1. Run `npm audit fix` on a new branch from `main`, never with `--force`. It must stay lockfile-only. A fix that needs a `package.json` range change is the user's call.
 2. Verify per AGENTS.md. Then run `npm audit --omit=dev` and note what remains.
-3. Open `Apply npm audit fixes` (`dependencies` + `patch`).
+3. Open `Apply npm audit fixes` with `open-pr` (`dependencies` + `patch`).
    - List the open Dependabot security PRs it supersedes.
    - Say what remains unfixed.
    - Explain why it isn't breaking (lockfile-only, manifests unchanged).

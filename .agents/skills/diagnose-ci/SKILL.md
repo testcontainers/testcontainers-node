@@ -48,3 +48,4 @@ Treat a flake as a bug and use red-green (AGENTS.md):
    - State shared between concurrent tests.
    - A timeout too tight for a slow image.
 3. Fix the cause. Don't just raise retries or timeouts.
+4. Ship the fix with `open-pr`, using the loop output as the red-green evidence.

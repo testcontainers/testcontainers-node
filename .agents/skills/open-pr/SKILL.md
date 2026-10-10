@@ -14,11 +14,12 @@ Before committing, pushing or opening anything, get the user's approval of the d
 - Branch from an up-to-date `main`.
 - Run the checks in AGENTS.md "Verification". For bug fixes, keep the red-green output.
 - Check that `git diff --stat main...HEAD` shows only the files you intended, and that the lockfile changes only the entries you intended.
-- If you changed GitHub Actions, Node or npm versions, or the publish automation, also dry-run the publish workflow against your branch:
+- If you changed GitHub Actions, Node or npm versions, or the publish automation, say so in the PR body so a maintainer can dry-run `npm-publish.yml` against the branch before merging.
 
-  ```bash
-  gh workflow run npm-publish.yml --ref <branch> -f version=<next version>
-  ```
+## Commit and push
+
+- Commit with `git commit`. Never bypass signing (`--no-gpg-sign`, `-c commit.gpgsign=false`). If signing fails, stop and ask the user to fix it, then retry.
+- Push with `git push -u origin <branch>`. Ask before any force push, including after rebasing an open PR.
 
 ## Title
 
@@ -51,10 +52,7 @@ Include:
 - **Not breaking** (unless the PR is labelled `major`): why the change is backward compatible.
 - `Closes #<issue>`, only if the PR fully resolves that issue.
 
-Write the body to a file and pass it with `--body-file`. Inline `--body` mangles backticks.
-
 ```bash
-git push -u origin <branch>
 gh pr create --base main --title "<title>" --body-file <path> --label <type> --label <semver>
 ```
 
