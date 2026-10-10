@@ -1,5 +1,4 @@
 import path from "node:path";
-import { setTimeout as delay } from "node:timers/promises";
 import { RandomUuid } from "../common";
 import { getContainerRuntimeClient, ImageName } from "../container-runtime";
 import { getReaper } from "../reaper/reaper";
@@ -76,21 +75,21 @@ describe("GenericContainer Dockerfile", { timeout: 180_000 }, () => {
       await dockerPullEventPromise;
     });
 
-    // Docker events are daemon-wide, so run apart from this file's other tests, which pull the same image.
-    it("should not pull existing image without pull policy", { concurrent: false }, async () => {
+    it("should not pull existing image without pull policy", async () => {
       const client = await getContainerRuntimeClient();
       await client.image.pull(new ImageName("docker.io", "node", "10-alpine"));
+      // Base the build on a tag that only exists locally, so the build fails if it pulls.
+      const localTag = `local-${uuidGen.nextUuid()}`;
+      await client.container.dockerode.getImage("node:10-alpine").tag({ repo: "node", tag: localTag });
 
-      const dockerfile = path.resolve(fixtures, "docker");
-      const containerSpec = GenericContainer.fromDockerfile(dockerfile);
+      const context = path.resolve(fixtures, "docker-with-buildargs");
+      const containerSpec = GenericContainer.fromDockerfile(context).withBuildArgs({ VERSION: localTag });
 
-      await containerSpec.build();
-      await using dockerEventStream = await getDockerEventStream();
-      const pulled = waitForDockerEvent(dockerEventStream.events, "pull").then(() => true);
-      await containerSpec.build();
-
-      // Events arrive on a separate stream, so give a late pull event time to be delivered before asserting.
-      expect(await Promise.race([pulled, delay(500, false)])).toBe(false);
+      try {
+        await expect(containerSpec.build()).resolves.toBeDefined();
+      } finally {
+        await deleteImageByName(`node:${localTag}`);
+      }
     });
   }
 
