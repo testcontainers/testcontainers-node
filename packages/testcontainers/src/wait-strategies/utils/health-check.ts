@@ -36,7 +36,7 @@ const isDisabledHealthCheck = (test: string[]): boolean => {
   return test[0].toUpperCase() === DISABLED_HEALTH_CHECK_TEST;
 };
 
-const isHealthCheckDisabled = (healthCheck: HealthCheckConfig | undefined): boolean => {
+export const isHealthCheckDisabled = (healthCheck: HealthCheckConfig | undefined): boolean => {
   if (healthCheck === undefined) {
     return false;
   }
@@ -62,7 +62,7 @@ export const hasHealthCheck = (healthCheck: HealthCheckConfig | undefined): bool
   return !isHealthCheckDisabled(healthCheck);
 };
 
-const getHealthCheckConfig = (inspectResult: HealthCheckInspectInfo): HealthConfig | undefined => {
+export const getHealthCheckConfig = (inspectResult: HealthCheckInspectInfo): HealthConfig | undefined => {
   const inspectWithHealthCheckConfig = inspectResult as InspectWithHealthCheckConfig;
 
   return (

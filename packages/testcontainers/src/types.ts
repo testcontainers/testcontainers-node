@@ -12,9 +12,11 @@ export type InspectResult = {
   labels: Labels;
 };
 
+export type ContainerRuntime = "docker" | "podman";
+
 export type Environment = { [key in string]: string };
 
-type BindMode = "rw" | "ro" | "z" | "Z";
+export type BindMode = "rw" | "ro" | "z" | "Z";
 
 export type BindMount = {
   source: string;
