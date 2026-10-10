@@ -6,7 +6,7 @@ argument-hint: "[issue number]"
 
 # Triage an issue
 
-Many reports turn out to be the environment, a container runtime, or another library rather than testcontainers. The aim is to settle each issue in one response: ask for exactly what's missing, give the known cause and workaround, or confirm the bug with a failing test.
+Many reports turn out to be the environment, a container runtime, or another library rather than testcontainers. The aim is to settle each issue in one response: ask for exactly what's missing, point to the existing answer and its workaround, or confirm the bug with a failing test.
 
 ## 1. Read it
 
@@ -58,7 +58,7 @@ Reports often arrive with an AI-written diagnosis citing files and lines. Treat 
 
 Draft for the user to approve:
 
-- **A short reply.** Either the missing information, the known cause with its workaround and a link, or a bug confirmation with a one-line root cause and the fix plan. If an open PR already fixes it, link that PR.
+- **A short reply.** Either the missing information, the existing answer with its workaround and a link, or a bug confirmation with a one-line root cause and the fix plan. If an open PR already fixes it, link that PR.
 - **Labels.** One of `bug`, `enhancement` or `documentation`. Add `triage` if it still needs investigation, or `duplicate` with a link.
 - **Whether to close it.**
 
