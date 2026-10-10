@@ -5,7 +5,7 @@ import { IntervalRetry, log, RandomUuid, withFileLock } from "../common";
 import { type ContainerRuntimeClient, ImageName } from "../container-runtime";
 // biome-ignore lint/suspicious/noImportCycles: Ryuk and sshd run as GenericContainers; only dereferenced at runtime
 import { GenericContainer } from "../generic-container/generic-container";
-import { LABEL_TESTCONTAINERS_RYUK, LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
+import { LABEL_TESTCONTAINERS_LANG, LABEL_TESTCONTAINERS_RYUK, LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
 import { Wait } from "../wait-strategies/wait";
 
 /**
@@ -49,9 +49,8 @@ export async function getReaper(client: ContainerRuntimeClient): Promise<Reaper>
     }
 
     for (const reaperContainer of reaperContainers) {
-      const existingSessionId = reaperContainer.Labels[LABEL_TESTCONTAINERS_SESSION_ID] ?? new RandomUuid().nextUuid();
       try {
-        sessionId = existingSessionId;
+        sessionId = reaperContainer.Labels[LABEL_TESTCONTAINERS_SESSION_ID];
         return await useExistingReaper(reaperContainer, sessionId, client.info.containerRuntime.host);
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
@@ -76,6 +75,8 @@ async function findReaperContainers(client: ContainerRuntimeClient): Promise<Con
       (container) =>
         container.State === "running" &&
         container.Labels[LABEL_TESTCONTAINERS_RYUK] === "true" &&
+        container.Labels[LABEL_TESTCONTAINERS_LANG] === "node" &&
+        !!container.Labels[LABEL_TESTCONTAINERS_SESSION_ID] &&
         container.Labels.TESTCONTAINERS_RYUK_TEST_LABEL !== "true"
     )
     .sort((a, b) => b.Created - a.Created);

@@ -32,6 +32,7 @@
     "testcontainers": "^12.2.0"
   },
   "devDependencies": {
+    "@azure/core-auth": "^1.10.1",
     "@azure/data-tables": "^13.3.2",
     "@azure/storage-blob": "12.34.0",
     "@azure/storage-queue": "12.32.0"
