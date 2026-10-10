@@ -43,7 +43,7 @@ gh pr checks <N>
   - Flag unrelated dependency bumps; leave those to Dependabot.
 - **Dependencies:** runtime dependencies load from CommonJS (AGENTS.md), and well-established libraries or built-ins are preferred.
 - **Breaking changes:** renamed exports, changed defaults and lowered timeouts all count. They need `major` or a non-breaking alternative.
-- **Claims:** check root-cause explanations and "Java/Go does X" statements against the actual code. AI-written PR descriptions are often confidently wrong.
+- **Claims:** check root-cause explanations, and claims about what another Testcontainers implementation does, against the actual code. AI-written PR descriptions are often confidently wrong.
 
 ## Write the comments
 

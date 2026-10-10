@@ -38,7 +38,7 @@ If nothing answers it and the report is missing what you need, draft one reply t
 Reports often arrive with an AI-written diagnosis citing files and lines. Treat it as a lead, not a fact:
 
 - Check the cited code against `main`.
-- Check any "Java/Go does X" claim against those repositories. When the bug involves another binding or Ryuk itself, read that code too.
+- Check any claim about what another Testcontainers implementation does against that repository. When the bug involves another binding or Ryuk itself, read that code too.
 - For a regression, diff the release tags: `git log --oneline v<good>..v<bad> -- packages/testcontainers/src/<area>`.
 
 ## 4. Reproduce

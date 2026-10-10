@@ -47,7 +47,7 @@ Every PR gets exactly one change-type label and one semver label.
 
 Include:
 
-- **Summary:** what changed and why. Link to the Java or Go implementation if you borrowed from it.
+- **Summary:** what changed and why. If you followed another Testcontainers implementation, link the code you followed (AGENTS.md "Cross-language Implementations").
 - **Verification:** the commands you ran and their results, including red-green evidence for fixes.
 - **Not breaking** (unless the PR is labelled `major`): why the change is backward compatible.
 - `Closes #<issue>`, only if the PR fully resolves that issue.

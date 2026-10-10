@@ -72,6 +72,12 @@ Implementations, roughly in order of maturity (most mature first):
 - Ruby: https://github.com/testcontainers/testcontainers-ruby
 - Haskell: https://github.com/testcontainers/testcontainers-hs
 
+To find other implementations and related projects, browse the org's repositories:
+https://github.com/orgs/testcontainers/repositories
+
+Check more than one where they exist. They don't always agree, and a module or feature may
+exist in only some of them.
+
 When you do borrow a decision from another implementation, note the source in the PR so
 reviewers can follow the reasoning.
 

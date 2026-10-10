@@ -39,7 +39,7 @@ Dependabot (`.github/dependabot.yml`) opens grouped weekly PRs for npm, module D
   1. a newer tag in the same repository
   2. the vendor's official repository on another registry
   3. a trusted rebuild such as Chainguard
-- See what the Java and Go modules moved to.
+- See what the other implementations' modules moved to (AGENTS.md "Cross-language Implementations").
 - Update the `FROM` line, keeping the line order, and the registry link in `docs/modules/<x>.md`.
 - If the tag or feature no longer exists upstream, drop that test case and say why.
 - Title the PR after the move, e.g. `Pull the MinIO image from Quay`.

@@ -10,7 +10,7 @@ Start by copying a small, recent module (`packages/modules/mosquitto` and `docs/
 
 ## Before writing code
 
-- Check the Java and Go modules for the image, ports, wait strategy and defaults, and for whether they split major versions into separate classes.
+- Check the module in the other implementations that have it (AGENTS.md "Cross-language Implementations"): the image, ports, wait strategy and defaults, and whether they split major versions into separate classes.
 - Pin a concrete, current, multi-arch tag in the module `Dockerfile`, never `latest` or a floating major. `docker manifest inspect <image:tag>` should list both amd64 and arm64.
 - The client library used in the tests goes in `devDependencies` (`npm install -w @testcontainers/<name> --save-dev <client>`). Users bring their own client. Add a runtime dependency only if the container class itself needs one.
 
