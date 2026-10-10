@@ -56,43 +56,20 @@ jobs:
           echo "${modules}"
 
   lint:
-    if: ${{ needs.detect-modules.outputs.modules_count != '0' }}
+    # Runs once for the whole repository instead of per module: Biome checks every file in well under a second, and
+    # knip analyses all workspaces together and reads the manifests of their installed dependencies.
     name: "Lint"
-    needs:
-      - detect-modules
-    strategy:
-      fail-fast: false
-      matrix:
-        module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
     runs-on: ubuntu-24.04
     steps:
       - name: Code checkout
         uses: actions/checkout@v7
       - name: Install Node and Dependencies
-        id: npm-install-modules
         uses: ./.github/actions/npm-setup
         with:
           runner: ubuntu-24.04
           node-version: 24.x
-          workspace: "${{ matrix.module }}"
       - name: Code linting
-        env:
-          WORKSPACE_PATH: ${{ steps.npm-install-modules.outputs.workspace_path }}
         run: npm run lint:ci
-
-  knip:
-    # Knip analyses every workspace together and reads the manifests of their installed dependencies, so it runs
-    # once with every workspace installed instead of per module.
-    name: Knip
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Code checkout
-        uses: actions/checkout@v7
-      - name: Install Node and Dependencies
-        uses: ./.github/actions/npm-setup
-        with:
-          runner: ubuntu-24.04
-          node-version: 24.x
       - name: Find unused files, exports and dependencies
         run: npm run knip
 
@@ -223,7 +200,6 @@ jobs:
     needs:
       - detect-modules
       - lint
-      - knip
       - compile
       - smoke-test
       - smoke-test-bun
