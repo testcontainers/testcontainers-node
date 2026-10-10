@@ -6,7 +6,9 @@ argument-hint: "[module name]"
 
 # Add a module
 
-Start by copying a small, recent module (`packages/modules/mosquitto` and `docs/modules/mosquitto.md`) and adapting it. Copying keeps the boilerplate current. The rules below are what reviewers keep flagging on module PRs.
+Copy `package.json`, `tsconfig.json` and `tsconfig.build.json` from any existing module. They have the same shape in every module. In `package.json`, change the name, description, keywords and `devDependencies`. Leave `version` and the `testcontainers` dependency as copied, because the release workflow sets both.
+
+For the container class, tests and docs page, start from the module closest in shape to the new one (same kind of wait, auth or number of ports). The rules below are what reviewers keep flagging on module PRs.
 
 ## Before writing code
 
@@ -33,7 +35,7 @@ Start by copying a small, recent module (`packages/modules/mosquitto` and `docs/
 
 ## Docs and finish
 
-- Adapt the mosquitto docs page. Examples come only from test blocks via `codeinclude`. Keep the "substitute `IMAGE`" line.
+- Copy the docs page of the module you started from. Examples come only from test blocks via `codeinclude`. Keep the "substitute `IMAGE`" line.
 - Add the page to the `mkdocs.yml` Modules nav in alphabetical order.
 - Verify per AGENTS.md, including `npx vitest run packages/modules/<name>`.
 - The diff should contain only the module directory, the docs page, `mkdocs.yml`, and the lockfile entries for the new workspace and client.
