@@ -18,16 +18,18 @@ describe("NatsContainer", { timeout: 180_000 }, () => {
 
     const sub = nc.subscribe(SUBJECT);
 
-    (async () => {
+    const received = (async () => {
+      const messages: string[] = [];
       for await (const m of sub) {
-        const actual = TD.decode(m.data);
-        expect(actual).toEqual(PAYLOAD);
+        messages.push(TD.decode(m.data));
       }
-    })().then();
+      return messages;
+    })();
 
     nc.publish(SUBJECT, TE.encode(PAYLOAD));
 
     await nc.drain();
+    expect(await received).toEqual([PAYLOAD]);
     await nc.close();
     // }
   });

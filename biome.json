@@ -26,6 +26,9 @@
       "correctness": {
         "noUndeclaredDependencies": "error"
       },
+      "nursery": {
+        "noFloatingPromises": "error"
+      },
       "suspicious": {
         "noImportCycles": "error"
       }

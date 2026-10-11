@@ -3,6 +3,9 @@ build/
 node_modules/
 coverage/
 
+# MkDocs build output
+/site/
+
 # Package files are copied from the root on pack
 packages/**/README.md
 packages/**/LICENSE

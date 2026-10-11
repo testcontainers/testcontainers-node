@@ -95,7 +95,7 @@ const container = await new GenericContainer("alpine")
 
 **Not recommended.**
 
-Bind mounts are not portable. They do not work with Docker in Docker or in cases where the Docker agent is remote. It is preferred to [copy files/directories/content into the container](../containers#with-filesdirectoriescontent) instead.
+Bind mounts are not portable. They do not work with Docker in Docker or in cases where the Docker agent is remote. It is preferred to [copy files/directories/content into the container](#with-filesdirectoriescontent) instead.
 
 ```js
 const container = await new GenericContainer("alpine")
@@ -122,7 +122,7 @@ const container = await new GenericContainer("alpine")
 
 **Not recommended.**
 
-If a container with the same name already exists, Docker will raise a conflict. If you are specifying a name to enable container to container communication, look into creating a network and using [network aliases](../networking#network-aliases).
+If a container with the same name already exists, Docker will raise a conflict. If you are specifying a name to enable container to container communication, look into creating a network and using [network aliases](networking.md#network-aliases).
 
 ```js
 const container = await new GenericContainer("alpine")
@@ -246,7 +246,7 @@ const container = await new GenericContainer("alpine")
 
 ### With default log driver
 
-May be necessary when the driver of your docker host does not support reading logs, and you want to use the [log output wait strategy](../wait-strategies#log-output).
+May be necessary when the driver of your docker host does not support reading logs, and you want to use the [log output wait strategy](wait-strategies.md#log-output).
 
 See [log drivers](https://docs.docker.com/config/containers/logging/configure/#configure-the-logging-driver-for-a-container).
 
