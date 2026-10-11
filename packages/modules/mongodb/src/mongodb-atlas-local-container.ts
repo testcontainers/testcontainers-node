@@ -9,8 +9,10 @@ export class MongoDBAtlasLocalContainer extends GenericContainer {
 
   constructor(image: string) {
     super(image);
+    // The image restarts mongod once it has finished initialising, and the healthcheck can pass on the mongod
+    // that is about to be stopped. A second healthcheck fails or blocks until the final mongod is up.
     this.withExposedPorts(MONGODB_PORT)
-      .withWaitStrategy(Wait.forSuccessfulCommand("runner healthcheck"))
+      .withWaitStrategy(Wait.forSuccessfulCommand("runner healthcheck && runner healthcheck"))
       .withStartupTimeout(120_000);
   }
 
