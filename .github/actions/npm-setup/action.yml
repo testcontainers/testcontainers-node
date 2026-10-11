@@ -2,9 +2,6 @@ name: "NPM Setup"
 description: "Sets up Node.js and installs NPM dependencies with caching"
 
 inputs:
-  runner:
-    description: "Runner to use"
-    required: true
   node-version:
     description: "Node.js version to use"
     required: true
@@ -26,7 +23,7 @@ runs:
           node_modules
           packages/testcontainers/node_modules
           packages/modules/*/node_modules
-        key: npm-v3-${{ inputs.runner }}-node-${{ inputs.node-version }}-${{ hashFiles('package-lock.json') }}
+        key: npm-v3-${{ runner.os }}-${{ runner.arch }}-node-${{ inputs.node-version }}-${{ hashFiles('package-lock.json') }}
 
     - name: Install dependencies
       if: steps.npm-cache.outputs.cache-hit != 'true'

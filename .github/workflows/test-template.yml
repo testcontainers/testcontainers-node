@@ -29,7 +29,6 @@ jobs:
       - name: Install Node ${{ inputs.node-version }} and Dependencies
         uses: ./.github/actions/npm-setup
         with:
-          runner: ${{ inputs.runner }}
           node-version: ${{ inputs.node-version }}
 
       - name: Run tests
