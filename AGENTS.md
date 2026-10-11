@@ -29,6 +29,9 @@ It captures practical rules that prevent avoidable CI and PR churn.
 - Codeinclude `inside_block:<name>` selects the block after the first line that contains `<name>` anywhere, so a marker whose name also appears earlier in the file (for example inside another marker's name) silently includes the wrong block. The `Docs` workflow runs `mkdocs build --strict`, which fails when a marker or included file is missing but cannot catch this.
 - Tests should verify observable behavior changes, not only internal/config state.
   - Example: for a security option, assert a real secure/insecure behavior difference.
+- Tests should not pull container images that the test suite does not already pull.
+  - Every extra image increases how long the tests take to run and how much storage they need.
+  - Reuse an image the tests already use, for example `cristianrgreco/testcontainer:1.1.14` in `packages/testcontainers`, or the module's own image.
 - When adding a regression test for a bug fix, follow a red-green-refactor workflow.
   - Run the focused test against the pre-fix implementation and confirm it fails for the expected reason.
   - Apply the implementation change, rerun the same test, and confirm it passes.

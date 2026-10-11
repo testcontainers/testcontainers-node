@@ -25,6 +25,9 @@
       "preset": "recommended",
       "correctness": {
         "noUndeclaredDependencies": "error"
+      },
+      "nursery": {
+        "noFloatingPromises": "error"
       }
     }
   },

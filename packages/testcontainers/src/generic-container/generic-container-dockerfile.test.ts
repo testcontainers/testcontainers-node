@@ -86,7 +86,7 @@ describe("GenericContainer Dockerfile", { timeout: 180_000 }, () => {
       await using dockerEventStream = await getDockerEventStream();
       const dockerPullEventPromise = waitForDockerEvent(dockerEventStream.events, "pull");
       let hasResolved = false;
-      dockerPullEventPromise.then(() => (hasResolved = true));
+      void dockerPullEventPromise.then(() => (hasResolved = true));
       await containerSpec.build();
 
       expect(hasResolved).toBeFalsy();
