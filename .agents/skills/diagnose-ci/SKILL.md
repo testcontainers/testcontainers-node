@@ -30,13 +30,7 @@ Don't work from a fixed list of failure patterns. The workflows, the runner imag
 
 ## 3. Reproduce
 
-- Run the failing file locally on the same runtime and Node version. For Podman, set `DOCKER_HOST` to the Podman socket and `CI_PODMAN=true`, as `podman-setup` does.
-- `retry` is 0 unless `CI` is set, so loop the file to catch a flake:
-
-  ```bash
-  for i in $(seq 1 20); do npx vitest run <file> || break; done
-  ```
-
+- Run the failing file locally (`npx vitest run <file>`) on the same runtime and Node version. For Podman, set `DOCKER_HOST` to the Podman socket and `CI_PODMAN=true`, as `podman-setup` does.
 - If it fails only in CI and is unrelated to the diff, rerun the failed jobs once (`gh run rerun <run-id> --failed`). Still report it as a flake, with the log link.
 
 ## 4. Fix or route
@@ -44,4 +38,4 @@ Don't work from a fixed list of failure patterns. The workflows, the runner imag
 - A dependency or image bump caused it: `update-dependencies`.
 - It fails every time: the change from step 2 shows whether the code or the test is wrong. Fix that one.
 - It's flaky: treat it as a bug. Look for a wait that passes before the service is ready, state shared between concurrent tests, or a timeout too tight for a slow image. Fix the cause. Don't just raise retries or timeouts.
-- Ship the fix with `open-pr`, using the loop output as the red-green evidence.
+- Ship the fix with `open-pr`. For a flaky test, link the failed CI log as the red evidence.
