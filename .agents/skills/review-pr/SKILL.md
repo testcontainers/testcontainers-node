@@ -31,7 +31,9 @@ gh pr checks <N>
   - Each option has a test that would fail if the option never reached the container.
   - Bug fixes come with red-green evidence.
   - New cases extend the nearest existing test file with the same setup (real Docker or a mocked client) rather than adding new files.
+  - Tests pull no image the suite doesn't already pull (AGENTS.md).
 - **Concurrency:** no shared containers, `process.env` or spies without `{ concurrent: false }`. Use `await using`. No skipping when Docker is unavailable.
+- **Root cause:** a fix removes the cause of the failure. Added sleeps, retries or longer timeouts only make it less likely (AGENTS.md).
 - **Completeness:** a fix applied to one path is also applied to its siblings, for example `restart()` next to `start()`, or the reuse path next to the create path.
 - **Docs:** public API changes are documented, and module examples use `codeinclude` (AGENTS.md).
 - **Design:**

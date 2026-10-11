@@ -49,7 +49,7 @@ Reports often arrive with an AI-written diagnosis citing files and lines. Treat 
 
 ## 5. Real bug: failing test first
 
-1. Add the case to the existing co-located `*.test.ts`, following the nearest similar test. For example, `reaper.test.ts` spies on `client.container.list`, and `docker-container-client.test.ts` fakes dockerode streams.
+1. Add the case to the existing co-located `*.test.ts`, following the nearest similar test and using an image the suite already pulls (AGENTS.md). For example, `reaper.test.ts` spies on `client.container.list`, and `docker-container-client.test.ts` fakes dockerode streams.
 2. Confirm the test fails for the reported reason (red-green, AGENTS.md).
 3. Look for sibling call sites with the same bug.
 4. Keep the test for the fix PR. If you are only triaging, revert it and describe it in the reply.

@@ -13,6 +13,7 @@ Don't work from a fixed list of failure patterns. The workflows, the runner imag
 1. Find the failed jobs with `gh pr checks <N>`, then read them with `gh run view <run-id> --log-failed`. Note the job, the step and the first error, not the last.
 2. Read what that step ran. These files are the source of truth:
    - `.github/workflows/checks.yml` and `test-template.yml`: the jobs, their order and the matrix
+   - `.github/workflows/docs.yml`: the strict docs build, which runs on every change
    - `.github/actions/`: the Node, npm and Podman setup
    - `.github/scripts/changed-modules.mjs`: which packages ran, and why
 3. Check `retry` in `vitest.config.ts`. In CI, a red test failed every attempt, and a test that passed on a retry is still flaky.
@@ -37,5 +38,5 @@ Don't work from a fixed list of failure patterns. The workflows, the runner imag
 
 - A dependency or image bump caused it: `update-dependencies`.
 - It fails every time: the change from step 2 shows whether the code or the test is wrong. Fix that one.
-- It's flaky: treat it as a bug. Look for a wait that passes before the service is ready, state shared between concurrent tests, or a timeout too tight for a slow image. Fix the cause. Don't just raise retries or timeouts.
+- It's flaky: treat it as a bug. Look for a wait that passes before the service is ready, state shared between concurrent tests, or a timeout too tight for a slow image. Fix the root cause. Delays, retries and longer timeouts only hide a race (AGENTS.md).
 - Ship the fix with `open-pr`. For a flaky test, link the failed CI log as the red evidence.
