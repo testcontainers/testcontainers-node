@@ -66,7 +66,6 @@ jobs:
         with:
           runner: ubuntu-24.04
           node-version: 24.x
-          workspace: "testcontainers"
       - name: Code linting
         run: npm run lint:ci
 
@@ -108,7 +107,6 @@ jobs:
         with:
           runner: ubuntu-24.04
           node-version: ${{ matrix.node-version }}
-          workspace: "testcontainers"
       - name: Build testcontainers
         run: npm run build --workspace packages/testcontainers
       - name: Remove dev dependencies
@@ -142,7 +140,6 @@ jobs:
         with:
           runner: ubuntu-24.04
           node-version: 24.x
-          workspace: "testcontainers"
       - name: Build testcontainers
         run: npm run build --workspace packages/testcontainers
       - name: Remove dev dependencies
