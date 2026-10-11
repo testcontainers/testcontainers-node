@@ -31,6 +31,9 @@ jobs:
         uses: actions/checkout@v7
         with:
           fetch-depth: 1
+          # Otherwise the read-only GITHUB_TOKEN overrides the Claude app token on `git push`
+          # (anthropics/claude-code-action#1721)
+          persist-credentials: false
 
       - name: Run Claude Code
         id: claude
