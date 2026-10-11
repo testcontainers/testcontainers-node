@@ -14,12 +14,23 @@ Before committing, pushing or opening anything, get the user's approval of the d
 - Branch from an up-to-date `main`.
 - Run the checks in AGENTS.md "Verification". For bug fixes, keep the red-green output.
 - Check that `git diff --stat main...HEAD` shows only the files you intended, and that the lockfile changes only the entries you intended.
-- If you changed GitHub Actions, Node or npm versions, or the publish automation, say so in the PR body so a maintainer can dry-run `npm-publish.yml` against the branch before merging.
 
 ## Commit and push
 
 - Commit with `git commit`. Never bypass signing (`--no-gpg-sign`, `-c commit.gpgsign=false`). If signing fails, stop and ask the user to fix it, then retry.
 - Push with `git push -u origin <branch>`. Ask before any force push, including after rebasing an open PR.
+
+## Dry-run the publish
+
+Run the publish dry run against the pushed branch when the change is large or possibly breaking, or could affect the release: GitHub Actions, Node or npm versions, the publish automation, package manifests or build config. A manual dispatch builds every package and runs `npm publish --ws --dry-run`. It doesn't commit, push or publish (AGENTS.md "Releases").
+
+```bash
+gh workflow run npm-publish.yml --ref <branch> -f version=<next version>
+gh run list --workflow npm-publish.yml --event workflow_dispatch --branch <branch> --limit 1
+gh run watch <run-id>
+```
+
+Link the run in the PR body. Dispatching needs write access to the repo. Without it, for example from a fork, say in the PR body that the change needs a dry run, so a maintainer can run it before merging.
 
 ## Title
 

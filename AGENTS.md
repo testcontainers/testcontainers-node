@@ -117,7 +117,10 @@ These rules replace the "Git and GitHub" rules above, the `open-pr` workflow, an
 
 ## Releases
 
-- Agents never publish. Don't run `npm publish`, dispatch `npm-publish.yml` (including its dry run), or publish or edit GitHub releases. A maintainer releases by publishing the draft GitHub release.
+- Agents never publish. A maintainer releases by publishing the draft GitHub release.
+  - Don't run `npm publish` without `--dry-run`, publish or edit GitHub releases, or re-run a publish run that a release started.
+- Dispatching `npm-publish.yml` manually is a dry run. It builds every package and runs `npm publish --ws --dry-run`, and skips the commit, push and publish steps.
+  - If you have permission, run it for large or possibly breaking changes, and for anything that could affect the release (`open-pr`, `review-release`).
 
 ## Lockfile Hygiene
 
