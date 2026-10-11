@@ -41,6 +41,7 @@ gh pr checks <N>
 - **Scope:**
   - Flag new files for a few lines of logic, dead fallbacks, duplicated constants, getters that exist only for tests, and tests of third-party behaviour.
   - Flag unrelated dependency bumps; leave those to Dependabot.
+  - Flag code comments that restate the code or describe the change (AGENTS.md).
 - **Dependencies:** runtime dependencies load from CommonJS (AGENTS.md), and well-established libraries or built-ins are preferred.
 - **Breaking changes:** renamed exports, changed defaults and lowered timeouts all count. They need `major` or a non-breaking alternative.
 - **Claims:** check root-cause explanations, and claims about what another Testcontainers implementation does, against the actual code. AI-written PR descriptions are often confidently wrong.

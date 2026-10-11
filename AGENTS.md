@@ -25,6 +25,8 @@ If a skill or this file turns out to be wrong or incomplete, update it in the sa
 - In docs Markdown, keep `<!--codeinclude-->` blocks tight with no blank lines between the markers and the include line, or the rendered snippet will contain blank lines between code lines.
 - Runtime `dependencies` of published packages must load from CommonJS. ESM-only packages break Jest and other CJS consumers, so adopting one is a breaking change.
   - Prefer built-ins (for example `fetch`) or well-established libraries over new small dependencies.
+- Keep code comments to a minimum; the codebase has very few. Add one only when it tells the reader something they can't get from the code, the PR or the git history, such as why a non-obvious approach was needed, or a link to an upstream bug.
+  - Don't narrate what the code does, describe the change you made, or reference the task or review that prompted it.
 - Tests should verify observable behavior changes, not only internal/config state.
   - Example: for a security option, assert a real secure/insecure behavior difference.
 - When adding a regression test for a bug fix, follow a red-green-refactor workflow.
