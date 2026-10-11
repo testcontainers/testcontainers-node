@@ -26,7 +26,7 @@ runs:
           node_modules
           packages/testcontainers/node_modules
           packages/modules/*/node_modules
-        key: npm-v2-${{ inputs.runner }}-node-${{ inputs.node-version }}-all-workspaces-${{ hashFiles('package-lock.json') }}
+        key: npm-v3-${{ inputs.runner }}-node-${{ inputs.node-version }}-${{ hashFiles('package-lock.json') }}
 
     - name: Install dependencies
       if: steps.npm-cache.outputs.cache-hit != 'true'
