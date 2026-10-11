@@ -37,6 +37,5 @@ For the container class, tests and docs page, start from the module closest in s
 
 - Copy the docs page of the module you started from. Examples come only from test blocks via `codeinclude`. Keep the "substitute `IMAGE`" line.
 - Add the page to the `mkdocs.yml` Modules nav in alphabetical order.
-- Verify per AGENTS.md, including `npx vitest run packages/modules/<name>`.
-- The diff should contain only the module directory, the docs page, `mkdocs.yml`, and the lockfile entries for the new workspace and client.
-- Open the PR with `open-pr`: title `Add <Name> module`, labels `enhancement` + `minor`.
+- Run `npm run check-compiles` as well as `npx vitest run packages/modules/<name>`. Vitest and Biome don't type-check, so without it a type error in the module or its tests first shows up in CI's Compile job.
+- Ship it with `open-pr`. The diff should contain only the module directory, the docs page, `mkdocs.yml`, and the lockfile entries for the new workspace and client.
