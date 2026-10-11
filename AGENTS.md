@@ -28,8 +28,14 @@ If a skill or this file turns out to be wrong or incomplete, update it in the sa
   - Prefer built-ins (for example `fetch`) or well-established libraries over new small dependencies.
 - Keep code comments to a minimum; the codebase has very few. Add one only when it tells the reader something they can't get from the code, the PR or the git history, such as why a non-obvious approach was needed, or a link to an upstream bug.
   - Don't narrate what the code does, describe the change you made, or reference the task or review that prompted it.
+- Fix the root cause. A change that only makes a failure less likely is not a fix.
+  - Arbitrary delays (`sleep`), repeating a check, or adding retries do not remove a race; they hide it.
+  - For readiness problems, wait on a deterministic signal of the state you need. If no such signal exists, say so rather than shipping a mitigation as a fix.
 - Tests should verify observable behavior changes, not only internal/config state.
   - Example: for a security option, assert a real secure/insecure behavior difference.
+- Tests should not pull container images that the test suite does not already pull.
+  - Every extra image increases how long the tests take to run and how much storage they need.
+  - Reuse an image the tests already use, for example `cristianrgreco/testcontainer:1.1.14` in `packages/testcontainers`, or the module's own image.
 - When adding a regression test for a bug fix, follow a red-green-refactor workflow.
   - Run the focused test against the pre-fix implementation and confirm it fails for the expected reason.
   - Apply the implementation change, rerun the same test, and confirm it passes.
