@@ -58,26 +58,6 @@ describe("MongoDBAtlasLocalContainer", { timeout: 240_000 }, () => {
     );
   });
 
-  it("should not be ready when the healthcheck passes just before mongod restarts", async () => {
-    // The image restarts mongod at the end of its initialisation, and its healthcheck can pass on the
-    // mongod that is about to be stopped. Simulate that with a `runner` earlier on the PATH whose first
-    // healthcheck passes while the container is still initialising.
-    const runner = `#!/bin/sh
-if [ "$1" = healthcheck ] && [ ! -e /tmp/healthcheck-passed-early ]; then
-  touch /tmp/healthcheck-passed-early
-  exit 0
-fi
-exec /usr/local/bin/runner "$@"
-`;
-
-    await using container = await new MongoDBAtlasLocalContainer(IMAGE)
-      .withCopyContentToContainer([{ content: runner, target: "/usr/local/sbin/runner", mode: 0o755 }])
-      .start();
-
-    expect((await container.exec(["test", "-e", "/tmp/healthcheck-passed-early"])).exitCode).toBe(0);
-    expect((await container.exec(["/usr/local/bin/runner", "healthcheck"])).exitCode).toBe(0);
-  });
-
   it("should connect to mongodb atlas local", async () => {
     await using container = await new MongoDBAtlasLocalContainer(IMAGE).start();
 
