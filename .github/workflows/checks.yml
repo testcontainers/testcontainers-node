@@ -56,28 +56,18 @@ jobs:
           echo "${modules}"
 
   lint:
-    if: ${{ needs.detect-modules.outputs.modules_count != '0' }}
     name: "Lint"
-    needs:
-      - detect-modules
-    strategy:
-      fail-fast: false
-      matrix:
-        module: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
     runs-on: ubuntu-24.04
     steps:
       - name: Code checkout
         uses: actions/checkout@v7
       - name: Install Node and Dependencies
-        id: npm-install-modules
         uses: ./.github/actions/npm-setup
         with:
           runner: ubuntu-24.04
           node-version: 24.x
-          workspace: "${{ matrix.module }}"
+          workspace: "testcontainers"
       - name: Code linting
-        env:
-          WORKSPACE_PATH: ${{ steps.npm-install-modules.outputs.workspace_path }}
         run: npm run lint:ci
 
   compile:
