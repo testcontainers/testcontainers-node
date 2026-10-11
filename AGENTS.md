@@ -26,11 +26,15 @@ It captures practical rules that prevent avoidable CI and PR churn.
 - If new types are made part of the public API, export them from the package's `index.ts` in the same PR.
 - If new learnings or misunderstandings are discovered, propose an `AGENTS.md` update in the same PR.
 - In docs Markdown, keep `<!--codeinclude-->` blocks tight with no blank lines between the markers and the include line, or the rendered snippet will contain blank lines between code lines.
+- Codeinclude `inside_block:<name>` selects the block after the first line that contains `<name>` anywhere, so a marker whose name also appears earlier in the file (for example inside another marker's name) silently includes the wrong block. The `Docs` workflow runs `mkdocs build --strict`, which fails when a marker or included file is missing but cannot catch this.
 - Fix the root cause. A change that only makes a failure less likely is not a fix.
   - Arbitrary delays (`sleep`), repeating a check, or adding retries do not remove a race; they hide it.
   - For readiness problems, wait on a deterministic signal of the state you need. If no such signal exists, say so rather than shipping a mitigation as a fix.
 - Tests should verify observable behavior changes, not only internal/config state.
   - Example: for a security option, assert a real secure/insecure behavior difference.
+- Tests should not pull container images that the test suite does not already pull.
+  - Every extra image increases how long the tests take to run and how much storage they need.
+  - Reuse an image the tests already use, for example `cristianrgreco/testcontainer:1.1.14` in `packages/testcontainers`, or the module's own image.
 - When adding a regression test for a bug fix, follow a red-green-refactor workflow.
   - Run the focused test against the pre-fix implementation and confirm it fails for the expected reason.
   - Apply the implementation change, rerun the same test, and confirm it passes.
