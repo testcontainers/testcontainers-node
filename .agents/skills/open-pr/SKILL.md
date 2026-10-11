@@ -64,7 +64,7 @@ Include:
 - `Closes #<issue>`, only if the PR fully resolves that issue.
 
 ```bash
-gh pr create --base main --title "<title>" --body-file <path> --label <type> --label <semver>
+gh pr create --base main --title "<title>" --body "<body>" --label <type> --label <semver>
 ```
 
 Open it ready for review. Only open it as a draft if the user asks.
