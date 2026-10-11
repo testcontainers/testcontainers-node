@@ -1,4 +1,4 @@
-const { GenericContainer } = require("./build/index");
+const { GenericContainer } = require("testcontainers");
 
 jest.setTimeout(120_000);
 

@@ -131,17 +131,26 @@ jobs:
           workspace: "testcontainers"
       - name: Build testcontainers
         run: npm run build --workspace packages/testcontainers
-      - name: Remove dev dependencies
-        run: npm prune --omit=dev --workspace packages/testcontainers
+      - name: Install the packed package into an empty project
+        run: |
+          npm pack --workspace packages/testcontainers --pack-destination "${RUNNER_TEMP}"
+          mkdir "${RUNNER_TEMP}/smoke-test"
+          cp .npmrc packages/testcontainers/smoke-test.* "${RUNNER_TEMP}/smoke-test"
+          cd "${RUNNER_TEMP}/smoke-test"
+          npm init --yes > /dev/null
+          npm install "${RUNNER_TEMP}"/testcontainers-*.tgz
       - name: Run CommonJS module smoke test
-        run: node packages/testcontainers/smoke-test.js
+        working-directory: ${{ runner.temp }}/smoke-test
+        run: node ./smoke-test.js
         env:
           DEBUG: "testcontainers*"
       - name: Run ES module smoke test
-        run: node packages/testcontainers/smoke-test.mjs
+        working-directory: ${{ runner.temp }}/smoke-test
+        run: node ./smoke-test.mjs
         env:
           DEBUG: "testcontainers*"
       - name: Run Jest CommonJS runtime smoke test
+        working-directory: ${{ runner.temp }}/smoke-test
         run: npm exec --yes --package jest@30.4.2 -- jest --testMatch "**/smoke-test.jest.js" --runInBand --transform "{}"
         env:
           DEBUG: "testcontainers*"
@@ -165,18 +174,26 @@ jobs:
           workspace: "testcontainers"
       - name: Build testcontainers
         run: npm run build --workspace packages/testcontainers
-      - name: Remove dev dependencies
-        run: npm prune --omit=dev --workspace packages/testcontainers
+      - name: Install the packed package into an empty project
+        run: |
+          npm pack --workspace packages/testcontainers --pack-destination "${RUNNER_TEMP}"
+          mkdir "${RUNNER_TEMP}/smoke-test"
+          cp .npmrc packages/testcontainers/smoke-test.* "${RUNNER_TEMP}/smoke-test"
+          cd "${RUNNER_TEMP}/smoke-test"
+          npm init --yes > /dev/null
+          npm install "${RUNNER_TEMP}"/testcontainers-*.tgz
       - name: Install Bun
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.2
       - name: Run CommonJS module smoke test
-        run: bun packages/testcontainers/smoke-test.js
+        working-directory: ${{ runner.temp }}/smoke-test
+        run: bun ./smoke-test.js
         env:
           DEBUG: "testcontainers*"
       - name: Run ES module smoke test
-        run: bun packages/testcontainers/smoke-test.mjs
+        working-directory: ${{ runner.temp }}/smoke-test
+        run: bun ./smoke-test.mjs
         env:
           DEBUG: "testcontainers*"
 

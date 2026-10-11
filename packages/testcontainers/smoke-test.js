@@ -1,4 +1,4 @@
-const { GenericContainer } = require("./build/index");
+const { GenericContainer } = require("testcontainers");
 
 (async () => {
   const container = await new GenericContainer("alpine:3.12").withCommand(["sleep", "infinity"]).start();
