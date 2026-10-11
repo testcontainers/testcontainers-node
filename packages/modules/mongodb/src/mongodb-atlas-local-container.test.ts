@@ -61,7 +61,7 @@ describe("MongoDBAtlasLocalContainer", { timeout: 240_000 }, () => {
   it("should connect to mongodb atlas local", async () => {
     await using container = await new MongoDBAtlasLocalContainer(IMAGE).start();
 
-    const db = mongoose.createConnection(container.getConnectionString(), { directConnection: true });
+    const db = await mongoose.createConnection(container.getConnectionString(), { directConnection: true }).asPromise();
 
     const obj = { value: 1 };
     const collection = db.collection("test");
@@ -79,7 +79,9 @@ describe("MongoDBAtlasLocalContainer", { timeout: 240_000 }, () => {
       .withPassword("customPassword")
       .start();
 
-    const db = mongoose.createConnection(container.getDatabaseConnectionString(), { directConnection: true });
+    const db = await mongoose
+      .createConnection(container.getDatabaseConnectionString(), { directConnection: true })
+      .asPromise();
 
     const obj = { value: 1 };
     const collection = db.collection("test");
@@ -95,10 +97,12 @@ describe("MongoDBAtlasLocalContainer", { timeout: 240_000 }, () => {
     // createAtlasIndexAndSearchIt {
     await using atlasLocalContainer = await new MongoDBAtlasLocalContainer(IMAGE).start();
 
-    const db = mongoose.createConnection(atlasLocalContainer.getConnectionString(), {
-      dbName: "test",
-      directConnection: true,
-    });
+    const db = await mongoose
+      .createConnection(atlasLocalContainer.getConnectionString(), {
+        dbName: "test",
+        directConnection: true,
+      })
+      .asPromise();
 
     try {
       const collection = db.collection("test");
