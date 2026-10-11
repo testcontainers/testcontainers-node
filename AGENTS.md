@@ -23,6 +23,7 @@ If a skill or this file turns out to be wrong or incomplete, update it in the sa
 - If a public API changes, update the relevant docs in the same PR.
 - If new types are made part of the public API, export them from the package's `index.ts` in the same PR.
 - In docs Markdown, keep `<!--codeinclude-->` blocks tight with no blank lines between the markers and the include line, or the rendered snippet will contain blank lines between code lines.
+- Codeinclude `inside_block:<name>` selects the block after the first line that contains `<name>` anywhere, so a marker whose name also appears earlier in the file (for example inside another marker's name) silently includes the wrong block. The `Docs` workflow runs `mkdocs build --strict`, which fails when a marker or included file is missing but cannot catch this.
 - Runtime `dependencies` of published packages must load from CommonJS. ESM-only packages break Jest and other CJS consumers, so adopting one is a breaking change.
   - Prefer built-ins (for example `fetch`) or well-established libraries over new small dependencies.
 - Keep code comments to a minimum; the codebase has very few. Add one only when it tells the reader something they can't get from the code, the PR or the git history, such as why a non-obvious approach was needed, or a link to an upstream bug.

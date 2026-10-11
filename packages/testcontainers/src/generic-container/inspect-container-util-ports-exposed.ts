@@ -4,7 +4,7 @@ import { IntervalRetry, log } from "../common";
 export async function inspectContainerUntilPortsExposed(
   inspectFn: () => Promise<ContainerInspectInfo>,
   containerId: string,
-  timeout = 10_000
+  timeout = 30_000
 ): Promise<ContainerInspectInfo> {
   const result = await new IntervalRetry<ContainerInspectInfo, Error>(250).retryUntil(
     () => inspectFn(),

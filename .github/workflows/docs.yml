@@ -1,0 +1,34 @@
+name: Docs
+
+# Runs for every change, not only docs/**: module docs pull snippets from
+# packages/**/*.test.ts via codeinclude, so code changes can break the docs too.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.head_ref || github.sha }}"
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build docs
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Code checkout
+        uses: actions/checkout@v7
+      - name: Install Python
+        uses: actions/setup-python@v7
+        with:
+          # Same Python version Netlify uses to build and deploy the docs.
+          python-version-file: runtime.txt
+          cache: pip
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Build docs in strict mode
+        run: mkdocs build --strict

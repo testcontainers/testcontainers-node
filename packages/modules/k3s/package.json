@@ -29,9 +29,11 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "dependencies": {
+    "tar-stream": "^3.1.7",
     "testcontainers": "^12.2.0"
   },
   "devDependencies": {
-    "@kubernetes/client-node": "^2.0.0"
+    "@kubernetes/client-node": "^2.0.0",
+    "@types/tar-stream": "^3.1.3"
   }
 }
