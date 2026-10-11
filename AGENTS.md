@@ -101,7 +101,7 @@ reviewers can follow the reasoning.
 ## Running as the `@claude` GitHub Action
 
 When invoked by an `@claude` mention through `.github/workflows/claude.yml`, there is no interactive user.
-These rules replace the "Git and GitHub" rules above, the `open-pr` workflow, and the approval step in `review-pr`:
+These rules replace the "Git and GitHub" rules above, the `open-pr` workflow, and the approval steps in the other skills:
 
 - The triggering comment is the maintainer's approval for that request.
   Reply in the Claude tracking comment, and leave inline review comments when a review is asked for.

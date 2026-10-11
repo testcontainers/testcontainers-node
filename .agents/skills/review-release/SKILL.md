@@ -12,8 +12,8 @@ Don't publish or edit the release, run `npm publish` without `--dry-run`, re-run
 
 ## 1. Review the draft
 
-1. Read the draft with `gh release view v<draft>`.
-2. List the PRs merged since the last release: `gh pr list --state merged --search "merged:>=<last release date>" --json number,title,labels`.
+1. Find the draft with `gh release list --limit 3`. It is the row marked `Draft`, and is only listed for accounts with write access. Read it with `gh release view v<draft>`.
+2. List the PRs merged since the last release: `gh pr list --state merged --limit 200 --search "merged:>=<last release date>" --json number,title,labels`.
 3. Check:
    - Every PR has a type label and a semver label. Without a type label, a PR is listed uncategorised at the top of the notes. Without a semver label, it counts as patch.
    - The version is right for the highest semver label.
@@ -21,7 +21,7 @@ Don't publish or edit the release, run `npm publish` without `--dry-run`, re-run
 
 ## 2. Look for hidden breaking changes
 
-- Diff runtime dependencies since the last tag: `git diff v<last>..main -- 'packages/**/package.json'`.
+- Diff runtime dependencies since the last tag: `git diff v<last>..main -- 'packages/**/package.json'`. Ignore the `version` and `testcontainers` lines in every manifest. The tag sits one commit before its own version-bump commit.
 - Flag any new major version that is ESM-only (AGENTS.md).
 - Also check whether `engines.node` changed, or exports were removed or renamed.
 

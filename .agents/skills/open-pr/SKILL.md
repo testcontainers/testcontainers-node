@@ -22,7 +22,7 @@ Before committing, pushing or opening anything, get the user's approval of the d
 
 ## Dry-run the publish
 
-Run the publish dry run against the pushed branch when the change is large or possibly breaking, or could affect the release: GitHub Actions, Node or npm versions, the publish automation, package manifests or build config. A manual dispatch builds every package and runs `npm publish --ws --dry-run`. It doesn't commit, push or publish (AGENTS.md "Releases").
+Run the publish dry run against the pushed branch when the change is large or possibly breaking, or could affect the release: GitHub Actions, Node or npm versions, the publish automation, package manifests or build config. A manual dispatch builds every package and runs `npm publish --ws --dry-run`. It doesn't commit, push or publish (AGENTS.md "Releases"). For the version, use the draft release's tag, the row marked `Draft` in `gh release list --limit 3`.
 
 ```bash
 gh workflow run npm-publish.yml --ref <branch> -f version=<next version>
