@@ -1,0 +1,41 @@
+name: "Smoke Test Setup"
+description: "Installs the packed testcontainers package and its production dependencies into an empty project"
+
+outputs:
+  path:
+    description: "Directory containing the smoke tests and the installed package"
+    value: ${{ steps.install.outputs.path }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Build and pack testcontainers
+      shell: bash
+      run: |
+        npm run build --workspace packages/testcontainers
+        npm pack --workspace packages/testcontainers --pack-destination "${RUNNER_TEMP}"
+
+    - name: Install the package into an empty project
+      id: install
+      shell: bash
+      run: |
+        project="${RUNNER_TEMP}/smoke-test"
+        package="${project}/node_modules/testcontainers"
+
+        # Production dependencies only, at the versions in package-lock.json.
+        npm ci --omit=dev --workspace packages/testcontainers
+
+        mkdir "${project}"
+        echo '{ "private": true }' > "${project}/package.json"
+        cp .npmrc packages/testcontainers/smoke-test.* "${project}"
+        mv node_modules "${project}/node_modules"
+
+        # Replace the workspace link with the files that get published.
+        rm "${package}"
+        mkdir "${package}"
+        tar -xzf "${RUNNER_TEMP}"/testcontainers-*.tgz -C "${package}" --strip-components=1
+        if [ -d packages/testcontainers/node_modules ]; then
+          mv packages/testcontainers/node_modules "${package}/node_modules"
+        fi
+
+        echo "path=${project}" >> "$GITHUB_OUTPUT"
