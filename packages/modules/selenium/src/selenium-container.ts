@@ -1,5 +1,6 @@
 import { copyFile } from "node:fs/promises";
 import path from "node:path";
+import { pipeline } from "node:stream/promises";
 import tar from "tar-fs";
 import {
   AbstractStartedContainer,
@@ -140,10 +141,6 @@ export class StoppedSeleniumRecordingContainer extends StoppedSeleniumContainer 
   }
 
   private async extractTarStreamToDest(tarStream: NodeJS.ReadableStream, dest: string): Promise<void> {
-    await new Promise<void>((resolve) => {
-      const destination = tar.extract(dest);
-      tarStream.pipe(destination);
-      destination.on("finish", resolve);
-    });
+    await pipeline(tarStream, tar.extract(dest));
   }
 }

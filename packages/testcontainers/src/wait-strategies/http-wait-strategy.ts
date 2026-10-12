@@ -1,3 +1,4 @@
+import { text } from "node:stream/consumers";
 import type Dockerode from "dockerode";
 import { Agent, request } from "undici";
 import { log, poll } from "../common";
@@ -148,18 +149,13 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
 
   private async handleContainerExit(container: Dockerode.Container) {
     const tail = 50;
-    const lastLogs: string[] = [];
     const client = await getContainerRuntimeClient();
     let message: string;
 
     try {
-      const stream = await client.container.logs(container, { tail });
+      const lastLogs = await text(await client.container.logs(container, { tail }));
 
-      await new Promise((res) => {
-        stream.on("data", (d) => lastLogs.push(d.trim())).on("end", res);
-      });
-
-      message = `Container exited during HTTP healthCheck, last ${tail} logs: ${lastLogs.join("\n")}`;
+      message = `Container exited during HTTP healthCheck, last ${tail} logs: ${lastLogs.trim()}`;
     } catch (_err) {
       message = "Container exited during HTTP healthCheck, failed to get last logs";
     }
