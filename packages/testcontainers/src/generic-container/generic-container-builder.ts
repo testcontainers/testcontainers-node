@@ -3,11 +3,13 @@ import type { ImageBuildOptions } from "dockerode";
 import { log, RandomUuid, type Uuid } from "../common";
 import { getAuthConfig, getContainerRuntimeClient, ImageName } from "../container-runtime";
 import type { AuthConfig } from "../container-runtime/auth/types";
+// biome-ignore lint/suspicious/noImportCycles: Ryuk and sshd run as GenericContainers; only dereferenced at runtime
 import { getReaper } from "../reaper/reaper";
 import type { BuildArgs, RegistryConfig } from "../types";
 import { getDockerfileImages } from "../utils/dockerfile-parser";
 import { createLabels, LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
 import { type ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
+// biome-ignore lint/suspicious/noImportCycles: fromDockerfile() and build() construct each other; only dereferenced at runtime
 import { GenericContainer } from "./generic-container";
 
 export type BuildOptions = {

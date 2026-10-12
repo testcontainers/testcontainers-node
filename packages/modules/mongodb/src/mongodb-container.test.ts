@@ -9,7 +9,7 @@ describe("MongoDBContainer", { timeout: 240_000 }, () => {
     // connectMongo {
     await using container = await new MongoDBContainer(image).start();
 
-    const db = mongoose.createConnection(container.getConnectionString(), { directConnection: true });
+    const db = await mongoose.createConnection(container.getConnectionString(), { directConnection: true }).asPromise();
 
     const obj = { value: 1 };
     const collection = db.collection("test");
@@ -30,7 +30,7 @@ describe("MongoDBContainer", { timeout: 240_000 }, () => {
       .start();
     // }
 
-    const db = mongoose.createConnection(container.getConnectionString(), { directConnection: true });
+    const db = await mongoose.createConnection(container.getConnectionString(), { directConnection: true }).asPromise();
 
     const result = await db.collection("test").insertOne({ title: "test" });
     const resultId = result.insertedId.toString();

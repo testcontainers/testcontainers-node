@@ -6,6 +6,7 @@ import type Dockerode from "dockerode";
 import type { ContainerInspectInfo } from "dockerode";
 import { containerLog, log } from "../common";
 import { type ContainerRuntimeClient, getContainerRuntimeClient } from "../container-runtime";
+// biome-ignore lint/suspicious/noImportCycles: Ryuk and sshd run as GenericContainers; only dereferenced at runtime
 import { getReaper } from "../reaper/reaper";
 import type { RestartOptions, StartedTestContainer, StopOptions, StoppedTestContainer } from "../test-container";
 import type {
@@ -204,8 +205,7 @@ export class StartedGenericContainer implements StartedTestContainer {
     filesToCopyWithStats.forEach(({ source, target, mode, stats }) => {
       tar.file(source, { name: target, mode, stats });
     });
-    tar.finalize();
-    await client.container.putArchive(this.container, tar, "/");
+    await Promise.all([tar.finalize(), client.container.putArchive(this.container, tar, "/")]);
     log.debug(`Copied files to container`, { containerId: this.container.id });
   }
 
@@ -216,8 +216,7 @@ export class StartedGenericContainer implements StartedTestContainer {
     directoriesToCopy.forEach(({ source, target }) => {
       tar.directory(source, target);
     });
-    tar.finalize();
-    await client.container.putArchive(this.container, tar, "/");
+    await Promise.all([tar.finalize(), client.container.putArchive(this.container, tar, "/")]);
     log.debug(`Copied directories to container`, { containerId: this.container.id });
   }
 
@@ -228,8 +227,7 @@ export class StartedGenericContainer implements StartedTestContainer {
     contentsToCopy.forEach(({ content, target, mode }) => {
       tar.append(content, { name: target, mode: mode });
     });
-    tar.finalize();
-    await client.container.putArchive(this.container, tar, "/");
+    await Promise.all([tar.finalize(), client.container.putArchive(this.container, tar, "/")]);
     log.debug(`Copied content to container`, { containerId: this.container.id });
   }
 
