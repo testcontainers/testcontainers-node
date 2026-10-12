@@ -42,4 +42,4 @@ export { HttpWaitStrategyOptions } from "./wait-strategies/http-wait-strategy";
 export { StartupCheckStrategy, StartupStatus } from "./wait-strategies/startup-check-strategy";
 export { Wait } from "./wait-strategies/wait";
 export { waitForContainer } from "./wait-strategies/wait-for-container";
-export { AbstractWaitStrategy, WaitStrategy } from "./wait-strategies/wait-strategy";
+export { WaitStrategy } from "./wait-strategies/wait-strategy";

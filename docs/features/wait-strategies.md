@@ -267,19 +267,3 @@ const container = await new GenericContainer("alpine")
   .withWaitStrategy(new ReadyAfterDelayWaitStrategy())
   .start();
 ```
-
-`StartupCheckStrategy` polls a check once a second. To decide readiness yourself, with access to the container and its bound ports, or to combine other wait strategies, subclass `AbstractWaitStrategy` and implement `waitUntilReady`:
-
-```js
-const { AbstractWaitStrategy, GenericContainer } = require("testcontainers");
-
-class CustomWaitStrategy extends AbstractWaitStrategy {
-  public async waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void> {
-    // resolve when the container is ready, or throw once `this.startupTimeoutMs` has passed
-  }
-}
-
-const container = await new GenericContainer("alpine")
-  .withWaitStrategy(new CustomWaitStrategy())
-  .start();
-```
