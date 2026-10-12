@@ -9,6 +9,7 @@ import tar from "tar-fs";
 import { buildLog, log, pullLog } from "../../../common";
 import { getAuthConfig } from "../../auth/get-auth-config";
 import type { ImageName } from "../../image-name";
+import { BuildOutput } from "./build-output";
 import type { ImageClient } from "./image-client";
 
 export class DockerImageClient implements ImageClient {
@@ -25,20 +26,24 @@ export class DockerImageClient implements ImageClient {
       log.debug(`Building image "${opts.t}" with context "${context}"...`);
       const tarPackOptions = await this.createTarPackOptions(context, opts.dockerfile ?? "Dockerfile");
       const tarStream = tar.pack(context, tarPackOptions);
-      await new Promise<void>((resolve) => {
-        this.dockerode
-          .buildImage(tarStream, opts)
-          .then((stream) => byline(stream))
-          .then((stream) => {
-            stream.setEncoding("utf-8");
-            stream.on("data", (line) => {
-              if (buildLog.enabled()) {
-                buildLog.trace(line, { imageName: opts.t });
-              }
-            });
-            stream.on("end", () => resolve());
-          });
+      const stream = await this.dockerode.buildImage(tarStream, opts);
+      const buildOutput = new BuildOutput();
+      await new Promise<void>((resolve, reject) => {
+        stream.on("error", reject);
+        const lines = byline(stream);
+        lines.setEncoding("utf-8");
+        lines.on("data", (line) => {
+          if (buildLog.enabled()) {
+            buildLog.trace(line, { imageName: opts.t });
+          }
+          buildOutput.add(line);
+        });
+        lines.on("end", () => resolve());
       });
+      const failure = buildOutput.getFailure();
+      if (failure !== undefined) {
+        throw new Error(failure);
+      }
       log.debug(`Built image "${opts.t}" with context "${context}"`);
     } catch (err) {
       log.error(`Failed to build image: ${err}`);
