@@ -33,7 +33,6 @@
     "testcontainers": "^12.2.0"
   },
   "devDependencies": {
-    "@kubernetes/client-node": "^2.0.0",
-    "@types/tar-stream": "^3.1.5"
+    "@kubernetes/client-node": "^2.0.0"
   }
 }
