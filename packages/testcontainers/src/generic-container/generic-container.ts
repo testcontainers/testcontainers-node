@@ -199,6 +199,27 @@ export class GenericContainer implements TestContainer {
   private async startContainer(client: ContainerRuntimeClient): Promise<StartedTestContainer> {
     const container = await client.container.create({ ...this.createOpts, HostConfig: this.hostConfig });
 
+    try {
+      return await this.startCreatedContainer(client, container);
+    } catch (err) {
+      try {
+        await container.remove({ force: true, v: true });
+      } catch (removeErr) {
+        const alreadyRemoved = (removeErr as { statusCode?: number }).statusCode === 404;
+        if (!alreadyRemoved) {
+          log.error(`Failed to remove container after it failed to start: ${removeErr}`, {
+            containerId: container.id,
+          });
+        }
+      }
+      throw err;
+    }
+  }
+
+  private async startCreatedContainer(
+    client: ContainerRuntimeClient,
+    container: Container
+  ): Promise<StartedTestContainer> {
     if (!this.isHelperContainer() && PortForwarderInstance.isRunning()) {
       await this.connectContainerToPortForwarder(client, container);
     }
