@@ -4,16 +4,17 @@ import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { CouchDBContainer } from "./couchdb-container";
 
 const IMAGE = getImage(__dirname);
+const OLDEST_IMAGE = "couchdb:3.4.3";
 
 type User = {
   username: string;
   email: string;
 };
 
-describe("CouchDBContainer", { timeout: 240_000 }, () => {
+describe.each([IMAGE, OLDEST_IMAGE])("CouchDBContainer (%s)", { timeout: 240_000 }, (image) => {
   it("should write and read a collection", async () => {
     // startContainer {
-    await using container = await new CouchDBContainer(IMAGE).start();
+    await using container = await new CouchDBContainer(image).start();
 
     const client = nano({
       url: container.getUrl(),
@@ -37,7 +38,7 @@ describe("CouchDBContainer", { timeout: 240_000 }, () => {
 
   it("should use custom credentials", async () => {
     // customCredentials {
-    await using container = await new CouchDBContainer(IMAGE).withUsername("admin").withPassword("foo").start();
+    await using container = await new CouchDBContainer(image).withUsername("admin").withPassword("foo").start();
 
     const client = nano({
       url: container.getUrl(),

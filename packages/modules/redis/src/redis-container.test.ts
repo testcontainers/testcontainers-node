@@ -5,12 +5,13 @@ import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { RedisContainer } from "./redis-container";
 
 const IMAGE = getImage(__dirname);
+const OLDEST_IMAGE = "redis:6.2.24";
 const REDISSTACK_IMAGE = getImage(__dirname, 1);
 
-describe("RedisContainer", { timeout: 240_000 }, () => {
+describe.each([IMAGE, OLDEST_IMAGE])("RedisContainer (%s)", { timeout: 240_000 }, (image) => {
   it("should connect and execute set-get", async () => {
     // redisStartContainer {
-    await using container = await new RedisContainer(IMAGE).start();
+    await using container = await new RedisContainer(image).start();
 
     const client = createClient({ url: container.getConnectionUrl() });
     await client.connect();
@@ -23,7 +24,7 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
   });
 
   it("should connect with password and execute set-get", async () => {
-    await using container = await new RedisContainer(IMAGE).withPassword("test").start();
+    await using container = await new RedisContainer(image).withPassword("test").start();
 
     const client = createClient({ url: container.getConnectionUrl() });
     await client.connect();
@@ -38,7 +39,7 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
     // persistentData {
     const sourcePath = fs.mkdtempSync("redis-");
 
-    await using container = await new RedisContainer(IMAGE).withPassword("test").withPersistence(sourcePath).start();
+    await using container = await new RedisContainer(image).withPassword("test").withPersistence(sourcePath).start();
 
     let client = createClient({ url: container.getConnectionUrl() });
     await client.connect();
@@ -58,7 +59,7 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
 
   it("should load initial data and can read it", async () => {
     // withPredefinedData {
-    await using container = await new RedisContainer(IMAGE)
+    await using container = await new RedisContainer(image)
       .withPassword("test")
       .withInitialData(path.join(__dirname, "initData.redis"))
       .start();
@@ -78,7 +79,7 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
   });
 
   it("should load initial data once", async () => {
-    await using container = await new RedisContainer(IMAGE)
+    await using container = await new RedisContainer(image)
       .withInitialData(path.join(__dirname, "initCount.redis"))
       .start();
 
@@ -94,7 +95,7 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
     // redisStartWithCredentials {
     const password = "testPassword";
 
-    await using container = await new RedisContainer(IMAGE).withPassword(password).start();
+    await using container = await new RedisContainer(image).withPassword(password).start();
 
     expect(container.getConnectionUrl()).toEqual(`redis://:${password}@${container.getHost()}:${container.getPort()}`);
     // }
@@ -110,7 +111,7 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
 
   it("should execute container cmd and return the result", async () => {
     // executeCommand {
-    await using container = await new RedisContainer(IMAGE).start();
+    await using container = await new RedisContainer(image).start();
 
     const queryResult = await container.executeCliCmd("info", ["clients"]);
 
@@ -118,23 +119,8 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
     // }
   });
 
-  it("should start with redis-stack-server and json module", async () => {
-    // startWithRedisStack {
-    await using container = await new RedisContainer(REDISSTACK_IMAGE).withPassword("testPassword").start();
-
-    const client = createClient({ url: container.getConnectionUrl() });
-    await client.connect();
-
-    await client.json.set("key", "$", { name: "test" });
-    const result = await client.json.get("key");
-    expect(result).toEqual({ name: "test" });
-
-    client.destroy();
-    // }
-  });
-
   it("should start redis with custom command", async () => {
-    const container = new RedisContainer(IMAGE).withCommand(["redis-server", "--loglevel", "verbose"]);
+    const container = new RedisContainer(image).withCommand(["redis-server", "--loglevel", "verbose"]);
     await using startedContainer = await container.start();
 
     // @ts-expect-error - accessing private property for testing
@@ -149,26 +135,10 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
     client.destroy();
   });
 
-  it("should start redis-stack with custom env", async () => {
-    const container = new RedisContainer(REDISSTACK_IMAGE).withEnvironment({ REDIS_ARGS: "--loglevel verbose" });
-    await using startedContainer = await container.start();
-
-    // @ts-expect-error - accessing private property for testing
-    expect(container.createOpts.Env).toEqual(["REDIS_ARGS=--loglevel verbose"]);
-
-    const client = createClient({ url: startedContainer.getConnectionUrl() });
-    await client.connect();
-
-    await client.set("key", "val");
-    expect(await client.get("key")).toBe("val");
-
-    client.destroy();
-  });
-
   it("should start redis with custom command and keeping default args", async () => {
     const sourcePath = fs.mkdtempSync("redis-");
 
-    const container = new RedisContainer(IMAGE)
+    const container = new RedisContainer(image)
       .withCommand(["redis-server", "--loglevel", "verbose"])
       .withPersistence(sourcePath);
     await using startedContainer = await container.start();
@@ -190,6 +160,54 @@ describe("RedisContainer", { timeout: 240_000 }, () => {
 
     client.destroy();
     fs.rmSync(sourcePath, { force: true, recursive: true });
+  });
+});
+
+describe("RedisContainer", { timeout: 240_000 }, () => {
+  it.each(["redis:7.2.16", "redis:7.4.11", "redis:8.2.10"])(
+    "should connect and execute set-get with %s",
+    async (image) => {
+      await using container = await new RedisContainer(image).start();
+
+      const client = createClient({ url: container.getConnectionUrl() });
+      await client.connect();
+
+      await client.set("key", "val");
+      expect(await client.get("key")).toBe("val");
+
+      client.destroy();
+    }
+  );
+
+  it("should start with redis-stack-server and json module", async () => {
+    // startWithRedisStack {
+    await using container = await new RedisContainer(REDISSTACK_IMAGE).withPassword("testPassword").start();
+
+    const client = createClient({ url: container.getConnectionUrl() });
+    await client.connect();
+
+    await client.json.set("key", "$", { name: "test" });
+    const result = await client.json.get("key");
+    expect(result).toEqual({ name: "test" });
+
+    client.destroy();
+    // }
+  });
+
+  it("should start redis-stack with custom env", async () => {
+    const container = new RedisContainer(REDISSTACK_IMAGE).withEnvironment({ REDIS_ARGS: "--loglevel verbose" });
+    await using startedContainer = await container.start();
+
+    // @ts-expect-error - accessing private property for testing
+    expect(container.createOpts.Env).toEqual(["REDIS_ARGS=--loglevel verbose"]);
+
+    const client = createClient({ url: startedContainer.getConnectionUrl() });
+    await client.connect();
+
+    await client.set("key", "val");
+    expect(await client.get("key")).toBe("val");
+
+    client.destroy();
   });
 
   it("should start redis-stack with custom env and keeping default args", async () => {

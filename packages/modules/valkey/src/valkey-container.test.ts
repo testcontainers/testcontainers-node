@@ -5,11 +5,12 @@ import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { ValkeyContainer } from "./valkey-container";
 
 const IMAGE = getImage(__dirname);
+const OLDEST_IMAGE = "valkey/valkey:7.2.14";
 
-describe("ValkeyContainer", { timeout: 240_000 }, () => {
+describe.each([IMAGE, OLDEST_IMAGE])("ValkeyContainer (%s)", { timeout: 240_000 }, (image) => {
   it("should connect and execute set-get", async () => {
     // valkeyStartContainer {
-    await using container = await new ValkeyContainer(IMAGE).start();
+    await using container = await new ValkeyContainer(image).start();
 
     const client = createClient({ url: container.getConnectionUrl() });
     await client.connect();
@@ -22,7 +23,7 @@ describe("ValkeyContainer", { timeout: 240_000 }, () => {
   });
 
   it("should connect with password and execute set-get", async () => {
-    await using container = await new ValkeyContainer(IMAGE).withPassword("test").start();
+    await using container = await new ValkeyContainer(image).withPassword("test").start();
 
     const client = createClient({ url: container.getConnectionUrl() });
     await client.connect();
@@ -37,7 +38,7 @@ describe("ValkeyContainer", { timeout: 240_000 }, () => {
     // valkeyWithPersistentData {
     const sourcePath = fs.mkdtempSync("valkey-");
 
-    await using container = await new ValkeyContainer(IMAGE).withPassword("test").withPersistence(sourcePath).start();
+    await using container = await new ValkeyContainer(image).withPassword("test").withPersistence(sourcePath).start();
 
     let client = createClient({ url: container.getConnectionUrl() });
     await client.connect();
@@ -58,7 +59,7 @@ describe("ValkeyContainer", { timeout: 240_000 }, () => {
 
   it("should load initial data and can read it", async () => {
     // valkeyWithPredefinedData {
-    await using container = await new ValkeyContainer(IMAGE)
+    await using container = await new ValkeyContainer(image)
       .withPassword("test")
       .withInitialData(path.join(__dirname, "initData.valkey"))
       .start();
@@ -82,7 +83,7 @@ describe("ValkeyContainer", { timeout: 240_000 }, () => {
     const username = "testUser";
     const password = "testPassword";
 
-    await using container = await new ValkeyContainer(IMAGE).withUsername(username).withPassword(password).start();
+    await using container = await new ValkeyContainer(image).withUsername(username).withPassword(password).start();
 
     expect(container.getConnectionUrl()).toEqual(
       `redis://${username}:${password}@${container.getHost()}:${container.getPort()}`
@@ -102,7 +103,7 @@ describe("ValkeyContainer", { timeout: 240_000 }, () => {
     // valkeyWithPassword {
     const password = "testPassword";
 
-    await using container = await new ValkeyContainer(IMAGE).withPassword(password).start();
+    await using container = await new ValkeyContainer(image).withPassword(password).start();
 
     expect(container.getConnectionUrl()).toEqual(`redis://:${password}@${container.getHost()}:${container.getPort()}`);
     // }
@@ -118,11 +119,28 @@ describe("ValkeyContainer", { timeout: 240_000 }, () => {
 
   it("should execute container cmd and return the result", async () => {
     // valkeyExecuteCommand {
-    await using container = await new ValkeyContainer(IMAGE).start();
+    await using container = await new ValkeyContainer(image).start();
 
     const queryResult = await container.executeCliCmd("info", ["clients"]);
 
     expect(queryResult).toEqual(expect.stringContaining("connected_clients:1"));
     // }
   });
+});
+
+describe("ValkeyContainer", { timeout: 240_000 }, () => {
+  it.each(["valkey/valkey:8.0.11", "valkey/valkey:8.1.10", "valkey/valkey:9.0.6"])(
+    "should connect and execute set-get with %s",
+    async (image) => {
+      await using container = await new ValkeyContainer(image).start();
+
+      const client = createClient({ url: container.getConnectionUrl() });
+      await client.connect();
+
+      await client.set("key", "val");
+      expect(await client.get("key")).toBe("val");
+
+      client.destroy();
+    }
+  );
 });
