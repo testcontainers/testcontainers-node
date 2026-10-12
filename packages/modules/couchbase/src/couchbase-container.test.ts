@@ -109,7 +109,6 @@ describe("CouchbaseContainer", { timeout: 180_000 }, () => {
     await using container = await new CouchbaseContainer(COMMUNITY_IMAGE)
       .withEnabledServices(CouchbaseService.KV)
       .withBucket(bucketDefinition)
-      .withStartupTimeout(30_000)
       .start();
 
     const cluster = await couchbase.Cluster.connect(container.getConnectionString(), {
@@ -144,6 +143,14 @@ describe("CouchbaseContainer", { timeout: 180_000 }, () => {
     expect(result.services[couchbase.ServiceType.KeyValue]?.[0].state).toBe(couchbase.PingState.Ok);
 
     await cluster.close();
+  });
+
+  it("should fail when setup exceeds the startup timeout", async () => {
+    const container = new CouchbaseContainer(COMMUNITY_IMAGE)
+      .withEnabledServices(CouchbaseService.KV)
+      .withStartupTimeout(2_000);
+
+    await expect(() => container.start()).rejects.toThrowError(/URL \/pools not accessible after \d+ms/);
   });
 
   it("should preserve fixed host port binding", async () => {
