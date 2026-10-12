@@ -6,8 +6,17 @@
 * Discuss with the authors via an issue or discussion prior to doing anything big.
 * Follow the style, structure and naming conventions of the rest of the project.
 * Make commits atomic and easy to merge.
-* Run the Git hooks when making commits to ensure the code is linted and correctly formatted.
-* Verify all tests are passing with `npm test`.
+* Run `npm run format`, `npm run lint` and `npm run knip` before committing.
+* Verify the tests for what you changed are passing, for example `npx vitest run packages/modules/redis`. `npm test` runs every package and pulls every module's image.
+* Give the pull request a short, imperative title that describes the change for users, such as `Add Mosquitto module` or `Fix container exec output truncation`, without `feat:` or `fix:` prefixes. Titles become the release notes. A maintainer will add the labels.
+
+## Adding a module
+
+[`.agents/skills/add-module/SKILL.md`](.agents/skills/add-module/SKILL.md) lists the conventions reviewers look for in a new module: the container class, tests, image pinning and docs.
+
+## Coding agents
+
+[`AGENTS.md`](AGENTS.md) holds the rules coding agents follow in this repository, and [`.agents/skills/`](.agents/skills) holds their workflows for opening and reviewing pull requests, adding modules and more. Both are also a short reference for human contributors.
 
 ## Documentation
 
