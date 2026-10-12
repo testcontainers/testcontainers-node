@@ -68,19 +68,6 @@
       }
     },
     {
-      "includes": ["packages/modules/couchbase/src/couchbase-container.ts"],
-      "linter": {
-        "rules": {
-          "complexity": {
-            "noExcessiveLinesPerFunction": "off"
-          },
-          "nursery": {
-            "useNullishCoalescing": "off"
-          }
-        }
-      }
-    },
-    {
       "includes": ["packages/modules/**"],
       "linter": {
         "rules": {
