@@ -3,10 +3,10 @@ import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { ElasticsearchContainer } from "./elasticsearch-container";
 
 const IMAGE = getImage(__dirname);
-const images = ["elasticsearch:7.17.28", "elasticsearch:8.18.1", IMAGE];
+const OLDEST_IMAGE = "elasticsearch:8.19.23";
 
-describe("ElasticsearchContainer", { timeout: 180_000 }, () => {
-  it.each(images)("should create an index with %s", async (image) => {
+describe.each([IMAGE, OLDEST_IMAGE])("ElasticsearchContainer (%s)", { timeout: 180_000 }, (image) => {
+  it("should create an index", async () => {
     // createIndex {
     await using container = await new ElasticsearchContainer(image).start();
 
@@ -21,9 +21,10 @@ describe("ElasticsearchContainer", { timeout: 180_000 }, () => {
     // }
   });
 
-  it("should index a document", async () => {
+  // The 9.x client sends a compatible-with=9 media type with request bodies, which Elasticsearch 8 rejects.
+  it.skipIf(image === OLDEST_IMAGE)("should index a document", async () => {
     // indexDocument {
-    await using container = await new ElasticsearchContainer(IMAGE).start();
+    await using container = await new ElasticsearchContainer(image).start();
 
     const client = new Client({
       node: container.getHttpUrl(),
@@ -46,7 +47,7 @@ describe("ElasticsearchContainer", { timeout: 180_000 }, () => {
 
   it("should set custom password", async () => {
     // withPassword {
-    await using container = await new ElasticsearchContainer(IMAGE).withPassword("testPassword").start();
+    await using container = await new ElasticsearchContainer(image).withPassword("testPassword").start();
 
     const client = new Client({
       node: container.getHttpUrl(),
@@ -60,7 +61,7 @@ describe("ElasticsearchContainer", { timeout: 180_000 }, () => {
   });
 
   it("should work with restarted container", async () => {
-    await using container = await new ElasticsearchContainer(IMAGE).start();
+    await using container = await new ElasticsearchContainer(image).start();
     await container.restart();
 
     const client = new Client({
