@@ -24,6 +24,7 @@ If a skill or this file turns out to be wrong or incomplete, update it in the sa
 
 - If a public API changes, update the relevant docs in the same PR.
 - If new types are made part of the public API, export them from the package's `index.ts` in the same PR.
+- Only what a package's `index.ts` exports is public API. `npm run knip` fails on any other export that no other file uses: drop the `export` keyword, or export it from `index.ts` if consumers need it.
 - In docs Markdown, keep `<!--codeinclude-->` blocks tight with no blank lines between the markers and the include line, or the rendered snippet will contain blank lines between code lines.
 - Codeinclude `inside_block:<name>` selects the block after the first line that contains `<name>` anywhere, so a marker whose name also appears earlier in the file (for example inside another marker's name) silently includes the wrong block. The `Docs` job in the `Checks` workflow runs `mkdocs build --strict`, which fails when a marker or included file is missing but cannot catch this.
 
@@ -64,7 +65,7 @@ If a skill or this file turns out to be wrong or incomplete, update it in the sa
 
 ## Verification
 
-- Run before handing off any change: `npm run format`, `npm run lint`, targeted tests, and `npm run check-compiles` when touching `packages/testcontainers` APIs consumed by modules.
+- Run before handing off any change: `npm run format`, `npm run lint`, `npm run knip`, targeted tests, and `npm run check-compiles` when touching `packages/testcontainers` APIs consumed by modules.
 - When working in a fresh git worktree, dependencies are not installed (`node_modules` is absent), so verification commands fail with "Cannot find module" errors. Run `npm ci` once first.
   - `npm ci` only populates `node_modules` and must not modify `package-lock.json`. If it does, treat that as drift to investigate.
 
