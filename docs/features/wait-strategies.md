@@ -268,7 +268,7 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
-For full control over how readiness is decided, subclass `AbstractWaitStrategy`, the base class of the built-in wait strategies, and implement `waitUntilReady`:
+`StartupCheckStrategy` polls a check once a second. To decide readiness yourself, with access to the container and its bound ports, or to combine other wait strategies, subclass `AbstractWaitStrategy` and implement `waitUntilReady`:
 
 ```js
 const { AbstractWaitStrategy, GenericContainer } = require("testcontainers");
