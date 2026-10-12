@@ -554,6 +554,7 @@ import {
   GenericContainer,
   AbstractStartedContainer,
   StartedTestContainer,
+  StartupDeadline,
   InspectResult
 } from "testcontainers";
 
@@ -576,7 +577,8 @@ class CustomContainer extends GenericContainer {
   protected override async containerStarted(
     container: StartedTestContainer,
     inspectResult: InspectResult,
-    reused: boolean
+    reused: boolean,
+    startupDeadline?: StartupDeadline
   ): Promise<void> {
     // ...
   }
@@ -594,6 +596,20 @@ class CustomStartedContainer extends AbstractStartedContainer {
   protected override async containerStopped(): Promise<void> {
     // ...
   }
+}
+```
+
+`containerStarted` runs after the [wait strategy](wait-strategies.md). When a startup timeout is set on the container, `startupDeadline.getRemainingMs()` returns how much of it is left, so that further waiting in the callback shares the timeout with the wait strategy instead of starting a new one. It is `undefined` when no startup timeout is set:
+
+```ts
+protected override async containerStarted(
+  container: StartedTestContainer,
+  inspectResult: InspectResult,
+  reused: boolean,
+  startupDeadline?: StartupDeadline
+): Promise<void> {
+  const timeoutMs = startupDeadline?.getRemainingMs() ?? 60_000;
+  // ...
 }
 ```
 

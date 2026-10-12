@@ -41,6 +41,7 @@ import { GenericContainerBuilder } from "./generic-container-builder";
 import { inspectContainerUntilPortsExposed } from "./inspect-container-util-ports-exposed";
 // biome-ignore lint/suspicious/noImportCycles: Ryuk and sshd run as GenericContainers; only dereferenced at runtime
 import { StartedGenericContainer } from "./started-generic-container";
+import { StartupDeadline } from "./startup-deadline";
 
 const reusableContainerCreationLock = new AsyncLock();
 
@@ -258,6 +259,8 @@ export class GenericContainer implements TestContainer {
       waitStrategy.withStartupTimeout(this.startupTimeoutMs);
     }
 
+    const startupDeadline =
+      this.startupTimeoutMs !== undefined ? new StartupDeadline(this.startupTimeoutMs) : undefined;
     await waitForContainer(client, container, waitStrategy, boundPorts);
 
     const startedContainer = new StartedGenericContainer(
@@ -271,7 +274,7 @@ export class GenericContainer implements TestContainer {
     );
 
     if (this.containerStarted) {
-      await this.containerStarted(startedContainer, mappedInspectResult, false);
+      await this.containerStarted(startedContainer, mappedInspectResult, false, startupDeadline);
     }
 
     return startedContainer;
@@ -313,7 +316,8 @@ export class GenericContainer implements TestContainer {
   protected containerStarted?(
     container: StartedTestContainer,
     inspectResult: InspectResult,
-    reused: boolean
+    reused: boolean,
+    startupDeadline?: StartupDeadline
   ): Promise<void>;
 
   public withCommand(command: string[]): this {
