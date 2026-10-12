@@ -14,7 +14,7 @@ These examples use the following libraries:
 
         npm install chromadb
 
-- [@chroma-core/default-embed](https://www.npmjs.com/package/@chroma-core/default-embed)
+- [@chroma-core/default-embed](https://www.npmjs.com/package/@chroma-core/default-embed) (optional). It provides chromadb's default embedding function. The examples work without it, but chromadb logs a warning when a collection has no embedding function.
 
         npm install @chroma-core/default-embed
 
