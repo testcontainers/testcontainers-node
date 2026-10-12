@@ -1,4 +1,3 @@
-import type { Environment } from "testcontainers/src/types";
 import weaviate from "weaviate-ts-client";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { WeaviateContainer } from "./weaviate-container";
@@ -38,7 +37,7 @@ describe("WeaviateContainer", { timeout: 100_000 }, () => {
       "text2vec-huggingface",
       "generative-openai",
     ];
-    const environment: Environment = {
+    const environment = {
       ENABLE_MODULES: enableModules.join(","),
       BACKUP_FILESYSTEM_PATH: "/tmp/backups",
     };
