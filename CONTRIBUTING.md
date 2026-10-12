@@ -6,7 +6,7 @@
 * Discuss with the authors via an issue or discussion prior to doing anything big.
 * Follow the style, structure and naming conventions of the rest of the project.
 * Make commits atomic and easy to merge.
-* Run `npm run format` and `npm run lint` before committing.
+* Run `npm run format`, `npm run lint` and `npm run knip` before committing.
 * Verify the tests for what you changed are passing, for example `npx vitest run packages/modules/redis`. `npm test` runs every package and pulls every module's image.
 * Give the pull request a short, imperative title that describes the change for users, such as `Add Mosquitto module` or `Fix container exec output truncation`, without `feat:` or `fix:` prefixes. Titles become the release notes. A maintainer will add the labels.
 
