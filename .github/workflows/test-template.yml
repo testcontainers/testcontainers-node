@@ -27,14 +27,12 @@ jobs:
         uses: ./.github/actions/podman-setup
 
       - name: Install Node ${{ inputs.node-version }} and Dependencies
-        id: npm-install
         uses: ./.github/actions/npm-setup
         with:
-          runner: ${{ inputs.runner }}
           node-version: ${{ inputs.node-version }}
-          workspace: "${{ inputs.workspace }}"
 
       - name: Run tests
-        run: npm run test:ci -- --coverage.include="${{ steps.npm-install.outputs.workspace_path }}/**/*.ts" ${{ steps.npm-install.outputs.workspace_path }}
+        run: npm run test:ci -- --coverage.include="${TEST_PATH}/**/*.ts" "${TEST_PATH}"
         env:
           CI: true
+          TEST_PATH: ${{ inputs.workspace == 'testcontainers' && 'packages/testcontainers' || format('packages/modules/{0}', inputs.workspace) }}
