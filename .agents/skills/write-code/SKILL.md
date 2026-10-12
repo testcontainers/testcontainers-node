@@ -5,7 +5,7 @@ description: Writes and refactors TypeScript in testcontainers-node following th
 
 # Write code
 
-Biome formats and lints, knip removes unused exports, and `tsc` requires `override`. AGENTS.md covers comments, root-cause fixes and import boundaries. The rules below are what none of those catch, and what reviewers keep flagging.
+Biome, knip and `tsc` already check formatting, lint rules, unused exports and `override`, and AGENTS.md holds the rules for every task. The rules below are what none of those cover, and what reviewers keep flagging.
 
 Some files predate a rule. Follow the rule in new code and say that the file is inconsistent, rather than copying it.
 
