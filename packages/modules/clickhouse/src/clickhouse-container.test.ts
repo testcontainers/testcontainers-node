@@ -3,15 +3,16 @@ import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { ClickHouseContainer } from "./clickhouse-container";
 
 const IMAGE = getImage(__dirname);
+const OLDEST_IMAGE = "clickhouse/clickhouse-server:26.3.49.3-alpine";
 
 interface ClickHouseQueryResponse<T> {
   data: T[];
 }
 
-describe("ClickHouseContainer", { timeout: 180_000 }, () => {
+describe.each([IMAGE, OLDEST_IMAGE])("ClickHouseContainer (%s)", { timeout: 180_000 }, (image) => {
   it("should connect using the client options object", async () => {
     // connectWithOptions {
-    await using container = await new ClickHouseContainer(IMAGE).start();
+    await using container = await new ClickHouseContainer(image).start();
 
     const client = createClient(container.getClientOptions());
 
@@ -29,7 +30,7 @@ describe("ClickHouseContainer", { timeout: 180_000 }, () => {
 
   it("should connect using the URL", async () => {
     // connectWithUrl {
-    await using container = await new ClickHouseContainer(IMAGE).start();
+    await using container = await new ClickHouseContainer(image).start();
 
     const client = createClient({
       url: container.getConnectionUrl(),
@@ -49,7 +50,7 @@ describe("ClickHouseContainer", { timeout: 180_000 }, () => {
 
   it("should connect using the username and password", async () => {
     // connectWithUsernameAndPassword {
-    await using container = await new ClickHouseContainer(IMAGE)
+    await using container = await new ClickHouseContainer(image)
       .withUsername("customUsername")
       .withPassword("customPassword")
       .start();
@@ -75,7 +76,7 @@ describe("ClickHouseContainer", { timeout: 180_000 }, () => {
   it("should set database", async () => {
     // setDatabase {
     const db = "customDatabase";
-    await using container = await new ClickHouseContainer(IMAGE).withDatabase(db).start();
+    await using container = await new ClickHouseContainer(image).withDatabase(db).start();
     // }
 
     const client = createClient(container.getClientOptions());
@@ -92,7 +93,7 @@ describe("ClickHouseContainer", { timeout: 180_000 }, () => {
   });
 
   it("should work with restarted container", async () => {
-    await using container = await new ClickHouseContainer(IMAGE).start();
+    await using container = await new ClickHouseContainer(image).start();
     await container.restart();
 
     const client = createClient(container.getClientOptions());
@@ -107,4 +108,25 @@ describe("ClickHouseContainer", { timeout: 180_000 }, () => {
 
     await client.close();
   });
+});
+
+describe("ClickHouseContainer", { timeout: 180_000 }, () => {
+  it.each(["clickhouse/clickhouse-server:26.8.25.14-alpine"])(
+    "should connect using the client options object with %s",
+    async (image) => {
+      await using container = await new ClickHouseContainer(image).start();
+
+      const client = createClient(container.getClientOptions());
+
+      const result = await client.query({
+        query: "SELECT 1 AS value",
+        format: "JSON",
+      });
+      const data = (await result.json()) as ClickHouseQueryResponse<{ value: number }>;
+
+      expect(data?.data?.[0]?.value).toBe(1);
+
+      await client.close();
+    }
+  );
 });

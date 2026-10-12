@@ -3,11 +3,12 @@ import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { WeaviateContainer } from "./weaviate-container";
 
 const IMAGE = getImage(__dirname);
+const OLDEST_IMAGE = "semitechnologies/weaviate:1.38.21";
 
-describe("WeaviateContainer", { timeout: 100_000 }, () => {
+describe.each([IMAGE, OLDEST_IMAGE])("WeaviateContainer (%s)", { timeout: 100_000 }, (image) => {
   it("should expose ports", async () => {
     // connectWeaviate {
-    await using container = await new WeaviateContainer(IMAGE).start();
+    await using container = await new WeaviateContainer(image).start();
 
     expect(container.getHttpHostAddress()).toBeDefined();
     expect(container.getGrpcHostAddress()).toBeDefined();
@@ -16,7 +17,7 @@ describe("WeaviateContainer", { timeout: 100_000 }, () => {
 
   it("should connect to Weaviate", async () => {
     // connectWeaviateWithClient {
-    await using container = await new WeaviateContainer(IMAGE).start();
+    await using container = await new WeaviateContainer(image).start();
 
     const client = weaviate.client({
       scheme: "http",
@@ -42,7 +43,7 @@ describe("WeaviateContainer", { timeout: 100_000 }, () => {
       BACKUP_FILESYSTEM_PATH: "/tmp/backups",
     };
 
-    await using container = await new WeaviateContainer(IMAGE).withEnvironment(environment).start();
+    await using container = await new WeaviateContainer(image).withEnvironment(environment).start();
 
     const client = weaviate.client({
       scheme: "http",

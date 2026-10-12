@@ -8,6 +8,7 @@ import PORTS from "./ports";
 
 const ENTERPRISE_IMAGE = getImage(__dirname, 0);
 const COMMUNITY_IMAGE = getImage(__dirname, 1);
+const COMMUNITY_IMAGES = [COMMUNITY_IMAGE, "couchbase/server:community-7.6.2"];
 
 describe("CouchbaseContainer", { timeout: 180_000 }, () => {
   const flushBucketAndCheckExists = async (
@@ -21,7 +22,7 @@ describe("CouchbaseContainer", { timeout: 180_000 }, () => {
     return coll.exists(key);
   };
 
-  it.each([ENTERPRISE_IMAGE, COMMUNITY_IMAGE])("should connect and query using %s image", async (image) => {
+  it.each([ENTERPRISE_IMAGE, ...COMMUNITY_IMAGES])("should connect and query using %s image", async (image) => {
     // connectAndQuery {
     const bucketDefinition = new BucketDefinition("mybucket");
     await using container = await new CouchbaseContainer(image).withBucket(bucketDefinition).start();
@@ -104,9 +105,9 @@ describe("CouchbaseContainer", { timeout: 180_000 }, () => {
     expect(container.getConnectionString()).toContain("couchbase://");
   });
 
-  it("should create and use a bucket with KV service only", async () => {
+  it.each(COMMUNITY_IMAGES)("should create and use a bucket with KV service only using %s image", async (image) => {
     const bucketDefinition = new BucketDefinition("kvbucket").withPrimaryIndex(false);
-    await using container = await new CouchbaseContainer(COMMUNITY_IMAGE)
+    await using container = await new CouchbaseContainer(image)
       .withEnabledServices(CouchbaseService.KV)
       .withBucket(bucketDefinition)
       .start();
@@ -128,10 +129,8 @@ describe("CouchbaseContainer", { timeout: 180_000 }, () => {
     await cluster.close();
   });
 
-  it("should connect without a bucket", async () => {
-    await using container = await new CouchbaseContainer(COMMUNITY_IMAGE)
-      .withEnabledServices(CouchbaseService.KV)
-      .start();
+  it.each(COMMUNITY_IMAGES)("should connect without a bucket using %s image", async (image) => {
+    await using container = await new CouchbaseContainer(image).withEnabledServices(CouchbaseService.KV).start();
 
     const cluster = await couchbase.Cluster.connect(container.getConnectionString(), {
       username: container.getUsername(),
