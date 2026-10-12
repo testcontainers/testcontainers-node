@@ -27,18 +27,17 @@ Don't work from a fixed list of failure causes. Packages, images and registries 
 
 The AGENTS.md rules on runtime dependencies and on module images apply to every bump.
 
-## Older image versions
+## Supported image versions
 
-Users choose their own image tag, so a module has to keep working with the older versions the vendor still supports. Modules whose source depends on what is inside the image keep the oldest supported version in their suite (AGENTS.md "Tests"), because a check done by hand at bump time protects nothing that changes later.
+A module's tests cover every version line the vendor still supports (AGENTS.md "Tests"). Dependabot only bumps the `Dockerfile`, so the hardcoded lines are kept current here. On every image bump for a module:
 
-A bump that needs no change to module source can't break older versions: they still run the same code. When following a bump does change module source:
-
-1. Find which versions are still supported, from the vendor's lifecycle page or endoflife.date. Versions past end of life are out of scope: don't test them, and don't add or keep code paths for them.
-2. If the suite already runs against an older supported version, those tests passing is the check.
-3. If it doesn't, add the oldest supported version to the suite in the same PR. Check the tag with `docker manifest inspect <image:tag>`. If it has no arm64 image, use the oldest supported tag that has both amd64 and arm64.
-4. If a supported version can't take the change, keep the old path for it. Versions that differ in ports, auth or startup get their own class (`add-module`). Dropping a supported version is a breaking change.
-
-Dependabot does not bump a hardcoded tag. When working on a module's image bump, check its pinned older version too. Once that version is past end of life, move the pin to the oldest version still supported, or remove it if none is left.
+1. List the supported lines from the vendor's lifecycle page or endoflife.date.
+2. Compare them with the lines the tests run:
+   - **Past end of life:** remove its tests. Removing module code that exists only for that line is a breaking change, so propose it separately.
+   - **Supported but untested:** add it as AGENTS.md "Tests" describes.
+   - **Hardcoded:** move it to that line's latest tag. `docker manifest inspect <image:tag>` should list both amd64 and arm64.
+3. When the bump moves the `Dockerfile` to a new line, hardcode the line it leaves in the tests in the same PR, if the vendor still supports it.
+4. If a supported line fails with the module as changed for the bump, keep the old path for it. Lines that differ in ports, auth or startup get their own class (`add-module`). Dropping a supported line is a breaking change.
 
 ## An image no longer pulls
 

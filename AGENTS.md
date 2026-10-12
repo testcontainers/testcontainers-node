@@ -57,10 +57,13 @@ If a skill or this file turns out to be wrong or incomplete, update it in the sa
   - Reuse an image the tests already use, for example `cristianrgreco/testcontainer:1.1.14` in `packages/testcontainers`, or the module's own image.
 - Module tests read their images from `packages/modules/<module>/Dockerfile` (one `FROM` line per image) with `getImage(__dirname, index)`, so Dependabot can bump them. Do not hardcode images in module source or tests.
   - Exception: a second version of the *same* image must be hardcoded in its test file (for example `influxdb1-container.test.ts`, `kafka-container-7.test.ts`). Dependabot treats same-image `FROM` lines as one dependency and bumps them all to the newest tag.
-- A module whose source depends on what is inside the image also runs its tests against the oldest version the vendor still supports, so a later change can't silently break that version. This is the one case where a suite pulls an extra image.
-  - It applies when the module runs a command in the container, or relies on an endpoint, flag, default or log line that differs between versions.
-  - Loop the tests over both images with `it.each` or `describe.each`, so new tests cover the older version by default. Skip it explicitly where a feature can't work there. A suite too heavy to double may loop a representative part of itself.
-  - Add the older version the first time a change adds or touches such a dependency. Versions past the vendor's end of life are out of scope.
+- A module's tests cover every version line the vendor still supports, so a change can't silently break one that users still run. This is the one case where a suite pulls extra images.
+  - The newest line comes from the module `Dockerfile`. Hardcode the others in the test file, each as that line's latest tag.
+  - Run the whole suite against the newest and the oldest supported line by looping it over both images with `describe.each` or `it.each`. New tests then cover the oldest line by default; skip it explicitly where a feature needs a newer version.
+  - Give each line in between one smoke test: start the container and do one round trip.
+  - A line that needs its own class, setup or assertions gets its own test file named after it, for example `kafka-container-7.test.ts`.
+  - A suite too heavy to double may loop a representative part of itself. Say which part in the PR.
+  - Versions past the vendor's end of life are out of scope: don't test them, and remove their tests.
 - Vitest runs tests concurrently by default (`sequence.concurrent: true` in `vitest.config.ts`).
   - Tests that rely on shared/global mocks (for example `vi.spyOn` on shared loggers/singletons) can be flaky due to interleaving or automatic mock resets.
   - Prefer asserting observable behavior instead of shared global mock state when possible.
