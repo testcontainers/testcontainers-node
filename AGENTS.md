@@ -20,36 +20,47 @@ If a skill or this file turns out to be wrong or incomplete, update it in the sa
 
 ## Development Expectations
 
+### API and docs
+
 - If a public API changes, update the relevant docs in the same PR.
 - If new types are made part of the public API, export them from the package's `index.ts` in the same PR.
 - In docs Markdown, keep `<!--codeinclude-->` blocks tight with no blank lines between the markers and the include line, or the rendered snippet will contain blank lines between code lines.
 - Codeinclude `inside_block:<name>` selects the block after the first line that contains `<name>` anywhere, so a marker whose name also appears earlier in the file (for example inside another marker's name) silently includes the wrong block. The `Docs` job in the `Checks` workflow runs `mkdocs build --strict`, which fails when a marker or included file is missing but cannot catch this.
-- Runtime `dependencies` of published packages must load from CommonJS. ESM-only packages break Jest and other CJS consumers, so adopting one is a breaking change.
-  - Prefer built-ins (for example `fetch`) or well-established libraries over new small dependencies.
+
+### Code
+
 - Keep code comments to a minimum; the codebase has very few. Add one only when it tells the reader something they can't get from the code, the PR or the git history, such as why a non-obvious approach was needed, or a link to an upstream bug.
   - Don't narrate what the code does, describe the change you made, or reference the task or review that prompted it.
 - Fix the root cause. A change that only makes a failure less likely is not a fix.
   - Arbitrary delays (`sleep`), repeating a check, or adding retries do not remove a race; they hide it.
   - For readiness problems, wait on a deterministic signal of the state you need. If no such signal exists, say so rather than shipping a mitigation as a fix.
+- Import boundaries are enforced by Biome (`biome.json`):
+  - Modules import core only from the `testcontainers` entry point. The one allowed exception is the core test helper (`../../../testcontainers/src/utils/test-helper`).
+  - `noImportCycles` is an error. Prefer breaking a new cycle (for example with `import type` or a leaf module) over adding a `biome-ignore` suppression.
+
+### Dependencies
+
+- Runtime `dependencies` of published packages must load from CommonJS. ESM-only packages break Jest and other CJS consumers, so adopting one is a breaking change.
+  - Prefer built-ins (for example `fetch`) or well-established libraries over new small dependencies.
+
+### Tests
+
 - Tests should verify observable behavior changes, not only internal/config state.
   - Example: for a security option, assert a real secure/insecure behavior difference.
-- Tests should not pull container images that the test suite does not already pull.
-  - Every extra image increases how long the tests take to run and how much storage they need.
-  - Reuse an image the tests already use, for example `cristianrgreco/testcontainer:1.1.14` in `packages/testcontainers`, or the module's own image.
 - When adding a regression test for a bug fix, follow a red-green-refactor workflow.
   - Run the focused test against the pre-fix implementation and confirm it fails for the expected reason.
   - Apply the implementation change, rerun the same test, and confirm it passes.
   - Report the red-green evidence in the PR verification summary.
-- Import boundaries are enforced by Biome (`biome.json`):
-  - Modules import core only from the `testcontainers` entry point. The one allowed exception is the core test helper (`../../../testcontainers/src/utils/test-helper`).
-  - `noImportCycles` is an error. Prefer breaking a new cycle (for example with `import type` or a leaf module) over adding a `biome-ignore` suppression.
-- Test-only helper files under `src` (for example `*-test-utils.ts`) must be explicitly excluded from package `tsconfig.build.json` so they are not emitted into `build` and accidentally published.
+- Tests should not pull container images that the test suite does not already pull.
+  - Every extra image increases how long the tests take to run and how much storage they need.
+  - Reuse an image the tests already use, for example `cristianrgreco/testcontainer:1.1.14` in `packages/testcontainers`, or the module's own image.
 - Module tests read their images from `packages/modules/<module>/Dockerfile` (one `FROM` line per image) with `getImage(__dirname, index)`, so Dependabot can bump them. Do not hardcode images in module source or tests.
   - Exception: a second version of the *same* image must be hardcoded in its test file (for example `influxdb1-container.test.ts`, `kafka-container-7.test.ts`). Dependabot treats same-image `FROM` lines as one dependency and bumps them all to the newest tag.
 - Vitest runs tests concurrently by default (`sequence.concurrent: true` in `vitest.config.ts`).
   - Tests that rely on shared/global mocks (for example `vi.spyOn` on shared loggers/singletons) can be flaky due to interleaving or automatic mock resets.
   - Prefer asserting observable behavior instead of shared global mock state when possible.
   - If a test must depend on shared/global mock state, pass `{ concurrent: false }` to its `describe(...)` or `it(...)`.
+- Test-only helper files under `src` (for example `*-test-utils.ts`) must be explicitly excluded from package `tsconfig.build.json` so they are not emitted into `build` and accidentally published.
 
 ## Verification
 
