@@ -18,16 +18,6 @@
     "packages/modules/gcloud": {
       // firebase-admin/firestore requires it at runtime, but firebase-admin only lists it as optional.
       "ignoreDependencies": ["@google-cloud/firestore"]
-    },
-    // TODO: remove the three entries below once #1485 declares these dependencies.
-    "packages/modules/azurite": {
-      "ignoreDependencies": ["@azure/core-auth"]
-    },
-    "packages/modules/k3s": {
-      "ignoreDependencies": ["tar-stream"]
-    },
-    "packages/modules/selenium": {
-      "ignoreDependencies": ["tar-fs", "tmp"]
     }
   }
 }
