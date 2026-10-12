@@ -184,6 +184,28 @@ export class CouchbaseContainer extends GenericContainer {
       );
   }
 
+  private async waitUntilKvAcceptsCredentials(container: StartedTestContainer) {
+    const timeoutMs = this.startupTimeoutMs || 60_000;
+
+    await new IntervalRetry<number, Error>(100).retryUntil(
+      async () => {
+        const { exitCode } = await container.exec(
+          ["/opt/couchbase/bin/mcstat", "--host", `127.0.0.1:${PORTS.KV_PORT}`, "--user", this.username, "connections"],
+          { env: { CB_PASSWORD: this.password } }
+        );
+        return exitCode;
+      },
+      (exitCode) => exitCode === 0,
+      () => {
+        const message = `KV service did not accept credentials after ${timeoutMs}ms`;
+        log.error(message, { containerId: container.getId() });
+
+        throw new Error(message);
+      },
+      timeoutMs
+    );
+  }
+
   private async initializeIsEnterprise(container: StartedTestContainer) {
     const response = await this.doHttpRequest(
       container.getHost(),
@@ -431,6 +453,23 @@ export class CouchbaseContainer extends GenericContainer {
           BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, inspectResult)
         );
 
+      await Wait.forHttp(`/pools/default/buckets/${bucket.getName()}`, PORTS.MGMT_PORT)
+        .withBasicCredentials(this.username, this.password)
+        .forStatusCode(200)
+        .forResponsePredicate((response) => {
+          try {
+            const jsonResponse = JSON.parse(response);
+            return jsonResponse.nodes[0]?.status === "healthy";
+          } catch (e) {
+            log.error(`Unable to parse response: ${response}, error: ${e}`);
+            return false;
+          }
+        })
+        .waitUntilReady(
+          client.container.getById(startedTestContainer.getId()),
+          BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, inspectResult)
+        );
+
       if (this.enabledServices.has(CouchbaseService.QUERY)) {
         await new IntervalRetry<Response | undefined, Error>(1000).retryUntil(
           async () => {
@@ -567,6 +606,10 @@ export class CouchbaseContainer extends GenericContainer {
         )
       )
     );
+
+    if (this.enabledServices.has(CouchbaseService.KV)) {
+      await this.waitUntilKvAcceptsCredentials(startedTestContainer);
+    }
 
     await this.createBuckets(client, inspectResult, startedTestContainer);
 

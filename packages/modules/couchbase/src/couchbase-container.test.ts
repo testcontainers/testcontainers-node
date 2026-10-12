@@ -129,6 +129,23 @@ describe("CouchbaseContainer", { timeout: 180_000 }, () => {
     await cluster.close();
   });
 
+  it("should connect without a bucket", async () => {
+    await using container = await new CouchbaseContainer(COMMUNITY_IMAGE)
+      .withEnabledServices(CouchbaseService.KV)
+      .start();
+
+    const cluster = await couchbase.Cluster.connect(container.getConnectionString(), {
+      username: container.getUsername(),
+      password: container.getPassword(),
+    });
+
+    const result = await cluster.ping({ serviceTypes: [couchbase.ServiceType.KeyValue] });
+
+    expect(result.services[couchbase.ServiceType.KeyValue]?.[0].state).toBe(couchbase.PingState.Ok);
+
+    await cluster.close();
+  });
+
   it("should preserve fixed host port binding", async () => {
     const hostPort = await getPort();
     await using container = await new CouchbaseContainer(COMMUNITY_IMAGE)
