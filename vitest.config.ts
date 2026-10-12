@@ -1,5 +1,5 @@
 import * as path from "node:path";
-import { defineConfig } from "vitest/config";
+import { configDefaults, defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
@@ -8,6 +8,7 @@ export default defineConfig({
       DEBUG: "testcontainers*",
     },
     passWithNoTests: true,
+    exclude: [...configDefaults.exclude, ".claude/worktrees/**"],
     silent: "passed-only",
     mockReset: true,
     restoreMocks: true,
