@@ -28,6 +28,9 @@ runs:
     - name: Install dependencies
       if: steps.npm-cache.outputs.cache-hit != 'true'
       shell: bash
+      env:
+        # onnxruntime-node (a dev dependency of the chromadb module) otherwise downloads CUDA binaries on install.
+        ONNXRUNTIME_NODE_INSTALL_CUDA: skip
       run: npm ci
 
     - name: Save dependencies cache
