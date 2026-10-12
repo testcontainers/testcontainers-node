@@ -31,6 +31,7 @@ export {
   FileToCopy,
   HealthCheck,
   InspectResult,
+  Labels,
 } from "./types";
 export { BoundPorts } from "./utils/bound-ports";
 export { LABEL_TESTCONTAINERS_SESSION_ID } from "./utils/labels";
@@ -41,4 +42,4 @@ export { HttpWaitStrategyOptions } from "./wait-strategies/http-wait-strategy";
 export { StartupCheckStrategy, StartupStatus } from "./wait-strategies/startup-check-strategy";
 export { Wait } from "./wait-strategies/wait";
 export { waitForContainer } from "./wait-strategies/wait-for-container";
-export { WaitStrategy } from "./wait-strategies/wait-strategy";
+export { AbstractWaitStrategy, WaitStrategy } from "./wait-strategies/wait-strategy";

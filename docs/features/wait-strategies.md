@@ -267,3 +267,19 @@ const container = await new GenericContainer("alpine")
   .withWaitStrategy(new ReadyAfterDelayWaitStrategy())
   .start();
 ```
+
+For full control over how readiness is decided, subclass `AbstractWaitStrategy`, the base class of the built-in wait strategies, and implement `waitUntilReady`:
+
+```js
+const { AbstractWaitStrategy, GenericContainer } = require("testcontainers");
+
+class CustomWaitStrategy extends AbstractWaitStrategy {
+  public async waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void> {
+    // resolve when the container is ready, or throw once `this.startupTimeoutMs` has passed
+  }
+}
+
+const container = await new GenericContainer("alpine")
+  .withWaitStrategy(new CustomWaitStrategy())
+  .start();
+```
