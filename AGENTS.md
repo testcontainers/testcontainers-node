@@ -118,7 +118,10 @@ reviewers can follow the reasoning.
 
 ## Git and GitHub
 
-- Never commit, push, or post on GitHub without first sharing the proposed diff or content and getting explicit user approval. Posting includes issues, PRs, comments, reviews, labels, and closing or editing anything.
+- Commit, push, or open a PR only when the user asks for it.
+  - Do only the steps asked for. "Commit this" is not a request to push or open a PR.
+  - Open PRs as drafts unless the user asks for one that is ready for review.
+- Before doing anything on GitHub that affects someone else, share the proposed content and get explicit user approval. Examples: commenting on, reviewing, editing or pushing to someone else's PR, and commenting on, labelling or closing someone else's issue.
   - This holds even when explicitly asked to review a PR: present the full set of comments first.
 - Never bypass commit signing (for example `--no-gpg-sign`). If signing fails, stop and ask the user to resolve it.
 - Ask for explicit permission before any force push.

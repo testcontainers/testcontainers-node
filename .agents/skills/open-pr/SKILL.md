@@ -7,8 +7,6 @@ description: Verifies, commits, pushes and opens a pull request in testcontainer
 
 Release Drafter turns PR titles into release notes and labels into the version bump (`.github/release-drafter.yml`). Titles and labels matter as much as the code.
 
-Before committing, pushing or opening anything, get the user's approval of the diff, commit message, title and body (AGENTS.md).
-
 ## Before committing
 
 - Branch from an up-to-date `main`.
@@ -64,7 +62,7 @@ Include:
 - `Closes #<issue>`, only if the PR fully resolves that issue.
 
 ```bash
-gh pr create --base main --title "<title>" --body "<body>" --label <type> --label <semver>
+gh pr create --draft --base main --title "<title>" --body "<body>" --label <type> --label <semver>
 ```
 
-Open it ready for review. Only open it as a draft if the user asks.
+Open it as a draft. Drop `--draft` only if the user asks for a PR that is ready for review. Afterwards, give the user the PR link, title and labels so they can ask for changes.

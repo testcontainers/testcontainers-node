@@ -1,4 +1,5 @@
 import { basename } from "node:path";
+import { text } from "node:stream/consumers";
 import tar from "tar-stream";
 import { AbstractStartedContainer, GenericContainer, type StartedTestContainer, Wait } from "testcontainers";
 
@@ -68,11 +69,7 @@ async function extractFromTarStream(tarStream: NodeJS.ReadableStream, entryName:
   for await (const entry of extract) {
     const { header } = entry;
     if (header.type === "file" && header.name === entryName) {
-      const chunks = [];
-      for await (const chunk of entry) {
-        chunks.push(chunk);
-      }
-      extracted = Buffer.concat(chunks).toString("utf-8");
+      extracted = await text(entry);
     } else {
       entry.resume();
     }
