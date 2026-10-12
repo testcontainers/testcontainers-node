@@ -10,10 +10,6 @@
       "entry": ["smoke-test.jest.js"],
       // Docker build contexts that tests copy into images, never imported.
       "ignoreFiles": ["fixtures/**"]
-    },
-    "packages/modules/gcloud": {
-      // firebase-admin/firestore requires it at runtime, but firebase-admin only lists it as optional.
-      "ignoreDependencies": ["@google-cloud/firestore"]
     }
   }
 }
