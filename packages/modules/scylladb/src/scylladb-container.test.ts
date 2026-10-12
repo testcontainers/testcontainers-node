@@ -3,11 +3,12 @@ import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { ScyllaContainer } from "./scylladb-container";
 
 const IMAGE = getImage(__dirname);
+const OLDEST_IMAGE = "scylladb/scylla:2025.1.16";
 
-describe("ScyllaDB", { timeout: 240_000 }, () => {
+describe.each([IMAGE, OLDEST_IMAGE])("ScyllaDB (%s)", { timeout: 240_000 }, (image) => {
   it("should connect and execute a query", async () => {
     // connectWithDefaultCredentials {
-    await using container = await new ScyllaContainer(IMAGE).start();
+    await using container = await new ScyllaContainer(image).start();
 
     const client = new Client({
       contactPoints: [container.getContactPoint()],
@@ -26,7 +27,7 @@ describe("ScyllaDB", { timeout: 240_000 }, () => {
 
   // createAndFetchData {
   it("should create keyspace, a table, insert data, and retrieve it", async () => {
-    await using container = await new ScyllaContainer(IMAGE).start();
+    await using container = await new ScyllaContainer(image).start();
 
     const client = new Client({
       contactPoints: [container.getContactPoint()],
@@ -38,7 +39,7 @@ describe("ScyllaDB", { timeout: 240_000 }, () => {
     // Create the keyspace
     await client.execute(`
       CREATE KEYSPACE IF NOT EXISTS test_keyspace
-      WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'}
+      WITH replication = {'class': 'NetworkTopologyStrategy', 'replication_factor': '1'}
     `);
 
     await client.execute("USE test_keyspace");
@@ -65,8 +66,27 @@ describe("ScyllaDB", { timeout: 240_000 }, () => {
   // }
 
   it("should work with restarted container", async () => {
-    await using container = await new ScyllaContainer(IMAGE).start();
+    await using container = await new ScyllaContainer(image).start();
     await container.restart();
+
+    const client = new Client({
+      contactPoints: [container.getContactPoint()],
+      localDataCenter: container.getDatacenter(),
+      keyspace: "system",
+    });
+
+    await client.connect();
+
+    const result = await client.execute("SELECT cql_version FROM system.local");
+    expect(result.rows[0].cql_version).toBe("3.3.1");
+
+    await client.shutdown();
+  });
+});
+
+describe("ScyllaDB", { timeout: 240_000 }, () => {
+  it.each(["scylladb/scylla:2026.1.14"])("should connect and execute a query with %s", async (image) => {
+    await using container = await new ScyllaContainer(image).start();
 
     const client = new Client({
       contactPoints: [container.getContactPoint()],

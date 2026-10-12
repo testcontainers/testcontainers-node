@@ -3,11 +3,12 @@ import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { Neo4jContainer, Neo4jPlugin } from "./neo4j-container";
 
 const IMAGE = getImage(__dirname);
+const OLDEST_IMAGE = "neo4j:5.26.31";
 
-describe("Neo4jContainer", { timeout: 180_000 }, () => {
+describe.each([IMAGE, OLDEST_IMAGE])("Neo4jContainer (%s)", { timeout: 180_000 }, (image) => {
   it("should create a person node", async () => {
     // createNode {
-    await using container = await new Neo4jContainer(IMAGE).start();
+    await using container = await new Neo4jContainer(image).start();
 
     const driver = neo4j.driver(
       container.getBoltUri(),
@@ -28,7 +29,7 @@ describe("Neo4jContainer", { timeout: 180_000 }, () => {
 
   it("should connect with custom password", async () => {
     // setPassword {
-    await using container = await new Neo4jContainer(IMAGE).withPassword("xyz1234@!").start();
+    await using container = await new Neo4jContainer(image).withPassword("xyz1234@!").start();
 
     const driver = neo4j.driver(
       container.getBoltUri(),
@@ -49,7 +50,7 @@ describe("Neo4jContainer", { timeout: 180_000 }, () => {
 
   it("should have APOC plugin installed", async () => {
     // apoc {
-    await using container = await new Neo4jContainer(IMAGE).withApoc().withStartupTimeout(120_000).start();
+    await using container = await new Neo4jContainer(image).withApoc().withStartupTimeout(120_000).start();
 
     const driver = neo4j.driver(
       container.getBoltUri(),
@@ -68,7 +69,7 @@ describe("Neo4jContainer", { timeout: 180_000 }, () => {
 
   it("should work with plugin list", async () => {
     // pluginsList {
-    await using container = await new Neo4jContainer(IMAGE)
+    await using container = await new Neo4jContainer(image)
       .withPlugins([Neo4jPlugin.APOC_EXTENDED, Neo4jPlugin.GRAPH_DATA_SCIENCE])
       .withStartupTimeout(120_000)
       .start();
