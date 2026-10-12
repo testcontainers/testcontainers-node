@@ -8,12 +8,7 @@ export async function inspectContainerUntilPortsExposed(
 ): Promise<ContainerInspectInfo> {
   const result = await new IntervalRetry<ContainerInspectInfo, Error>(250).retryUntil(
     () => inspectFn(),
-    (inspectResult) => {
-      const portBindings = inspectResult?.HostConfig?.PortBindings;
-      if (!portBindings) return true;
-      const expectedlyBoundPorts = Object.keys(portBindings);
-      return expectedlyBoundPorts.every((exposedPort) => inspectResult.NetworkSettings.Ports[exposedPort]?.length > 0);
-    },
+    (inspectResult) => arePortsBound(inspectResult) || hasExited(inspectResult),
     () => {
       const message = `Timed out after ${timeout}ms while waiting for container ports to be bound to the host`;
       log.error(message, { containerId });
@@ -26,5 +21,22 @@ export async function inspectContainerUntilPortsExposed(
     throw result;
   }
 
+  if (!arePortsBound(result)) {
+    const message = `Container exited with code ${result.State.ExitCode} before its ports were bound to the host`;
+    log.error(message, { containerId });
+    throw new Error(message);
+  }
+
   return result;
+}
+
+function arePortsBound(inspectResult: ContainerInspectInfo): boolean {
+  const portBindings = inspectResult?.HostConfig?.PortBindings;
+  if (!portBindings) return true;
+  const expectedlyBoundPorts = Object.keys(portBindings);
+  return expectedlyBoundPorts.every((exposedPort) => inspectResult.NetworkSettings.Ports[exposedPort]?.length > 0);
+}
+
+function hasExited(inspectResult: ContainerInspectInfo): boolean {
+  return inspectResult?.State?.Status === "exited";
 }
