@@ -176,7 +176,7 @@ const container = await new GenericContainer("redis")
 ```js
 .withWaitStrategy(Wait.forHttp("/health", 8443)
   .usingTls()
-  .insecureTls())
+  .allowInsecure())
 ```
 
 ## Shell command
