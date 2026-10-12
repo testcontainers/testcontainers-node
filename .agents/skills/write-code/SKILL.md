@@ -29,7 +29,7 @@ Some files predate a rule. Follow the rule in new code and say that the file is 
 - Readiness goes in the wait strategy set in the constructor, combining conditions with `Wait.forAll([...])`. Users can override it there, and `withStartupTimeout` applies to it.
 - Setup that needs a running container (`exec`, copying config, HTTP calls) goes in `containerStarted`.
 - Wait inside `containerStarted` only when setup has to run before the container can become ready. Call `waitForContainer`, not `waitUntilReady` on a strategy. It also stops and removes the container when the wait fails.
-- Give every such wait the user's timeout with `withStartupTimeout(this.startupTimeoutMs)` when it is set. Core applies it only to the constructor's wait strategy, so a later wait otherwise runs on its own default.
+- Waits added after start share the user's startup timeout. Give each one what is left of it with `withStartupTimeout(...)`, never a fresh timeout or its own default. Core applies the timeout only to the constructor's wait strategy.
 - Express a condition as a `WaitStrategy` (`Wait.forHttp(...).forResponsePredicate(...)`, `Wait.forSuccessfulCommand(...)`) instead of a polling loop.
 - Check every `exec`: throw on a non-zero `exitCode` with `output` in the message.
 
