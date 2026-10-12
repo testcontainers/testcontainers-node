@@ -39,3 +39,4 @@ For the container class, tests and docs page, start from the module closest in s
 - Add the page to the `mkdocs.yml` Modules nav in alphabetical order.
 - Run `npm run check-compiles` as well as `npx vitest run packages/modules/<name>`. Vitest and Biome don't type-check, so without it a type error in the module or its tests first shows up in CI's Compile job.
 - Ship it with `open-pr`. The diff should contain only the module directory, the docs page, `mkdocs.yml`, and the lockfile entries for the new workspace and client.
+- After the PR merges, list the module in the catalog at testcontainers.com/modules. Open a PR to `testcontainers/community-module-registry` that adds a `nodejs` entry to `modules/<name>/index.md`, following that repo's README. Create the folder if the module is new to the catalog.
