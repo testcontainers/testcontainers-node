@@ -3,7 +3,9 @@ import type { ContainerInfo } from "dockerode";
 import { createSshConnection, type SshConnection } from "ssh-remote-port-forward";
 import { log, withFileLock } from "../common";
 import { type ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "../container-runtime";
+// biome-ignore lint/suspicious/noImportCycles: Ryuk and sshd run as GenericContainers; only dereferenced at runtime
 import { GenericContainer } from "../generic-container/generic-container";
+// biome-ignore lint/suspicious/noImportCycles: Ryuk and sshd run as GenericContainers; only dereferenced at runtime
 import { getReaper } from "../reaper/reaper";
 import { LABEL_TESTCONTAINERS_SESSION_ID, LABEL_TESTCONTAINERS_SSHD } from "../utils/labels";
 import type { PortWithOptionalBinding } from "../utils/port";

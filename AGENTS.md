@@ -40,6 +40,9 @@ If a skill or this file turns out to be wrong or incomplete, update it in the sa
   - Run the focused test against the pre-fix implementation and confirm it fails for the expected reason.
   - Apply the implementation change, rerun the same test, and confirm it passes.
   - Report the red-green evidence in the PR verification summary.
+- Import boundaries are enforced by Biome (`biome.json`):
+  - Modules import core only from the `testcontainers` entry point. The one allowed exception is the core test helper (`../../../testcontainers/src/utils/test-helper`).
+  - `noImportCycles` is an error. Prefer breaking a new cycle (for example with `import type` or a leaf module) over adding a `biome-ignore` suppression.
 - Test-only helper files under `src` (for example `*-test-utils.ts`) must be explicitly excluded from package `tsconfig.build.json` so they are not emitted into `build` and accidentally published.
 - Module tests read their images from `packages/modules/<module>/Dockerfile` (one `FROM` line per image) with `getImage(__dirname, index)`, so Dependabot can bump them. Do not hardcode images in module source or tests.
   - Exception: a second version of the *same* image must be hardcoded in its test file (for example `influxdb1-container.test.ts`, `kafka-container-7.test.ts`). Dependabot treats same-image `FROM` lines as one dependency and bumps them all to the newest tag.

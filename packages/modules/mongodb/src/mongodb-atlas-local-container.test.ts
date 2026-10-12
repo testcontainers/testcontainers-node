@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { IntervalRetry } from "../../../testcontainers/src/common";
+import { IntervalRetry } from "testcontainers";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { MongoDBAtlasLocalContainer } from "./mongodb-atlas-local-container";
 

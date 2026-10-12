@@ -3,16 +3,8 @@ name: Checks
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - "mkdocs.yml"
-      - "docs/**"
-      - "README.md"
   pull_request:
     branches: [main]
-    paths-ignore:
-      - "mkdocs.yml"
-      - "docs/**"
-      - "README.md"
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.head_ref || github.sha }}"
@@ -54,6 +46,24 @@ jobs:
 
           echo "${modules_count} packages in the build"
           echo "${modules}"
+
+  # Runs for every change, not only docs/**: module docs pull snippets from
+  # packages/**/*.test.ts via codeinclude, so code changes can break the docs too.
+  docs:
+    name: Docs
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Code checkout
+        uses: actions/checkout@v7
+      - name: Install Python
+        uses: actions/setup-python@v7
+        with:
+          python-version-file: runtime.txt
+          cache: pip
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Build docs in strict mode
+        run: mkdocs build --strict
 
   lint:
     if: ${{ needs.detect-modules.outputs.modules_count != '0' }}
@@ -202,10 +212,11 @@ jobs:
       workspace: "${{ matrix.module }}"
 
   end:
-    if: ${{ always() && needs.detect-modules.outputs.modules_count != '0' }}
+    if: ${{ always() }}
     name: Checks complete
     needs:
       - detect-modules
+      - docs
       - lint
       - compile
       - smoke-test
