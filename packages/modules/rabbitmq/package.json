@@ -32,7 +32,6 @@
     "testcontainers": "^12.2.0"
   },
   "devDependencies": {
-    "@types/amqplib": "^0.10.8",
     "amqplib": "^2.2.0"
   }
 }

@@ -1,5 +1,6 @@
 import { existsSync, promises as fs } from "node:fs";
 import path from "node:path";
+import { Readable } from "node:stream";
 import dockerIgnore from "@balena/dockerignore";
 import AsyncLock from "async-lock";
 import byline from "byline";
@@ -25,7 +26,7 @@ export class DockerImageClient implements ImageClient {
     try {
       log.debug(`Building image "${opts.t}" with context "${context}"...`);
       const tarPackOptions = await this.createTarPackOptions(context, opts.dockerfile ?? "Dockerfile");
-      const tarStream = tar.pack(context, tarPackOptions);
+      const tarStream = Readable.from(tar.pack(context, tarPackOptions));
       const stream = await this.dockerode.buildImage(tarStream, opts);
       const buildOutput = new BuildOutput();
       await new Promise<void>((resolve, reject) => {
