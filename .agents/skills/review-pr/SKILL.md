@@ -40,6 +40,7 @@ gh pr checks <N>
   - Zero-config defaults work, and invalid or half-set config fails fast.
   - The wait strategy is set in the constructor, and waits are robust (listening ports, health check or HTTP rather than log regexes).
   - Images are pinned in the module `Dockerfile`.
+- **Style:** new code follows `write-code`. Helpers sit below their callers, long functions are split into named steps, waits added after start take the user's startup timeout, and nothing is hand-rolled that core already provides.
 - **Scope:**
   - Flag new files for a few lines of logic, dead fallbacks, duplicated constants, getters that exist only for tests, and tests of third-party behaviour.
   - Flag unrelated dependency bumps; leave those to Dependabot.

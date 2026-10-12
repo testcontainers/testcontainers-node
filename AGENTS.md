@@ -5,7 +5,7 @@
 This is a working guide for contributors and coding agents in this repository.
 It captures practical rules that prevent avoidable CI and PR churn.
 
-This file holds the rules for every task. Workflows live in skills under `.agents/skills/`, which Claude Code reads through symlinks in `.claude/skills/`. They cover opening and reviewing PRs, adding modules, issue triage, CI and dependency maintenance, and release review.
+This file holds the rules for every task. Workflows live in skills under `.agents/skills/`, which Claude Code reads through symlinks in `.claude/skills/`. They cover writing code, opening and reviewing PRs, adding modules, issue triage, CI and dependency maintenance, and release review.
 If a skill or this file turns out to be wrong or incomplete, update it in the same PR.
 
 ## Repository Layout
@@ -30,6 +30,7 @@ If a skill or this file turns out to be wrong or incomplete, update it in the sa
 
 ### Code
 
+- Follow the `write-code` skill when writing or changing code under `packages/`: where helpers go, function size, waits and timeouts in modules, and reusing core.
 - Keep code comments to a minimum; the codebase has very few. Add one only when it tells the reader something they can't get from the code, the PR or the git history, such as why a non-obvious approach was needed, or a link to an upstream bug.
   - Don't narrate what the code does, describe the change you made, or reference the task or review that prompted it.
 - Fix the root cause. A change that only makes a failure less likely is not a fix.
