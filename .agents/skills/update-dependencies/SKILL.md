@@ -29,15 +29,16 @@ The AGENTS.md rules on runtime dependencies and on module images apply to every 
 
 ## Older image versions
 
-Users choose their own image tag, so a module has to keep working with the older versions the vendor still supports, not only the one in its `Dockerfile`. Check this whenever following an image bump changes module source and not only tests: a new wait, endpoint, flag, default or log line, or a binary run inside the container.
+Users choose their own image tag, so a module has to keep working with the older versions the vendor still supports. Modules whose source depends on what is inside the image keep the oldest supported version in their suite (AGENTS.md "Tests"), because a check done by hand at bump time protects nothing that changes later.
+
+A bump that needs no change to module source can't break older versions: they still run the same code. When following a bump does change module source:
 
 1. Find which versions are still supported, from the vendor's lifecycle page or endoflife.date. Versions past end of life are out of scope: don't test them, and don't add or keep code paths for them.
-2. Find how far back the thing you now rely on exists, from the vendor's release notes or its source at older tags.
-3. Run the changed path against the oldest supported version with a temporary local test, plus one in between if the gap is large.
-   - Check the tag with `docker manifest inspect <image:tag>` first. A tag without an arm64 image runs emulated on Apple Silicon and may not start, so report it as not checked rather than guessing.
-   - Don't commit the test or add its images to the suite (AGENTS.md).
+2. If the suite already runs against an older supported version, those tests passing is the check.
+3. If it doesn't, add the oldest supported version to the suite in the same PR. Check the tag with `docker manifest inspect <image:tag>`. If it has no arm64 image, use the oldest supported tag that has both amd64 and arm64.
 4. If a supported version can't take the change, keep the old path for it. Versions that differ in ports, auth or startup get their own class (`add-module`). Dropping a supported version is a breaking change.
-5. List in the PR body which versions were run and which were not.
+
+Dependabot does not bump a hardcoded tag. When working on a module's image bump, check its pinned older version too. Once that version is past end of life, move the pin to the oldest version still supported, or remove it if none is left.
 
 ## An image no longer pulls
 
