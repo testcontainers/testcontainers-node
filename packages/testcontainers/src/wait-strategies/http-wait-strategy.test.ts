@@ -3,6 +3,8 @@ import { GenericContainer } from "../generic-container/generic-container";
 import { checkContainerIsHealthy, checkContainerIsHealthyTls, stopStartingContainer } from "../utils/test-helper";
 import { Wait } from "./wait";
 
+const exitAfterFirstRequest = ["/bin/sh", "-c", "nc -l -p 8080; exit 1"];
+
 describe("HttpWaitStrategy", { timeout: 180_000 }, () => {
   it("should wait for 200", async () => {
     await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
@@ -72,6 +74,27 @@ describe("HttpWaitStrategy", { timeout: 180_000 }, () => {
         .withExposedPorts(8080)
         .withStartupTimeout(3000)
         .withWaitStrategy(Wait.forHttp("/hello-world", 8080).forResponsePredicate(() => false))
+        .start()
+    ).rejects.toThrowError("URL /hello-world not accessible after 3000ms");
+  });
+
+  it("should fail when the container exits before the wait succeeds", async () => {
+    await expect(() =>
+      new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+        .withExposedPorts(8080)
+        .withEntrypoint(exitAfterFirstRequest)
+        .withWaitStrategy(Wait.forHttp("/hello-world", 8080))
+        .start()
+    ).rejects.toThrowError("Container exited during HTTP healthCheck");
+  });
+
+  it("should keep waiting after the container exits when abortOnContainerExit is false", async () => {
+    await expect(() =>
+      new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+        .withExposedPorts(8080)
+        .withStartupTimeout(3000)
+        .withEntrypoint(exitAfterFirstRequest)
+        .withWaitStrategy(Wait.forHttp("/hello-world", 8080, { abortOnContainerExit: false }))
         .start()
     ).rejects.toThrowError("URL /hello-world not accessible after 3000ms");
   });

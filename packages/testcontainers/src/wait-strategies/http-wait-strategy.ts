@@ -78,7 +78,7 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
     const exitStatus = "exited";
     let containerExited = false;
     const client = await getContainerRuntimeClient();
-    const { abortOnContainerExit } = this.options;
+    const abortOnContainerExit = this.options.abortOnContainerExit ?? true;
     // Scoped per invocation: one strategy instance can drive concurrent waits, so a shared
     // agent would let one finished wait destroy a dispatcher another is still using.
     const agent = this.createInsecureAgent();
