@@ -1,6 +1,6 @@
 import { AbstractStartedContainer, GenericContainer, getContainerRuntimeClient, Wait } from "testcontainers";
 
-export const OLLAMA_PORT = 11434;
+const OLLAMA_PORT = 11434;
 
 export class OllamaContainer extends GenericContainer {
   constructor(image: string) {
