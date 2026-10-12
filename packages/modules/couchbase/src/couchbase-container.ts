@@ -174,10 +174,12 @@ export class CouchbaseContainer extends GenericContainer {
   private async waitUntilNodeIsOnline(
     client: ContainerRuntimeClient,
     inspectResult: InspectResult,
-    startedTestContainer: StartedTestContainer
+    startedTestContainer: StartedTestContainer,
+    timeoutMs: number
   ) {
     return Wait.forHttp("/pools", PORTS.MGMT_PORT)
       .forStatusCode(200)
+      .withStartupTimeout(timeoutMs)
       .waitUntilReady(
         client.container.getById(startedTestContainer.getId()),
         BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, inspectResult)
@@ -378,7 +380,8 @@ export class CouchbaseContainer extends GenericContainer {
   private async createBuckets(
     client: ContainerRuntimeClient,
     inspectResult: InspectResult,
-    startedTestContainer: StartedTestContainer
+    startedTestContainer: StartedTestContainer,
+    remainingStartupMs: () => number
   ) {
     log.debug(`Creating ${this.buckets.size} buckets (and corresponding indexes).`);
     for (const bucket of this.buckets) {
@@ -404,6 +407,7 @@ export class CouchbaseContainer extends GenericContainer {
       await Wait.forHttp(`/pools/default/b/${bucket.getName()}`, PORTS.MGMT_PORT)
         .withBasicCredentials(this.username, this.password)
         .forStatusCode(200)
+        .withStartupTimeout(remainingStartupMs())
         .forResponsePredicate((response) => {
           try {
             const jsonResponse = JSON.parse(response);
@@ -431,7 +435,27 @@ export class CouchbaseContainer extends GenericContainer {
           BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, inspectResult)
         );
 
+      await Wait.forHttp(`/pools/default/buckets/${bucket.getName()}`, PORTS.MGMT_PORT)
+        .withBasicCredentials(this.username, this.password)
+        .forStatusCode(200)
+        .withStartupTimeout(remainingStartupMs())
+        .forResponsePredicate((response) => {
+          try {
+            const jsonResponse = JSON.parse(response);
+            return jsonResponse.nodes[0]?.status === "healthy";
+          } catch (e) {
+            log.error(`Unable to parse response: ${response}, error: ${e}`);
+            return false;
+          }
+        })
+        .waitUntilReady(
+          client.container.getById(startedTestContainer.getId()),
+          BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, inspectResult)
+        );
+
       if (this.enabledServices.has(CouchbaseService.QUERY)) {
+        const timeoutMs = remainingStartupMs();
+
         await new IntervalRetry<Response | undefined, Error>(1000).retryUntil(
           async () => {
             try {
@@ -465,12 +489,12 @@ export class CouchbaseContainer extends GenericContainer {
             return jsonResponse.results[0].present;
           },
           () => {
-            const message = `URL /query/service not accessible after ${this.startupTimeoutMs || 60_000}ms`;
+            const message = `URL /query/service not accessible after ${timeoutMs}ms`;
             log.error(message, { containerId: client.container.getById(startedTestContainer.getId()).id });
 
             throw new Error(message);
           },
-          this.startupTimeoutMs || 60_000
+          timeoutMs
         );
       }
 
@@ -489,6 +513,8 @@ export class CouchbaseContainer extends GenericContainer {
           );
 
           await this.checkResponse(response, `Could not create primary index for bucket ${bucket.getName()}`);
+
+          const timeoutMs = remainingStartupMs();
 
           await new IntervalRetry<Response | undefined, Error>(1000).retryUntil(
             async () => {
@@ -526,12 +552,12 @@ export class CouchbaseContainer extends GenericContainer {
               return jsonResponse.results[0].online;
             },
             () => {
-              const message = `URL /query/service not accessible after ${this.startupTimeoutMs || 60_000}ms`;
+              const message = `URL /query/service not accessible after ${timeoutMs}ms`;
               log.error(message, { containerId: client.container.getById(startedTestContainer.getId()).id });
 
               throw new Error(message);
             },
-            this.startupTimeoutMs || 60_000
+            timeoutMs
           );
         } else {
           log.info(
@@ -546,9 +572,11 @@ export class CouchbaseContainer extends GenericContainer {
     startedTestContainer: StartedTestContainer,
     inspectResult: InspectResult
   ): Promise<void> {
+    const deadline = this.startupTimeoutMs === undefined ? undefined : Date.now() + this.startupTimeoutMs;
+    const remainingStartupMs = () => (deadline === undefined ? 60_000 : Math.max(deadline - Date.now(), 0));
     const client = await getContainerRuntimeClient();
 
-    await this.waitUntilNodeIsOnline(client, inspectResult, startedTestContainer);
+    await this.waitUntilNodeIsOnline(client, inspectResult, startedTestContainer, remainingStartupMs());
     await this.initializeIsEnterprise(startedTestContainer);
     await this.renameNode(startedTestContainer, inspectResult);
     await this.initializeServices(startedTestContainer);
@@ -561,19 +589,45 @@ export class CouchbaseContainer extends GenericContainer {
 
     await Promise.all(
       this.constructWaitStrategies().map((s) =>
-        s.waitUntilReady(
-          client.container.getById(startedTestContainer.getId()),
-          BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, inspectResult)
-        )
+        s
+          .withStartupTimeout(remainingStartupMs())
+          .waitUntilReady(
+            client.container.getById(startedTestContainer.getId()),
+            BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, inspectResult)
+          )
       )
     );
 
-    await this.createBuckets(client, inspectResult, startedTestContainer);
+    if (this.enabledServices.has(CouchbaseService.KV)) {
+      await this.waitUntilKvAcceptsCredentials(startedTestContainer, remainingStartupMs());
+    }
+
+    await this.createBuckets(client, inspectResult, startedTestContainer, remainingStartupMs);
 
     log.info(
       `Couchbase container is ready! UI available at http://${startedTestContainer.getHost()}:${startedTestContainer.getMappedPort(
         PORTS.MGMT_PORT
       )}`
+    );
+  }
+
+  private async waitUntilKvAcceptsCredentials(container: StartedTestContainer, timeoutMs: number) {
+    await new IntervalRetry<number, Error>(100).retryUntil(
+      async () => {
+        const { exitCode } = await container.exec(
+          ["/opt/couchbase/bin/mcstat", "--host", `127.0.0.1:${PORTS.KV_PORT}`, "--user", this.username, "connections"],
+          { env: { CB_PASSWORD: this.password } }
+        );
+        return exitCode;
+      },
+      (exitCode) => exitCode === 0,
+      () => {
+        const message = `KV service did not accept credentials after ${timeoutMs}ms`;
+        log.error(message, { containerId: container.getId() });
+
+        throw new Error(message);
+      },
+      timeoutMs
     );
   }
 
