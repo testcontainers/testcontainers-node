@@ -18,6 +18,12 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
     // }
   });
 
+  it.each(["confluentinc/cp-kafka:8.2.4"])("should connect with %s", async (image) => {
+    await using container = await new KafkaContainer(image).start();
+
+    await assertMessageProducedAndConsumed(container);
+  });
+
   it("should connect with custom network", async () => {
     await using network = await new Network().start();
     await using container = await new KafkaContainer(IMAGE).withNetwork(network).start();
