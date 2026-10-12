@@ -6,43 +6,36 @@ argument-hint: "[PR number]"
 
 # Dependency updates
 
-Dependabot (`.github/dependabot.yml`) opens grouped weekly PRs for npm, module Dockerfiles, GitHub Actions and devcontainers. Find the failure with `diagnose-ci`, then match it below.
+Dependabot (`.github/dependabot.yml`) opens grouped weekly PRs for npm, module Dockerfiles, GitHub Actions and devcontainers.
 
-## Known failure shapes
+Don't work from a fixed list of failure causes. Packages, images and registries keep changing. Work from the PR and what the bump changed.
 
-**`npm ci` fails with ERESOLVE (the `npm-setup` action's `Install dependencies` step is red).** A major version bump falls outside another package's peer range. TypeScript was held back this way several times.
+## 1. Find the bump that broke it
 
-- Fix: on the Dependabot branch, revert that package to its previous version, run `npm install --package-lock-only`, and commit with a message saying why.
-- If the conflict will last, propose an `ignore` entry in `dependabot.yml` with a comment.
+1. Read what failed with `diagnose-ci`: the job, the step and the first error.
+2. List what the PR bumped with `gh pr view <N> --json body,files`. Narrow it to one package or image, using the failing package, the error and the lockfile diff.
+3. Read that dependency's release notes for the versions in between. For an image, check the new tag with `docker manifest inspect <image:tag>`. It should exist and list both amd64 and arm64.
+4. See how it was handled before:
+   - `gh pr list --state all --search "<package>"`
+   - the `ignore` entries in `.github/dependabot.yml`, whose comments record earlier decisions
 
-**A runtime dependency's new major is ESM-only (smoke tests red).** This breaks CJS and Jest consumers (AGENTS.md).
+## 2. Adapt, hold back or ignore
 
-- Confirm with the smoke tests from `checks.yml`.
-- Fix: keep the old major and add a `dependabot.yml` major-version ignore, as done for `archiver` and `get-port`.
-- devDependencies don't affect consumers.
+- **Adapt** when the new version is fine and our code or tests need to follow it. If tests changed, check that the docs examples included from them still read well.
+- **Hold back** when the new version can't be used yet. On the Dependabot branch, revert that one package or `FROM` line to its previous version. For npm, then run `npm install --package-lock-only`. Say why in the commit message.
+- **Ignore** when it will stay unusable, for example a runtime dependency that became ESM-only. Propose an `ignore` entry in `dependabot.yml` with a comment saying why.
 
-**A Docker tag is odd.** Dependabot sometimes picks an arch-suffixed tag (e.g. `…arm64`) or a pre-release.
+The AGENTS.md rules on runtime dependencies and on module images apply to every bump.
 
-- Fix: switch to the plain multi-arch tag, and check it with `docker manifest inspect <image:tag>`.
-
-**Two versions of the same image collapsed.** Dependabot bumps every `FROM` line for one image to the same tag.
-
-- Fix: hardcode the older version in its test file (AGENTS.md).
-
-**A client SDK changed its API (one module's tests red).**
-
-- Fix: update the tests. Check that the docs examples included from them still read well.
-
-**An image is gone or moved (pull fails with 404 or 401).**
+## An image no longer pulls
 
 - Find a replacement. Prefer, in order:
   1. a newer tag in the same repository
   2. the vendor's official repository on another registry
-  3. a trusted rebuild such as Chainguard
+  3. a trusted rebuild
 - See what the other implementations' modules moved to (AGENTS.md "Cross-language Implementations").
 - Update the `FROM` line, keeping the line order, and the registry link in `docs/modules/<x>.md`.
 - If the tag or feature no longer exists upstream, drop that test case and say why.
-- Title the PR after the move, e.g. `Pull the MinIO image from Quay`.
 
 ## Committing on a Dependabot PR
 
