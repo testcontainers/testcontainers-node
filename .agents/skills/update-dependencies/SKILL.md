@@ -43,6 +43,12 @@ The AGENTS.md rules on runtime dependencies and on module images apply to every 
 - Once you push, Dependabot stops rebasing the PR, and `@dependabot recreate` would discard your commit.
 - If a newer grouped PR supersedes a red one, close the old one rather than fixing both.
 
+## Semver label
+
+- Dependabot adds a semver label for the highest bump in the PR, whatever `labels` in `dependabot.yml` lists. One major bump of a dev dependency labels the whole grouped PR `major`.
+- Release Drafter turns that label into our version bump (`open-pr`). A dependency's major is rarely a breaking change for our users, so the label usually needs changing to `patch`.
+- Check the label before the PR merges and propose the one that matches the impact on users. Keep `major` only for a real breaking change, such as an ESM-only runtime dependency or a higher Node floor.
+
 ## npm audit pass
 
 1. Run `npm audit fix` on a new branch from `main`, never with `--force`. It must stay lockfile-only. A fix that needs a `package.json` range change is the user's call.
