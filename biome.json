@@ -23,11 +23,20 @@
     "enabled": true,
     "rules": {
       "preset": "recommended",
+      "complexity": {
+        "noExcessiveLinesPerFunction": {
+          "level": "error",
+          "options": {
+            "maxLines": 50
+          }
+        }
+      },
       "correctness": {
         "noUndeclaredDependencies": "error"
       },
       "nursery": {
-        "noFloatingPromises": "error"
+        "noFloatingPromises": "error",
+        "useNullishCoalescing": "error"
       },
       "suspicious": {
         "noImportCycles": "error"
@@ -39,8 +48,34 @@
       "includes": ["**/*.test.ts"],
       "linter": {
         "rules": {
+          "complexity": {
+            "noExcessiveLinesPerFunction": "off"
+          },
           "correctness": {
             "noUndeclaredDependencies": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["packages/**/src/**", "!packages/testcontainers/src/common/logger.ts"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsole": "error"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["packages/modules/couchbase/src/couchbase-container.ts"],
+      "linter": {
+        "rules": {
+          "complexity": {
+            "noExcessiveLinesPerFunction": "off"
+          },
+          "nursery": {
+            "useNullishCoalescing": "off"
           }
         }
       }

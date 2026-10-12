@@ -38,6 +38,7 @@ If a skill or this file turns out to be wrong or incomplete, update it in the sa
 - Import boundaries are enforced by Biome (`biome.json`):
   - Modules import core only from the `testcontainers` entry point. The one allowed exception is the core test helper (`../../../testcontainers/src/utils/test-helper`).
   - `noImportCycles` is an error. Prefer breaking a new cycle (for example with `import type` or a leaf module) over adding a `biome-ignore` suppression.
+- Biome also enforces a 50-line limit on non-test functions, `??` over `||` for defaults, and no `console` in package source. Fix a violation rather than suppressing it.
 
 ### Dependencies
 

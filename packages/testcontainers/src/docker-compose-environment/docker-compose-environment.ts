@@ -1,6 +1,11 @@
 import type { ContainerInfo } from "dockerode";
 import { containerLog, log, RandomUuid, type Uuid } from "../common";
-import { type ComposeOptions, getContainerRuntimeClient, parseComposeContainerName } from "../container-runtime";
+import {
+  type ComposeOptions,
+  type ContainerRuntimeClient,
+  getContainerRuntimeClient,
+  parseComposeContainerName,
+} from "../container-runtime";
 import { StartedGenericContainer } from "../generic-container/started-generic-container";
 import { getReaper } from "../reaper/reaper";
 import type { Environment } from "../types";
@@ -119,26 +124,9 @@ export class DockerComposeEnvironment {
       projectName: this.projectName,
     };
 
-    const commandOptions = [...clientCommandOptions];
-
-    if (this.build) {
-      commandOptions.push("--build");
-    }
     const shouldPull = this.pullPolicy.shouldPull();
-    if (shouldPull === "never") {
-      commandOptions.push("--pull", "never");
-    }
-    if (!this.recreate) {
-      commandOptions.push("--no-recreate");
-    }
-
-    const composeOptions = [...clientComposeOptions];
-    if (this.environmentFile) {
-      composeOptions.push("--env-file", this.environmentFile);
-    }
-    this.profiles.forEach((profile) => {
-      composeOptions.push("--profile", profile);
-    });
+    const commandOptions = this.createCommandOptions(clientCommandOptions, shouldPull);
+    const composeOptions = this.createComposeOptions(clientComposeOptions);
 
     if (shouldPull === true) {
       await client.compose.pull(options, services);
@@ -153,6 +141,49 @@ export class DockerComposeEnvironment {
       services
     );
 
+    const startedGenericContainers = await this.waitForStartedContainers(client, options);
+
+    log.info(`DockerCompose environment started`);
+
+    return new StartedDockerComposeEnvironment(startedGenericContainers, {
+      ...options,
+      composeOptions,
+      environment: this.environment,
+    });
+  }
+
+  private createCommandOptions(clientCommandOptions: string[], shouldPull: boolean | "never"): string[] {
+    const commandOptions = [...clientCommandOptions];
+
+    if (this.build) {
+      commandOptions.push("--build");
+    }
+    if (shouldPull === "never") {
+      commandOptions.push("--pull", "never");
+    }
+    if (!this.recreate) {
+      commandOptions.push("--no-recreate");
+    }
+
+    return commandOptions;
+  }
+
+  private createComposeOptions(clientComposeOptions: string[]): string[] {
+    const composeOptions = [...clientComposeOptions];
+    if (this.environmentFile) {
+      composeOptions.push("--env-file", this.environmentFile);
+    }
+    this.profiles.forEach((profile) => {
+      composeOptions.push("--profile", profile);
+    });
+
+    return composeOptions;
+  }
+
+  private async waitForStartedContainers(
+    client: ContainerRuntimeClient,
+    options: ComposeOptions
+  ): Promise<{ [containerName: string]: StartedGenericContainer }> {
     const startedContainers = (await client.container.list()).filter(
       (container) => container.Labels["com.docker.compose.project"] === this.projectName
     );
@@ -168,51 +199,9 @@ export class DockerComposeEnvironment {
     );
     this.warnForUnusedWaitStrategies(startedContainerNameSet);
 
-    const startedGenericContainers = (
+    return (
       await Promise.all(
-        startedContainers.map(async (startedContainer) => {
-          const container = client.container.getById(startedContainer.Id);
-          const containerName = parseComposeContainerName(this.projectName, startedContainer.Names[0]);
-
-          const inspectResult = await client.container.inspect(container);
-          const mappedInspectResult = mapInspectResult(inspectResult);
-          const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, mappedInspectResult);
-          const waitStrategy = await selectWaitStrategy({
-            client,
-            inspectResult,
-            waitStrategy: this.waitStrategy[containerName] ?? this.defaultWaitStrategy,
-          });
-          if (this.startupTimeoutMs !== undefined) {
-            waitStrategy.withStartupTimeout(this.startupTimeoutMs);
-          }
-
-          if (containerLog.enabled()) {
-            (await client.container.logs(container))
-              .on("data", (data) => containerLog.trace(`${containerName}: ${data.trim()}`))
-              .on("err", (data) => containerLog.error(`${containerName}: ${data.trim()}`));
-          }
-
-          try {
-            await waitForContainer(client, container, waitStrategy, boundPorts);
-          } catch (err) {
-            try {
-              await client.compose.down(options, { removeVolumes: true, timeout: 0 });
-            } catch {
-              log.warn(`Failed to stop DockerCompose environment after failed up`);
-            }
-            throw err;
-          }
-
-          return new StartedGenericContainer(
-            container,
-            client.info.containerRuntime.host,
-            inspectResult,
-            boundPorts,
-            containerName,
-            waitStrategy,
-            true
-          );
-        })
+        startedContainers.map((startedContainer) => this.toStartedGenericContainer(client, options, startedContainer))
       )
     ).reduce<{ [containerName: string]: StartedGenericContainer }>((map, startedGenericContainer) => {
       // defineProperty rather than assignment: a container named "__proto__" would otherwise
@@ -225,14 +214,54 @@ export class DockerComposeEnvironment {
       });
       return map;
     }, {});
+  }
 
-    log.info(`DockerCompose environment started`);
+  private async toStartedGenericContainer(
+    client: ContainerRuntimeClient,
+    options: ComposeOptions,
+    startedContainer: ContainerInfo
+  ): Promise<StartedGenericContainer> {
+    const container = client.container.getById(startedContainer.Id);
+    const containerName = parseComposeContainerName(this.projectName, startedContainer.Names[0]);
 
-    return new StartedDockerComposeEnvironment(startedGenericContainers, {
-      ...options,
-      composeOptions,
-      environment: this.environment,
+    const inspectResult = await client.container.inspect(container);
+    const mappedInspectResult = mapInspectResult(inspectResult);
+    const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, mappedInspectResult);
+    const waitStrategy = await selectWaitStrategy({
+      client,
+      inspectResult,
+      waitStrategy: this.waitStrategy[containerName] ?? this.defaultWaitStrategy,
     });
+    if (this.startupTimeoutMs !== undefined) {
+      waitStrategy.withStartupTimeout(this.startupTimeoutMs);
+    }
+
+    if (containerLog.enabled()) {
+      (await client.container.logs(container))
+        .on("data", (data) => containerLog.trace(`${containerName}: ${data.trim()}`))
+        .on("err", (data) => containerLog.error(`${containerName}: ${data.trim()}`));
+    }
+
+    try {
+      await waitForContainer(client, container, waitStrategy, boundPorts);
+    } catch (err) {
+      try {
+        await client.compose.down(options, { removeVolumes: true, timeout: 0 });
+      } catch {
+        log.warn(`Failed to stop DockerCompose environment after failed up`);
+      }
+      throw err;
+    }
+
+    return new StartedGenericContainer(
+      container,
+      client.info.containerRuntime.host,
+      inspectResult,
+      boundPorts,
+      containerName,
+      waitStrategy,
+      true
+    );
   }
 
   private warnForUnusedWaitStrategies(startedContainerNames: Set<string>): void {
