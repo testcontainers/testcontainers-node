@@ -35,7 +35,7 @@ describe("CloudStorageEmulatorContainer", { concurrent: false, timeout: 240_000 
 
   beforeAll(() => {
     server.listen({
-      onUnhandledRequest: "bypass",
+      onUnhandledFrame: "bypass",
     });
   });
 

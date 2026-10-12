@@ -1,0 +1,15 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema-jsonc.json",
+  "workspaces": {
+    ".": {
+      // Loaded by a <script> tag in docs/site/theme/main.html, not imported by any module.
+      "entry": ["docs/site/js/tc-header.js"]
+    },
+    "packages/testcontainers": {
+      // Run by Jest in the Checks workflow via `--testMatch`, which knip can't trace back to a file.
+      "entry": ["smoke-test.jest.js"],
+      // Docker build contexts that tests copy into images, never imported.
+      "ignoreFiles": ["fixtures/**"]
+    }
+  }
+}
