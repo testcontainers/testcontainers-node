@@ -24,6 +24,7 @@
     "rules": {
       "preset": "recommended",
       "complexity": {
+        "noExcessiveCognitiveComplexity": "error",
         "noExcessiveLinesPerFunction": {
           "level": "error",
           "options": {
@@ -38,8 +39,14 @@
         "noFloatingPromises": "error",
         "useNullishCoalescing": "error"
       },
+      "style": {
+        "noUselessElse": "error",
+        "useBlockStatements": "error",
+        "useReadonlyClassProperties": "error"
+      },
       "suspicious": {
-        "noImportCycles": "error"
+        "noImportCycles": "error",
+        "noShadow": "error"
       }
     }
   },

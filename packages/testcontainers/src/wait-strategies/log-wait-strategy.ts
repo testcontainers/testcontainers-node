@@ -36,9 +36,8 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
             this.message.lastIndex = 0;
           }
           return this.message.test(line);
-        } else {
-          return line.includes(this.message);
         }
+        return line.includes(this.message);
       };
 
       let count = 0;

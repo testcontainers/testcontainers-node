@@ -13,7 +13,7 @@ export abstract class StartupCheckStrategy extends AbstractWaitStrategy {
 
     const startupStatus = await new IntervalRetry<StartupStatus, Error>(1000).retryUntil(
       async () => await this.checkStartupState(client.container.dockerode, container.id),
-      (startupStatus) => startupStatus === "SUCCESS" || startupStatus === "FAIL",
+      (status) => status === "SUCCESS" || status === "FAIL",
       () => {
         const message = `Container not accessible after ${this.startupTimeoutMs}ms`;
         log.error(message, { containerId: container.id });
@@ -24,7 +24,8 @@ export abstract class StartupCheckStrategy extends AbstractWaitStrategy {
 
     if (startupStatus instanceof Error) {
       throw startupStatus;
-    } else if (startupStatus === "FAIL") {
+    }
+    if (startupStatus === "FAIL") {
       throw new Error(`Container failed to start for ${container.id}`);
     }
   }

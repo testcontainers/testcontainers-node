@@ -7,7 +7,7 @@ describe("GenericContainer logs", { timeout: 180_000 }, () => {
     const line = await new Promise((resolve) => {
       return new GenericContainer("cristianrgreco/testcontainer:1.1.14")
         .withExposedPorts(8080)
-        .withLogConsumer((stream) => stream.on("data", (line) => resolve(line)))
+        .withLogConsumer((stream) => stream.on("data", (chunk) => resolve(chunk)))
         .start()
         .then((startedContainer) => startedContainer.stop());
     });
