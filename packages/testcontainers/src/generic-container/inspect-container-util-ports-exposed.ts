@@ -1,30 +1,28 @@
 import type { ContainerInspectInfo } from "dockerode";
-import { IntervalRetry, log } from "../common";
+import { log, poll } from "../common";
 
 export async function inspectContainerUntilPortsExposed(
-  inspectFn: () => Promise<ContainerInspectInfo>,
+  inspectFn: (signal: AbortSignal) => Promise<ContainerInspectInfo>,
   containerId: string,
   timeout = 30_000
 ): Promise<ContainerInspectInfo> {
-  const result = await new IntervalRetry<ContainerInspectInfo, Error>(250).retryUntil(
-    () => inspectFn(),
-    (inspectResult) => {
-      const portBindings = inspectResult?.HostConfig?.PortBindings;
-      if (!portBindings) return true;
-      const expectedlyBoundPorts = Object.keys(portBindings);
-      return expectedlyBoundPorts.every((exposedPort) => inspectResult.NetworkSettings.Ports[exposedPort]?.length > 0);
-    },
-    () => {
-      const message = `Timed out after ${timeout}ms while waiting for container ports to be bound to the host`;
-      log.error(message, { containerId });
-      return new Error(message);
-    },
-    timeout
-  );
-
-  if (result instanceof Error) {
-    throw result;
+  try {
+    return await poll(({ signal }) => inspectFn(signal), {
+      until: (inspectResult) => {
+        const portBindings = inspectResult?.HostConfig?.PortBindings;
+        if (!portBindings) return true;
+        const expectedlyBoundPorts = Object.keys(portBindings);
+        return expectedlyBoundPorts.every(
+          (exposedPort) => inspectResult.NetworkSettings.Ports[exposedPort]?.length > 0
+        );
+      },
+      intervalMs: 250,
+      timeoutMs: timeout,
+      timeoutMessage: `Timed out after ${timeout}ms while waiting for container ports to be bound to the host`,
+      retryOnError: false,
+    });
+  } catch (err) {
+    log.error(`${err}`, { containerId });
+    throw err;
   }
-
-  return result;
 }

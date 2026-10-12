@@ -5,8 +5,8 @@ import {
   GenericContainer,
   getContainerRuntimeClient,
   type InspectResult,
-  IntervalRetry,
   log,
+  poll,
   type StartedTestContainer,
   Wait,
   type WaitStrategy,
@@ -432,7 +432,7 @@ export class CouchbaseContainer extends GenericContainer {
         );
 
       if (this.enabledServices.has(CouchbaseService.QUERY)) {
-        await new IntervalRetry<Response | undefined, Error>(1000).retryUntil(
+        await poll(
           async () => {
             try {
               const body = new URLSearchParams();
@@ -457,20 +457,18 @@ export class CouchbaseContainer extends GenericContainer {
               return undefined;
             }
           },
-          async (response) => {
-            if (response === undefined) {
-              return false;
-            }
-            const jsonResponse = (await response.json()) as { results: Array<{ present: boolean }> };
-            return jsonResponse.results[0].present;
-          },
-          () => {
-            const message = `URL /query/service not accessible after ${this.startupTimeoutMs || 60_000}ms`;
-            log.error(message, { containerId: client.container.getById(startedTestContainer.getId()).id });
-
-            throw new Error(message);
-          },
-          this.startupTimeoutMs || 60_000
+          {
+            until: async (response) => {
+              if (response === undefined) {
+                return false;
+              }
+              const jsonResponse = (await response.json()) as { results: Array<{ present: boolean }> };
+              return jsonResponse.results[0].present;
+            },
+            intervalMs: 1000,
+            timeoutMs: this.startupTimeoutMs || 60_000,
+            timeoutMessage: `URL /query/service not accessible after ${this.startupTimeoutMs || 60_000}ms`,
+          }
         );
       }
 
@@ -490,7 +488,7 @@ export class CouchbaseContainer extends GenericContainer {
 
           await this.checkResponse(response, `Could not create primary index for bucket ${bucket.getName()}`);
 
-          await new IntervalRetry<Response | undefined, Error>(1000).retryUntil(
+          await poll(
             async () => {
               try {
                 const body = new URLSearchParams();
@@ -518,20 +516,18 @@ export class CouchbaseContainer extends GenericContainer {
                 return undefined;
               }
             },
-            async (response) => {
-              if (response === undefined) {
-                return false;
-              }
-              const jsonResponse = (await response.json()) as { results: Array<{ online: boolean }> };
-              return jsonResponse.results[0].online;
-            },
-            () => {
-              const message = `URL /query/service not accessible after ${this.startupTimeoutMs || 60_000}ms`;
-              log.error(message, { containerId: client.container.getById(startedTestContainer.getId()).id });
-
-              throw new Error(message);
-            },
-            this.startupTimeoutMs || 60_000
+            {
+              until: async (response) => {
+                if (response === undefined) {
+                  return false;
+                }
+                const jsonResponse = (await response.json()) as { results: Array<{ online: boolean }> };
+                return jsonResponse.results[0].online;
+              },
+              intervalMs: 1000,
+              timeoutMs: this.startupTimeoutMs || 60_000,
+              timeoutMessage: `URL /query/service not accessible after ${this.startupTimeoutMs || 60_000}ms`,
+            }
           );
         } else {
           log.info(

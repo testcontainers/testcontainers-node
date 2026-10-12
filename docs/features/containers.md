@@ -597,6 +597,8 @@ class CustomStartedContainer extends AbstractStartedContainer {
 }
 ```
 
+To wait for a condition in a callback, such as an API becoming available after the container has started, use [`poll`](wait-strategies.md#polling).
+
 ## Exposing container ports
 
 Specify which container ports you want accessible by the host:
@@ -716,6 +718,8 @@ The following options can be provided to modify the command execution:
 
 3. **`env`:** A map of environment variables to set inside the container.
 
+4. **`signal`:** An `AbortSignal` to stop waiting for the command. `exec` rejects when the signal aborts. Docker cannot kill a command it has started, so the process keeps running inside the container until it exits or the container stops.
+
 ```js
 const container = await new GenericContainer("alpine")
   .withCommand(["sleep", "infinity"])
@@ -727,7 +731,8 @@ const { output, stdout, stderr, exitCode } = await container.exec(["echo", "hell
 	env: {
 		"VAR1": "enabled",
 		"VAR2": "/app/debug.log",
-	}
+	},
+	signal: AbortSignal.timeout(5_000),
 });
 ```
 
