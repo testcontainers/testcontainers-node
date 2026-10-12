@@ -3,11 +3,12 @@ import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { MariaDbContainer } from "./mariadb-container";
 
 const IMAGE = getImage(__dirname);
+const OLDEST_IMAGE = "mariadb:10.11.19";
 
-describe("MariaDbContainer", { timeout: 240_000 }, () => {
+describe.each([IMAGE, OLDEST_IMAGE])("MariaDbContainer (%s)", { timeout: 240_000 }, (image) => {
   it("should connect and execute query", async () => {
     // mariaDbConnect {
-    await using container = await new MariaDbContainer(IMAGE).start();
+    await using container = await new MariaDbContainer(image).start();
 
     const client = await createConnection({
       host: container.getHost(),
@@ -31,7 +32,7 @@ describe("MariaDbContainer", { timeout: 240_000 }, () => {
     const database = "testDB";
 
     // Test non-root user
-    await using container = await new MariaDbContainer(IMAGE)
+    await using container = await new MariaDbContainer(image)
       .withUsername(username)
       .withUserPassword(password)
       .withDatabase(database)
@@ -42,7 +43,7 @@ describe("MariaDbContainer", { timeout: 240_000 }, () => {
     );
 
     // Test root user
-    await using rootContainer = await new MariaDbContainer(IMAGE)
+    await using rootContainer = await new MariaDbContainer(image)
       .withRootPassword(password)
       .withDatabase(database)
       .start();
@@ -55,7 +56,7 @@ describe("MariaDbContainer", { timeout: 240_000 }, () => {
 
   it("should set database", async () => {
     // mariaDbSetDatabase {
-    await using container = await new MariaDbContainer(IMAGE).withDatabase("customDatabase").start();
+    await using container = await new MariaDbContainer(image).withDatabase("customDatabase").start();
 
     const client = await createConnection({
       host: container.getHost(),
@@ -74,7 +75,7 @@ describe("MariaDbContainer", { timeout: 240_000 }, () => {
 
   it("should set username", async () => {
     // mariaDbSetUsername {
-    await using container = await new MariaDbContainer(IMAGE).withUsername("customUsername").start();
+    await using container = await new MariaDbContainer(image).withUsername("customUsername").start();
 
     const client = await createConnection({
       host: container.getHost(),
@@ -92,7 +93,7 @@ describe("MariaDbContainer", { timeout: 240_000 }, () => {
   });
 
   it("should work with restarted container", async () => {
-    await using container = await new MariaDbContainer(IMAGE).start();
+    await using container = await new MariaDbContainer(image).start();
     await container.restart();
 
     const client = await createConnection({
@@ -108,4 +109,26 @@ describe("MariaDbContainer", { timeout: 240_000 }, () => {
 
     await client.end();
   });
+});
+
+describe("MariaDbContainer", { timeout: 240_000 }, () => {
+  it.each(["mariadb:11.4.13", "mariadb:11.8.9", "mariadb:12.3.3"])(
+    "should connect and execute query with %s",
+    async (image) => {
+      await using container = await new MariaDbContainer(image).start();
+
+      const client = await createConnection({
+        host: container.getHost(),
+        port: container.getPort(),
+        database: container.getDatabase(),
+        user: container.getUsername(),
+        password: container.getUserPassword(),
+      });
+
+      const rows = await client.query("SELECT 1 as res");
+      expect(rows).toEqual([{ res: 1 }]);
+
+      await client.end();
+    }
+  );
 });

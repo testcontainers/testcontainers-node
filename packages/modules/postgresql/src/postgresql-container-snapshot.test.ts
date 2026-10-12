@@ -3,11 +3,12 @@ import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { PostgreSqlContainer } from "./postgresql-container";
 
 const IMAGE = getImage(__dirname);
+const OLDEST_IMAGE = "postgres:15.19-alpine";
 
-describe("PostgreSqlContainer snapshot and restore", { timeout: 180_000 }, () => {
+describe.each([IMAGE, OLDEST_IMAGE])("PostgreSqlContainer snapshot and restore (%s)", { timeout: 180_000 }, (image) => {
   it("should create and restore from snapshot", async () => {
     // createAndRestoreFromSnapshot {
-    await using container = await new PostgreSqlContainer(IMAGE).start();
+    await using container = await new PostgreSqlContainer(image).start();
 
     // Connect to the database
     let client = new Client({
@@ -62,7 +63,7 @@ describe("PostgreSqlContainer snapshot and restore", { timeout: 180_000 }, () =>
   });
 
   it("should use custom snapshot name", async () => {
-    await using container = await new PostgreSqlContainer(IMAGE).start();
+    await using container = await new PostgreSqlContainer(image).start();
     const customSnapshotName = "my_custom_snapshot";
 
     // Connect to the database
@@ -111,7 +112,7 @@ describe("PostgreSqlContainer snapshot and restore", { timeout: 180_000 }, () =>
   });
 
   it("should handle multiple snapshots", async () => {
-    await using container = await new PostgreSqlContainer(IMAGE).start();
+    await using container = await new PostgreSqlContainer(image).start();
 
     // Connect to the database
     let client = new Client({
@@ -193,7 +194,7 @@ describe("PostgreSqlContainer snapshot and restore", { timeout: 180_000 }, () =>
   });
 
   it("should throw an error when trying to snapshot postgres system database", async () => {
-    await using container = await new PostgreSqlContainer(IMAGE).withDatabase("postgres").start();
+    await using container = await new PostgreSqlContainer(image).withDatabase("postgres").start();
 
     await expect(container.snapshot()).rejects.toThrow(
       "Snapshot feature is not supported when using the postgres system database"
