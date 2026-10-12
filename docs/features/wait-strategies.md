@@ -10,6 +10,15 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+If a container does not become ready, it is stopped and removed, and the error thrown includes the last 50 lines of its logs:
+
+```
+URL /health not accessible after 120000ms
+Container logs (last 50 lines):
+Error: connect ECONNREFUSED 10.0.0.5:5432
+Retrying database connection in 5 seconds
+```
+
 ## Default wait strategy
 
 By default, Testcontainers waits for a container health check when one is defined by the image or configured with `withHealthCheck`. If no health check is defined, or the image disables health checks with `HEALTHCHECK NONE`, it waits up to 60 seconds for mapped network ports to be bound.

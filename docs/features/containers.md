@@ -744,7 +744,7 @@ const container = await new GenericContainer("alpine").start();
   .on("end", () => console.log("Stream closed"));
 ```
 
-Or a consumer can be provided before start. This is useful for example if your container is failing to start:
+Or a consumer can be provided before start. This is useful for example if your container is failing to start and you need more than the [last lines of its logs included in the error](wait-strategies.md):
 
 ```js
 const container = await new GenericContainer("alpine")
