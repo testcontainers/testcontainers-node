@@ -1,5 +1,6 @@
+import { text } from "node:stream/consumers";
 import type Dockerode from "dockerode";
-import { log, streamToString } from "../../common";
+import { log } from "../../common";
 import { ImageName } from "../image-name";
 import { attachContainer } from "./attach-container";
 import { pullImage } from "./pull-image";
@@ -24,7 +25,7 @@ export const runInContainer = async (
     await startContainer(container);
 
     log.debug(`Waiting for container output...`, { containerId: container.id });
-    const output = await streamToString(stream, { trim: true });
+    const output = (await text(stream)).trim();
 
     log.debug(`Removing container...`, { containerId: container.id });
     await container.remove({ force: true, v: true });

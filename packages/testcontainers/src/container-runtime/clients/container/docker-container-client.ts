@@ -1,5 +1,5 @@
 import type { IncomingMessage } from "node:http";
-import { type Duplex, PassThrough, Readable } from "node:stream";
+import { type Duplex, PassThrough, type Readable } from "node:stream";
 import { finished } from "node:stream/promises";
 import type Dockerode from "dockerode";
 import type {
@@ -11,7 +11,7 @@ import type {
   ExecCreateOptions,
   Network,
 } from "dockerode";
-import { execLog, log, streamToString, toSeconds } from "../../../common";
+import { execLog, log, toSeconds } from "../../../common";
 import type { CopyToContainerOptions } from "../../../types";
 import type { ContainerClient } from "./container-client";
 import type { ContainerCommitOptions, ContainerStatus, ExecOptions, ExecResult } from "./types";
@@ -83,15 +83,11 @@ export class DockerContainerClient implements ContainerClient {
   ): Promise<void> {
     try {
       log.debug(`Putting archive to container...`, { containerId: container.id });
-      await streamToString(
-        Readable.from(
-          await container.putArchive(stream, {
-            path,
-            noOverwriteDirNonDir: options?.noOverwriteDirNonDir,
-            copyUIDGID: options?.copyUIDGID,
-          })
-        )
-      );
+      await container.putArchive(stream, {
+        path,
+        noOverwriteDirNonDir: options?.noOverwriteDirNonDir,
+        copyUIDGID: options?.copyUIDGID,
+      });
       log.debug(`Put archive to container`, { containerId: container.id });
     } catch (err) {
       log.error(`Failed to put archive to container: ${err}`, { containerId: container.id });
