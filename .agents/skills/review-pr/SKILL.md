@@ -35,7 +35,7 @@ gh pr checks <N>
 - **Concurrency:** no shared containers, `process.env` or spies without `{ concurrent: false }`. Use `await using`. No skipping when Docker is unavailable.
 - **Root cause:** a fix removes the cause of the failure. Added sleeps, retries or longer timeouts only make it less likely (AGENTS.md).
 - **Completeness:** a fix applied to one path is also applied to its siblings, for example `restart()` next to `start()`, or the reuse path next to the create path.
-- **Docs:** public API changes are documented, and module examples use `codeinclude` (AGENTS.md).
+- **Docs:** public API changes are documented, and module examples use `codeinclude`. Check that each marker name appears only once in its test file; CI can't catch a collision (AGENTS.md).
 - **Design:**
   - Zero-config defaults work, and invalid or half-set config fails fast.
   - The wait strategy is set in the constructor, and waits are robust (listening ports, health check or HTTP rather than log regexes).

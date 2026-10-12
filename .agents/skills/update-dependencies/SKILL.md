@@ -10,7 +10,7 @@ Dependabot (`.github/dependabot.yml`) opens grouped weekly PRs for npm, module D
 
 ## Known failure shapes
 
-**`npm ci` fails with ERESOLVE (`Install dependencies` step red).** A major version bump falls outside another package's peer range. TypeScript was held back this way several times.
+**`npm ci` fails with ERESOLVE (the `npm-setup` action's `Install dependencies` step is red).** A major version bump falls outside another package's peer range. TypeScript was held back this way several times.
 
 - Fix: on the Dependabot branch, revert that package to its previous version, run `npm install --package-lock-only`, and commit with a message saying why.
 - If the conflict will last, propose an `ignore` entry in `dependabot.yml` with a comment.

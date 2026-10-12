@@ -13,7 +13,6 @@ Don't work from a fixed list of failure patterns. The workflows, the runner imag
 1. Find the failed jobs with `gh pr checks <N>`, then read them with `gh run view <run-id> --log-failed`. Note the job, the step and the first error, not the last.
 2. Read what that step ran. These files are the source of truth:
    - `.github/workflows/checks.yml` and `test-template.yml`: the jobs, their order and the matrix
-   - `.github/workflows/docs.yml`: the strict docs build, which runs on every change
    - `.github/actions/`: the Node, npm and Podman setup
    - `.github/scripts/changed-modules.mjs`: which packages ran, and why
 3. Check `retry` in `vitest.config.ts`. In CI, a red test failed every attempt, and a test that passed on a retry is still flaky.
