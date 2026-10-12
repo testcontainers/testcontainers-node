@@ -19,7 +19,7 @@ Don't work from a fixed list of failure patterns. The workflows, the runner imag
 
 ## 2. Find what changed
 
-1. Check whether `main` fails the same way: `gh run list --branch main --workflow checks.yml`. Pushes to `main` only run the packages they touch, so find the latest run that included this one. A change to core or root config runs them all.
+1. Check whether `main` fails the same way: `gh run list --branch main --workflow checks.yml`. Pushes to `main` only run the tests for the packages they touch, so find the latest run that included this one. A change to core or root config runs them all.
 2. Compare with the last green run of the same job:
    - In the repo: the PR diff, and `git log` for the files the step depends on, such as the module, its `Dockerfile`, `package-lock.json`, `.github/` and `vitest.config.ts`.
    - Outside the repo: the runner image version ("Set up job") and the Podman version ("Verify Podman"). Both change without a commit.

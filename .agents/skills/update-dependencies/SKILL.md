@@ -6,7 +6,7 @@ argument-hint: "[PR number]"
 
 # Dependency updates
 
-Dependabot (`.github/dependabot.yml`) opens grouped weekly PRs for npm, module Dockerfiles, GitHub Actions and devcontainers.
+Dependabot opens grouped weekly PRs for npm, the module Dockerfiles, GitHub Actions and the other ecosystems listed in `.github/dependabot.yml`.
 
 Don't work from a fixed list of failure causes. Packages, images and registries keep changing. Work from the PR and what the bump changed.
 
@@ -22,7 +22,7 @@ Don't work from a fixed list of failure causes. Packages, images and registries 
 ## 2. Adapt, hold back or ignore
 
 - **Adapt** when the new version is fine and our code or tests need to follow it. If tests changed, check that the docs examples included from them still read well.
-- **Hold back** when the new version can't be used yet. On the Dependabot branch, revert that one package or `FROM` line to its previous version. For npm, then run `npm install --package-lock-only`. Say why in the commit message.
+- **Hold back** when the new version can't be used yet. On the Dependabot branch, revert that one package or `FROM` line to its previous version. After reverting an npm package, run `npm install --package-lock-only`. Say why in the commit message.
 - **Ignore** when it will stay unusable, for example a runtime dependency that became ESM-only. Propose an `ignore` entry in `dependabot.yml` with a comment saying why.
 
 The AGENTS.md rules on runtime dependencies and on module images apply to every bump.
