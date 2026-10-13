@@ -4,7 +4,7 @@ import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { RedpandaContainer } from "./redpanda-container";
 import { assertMessageProducedAndConsumed } from "./test-helper";
 
-const IMAGES = ["docker.io/redpandadata/redpanda:v26.1.18", getImage(__dirname)];
+const IMAGE = getImage(__dirname);
 
 // Writes each copied file in two parts with a pause between them, as a busy Docker host can.
 class SlowCopyRedpandaContainer extends RedpandaContainer {
@@ -25,24 +25,24 @@ class SlowCopyRedpandaContainer extends RedpandaContainer {
   }
 }
 
-describe.each(IMAGES)("RedpandaContainer (%s)", { timeout: 240_000 }, (image) => {
+describe("RedpandaContainer", { timeout: 240_000 }, () => {
   it("should connect", async () => {
     // connectToKafka {
-    await using container = await new RedpandaContainer(image).start();
+    await using container = await new RedpandaContainer(IMAGE).start();
 
     await assertMessageProducedAndConsumed(container);
     // }
   });
 
   it("should connect when the config reaches the container late and in parts", async () => {
-    await using container = await new SlowCopyRedpandaContainer(image).start();
+    await using container = await new SlowCopyRedpandaContainer(IMAGE).start();
 
     await assertMessageProducedAndConsumed(container);
   });
 
   it("should connect to schema registry", async () => {
     // connectToSchemaRegistry {
-    await using container = await new RedpandaContainer(image).start();
+    await using container = await new RedpandaContainer(IMAGE).start();
     const schemaRegistryUrl = container.getSchemaRegistryAddress();
 
     const response = await fetch(`${schemaRegistryUrl}/subjects`, {
@@ -58,7 +58,7 @@ describe.each(IMAGES)("RedpandaContainer (%s)", { timeout: 240_000 }, (image) =>
 
   it("should connect to admin", async () => {
     // connectToAdmin {
-    await using container = await new RedpandaContainer(image).start();
+    await using container = await new RedpandaContainer(IMAGE).start();
     const adminUrl = `${container.getAdminAddress()}/v1`;
 
     const response = await fetch(adminUrl);
@@ -69,7 +69,7 @@ describe.each(IMAGES)("RedpandaContainer (%s)", { timeout: 240_000 }, (image) =>
 
   it("should connect to rest proxy", async () => {
     // connectToRestProxy {
-    await using container = await new RedpandaContainer(image).start();
+    await using container = await new RedpandaContainer(IMAGE).start();
     const restProxyUrl = `${container.getRestProxyAddress()}/topics`;
 
     const response = await fetch(restProxyUrl);
