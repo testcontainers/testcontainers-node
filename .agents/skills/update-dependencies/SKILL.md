@@ -29,17 +29,17 @@ The AGENTS.md rules on runtime dependencies and on module images apply to every 
 
 ## Supported image versions
 
-A module's tests run against every version line the vendor still supports, from the `IMAGES` list in its test file (AGENTS.md "Tests"). Dependabot only bumps the `Dockerfile`, so the older lines in that list are kept current here. Do this on every image bump for a module, and when changing a module for any other reason:
+A module's tests run against every major version the vendor still supports, from the `IMAGES` list in its test file (AGENTS.md "Tests"). Dependabot only bumps the `Dockerfile`, so the older majors in that list are kept current here. Do this on every image bump for a module, and when changing a module for any other reason:
 
-1. List the supported lines from the vendor's lifecycle page or endoflife.date.
+1. List the supported major versions from the vendor's lifecycle page or endoflife.date.
 2. Compare them with the module's `IMAGES` list:
-   - **A listed line is past end of life:** remove it from the list. Remove the module code that exists only for it in a separate PR, since that is a breaking change.
-   - **A supported line is missing:** add the exact tag of its latest patch.
-   - **A listed line has a newer patch:** move it to that tag.
+   - **A listed major is past end of life:** remove it from the list. Remove the module code that exists only for it in a separate PR, since that is a breaking change.
+   - **A supported major is missing:** add the exact tag of its latest release.
+   - **A listed major has a newer minor or patch:** move it to that tag.
 3. Check each new tag with `docker manifest inspect <image:tag>`. A registry can list a tag before its manifest exists, and the tag should have the same architectures as the `Dockerfile` image.
-4. Check that the `Dockerfile` is on the newest supported line, and move it by hand if not. Dependabot has left a `Dockerfile` behind when the vendor changed tag format (Neo4j and ScyllaDB moved to calendar versions) and when the tag is not a plain version (SQL Server `2022-CU13-ubuntu-22.04`).
-5. When the bump moves the `Dockerfile` to a new line, add the line it leaves to `IMAGES` in the same PR, if the vendor still supports it.
-6. If a supported line fails with the module as changed for the bump, keep the old path for it. Lines that differ in ports, auth or startup get their own class (`add-module`). Dropping a supported line is a breaking change.
+4. Check that the `Dockerfile` is on the newest supported version, and move it by hand if not. Dependabot has left a `Dockerfile` behind when the vendor changed tag format (Neo4j and ScyllaDB moved to calendar versions) and when the tag is not a plain version (SQL Server `2022-CU13-ubuntu-22.04`).
+5. When the bump moves the `Dockerfile` to a new major, add the major it leaves to `IMAGES` in the same PR, if the vendor still supports it.
+6. If a supported major fails with the module as changed for the bump, keep the old path for it. Majors that differ in ports, auth or startup get their own class (`add-module`). Dropping a supported major is a breaking change.
 
 ## An image no longer pulls
 

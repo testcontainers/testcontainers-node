@@ -57,13 +57,13 @@ If a skill or this file turns out to be wrong or incomplete, update it in the sa
   - Reuse an image the tests already use, for example `cristianrgreco/testcontainer:1.1.14` in `packages/testcontainers`, or the module's own image.
 - Module tests read their images from `packages/modules/<module>/Dockerfile` (one `FROM` line per image) with `getImage(__dirname, index)`, so Dependabot can bump them. Do not hardcode images in module source or tests.
   - Exception: a second version of the *same* image must be hardcoded in its test file. Dependabot treats same-image `FROM` lines as one dependency and bumps them all to the newest tag.
-- A module's tests cover every version line the vendor still supports, so a change can't silently break one that users still run. This is the one case where a suite pulls extra images.
-  - Keep one `IMAGES` list in the test file: the older supported lines, oldest first, each as the exact tag of its latest patch, then the `Dockerfile` image. Don't use rolling tags such as `redis:7.4`.
-  - Loop the whole suite over the list with `describe.each(IMAGES)`, so every test runs on every line.
-  - A line is supported while the vendor's free or community support covers it. Leave out a line that ends within 60 days, and a feature line that ends when the next release ships. If the vendor publishes no lifecycle, test only the `Dockerfile` image.
-  - Where a test can't pass on a line, skip it by matching the image, for example `it.skipIf(image.startsWith("elasticsearch:8."))`, with a comment saying why.
-  - A line that needs its own class or setup gets its own test file named after it, such as `<module>-container-v<N>.test.ts`.
-  - A suite too heavy to run on every line may loop a representative part of itself. Say which part in the PR.
+- A module's tests cover every major version the vendor still supports, so a change can't silently break one that users still run. This is the one case where a suite pulls extra images.
+  - Keep one `IMAGES` list in the test file: the latest release of each older supported major, oldest first, as an exact tag, then the `Dockerfile` image. Don't list other minors or patches of a major, and don't use rolling tags such as `redis:7`.
+  - Loop the whole suite over the list with `describe.each(IMAGES)`, so every test runs on every major.
+  - A major is supported while the vendor's free or community support covers it. Leave out a major that ends within 60 days. If the vendor publishes no lifecycle, test only the `Dockerfile` image.
+  - Where a test can't pass on a major, skip it by matching the image, for example `it.skipIf(image.startsWith("elasticsearch:8."))`, with a comment saying why.
+  - A major that needs its own class or setup gets its own test file named after it, such as `<module>-container-v<N>.test.ts`.
+  - A suite too heavy to run on every major may loop a representative part of itself. Say which part in the PR.
   - Looping multiplies the suite's container starts. If that overloads the test runner (tests far slower than locally, connection timeouts, passing only on retry), consider running the suite sequentially with `{ concurrent: false }` on its `describe`, and point the change out to the user.
   - Versions past the vendor's end of life are out of scope. Remove their tests and the module code that exists only for them. Removing that code is a breaking change, so it goes in its own PR.
 - Vitest runs tests concurrently by default (`sequence.concurrent: true` in `vitest.config.ts`).
