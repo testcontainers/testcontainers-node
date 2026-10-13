@@ -2,10 +2,9 @@ import { Client } from "@elastic/elasticsearch";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { ElasticsearchContainer } from "./elasticsearch-container";
 
-const IMAGE = getImage(__dirname);
-const OLDEST_IMAGE = "elasticsearch:8.19.23";
+const IMAGES = ["elasticsearch:8.19.23", getImage(__dirname)];
 
-describe.each([IMAGE, OLDEST_IMAGE])("ElasticsearchContainer (%s)", { timeout: 180_000 }, (image) => {
+describe.each(IMAGES)("ElasticsearchContainer (%s)", { timeout: 180_000 }, (image) => {
   it("should create an index", async () => {
     // createIndex {
     await using container = await new ElasticsearchContainer(image).start();
@@ -22,7 +21,7 @@ describe.each([IMAGE, OLDEST_IMAGE])("ElasticsearchContainer (%s)", { timeout: 1
   });
 
   // The 9.x client sends a compatible-with=9 media type with request bodies, which Elasticsearch 8 rejects.
-  it.skipIf(image === OLDEST_IMAGE)("should index a document", async () => {
+  it.skipIf(image.startsWith("elasticsearch:8."))("should index a document", async () => {
     // indexDocument {
     await using container = await new ElasticsearchContainer(image).start();
 
