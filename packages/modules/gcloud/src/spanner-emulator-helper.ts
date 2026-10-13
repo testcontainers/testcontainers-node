@@ -18,8 +18,8 @@ export class SpannerEmulatorHelper {
    * Lazily get or create the Spanner client.
    */
   public async client(): Promise<Spanner> {
-    const { Spanner } = await import("@google-cloud/spanner");
-    this.clientInstance ??= new Spanner({
+    const { Spanner: SpannerClient } = await import("@google-cloud/spanner");
+    this.clientInstance ??= new SpannerClient({
       projectId: this.emulator.getProjectId(),
       apiEndpoint: this.emulator.getHost(),
       port: this.emulator.getGrpcPort(),

@@ -51,8 +51,8 @@ export class StartedToxiProxyContainer extends AbstractStartedContainer {
     const proxies = await this.client.getAll();
 
     const usedPorts = PORT_ARRAY.reduce(
-      (acc, port) => {
-        acc[port] = false;
+      (acc, candidatePort) => {
+        acc[candidatePort] = false;
         return acc;
       },
       {} as Record<string, boolean>

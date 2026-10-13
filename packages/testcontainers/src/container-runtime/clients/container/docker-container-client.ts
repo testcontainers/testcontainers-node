@@ -1,5 +1,5 @@
 import type { IncomingMessage } from "node:http";
-import { PassThrough, type Readable } from "node:stream";
+import { type Duplex, PassThrough, type Readable } from "node:stream";
 import { finished } from "node:stream/promises";
 import type Dockerode from "dockerode";
 import type {
@@ -53,10 +53,9 @@ export class DockerContainerClient implements ContainerClient {
       if (containers.length === 0) {
         log.debug(`No container found with label "${labelName}=${labelValue}"`);
         return undefined;
-      } else {
-        log.debug(`Fetched container by label "${labelName}=${labelValue}"`);
-        return this.getById(containers[0].Id);
       }
+      log.debug(`Fetched container by label "${labelName}=${labelValue}"`);
+      return this.getById(containers[0].Id);
     } catch (err) {
       log.error(`Failed to fetch container by label "${labelName}=${labelValue}": ${err}`);
       throw err;
@@ -211,22 +210,7 @@ export class DockerContainerClient implements ContainerClient {
 
   async exec(container: Container, command: string[], opts?: Partial<ExecOptions>): Promise<ExecResult> {
     const signal = opts?.signal;
-    const execOptions: ExecCreateOptions = {
-      Cmd: command,
-      AttachStdout: true,
-      AttachStderr: true,
-      abortSignal: signal,
-    };
-
-    if (opts?.env !== undefined) {
-      execOptions.Env = Object.entries(opts.env).map(([key, value]) => `${key}=${value}`);
-    }
-    if (opts?.workingDir !== undefined) {
-      execOptions.WorkingDir = opts.workingDir;
-    }
-    if (opts?.user !== undefined) {
-      execOptions.User = opts.user;
-    }
+    const execOptions = this.createExecOptions(command, opts);
 
     const outputChunks: string[] = [];
     const stdoutChunks: string[] = [];
@@ -247,8 +231,8 @@ export class DockerContainerClient implements ContainerClient {
 
       this.dockerode.modem.demuxStream(stream, stdoutStream, stderrStream);
 
-      const processStream = (stream: Readable, chunks: string[]) => {
-        stream.on("data", (chunk) => {
+      const processStream = (source: Readable, chunks: string[]) => {
+        source.on("data", (chunk) => {
           chunks.push(chunk.toString());
           outputChunks.push(chunk.toString());
 
@@ -261,25 +245,7 @@ export class DockerContainerClient implements ContainerClient {
       processStream(stdoutStream, stdoutChunks);
       processStream(stderrStream, stderrChunks);
 
-      let rejectOnAbort = () => {};
-
-      try {
-        signal?.throwIfAborted();
-
-        await new Promise<void>((res, rej) => {
-          rejectOnAbort = () => rej(signal?.reason);
-          stream.on("end", res);
-          stream.on("error", rej);
-          signal?.addEventListener("abort", rejectOnAbort);
-        });
-
-        stdoutStream.end();
-        stderrStream.end();
-        await Promise.all([finished(stdoutStream), finished(stderrStream)]);
-      } finally {
-        signal?.removeEventListener("abort", rejectOnAbort);
-        stream.destroy();
-      }
+      await this.waitForExecStreamToEnd(stream, stdoutStream, stderrStream, signal);
 
       const inspectResult = await exec.inspect({ abortSignal: signal });
       const exitCode = inspectResult.ExitCode ?? -1;
@@ -298,6 +264,54 @@ export class DockerContainerClient implements ContainerClient {
         });
       }
       throw err;
+    }
+  }
+
+  private createExecOptions(command: string[], opts?: Partial<ExecOptions>): ExecCreateOptions {
+    const execOptions: ExecCreateOptions = {
+      Cmd: command,
+      AttachStdout: true,
+      AttachStderr: true,
+      abortSignal: opts?.signal,
+    };
+
+    if (opts?.env !== undefined) {
+      execOptions.Env = Object.entries(opts.env).map(([key, value]) => `${key}=${value}`);
+    }
+    if (opts?.workingDir !== undefined) {
+      execOptions.WorkingDir = opts.workingDir;
+    }
+    if (opts?.user !== undefined) {
+      execOptions.User = opts.user;
+    }
+
+    return execOptions;
+  }
+
+  private async waitForExecStreamToEnd(
+    stream: Duplex,
+    stdoutStream: PassThrough,
+    stderrStream: PassThrough,
+    signal?: AbortSignal
+  ): Promise<void> {
+    let rejectOnAbort = () => {};
+
+    try {
+      signal?.throwIfAborted();
+
+      await new Promise<void>((res, rej) => {
+        rejectOnAbort = () => rej(signal?.reason);
+        stream.on("end", res);
+        stream.on("error", rej);
+        signal?.addEventListener("abort", rejectOnAbort);
+      });
+
+      stdoutStream.end();
+      stderrStream.end();
+      await Promise.all([finished(stdoutStream), finished(stderrStream)]);
+    } finally {
+      signal?.removeEventListener("abort", rejectOnAbort);
+      stream.destroy();
     }
   }
 

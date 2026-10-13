@@ -14,7 +14,7 @@ describe("Retry", { concurrent: false }, () => {
     it("should retry until the predicate passes", async () => {
       const fnMock = vi.fn().mockResolvedValueOnce(1).mockResolvedValueOnce(2).mockResolvedValueOnce(3);
 
-      const result = await poll(() => fnMock(), { until: (result) => result === 3, intervalMs: 1, timeoutMs: 1000 });
+      const result = await poll(() => fnMock(), { until: (value) => value === 3, intervalMs: 1, timeoutMs: 1000 });
 
       expect(result).toEqual(3);
       expect(fnMock).toHaveBeenCalledTimes(3);
@@ -101,7 +101,7 @@ describe("Retry", { concurrent: false }, () => {
     it("should not time out early when the timeout exceeds the maximum timer delay", async () => {
       const fnMock = vi.fn().mockResolvedValueOnce(false).mockResolvedValueOnce(true);
 
-      const result = await poll(() => fnMock(), { until: (result) => result, intervalMs: 20, timeoutMs: Infinity });
+      const result = await poll(() => fnMock(), { until: (value) => value, intervalMs: 20, timeoutMs: Infinity });
 
       expect(result).toEqual(true);
     });
@@ -160,7 +160,7 @@ describe("Retry", { concurrent: false }, () => {
 
       const result = await new IntervalRetry<boolean, Error>(1).retryUntil(
         () => fnMock(),
-        (result) => result,
+        (value) => value,
         () => new Error(),
         10
       );
@@ -174,7 +174,7 @@ describe("Retry", { concurrent: false }, () => {
 
       const result = await new IntervalRetry<boolean, Error>(1).retryUntil(
         () => fnMock(),
-        (result) => result,
+        (value) => value,
         () => new Error(),
         10
       );
@@ -189,7 +189,7 @@ describe("Retry", { concurrent: false }, () => {
 
       const result = await new IntervalRetry<boolean, Error>(1).retryUntil(
         () => fnMock(),
-        (result) => result,
+        (value) => value,
         () => timeoutMock(),
         10
       );

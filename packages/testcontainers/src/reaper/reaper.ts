@@ -32,7 +32,7 @@ export interface Reaper {
 }
 
 let reaper: Reaper;
-let sessionId: string;
+let reaperSessionId: string;
 
 export async function getReaper(client: ContainerRuntimeClient): Promise<Reaper> {
   if (reaper) {
@@ -44,14 +44,14 @@ export async function getReaper(client: ContainerRuntimeClient): Promise<Reaper>
     const reaperContainers = await findReaperContainers(client);
 
     if (process.env.TESTCONTAINERS_RYUK_DISABLED === "true") {
-      sessionId = new RandomUuid().nextUuid();
-      return new DisabledReaper(sessionId, "");
+      reaperSessionId = new RandomUuid().nextUuid();
+      return new DisabledReaper(reaperSessionId, "");
     }
 
     for (const reaperContainer of reaperContainers) {
       try {
-        sessionId = reaperContainer.Labels[LABEL_TESTCONTAINERS_SESSION_ID];
-        return await useExistingReaper(reaperContainer, sessionId, client.info.containerRuntime.host);
+        reaperSessionId = reaperContainer.Labels[LABEL_TESTCONTAINERS_SESSION_ID];
+        return await useExistingReaper(reaperContainer, reaperSessionId, client.info.containerRuntime.host);
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         log.warn(`Failed to reuse existing Reaper: ${message}. Trying another Reaper...`, {
@@ -60,11 +60,11 @@ export async function getReaper(client: ContainerRuntimeClient): Promise<Reaper>
       }
     }
 
-    sessionId = new RandomUuid().nextUuid();
-    return await createNewReaper(sessionId, client.info.containerRuntime.remoteSocketPath);
+    reaperSessionId = new RandomUuid().nextUuid();
+    return await createNewReaper(reaperSessionId, client.info.containerRuntime.remoteSocketPath);
   });
 
-  reaper.addSession(sessionId);
+  reaper.addSession(reaperSessionId);
   return reaper;
 }
 

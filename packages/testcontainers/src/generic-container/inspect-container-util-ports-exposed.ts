@@ -10,7 +10,9 @@ export async function inspectContainerUntilPortsExposed(
     return await poll(({ signal }) => inspectFn(signal), {
       until: (inspectResult) => {
         const portBindings = inspectResult?.HostConfig?.PortBindings;
-        if (!portBindings) return true;
+        if (!portBindings) {
+          return true;
+        }
         const expectedlyBoundPorts = Object.keys(portBindings);
         return expectedlyBoundPorts.every(
           (exposedPort) => inspectResult.NetworkSettings.Ports[exposedPort]?.length > 0

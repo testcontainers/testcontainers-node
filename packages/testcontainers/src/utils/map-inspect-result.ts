@@ -44,9 +44,8 @@ function mapHealthCheckStatus(inspectResult: ContainerInspectInfo): HealthCheckS
 
   if (status === undefined) {
     return "none";
-  } else {
-    return status;
   }
+  return status;
 }
 
 function mapNetworkSettings(inspectResult: ContainerInspectInfo): { [networkName: string]: NetworkSettings } {

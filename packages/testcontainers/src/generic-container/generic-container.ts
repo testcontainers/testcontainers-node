@@ -202,26 +202,8 @@ export class GenericContainer implements TestContainer {
   private async startContainer(client: ContainerRuntimeClient): Promise<StartedTestContainer> {
     const container = await client.container.create({ ...this.createOpts, HostConfig: this.hostConfig });
 
-    if (!this.isHelperContainer() && PortForwarderInstance.isRunning()) {
-      await this.connectContainerToPortForwarder(client, container);
-    }
-
-    if (this.networkMode && this.networkAliases.length > 0) {
-      const network = client.network.getById(this.networkMode);
-      await client.container.connectToNetwork(container, network, this.networkAliases);
-    }
-
-    if (this.filesToCopy.length > 0 || this.directoriesToCopy.length > 0 || this.contentsToCopy.length > 0) {
-      const archive = await this.createArchiveToCopyToContainer();
-      await Promise.all([
-        archive.finalize(),
-        client.container.putArchive(container, archive, "/", this.copyToContainerOptions),
-      ]);
-    }
-
-    for (const archive of this.archivesToCopy) {
-      await client.container.putArchive(container, archive.tar, archive.target, this.copyToContainerOptions);
-    }
+    await this.connectContainerToNetworks(client, container);
+    await this.copyToCreatedContainer(client, container);
 
     log.info(`Starting container for image "${this.createOpts.Image}"...`, { containerId: container.id });
     if (this.containerCreated) {
@@ -240,17 +222,7 @@ export class GenericContainer implements TestContainer {
       this.exposedPorts
     );
 
-    if (containerLog.enabled() || this.logConsumer !== undefined) {
-      if (this.logConsumer !== undefined) {
-        this.logConsumer(await client.container.logs(container));
-      }
-
-      if (containerLog.enabled()) {
-        (await client.container.logs(container))
-          .on("data", (data) => containerLog.trace(data.trim(), { containerId: container.id }))
-          .on("err", (data) => containerLog.error(data.trim(), { containerId: container.id }));
-      }
-    }
+    await this.consumeContainerLogs(client, container);
 
     if (this.containerStarting) {
       await this.containerStarting(mappedInspectResult, false);
@@ -280,6 +252,17 @@ export class GenericContainer implements TestContainer {
     return startedContainer;
   }
 
+  private async connectContainerToNetworks(client: ContainerRuntimeClient, container: Container): Promise<void> {
+    if (!this.isHelperContainer() && PortForwarderInstance.isRunning()) {
+      await this.connectContainerToPortForwarder(client, container);
+    }
+
+    if (this.networkMode && this.networkAliases.length > 0) {
+      const network = client.network.getById(this.networkMode);
+      await client.container.connectToNetwork(container, network, this.networkAliases);
+    }
+  }
+
   private async connectContainerToPortForwarder(client: ContainerRuntimeClient, container: Container) {
     const portForwarder = await PortForwarderInstance.getInstance();
     const portForwarderNetworkId = portForwarder.getNetworkId();
@@ -288,6 +271,20 @@ export class GenericContainer implements TestContainer {
     if (!this.networkMode || !excludedNetworks.includes(this.networkMode)) {
       const network = client.network.getById(portForwarderNetworkId);
       await client.container.connectToNetwork(container, network, []);
+    }
+  }
+
+  private async copyToCreatedContainer(client: ContainerRuntimeClient, container: Container): Promise<void> {
+    if (this.filesToCopy.length > 0 || this.directoriesToCopy.length > 0 || this.contentsToCopy.length > 0) {
+      const archive = await this.createArchiveToCopyToContainer();
+      await Promise.all([
+        archive.finalize(),
+        client.container.putArchive(container, archive, "/", this.copyToContainerOptions),
+      ]);
+    }
+
+    for (const archive of this.archivesToCopy) {
+      await client.container.putArchive(container, archive.tar, archive.target, this.copyToContainerOptions);
     }
   }
 
@@ -311,6 +308,20 @@ export class GenericContainer implements TestContainer {
     }
 
     return tar;
+  }
+
+  private async consumeContainerLogs(client: ContainerRuntimeClient, container: Container): Promise<void> {
+    if (containerLog.enabled() || this.logConsumer !== undefined) {
+      if (this.logConsumer !== undefined) {
+        this.logConsumer(await client.container.logs(container));
+      }
+
+      if (containerLog.enabled()) {
+        (await client.container.logs(container))
+          .on("data", (data) => containerLog.trace(data.trim(), { containerId: container.id }))
+          .on("err", (data) => containerLog.error(data.trim(), { containerId: container.id }));
+      }
+    }
   }
 
   protected containerStarted?(

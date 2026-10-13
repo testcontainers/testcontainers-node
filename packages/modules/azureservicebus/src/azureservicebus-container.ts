@@ -13,7 +13,7 @@ const DEFAULT_HTTP_PORT = 5300;
 const DEFAULT_SHARED_ACCESS_KEY_NAME = "RootManageSharedAccessKey";
 const DEFAULT_SHARED_ACCESS_KEY = "SAS_KEY_VALUE";
 const DEFAULT_MSSQL_ALIAS = "mssql";
-const DEFAULT_MSSQL_IMAGE = "mcr.microsoft.com/mssql/server:2022-CU14-ubuntu-22.04";
+const DEFAULT_MSSQL_IMAGE = "mcr.microsoft.com/mssql/server:2022-CU27-ubuntu-22.04";
 const DEFAULT_MSSQL_PASSWORD = "P@ssword1!d3adb33f#";
 const CONTAINER_CONFIG_FILE = "/ServiceBus_Emulator/ConfigFiles/Config.json";
 

@@ -18,7 +18,7 @@ export abstract class StartupCheckStrategy extends AbstractWaitStrategy {
     const startupStatus = await poll(
       ({ signal }) => this.checkStartupState(client.container.dockerode, container.id, signal),
       {
-        until: (startupStatus) => startupStatus === "SUCCESS" || startupStatus === "FAIL",
+        until: (status) => status === "SUCCESS" || status === "FAIL",
         intervalMs: 1000,
         timeoutMs: this.startupTimeoutMs,
         timeoutMessage: `Container not accessible after ${this.startupTimeoutMs}ms`,

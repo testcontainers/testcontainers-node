@@ -83,8 +83,9 @@ export class RedisContainer extends GenericContainer {
 
   private async importInitialData(container: StartedTestContainer) {
     const re = await container.exec(`/tmp/import.sh ${this.password}`);
-    if (re.exitCode !== 0 || re.output.includes("ERR"))
+    if (re.exitCode !== 0 || re.output.includes("ERR")) {
       throw Error(`Could not import initial data from ${this.initialImportScriptFile}: ${re.output}`);
+    }
   }
 }
 
