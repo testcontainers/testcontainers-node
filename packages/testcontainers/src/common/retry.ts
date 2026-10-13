@@ -1,4 +1,5 @@
 import { type Clock, SystemClock, type Time } from "./clock";
+import { limitToStartupDeadline } from "./startup-deadline";
 
 export interface Retry<T, U> {
   retryUntil(
@@ -40,12 +41,13 @@ export class IntervalRetry<T, U> extends AbstractRetry<T, U> {
     timeoutMs: number
   ): Promise<T | U> {
     const startTime = this.clock.getTime();
+    const limitedTimeoutMs = limitToStartupDeadline(timeoutMs);
 
     let attemptNumber = 0;
     let result = await fn(attemptNumber++);
 
     while (!(await predicate(result))) {
-      if (this.hasTimedOut(timeoutMs, startTime)) {
+      if (this.hasTimedOut(limitedTimeoutMs, startTime)) {
         return onTimeout();
       }
       await this.wait(this.interval);

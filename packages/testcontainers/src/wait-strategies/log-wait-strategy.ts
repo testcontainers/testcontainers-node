@@ -1,6 +1,6 @@
 import byline from "byline";
 import type Dockerode from "dockerode";
-import { log } from "../common";
+import { limitToStartupDeadline, log } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
 import type { BoundPorts } from "../utils/bound-ports";
 import { AbstractWaitStrategy } from "./wait-strategy";
@@ -28,7 +28,7 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
         const message = `Log message "${this.message}" not received after ${this.startupTimeoutMs}ms`;
         log.error(message, { containerId: container.id });
         reject(new Error(message));
-      }, this.startupTimeoutMs);
+      }, limitToStartupDeadline(this.startupTimeoutMs));
 
       const comparisonFn: (line: string) => boolean = (line: string) => {
         if (this.message instanceof RegExp) {

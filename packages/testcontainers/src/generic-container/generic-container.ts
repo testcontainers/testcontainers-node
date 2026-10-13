@@ -3,7 +3,7 @@ import type { Readable } from "node:stream";
 import archiver from "archiver";
 import AsyncLock from "async-lock";
 import type { Container, ContainerCreateOptions, ContainerInspectInfo, HostConfig } from "dockerode";
-import { containerLog, hash, log, toNanos } from "../common";
+import { containerLog, hash, log, StartupDeadline, toNanos, withStartupDeadline } from "../common";
 import { type ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "../container-runtime";
 import { CONTAINER_STATUSES } from "../container-runtime/clients/container/types";
 import type { StartedNetwork } from "../network/network";
@@ -41,7 +41,6 @@ import { GenericContainerBuilder } from "./generic-container-builder";
 import { inspectContainerUntilPortsExposed } from "./inspect-container-util-ports-exposed";
 // biome-ignore lint/suspicious/noImportCycles: Ryuk and sshd run as GenericContainers; only dereferenced at runtime
 import { StartedGenericContainer } from "./started-generic-container";
-import { StartupDeadline } from "./startup-deadline";
 
 const reusableContainerCreationLock = new AsyncLock();
 
@@ -90,7 +89,11 @@ export class GenericContainer implements TestContainer {
 
   protected containerCreated?(containerId: string): Promise<void>;
 
-  protected containerStarting?(inspectResult: InspectResult, reused: boolean): Promise<void>;
+  protected containerStarting?(
+    inspectResult: InspectResult,
+    reused: boolean,
+    startupDeadline?: StartupDeadline
+  ): Promise<void>;
 
   public async start(): Promise<StartedTestContainer> {
     const shouldPull = this.pullPolicy.shouldPull();
@@ -168,6 +171,7 @@ export class GenericContainer implements TestContainer {
   }
 
   private async reuseContainer(client: ContainerRuntimeClient, container: Container) {
+    const startupDeadline = this.createStartupDeadline();
     let inspectResult = await client.container.inspect(container);
     if (!inspectResult.State.Running) {
       log.debug("Reused container is not running, attempting to start it");
@@ -184,7 +188,7 @@ export class GenericContainer implements TestContainer {
       waitStrategy.withStartupTimeout(this.startupTimeoutMs);
     }
 
-    await waitForContainer(client, container, waitStrategy, boundPorts);
+    await withStartupDeadline(startupDeadline, () => waitForContainer(client, container, waitStrategy, boundPorts));
 
     return new StartedGenericContainer(
       container,
@@ -226,6 +230,7 @@ export class GenericContainer implements TestContainer {
       await this.containerCreated(container.id);
     }
 
+    const startupDeadline = this.createStartupDeadline();
     await client.container.start(container);
     log.info(`Started container for image "${this.createOpts.Image}"`, { containerId: container.id });
 
@@ -233,6 +238,22 @@ export class GenericContainer implements TestContainer {
       () => client.container.inspect(container),
       container.id
     );
+
+    return withStartupDeadline(startupDeadline, () =>
+      this.waitUntilContainerReady(client, container, inspectResult, startupDeadline)
+    );
+  }
+
+  private createStartupDeadline(): StartupDeadline | undefined {
+    return this.startupTimeoutMs !== undefined ? new StartupDeadline(this.startupTimeoutMs) : undefined;
+  }
+
+  private async waitUntilContainerReady(
+    client: ContainerRuntimeClient,
+    container: Container,
+    inspectResult: ContainerInspectInfo,
+    startupDeadline: StartupDeadline | undefined
+  ): Promise<StartedTestContainer> {
     const mappedInspectResult = mapInspectResult(inspectResult);
     const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, mappedInspectResult).filter(
       this.exposedPorts
@@ -251,7 +272,7 @@ export class GenericContainer implements TestContainer {
     }
 
     if (this.containerStarting) {
-      await this.containerStarting(mappedInspectResult, false);
+      await this.containerStarting(mappedInspectResult, false, startupDeadline);
     }
 
     const waitStrategy = await this.selectWaitStrategy(client, inspectResult);
@@ -259,8 +280,6 @@ export class GenericContainer implements TestContainer {
       waitStrategy.withStartupTimeout(this.startupTimeoutMs);
     }
 
-    const startupDeadline =
-      this.startupTimeoutMs !== undefined ? new StartupDeadline(this.startupTimeoutMs) : undefined;
     await waitForContainer(client, container, waitStrategy, boundPorts);
 
     const startedContainer = new StartedGenericContainer(

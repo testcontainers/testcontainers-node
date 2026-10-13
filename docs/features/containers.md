@@ -569,7 +569,8 @@ class CustomContainer extends GenericContainer {
 
   protected override async containerStarting(
     inspectResult: InspectResult,
-    reused: boolean
+    reused: boolean,
+    startupDeadline?: StartupDeadline
   ): Promise<void> {
     // ...
   }
@@ -599,7 +600,9 @@ class CustomStartedContainer extends AbstractStartedContainer {
 }
 ```
 
-`containerStarted` runs after the [wait strategy](wait-strategies.md). When a startup timeout is set on the container, `startupDeadline.getRemainingMs()` returns how much of it is left, so that further waiting in the callback shares the timeout with the wait strategy instead of starting a new one. It is `undefined` when no startup timeout is set:
+`containerStarting` and `containerStarted` run within the container's [startup timeout](wait-strategies.md). Wait strategies and `IntervalRetry` used in them stop when the startup timeout is reached, even when their own timeout is longer.
+
+For anything else that waits, `startupDeadline.getRemainingMs()` returns how much of the startup timeout is left. `startupDeadline` is `undefined` when no startup timeout is set on the container:
 
 ```ts
 protected override async containerStarted(
@@ -609,7 +612,7 @@ protected override async containerStarted(
   startupDeadline?: StartupDeadline
 ): Promise<void> {
   const timeoutMs = startupDeadline?.getRemainingMs() ?? 60_000;
-  // ...
+  await fetch(url, { signal: AbortSignal.timeout(timeoutMs) });
 }
 ```
 

@@ -8,6 +8,7 @@ import {
   IntervalRetry,
   log,
   type StartedTestContainer,
+  type StartupDeadline,
   Wait,
   type WaitStrategy,
 } from "testcontainers";
@@ -570,10 +571,11 @@ export class CouchbaseContainer extends GenericContainer {
 
   protected override async containerStarted(
     startedTestContainer: StartedTestContainer,
-    inspectResult: InspectResult
+    inspectResult: InspectResult,
+    _reused: boolean,
+    startupDeadline?: StartupDeadline
   ): Promise<void> {
-    const deadline = this.startupTimeoutMs === undefined ? undefined : Date.now() + this.startupTimeoutMs;
-    const remainingStartupMs = () => (deadline === undefined ? 60_000 : Math.max(deadline - Date.now(), 0));
+    const remainingStartupMs = () => startupDeadline?.getRemainingMs() ?? 60_000;
     const client = await getContainerRuntimeClient();
 
     await this.waitUntilNodeIsOnline(client, inspectResult, startedTestContainer, remainingStartupMs());

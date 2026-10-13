@@ -1,4 +1,5 @@
 import { IntervalRetry } from "./retry";
+import { StartupDeadline, withStartupDeadline } from "./startup-deadline";
 
 describe("Retry", () => {
   describe("IntervalRetry", () => {
@@ -43,6 +44,19 @@ describe("Retry", () => {
 
       expect(result).toEqual(new Error());
       expect(timeoutMock).toHaveBeenCalledTimes(1);
+    });
+
+    it("should time out at the startup deadline when it is sooner than the timeout", async () => {
+      const result = await withStartupDeadline(new StartupDeadline(20), () =>
+        new IntervalRetry<boolean, string>(1).retryUntil(
+          async () => false,
+          (result) => result,
+          () => "timed out",
+          60_000
+        )
+      );
+
+      expect(result).toEqual("timed out");
     });
   });
 });
