@@ -269,38 +269,3 @@ const container = await new GenericContainer("alpine")
 ```
 
 `checkStartupState` is passed an `AbortSignal` as a third argument. It aborts when the startup timeout is reached, so pass it to Dockerode calls as `abortSignal` to cancel them.
-
-## Polling
-
-To wait for a condition outside of a wait strategy, for example in a [lifecycle callback](containers.md#lifecycle-callbacks) of a custom container, use `poll`. It calls a function, waiting `intervalMs` between attempts, until the result satisfies `until`, and rejects once the timeout is reached:
-
-```js
-const { poll } = require("testcontainers");
-
-const response = await poll(
-  ({ signal }) => fetch(`http://${container.getHost()}:${container.getMappedPort(8080)}/status`, { signal }),
-  {
-    until: (response) => response.ok,
-    intervalMs: 100,
-    timeoutMs: 10_000,
-  }
-);
-```
-
-The function is passed `{ attempt, signal }`. `attempt` starts at 1. `signal` is an `AbortSignal` that aborts when the timeout is reached, so pass it on to cancel work that is still in flight. `poll` rejects at the timeout even when an attempt has not finished.
-
-If `until` is omitted, `poll` resolves with the first result.
-
-An attempt that throws is retried. If the last attempt before the timeout threw, its error is the `cause` of the timeout error. To rethrow the error immediately instead, for example because the container is no longer running, set `retryOnError`:
-
-```js
-const { exitCode } = await poll(({ signal }) => container.exec(["stat", "/tmp/app.lock"], { signal }), {
-  until: ({ exitCode }) => exitCode === 0,
-  intervalMs: 100,
-  timeoutMs: 10_000,
-  timeoutMessage: "Lock file not created after 10000ms",
-  retryOnError: false,
-});
-```
-
-The timeout error message defaults to `Timed out after ${timeoutMs}ms` and can be set with `timeoutMessage`.

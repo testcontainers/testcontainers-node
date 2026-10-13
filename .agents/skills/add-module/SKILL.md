@@ -21,7 +21,6 @@ For the container class, tests and docs page, start from the module closest in s
 - The constructor sets exposed ports, the wait strategy and `withStartupTimeout(120_000)`. Setting the wait strategy there lets users override it.
 - Prefer listening-port, health-check or HTTP waits over log regexes. Log output changes between image versions. Shell-less images need a health-check or HTTP wait.
 - Zero config must work: `new XContainer(IMAGE).start()` gives a container a client can connect to. Prefer defaults to getters that can return `undefined`.
-- For readiness that a wait strategy can't express, such as calling an API in `containerStarted`, use `poll` from `testcontainers` (docs: `docs/features/wait-strategies.md#polling`). Don't hand-roll a loop or use the deprecated `IntervalRetry`.
 - Validate `with*` inputs, and fail fast on half-set config (for example a username without a password) instead of waiting out the startup timeout.
 - Started-container getters call `getMappedPort()` when they're invoked. A restarted container can get different host ports.
 - Incompatible major versions (different ports, auth or startup) get separate classes, not image-tag parsing.

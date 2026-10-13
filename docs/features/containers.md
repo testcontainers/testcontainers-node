@@ -597,8 +597,6 @@ class CustomStartedContainer extends AbstractStartedContainer {
 }
 ```
 
-To wait for a condition in a callback, such as an API becoming available after the container has started, use [`poll`](wait-strategies.md#polling).
-
 ## Exposing container ports
 
 Specify which container ports you want accessible by the host:
