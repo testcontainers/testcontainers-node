@@ -1,5 +1,12 @@
 import type { Mock } from "vitest";
-import { AbstractStartedContainer, GenericContainer, type InspectResult, type StartedTestContainer } from "../index";
+import { RandomUuid } from "../common";
+import {
+  AbstractStartedContainer,
+  GenericContainer,
+  getContainerRuntimeClient,
+  type InspectResult,
+  type StartedTestContainer,
+} from "../index";
 
 describe("GenericContainer lifecycle", { concurrent: false, timeout: 180_000 }, () => {
   let beforeContainerCreated: Mock;
@@ -48,6 +55,44 @@ describe("GenericContainer lifecycle", { concurrent: false, timeout: 180_000 }, 
     expect(containerCreated).not.toHaveBeenCalled();
     expect(containerStarting).not.toHaveBeenCalled();
     expect(containerStarted).not.toHaveBeenCalled();
+  });
+
+  it.each(["containerCreated", "containerStarting", "containerStarted"] as const)(
+    "should remove the container when the %s callback fails",
+    async (callback) => {
+      const containerName = `container-${new RandomUuid().nextUuid()}`;
+      ({ containerCreated, containerStarting, containerStarted })[callback].mockImplementation(() => {
+        throw new Error(`${callback} failed`);
+      });
+
+      await expect(
+        new CustomContainer("cristianrgreco/testcontainer:1.1.14")
+          .withName(containerName)
+          .withExposedPorts(8080)
+          .start()
+      ).rejects.toThrowError(`${callback} failed`);
+
+      const client = await getContainerRuntimeClient();
+      await expect(client.container.getById(containerName).inspect()).rejects.toThrow(/404/);
+    }
+  );
+
+  it("should not reuse a container when a lifecycle callback failed", async () => {
+    const labels = { "failed-start": new RandomUuid().nextUuid() };
+    const startContainer = () =>
+      new CustomContainer("cristianrgreco/testcontainer:1.1.14")
+        .withLabels(labels)
+        .withExposedPorts(8080)
+        .withReuse()
+        .start();
+    containerStarted.mockImplementationOnce(() => {
+      throw new Error("containerStarted failed");
+    });
+
+    await expect(startContainer()).rejects.toThrowError("containerStarted failed");
+    await using container = await startContainer();
+
+    expect(container.getId()).not.toEqual(containerCreated.mock.calls[0][0]);
   });
 
   class CustomContainer extends GenericContainer {
