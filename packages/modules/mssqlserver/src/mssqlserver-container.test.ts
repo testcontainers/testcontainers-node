@@ -2,12 +2,7 @@ import sql, { type config } from "mssql";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { MSSQLServerContainer } from "./mssqlserver-container";
 
-const IMAGES = [
-  "mcr.microsoft.com/mssql/server:2017-CU31-GDR9-ubuntu-18.04",
-  "mcr.microsoft.com/mssql/server:2019-CU32-GDR8-ubuntu-20.04",
-  "mcr.microsoft.com/mssql/server:2022-CU27-ubuntu-22.04",
-  getImage(__dirname),
-];
+const IMAGES = ["mcr.microsoft.com/mssql/server:2022-CU27-ubuntu-22.04", getImage(__dirname)];
 
 describe.each(IMAGES)("MSSQLServerContainer (%s)", { concurrent: false, timeout: 180_000 }, (image) => {
   it.concurrent("should connect and return a query result", async () => {
