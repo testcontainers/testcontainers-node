@@ -152,6 +152,47 @@ describe("Retry", { concurrent: false }, () => {
 
       expect(fnMock).toHaveBeenCalledTimes(callsAtTimeout);
     });
+
+    it("should reject with the timeout message when the given signal aborts", async () => {
+      const controller = new AbortController();
+      const promise = poll(async () => false, {
+        until: (result) => result,
+        intervalMs: 1,
+        timeoutMs: 60_000,
+        timeoutMessage: "not ready after 60000ms",
+        signal: controller.signal,
+      });
+
+      controller.abort();
+
+      await expect(promise).rejects.toThrow("not ready after 60000ms");
+    });
+
+    it("should abort the attempt's signal when the given signal aborts", async () => {
+      const controller = new AbortController();
+      let attemptSignal: AbortSignal | undefined;
+      const promise = poll(
+        ({ signal }) => {
+          attemptSignal = signal;
+          return new Promise<never>(() => {});
+        },
+        { intervalMs: 1, timeoutMs: 60_000, signal: controller.signal }
+      );
+
+      controller.abort();
+
+      await expect(promise).rejects.toThrow("Timed out after 60000ms");
+      expect(attemptSignal?.aborted).toBe(true);
+    });
+
+    it("should not start an attempt when the given signal has already aborted", async () => {
+      const fnMock = vi.fn().mockResolvedValue("result");
+
+      await expect(
+        poll(() => fnMock(), { intervalMs: 1, timeoutMs: 60_000, signal: AbortSignal.abort() })
+      ).rejects.toThrow("Timed out after 60000ms");
+      expect(fnMock).not.toHaveBeenCalled();
+    });
   });
 
   describe("IntervalRetry", () => {

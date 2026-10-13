@@ -1,7 +1,7 @@
 import { setTimeout as sleep } from "node:timers/promises";
 
 // setTimeout fires after 1ms when the delay exceeds this
-const MAX_TIMEOUT_MS = 2 ** 31 - 1;
+export const MAX_TIMEOUT_MS = 2 ** 31 - 1;
 
 export type PollOptions<T> = {
   until?: (result: T) => boolean | Promise<boolean>;
@@ -9,6 +9,7 @@ export type PollOptions<T> = {
   timeoutMs: number;
   timeoutMessage?: string;
   retryOnError?: boolean;
+  signal?: AbortSignal;
 };
 
 export async function poll<T>(
@@ -21,6 +22,7 @@ export async function poll<T>(
     timeoutMs,
     timeoutMessage = `Timed out after ${timeoutMs}ms`,
     retryOnError = true,
+    signal: parentSignal,
   } = options;
   const controller = new AbortController();
   const { signal } = controller;
@@ -48,18 +50,26 @@ export async function poll<T>(
   };
 
   return new Promise<T>((resolve, reject) => {
-    const deadline = setTimeout(
-      () => {
-        const error = new Error(timeoutMessage, lastError === undefined ? {} : { cause: lastError });
-        reject(error);
-        controller.abort(error);
-      },
-      Math.min(timeoutMs, MAX_TIMEOUT_MS)
-    );
+    const timeOut = () => {
+      const error = new Error(timeoutMessage, lastError === undefined ? {} : { cause: lastError });
+      reject(error);
+      controller.abort(error);
+    };
+
+    if (parentSignal?.aborted) {
+      timeOut();
+      return;
+    }
+
+    const deadline = setTimeout(timeOut, Math.min(timeoutMs, MAX_TIMEOUT_MS));
+    parentSignal?.addEventListener("abort", timeOut, { once: true });
 
     attempts()
       .then(resolve, reject)
-      .finally(() => clearTimeout(deadline));
+      .finally(() => {
+        clearTimeout(deadline);
+        parentSignal?.removeEventListener("abort", timeOut);
+      });
   });
 }
 

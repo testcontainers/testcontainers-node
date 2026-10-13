@@ -10,6 +10,10 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+A startup timeout set on the container is one deadline for the whole startup. It is counted from when the container is started. The wait strategy stops when it is reached, and the [lifecycle callbacks](containers.md#lifecycle-callbacks) are passed an `AbortSignal` for it. Pulling the image is not included.
+
+The deadline starts again when the container is restarted. The startup timeout of a Compose environment is one deadline for all of its containers, counted from when Compose has started them.
+
 ## Default wait strategy
 
 By default, Testcontainers waits for a container health check when one is defined by the image or configured with `withHealthCheck`. If no health check is defined, or the image disables health checks with `HEALTHCHECK NONE`, it waits up to 60 seconds for mapped network ports to be bound.
@@ -304,3 +308,5 @@ const { exitCode } = await poll(({ signal }) => container.exec(["stat", "/tmp/ap
 ```
 
 The timeout error message defaults to `Timed out after ${timeoutMs}ms` and can be set with `timeoutMessage`.
+
+To stop polling before the timeout, pass an `AbortSignal` as `signal`, for example the one a lifecycle callback is given. When it aborts, `poll` rejects with the timeout error.

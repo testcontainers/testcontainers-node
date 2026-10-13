@@ -57,7 +57,9 @@ export class RedpandaContainer extends GenericContainer {
 
   protected override async containerStarted(
     container: StartedTestContainer,
-    inspectResult: InspectResult
+    inspectResult: InspectResult,
+    _reused?: boolean,
+    startupSignal?: AbortSignal
   ): Promise<void> {
     // Docker writes a copied file in place, so the starter could read the marker before the rest.
     // A rename on the same filesystem publishes the whole file at once.
@@ -83,7 +85,7 @@ export class RedpandaContainer extends GenericContainer {
     if (this.startupTimeoutMs !== undefined) {
       waitStrategy.withStartupTimeout(this.startupTimeoutMs);
     }
-    await waitForContainer(client, dockerContainer, waitStrategy, boundPorts);
+    await waitForContainer(client, dockerContainer, waitStrategy, boundPorts, undefined, startupSignal);
   }
 
   private renderRedpandaFile(host: string, port: number): string {

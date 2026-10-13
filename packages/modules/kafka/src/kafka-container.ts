@@ -161,7 +161,9 @@ export class KafkaContainer extends GenericContainer {
 
   protected override async containerStarted(
     container: StartedTestContainer,
-    inspectResult: InspectResult
+    inspectResult: InspectResult,
+    _reused?: boolean,
+    startupSignal?: AbortSignal
   ): Promise<void> {
     let command = "#!/bin/bash\n";
     const advertisedListeners = this.updateAdvertisedListeners(container, inspectResult);
@@ -197,7 +199,7 @@ export class KafkaContainer extends GenericContainer {
     if (this.startupTimeoutMs !== undefined) {
       waitStrategy.withStartupTimeout(this.startupTimeoutMs);
     }
-    await waitForContainer(client, dockerContainer, waitStrategy, boundPorts);
+    await waitForContainer(client, dockerContainer, waitStrategy, boundPorts, undefined, startupSignal);
 
     if (this.saslSslConfig && this.mode !== KafkaMode.KRAFT) {
       await this.createUser(container, this.saslSslConfig.sasl);

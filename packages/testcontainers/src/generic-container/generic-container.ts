@@ -3,7 +3,7 @@ import type { Readable } from "node:stream";
 import archiver from "archiver";
 import AsyncLock from "async-lock";
 import type { Container, ContainerCreateOptions, ContainerInspectInfo, HostConfig } from "dockerode";
-import { containerLog, hash, log, toNanos } from "../common";
+import { containerLog, createStartupSignal, hash, log, toNanos } from "../common";
 import { type ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "../container-runtime";
 import { CONTAINER_STATUSES } from "../container-runtime/clients/container/types";
 import type { StartedNetwork } from "../network/network";
@@ -89,7 +89,11 @@ export class GenericContainer implements TestContainer {
 
   protected containerCreated?(containerId: string): Promise<void>;
 
-  protected containerStarting?(inspectResult: InspectResult, reused: boolean): Promise<void>;
+  protected containerStarting?(
+    inspectResult: InspectResult,
+    reused: boolean,
+    startupSignal?: AbortSignal
+  ): Promise<void>;
 
   public async start(): Promise<StartedTestContainer> {
     const shouldPull = this.pullPolicy.shouldPull();
@@ -167,6 +171,7 @@ export class GenericContainer implements TestContainer {
   }
 
   private async reuseContainer(client: ContainerRuntimeClient, container: Container) {
+    const startupSignal = createStartupSignal(this.startupTimeoutMs);
     let inspectResult = await client.container.inspect(container);
     if (!inspectResult.State.Running) {
       log.debug("Reused container is not running, attempting to start it");
@@ -186,7 +191,7 @@ export class GenericContainer implements TestContainer {
       waitStrategy.withStartupTimeout(this.startupTimeoutMs);
     }
 
-    await waitForContainer(client, container, waitStrategy, boundPorts);
+    await waitForContainer(client, container, waitStrategy, boundPorts, undefined, startupSignal);
 
     return new StartedGenericContainer(
       container,
@@ -195,7 +200,8 @@ export class GenericContainer implements TestContainer {
       boundPorts,
       inspectResult.Name,
       waitStrategy,
-      this.autoRemove
+      this.autoRemove,
+      this.startupTimeoutMs
     );
   }
 
@@ -228,6 +234,7 @@ export class GenericContainer implements TestContainer {
       await this.containerCreated(container.id);
     }
 
+    const startupSignal = createStartupSignal(this.startupTimeoutMs);
     await client.container.start(container);
     log.info(`Started container for image "${this.createOpts.Image}"`, { containerId: container.id });
 
@@ -253,7 +260,7 @@ export class GenericContainer implements TestContainer {
     }
 
     if (this.containerStarting) {
-      await this.containerStarting(mappedInspectResult, false);
+      await this.containerStarting(mappedInspectResult, false, startupSignal);
     }
 
     const waitStrategy = await this.selectWaitStrategy(client, inspectResult);
@@ -261,7 +268,7 @@ export class GenericContainer implements TestContainer {
       waitStrategy.withStartupTimeout(this.startupTimeoutMs);
     }
 
-    await waitForContainer(client, container, waitStrategy, boundPorts);
+    await waitForContainer(client, container, waitStrategy, boundPorts, undefined, startupSignal);
 
     const startedContainer = new StartedGenericContainer(
       container,
@@ -270,11 +277,12 @@ export class GenericContainer implements TestContainer {
       boundPorts,
       inspectResult.Name,
       waitStrategy,
-      this.autoRemove
+      this.autoRemove,
+      this.startupTimeoutMs
     );
 
     if (this.containerStarted) {
-      await this.containerStarted(startedContainer, mappedInspectResult, false);
+      await this.containerStarted(startedContainer, mappedInspectResult, false, startupSignal);
     }
 
     return startedContainer;
@@ -316,7 +324,8 @@ export class GenericContainer implements TestContainer {
   protected containerStarted?(
     container: StartedTestContainer,
     inspectResult: InspectResult,
-    reused: boolean
+    reused: boolean,
+    startupSignal?: AbortSignal
   ): Promise<void>;
 
   public withCommand(command: string[]): this {

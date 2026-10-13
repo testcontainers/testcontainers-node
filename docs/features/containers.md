@@ -568,7 +568,8 @@ class CustomContainer extends GenericContainer {
 
   protected override async containerStarting(
     inspectResult: InspectResult,
-    reused: boolean
+    reused: boolean,
+    startupSignal?: AbortSignal
   ): Promise<void> {
     // ...
   }
@@ -576,7 +577,8 @@ class CustomContainer extends GenericContainer {
   protected override async containerStarted(
     container: StartedTestContainer,
     inspectResult: InspectResult,
-    reused: boolean
+    reused: boolean,
+    startupSignal?: AbortSignal
   ): Promise<void> {
     // ...
   }
@@ -597,7 +599,25 @@ class CustomStartedContainer extends AbstractStartedContainer {
 }
 ```
 
-To wait for a condition in a callback, such as an API becoming available after the container has started, use [`poll`](wait-strategies.md#polling).
+`containerStarting` and `containerStarted` are passed an `AbortSignal` that aborts when the container's [startup timeout](wait-strategies.md) is reached. It is `undefined` when no startup timeout is set. Pass it to whatever waits in the callback, so that the wait ends with the startup timeout instead of running to a timeout of its own.
+
+To wait for a condition in a callback, such as an API becoming available after the container has started, use [`poll`](wait-strategies.md#polling):
+
+```ts
+protected override async containerStarted(
+  container: StartedTestContainer,
+  inspectResult: InspectResult,
+  reused: boolean,
+  startupSignal?: AbortSignal
+): Promise<void> {
+  await poll(({ signal }) => container.exec(["stat", "/tmp/app.lock"], { signal }), {
+    until: ({ exitCode }) => exitCode === 0,
+    intervalMs: 100,
+    timeoutMs: 60_000,
+    signal: startupSignal,
+  });
+}
+```
 
 ## Exposing container ports
 

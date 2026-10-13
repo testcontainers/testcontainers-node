@@ -1,6 +1,7 @@
 import type Dockerode from "dockerode";
 import { poll } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
+import type { BoundPorts } from "../utils/bound-ports";
 import { AbstractWaitStrategy } from "./wait-strategy";
 
 export type StartupStatus = "PENDING" | "SUCCESS" | "FAIL";
@@ -12,7 +13,12 @@ export abstract class StartupCheckStrategy extends AbstractWaitStrategy {
     signal?: AbortSignal
   ): Promise<StartupStatus>;
 
-  public override async waitUntilReady(container: Dockerode.Container): Promise<void> {
+  public override async waitUntilReady(
+    container: Dockerode.Container,
+    _boundPorts?: BoundPorts,
+    _startTime?: Date,
+    startupSignal?: AbortSignal
+  ): Promise<void> {
     const client = await getContainerRuntimeClient();
 
     const startupStatus = await poll(
@@ -23,6 +29,7 @@ export abstract class StartupCheckStrategy extends AbstractWaitStrategy {
         timeoutMs: this.startupTimeoutMs,
         timeoutMessage: `Container not accessible after ${this.startupTimeoutMs}ms`,
         retryOnError: false,
+        signal: startupSignal,
       }
     );
 

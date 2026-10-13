@@ -10,7 +10,12 @@ export class CompositeWaitStrategy extends AbstractWaitStrategy {
     super();
   }
 
-  public async waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts, startTime?: Date): Promise<void> {
+  public async waitUntilReady(
+    container: Dockerode.Container,
+    boundPorts: BoundPorts,
+    startTime?: Date,
+    startupSignal?: AbortSignal
+  ): Promise<void> {
     log.debug(`Waiting for composite...`, { containerId: container.id });
 
     return new Promise((resolve, reject) => {
@@ -24,7 +29,9 @@ export class CompositeWaitStrategy extends AbstractWaitStrategy {
       }
 
       Promise.all(
-        this.waitStrategies.map((waitStrategy) => waitStrategy.waitUntilReady(container, boundPorts, startTime))
+        this.waitStrategies.map((waitStrategy) =>
+          waitStrategy.waitUntilReady(container, boundPorts, startTime, startupSignal)
+        )
       )
         .then(() => {
           log.debug(`Composite wait strategy complete`, { containerId: container.id });

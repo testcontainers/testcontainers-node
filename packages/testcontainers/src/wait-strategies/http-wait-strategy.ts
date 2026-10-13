@@ -73,7 +73,12 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
     return this;
   }
 
-  public async waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void> {
+  public async waitUntilReady(
+    container: Dockerode.Container,
+    boundPorts: BoundPorts,
+    _startTime?: Date,
+    startupSignal?: AbortSignal
+  ): Promise<void> {
     log.debug(`Waiting for HTTP...`, { containerId: container.id });
 
     const exitStatus = "exited";
@@ -132,6 +137,7 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
           intervalMs: this.readTimeoutMs,
           timeoutMs: this.startupTimeoutMs,
           timeoutMessage: `URL ${this.path} not accessible after ${this.startupTimeoutMs}ms`,
+          signal: startupSignal,
         }
       );
     } finally {

@@ -2,7 +2,12 @@ import type Dockerode from "dockerode";
 import type { BoundPorts } from "../utils/bound-ports";
 
 export interface WaitStrategy {
-  waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts, startTime?: Date): Promise<void>;
+  waitUntilReady(
+    container: Dockerode.Container,
+    boundPorts: BoundPorts,
+    startTime?: Date,
+    startupSignal?: AbortSignal
+  ): Promise<void>;
 
   withStartupTimeout(startupTimeoutMs: number): WaitStrategy;
 
@@ -18,7 +23,8 @@ export abstract class AbstractWaitStrategy implements WaitStrategy {
   public abstract waitUntilReady(
     container: Dockerode.Container,
     boundPorts: BoundPorts,
-    startTime?: Date
+    startTime?: Date,
+    startupSignal?: AbortSignal
   ): Promise<void>;
 
   public withStartupTimeout(startupTimeoutMs: number): this {
