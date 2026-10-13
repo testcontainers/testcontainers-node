@@ -25,12 +25,14 @@ For the container class, tests and docs page, start from the module closest in s
 - Started-container getters call `getMappedPort()` when they're invoked. A restarted container can get different host ports.
 - Incompatible major versions (different ports, auth or startup) get separate classes, not image-tag parsing.
 - Keep it small: no getters that exist only for tests, and no speculative options.
+- Write the class following `write-code`.
 
 ## Tests
 
 - Every test does a real client round trip, such as write then read, or publish then receive. Asserting that getters or connection strings look right proves nothing. Cover the default path and each option that changes behaviour.
 - Use `await using`, with one container per test. Tests run concurrently.
 - Import from the container file, not `./index`. Read images with `getImage(__dirname, index)` (AGENTS.md).
+- If the vendor supports more than one major version of the image, loop the suite over an `IMAGES` list (AGENTS.md "Tests").
 - Wrap the part a user would copy in `// name {` … `// }` markers inside the `it` body. The docs include these blocks, so give each marker a name that appears nowhere else in the file (AGENTS.md).
 
 ## Docs and finish

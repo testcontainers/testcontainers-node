@@ -2,12 +2,12 @@ import { Client } from "cassandra-driver"; // Scylla uses Cassandra's driver in 
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { ScyllaContainer } from "./scylladb-container";
 
-const IMAGE = getImage(__dirname);
+const IMAGES = ["scylladb/scylla:2025.1.16", getImage(__dirname)];
 
-describe("ScyllaDB", { timeout: 240_000 }, () => {
-  it("should connect and execute a query", async () => {
+describe.each(IMAGES)("ScyllaDB (%s)", { concurrent: false, timeout: 240_000 }, (image) => {
+  it.concurrent("should connect and execute a query", async () => {
     // connectWithDefaultCredentials {
-    await using container = await new ScyllaContainer(IMAGE).start();
+    await using container = await new ScyllaContainer(image).start();
 
     const client = new Client({
       contactPoints: [container.getContactPoint()],
@@ -25,8 +25,8 @@ describe("ScyllaDB", { timeout: 240_000 }, () => {
   });
 
   // createAndFetchData {
-  it("should create keyspace, a table, insert data, and retrieve it", async () => {
-    await using container = await new ScyllaContainer(IMAGE).start();
+  it.concurrent("should create keyspace, a table, insert data, and retrieve it", async () => {
+    await using container = await new ScyllaContainer(image).start();
 
     const client = new Client({
       contactPoints: [container.getContactPoint()],
@@ -38,7 +38,7 @@ describe("ScyllaDB", { timeout: 240_000 }, () => {
     // Create the keyspace
     await client.execute(`
       CREATE KEYSPACE IF NOT EXISTS test_keyspace
-      WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'}
+      WITH replication = {'class': 'NetworkTopologyStrategy', 'replication_factor': '1'}
     `);
 
     await client.execute("USE test_keyspace");
@@ -64,8 +64,8 @@ describe("ScyllaDB", { timeout: 240_000 }, () => {
   });
   // }
 
-  it("should work with restarted container", async () => {
-    await using container = await new ScyllaContainer(IMAGE).start();
+  it.concurrent("should work with restarted container", async () => {
+    await using container = await new ScyllaContainer(image).start();
     await container.restart();
 
     const client = new Client({

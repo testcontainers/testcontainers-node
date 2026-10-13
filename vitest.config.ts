@@ -14,6 +14,11 @@ export default defineConfig({
     restoreMocks: true,
     unstubEnvs: true,
     retry: process.env.CI ? 3 : 0,
+    // Logs from long-lived containers such as the reaper can arrive after a file's tests finish:
+    // https://github.com/vitest-dev/vitest/issues/11153
+    onUnhandledError(error) {
+      return !(error.name === "EnvironmentTeardownError" && error.message.includes('"onUserConsoleLog"'));
+    },
     sequence: {
       concurrent: true,
     },

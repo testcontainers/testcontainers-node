@@ -5,8 +5,9 @@
 This is a working guide for contributors and coding agents in this repository.
 It captures practical rules that prevent avoidable CI and PR churn.
 
-This file holds the rules for every task. Workflows live in skills under `.agents/skills/`, which Claude Code reads through symlinks in `.claude/skills/`. They cover opening and reviewing PRs, adding modules, issue triage, CI and dependency maintenance, and release review.
+This file holds the rules for every task. Workflows live in skills under `.agents/skills/`, which Claude Code reads through symlinks in `.claude/skills/`. They cover writing code, opening and reviewing PRs, adding modules, issue triage, CI and dependency maintenance, and release review.
 If a skill or this file turns out to be wrong or incomplete, update it in the same PR.
+Wrong or incomplete means a rule misled you, or a mistake keeps recurring that no rule covers. Adding a feature, helper or option is not a reason to add a line about it here or in a skill.
 
 ## Repository Layout
 
@@ -22,7 +23,11 @@ If a skill or this file turns out to be wrong or incomplete, update it in the sa
 
 ### API and docs
 
-- If a public API changes, update the relevant docs in the same PR.
+- If a user-facing API changes, update the relevant docs in the same PR.
+  - User-facing means what someone testing against a container uses: containers, images, networks, Compose, wait strategies, and modules and their options.
+  - Don't document helpers that `index.ts` exports so that modules can import them (for example `log`, `RandomUuid`, `BoundPorts`). Being exported makes them public API, not a docs topic.
+- Docs tell a user how to use a feature: what to call, a short example, and anything they have to account for.
+  - Leave out how it is implemented: which Docker calls are made, timing and retry mechanics, and why the change was made. That belongs in the PR body.
 - If new types are made part of the public API, export them from the package's `index.ts` in the same PR.
 - Only what a package's `index.ts` exports is public API. `npm run knip` fails on any other export that no other file uses: drop the `export` keyword, or export it from `index.ts` if consumers need it.
 - In docs Markdown, keep `<!--codeinclude-->` blocks tight with no blank lines between the markers and the include line, or the rendered snippet will contain blank lines between code lines.
@@ -30,14 +35,13 @@ If a skill or this file turns out to be wrong or incomplete, update it in the sa
 
 ### Code
 
+- Follow the `write-code` skill when writing or changing code under `packages/`.
 - Keep code comments to a minimum; the codebase has very few. Add one only when it tells the reader something they can't get from the code, the PR or the git history, such as why a non-obvious approach was needed, or a link to an upstream bug.
   - Don't narrate what the code does, describe the change you made, or reference the task or review that prompted it.
 - Fix the root cause. A change that only makes a failure less likely is not a fix.
   - Arbitrary delays (`sleep`), repeating a check, or adding retries do not remove a race; they hide it.
   - For readiness problems, wait on a deterministic signal of the state you need. If no such signal exists, say so rather than shipping a mitigation as a fix.
-- Import boundaries are enforced by Biome (`biome.json`):
-  - Modules import core only from the `testcontainers` entry point. The one allowed exception is the core test helper (`../../../testcontainers/src/utils/test-helper`).
-  - `noImportCycles` is an error. Prefer breaking a new cycle (for example with `import type` or a leaf module) over adding a `biome-ignore` suppression.
+- Fix a lint violation rather than suppressing it with `biome-ignore`.
 
 ### Dependencies
 
@@ -56,7 +60,18 @@ If a skill or this file turns out to be wrong or incomplete, update it in the sa
   - Every extra image increases how long the tests take to run and how much storage they need.
   - Reuse an image the tests already use, for example `cristianrgreco/testcontainer:1.1.14` in `packages/testcontainers`, or the module's own image.
 - Module tests read their images from `packages/modules/<module>/Dockerfile` (one `FROM` line per image) with `getImage(__dirname, index)`, so Dependabot can bump them. Do not hardcode images in module source or tests.
-  - Exception: a second version of the *same* image must be hardcoded in its test file (for example `influxdb1-container.test.ts`, `kafka-container-7.test.ts`). Dependabot treats same-image `FROM` lines as one dependency and bumps them all to the newest tag.
+  - Exception: a second version of the *same* image must be hardcoded in its test file. Dependabot treats same-image `FROM` lines as one dependency and bumps them all to the newest tag.
+- A module's tests cover every major version the vendor still supports, so a change can't silently break one that users still run. This is the one case where a suite pulls extra images.
+  - Keep one `IMAGES` list in the test file: the latest release of each older supported major, oldest first, as an exact tag, then the `Dockerfile` image. Don't list other minors or patches of a major, and don't use rolling tags such as `redis:7`.
+  - This applies to every image the module itself runs, so a second class, edition or variant with its own image gets its own list. Images that only help the tests, such as a CLI or the database behind an emulator, are exempt.
+  - Loop the whole suite over the list with `describe.each(IMAGES)`, so every test runs on every major.
+  - Run the majors one after another and each major's tests concurrently, as a single-image suite runs: pass `{ concurrent: false }` to `describe.each` and declare the tests with `it.concurrent`.
+  - A major is supported while the vendor's free or community support covers it. Leave out a major that ends within 60 days. If the vendor publishes no lifecycle, test only the `Dockerfile` image.
+  - Where a test only applies to some of the images, select it by matching the image with `it.skipIf` or `it.runIf`, and add a comment when the reason isn't obvious.
+  - A major that needs its own class or setup gets its own test file named after it, such as `<module>-container-v<N>.test.ts`.
+  - A suite too heavy to run on every major may loop a representative part of itself. Say which part in the PR.
+  - If a looped suite still overloads the test runner (tests far slower than locally, connection timeouts, passing only on retry), consider running its tests sequentially too, with plain `it`, and point the change out to the user.
+  - Versions past the vendor's end of life are out of scope. Remove their tests and the module code that exists only for them. Removing that code is a breaking change, so it goes in its own PR.
 - Vitest runs tests concurrently by default (`sequence.concurrent: true` in `vitest.config.ts`).
   - Tests that rely on shared/global mocks (for example `vi.spyOn` on shared loggers/singletons) can be flaky due to interleaving or automatic mock resets.
   - Prefer asserting observable behavior instead of shared global mock state when possible.

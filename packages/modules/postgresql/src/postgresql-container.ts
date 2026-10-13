@@ -1,4 +1,4 @@
-import { AbstractStartedContainer, GenericContainer, type StartedTestContainer, Wait } from "testcontainers";
+import { AbstractStartedContainer, GenericContainer, log, type StartedTestContainer, Wait } from "testcontainers";
 
 const POSTGRES_PORT = 5432;
 const POSTGRES_SSL_PATH = "/tmp/testcontainers-node/postgres";
@@ -60,9 +60,15 @@ export class PostgreSqlContainer extends GenericContainer {
   }
 
   public withSSL(certFile: string, keyFile: string, caCertFile?: string): this {
-    if (!certFile) throw new Error("SSL certificate file should not be empty.");
-    if (!keyFile) throw new Error("SSL key file should not be empty.");
-    if (caCertFile !== undefined && !caCertFile) throw new Error("SSL CA certificate file should not be empty.");
+    if (!certFile) {
+      throw new Error("SSL certificate file should not be empty.");
+    }
+    if (!keyFile) {
+      throw new Error("SSL key file should not be empty.");
+    }
+    if (caCertFile !== undefined && !caCertFile) {
+      throw new Error("SSL CA certificate file should not be empty.");
+    }
 
     const filesToCopy = [
       { source: certFile, target: POSTGRES_SSL_CERT_PATH, mode: 0o600 },
@@ -91,7 +97,9 @@ export class PostgreSqlContainer extends GenericContainer {
   }
 
   public withSSLCert(caCertFile: string, certFile: string, keyFile: string): this {
-    if (!caCertFile) throw new Error("SSL CA certificate file should not be empty.");
+    if (!caCertFile) {
+      throw new Error("SSL CA certificate file should not be empty.");
+    }
     return this.withSSL(certFile, keyFile, caCertFile);
   }
 
@@ -251,7 +259,7 @@ export class StartedPostgreSqlContainer extends AbstractStartedContainer {
           throw new Error(`Command failed with exit code ${result.exitCode}: ${result.output}`);
         }
       } catch (error) {
-        console.error(`Failed to execute command: ${command}`, error);
+        log.error(`Failed to execute command: ${command}: ${error}`);
         throw error;
       }
     }

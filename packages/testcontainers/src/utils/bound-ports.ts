@@ -30,9 +30,8 @@ export class BoundPorts {
 
     if (!firstBinding) {
       throw new Error("No port bindings found");
-    } else {
-      return firstBinding;
     }
+    return firstBinding;
   }
 
   public setBinding(key: string | number, value: number, protocol: string = "tcp"): void {

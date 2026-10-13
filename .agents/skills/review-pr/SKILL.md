@@ -35,15 +35,19 @@ gh pr checks <N>
 - **Concurrency:** no shared containers, `process.env` or spies without `{ concurrent: false }`. Use `await using`. No skipping when Docker is unavailable.
 - **Root cause:** a fix removes the cause of the failure. Added sleeps, retries or longer timeouts only make it less likely (AGENTS.md).
 - **Completeness:** a fix applied to one path is also applied to its siblings, for example `restart()` next to `start()`, or the reuse path next to the create path.
-- **Docs:** public API changes are documented, and module examples use `codeinclude`. Check that each marker name appears only once in its test file; CI can't catch a collision (AGENTS.md).
+- **Docs:**
+  - User-facing API changes are documented. Flag docs for helpers that only modules use, and docs that explain how a feature is implemented instead of how to use it (AGENTS.md "API and docs").
+  - Module examples use `codeinclude`. Check that each marker name appears only once in its test file; CI can't catch a collision (AGENTS.md).
 - **Design:**
   - Zero-config defaults work, and invalid or half-set config fails fast.
   - The wait strategy is set in the constructor, and waits are robust (listening ports, health check or HTTP rather than log regexes).
   - Images are pinned in the module `Dockerfile`.
+- **Style:** new code follows `write-code`.
 - **Scope:**
   - Flag new files for a few lines of logic, dead fallbacks, duplicated constants, getters that exist only for tests, and tests of third-party behaviour.
   - Flag unrelated dependency bumps; leave those to Dependabot.
   - Flag code comments that restate the code or describe the change (AGENTS.md).
+  - Flag lines added to AGENTS.md or a skill that only describe the PR's own feature (AGENTS.md "Purpose").
 - **Dependencies:** runtime dependencies load from CommonJS (AGENTS.md), and well-established libraries or built-ins are preferred.
 - **Breaking changes:** renamed exports, changed defaults and lowered timeouts all count. They need `major` or a non-breaking alternative.
 - **Claims:** check root-cause explanations, and claims about what another Testcontainers implementation does, against the actual code. AI-written PR descriptions are often confidently wrong.

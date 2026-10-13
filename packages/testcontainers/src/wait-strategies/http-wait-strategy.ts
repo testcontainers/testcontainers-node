@@ -101,14 +101,7 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
               }
             }
 
-            return undiciResponseToFetchResponse(
-              await request(url, {
-                method: this.method,
-                signal: AbortSignal.timeout(this.readTimeoutMs),
-                headers: this.headers,
-                dispatcher: agent,
-              })
-            );
+            return await this.sendRequest(url, agent);
           } catch {
             return undefined;
           }
@@ -118,19 +111,7 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
             return true;
           }
 
-          if (response === undefined) {
-            return false;
-          } else if (!this.predicates.length) {
-            return response.ok;
-          } else {
-            for (const predicate of this.predicates) {
-              const result = await predicate(response);
-              if (!result) {
-                return false;
-              }
-            }
-            return true;
-          }
+          return this.matchesPredicates(response);
         },
         () => {
           const message = `URL ${this.path} not accessible after ${this.startupTimeoutMs}ms`;
@@ -150,6 +131,33 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
     }
 
     log.debug(`HTTP wait strategy complete`, { containerId: container.id });
+  }
+
+  private async sendRequest(url: string, agent: Agent | undefined): Promise<Response> {
+    return undiciResponseToFetchResponse(
+      await request(url, {
+        method: this.method,
+        signal: AbortSignal.timeout(this.readTimeoutMs),
+        headers: this.headers,
+        dispatcher: agent,
+      })
+    );
+  }
+
+  private async matchesPredicates(response: Response | undefined): Promise<boolean> {
+    if (response === undefined) {
+      return false;
+    }
+    if (!this.predicates.length) {
+      return response.ok;
+    }
+    for (const predicate of this.predicates) {
+      const result = await predicate(response);
+      if (!result) {
+        return false;
+      }
+    }
+    return true;
   }
 
   private async handleContainerExit(container: Dockerode.Container) {

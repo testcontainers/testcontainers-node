@@ -46,9 +46,8 @@ export class RootlessUnixSocketStrategy implements ContainerRuntimeClientStrateg
 
     if (xdgRuntimeDir !== undefined) {
       return path.join(xdgRuntimeDir, "docker.sock");
-    } else {
-      return undefined;
     }
+    return undefined;
   }
 
   private getSocketPathFromHomeRunDir(): string {

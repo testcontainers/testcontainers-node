@@ -4,7 +4,7 @@ import { GenericContainer, Network } from "testcontainers";
 import { KafkaContainer } from "./kafka-container";
 import { assertMessageProducedAndConsumed } from "./test-helper";
 
-const IMAGE = "confluentinc/cp-kafka:7.9.1";
+const IMAGE = "confluentinc/cp-kafka:7.9.10";
 
 describe("KafkaContainer", { timeout: 240_000 }, () => {
   it("should connect using in-built zoo-keeper", async () => {
@@ -43,7 +43,7 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
     const zooKeeperHost = "zookeeper";
     const zooKeeperPort = 2181;
 
-    await using _ = await new GenericContainer("confluentinc/cp-zookeeper:7.5.0")
+    await using _ = await new GenericContainer("confluentinc/cp-zookeeper:7.9.10")
       .withNetwork(network)
       .withNetworkAliases(zooKeeperHost)
       .withEnvironment({ ZOOKEEPER_CLIENT_PORT: zooKeeperPort.toString() })
@@ -71,7 +71,7 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
 
     it(`should connect locally with ZK`, async () => {
       // kafkaSsl {
-      await using container = await new KafkaContainer("confluentinc/cp-kafka:7.5.0")
+      await using container = await new KafkaContainer(IMAGE)
         .withSaslSslListener({
           port: 9096,
           sasl: {
@@ -111,7 +111,7 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
     });
 
     it(`should connect locally with Kraft`, async () => {
-      await using container = await new KafkaContainer("confluentinc/cp-kafka:7.5.0")
+      await using container = await new KafkaContainer(IMAGE)
         .withKraft()
         .withSaslSslListener({
           port: 9096,

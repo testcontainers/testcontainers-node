@@ -89,8 +89,8 @@ describe.each(IMAGES)("KurrentDbContainer (%s)", { concurrent: false, timeout: 2
     await stream.unsubscribe();
     await client.dispose();
 
-    async function getStreamFirstEvent(stream: StreamSubscription): Promise<unknown> {
-      for await (const event of stream) {
+    async function getStreamFirstEvent(subscription: StreamSubscription): Promise<unknown> {
+      for await (const event of subscription) {
         return event;
       }
     }
