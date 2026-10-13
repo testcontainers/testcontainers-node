@@ -1,9 +1,8 @@
 import path from "node:path";
 import { Client } from "pg";
-import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { PostgreSqlContainer } from "./postgresql-container";
+import { IMAGES } from "./test-helper";
 
-const IMAGES = ["postgres:15.19-alpine", "postgres:16.15-alpine", "postgres:17.11-alpine", getImage(__dirname)];
 const SSL_CA_CERT = path.resolve(__dirname, "test-certs/ca.crt");
 const SSL_SERVER_CERT = path.resolve(__dirname, "test-certs/server.crt");
 const SSL_SERVER_KEY = path.resolve(__dirname, "test-certs/server.key");
