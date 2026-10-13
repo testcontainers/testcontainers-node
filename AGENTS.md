@@ -59,6 +59,7 @@ If a skill or this file turns out to be wrong or incomplete, update it in the sa
   - Exception: a second version of the *same* image must be hardcoded in its test file. Dependabot treats same-image `FROM` lines as one dependency and bumps them all to the newest tag.
 - A module's tests cover every major version the vendor still supports, so a change can't silently break one that users still run. This is the one case where a suite pulls extra images.
   - Keep one `IMAGES` list in the test file: the latest release of each older supported major, oldest first, as an exact tag, then the `Dockerfile` image. Don't list other minors or patches of a major, and don't use rolling tags such as `redis:7`.
+  - This applies to every image the module itself runs, so a second class, edition or variant with its own image gets its own list. Images that only help the tests, such as a CLI or the database behind an emulator, are exempt.
   - Loop the whole suite over the list with `describe.each(IMAGES)`, so every test runs on every major.
   - Run the majors one after another and each major's tests concurrently, as a single-image suite runs: pass `{ concurrent: false }` to `describe.each` and declare the tests with `it.concurrent`.
   - A major is supported while the vendor's free or community support covers it. Leave out a major that ends within 60 days. If the vendor publishes no lifecycle, test only the `Dockerfile` image.
