@@ -3,11 +3,10 @@ import { GenericContainer, Network, Wait } from "testcontainers";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { K3sContainer } from "./k3s-container";
 
-const IMAGE = getImage(__dirname);
-const OLDEST_IMAGE = "rancher/k3s:v1.35.9-k3s1";
+const IMAGES = ["rancher/k3s:v1.35.9-k3s1", "rancher/k3s:v1.36.5-k3s1", getImage(__dirname)];
 const KUBECTL_IMAGE = getImage(__dirname, 1);
 
-describe.each([IMAGE, OLDEST_IMAGE])("K3sContainer (%s)", { timeout: 120_000 }, (image) => {
+describe.each(IMAGES)("K3sContainer (%s)", { timeout: 120_000 }, (image) => {
   // K3sContainer runs as a privileged container
   if (!process.env.CI_ROOTLESS) {
     it("should start and have listable node", async () => {
@@ -86,23 +85,6 @@ describe.each([IMAGE, OLDEST_IMAGE])("K3sContainer (%s)", { timeout: 120_000 }, 
       const chunks = await (await kubectlContainer.logs()).toArray();
       expect(chunks).toEqual(expect.arrayContaining([expect.stringContaining("kube-system")]));
       // }
-    });
-  }
-});
-
-describe("K3sContainer", { timeout: 120_000 }, () => {
-  // K3sContainer runs as a privileged container
-  if (!process.env.CI_ROOTLESS) {
-    it.each(["rancher/k3s:v1.36.5-k3s1"])("should start and have listable node with %s", async (image) => {
-      await using container = await new K3sContainer(image).start();
-
-      const kubeConfig = new k8s.KubeConfig();
-      kubeConfig.loadFromString(container.getKubeConfig());
-
-      const client = kubeConfig.makeApiClient(k8s.CoreV1Api);
-      const nodeList = await client.listNode();
-
-      expect(nodeList.items).toHaveLength(1);
     });
   }
 });

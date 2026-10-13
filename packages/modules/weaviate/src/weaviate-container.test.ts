@@ -2,10 +2,9 @@ import weaviate from "weaviate-ts-client";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { WeaviateContainer } from "./weaviate-container";
 
-const IMAGE = getImage(__dirname);
-const OLDEST_IMAGE = "semitechnologies/weaviate:1.38.21";
+const IMAGES = ["semitechnologies/weaviate:1.38.21", getImage(__dirname)];
 
-describe.each([IMAGE, OLDEST_IMAGE])("WeaviateContainer (%s)", { timeout: 100_000 }, (image) => {
+describe.each(IMAGES)("WeaviateContainer (%s)", { timeout: 100_000 }, (image) => {
   it("should expose ports", async () => {
     // connectWeaviate {
     await using container = await new WeaviateContainer(image).start();

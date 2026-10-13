@@ -3,10 +3,9 @@ import { ImageName } from "testcontainers";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { CassandraContainer } from "./cassandra-container";
 
-const IMAGE = getImage(__dirname);
-const OLDEST_IMAGE = "cassandra:4.0.21";
+const IMAGES = ["cassandra:4.0.21", "cassandra:4.1.12", getImage(__dirname)];
 
-describe.each([IMAGE, OLDEST_IMAGE])("CassandraContainer (%s)", { concurrent: false, timeout: 240_000 }, (image) => {
+describe.each(IMAGES)("CassandraContainer (%s)", { concurrent: false, timeout: 240_000 }, (image) => {
   it("should connect and execute a query with default credentials", async () => {
     // connectWithDefaultCredentials {
     await using container = await new CassandraContainer(image).start();
@@ -129,25 +128,4 @@ describe.each([IMAGE, OLDEST_IMAGE])("CassandraContainer (%s)", { concurrent: fa
 
     await client.shutdown();
   });
-});
-
-describe("CassandraContainer", { concurrent: false, timeout: 240_000 }, () => {
-  it.each(["cassandra:4.1.12"])(
-    "should connect and execute a query with default credentials with %s",
-    async (image) => {
-      await using container = await new CassandraContainer(image).start();
-
-      const client = new Client({
-        contactPoints: [container.getContactPoint()],
-        localDataCenter: container.getDatacenter(),
-        keyspace: "system",
-      });
-      await client.connect();
-
-      const result = await client.execute("SELECT release_version FROM system.local");
-      expect(result.rows[0].release_version).toBe(ImageName.fromString(image).tag);
-
-      await client.shutdown();
-    }
-  );
 });

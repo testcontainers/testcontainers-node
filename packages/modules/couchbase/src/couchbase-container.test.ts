@@ -8,7 +8,7 @@ import PORTS from "./ports";
 
 const ENTERPRISE_IMAGE = getImage(__dirname, 0);
 const COMMUNITY_IMAGE = getImage(__dirname, 1);
-const COMMUNITY_IMAGES = [COMMUNITY_IMAGE, "couchbase/server:community-7.6.2"];
+const COMMUNITY_IMAGES = ["couchbase/server:community-7.6.2", COMMUNITY_IMAGE];
 
 describe("CouchbaseContainer", { timeout: 180_000 }, () => {
   const flushBucketAndCheckExists = async (
@@ -22,7 +22,7 @@ describe("CouchbaseContainer", { timeout: 180_000 }, () => {
     return coll.exists(key);
   };
 
-  it.each([ENTERPRISE_IMAGE, ...COMMUNITY_IMAGES])("should connect and query using %s image", async (image) => {
+  it.each([...COMMUNITY_IMAGES, ENTERPRISE_IMAGE])("should connect and query using %s image", async (image) => {
     // connectAndQuery {
     const bucketDefinition = new BucketDefinition("mybucket");
     await using container = await new CouchbaseContainer(image).withBucket(bucketDefinition).start();
