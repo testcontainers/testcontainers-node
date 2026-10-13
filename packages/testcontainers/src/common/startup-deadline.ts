@@ -12,6 +12,10 @@ export class StartupDeadline {
   }
 }
 
+export function createStartupDeadline(startupTimeoutMs: number | undefined): StartupDeadline | undefined {
+  return startupTimeoutMs !== undefined ? new StartupDeadline(startupTimeoutMs) : undefined;
+}
+
 type Startup = { deadline: StartupDeadline; inProgress: boolean };
 
 const currentStartup = new AsyncLocalStorage<Startup>();

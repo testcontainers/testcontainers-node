@@ -12,6 +12,8 @@ const container = await new GenericContainer("alpine")
 
 A startup timeout set on the container is one deadline for the whole startup. It is counted from when the container is started, and the wait strategy and the [lifecycle callbacks](containers.md#lifecycle-callbacks) share it. Pulling the image is not included.
 
+The deadline starts again when the container is restarted. The startup timeout of a Compose environment is one deadline for all of its containers, counted from when Compose has started them.
+
 ## Default wait strategy
 
 By default, Testcontainers waits for a container health check when one is defined by the image or configured with `withHealthCheck`. If no health check is defined, or the image disables health checks with `HEALTHCHECK NONE`, it waits up to 60 seconds for mapped network ports to be bound.

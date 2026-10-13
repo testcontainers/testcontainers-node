@@ -46,6 +46,22 @@ describe("GenericContainer startup deadline", { timeout: 180_000 }, () => {
     expect(Date.now() - startTime).toBeLessThan(60_000);
   });
 
+  it("should apply the startup timeout to a wait strategy with a longer timeout after a restart", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withStartupTimeout(2_000)
+      .withWaitStrategy(
+        Wait.forAll([
+          Wait.forSuccessfulCommand("[ ! -f /tmp/started ] && touch /tmp/started").withStartupTimeout(60_000),
+        ])
+      )
+      .start();
+    const startTime = Date.now();
+
+    await expect(container.restart()).rejects.toThrow("not successful");
+
+    expect(Date.now() - startTime).toBeLessThan(60_000);
+  });
+
   class RecordingContainer extends GenericContainer {
     public readonly remainingMsWhenStarting: Array<number | undefined> = [];
     public readonly remainingMsWhenStarted: Array<number | undefined> = [];

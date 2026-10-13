@@ -3,7 +3,15 @@ import type { Readable } from "node:stream";
 import archiver from "archiver";
 import AsyncLock from "async-lock";
 import type { Container, ContainerCreateOptions, ContainerInspectInfo, HostConfig } from "dockerode";
-import { containerLog, hash, log, StartupDeadline, toNanos, withStartupDeadline } from "../common";
+import {
+  containerLog,
+  createStartupDeadline,
+  hash,
+  log,
+  type StartupDeadline,
+  toNanos,
+  withStartupDeadline,
+} from "../common";
 import { type ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "../container-runtime";
 import { CONTAINER_STATUSES } from "../container-runtime/clients/container/types";
 import type { StartedNetwork } from "../network/network";
@@ -171,7 +179,7 @@ export class GenericContainer implements TestContainer {
   }
 
   private async reuseContainer(client: ContainerRuntimeClient, container: Container) {
-    const startupDeadline = this.createStartupDeadline();
+    const startupDeadline = createStartupDeadline(this.startupTimeoutMs);
     let inspectResult = await client.container.inspect(container);
     if (!inspectResult.State.Running) {
       log.debug("Reused container is not running, attempting to start it");
@@ -197,7 +205,8 @@ export class GenericContainer implements TestContainer {
       boundPorts,
       inspectResult.Name,
       waitStrategy,
-      this.autoRemove
+      this.autoRemove,
+      this.startupTimeoutMs
     );
   }
 
@@ -230,7 +239,7 @@ export class GenericContainer implements TestContainer {
       await this.containerCreated(container.id);
     }
 
-    const startupDeadline = this.createStartupDeadline();
+    const startupDeadline = createStartupDeadline(this.startupTimeoutMs);
     await client.container.start(container);
     log.info(`Started container for image "${this.createOpts.Image}"`, { containerId: container.id });
 
@@ -242,10 +251,6 @@ export class GenericContainer implements TestContainer {
     return withStartupDeadline(startupDeadline, () =>
       this.waitUntilContainerReady(client, container, inspectResult, startupDeadline)
     );
-  }
-
-  private createStartupDeadline(): StartupDeadline | undefined {
-    return this.startupTimeoutMs !== undefined ? new StartupDeadline(this.startupTimeoutMs) : undefined;
   }
 
   private async waitUntilContainerReady(
@@ -289,7 +294,8 @@ export class GenericContainer implements TestContainer {
       boundPorts,
       inspectResult.Name,
       waitStrategy,
-      this.autoRemove
+      this.autoRemove,
+      this.startupTimeoutMs
     );
 
     if (this.containerStarted) {
