@@ -1,5 +1,5 @@
 import type { StartedTestContainer } from "testcontainers";
-import { AbstractStartedContainer, GenericContainer, Wait } from "testcontainers";
+import { AbstractStartedContainer, GenericContainer, log, Wait } from "testcontainers";
 
 const PORT = 4443;
 
@@ -101,7 +101,7 @@ export class StartedCloudStorageEmulatorContainer extends AbstractStartedContain
     });
 
     if (!response.ok) {
-      console.warn(`error updating fake-gcs-server with external url, response status code: ${response.status}`);
+      log.warn(`error updating fake-gcs-server with external url, response status code: ${response.status}`);
     }
   }
 

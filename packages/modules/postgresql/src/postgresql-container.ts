@@ -1,4 +1,4 @@
-import { AbstractStartedContainer, GenericContainer, type StartedTestContainer, Wait } from "testcontainers";
+import { AbstractStartedContainer, GenericContainer, log, type StartedTestContainer, Wait } from "testcontainers";
 
 const POSTGRES_PORT = 5432;
 const POSTGRES_SSL_PATH = "/tmp/testcontainers-node/postgres";
@@ -251,7 +251,7 @@ export class StartedPostgreSqlContainer extends AbstractStartedContainer {
           throw new Error(`Command failed with exit code ${result.exitCode}: ${result.output}`);
         }
       } catch (error) {
-        console.error(`Failed to execute command: ${command}`, error);
+        log.error(`Failed to execute command: ${command}: ${error}`);
         throw error;
       }
     }

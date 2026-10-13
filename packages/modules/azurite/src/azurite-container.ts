@@ -159,6 +159,31 @@ export class AzuriteContainer extends GenericContainer {
   }
 
   public override async start(): Promise<StartedAzuriteContainer> {
+    const command = this.createCommand();
+
+    this.withCommand(command).withExposedPorts(this.blobPort, this.queuePort, this.tablePort);
+
+    if (this.accountName !== DEFAULT_ACCOUNT_NAME || this.accountKey !== DEFAULT_ACCOUNT_KEY) {
+      this.withEnvironment({
+        AZURITE_ACCOUNTS: `${this.accountName}:${this.accountKey}`,
+      });
+    }
+
+    const protocol: Protocol = this.cert === undefined ? "http" : "https";
+    const startedContainer = await super.start();
+
+    return new StartedAzuriteContainer(
+      startedContainer,
+      this.accountName,
+      this.accountKey,
+      this.blobPort,
+      this.queuePort,
+      this.tablePort,
+      protocol
+    );
+  }
+
+  private createCommand(): string[] {
     const command = [
       "--blobHost",
       "0.0.0.0",
@@ -190,6 +215,16 @@ export class AzuriteContainer extends GenericContainer {
       command.push("--skipApiVersionCheck");
     }
 
+    this.configureSsl(command);
+
+    if (this.oauthEnabled) {
+      command.push("--oauth", "basic");
+    }
+
+    return command;
+  }
+
+  private configureSsl(command: string[]): void {
     if (this.cert !== undefined && this.certPath !== undefined) {
       const contentsToCopy = [
         {
@@ -216,31 +251,6 @@ export class AzuriteContainer extends GenericContainer {
         command.push("--pwd", this.password);
       }
     }
-
-    if (this.oauthEnabled) {
-      command.push("--oauth", "basic");
-    }
-
-    this.withCommand(command).withExposedPorts(this.blobPort, this.queuePort, this.tablePort);
-
-    if (this.accountName !== DEFAULT_ACCOUNT_NAME || this.accountKey !== DEFAULT_ACCOUNT_KEY) {
-      this.withEnvironment({
-        AZURITE_ACCOUNTS: `${this.accountName}:${this.accountKey}`,
-      });
-    }
-
-    const protocol: Protocol = this.cert === undefined ? "http" : "https";
-    const startedContainer = await super.start();
-
-    return new StartedAzuriteContainer(
-      startedContainer,
-      this.accountName,
-      this.accountKey,
-      this.blobPort,
-      this.queuePort,
-      this.tablePort,
-      protocol
-    );
   }
 }
 
