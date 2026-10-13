@@ -4,8 +4,8 @@ import { ScyllaContainer } from "./scylladb-container";
 
 const IMAGES = ["scylladb/scylla:2025.1.16", getImage(__dirname)];
 
-describe.each(IMAGES)("ScyllaDB (%s)", { timeout: 240_000 }, (image) => {
-  it("should connect and execute a query", async () => {
+describe.each(IMAGES)("ScyllaDB (%s)", { concurrent: false, timeout: 240_000 }, (image) => {
+  it.concurrent("should connect and execute a query", async () => {
     // connectWithDefaultCredentials {
     await using container = await new ScyllaContainer(image).start();
 
@@ -25,7 +25,7 @@ describe.each(IMAGES)("ScyllaDB (%s)", { timeout: 240_000 }, (image) => {
   });
 
   // createAndFetchData {
-  it("should create keyspace, a table, insert data, and retrieve it", async () => {
+  it.concurrent("should create keyspace, a table, insert data, and retrieve it", async () => {
     await using container = await new ScyllaContainer(image).start();
 
     const client = new Client({
@@ -64,7 +64,7 @@ describe.each(IMAGES)("ScyllaDB (%s)", { timeout: 240_000 }, (image) => {
   });
   // }
 
-  it("should work with restarted container", async () => {
+  it.concurrent("should work with restarted container", async () => {
     await using container = await new ScyllaContainer(image).start();
     await container.restart();
 

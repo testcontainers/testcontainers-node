@@ -9,8 +9,8 @@ const IMAGES = [
   getImage(__dirname),
 ];
 
-describe.each(IMAGES)("MSSQLServerContainer (%s)", { timeout: 180_000 }, (image) => {
-  it("should connect and return a query result", async () => {
+describe.each(IMAGES)("MSSQLServerContainer (%s)", { concurrent: false, timeout: 180_000 }, (image) => {
+  it.concurrent("should connect and return a query result", async () => {
     // mssqlConnect {
     await using container = await new MSSQLServerContainer(image).acceptLicense().start();
 
@@ -32,7 +32,7 @@ describe.each(IMAGES)("MSSQLServerContainer (%s)", { timeout: 180_000 }, (image)
     // }
   });
 
-  it("should connect and return a query result with database URI", async () => {
+  it.concurrent("should connect and return a query result with database URI", async () => {
     // mssqlUriConnect {
     await using container = await new MSSQLServerContainer(image).acceptLicense().start();
 
@@ -46,7 +46,7 @@ describe.each(IMAGES)("MSSQLServerContainer (%s)", { timeout: 180_000 }, (image)
     // }
   });
 
-  it("should connect and return a query result with valid custom password", async () => {
+  it.concurrent("should connect and return a query result with valid custom password", async () => {
     // mssqlValidPassword {
     await using container = await new MSSQLServerContainer(image).acceptLicense().withPassword("I!@M#$eCur3").start();
     // }
@@ -60,14 +60,14 @@ describe.each(IMAGES)("MSSQLServerContainer (%s)", { timeout: 180_000 }, (image)
     await connection.close();
   });
 
-  it("should throw error with invalid password", async () => {
+  it.concurrent("should throw error with invalid password", async () => {
     const container = new MSSQLServerContainer(image).acceptLicense().withPassword("password");
     await expect(container.start()).rejects.toThrow(
       Error('Log stream ended and message "/.*Recovery is complete.*/" was not received')
     );
   });
 
-  it("should start db with express edition", async () => {
+  it.concurrent("should start db with express edition", async () => {
     // mssqlExpressEdition {
     await using container = await new MSSQLServerContainer(image)
       .acceptLicense()
