@@ -7,7 +7,7 @@ import { assertMessageProducedAndConsumed } from "./test-helper";
 
 const IMAGES = ["confluentinc/cp-kafka:8.2.4", getImage(__dirname)];
 
-describe.each(IMAGES)("KafkaContainer (%s)", { timeout: 240_000 }, (image) => {
+describe.each(IMAGES)("KafkaContainer (%s)", { concurrent: false, timeout: 240_000 }, (image) => {
   const certificatesDir = path.resolve(__dirname, "..", "test-certs");
 
   it("should connect", async () => {
