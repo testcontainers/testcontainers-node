@@ -4,8 +4,8 @@ import { MySqlContainer } from "./mysql-container";
 
 const IMAGES = ["mysql:8.4.11", "mysql:9.7.2", getImage(__dirname)];
 
-describe.each(IMAGES)("MySqlContainer (%s)", { timeout: 240_000 }, (image) => {
-  it("should connect and execute query", async () => {
+describe.each(IMAGES)("MySqlContainer (%s)", { concurrent: false, timeout: 240_000 }, (image) => {
+  it.concurrent("should connect and execute query", async () => {
     // mysqlConnect {
     await using container = await new MySqlContainer(image).start();
 
@@ -24,7 +24,7 @@ describe.each(IMAGES)("MySqlContainer (%s)", { timeout: 240_000 }, (image) => {
     // }
   });
 
-  it("should work with database URI", async () => {
+  it.concurrent("should work with database URI", async () => {
     // mysqlUriConnect {
     const username = "testUser";
     const password = "testPassword";
@@ -51,7 +51,7 @@ describe.each(IMAGES)("MySqlContainer (%s)", { timeout: 240_000 }, (image) => {
     // }
   });
 
-  it("should set database", async () => {
+  it.concurrent("should set database", async () => {
     // mysqlSetDatabase {
     await using container = await new MySqlContainer(image).withDatabase("customDatabase").start();
 
@@ -71,7 +71,7 @@ describe.each(IMAGES)("MySqlContainer (%s)", { timeout: 240_000 }, (image) => {
   });
 
   // mysqlSetUsername {
-  it("should set username", async () => {
+  it.concurrent("should set username", async () => {
     await using container = await new MySqlContainer(image).withUsername("customUsername").start();
 
     const client = await createConnection({
@@ -89,7 +89,7 @@ describe.each(IMAGES)("MySqlContainer (%s)", { timeout: 240_000 }, (image) => {
   });
   // }
 
-  it("should execute a query and return the result", async () => {
+  it.concurrent("should execute a query and return the result", async () => {
     // mysqlExecuteQuery {
     await using container = await new MySqlContainer(image).start();
 
@@ -98,7 +98,7 @@ describe.each(IMAGES)("MySqlContainer (%s)", { timeout: 240_000 }, (image) => {
     // }
   });
 
-  it("should execute a query as root user", async () => {
+  it.concurrent("should execute a query as root user", async () => {
     await using container = await new MySqlContainer(image).withUsername("customUsername").start();
 
     // Test non-root user
@@ -110,7 +110,7 @@ describe.each(IMAGES)("MySqlContainer (%s)", { timeout: 240_000 }, (image) => {
     expect(rootQueryResult).toEqual(expect.stringContaining("user\nroot"));
   });
 
-  it("should work with restarted container", async () => {
+  it.concurrent("should work with restarted container", async () => {
     await using container = await new MySqlContainer(image).start();
     await container.restart();
 

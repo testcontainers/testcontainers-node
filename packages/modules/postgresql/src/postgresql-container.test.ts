@@ -7,8 +7,8 @@ const SSL_CA_CERT = path.resolve(__dirname, "test-certs/ca.crt");
 const SSL_SERVER_CERT = path.resolve(__dirname, "test-certs/server.crt");
 const SSL_SERVER_KEY = path.resolve(__dirname, "test-certs/server.key");
 
-describe.each(IMAGES)("PostgreSqlContainer (%s)", { timeout: 180_000 }, (image) => {
-  it("should connect and return a query result", async () => {
+describe.each(IMAGES)("PostgreSqlContainer (%s)", { concurrent: false, timeout: 180_000 }, (image) => {
+  it.concurrent("should connect and return a query result", async () => {
     // pgConnect {
     await using container = await new PostgreSqlContainer(image).start();
 
@@ -28,7 +28,7 @@ describe.each(IMAGES)("PostgreSqlContainer (%s)", { timeout: 180_000 }, (image) 
     // }
   });
 
-  it("should work with database URI", async () => {
+  it.concurrent("should work with database URI", async () => {
     // pgUriConnect {
     await using container = await new PostgreSqlContainer(image).start();
 
@@ -44,7 +44,7 @@ describe.each(IMAGES)("PostgreSqlContainer (%s)", { timeout: 180_000 }, (image) 
     await client.end();
   });
 
-  it("should set database", async () => {
+  it.concurrent("should set database", async () => {
     // pgSetDatabase {
     await using container = await new PostgreSqlContainer(image).withDatabase("customDatabase").start();
     // }
@@ -64,7 +64,7 @@ describe.each(IMAGES)("PostgreSqlContainer (%s)", { timeout: 180_000 }, (image) 
     await client.end();
   });
 
-  it("should set username", async () => {
+  it.concurrent("should set username", async () => {
     // pgSetUsername {
     await using container = await new PostgreSqlContainer(image).withUsername("customUsername").start();
     // }
@@ -84,7 +84,7 @@ describe.each(IMAGES)("PostgreSqlContainer (%s)", { timeout: 180_000 }, (image) 
     await client.end();
   });
 
-  it("should work with restarted container", async () => {
+  it.concurrent("should work with restarted container", async () => {
     await using container = await new PostgreSqlContainer(image).start();
     await container.restart();
 
@@ -103,7 +103,7 @@ describe.each(IMAGES)("PostgreSqlContainer (%s)", { timeout: 180_000 }, (image) 
     await client.end();
   });
 
-  it("should allow custom healthcheck", async () => {
+  it.concurrent("should allow custom healthcheck", async () => {
     const container = new PostgreSqlContainer(image).withHealthCheck({
       test: ["CMD-SHELL", "exit 1"],
       interval: 100,
@@ -114,7 +114,7 @@ describe.each(IMAGES)("PostgreSqlContainer (%s)", { timeout: 180_000 }, (image) 
     await expect(() => container.start()).rejects.toThrow();
   });
 
-  it("should connect with SSL", async () => {
+  it.concurrent("should connect with SSL", async () => {
     // pgSslConnect {
     await using container = await new PostgreSqlContainer(image)
       .withSSLCert(SSL_CA_CERT, SSL_SERVER_CERT, SSL_SERVER_KEY)
@@ -139,7 +139,7 @@ describe.each(IMAGES)("PostgreSqlContainer (%s)", { timeout: 180_000 }, (image) 
     // }
   });
 
-  it("should validate SSL certificate paths", () => {
+  it.concurrent("should validate SSL certificate paths", () => {
     const container = new PostgreSqlContainer(image);
 
     expect(() => container.withSSL("", "server.key")).toThrow("SSL certificate file should not be empty.");

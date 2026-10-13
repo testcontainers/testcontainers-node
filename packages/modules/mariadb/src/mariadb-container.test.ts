@@ -4,8 +4,8 @@ import { MariaDbContainer } from "./mariadb-container";
 
 const IMAGES = ["mariadb:10.11.19", "mariadb:11.8.9", "mariadb:12.3.3", getImage(__dirname)];
 
-describe.each(IMAGES)("MariaDbContainer (%s)", { timeout: 240_000 }, (image) => {
-  it("should connect and execute query", async () => {
+describe.each(IMAGES)("MariaDbContainer (%s)", { concurrent: false, timeout: 240_000 }, (image) => {
+  it.concurrent("should connect and execute query", async () => {
     // mariaDbConnect {
     await using container = await new MariaDbContainer(image).start();
 
@@ -24,7 +24,7 @@ describe.each(IMAGES)("MariaDbContainer (%s)", { timeout: 240_000 }, (image) => 
     // }
   });
 
-  it("should work with database URI", async () => {
+  it.concurrent("should work with database URI", async () => {
     // mariaDbUriConnect {
     const username = "testUser";
     const password = "testPassword";
@@ -53,7 +53,7 @@ describe.each(IMAGES)("MariaDbContainer (%s)", { timeout: 240_000 }, (image) => 
     // }
   });
 
-  it("should set database", async () => {
+  it.concurrent("should set database", async () => {
     // mariaDbSetDatabase {
     await using container = await new MariaDbContainer(image).withDatabase("customDatabase").start();
 
@@ -72,7 +72,7 @@ describe.each(IMAGES)("MariaDbContainer (%s)", { timeout: 240_000 }, (image) => 
     // }
   });
 
-  it("should set username", async () => {
+  it.concurrent("should set username", async () => {
     // mariaDbSetUsername {
     await using container = await new MariaDbContainer(image).withUsername("customUsername").start();
 
@@ -91,7 +91,7 @@ describe.each(IMAGES)("MariaDbContainer (%s)", { timeout: 240_000 }, (image) => 
     // }
   });
 
-  it("should work with restarted container", async () => {
+  it.concurrent("should work with restarted container", async () => {
     await using container = await new MariaDbContainer(image).start();
     await container.restart();
 
