@@ -10,9 +10,8 @@ describe("StartupCheckStrategy", { timeout: 180_000 }, () => {
         if (this.count < 1) {
           this.count++;
           return "PENDING";
-        } else {
-          return "SUCCESS";
         }
+        return "SUCCESS";
       }
     })();
 

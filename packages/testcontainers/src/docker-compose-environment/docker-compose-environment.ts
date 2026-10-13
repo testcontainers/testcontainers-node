@@ -30,7 +30,7 @@ export class DockerComposeEnvironment {
   private environment: Environment = {};
   private pullPolicy: ImagePullPolicy = PullPolicy.defaultPolicy();
   private defaultWaitStrategy: WaitStrategy | undefined;
-  private waitStrategy: { [containerName: string]: WaitStrategy } = {};
+  private readonly waitStrategy: { [containerName: string]: WaitStrategy } = {};
   private startupTimeoutMs?: number;
   private clientOptions: Partial<ComposeOptions> = {};
 

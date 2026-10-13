@@ -8,8 +8,8 @@ const USER_ARGUMENT_KEY = "--user";
 const PASS_ARGUMENT_KEY = "--pass";
 
 export class NatsContainer extends GenericContainer {
-  private args = new Set<string>();
-  private values = new Map<string, string | undefined>();
+  private readonly args = new Set<string>();
+  private readonly values = new Map<string, string | undefined>();
 
   constructor(image: string) {
     super(image);
@@ -62,9 +62,8 @@ export class NatsContainer extends GenericContainer {
 
     if (name.length === 1) {
       return `-${name}`;
-    } else {
-      return `--${name}`;
     }
+    return `--${name}`;
   }
 
   public override async start(): Promise<StartedNatsContainer> {

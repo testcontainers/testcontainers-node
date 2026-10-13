@@ -15,7 +15,9 @@ async function getRequestBodyFromReadableStream(stream: ReadableStream<Uint8Arra
     while (true) {
       const { value, done } = await reader.read();
 
-      if (done) break;
+      if (done) {
+        break;
+      }
 
       if (value) {
         fullString += decoder.decode(value, { stream: true });
@@ -112,7 +114,9 @@ describe("CloudStorageEmulatorContainer", { concurrent: false, timeout: 240_000 
     let configUpdated = false;
 
     server.events.on("request:start", ({ request }) => {
-      if (request.url.includes("/_internal/config")) configUpdated = true;
+      if (request.url.includes("/_internal/config")) {
+        configUpdated = true;
+      }
     });
 
     await using container = await new CloudStorageEmulatorContainer(IMAGE).start();
@@ -126,7 +130,9 @@ describe("CloudStorageEmulatorContainer", { concurrent: false, timeout: 240_000 
     let configUpdated = false;
 
     server.events.on("request:start", ({ request }) => {
-      if (request.url.includes("/_internal/config")) configUpdated = true;
+      if (request.url.includes("/_internal/config")) {
+        configUpdated = true;
+      }
     });
 
     await using container = await new CloudStorageEmulatorContainer(IMAGE).withAutoUpdateExternalUrl(false).start();

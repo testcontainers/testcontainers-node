@@ -311,6 +311,20 @@ export class CouchbaseContainer extends GenericContainer {
       body.set("mgmtSSL", container.getMappedPort(PORTS.MGMT_SSL_PORT).toString());
     }
 
+    this.setServicePorts(body, container);
+
+    const response = await this.doHttpRequest(
+      container.getHost(),
+      container.getMappedPort(PORTS.MGMT_PORT),
+      "/node/controller/setupAlternateAddresses/external",
+      "PUT",
+      body,
+      true
+    );
+    await this.checkResponse(response, "Could not configure external ports");
+  }
+
+  private setServicePorts(body: URLSearchParams, container: StartedTestContainer) {
     if (this.enabledServices.has(CouchbaseService.KV)) {
       body.set("kv", container.getMappedPort(PORTS.KV_PORT).toString());
       body.set("capi", container.getMappedPort(PORTS.VIEW_PORT).toString());
@@ -348,16 +362,6 @@ export class CouchbaseContainer extends GenericContainer {
         body.set("eventingSSL", container.getMappedPort(PORTS.EVENTING_SSL_PORT).toString());
       }
     }
-
-    const response = await this.doHttpRequest(
-      container.getHost(),
-      container.getMappedPort(PORTS.MGMT_PORT),
-      "/node/controller/setupAlternateAddresses/external",
-      "PUT",
-      body,
-      true
-    );
-    await this.checkResponse(response, "Could not configure external ports");
   }
 
   private async configureIndexer(container: StartedTestContainer) {
