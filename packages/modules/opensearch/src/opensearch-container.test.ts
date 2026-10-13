@@ -4,8 +4,8 @@ import { OpenSearchContainer } from "./opensearch-container";
 
 const IMAGES = ["opensearchproject/opensearch:2.19.6", getImage(__dirname)];
 
-describe.each(IMAGES)("OpenSearchContainer (%s)", { timeout: 180_000 }, (image) => {
-  it("should create an index", async () => {
+describe.each(IMAGES)("OpenSearchContainer (%s)", { concurrent: false, timeout: 180_000 }, (image) => {
+  it.concurrent("should create an index", async () => {
     // opensearchCreateIndex {
     await using container = await new OpenSearchContainer(image).start();
 
@@ -27,7 +27,7 @@ describe.each(IMAGES)("OpenSearchContainer (%s)", { timeout: 180_000 }, (image) 
     // }
   });
 
-  it("should index a document", async () => {
+  it.concurrent("should index a document", async () => {
     // opensearchIndexDocument {
     await using container = await new OpenSearchContainer(image).start();
 
@@ -55,7 +55,7 @@ describe.each(IMAGES)("OpenSearchContainer (%s)", { timeout: 180_000 }, (image) 
     // }
   });
 
-  it("should work with restarted container", async () => {
+  it.concurrent("should work with restarted container", async () => {
     await using container = await new OpenSearchContainer(image).start();
     await container.restart();
 
@@ -76,11 +76,11 @@ describe.each(IMAGES)("OpenSearchContainer (%s)", { timeout: 180_000 }, (image) 
     expect(existsResponse.body).toBe(true);
   });
 
-  it("should throw when given an invalid password", () => {
+  it.concurrent("should throw when given an invalid password", () => {
     expect(() => new OpenSearchContainer(image).withPassword("weakpwd")).toThrowError(/Password "weakpwd" is too weak/);
   });
 
-  it("should set custom password", async () => {
+  it.concurrent("should set custom password", async () => {
     // opensearchCustomPassword {
     await using container = await new OpenSearchContainer(image).withPassword("Str0ng!Passw0rd2025").start();
     // }
@@ -102,7 +102,7 @@ describe.each(IMAGES)("OpenSearchContainer (%s)", { timeout: 180_000 }, (image) 
     expect(body).toBe(true);
   });
 
-  it("should be reachable with security disabled", async () => {
+  it.concurrent("should be reachable with security disabled", async () => {
     // opensearchDisableSecurity {
     await using container = await new OpenSearchContainer(image).withSecurityEnabled(false).start();
 

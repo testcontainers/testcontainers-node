@@ -4,8 +4,8 @@ import { MongoDBContainer } from "./mongodb-container";
 
 const IMAGES = ["mongo:7.0.43", "mongo:8.3.11", getImage(__dirname)];
 
-describe.each(IMAGES)("MongoDBContainer (%s)", { timeout: 240_000 }, (image) => {
-  it("should connect", async () => {
+describe.each(IMAGES)("MongoDBContainer (%s)", { concurrent: false, timeout: 240_000 }, (image) => {
+  it.concurrent("should connect", async () => {
     // connectMongo {
     await using container = await new MongoDBContainer(image).start();
 
@@ -22,7 +22,7 @@ describe.each(IMAGES)("MongoDBContainer (%s)", { timeout: 240_000 }, (image) => 
     // }
   });
 
-  it("should connect with credentials", async () => {
+  it.concurrent("should connect with credentials", async () => {
     // connectWithCredentials {
     await using container = await new MongoDBContainer(image)
       .withUsername("customUsername")
