@@ -5,7 +5,7 @@ import { GenericContainer } from "../generic-container/generic-container";
 export class SocatContainer extends GenericContainer {
   private readonly targets: { [exposePort: number]: string } = {};
 
-  constructor(image = "alpine/socat:1.7.4.3-r0") {
+  constructor(image = "alpine/socat:1.8.1.3") {
     super(image);
     this.withEntrypoint(["/bin/sh"]);
     this.withName(`testcontainers-socat-${new RandomUuid().nextUuid()}`);
