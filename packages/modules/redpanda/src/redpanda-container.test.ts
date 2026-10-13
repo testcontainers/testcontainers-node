@@ -4,8 +4,7 @@ import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { RedpandaContainer } from "./redpanda-container";
 import { assertMessageProducedAndConsumed } from "./test-helper";
 
-const IMAGE = getImage(__dirname);
-const OLDEST_IMAGE = "docker.io/redpandadata/redpanda:v26.1.18";
+const IMAGES = ["docker.io/redpandadata/redpanda:v26.1.18", getImage(__dirname)];
 
 // Writes each copied file in two parts with a pause between them, as a busy Docker host can.
 class SlowCopyRedpandaContainer extends RedpandaContainer {
@@ -26,7 +25,7 @@ class SlowCopyRedpandaContainer extends RedpandaContainer {
   }
 }
 
-describe.each([IMAGE, OLDEST_IMAGE])("RedpandaContainer (%s)", { timeout: 240_000 }, (image) => {
+describe.each(IMAGES)("RedpandaContainer (%s)", { timeout: 240_000 }, (image) => {
   it("should connect", async () => {
     // connectToKafka {
     await using container = await new RedpandaContainer(image).start();

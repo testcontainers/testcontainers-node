@@ -5,35 +5,29 @@ import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { KafkaContainer, type SaslSslListenerOptions } from "./kafka-container";
 import { assertMessageProducedAndConsumed } from "./test-helper";
 
-const IMAGE = getImage(__dirname);
+const IMAGES = ["confluentinc/cp-kafka:8.2.4", getImage(__dirname)];
 
-describe("KafkaContainer", { timeout: 240_000 }, () => {
+describe.each(IMAGES)("KafkaContainer (%s)", { timeout: 240_000 }, (image) => {
   const certificatesDir = path.resolve(__dirname, "..", "test-certs");
 
   it("should connect", async () => {
     // kafkaLatestConnect {
-    await using container = await new KafkaContainer(IMAGE).start();
+    await using container = await new KafkaContainer(image).start();
 
     await assertMessageProducedAndConsumed(container);
     // }
   });
 
-  it.each(["confluentinc/cp-kafka:8.2.4"])("should connect with %s", async (image) => {
-    await using container = await new KafkaContainer(image).start();
-
-    await assertMessageProducedAndConsumed(container);
-  });
-
   it("should connect with custom network", async () => {
     await using network = await new Network().start();
-    await using container = await new KafkaContainer(IMAGE).withNetwork(network).start();
+    await using container = await new KafkaContainer(image).withNetwork(network).start();
 
     await assertMessageProducedAndConsumed(container);
   });
 
   it("should be reusable", async () => {
-    await using container1 = await new KafkaContainer(IMAGE).withReuse().start();
-    const container2 = await new KafkaContainer(IMAGE).withReuse().start();
+    await using container1 = await new KafkaContainer(image).withReuse().start();
+    const container2 = await new KafkaContainer(image).withReuse().start();
 
     expect(container2.getId()).toBe(container1.getId());
   });
@@ -59,7 +53,7 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
       },
     };
 
-    await using container = await new KafkaContainer(IMAGE).withSaslSslListener(saslConfig).start();
+    await using container = await new KafkaContainer(image).withSaslSslListener(saslConfig).start();
 
     await assertMessageProducedAndConsumed(
       container,
@@ -101,13 +95,13 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
       },
     };
 
-    await using _ = await new KafkaContainer(IMAGE)
+    await using _ = await new KafkaContainer(image)
       .withNetwork(network)
       .withNetworkAliases("kafka")
       .withSaslSslListener(saslConfig)
       .start();
 
-    await using kafkaCliContainer = await new GenericContainer(IMAGE)
+    await using kafkaCliContainer = await new GenericContainer(image)
       .withNetwork(network)
       .withCommand(["bash", "-c", "sleep infinity"])
       .withCopyFilesToContainer([
