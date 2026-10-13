@@ -1,6 +1,6 @@
 import type { Environment } from "../../../types";
 
-export type ExecOptions = { workingDir: string; user: string; env: Environment; log: boolean };
+export type ExecOptions = { workingDir: string; user: string; env: Environment; log: boolean; signal: AbortSignal };
 
 export type ExecResult = { output: string; stdout: string; stderr: string; exitCode: number };
 

@@ -22,4 +22,4 @@ Biome enforces the lint and formatting rules (`biome.json`). This skill covers w
 
 - Configure containers through the `with*` methods. Don't assign to `this.createOpts` or `this.hostConfig`.
 - Wait with a `WaitStrategy` run through `waitForContainer`. Don't call `waitUntilReady` on a strategy or write a polling loop.
-- A wait added after start gets what is left of the user's startup timeout, never a fresh one.
+- A wait added after start is passed the startup signal its callback receives, so it ends with the user's startup timeout instead of starting a new one.

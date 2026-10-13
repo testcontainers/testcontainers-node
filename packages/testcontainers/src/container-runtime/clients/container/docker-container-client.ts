@@ -130,11 +130,13 @@ export class DockerContainerClient implements ContainerClient {
     }
   }
 
-  async inspect(container: Dockerode.Container): Promise<ContainerInspectInfo> {
+  async inspect(container: Dockerode.Container, opts?: { signal?: AbortSignal }): Promise<ContainerInspectInfo> {
     try {
-      return await container.inspect();
+      return await container.inspect(opts?.signal && { abortSignal: opts.signal });
     } catch (err) {
-      log.error(`Failed to inspect container: ${err}`, { containerId: container.id });
+      if (!opts?.signal?.aborted) {
+        log.error(`Failed to inspect container: ${err}`, { containerId: container.id });
+      }
       throw err;
     }
   }
@@ -208,10 +210,12 @@ export class DockerContainerClient implements ContainerClient {
   }
 
   async exec(container: Container, command: string[], opts?: Partial<ExecOptions>): Promise<ExecResult> {
+    const signal = opts?.signal;
     const execOptions: ExecCreateOptions = {
       Cmd: command,
       AttachStdout: true,
       AttachStderr: true,
+      abortSignal: signal,
     };
 
     if (opts?.env !== undefined) {
@@ -229,12 +233,14 @@ export class DockerContainerClient implements ContainerClient {
     const stderrChunks: string[] = [];
 
     try {
+      signal?.throwIfAborted();
+
       if (opts?.log) {
         log.debug(`Execing container with command "${command.join(" ")}"...`, { containerId: container.id });
       }
 
       const exec = await container.exec(execOptions);
-      const stream = await exec.start({ stdin: true, Detach: false, Tty: false });
+      const stream = await exec.start({ stdin: true, Detach: false, Tty: false, abortSignal: signal });
 
       const stdoutStream = new PassThrough();
       const stderrStream = new PassThrough();
@@ -255,20 +261,27 @@ export class DockerContainerClient implements ContainerClient {
       processStream(stdoutStream, stdoutChunks);
       processStream(stderrStream, stderrChunks);
 
+      let rejectOnAbort = () => {};
+
       try {
+        signal?.throwIfAborted();
+
         await new Promise<void>((res, rej) => {
+          rejectOnAbort = () => rej(signal?.reason);
           stream.on("end", res);
           stream.on("error", rej);
+          signal?.addEventListener("abort", rejectOnAbort);
         });
 
         stdoutStream.end();
         stderrStream.end();
         await Promise.all([finished(stdoutStream), finished(stderrStream)]);
       } finally {
+        signal?.removeEventListener("abort", rejectOnAbort);
         stream.destroy();
       }
 
-      const inspectResult = await exec.inspect();
+      const inspectResult = await exec.inspect({ abortSignal: signal });
       const exitCode = inspectResult.ExitCode ?? -1;
       const output = outputChunks.join("");
       const stdout = stdoutChunks.join("");
@@ -279,9 +292,11 @@ export class DockerContainerClient implements ContainerClient {
       }
       return { output, stdout, stderr, exitCode };
     } catch (err) {
-      log.error(`Failed to exec container with command "${command.join(" ")}": ${err}: ${outputChunks.join("")}`, {
-        containerId: container.id,
-      });
+      if (!signal?.aborted) {
+        log.error(`Failed to exec container with command "${command.join(" ")}": ${err}: ${outputChunks.join("")}`, {
+          containerId: container.id,
+        });
+      }
       throw err;
     }
   }

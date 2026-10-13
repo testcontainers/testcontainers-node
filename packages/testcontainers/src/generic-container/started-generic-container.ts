@@ -4,7 +4,7 @@ import archiver from "archiver";
 import AsyncLock from "async-lock";
 import type Dockerode from "dockerode";
 import type { ContainerInspectInfo } from "dockerode";
-import { containerLog, createStartupDeadline, log, withStartupDeadline } from "../common";
+import { containerLog, createStartupSignal, log } from "../common";
 import { type ContainerRuntimeClient, getContainerRuntimeClient } from "../container-runtime";
 // biome-ignore lint/suspicious/noImportCycles: Ryuk and sshd run as GenericContainers; only dereferenced at runtime
 import { getReaper } from "../reaper/reaper";
@@ -94,10 +94,10 @@ export class StartedGenericContainer implements StartedTestContainer {
     const client = await getContainerRuntimeClient();
     const resolvedOptions: RestartOptions = { timeout: 0, ...options };
     await client.container.restart(this.container, resolvedOptions);
-    const startupDeadline = createStartupDeadline(this.startupTimeoutMs);
+    const startupSignal = createStartupSignal(this.startupTimeoutMs);
 
     this.inspectResult = await inspectContainerUntilPortsExposed(
-      () => client.container.inspect(this.container),
+      (signal) => client.container.inspect(this.container, { signal }),
       this.container.id
     );
     const mappedInspectResult = mapInspectResult(this.inspectResult);
@@ -116,9 +116,7 @@ export class StartedGenericContainer implements StartedTestContainer {
       })
     );
 
-    await withStartupDeadline(startupDeadline, () =>
-      waitForContainer(client, this.container, this.waitStrategy, this.boundPorts, startTime)
-    );
+    await waitForContainer(client, this.container, this.waitStrategy, this.boundPorts, startTime, startupSignal);
     log.info(`Restarted container`, { containerId: this.container.id });
   }
 

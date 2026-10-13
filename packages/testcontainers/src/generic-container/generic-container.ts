@@ -3,15 +3,7 @@ import type { Readable } from "node:stream";
 import archiver from "archiver";
 import AsyncLock from "async-lock";
 import type { Container, ContainerCreateOptions, ContainerInspectInfo, HostConfig } from "dockerode";
-import {
-  containerLog,
-  createStartupDeadline,
-  hash,
-  log,
-  type StartupDeadline,
-  toNanos,
-  withStartupDeadline,
-} from "../common";
+import { containerLog, createStartupSignal, hash, log, toNanos } from "../common";
 import { type ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "../container-runtime";
 import { CONTAINER_STATUSES } from "../container-runtime/clients/container/types";
 import type { StartedNetwork } from "../network/network";
@@ -100,7 +92,7 @@ export class GenericContainer implements TestContainer {
   protected containerStarting?(
     inspectResult: InspectResult,
     reused: boolean,
-    startupDeadline?: StartupDeadline
+    startupSignal?: AbortSignal
   ): Promise<void>;
 
   public async start(): Promise<StartedTestContainer> {
@@ -179,12 +171,15 @@ export class GenericContainer implements TestContainer {
   }
 
   private async reuseContainer(client: ContainerRuntimeClient, container: Container) {
-    const startupDeadline = createStartupDeadline(this.startupTimeoutMs);
+    const startupSignal = createStartupSignal(this.startupTimeoutMs);
     let inspectResult = await client.container.inspect(container);
     if (!inspectResult.State.Running) {
       log.debug("Reused container is not running, attempting to start it");
       await client.container.start(container);
-      inspectResult = await inspectContainerUntilPortsExposed(() => client.container.inspect(container), container.id);
+      inspectResult = await inspectContainerUntilPortsExposed(
+        (signal) => client.container.inspect(container, { signal }),
+        container.id
+      );
     }
 
     const mappedInspectResult = mapInspectResult(inspectResult);
@@ -196,7 +191,7 @@ export class GenericContainer implements TestContainer {
       waitStrategy.withStartupTimeout(this.startupTimeoutMs);
     }
 
-    await withStartupDeadline(startupDeadline, () => waitForContainer(client, container, waitStrategy, boundPorts));
+    await waitForContainer(client, container, waitStrategy, boundPorts, undefined, startupSignal);
 
     return new StartedGenericContainer(
       container,
@@ -239,26 +234,14 @@ export class GenericContainer implements TestContainer {
       await this.containerCreated(container.id);
     }
 
-    const startupDeadline = createStartupDeadline(this.startupTimeoutMs);
+    const startupSignal = createStartupSignal(this.startupTimeoutMs);
     await client.container.start(container);
     log.info(`Started container for image "${this.createOpts.Image}"`, { containerId: container.id });
 
     const inspectResult = await inspectContainerUntilPortsExposed(
-      () => client.container.inspect(container),
+      (signal) => client.container.inspect(container, { signal }),
       container.id
     );
-
-    return withStartupDeadline(startupDeadline, () =>
-      this.waitUntilContainerReady(client, container, inspectResult, startupDeadline)
-    );
-  }
-
-  private async waitUntilContainerReady(
-    client: ContainerRuntimeClient,
-    container: Container,
-    inspectResult: ContainerInspectInfo,
-    startupDeadline: StartupDeadline | undefined
-  ): Promise<StartedTestContainer> {
     const mappedInspectResult = mapInspectResult(inspectResult);
     const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, mappedInspectResult).filter(
       this.exposedPorts
@@ -277,7 +260,7 @@ export class GenericContainer implements TestContainer {
     }
 
     if (this.containerStarting) {
-      await this.containerStarting(mappedInspectResult, false, startupDeadline);
+      await this.containerStarting(mappedInspectResult, false, startupSignal);
     }
 
     const waitStrategy = await this.selectWaitStrategy(client, inspectResult);
@@ -285,7 +268,7 @@ export class GenericContainer implements TestContainer {
       waitStrategy.withStartupTimeout(this.startupTimeoutMs);
     }
 
-    await waitForContainer(client, container, waitStrategy, boundPorts);
+    await waitForContainer(client, container, waitStrategy, boundPorts, undefined, startupSignal);
 
     const startedContainer = new StartedGenericContainer(
       container,
@@ -299,7 +282,7 @@ export class GenericContainer implements TestContainer {
     );
 
     if (this.containerStarted) {
-      await this.containerStarted(startedContainer, mappedInspectResult, false, startupDeadline);
+      await this.containerStarted(startedContainer, mappedInspectResult, false, startupSignal);
     }
 
     return startedContainer;
@@ -342,7 +325,7 @@ export class GenericContainer implements TestContainer {
     container: StartedTestContainer,
     inspectResult: InspectResult,
     reused: boolean,
-    startupDeadline?: StartupDeadline
+    startupSignal?: AbortSignal
   ): Promise<void>;
 
   public withCommand(command: string[]): this {

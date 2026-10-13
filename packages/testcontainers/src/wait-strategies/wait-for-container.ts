@@ -9,12 +9,13 @@ export const waitForContainer = async (
   container: Container,
   waitStrategy: WaitStrategy,
   boundPorts: BoundPorts,
-  startTime?: Date
+  startTime?: Date,
+  startupSignal?: AbortSignal
 ): Promise<void> => {
   log.debug(`Waiting for container to be ready...`, { containerId: container.id });
 
   try {
-    await waitStrategy.waitUntilReady(container, boundPorts, startTime);
+    await waitStrategy.waitUntilReady(container, boundPorts, startTime, startupSignal);
     log.info(`Container is ready`, { containerId: container.id });
   } catch (err) {
     log.error(`Container failed to be ready: ${err}`, { containerId: container.id });

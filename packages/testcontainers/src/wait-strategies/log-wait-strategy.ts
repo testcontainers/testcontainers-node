@@ -1,6 +1,6 @@
 import byline from "byline";
 import type Dockerode from "dockerode";
-import { limitToStartupDeadline, log } from "../common";
+import { log } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
 import type { BoundPorts } from "../utils/bound-ports";
 import { AbstractWaitStrategy } from "./wait-strategy";
@@ -18,17 +18,28 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
   public async waitUntilReady(
     container: Dockerode.Container,
     _boundPorts: BoundPorts,
-    startTime?: Date
+    startTime?: Date,
+    startupSignal?: AbortSignal
   ): Promise<void> {
     log.debug(`Waiting for log message "${this.message}"...`, { containerId: container.id });
     const client = await getContainerRuntimeClient();
     const stream = await client.container.logs(container, { since: startTime ? startTime.getTime() / 1000 : 0 });
     return new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => {
+      const timeOut = () => {
+        stopTimeout();
         const message = `Log message "${this.message}" not received after ${this.startupTimeoutMs}ms`;
         log.error(message, { containerId: container.id });
         reject(new Error(message));
-      }, limitToStartupDeadline(this.startupTimeoutMs));
+      };
+      const timeout = setTimeout(timeOut, this.startupTimeoutMs);
+      startupSignal?.addEventListener("abort", timeOut, { once: true });
+      const stopTimeout = () => {
+        clearTimeout(timeout);
+        startupSignal?.removeEventListener("abort", timeOut);
+      };
+      if (startupSignal?.aborted) {
+        timeOut();
+      }
 
       const comparisonFn: (line: string) => boolean = (line: string) => {
         if (this.message instanceof RegExp) {
@@ -46,7 +57,7 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
         if (comparisonFn(line)) {
           if (++count === this.times) {
             stream.destroy();
-            clearTimeout(timeout);
+            stopTimeout();
             log.debug(`Log wait strategy complete`, { containerId: container.id });
             resolve();
           }
@@ -58,7 +69,7 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
         .on("err", lineProcessor)
         .on("end", () => {
           stream.destroy();
-          clearTimeout(timeout);
+          stopTimeout();
           const message = `Log stream ended and message "${this.message}" was not received`;
           log.error(message, { containerId: container.id });
           reject(new Error(message));

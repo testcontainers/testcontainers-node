@@ -1,5 +1,5 @@
 import type { ContainerInfo } from "dockerode";
-import { containerLog, createStartupDeadline, log, RandomUuid, type Uuid, withStartupDeadline } from "../common";
+import { containerLog, createStartupSignal, log, RandomUuid, type Uuid } from "../common";
 import { type ComposeOptions, getContainerRuntimeClient, parseComposeContainerName } from "../container-runtime";
 import { StartedGenericContainer } from "../generic-container/started-generic-container";
 import { getReaper } from "../reaper/reaper";
@@ -152,7 +152,7 @@ export class DockerComposeEnvironment {
       },
       services
     );
-    const startupDeadline = createStartupDeadline(this.startupTimeoutMs);
+    const startupSignal = createStartupSignal(this.startupTimeoutMs);
 
     const startedContainers = (await client.container.list()).filter(
       (container) => container.Labels["com.docker.compose.project"] === this.projectName
@@ -194,9 +194,7 @@ export class DockerComposeEnvironment {
           }
 
           try {
-            await withStartupDeadline(startupDeadline, () =>
-              waitForContainer(client, container, waitStrategy, boundPorts)
-            );
+            await waitForContainer(client, container, waitStrategy, boundPorts, undefined, startupSignal);
           } catch (err) {
             try {
               await client.compose.down(options, { removeVolumes: true, timeout: 0 });

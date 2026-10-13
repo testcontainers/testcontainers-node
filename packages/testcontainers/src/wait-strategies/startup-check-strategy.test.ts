@@ -1,3 +1,4 @@
+import type Dockerode from "dockerode";
 import { GenericContainer } from "../generic-container/generic-container";
 import { StartupCheckStrategy, type StartupStatus } from "./startup-check-strategy";
 
@@ -34,6 +35,29 @@ describe("StartupCheckStrategy", { timeout: 180_000 }, () => {
         .withStartupTimeout(3000)
         .start()
     ).rejects.toThrowError("Container not accessible after 3000ms");
+  });
+
+  it("should abort the signal passed to the startup check when the timeout is reached", async () => {
+    const signals: (AbortSignal | undefined)[] = [];
+    const waitStrategy = new (class extends StartupCheckStrategy {
+      public override async checkStartupState(
+        _dockerClient: Dockerode,
+        _containerId: string,
+        signal?: AbortSignal
+      ): Promise<StartupStatus> {
+        signals.push(signal);
+        return "PENDING";
+      }
+    })();
+
+    await expect(() =>
+      new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+        .withWaitStrategy(waitStrategy)
+        .withStartupTimeout(1000)
+        .start()
+    ).rejects.toThrowError("Container not accessible after 1000ms");
+    expect(signals.length).toBeGreaterThan(0);
+    expect(signals.every((signal) => signal?.aborted)).toBe(true);
   });
 
   it("should fail immediately when status FAILED", async () => {

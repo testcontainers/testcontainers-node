@@ -5,10 +5,9 @@ import {
   GenericContainer,
   getContainerRuntimeClient,
   type InspectResult,
-  IntervalRetry,
   log,
+  poll,
   type StartedTestContainer,
-  type StartupDeadline,
   Wait,
   type WaitStrategy,
 } from "testcontainers";
@@ -176,14 +175,17 @@ export class CouchbaseContainer extends GenericContainer {
     client: ContainerRuntimeClient,
     inspectResult: InspectResult,
     startedTestContainer: StartedTestContainer,
-    timeoutMs: number
+    timeoutMs: number,
+    startupSignal?: AbortSignal
   ) {
     return Wait.forHttp("/pools", PORTS.MGMT_PORT)
       .forStatusCode(200)
       .withStartupTimeout(timeoutMs)
       .waitUntilReady(
         client.container.getById(startedTestContainer.getId()),
-        BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, inspectResult)
+        BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, inspectResult),
+        undefined,
+        startupSignal
       );
   }
 
@@ -382,7 +384,8 @@ export class CouchbaseContainer extends GenericContainer {
     client: ContainerRuntimeClient,
     inspectResult: InspectResult,
     startedTestContainer: StartedTestContainer,
-    remainingStartupMs: () => number
+    timeoutMs: number,
+    startupSignal?: AbortSignal
   ) {
     log.debug(`Creating ${this.buckets.size} buckets (and corresponding indexes).`);
     for (const bucket of this.buckets) {
@@ -408,7 +411,7 @@ export class CouchbaseContainer extends GenericContainer {
       await Wait.forHttp(`/pools/default/b/${bucket.getName()}`, PORTS.MGMT_PORT)
         .withBasicCredentials(this.username, this.password)
         .forStatusCode(200)
-        .withStartupTimeout(remainingStartupMs())
+        .withStartupTimeout(timeoutMs)
         .forResponsePredicate((response) => {
           try {
             const jsonResponse = JSON.parse(response);
@@ -433,13 +436,15 @@ export class CouchbaseContainer extends GenericContainer {
         })
         .waitUntilReady(
           client.container.getById(startedTestContainer.getId()),
-          BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, inspectResult)
+          BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, inspectResult),
+          undefined,
+          startupSignal
         );
 
       await Wait.forHttp(`/pools/default/buckets/${bucket.getName()}`, PORTS.MGMT_PORT)
         .withBasicCredentials(this.username, this.password)
         .forStatusCode(200)
-        .withStartupTimeout(remainingStartupMs())
+        .withStartupTimeout(timeoutMs)
         .forResponsePredicate((response) => {
           try {
             const jsonResponse = JSON.parse(response);
@@ -451,13 +456,13 @@ export class CouchbaseContainer extends GenericContainer {
         })
         .waitUntilReady(
           client.container.getById(startedTestContainer.getId()),
-          BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, inspectResult)
+          BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, inspectResult),
+          undefined,
+          startupSignal
         );
 
       if (this.enabledServices.has(CouchbaseService.QUERY)) {
-        const timeoutMs = remainingStartupMs();
-
-        await new IntervalRetry<Response | undefined, Error>(1000).retryUntil(
+        await poll(
           async () => {
             try {
               const body = new URLSearchParams();
@@ -482,20 +487,19 @@ export class CouchbaseContainer extends GenericContainer {
               return undefined;
             }
           },
-          async (response) => {
-            if (response === undefined) {
-              return false;
-            }
-            const jsonResponse = (await response.json()) as { results: Array<{ present: boolean }> };
-            return jsonResponse.results[0].present;
-          },
-          () => {
-            const message = `URL /query/service not accessible after ${timeoutMs}ms`;
-            log.error(message, { containerId: client.container.getById(startedTestContainer.getId()).id });
-
-            throw new Error(message);
-          },
-          timeoutMs
+          {
+            until: async (response) => {
+              if (response === undefined) {
+                return false;
+              }
+              const jsonResponse = (await response.json()) as { results: Array<{ present: boolean }> };
+              return jsonResponse.results[0].present;
+            },
+            intervalMs: 1000,
+            timeoutMs,
+            timeoutMessage: `URL /query/service not accessible after ${timeoutMs}ms`,
+            signal: startupSignal,
+          }
         );
       }
 
@@ -515,9 +519,7 @@ export class CouchbaseContainer extends GenericContainer {
 
           await this.checkResponse(response, `Could not create primary index for bucket ${bucket.getName()}`);
 
-          const timeoutMs = remainingStartupMs();
-
-          await new IntervalRetry<Response | undefined, Error>(1000).retryUntil(
+          await poll(
             async () => {
               try {
                 const body = new URLSearchParams();
@@ -545,20 +547,19 @@ export class CouchbaseContainer extends GenericContainer {
                 return undefined;
               }
             },
-            async (response) => {
-              if (response === undefined) {
-                return false;
-              }
-              const jsonResponse = (await response.json()) as { results: Array<{ online: boolean }> };
-              return jsonResponse.results[0].online;
-            },
-            () => {
-              const message = `URL /query/service not accessible after ${timeoutMs}ms`;
-              log.error(message, { containerId: client.container.getById(startedTestContainer.getId()).id });
-
-              throw new Error(message);
-            },
-            timeoutMs
+            {
+              until: async (response) => {
+                if (response === undefined) {
+                  return false;
+                }
+                const jsonResponse = (await response.json()) as { results: Array<{ online: boolean }> };
+                return jsonResponse.results[0].online;
+              },
+              intervalMs: 1000,
+              timeoutMs,
+              timeoutMessage: `URL /query/service not accessible after ${timeoutMs}ms`,
+              signal: startupSignal,
+            }
           );
         } else {
           log.info(
@@ -572,13 +573,13 @@ export class CouchbaseContainer extends GenericContainer {
   protected override async containerStarted(
     startedTestContainer: StartedTestContainer,
     inspectResult: InspectResult,
-    _reused: boolean,
-    startupDeadline?: StartupDeadline
+    _reused?: boolean,
+    startupSignal?: AbortSignal
   ): Promise<void> {
-    const remainingStartupMs = () => startupDeadline?.getRemainingMs() ?? 60_000;
+    const timeoutMs = this.startupTimeoutMs ?? 60_000;
     const client = await getContainerRuntimeClient();
 
-    await this.waitUntilNodeIsOnline(client, inspectResult, startedTestContainer, remainingStartupMs());
+    await this.waitUntilNodeIsOnline(client, inspectResult, startedTestContainer, timeoutMs, startupSignal);
     await this.initializeIsEnterprise(startedTestContainer);
     await this.renameNode(startedTestContainer, inspectResult);
     await this.initializeServices(startedTestContainer);
@@ -592,19 +593,21 @@ export class CouchbaseContainer extends GenericContainer {
     await Promise.all(
       this.constructWaitStrategies().map((s) =>
         s
-          .withStartupTimeout(remainingStartupMs())
+          .withStartupTimeout(timeoutMs)
           .waitUntilReady(
             client.container.getById(startedTestContainer.getId()),
-            BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, inspectResult)
+            BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, inspectResult),
+            undefined,
+            startupSignal
           )
       )
     );
 
     if (this.enabledServices.has(CouchbaseService.KV)) {
-      await this.waitUntilKvAcceptsCredentials(startedTestContainer, remainingStartupMs());
+      await this.waitUntilKvAcceptsCredentials(startedTestContainer, timeoutMs, startupSignal);
     }
 
-    await this.createBuckets(client, inspectResult, startedTestContainer, remainingStartupMs);
+    await this.createBuckets(client, inspectResult, startedTestContainer, timeoutMs, startupSignal);
 
     log.info(
       `Couchbase container is ready! UI available at http://${startedTestContainer.getHost()}:${startedTestContainer.getMappedPort(
@@ -613,23 +616,27 @@ export class CouchbaseContainer extends GenericContainer {
     );
   }
 
-  private async waitUntilKvAcceptsCredentials(container: StartedTestContainer, timeoutMs: number) {
-    await new IntervalRetry<number, Error>(100).retryUntil(
-      async () => {
+  private async waitUntilKvAcceptsCredentials(
+    container: StartedTestContainer,
+    timeoutMs: number,
+    startupSignal?: AbortSignal
+  ) {
+    await poll(
+      async ({ signal }) => {
         const { exitCode } = await container.exec(
           ["/opt/couchbase/bin/mcstat", "--host", `127.0.0.1:${PORTS.KV_PORT}`, "--user", this.username, "connections"],
-          { env: { CB_PASSWORD: this.password } }
+          { env: { CB_PASSWORD: this.password }, signal }
         );
         return exitCode;
       },
-      (exitCode) => exitCode === 0,
-      () => {
-        const message = `KV service did not accept credentials after ${timeoutMs}ms`;
-        log.error(message, { containerId: container.getId() });
-
-        throw new Error(message);
-      },
-      timeoutMs
+      {
+        until: (exitCode) => exitCode === 0,
+        intervalMs: 100,
+        timeoutMs,
+        timeoutMessage: `KV service did not accept credentials after ${timeoutMs}ms`,
+        retryOnError: false,
+        signal: startupSignal,
+      }
     );
   }
 

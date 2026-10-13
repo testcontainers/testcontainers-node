@@ -554,7 +554,6 @@ import {
   GenericContainer,
   AbstractStartedContainer,
   StartedTestContainer,
-  StartupDeadline,
   InspectResult
 } from "testcontainers";
 
@@ -570,7 +569,7 @@ class CustomContainer extends GenericContainer {
   protected override async containerStarting(
     inspectResult: InspectResult,
     reused: boolean,
-    startupDeadline?: StartupDeadline
+    startupSignal?: AbortSignal
   ): Promise<void> {
     // ...
   }
@@ -579,7 +578,7 @@ class CustomContainer extends GenericContainer {
     container: StartedTestContainer,
     inspectResult: InspectResult,
     reused: boolean,
-    startupDeadline?: StartupDeadline
+    startupSignal?: AbortSignal
   ): Promise<void> {
     // ...
   }
@@ -600,19 +599,23 @@ class CustomStartedContainer extends AbstractStartedContainer {
 }
 ```
 
-`containerStarting` and `containerStarted` run within the container's [startup timeout](wait-strategies.md). Wait strategies and `IntervalRetry` used in them stop when the startup timeout is reached, even when their own timeout is longer.
+`containerStarting` and `containerStarted` are passed an `AbortSignal` that aborts when the container's [startup timeout](wait-strategies.md) is reached. It is `undefined` when no startup timeout is set. Pass it to whatever waits in the callback, so that the wait ends with the startup timeout instead of running to a timeout of its own.
 
-For anything else that waits, `startupDeadline.getRemainingMs()` returns how much of the startup timeout is left. `startupDeadline` is `undefined` when no startup timeout is set on the container:
+To wait for a condition in a callback, such as an API becoming available after the container has started, use [`poll`](wait-strategies.md#polling):
 
 ```ts
 protected override async containerStarted(
   container: StartedTestContainer,
   inspectResult: InspectResult,
   reused: boolean,
-  startupDeadline?: StartupDeadline
+  startupSignal?: AbortSignal
 ): Promise<void> {
-  const timeoutMs = startupDeadline?.getRemainingMs() ?? 60_000;
-  await fetch(url, { signal: AbortSignal.timeout(timeoutMs) });
+  await poll(({ signal }) => container.exec(["stat", "/tmp/app.lock"], { signal }), {
+    until: ({ exitCode }) => exitCode === 0,
+    intervalMs: 100,
+    timeoutMs: 60_000,
+    signal: startupSignal,
+  });
 }
 ```
 
@@ -735,6 +738,8 @@ The following options can be provided to modify the command execution:
 
 3. **`env`:** A map of environment variables to set inside the container.
 
+4. **`signal`:** An `AbortSignal` to stop waiting for the command. `exec` rejects when the signal aborts. Docker cannot kill a command it has started, so the process keeps running inside the container until it exits or the container stops.
+
 ```js
 const container = await new GenericContainer("alpine")
   .withCommand(["sleep", "infinity"])
@@ -746,7 +751,8 @@ const { output, stdout, stderr, exitCode } = await container.exec(["echo", "hell
 	env: {
 		"VAR1": "enabled",
 		"VAR2": "/app/debug.log",
-	}
+	},
+	signal: AbortSignal.timeout(5_000),
 });
 ```
 

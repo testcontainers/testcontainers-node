@@ -10,7 +10,7 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
-A startup timeout set on the container is one deadline for the whole startup. It is counted from when the container is started, and the wait strategy and the [lifecycle callbacks](containers.md#lifecycle-callbacks) share it. Pulling the image is not included.
+A startup timeout set on the container is one deadline for the whole startup. It is counted from when the container is started. The wait strategy stops when it is reached, and the [lifecycle callbacks](containers.md#lifecycle-callbacks) are passed an `AbortSignal` for it. Pulling the image is not included.
 
 The deadline starts again when the container is restarted. The startup timeout of a Compose environment is one deadline for all of its containers, counted from when Compose has started them.
 
@@ -271,3 +271,42 @@ const container = await new GenericContainer("alpine")
   .withWaitStrategy(new ReadyAfterDelayWaitStrategy())
   .start();
 ```
+
+`checkStartupState` is passed an `AbortSignal` as a third argument. It aborts when the startup timeout is reached, so pass it to Dockerode calls as `abortSignal` to cancel them.
+
+## Polling
+
+To wait for a condition outside of a wait strategy, for example in a [lifecycle callback](containers.md#lifecycle-callbacks) of a custom container, use `poll`. It calls a function, waiting `intervalMs` between attempts, until the result satisfies `until`, and rejects once the timeout is reached:
+
+```js
+const { poll } = require("testcontainers");
+
+const response = await poll(
+  ({ signal }) => fetch(`http://${container.getHost()}:${container.getMappedPort(8080)}/status`, { signal }),
+  {
+    until: (response) => response.ok,
+    intervalMs: 100,
+    timeoutMs: 10_000,
+  }
+);
+```
+
+The function is passed `{ attempt, signal }`. `attempt` starts at 1. `signal` is an `AbortSignal` that aborts when the timeout is reached, so pass it on to cancel work that is still in flight. `poll` rejects at the timeout even when an attempt has not finished.
+
+If `until` is omitted, `poll` resolves with the first result.
+
+An attempt that throws is retried. If the last attempt before the timeout threw, its error is the `cause` of the timeout error. To rethrow the error immediately instead, for example because the container is no longer running, set `retryOnError`:
+
+```js
+const { exitCode } = await poll(({ signal }) => container.exec(["stat", "/tmp/app.lock"], { signal }), {
+  until: ({ exitCode }) => exitCode === 0,
+  intervalMs: 100,
+  timeoutMs: 10_000,
+  timeoutMessage: "Lock file not created after 10000ms",
+  retryOnError: false,
+});
+```
+
+The timeout error message defaults to `Timed out after ${timeoutMs}ms` and can be set with `timeoutMessage`.
+
+To stop polling before the timeout, pass an `AbortSignal` as `signal`, for example the one a lifecycle callback is given. When it aborts, `poll` rejects with the timeout error.

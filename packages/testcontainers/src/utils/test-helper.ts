@@ -6,7 +6,7 @@ import path from "node:path";
 import type { Readable } from "node:stream";
 import type { GetEventsOptions, ImageInspectInfo } from "dockerode";
 import { Agent, request } from "undici";
-import { IntervalRetry } from "../common";
+import { poll } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
 import type { StartedDockerComposeEnvironment } from "../docker-compose-environment/started-docker-compose-environment";
 import type { GenericContainer } from "../generic-container/generic-container";
@@ -146,19 +146,12 @@ export async function stopStartingContainer(container: GenericContainer, name: s
   const client = await getContainerRuntimeClient();
   const containerStartPromise = container.start();
 
-  const status = await new IntervalRetry<boolean, boolean>(500).retryUntil(
-    () =>
-      client.container
-        .getById(name)
-        .inspect()
-        .then((i) => i.State.Running)
-        .catch(() => false),
-    (status) => status,
-    () => false,
-    10000
-  );
-
-  if (!status) throw Error("failed start container");
+  await poll(({ signal }) => client.container.getById(name).inspect({ abortSignal: signal }), {
+    until: (inspectResult) => inspectResult.State.Running,
+    intervalMs: 500,
+    timeoutMs: 10000,
+    timeoutMessage: "failed start container",
+  });
 
   await client.container.getById(name).stop();
   await containerStartPromise;

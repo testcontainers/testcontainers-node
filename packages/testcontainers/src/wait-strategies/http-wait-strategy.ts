@@ -1,7 +1,7 @@
 import { text } from "node:stream/consumers";
 import type Dockerode from "dockerode";
 import { Agent, request } from "undici";
-import { IntervalRetry, log } from "../common";
+import { log, poll } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
 import type { BoundPorts } from "../utils/bound-ports";
 import { undiciResponseToFetchResponse } from "./utils/undici-response-parser";
@@ -73,7 +73,12 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
     return this;
   }
 
-  public async waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void> {
+  public async waitUntilReady(
+    container: Dockerode.Container,
+    boundPorts: BoundPorts,
+    _startTime?: Date,
+    startupSignal?: AbortSignal
+  ): Promise<void> {
     log.debug(`Waiting for HTTP...`, { containerId: container.id });
 
     const exitStatus = "exited";
@@ -85,59 +90,55 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
     const agent = this.createInsecureAgent();
 
     try {
-      await new IntervalRetry<Response | undefined, Error>(this.readTimeoutMs).retryUntil(
-        async () => {
-          try {
-            const url = `${this.protocol}://${client.info.containerRuntime.host}:${boundPorts.getBinding(this.port)}${
-              this.path
-            }`;
+      await poll(
+        async ({ signal }) => {
+          const url = `${this.protocol}://${client.info.containerRuntime.host}:${boundPorts.getBinding(this.port)}${
+            this.path
+          }`;
 
-            if (abortOnContainerExit) {
-              const containerStatus = (await client.container.inspect(container)).State.Status;
+          if (abortOnContainerExit) {
+            const containerStatus = (await client.container.inspect(container, { signal })).State.Status;
 
-              if (containerStatus === exitStatus) {
-                containerExited = true;
-                return;
-              }
+            if (containerStatus === exitStatus) {
+              containerExited = true;
+              return undefined;
+            }
+          }
+
+          return undiciResponseToFetchResponse(
+            await request(url, {
+              method: this.method,
+              signal: AbortSignal.any([signal, AbortSignal.timeout(this.readTimeoutMs)]),
+              headers: this.headers,
+              dispatcher: agent,
+            })
+          );
+        },
+        {
+          until: async (response) => {
+            if (abortOnContainerExit && containerExited) {
+              return true;
             }
 
-            return undiciResponseToFetchResponse(
-              await request(url, {
-                method: this.method,
-                signal: AbortSignal.timeout(this.readTimeoutMs),
-                headers: this.headers,
-                dispatcher: agent,
-              })
-            );
-          } catch {
-            return undefined;
-          }
-        },
-        async (response) => {
-          if (abortOnContainerExit && containerExited) {
-            return true;
-          }
-
-          if (response === undefined) {
-            return false;
-          } else if (!this.predicates.length) {
-            return response.ok;
-          } else {
-            for (const predicate of this.predicates) {
-              const result = await predicate(response);
-              if (!result) {
-                return false;
+            if (response === undefined) {
+              return false;
+            } else if (!this.predicates.length) {
+              return response.ok;
+            } else {
+              for (const predicate of this.predicates) {
+                const result = await predicate(response);
+                if (!result) {
+                  return false;
+                }
               }
+              return true;
             }
-            return true;
-          }
-        },
-        () => {
-          const message = `URL ${this.path} not accessible after ${this.startupTimeoutMs}ms`;
-          log.error(message, { containerId: container.id });
-          throw new Error(message);
-        },
-        this.startupTimeoutMs
+          },
+          intervalMs: this.readTimeoutMs,
+          timeoutMs: this.startupTimeoutMs,
+          timeoutMessage: `URL ${this.path} not accessible after ${this.startupTimeoutMs}ms`,
+          signal: startupSignal,
+        }
       );
     } finally {
       // Force-close: status-only predicates never read the body, so a graceful close() could
