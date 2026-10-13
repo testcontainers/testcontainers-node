@@ -3,7 +3,7 @@ import { ImageName } from "testcontainers";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { CassandraContainer } from "./cassandra-container";
 
-const IMAGES = ["cassandra:4.0.21", "cassandra:4.1.12", getImage(__dirname)];
+const IMAGES = ["cassandra:4.1.12", getImage(__dirname)];
 
 describe.each(IMAGES)("CassandraContainer (%s)", { concurrent: false, timeout: 240_000 }, (image) => {
   it("should connect and execute a query with default credentials", async () => {

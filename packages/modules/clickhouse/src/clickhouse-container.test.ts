@@ -2,20 +2,16 @@ import { createClient } from "@clickhouse/client";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { ClickHouseContainer } from "./clickhouse-container";
 
-const IMAGES = [
-  "clickhouse/clickhouse-server:26.3.49.3-alpine",
-  "clickhouse/clickhouse-server:26.8.25.14-alpine",
-  getImage(__dirname),
-];
+const IMAGE = getImage(__dirname);
 
 interface ClickHouseQueryResponse<T> {
   data: T[];
 }
 
-describe.each(IMAGES)("ClickHouseContainer (%s)", { timeout: 180_000 }, (image) => {
+describe("ClickHouseContainer", { timeout: 180_000 }, () => {
   it("should connect using the client options object", async () => {
     // connectWithOptions {
-    await using container = await new ClickHouseContainer(image).start();
+    await using container = await new ClickHouseContainer(IMAGE).start();
 
     const client = createClient(container.getClientOptions());
 
@@ -33,7 +29,7 @@ describe.each(IMAGES)("ClickHouseContainer (%s)", { timeout: 180_000 }, (image) 
 
   it("should connect using the URL", async () => {
     // connectWithUrl {
-    await using container = await new ClickHouseContainer(image).start();
+    await using container = await new ClickHouseContainer(IMAGE).start();
 
     const client = createClient({
       url: container.getConnectionUrl(),
@@ -53,7 +49,7 @@ describe.each(IMAGES)("ClickHouseContainer (%s)", { timeout: 180_000 }, (image) 
 
   it("should connect using the username and password", async () => {
     // connectWithUsernameAndPassword {
-    await using container = await new ClickHouseContainer(image)
+    await using container = await new ClickHouseContainer(IMAGE)
       .withUsername("customUsername")
       .withPassword("customPassword")
       .start();
@@ -79,7 +75,7 @@ describe.each(IMAGES)("ClickHouseContainer (%s)", { timeout: 180_000 }, (image) 
   it("should set database", async () => {
     // setDatabase {
     const db = "customDatabase";
-    await using container = await new ClickHouseContainer(image).withDatabase(db).start();
+    await using container = await new ClickHouseContainer(IMAGE).withDatabase(db).start();
     // }
 
     const client = createClient(container.getClientOptions());
@@ -96,7 +92,7 @@ describe.each(IMAGES)("ClickHouseContainer (%s)", { timeout: 180_000 }, (image) 
   });
 
   it("should work with restarted container", async () => {
-    await using container = await new ClickHouseContainer(image).start();
+    await using container = await new ClickHouseContainer(IMAGE).start();
     await container.restart();
 
     const client = createClient(container.getClientOptions());

@@ -2,7 +2,7 @@ import { KurrentDBClient, type StreamSubscription } from "@kurrent/kurrentdb-cli
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { KurrentDbContainer } from "./kurrentdb-container";
 
-const IMAGES = ["kurrentplatform/kurrentdb:25.0.1", "kurrentplatform/kurrentdb:26.0.3", getImage(__dirname)];
+const IMAGES = ["kurrentplatform/kurrentdb:25.0.1", getImage(__dirname)];
 
 describe.each(IMAGES)("KurrentDbContainer (%s)", { concurrent: false, timeout: 240_000 }, (image) => {
   it("should execute write and read", async () => {

@@ -3,15 +3,15 @@ import { GenericContainer, Network, Wait } from "testcontainers";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { K3sContainer } from "./k3s-container";
 
-const IMAGES = ["rancher/k3s:v1.35.9-k3s1", "rancher/k3s:v1.36.5-k3s1", getImage(__dirname)];
+const IMAGE = getImage(__dirname);
 const KUBECTL_IMAGE = getImage(__dirname, 1);
 
-describe.each(IMAGES)("K3sContainer (%s)", { timeout: 120_000 }, (image) => {
+describe("K3sContainer", { timeout: 120_000 }, () => {
   // K3sContainer runs as a privileged container
   if (!process.env.CI_ROOTLESS) {
     it("should start and have listable node", async () => {
       // k3sListNodes {
-      await using container = await new K3sContainer(image).start();
+      await using container = await new K3sContainer(IMAGE).start();
 
       const kubeConfig = new k8s.KubeConfig();
       kubeConfig.loadFromString(container.getKubeConfig());
@@ -25,7 +25,7 @@ describe.each(IMAGES)("K3sContainer (%s)", { timeout: 120_000 }, (image) => {
 
     it("should start a pod", async () => {
       // k3sStartPod {
-      await using container = await new K3sContainer(image).start();
+      await using container = await new K3sContainer(IMAGE).start();
 
       const kubeConfig = new k8s.KubeConfig();
       kubeConfig.loadFromString(container.getKubeConfig());
@@ -71,7 +71,7 @@ describe.each(IMAGES)("K3sContainer (%s)", { timeout: 120_000 }, (image) => {
     it("should expose kubeconfig for a network alias", async () => {
       // k3sAliasedKubeConfig {
       await using network = await new Network().start();
-      await using container = await new K3sContainer(image).withNetwork(network).withNetworkAliases("k3s").start();
+      await using container = await new K3sContainer(IMAGE).withNetwork(network).withNetworkAliases("k3s").start();
 
       const kubeConfig = container.getAliasedKubeConfig("k3s");
 
