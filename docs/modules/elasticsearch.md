@@ -14,6 +14,8 @@ These examples use the following libraries:
 
         npm install @elastic/elasticsearch
 
+Use the client major that matches your Elasticsearch major. A 9.x client can't talk to Elasticsearch 8.
+
 Choose an image from the [container registry](https://hub.docker.com/_/elasticsearch) and substitute `IMAGE`.
 
 ### Create an index
