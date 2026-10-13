@@ -17,7 +17,9 @@ import { DockerImageClient } from "./image/docker-image-client";
 import type { ImageClient } from "./image/image-client";
 import { DockerNetworkClient } from "./network/docker-network-client";
 import type { NetworkClient } from "./network/network-client";
-import type { ContainerRuntimeInfo, Info, NodeInfo } from "./types";
+import type { ContainerRuntimeInfo, HostIp, Info, NodeInfo } from "./types";
+
+type DockerodeInfo = Awaited<ReturnType<Dockerode["info"]>>;
 
 export class ContainerRuntimeClient {
   constructor(
@@ -94,12 +96,6 @@ async function initStrategy(strategy: ContainerRuntimeClientStrategy): Promise<C
   log.trace("Fetching Compose info...");
   const composeClient = await getComposeClient(result.composeEnvironment);
 
-  const nodeInfo: NodeInfo = {
-    version: process.version,
-    architecture: process.arch,
-    platform: process.platform,
-  };
-
   log.trace("Looking up host IPs...");
   const hostIps = await lookupHostIps(host);
 
@@ -108,11 +104,30 @@ async function initStrategy(strategy: ContainerRuntimeClientStrategy): Promise<C
   const imageClient = new DockerImageClient(dockerode, indexServerAddress);
   const networkClient = new DockerNetworkClient(dockerode);
 
+  const info = createInfo(dockerodeInfo, host, hostIps, remoteContainerRuntimeSocketPath, indexServerAddress);
+
+  log.trace(`Container runtime info:\n${JSON.stringify(info, null, 2)}`);
+  return new ContainerRuntimeClient(info, composeClient, containerClient, imageClient, networkClient);
+}
+
+function createInfo(
+  dockerodeInfo: DockerodeInfo,
+  host: string,
+  hostIps: HostIp[],
+  remoteSocketPath: string,
+  indexServerAddress: string
+): Info {
+  const nodeInfo: NodeInfo = {
+    version: process.version,
+    architecture: process.arch,
+    platform: process.platform,
+  };
+
   const containerRuntimeInfo: ContainerRuntimeInfo = {
     host,
     hostIps,
-    remoteSocketPath: remoteContainerRuntimeSocketPath,
-    indexServerAddress: indexServerAddress,
+    remoteSocketPath,
+    indexServerAddress,
     serverVersion: dockerodeInfo.ServerVersion,
     operatingSystem: dockerodeInfo.OperatingSystem,
     operatingSystemType: dockerodeInfo.OSType,
@@ -123,8 +138,5 @@ async function initStrategy(strategy: ContainerRuntimeClientStrategy): Promise<C
     labels: dockerodeInfo.Labels ? dockerodeInfo.Labels : [],
   };
 
-  const info: Info = { node: nodeInfo, containerRuntime: containerRuntimeInfo };
-
-  log.trace(`Container runtime info:\n${JSON.stringify(info, null, 2)}`);
-  return new ContainerRuntimeClient(info, composeClient, containerClient, imageClient, networkClient);
+  return { node: nodeInfo, containerRuntime: containerRuntimeInfo };
 }
