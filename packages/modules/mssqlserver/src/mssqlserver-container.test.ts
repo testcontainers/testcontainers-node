@@ -2,10 +2,14 @@ import sql, { type config } from "mssql";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { MSSQLServerContainer } from "./mssqlserver-container";
 
-const IMAGE = getImage(__dirname);
-const OLDEST_IMAGE = "mcr.microsoft.com/mssql/server:2017-CU31-GDR9-ubuntu-18.04";
+const IMAGES = [
+  "mcr.microsoft.com/mssql/server:2017-CU31-GDR9-ubuntu-18.04",
+  "mcr.microsoft.com/mssql/server:2019-CU32-GDR8-ubuntu-20.04",
+  "mcr.microsoft.com/mssql/server:2022-CU27-ubuntu-22.04",
+  getImage(__dirname),
+];
 
-describe.each([IMAGE, OLDEST_IMAGE])("MSSQLServerContainer (%s)", { timeout: 180_000 }, (image) => {
+describe.each(IMAGES)("MSSQLServerContainer (%s)", { timeout: 180_000 }, (image) => {
   it("should connect and return a query result", async () => {
     // mssqlConnect {
     await using container = await new MSSQLServerContainer(image).acceptLicense().start();
@@ -88,28 +92,5 @@ describe("MSSQLServerContainer", { timeout: 180_000 }, () => {
       .withWaitForMessage("custom ready")
       .withStartupTimeout(1_000)
       .start();
-  });
-
-  it.each([
-    "mcr.microsoft.com/mssql/server:2019-CU32-GDR8-ubuntu-20.04",
-    "mcr.microsoft.com/mssql/server:2022-CU27-ubuntu-22.04",
-  ])("should connect and return a query result with %s", async (image) => {
-    await using container = await new MSSQLServerContainer(image).acceptLicense().start();
-
-    const sqlConfig: config = {
-      user: container.getUsername(),
-      password: container.getPassword(),
-      database: container.getDatabase(),
-      server: container.getHost(),
-      port: container.getPort(),
-      pool: { max: 1, min: 0, idleTimeoutMillis: 30000 },
-      options: { trustServerCertificate: true },
-    };
-    const connection = await new sql.ConnectionPool(sqlConfig).connect();
-
-    const { recordset } = await connection.query`SELECT 1;`;
-    expect(recordset).toStrictEqual([{ "": 1 }]);
-
-    await connection.close();
   });
 });

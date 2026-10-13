@@ -2,10 +2,9 @@ import { Client } from "cassandra-driver"; // Scylla uses Cassandra's driver in 
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { ScyllaContainer } from "./scylladb-container";
 
-const IMAGE = getImage(__dirname);
-const OLDEST_IMAGE = "scylladb/scylla:2025.1.16";
+const IMAGES = ["scylladb/scylla:2025.1.16", "scylladb/scylla:2026.1.14", getImage(__dirname)];
 
-describe.each([IMAGE, OLDEST_IMAGE])("ScyllaDB (%s)", { timeout: 240_000 }, (image) => {
+describe.each(IMAGES)("ScyllaDB (%s)", { timeout: 240_000 }, (image) => {
   it("should connect and execute a query", async () => {
     // connectWithDefaultCredentials {
     await using container = await new ScyllaContainer(image).start();
@@ -68,25 +67,6 @@ describe.each([IMAGE, OLDEST_IMAGE])("ScyllaDB (%s)", { timeout: 240_000 }, (ima
   it("should work with restarted container", async () => {
     await using container = await new ScyllaContainer(image).start();
     await container.restart();
-
-    const client = new Client({
-      contactPoints: [container.getContactPoint()],
-      localDataCenter: container.getDatacenter(),
-      keyspace: "system",
-    });
-
-    await client.connect();
-
-    const result = await client.execute("SELECT cql_version FROM system.local");
-    expect(result.rows[0].cql_version).toBe("3.3.1");
-
-    await client.shutdown();
-  });
-});
-
-describe("ScyllaDB", { timeout: 240_000 }, () => {
-  it.each(["scylladb/scylla:2026.1.14"])("should connect and execute a query with %s", async (image) => {
-    await using container = await new ScyllaContainer(image).start();
 
     const client = new Client({
       contactPoints: [container.getContactPoint()],

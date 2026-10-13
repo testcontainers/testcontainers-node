@@ -2,10 +2,9 @@ import neo4j from "neo4j-driver";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { Neo4jContainer, Neo4jPlugin } from "./neo4j-container";
 
-const IMAGE = getImage(__dirname);
-const OLDEST_IMAGE = "neo4j:5.26.31";
+const IMAGES = ["neo4j:5.26.31", getImage(__dirname)];
 
-describe.each([IMAGE, OLDEST_IMAGE])("Neo4jContainer (%s)", { timeout: 180_000 }, (image) => {
+describe.each(IMAGES)("Neo4jContainer (%s)", { timeout: 180_000 }, (image) => {
   it("should create a person node", async () => {
     // createNode {
     await using container = await new Neo4jContainer(image).start();
