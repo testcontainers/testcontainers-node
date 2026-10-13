@@ -8,6 +8,7 @@ import PORTS from "./ports";
 
 const ENTERPRISE_IMAGE = getImage(__dirname, 0);
 const COMMUNITY_IMAGE = getImage(__dirname, 1);
+const ENTERPRISE_IMAGES = ["couchbase/server:enterprise-7.6.12", ENTERPRISE_IMAGE];
 const COMMUNITY_IMAGES = ["couchbase/server:community-7.6.2", COMMUNITY_IMAGE];
 
 describe("CouchbaseContainer", { timeout: 180_000 }, () => {
@@ -22,7 +23,7 @@ describe("CouchbaseContainer", { timeout: 180_000 }, () => {
     return coll.exists(key);
   };
 
-  it.each([...COMMUNITY_IMAGES, ENTERPRISE_IMAGE])("should connect and query using %s image", async (image) => {
+  it.each([...COMMUNITY_IMAGES, ...ENTERPRISE_IMAGES])("should connect and query using %s image", async (image) => {
     // connectAndQuery {
     const bucketDefinition = new BucketDefinition("mybucket");
     await using container = await new CouchbaseContainer(image).withBucket(bucketDefinition).start();
@@ -97,8 +98,8 @@ describe("CouchbaseContainer", { timeout: 180_000 }, () => {
     );
   });
 
-  it("should start with analytics service enabled", async () => {
-    await using container = await new CouchbaseContainer(ENTERPRISE_IMAGE)
+  it.each(ENTERPRISE_IMAGES)("should start with analytics service enabled using %s image", async (image) => {
+    await using container = await new CouchbaseContainer(image)
       .withEnabledServices(CouchbaseService.KV, CouchbaseService.ANALYTICS)
       .start();
 
