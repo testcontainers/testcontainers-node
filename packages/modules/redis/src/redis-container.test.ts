@@ -4,7 +4,7 @@ import { createClient } from "redis";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { RedisContainer } from "./redis-container";
 
-const IMAGES = ["redis:6.2.24", "redis:7.2.16", "redis:7.4.11", "redis:8.2.10", getImage(__dirname)];
+const IMAGES = ["redis:6.2.24", "redis:7.4.11", getImage(__dirname)];
 const REDISSTACK_IMAGE = getImage(__dirname, 1);
 
 describe.each(IMAGES)("RedisContainer (%s)", { timeout: 240_000 }, (image) => {

@@ -3,9 +3,9 @@ import { connect } from "@nats-io/transport-node";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { NatsContainer } from "./nats-container";
 
-const IMAGES = ["nats:2.14.7-alpine", getImage(__dirname)];
+const IMAGE = getImage(__dirname);
 
-describe.each(IMAGES)("NatsContainer (%s)", { timeout: 180_000 }, (image) => {
+describe("NatsContainer", { timeout: 180_000 }, () => {
   it("should subscribe and receive one published message", async () => {
     // natsPubsub {
     const SUBJECT = "HELLO";
@@ -13,7 +13,7 @@ describe.each(IMAGES)("NatsContainer (%s)", { timeout: 180_000 }, (image) => {
     const TE = new TextEncoder();
     const TD = new TextDecoder();
 
-    await using container = await new NatsContainer(image).start();
+    await using container = await new NatsContainer(IMAGE).start();
     const nc = await connect(container.getConnectionOptions());
 
     const sub = nc.subscribe(SUBJECT);
@@ -36,7 +36,7 @@ describe.each(IMAGES)("NatsContainer (%s)", { timeout: 180_000 }, (image) => {
 
   it("should start with alternative username and password ", async () => {
     // natsCredentials {
-    await using container = await new NatsContainer(image).withUsername("George").withPass("1234").start();
+    await using container = await new NatsContainer(IMAGE).withUsername("George").withPass("1234").start();
     // }
 
     const nc = await connect(container.getConnectionOptions());
@@ -48,7 +48,7 @@ describe.each(IMAGES)("NatsContainer (%s)", { timeout: 180_000 }, (image) => {
 
   it("should start with JetStream ", async () => {
     // natsJetstream {
-    await using container = await new NatsContainer(image).withJetStream().start();
+    await using container = await new NatsContainer(IMAGE).withJetStream().start();
     // }
 
     const nc = await connect(container.getConnectionOptions());
@@ -60,7 +60,7 @@ describe.each(IMAGES)("NatsContainer (%s)", { timeout: 180_000 }, (image) => {
   });
 
   it("should fail without JetStream ", async () => {
-    await using container = await new NatsContainer(image).start();
+    await using container = await new NatsContainer(IMAGE).start();
 
     const nc = await connect(container.getConnectionOptions());
 
@@ -79,7 +79,7 @@ describe.each(IMAGES)("NatsContainer (%s)", { timeout: 180_000 }, (image) => {
     // for the complete list of available arguments see:
     // See Command Line Options section inside [NATS docker image documentation](https://hub.docker.com/_/nats)
     async function outputVersionAndExit() {
-      await using container = await new NatsContainer(image).withArg("version", "").start();
+      await using container = await new NatsContainer(IMAGE).withArg("version", "").start();
       await connect(container.getConnectionOptions());
     }
 

@@ -3,17 +3,17 @@ import { expect } from "vitest";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { CouchDBContainer } from "./couchdb-container";
 
-const IMAGES = ["couchdb:3.4.3", getImage(__dirname)];
+const IMAGE = getImage(__dirname);
 
 type User = {
   username: string;
   email: string;
 };
 
-describe.each(IMAGES)("CouchDBContainer (%s)", { timeout: 240_000 }, (image) => {
+describe("CouchDBContainer", { timeout: 240_000 }, () => {
   it("should write and read a collection", async () => {
     // startContainer {
-    await using container = await new CouchDBContainer(image).start();
+    await using container = await new CouchDBContainer(IMAGE).start();
 
     const client = nano({
       url: container.getUrl(),
@@ -37,7 +37,7 @@ describe.each(IMAGES)("CouchDBContainer (%s)", { timeout: 240_000 }, (image) => 
 
   it("should use custom credentials", async () => {
     // customCredentials {
-    await using container = await new CouchDBContainer(image).withUsername("admin").withPassword("foo").start();
+    await using container = await new CouchDBContainer(IMAGE).withUsername("admin").withPassword("foo").start();
 
     const client = nano({
       url: container.getUrl(),

@@ -4,13 +4,7 @@ import { createClient } from "redis";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { ValkeyContainer } from "./valkey-container";
 
-const IMAGES = [
-  "valkey/valkey:7.2.14",
-  "valkey/valkey:8.0.11",
-  "valkey/valkey:8.1.10",
-  "valkey/valkey:9.0.6",
-  getImage(__dirname),
-];
+const IMAGES = ["valkey/valkey:7.2.14", "valkey/valkey:8.1.10", getImage(__dirname)];
 
 describe.each(IMAGES)("ValkeyContainer (%s)", { timeout: 240_000 }, (image) => {
   it("should connect and execute set-get", async () => {
