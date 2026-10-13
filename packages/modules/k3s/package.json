@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/k3s",
-  "version": "12.2.0",
+  "version": "12.2.1",
   "license": "MIT",
   "keywords": [
     "k3s",
@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "tar-stream": "^3.2.2",
-    "testcontainers": "^12.2.0"
+    "testcontainers": "^12.2.1"
   },
   "devDependencies": {
     "@kubernetes/client-node": "^2.0.0"
