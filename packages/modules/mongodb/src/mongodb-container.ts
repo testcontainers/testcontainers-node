@@ -12,20 +12,26 @@ export class MongoDBContainer extends GenericContainer {
   }
 
   public withUsername(username: string): this {
-    if (!username) throw new Error("Username should not be empty.");
+    if (!username) {
+      throw new Error("Username should not be empty.");
+    }
     this.username = username;
     return this;
   }
 
   public withPassword(password: string): this {
-    if (!password) throw new Error("Password should not be empty.");
+    if (!password) {
+      throw new Error("Password should not be empty.");
+    }
     this.password = password;
     return this;
   }
 
   public override async start(): Promise<StartedMongoDBContainer> {
     const cmdArgs = ["--replSet", "rs0"];
-    if (!this.healthCheck) this.withWaitForRsHealthCheck();
+    if (!this.healthCheck) {
+      this.withWaitForRsHealthCheck();
+    }
     if (this.username && this.password) {
       cmdArgs.push("--keyFile", "/data/db/key.txt");
       this.withEnvironment({
@@ -57,7 +63,9 @@ export class MongoDBContainer extends GenericContainer {
 
   private buildMongoEvalCommand(command: string) {
     const args = ["mongosh"];
-    if (this.username && this.password) args.push("-u", this.username, "-p", this.password);
+    if (this.username && this.password) {
+      args.push("-u", this.username, "-p", this.password);
+    }
     args.push("--quiet", "--eval", command);
     return args.join(" ");
   }
@@ -78,8 +86,9 @@ export class StartedMongoDBContainer extends AbstractStartedContainer {
   }
 
   public getConnectionString(): string {
-    if (this.username && this.password)
+    if (this.username && this.password) {
       return `mongodb://${this.username}:${this.password}@${this.getHost()}:${this.getMappedPort(MONGODB_PORT)}?authSource=admin`;
+    }
     return `mongodb://${this.getHost()}:${this.getMappedPort(MONGODB_PORT)}`;
   }
 }

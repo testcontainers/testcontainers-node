@@ -153,12 +153,14 @@ export async function stopStartingContainer(container: GenericContainer, name: s
         .inspect()
         .then((i) => i.State.Running)
         .catch(() => false),
-    (status) => status,
+    (running) => running,
     () => false,
     10000
   );
 
-  if (!status) throw Error("failed start container");
+  if (!status) {
+    throw Error("failed start container");
+  }
 
   await client.container.getById(name).stop();
   await containerStartPromise;

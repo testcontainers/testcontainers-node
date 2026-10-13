@@ -147,17 +147,17 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
   private async matchesPredicates(response: Response | undefined): Promise<boolean> {
     if (response === undefined) {
       return false;
-    } else if (!this.predicates.length) {
-      return response.ok;
-    } else {
-      for (const predicate of this.predicates) {
-        const result = await predicate(response);
-        if (!result) {
-          return false;
-        }
-      }
-      return true;
     }
+    if (!this.predicates.length) {
+      return response.ok;
+    }
+    for (const predicate of this.predicates) {
+      const result = await predicate(response);
+      if (!result) {
+        return false;
+      }
+    }
+    return true;
   }
 
   private async handleContainerExit(container: Dockerode.Container) {

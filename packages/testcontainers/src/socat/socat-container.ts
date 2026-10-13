@@ -3,7 +3,7 @@ import { AbstractStartedContainer } from "../generic-container/abstract-started-
 import { GenericContainer } from "../generic-container/generic-container";
 
 export class SocatContainer extends GenericContainer {
-  private targets: { [exposePort: number]: string } = {};
+  private readonly targets: { [exposePort: number]: string } = {};
 
   constructor(image = "alpine/socat:1.7.4.3-r0") {
     super(image);

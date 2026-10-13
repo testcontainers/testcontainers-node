@@ -53,10 +53,9 @@ export class DockerContainerClient implements ContainerClient {
       if (containers.length === 0) {
         log.debug(`No container found with label "${labelName}=${labelValue}"`);
         return undefined;
-      } else {
-        log.debug(`Fetched container by label "${labelName}=${labelValue}"`);
-        return this.getById(containers[0].Id);
       }
+      log.debug(`Fetched container by label "${labelName}=${labelValue}"`);
+      return this.getById(containers[0].Id);
     } catch (err) {
       log.error(`Failed to fetch container by label "${labelName}=${labelValue}": ${err}`);
       throw err;
@@ -227,8 +226,8 @@ export class DockerContainerClient implements ContainerClient {
 
       this.dockerode.modem.demuxStream(stream, stdoutStream, stderrStream);
 
-      const processStream = (stream: Readable, chunks: string[]) => {
-        stream.on("data", (chunk) => {
+      const processStream = (source: Readable, chunks: string[]) => {
+        source.on("data", (chunk) => {
           chunks.push(chunk.toString());
           outputChunks.push(chunk.toString());
 
