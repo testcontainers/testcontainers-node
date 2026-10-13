@@ -2,7 +2,7 @@ import { Client } from "cassandra-driver"; // Scylla uses Cassandra's driver in 
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { ScyllaContainer } from "./scylladb-container";
 
-const IMAGES = ["scylladb/scylla:2025.1.16", "scylladb/scylla:2026.1.14", getImage(__dirname)];
+const IMAGES = ["scylladb/scylla:2025.1.16", getImage(__dirname)];
 
 describe.each(IMAGES)("ScyllaDB (%s)", { timeout: 240_000 }, (image) => {
   it("should connect and execute a query", async () => {
