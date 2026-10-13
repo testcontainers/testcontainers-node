@@ -125,8 +125,6 @@ const container = await new GenericContainer("redis")
   .start();
 ```
 
-If the container exits before the condition is satisfied, the wait fails straight away instead of polling until the startup timeout, and the error includes the last 50 lines of the container's logs. A container that is being restarted by its restart policy is not treated as exited.
-
 To keep waiting after the container has exited, for example when something other than a restart policy starts it again, set `abortOnContainerExit` to `false`:
 
 ```js
