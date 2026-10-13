@@ -162,7 +162,7 @@ describe.each(IMAGES)("RedisContainer (%s)", { concurrent: false, timeout: 240_0
   });
 });
 
-describe("RedisContainer", { timeout: 240_000 }, () => {
+describe(`RedisContainer (${REDISSTACK_IMAGE})`, { timeout: 240_000 }, () => {
   it("should start with redis-stack-server and json module", async () => {
     // startWithRedisStack {
     await using container = await new RedisContainer(REDISSTACK_IMAGE).withPassword("testPassword").start();
