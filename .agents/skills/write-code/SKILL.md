@@ -16,7 +16,13 @@ Biome enforces the lint and formatting rules (`biome.json`). This skill covers w
 
 - In one file, extract a helper: a private method, or a function the file doesn't export. Define it below the first function that calls it.
 - Across files in a package, move it into a function in its own file.
-- Across modules, it belongs in core, exported from `testcontainers`, because modules can't import each other. That adds public API, so propose it instead of copying the code.
+- Across modules, it belongs in core, exported from `testcontainers`, because modules can't import each other. That adds public API, so propose it instead of copying the code. A helper exported for modules gets no docs.
+
+## Before touching docs
+
+- Change `docs/` only when what a user calls changes: a new option, method or module, or behaviour they have to account for (AGENTS.md "API and docs").
+- Show how to use it and stop. How it works and why it changed go in the PR body.
+- Don't add a line about your change to AGENTS.md or a skill.
 
 ## Use what core provides
 
