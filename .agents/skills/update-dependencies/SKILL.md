@@ -40,6 +40,7 @@ A module's tests run against every major version the vendor still supports, from
 4. Check that the `Dockerfile` is on the newest supported version, and move it by hand if not. Dependabot has left a `Dockerfile` behind when the vendor changed tag format (Neo4j and ScyllaDB moved to calendar versions) and when the tag is not a plain version (SQL Server `2022-CU13-ubuntu-22.04`).
 5. When the bump moves the `Dockerfile` to a new major, add the major it leaves to `IMAGES` in the same PR, if the vendor still supports it.
 6. If a supported major fails with the module as changed for the bump, keep the old path for it. Majors that differ in ports, auth or startup get their own class (`add-module`). Dropping a supported major is a breaking change.
+7. Check the module source for an image the module starts itself, such as a video recorder or the database behind an emulator. Dependabot doesn't see those. Move it to its latest exact tag and run the module's tests.
 
 ## An image no longer pulls
 
