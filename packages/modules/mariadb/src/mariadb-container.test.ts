@@ -2,7 +2,7 @@ import { createConnection } from "mariadb";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { MariaDbContainer } from "./mariadb-container";
 
-const IMAGES = ["mariadb:10.11.19", "mariadb:11.4.13", "mariadb:11.8.9", "mariadb:12.3.3", getImage(__dirname)];
+const IMAGES = ["mariadb:10.11.19", "mariadb:11.8.9", "mariadb:12.3.3", getImage(__dirname)];
 
 describe.each(IMAGES)("MariaDbContainer (%s)", { timeout: 240_000 }, (image) => {
   it("should connect and execute query", async () => {

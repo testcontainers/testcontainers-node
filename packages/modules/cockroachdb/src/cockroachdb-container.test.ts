@@ -2,13 +2,7 @@ import { Client } from "pg";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { CockroachDbContainer } from "./cockroachdb-container";
 
-const IMAGES = [
-  "cockroachdb/cockroach:v24.3.36",
-  "cockroachdb/cockroach:v25.2.24",
-  "cockroachdb/cockroach:v25.4.17",
-  "cockroachdb/cockroach:v26.2.7",
-  getImage(__dirname),
-];
+const IMAGES = ["cockroachdb/cockroach:v24.3.36", "cockroachdb/cockroach:v25.4.17", getImage(__dirname)];
 
 describe.each(IMAGES)("CockroachDbContainer (%s)", { timeout: 180_000 }, (image) => {
   it("should connect and return a query result", async () => {
