@@ -1,3 +1,4 @@
+import { createServer } from "node:net";
 import path from "node:path";
 import archiver from "archiver";
 import getPort from "get-port";
@@ -64,6 +65,32 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     await checkContainerIsHealthyUdp(container);
     expect(container.getMappedPort("5005/udp")).toBe(hostPort);
     expect(container.getMappedPort(5005, "udp")).toBe(hostPort);
+  });
+
+  it("should bind to a random host port when the host uses the ports the container runtime picks next", async () => {
+    await using pilot = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withExposedPorts({ container: 8080, host: 0 })
+      .start();
+    const servers = [1, 2, 3]
+      .map((offset) => pilot.getMappedPort(8080) + offset)
+      .filter((port) => port < 65536)
+      .map((port) =>
+        createServer()
+          .on("error", () => undefined)
+          .listen(port)
+      );
+
+    try {
+      await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+        .withExposedPorts(8080)
+        .start();
+
+      await checkContainerIsHealthy(container);
+    } finally {
+      for (const server of servers) {
+        server.close();
+      }
+    }
   });
 
   it("should execute a command on a running container", async () => {
