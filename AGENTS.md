@@ -7,6 +7,7 @@ It captures practical rules that prevent avoidable CI and PR churn.
 
 This file holds the rules for every task. Workflows live in skills under `.agents/skills/`, which Claude Code reads through symlinks in `.claude/skills/`. They cover writing code, opening and reviewing PRs, adding modules, issue triage, CI and dependency maintenance, and release review.
 If a skill or this file turns out to be wrong or incomplete, update it in the same PR.
+Wrong or incomplete means a rule misled you, or a mistake keeps recurring that no rule covers. Adding a feature, helper or option is not a reason to add a line about it here or in a skill.
 
 ## Repository Layout
 
@@ -22,7 +23,11 @@ If a skill or this file turns out to be wrong or incomplete, update it in the sa
 
 ### API and docs
 
-- If a public API changes, update the relevant docs in the same PR.
+- If a user-facing API changes, update the relevant docs in the same PR.
+  - User-facing means what someone testing against a container uses: containers, images, networks, Compose, wait strategies, and modules and their options.
+  - Don't document helpers that `index.ts` exports so that modules can import them (for example `log`, `RandomUuid`, `BoundPorts`). Being exported makes them public API, not a docs topic.
+- Docs tell a user how to use a feature: what to call, a short example, and anything they have to account for.
+  - Leave out how it is implemented: which Docker calls are made, timing and retry mechanics, and why the change was made. That belongs in the PR body.
 - If new types are made part of the public API, export them from the package's `index.ts` in the same PR.
 - Only what a package's `index.ts` exports is public API. `npm run knip` fails on any other export that no other file uses: drop the `export` keyword, or export it from `index.ts` if consumers need it.
 - In docs Markdown, keep `<!--codeinclude-->` blocks tight with no blank lines between the markers and the include line, or the rendered snippet will contain blank lines between code lines.
