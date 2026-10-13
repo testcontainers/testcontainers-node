@@ -22,9 +22,6 @@ const DEFAULT_CLUSTER_ID = "4L6g3nShT-eMCtK--X86sw";
 const STARTER_SCRIPT = "/tmp/testcontainers_start.sh";
 const WAIT_FOR_SCRIPT_MESSAGE = "Waiting for script...";
 
-const MIN_KRAFT_VERSION = "7.4.0";
-const MIN_KRAFT_SASL_VERSION = "7.5.0";
-
 export interface SaslSslListenerOptions {
   sasl: SaslOptions;
   port: number;
@@ -92,7 +89,6 @@ export class KafkaContainer extends GenericContainer {
   }
 
   public withKraft(): this {
-    this.verifyMinKraftVersion();
     this.mode = KafkaMode.KRAFT;
     this.zooKeeperHost = undefined;
     this.zooKeeperPort = undefined;
@@ -146,15 +142,6 @@ export class KafkaContainer extends GenericContainer {
   }
 
   public override async start(): Promise<StartedKafkaContainer> {
-    if (
-      this.mode === KafkaMode.KRAFT &&
-      this.saslSslConfig &&
-      satisfies(this.imageName.tag, `<${MIN_KRAFT_SASL_VERSION}`)
-    ) {
-      throw new Error(
-        `Provided Confluent Platform's version ${this.imageName.tag} is not supported in Kraft mode with sasl (must be ${MIN_KRAFT_SASL_VERSION} or above)`
-      );
-    }
     return new StartedKafkaContainer(await super.start());
   }
 
@@ -267,14 +254,6 @@ export class KafkaContainer extends GenericContainer {
 
     if (exitCode !== 0) {
       throw new Error(`Kafka container configuration failed with exit code ${exitCode}: ${output}`);
-    }
-  }
-
-  private verifyMinKraftVersion() {
-    if (satisfies(this.imageName.tag, `<${MIN_KRAFT_VERSION}`)) {
-      throw new Error(
-        `Provided Confluent Platform's version ${this.imageName.tag} is not supported in Kraft mode (must be ${MIN_KRAFT_VERSION} or above)`
-      );
     }
   }
 

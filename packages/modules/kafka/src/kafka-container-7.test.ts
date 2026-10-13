@@ -222,40 +222,10 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
     await assertMessageProducedAndConsumed(container);
   });
 
-  it("should throw an error when using kraft and and confluence platfom below 7.4.0", async () => {
-    expect(() => new KafkaContainer("confluentinc/cp-kafka:7.3.15").withKraft()).toThrow(
-      "Provided Confluent Platform's version 7.3.15 is not supported in Kraft mode (must be 7.4.0 or above)"
-    );
-  });
-
   it("should connect using kraft and custom network", async () => {
     await using network = await new Network().start();
     await using container = await new KafkaContainer(IMAGE).withKraft().withNetwork(network).start();
 
     await assertMessageProducedAndConsumed(container);
-  });
-
-  it("should throw an error when using kraft wit sasl and confluence platfom below 7.5.0", async () => {
-    const kafkaContainer = new KafkaContainer("confluentinc/cp-kafka:7.4.0").withKraft().withSaslSslListener({
-      port: 9094,
-      sasl: {
-        mechanism: "SCRAM-SHA-512",
-        user: {
-          name: "app-user",
-          password: "userPassword",
-        },
-      },
-      keystore: {
-        content: "fake",
-        passphrase: "serverKeystorePassword",
-      },
-      truststore: {
-        content: "fake",
-        passphrase: "serverTruststorePassword",
-      },
-    });
-    await expect(() => kafkaContainer.start()).rejects.toThrow(
-      "Provided Confluent Platform's version 7.4.0 is not supported in Kraft mode with sasl (must be 7.5.0 or above)"
-    );
   });
 });
