@@ -3,10 +3,9 @@ import { connect } from "@nats-io/transport-node";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { NatsContainer } from "./nats-container";
 
-const IMAGE = getImage(__dirname);
-const OLDEST_IMAGE = "nats:2.14.7-alpine";
+const IMAGES = ["nats:2.14.7-alpine", getImage(__dirname)];
 
-describe.each([IMAGE, OLDEST_IMAGE])("NatsContainer (%s)", { timeout: 180_000 }, (image) => {
+describe.each(IMAGES)("NatsContainer (%s)", { timeout: 180_000 }, (image) => {
   it("should subscribe and receive one published message", async () => {
     // natsPubsub {
     const SUBJECT = "HELLO";

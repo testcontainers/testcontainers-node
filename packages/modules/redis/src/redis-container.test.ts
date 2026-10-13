@@ -4,11 +4,10 @@ import { createClient } from "redis";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { RedisContainer } from "./redis-container";
 
-const IMAGE = getImage(__dirname);
-const OLDEST_IMAGE = "redis:6.2.24";
+const IMAGES = ["redis:6.2.24", "redis:7.2.16", "redis:7.4.11", "redis:8.2.10", getImage(__dirname)];
 const REDISSTACK_IMAGE = getImage(__dirname, 1);
 
-describe.each([IMAGE, OLDEST_IMAGE])("RedisContainer (%s)", { timeout: 240_000 }, (image) => {
+describe.each(IMAGES)("RedisContainer (%s)", { timeout: 240_000 }, (image) => {
   it("should connect and execute set-get", async () => {
     // redisStartContainer {
     await using container = await new RedisContainer(image).start();
@@ -164,21 +163,6 @@ describe.each([IMAGE, OLDEST_IMAGE])("RedisContainer (%s)", { timeout: 240_000 }
 });
 
 describe("RedisContainer", { timeout: 240_000 }, () => {
-  it.each(["redis:7.2.16", "redis:7.4.11", "redis:8.2.10"])(
-    "should connect and execute set-get with %s",
-    async (image) => {
-      await using container = await new RedisContainer(image).start();
-
-      const client = createClient({ url: container.getConnectionUrl() });
-      await client.connect();
-
-      await client.set("key", "val");
-      expect(await client.get("key")).toBe("val");
-
-      client.destroy();
-    }
-  );
-
   it("should start with redis-stack-server and json module", async () => {
     // startWithRedisStack {
     await using container = await new RedisContainer(REDISSTACK_IMAGE).withPassword("testPassword").start();

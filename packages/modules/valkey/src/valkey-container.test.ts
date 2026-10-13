@@ -4,10 +4,15 @@ import { createClient } from "redis";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { ValkeyContainer } from "./valkey-container";
 
-const IMAGE = getImage(__dirname);
-const OLDEST_IMAGE = "valkey/valkey:7.2.14";
+const IMAGES = [
+  "valkey/valkey:7.2.14",
+  "valkey/valkey:8.0.11",
+  "valkey/valkey:8.1.10",
+  "valkey/valkey:9.0.6",
+  getImage(__dirname),
+];
 
-describe.each([IMAGE, OLDEST_IMAGE])("ValkeyContainer (%s)", { timeout: 240_000 }, (image) => {
+describe.each(IMAGES)("ValkeyContainer (%s)", { timeout: 240_000 }, (image) => {
   it("should connect and execute set-get", async () => {
     // valkeyStartContainer {
     await using container = await new ValkeyContainer(image).start();
@@ -126,21 +131,4 @@ describe.each([IMAGE, OLDEST_IMAGE])("ValkeyContainer (%s)", { timeout: 240_000 
     expect(queryResult).toEqual(expect.stringContaining("connected_clients:1"));
     // }
   });
-});
-
-describe("ValkeyContainer", { timeout: 240_000 }, () => {
-  it.each(["valkey/valkey:8.0.11", "valkey/valkey:8.1.10", "valkey/valkey:9.0.6"])(
-    "should connect and execute set-get with %s",
-    async (image) => {
-      await using container = await new ValkeyContainer(image).start();
-
-      const client = createClient({ url: container.getConnectionUrl() });
-      await client.connect();
-
-      await client.set("key", "val");
-      expect(await client.get("key")).toBe("val");
-
-      client.destroy();
-    }
-  );
 });

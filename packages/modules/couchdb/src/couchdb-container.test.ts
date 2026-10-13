@@ -3,15 +3,14 @@ import { expect } from "vitest";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { CouchDBContainer } from "./couchdb-container";
 
-const IMAGE = getImage(__dirname);
-const OLDEST_IMAGE = "couchdb:3.4.3";
+const IMAGES = ["couchdb:3.4.3", getImage(__dirname)];
 
 type User = {
   username: string;
   email: string;
 };
 
-describe.each([IMAGE, OLDEST_IMAGE])("CouchDBContainer (%s)", { timeout: 240_000 }, (image) => {
+describe.each(IMAGES)("CouchDBContainer (%s)", { timeout: 240_000 }, (image) => {
   it("should write and read a collection", async () => {
     // startContainer {
     await using container = await new CouchDBContainer(image).start();
