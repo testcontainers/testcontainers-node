@@ -278,28 +278,25 @@ export class StartedAzuriteContainer extends AbstractStartedContainer {
   public getBlobPort(): number {
     if (hasHostBinding(this.blobPort)) {
       return this.blobPort.host;
-    } else {
-      const containerPort = getContainerPort(this.blobPort);
-      return this.getMappedPort(containerPort);
     }
+    const containerPort = getContainerPort(this.blobPort);
+    return this.getMappedPort(containerPort);
   }
 
   public getQueuePort(): number {
     if (hasHostBinding(this.queuePort)) {
       return this.queuePort.host;
-    } else {
-      const containerPort = getContainerPort(this.queuePort);
-      return this.getMappedPort(containerPort);
     }
+    const containerPort = getContainerPort(this.queuePort);
+    return this.getMappedPort(containerPort);
   }
 
   public getTablePort(): number {
     if (hasHostBinding(this.tablePort)) {
       return this.tablePort.host;
-    } else {
-      const containerPort = getContainerPort(this.tablePort);
-      return this.getMappedPort(containerPort);
     }
+    const containerPort = getContainerPort(this.tablePort);
+    return this.getMappedPort(containerPort);
   }
 
   public getBlobEndpoint(): string {

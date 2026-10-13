@@ -56,7 +56,7 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
     {
       await using dockerEventStream = await getDockerEventStream();
       const dockerPullEventPromise = waitForDockerEvent(dockerEventStream.events, "pull");
-      await using _ = await env.withPullPolicy(PullPolicy.alwaysPull()).up();
+      await using _pulled = await env.withPullPolicy(PullPolicy.alwaysPull()).up();
       await dockerPullEventPromise;
     }
   });
@@ -69,7 +69,7 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
     {
       await using dockerEventStream = await getDockerEventStream();
       const dockerPullEventPromise = waitForDockerEvent(dockerEventStream.events, "pull");
-      await using _ = await env.withPullPolicy(PullPolicy.alwaysPull()).up(["service-b"]);
+      await using _pulled = await env.withPullPolicy(PullPolicy.alwaysPull()).up(["service-b"]);
       await dockerPullEventPromise;
     }
   });

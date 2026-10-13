@@ -97,7 +97,7 @@ export class PortForwarderInstance {
     log.debug(`Reusing existing PortForwarder for session "${sessionId}"...`);
 
     const host = client.info.containerRuntime.host;
-    const port = container.Ports.find((port) => port.PrivatePort === 22)?.PublicPort;
+    const port = container.Ports.find((mapping) => mapping.PrivatePort === 22)?.PublicPort;
     if (!port) {
       throw new Error("Expected PortForwarder to map exposed port 22");
     }

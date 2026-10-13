@@ -4,7 +4,7 @@ const MSSQL_PORT = 1433;
 
 export class MSSQLServerContainer extends GenericContainer {
   private database = "master";
-  private username = "sa";
+  private readonly username = "sa";
   private password = "Passw0rd";
   private acceptEula = "N";
   private message: string | RegExp = /.*Recovery is complete.*/;

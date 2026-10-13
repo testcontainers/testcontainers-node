@@ -342,7 +342,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     {
       await using dockerEventStream = await getDockerEventStream();
       const dockerPullEventPromise = waitForDockerEvent(dockerEventStream.events, "pull");
-      await using _ = await container.withPullPolicy(PullPolicy.alwaysPull()).start();
+      await using _pulled = await container.withPullPolicy(PullPolicy.alwaysPull()).start();
       await dockerPullEventPromise;
     }
   });
