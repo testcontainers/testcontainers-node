@@ -702,13 +702,13 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
         throw new Error("Container is not ready");
       }
     })();
-    const container = new GenericContainer("cristianrgreco/testcontainer:1.1.14")
-      .withCommand(["/bin/sh", "-c", "echo 'connecting to database'; sleep infinity"])
-      .withWaitStrategy(waitStrategy);
 
-    await expect(container.start()).rejects.toThrow(
-      new Error("Container is not ready\nContainer logs (last 50 lines):\nconnecting to database")
-    );
+    await expect(
+      new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+        .withCommand(["/bin/sh", "-c", "echo 'connecting to database'; sleep infinity"])
+        .withWaitStrategy(waitStrategy)
+        .start()
+    ).rejects.toThrow(new Error("Container is not ready\nContainer logs (last 50 lines):\nconnecting to database"));
   });
 
   // failing to build an image hangs within the DockerImageClient.build method,
