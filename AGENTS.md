@@ -63,7 +63,7 @@ If a skill or this file turns out to be wrong or incomplete, update it in the sa
   - Loop the whole suite over the list with `describe.each(IMAGES)`, so every test runs on every major.
   - Run the majors one after another and each major's tests concurrently, as a single-image suite runs: pass `{ concurrent: false }` to `describe.each` and declare the tests with `it.concurrent`.
   - A major is supported while the vendor's free or community support covers it. Leave out a major that ends within 60 days. If the vendor publishes no lifecycle, test only the `Dockerfile` image.
-  - Where a test can't pass on a major, skip it by matching the image, for example `it.skipIf(image.startsWith("elasticsearch:8."))`, with a comment saying why.
+  - Where a test only applies to some of the images, select it by matching the image with `it.skipIf` or `it.runIf`, and add a comment when the reason isn't obvious.
   - A major that needs its own class or setup gets its own test file named after it, such as `<module>-container-v<N>.test.ts`.
   - A suite too heavy to run on every major may loop a representative part of itself. Say which part in the PR.
   - If a looped suite still overloads the test runner (tests far slower than locally, connection timeouts, passing only on retry), consider running its tests sequentially too, with plain `it`, and point the change out to the user.
