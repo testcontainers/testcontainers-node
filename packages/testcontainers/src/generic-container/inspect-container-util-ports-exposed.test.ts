@@ -3,9 +3,11 @@ import { inspectContainerUntilPortsExposed } from "./inspect-container-util-port
 
 function mockInspectResult(
   portBindings: ContainerInspectInfo["HostConfig"]["PortBindings"],
-  ports: ContainerInspectInfo["NetworkSettings"]["Ports"]
+  ports: ContainerInspectInfo["NetworkSettings"]["Ports"],
+  state: Partial<ContainerInspectInfo["State"]> = { Status: "running" }
 ): ContainerInspectInfo {
   return {
+    State: state,
     HostConfig: {
       PortBindings: portBindings,
     },
@@ -73,5 +75,34 @@ describe("inspectContainerUntilPortsExposed", { concurrent: false }, () => {
     await expect(inspectContainerUntilPortsExposed(inspectFn, "container-id", 0)).rejects.toThrow(
       "Timed out after 0ms while waiting for container ports to be bound to the host"
     );
+  });
+
+  it("throws an error when the container exits before its ports are exposed", async () => {
+    const data = mockInspectResult({ "8080/tcp": [] }, {}, { Status: "exited", ExitCode: 1 });
+    const inspectFn = vi.fn().mockResolvedValue(data);
+
+    await expect(inspectContainerUntilPortsExposed(inspectFn, "container-id")).rejects.toThrow(
+      "Container exited with code 1 before its ports were bound to the host"
+    );
+    expect(inspectFn).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns the inspect result when the container has exited and no ports are exposed", async () => {
+    const data = mockInspectResult({}, {}, { Status: "exited", ExitCode: 0 });
+    const inspectFn = vi.fn().mockResolvedValueOnce(data);
+
+    const result = await inspectContainerUntilPortsExposed(inspectFn, "container-id");
+
+    expect(result).toEqual(data);
+  });
+
+  it("retries the inspect while the container is restarting", async () => {
+    const data1 = mockInspectResult({ "8080/tcp": [] }, {}, { Status: "restarting" });
+    const data2 = mockInspectResult({ "8080/tcp": [] }, { "8080/tcp": [{ HostIp: "0.0.0.0", HostPort: "45000" }] });
+    const inspectFn = vi.fn().mockResolvedValueOnce(data1).mockResolvedValueOnce(data2);
+
+    const result = await inspectContainerUntilPortsExposed(inspectFn, "container-id");
+
+    expect(result).toEqual(data2);
   });
 });
