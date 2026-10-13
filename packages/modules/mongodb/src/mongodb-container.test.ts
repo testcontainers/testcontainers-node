@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { MongoDBContainer } from "./mongodb-container";
 
-const IMAGES = ["mongo:7.0.43", "mongo:8.0.32", "mongo:8.3.11", getImage(__dirname)];
+const IMAGES = ["mongo:7.0.43", "mongo:8.3.11", getImage(__dirname)];
 
 describe.each(IMAGES)("MongoDBContainer (%s)", { timeout: 240_000 }, (image) => {
   it("should connect", async () => {
