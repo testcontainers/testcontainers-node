@@ -3,13 +3,15 @@ import { Client } from "pg";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { PostgreSqlContainer } from "./postgresql-container";
 
-const IMAGE = getImage(__dirname);
+const IMAGE = getImage(__dirname, 2);
+// postgis/postgis publishes no arm64 image.
+const PLATFORM = "linux/amd64";
 const SSL_SERVER_CERT = path.resolve(__dirname, "test-certs/server.crt");
 const SSL_SERVER_KEY = path.resolve(__dirname, "test-certs/server.key");
 
 describe("PostgisContainer", { timeout: 180_000 }, () => {
   it("should work", async () => {
-    await using container = await new PostgreSqlContainer(IMAGE).start();
+    await using container = await new PostgreSqlContainer(IMAGE).withPlatform(PLATFORM).start();
 
     const client = new Client({
       host: container.getHost(),
@@ -27,7 +29,7 @@ describe("PostgisContainer", { timeout: 180_000 }, () => {
   });
 
   it("should restart", async () => {
-    await using container = await new PostgreSqlContainer(IMAGE).start();
+    await using container = await new PostgreSqlContainer(IMAGE).withPlatform(PLATFORM).start();
     await container.restart();
 
     const client = new Client({
@@ -46,7 +48,10 @@ describe("PostgisContainer", { timeout: 180_000 }, () => {
   });
 
   it("should connect with SSL", async () => {
-    await using container = await new PostgreSqlContainer(IMAGE).withSSL(SSL_SERVER_CERT, SSL_SERVER_KEY).start();
+    await using container = await new PostgreSqlContainer(IMAGE)
+      .withPlatform(PLATFORM)
+      .withSSL(SSL_SERVER_CERT, SSL_SERVER_KEY)
+      .start();
 
     const client = new Client({
       host: container.getHost(),
