@@ -2,10 +2,9 @@ import { Client } from "@opensearch-project/opensearch";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { OpenSearchContainer } from "./opensearch-container";
 
-const IMAGE = getImage(__dirname);
-const OLDEST_IMAGE = "opensearchproject/opensearch:2.19.6";
+const IMAGES = ["opensearchproject/opensearch:2.19.6", getImage(__dirname)];
 
-describe.each([IMAGE, OLDEST_IMAGE])("OpenSearchContainer (%s)", { timeout: 180_000 }, (image) => {
+describe.each(IMAGES)("OpenSearchContainer (%s)", { timeout: 180_000 }, (image) => {
   it("should create an index", async () => {
     // opensearchCreateIndex {
     await using container = await new OpenSearchContainer(image).start();
