@@ -74,9 +74,9 @@ describe("CredentialProvider", { concurrent: false }, () => {
   });
 
   it("should return undefined when provider name not provided", async () => {
-    const credentialProvider = new TestCredentialProvider("name", undefined);
+    const unnamedCredentialProvider = new TestCredentialProvider("name", undefined);
 
-    expect(await credentialProvider.getAuthConfig("registry", containerRuntimeConfig)).toBeUndefined();
+    expect(await unnamedCredentialProvider.getAuthConfig("registry", containerRuntimeConfig)).toBeUndefined();
   });
 
   it("should return undefined when get credentials fails because we lookup optimistically", async () => {

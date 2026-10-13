@@ -7,7 +7,7 @@ describe("Retry", () => {
 
       const result = await new IntervalRetry<boolean, Error>(1).retryUntil(
         () => fnMock(),
-        (result) => result,
+        (value) => value,
         () => new Error(),
         10
       );
@@ -21,7 +21,7 @@ describe("Retry", () => {
 
       const result = await new IntervalRetry<boolean, Error>(1).retryUntil(
         () => fnMock(),
-        (result) => result,
+        (value) => value,
         () => new Error(),
         10
       );
@@ -36,7 +36,7 @@ describe("Retry", () => {
 
       const result = await new IntervalRetry<boolean, Error>(1).retryUntil(
         () => fnMock(),
-        (result) => result,
+        (value) => value,
         () => timeoutMock(),
         10
       );

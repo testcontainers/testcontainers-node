@@ -41,7 +41,16 @@ describe.for(browsers)("SeleniumContainer", { timeout: 240_000 }, ([browser, ima
       .withCommand(["sleep", "infinity"])
       .start();
     await ffmpegContainer.copyFilesToContainer([{ source: videoFilePath, target: `/tmp/${videoFileName}` }]);
-    const { exitCode } = await ffmpegContainer.exec(["ffprobe", `/tmp/${videoFileName}`]);
+    const { exitCode } = await ffmpegContainer.exec([
+      "ffmpeg",
+      "-v",
+      "error",
+      "-i",
+      `/tmp/${videoFileName}`,
+      "-f",
+      "null",
+      "-",
+    ]);
     expect(exitCode).toBe(0);
     // }
   });

@@ -311,6 +311,20 @@ export class CouchbaseContainer extends GenericContainer {
       body.set("mgmtSSL", container.getMappedPort(PORTS.MGMT_SSL_PORT).toString());
     }
 
+    this.setServicePorts(body, container);
+
+    const response = await this.doHttpRequest(
+      container.getHost(),
+      container.getMappedPort(PORTS.MGMT_PORT),
+      "/node/controller/setupAlternateAddresses/external",
+      "PUT",
+      body,
+      true
+    );
+    await this.checkResponse(response, "Could not configure external ports");
+  }
+
+  private setServicePorts(body: URLSearchParams, container: StartedTestContainer) {
     if (this.enabledServices.has(CouchbaseService.KV)) {
       body.set("kv", container.getMappedPort(PORTS.KV_PORT).toString());
       body.set("capi", container.getMappedPort(PORTS.VIEW_PORT).toString());
@@ -348,16 +362,6 @@ export class CouchbaseContainer extends GenericContainer {
         body.set("eventingSSL", container.getMappedPort(PORTS.EVENTING_SSL_PORT).toString());
       }
     }
-
-    const response = await this.doHttpRequest(
-      container.getHost(),
-      container.getMappedPort(PORTS.MGMT_PORT),
-      "/node/controller/setupAlternateAddresses/external",
-      "PUT",
-      body,
-      true
-    );
-    await this.checkResponse(response, "Could not configure external ports");
   }
 
   private async configureIndexer(container: StartedTestContainer) {
@@ -387,121 +391,131 @@ export class CouchbaseContainer extends GenericContainer {
     for (const bucket of this.buckets) {
       log.debug(`Creating bucket ${bucket.getName()}`);
 
-      const body = new URLSearchParams();
-      body.set("name", bucket.getName());
-      body.set("ramQuotaMB", bucket.getQuota().toString());
-      body.set("flushEnabled", bucket.hasFlushEnabled() ? "1" : "0");
-      body.set("replicaNumber", bucket.getNumOfReplicas().toString());
-
-      const response = await this.doHttpRequest(
-        startedTestContainer.getHost(),
-        startedTestContainer.getMappedPort(PORTS.MGMT_PORT),
-        "/pools/default/buckets",
-        "POST",
-        body,
-        true
+      await this.createBucket(startedTestContainer, bucket);
+      await this.waitUntilBucketHasEnabledServices(
+        client,
+        inspectResult,
+        startedTestContainer,
+        bucket,
+        remainingStartupMs()
       );
-
-      await this.checkResponse(response, `Could not create bucket ${bucket.getName()}`);
-
-      await Wait.forHttp(`/pools/default/b/${bucket.getName()}`, PORTS.MGMT_PORT)
-        .withBasicCredentials(this.username, this.password)
-        .forStatusCode(200)
-        .withStartupTimeout(remainingStartupMs())
-        .forResponsePredicate((response) => {
-          try {
-            const jsonResponse = JSON.parse(response);
-            const services = jsonResponse.nodesExt[0].services;
-            const serviceNames = Object.keys(services);
-
-            let found = false;
-            for (const enabledService of this.enabledServices) {
-              if (serviceNames.some((s) => s.startsWith(enabledService.getIdentifier()))) {
-                found = true;
-              } else {
-                found = false;
-                log.trace(`Service ${enabledService.getIdentifier()} not yet part of config, retrying.`);
-                break;
-              }
-            }
-            return found;
-          } catch (e) {
-            log.error(`Unable to parse response: ${response} ${e}`);
-            return false;
-          }
-        })
-        .waitUntilReady(
-          client.container.getById(startedTestContainer.getId()),
-          BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, inspectResult)
-        );
-
-      await Wait.forHttp(`/pools/default/buckets/${bucket.getName()}`, PORTS.MGMT_PORT)
-        .withBasicCredentials(this.username, this.password)
-        .forStatusCode(200)
-        .withStartupTimeout(remainingStartupMs())
-        .forResponsePredicate((response) => {
-          try {
-            const jsonResponse = JSON.parse(response);
-            return jsonResponse.nodes[0]?.status === "healthy";
-          } catch (e) {
-            log.error(`Unable to parse response: ${response}, error: ${e}`);
-            return false;
-          }
-        })
-        .waitUntilReady(
-          client.container.getById(startedTestContainer.getId()),
-          BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, inspectResult)
-        );
+      await this.waitUntilBucketIsHealthy(client, inspectResult, startedTestContainer, bucket, remainingStartupMs());
 
       if (this.enabledServices.has(CouchbaseService.QUERY)) {
-        const timeoutMs = remainingStartupMs();
-
-        await new IntervalRetry<Response | undefined, Error>(1000).retryUntil(
-          async () => {
-            try {
-              const body = new URLSearchParams();
-              body.set(
-                "statement",
-                `SELECT COUNT(*) > 0 as present FROM system:keyspaces WHERE name = "${bucket.getName()}"`
-              );
-
-              const response = await this.doHttpRequest(
-                startedTestContainer.getHost(),
-                startedTestContainer.getMappedPort(PORTS.QUERY_PORT),
-                "/query/service",
-                "POST",
-                body,
-                true
-              );
-
-              await this.checkResponse(response, `Could not poll query service state for bucket: ${bucket.getName()}`);
-
-              return response;
-            } catch (_e) {
-              return undefined;
-            }
-          },
-          async (response) => {
-            if (response === undefined) {
-              return false;
-            }
-            const jsonResponse = (await response.json()) as { results: Array<{ present: boolean }> };
-            return jsonResponse.results[0].present;
-          },
-          () => {
-            const message = `URL /query/service not accessible after ${timeoutMs}ms`;
-            log.error(message, { containerId: client.container.getById(startedTestContainer.getId()).id });
-
-            throw new Error(message);
-          },
-          timeoutMs
-        );
+        await this.waitUntilKeyspaceIsPresent(client, startedTestContainer, bucket, remainingStartupMs());
       }
 
       if (bucket.hasPrimaryIndex()) {
         if (this.enabledServices.has(CouchbaseService.QUERY)) {
+          await this.createPrimaryIndex(startedTestContainer, bucket);
+          await this.waitUntilPrimaryIndexIsOnline(client, startedTestContainer, bucket, remainingStartupMs());
+        } else {
+          log.info(
+            `Primary index creation for bucket ${bucket.getName()} ignored, since QUERY service is not present.`
+          );
+        }
+      }
+    }
+  }
+
+  private async createBucket(startedTestContainer: StartedTestContainer, bucket: BucketDefinition) {
+    const body = new URLSearchParams();
+    body.set("name", bucket.getName());
+    body.set("ramQuotaMB", bucket.getQuota().toString());
+    body.set("flushEnabled", bucket.hasFlushEnabled() ? "1" : "0");
+    body.set("replicaNumber", bucket.getNumOfReplicas().toString());
+
+    const response = await this.doHttpRequest(
+      startedTestContainer.getHost(),
+      startedTestContainer.getMappedPort(PORTS.MGMT_PORT),
+      "/pools/default/buckets",
+      "POST",
+      body,
+      true
+    );
+
+    await this.checkResponse(response, `Could not create bucket ${bucket.getName()}`);
+  }
+
+  private async waitUntilBucketHasEnabledServices(
+    client: ContainerRuntimeClient,
+    inspectResult: InspectResult,
+    startedTestContainer: StartedTestContainer,
+    bucket: BucketDefinition,
+    timeoutMs: number
+  ) {
+    await Wait.forHttp(`/pools/default/b/${bucket.getName()}`, PORTS.MGMT_PORT)
+      .withBasicCredentials(this.username, this.password)
+      .forStatusCode(200)
+      .withStartupTimeout(timeoutMs)
+      .forResponsePredicate((response) => {
+        try {
+          const jsonResponse = JSON.parse(response);
+          const services = jsonResponse.nodesExt[0].services;
+          const serviceNames = Object.keys(services);
+
+          let found = false;
+          for (const enabledService of this.enabledServices) {
+            if (serviceNames.some((s) => s.startsWith(enabledService.getIdentifier()))) {
+              found = true;
+            } else {
+              found = false;
+              log.trace(`Service ${enabledService.getIdentifier()} not yet part of config, retrying.`);
+              break;
+            }
+          }
+          return found;
+        } catch (e) {
+          log.error(`Unable to parse response: ${response} ${e}`);
+          return false;
+        }
+      })
+      .waitUntilReady(
+        client.container.getById(startedTestContainer.getId()),
+        BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, inspectResult)
+      );
+  }
+
+  private async waitUntilBucketIsHealthy(
+    client: ContainerRuntimeClient,
+    inspectResult: InspectResult,
+    startedTestContainer: StartedTestContainer,
+    bucket: BucketDefinition,
+    timeoutMs: number
+  ) {
+    await Wait.forHttp(`/pools/default/buckets/${bucket.getName()}`, PORTS.MGMT_PORT)
+      .withBasicCredentials(this.username, this.password)
+      .forStatusCode(200)
+      .withStartupTimeout(timeoutMs)
+      .forResponsePredicate((response) => {
+        try {
+          const jsonResponse = JSON.parse(response);
+          return jsonResponse.nodes[0]?.status === "healthy";
+        } catch (e) {
+          log.error(`Unable to parse response: ${response}, error: ${e}`);
+          return false;
+        }
+      })
+      .waitUntilReady(
+        client.container.getById(startedTestContainer.getId()),
+        BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, inspectResult)
+      );
+  }
+
+  private async waitUntilKeyspaceIsPresent(
+    client: ContainerRuntimeClient,
+    startedTestContainer: StartedTestContainer,
+    bucket: BucketDefinition,
+    timeoutMs: number
+  ) {
+    await new IntervalRetry<Response | undefined, Error>(1000).retryUntil(
+      async () => {
+        try {
           const body = new URLSearchParams();
-          body.set("statement", `CREATE PRIMARY INDEX on \`${bucket.getName()}\``); //TODO: check here!
+          body.set(
+            "statement",
+            `SELECT COUNT(*) > 0 as present FROM system:keyspaces WHERE name = "${bucket.getName()}"`
+          );
 
           const response = await this.doHttpRequest(
             startedTestContainer.getHost(),
@@ -512,60 +526,92 @@ export class CouchbaseContainer extends GenericContainer {
             true
           );
 
-          await this.checkResponse(response, `Could not create primary index for bucket ${bucket.getName()}`);
+          await this.checkResponse(response, `Could not poll query service state for bucket: ${bucket.getName()}`);
 
-          const timeoutMs = remainingStartupMs();
-
-          await new IntervalRetry<Response | undefined, Error>(1000).retryUntil(
-            async () => {
-              try {
-                const body = new URLSearchParams();
-                body.set(
-                  "statement",
-                  `SELECT COUNT(*) > 0 as online FROM system:indexes WHERE keyspace_id = "${bucket.getName()}" and is_primary = true and state = "online"`
-                );
-
-                const response = await this.doHttpRequest(
-                  startedTestContainer.getHost(),
-                  startedTestContainer.getMappedPort(PORTS.QUERY_PORT),
-                  "/query/service",
-                  "POST",
-                  body,
-                  true
-                );
-
-                await this.checkResponse(
-                  response,
-                  `Could not poll primary index state for bucket: ${bucket.getName()}`
-                );
-
-                return response;
-              } catch (_e) {
-                return undefined;
-              }
-            },
-            async (response) => {
-              if (response === undefined) {
-                return false;
-              }
-              const jsonResponse = (await response.json()) as { results: Array<{ online: boolean }> };
-              return jsonResponse.results[0].online;
-            },
-            () => {
-              const message = `URL /query/service not accessible after ${timeoutMs}ms`;
-              log.error(message, { containerId: client.container.getById(startedTestContainer.getId()).id });
-
-              throw new Error(message);
-            },
-            timeoutMs
-          );
-        } else {
-          log.info(
-            `Primary index creation for bucket ${bucket.getName()} ignored, since QUERY service is not present.`
-          );
+          return response;
+        } catch (_e) {
+          return undefined;
         }
-      }
-    }
+      },
+      async (response) => {
+        if (response === undefined) {
+          return false;
+        }
+        const jsonResponse = (await response.json()) as { results: Array<{ present: boolean }> };
+        return jsonResponse.results[0].present;
+      },
+      () => {
+        const message = `URL /query/service not accessible after ${timeoutMs}ms`;
+        log.error(message, { containerId: client.container.getById(startedTestContainer.getId()).id });
+
+        throw new Error(message);
+      },
+      timeoutMs
+    );
+  }
+
+  private async createPrimaryIndex(startedTestContainer: StartedTestContainer, bucket: BucketDefinition) {
+    const body = new URLSearchParams();
+    body.set("statement", `CREATE PRIMARY INDEX on \`${bucket.getName()}\``); //TODO: check here!
+
+    const response = await this.doHttpRequest(
+      startedTestContainer.getHost(),
+      startedTestContainer.getMappedPort(PORTS.QUERY_PORT),
+      "/query/service",
+      "POST",
+      body,
+      true
+    );
+
+    await this.checkResponse(response, `Could not create primary index for bucket ${bucket.getName()}`);
+  }
+
+  private async waitUntilPrimaryIndexIsOnline(
+    client: ContainerRuntimeClient,
+    startedTestContainer: StartedTestContainer,
+    bucket: BucketDefinition,
+    timeoutMs: number
+  ) {
+    await new IntervalRetry<Response | undefined, Error>(1000).retryUntil(
+      async () => {
+        try {
+          const body = new URLSearchParams();
+          body.set(
+            "statement",
+            `SELECT COUNT(*) > 0 as online FROM system:indexes WHERE keyspace_id = "${bucket.getName()}" and is_primary = true and state = "online"`
+          );
+
+          const response = await this.doHttpRequest(
+            startedTestContainer.getHost(),
+            startedTestContainer.getMappedPort(PORTS.QUERY_PORT),
+            "/query/service",
+            "POST",
+            body,
+            true
+          );
+
+          await this.checkResponse(response, `Could not poll primary index state for bucket: ${bucket.getName()}`);
+
+          return response;
+        } catch (_e) {
+          return undefined;
+        }
+      },
+      async (response) => {
+        if (response === undefined) {
+          return false;
+        }
+        const jsonResponse = (await response.json()) as { results: Array<{ online: boolean }> };
+        return jsonResponse.results[0].online;
+      },
+      () => {
+        const message = `URL /query/service not accessible after ${timeoutMs}ms`;
+        log.error(message, { containerId: client.container.getById(startedTestContainer.getId()).id });
+
+        throw new Error(message);
+      },
+      timeoutMs
+    );
   }
 
   protected override async containerStarted(

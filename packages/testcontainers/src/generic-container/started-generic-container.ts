@@ -63,7 +63,7 @@ export class StartedGenericContainer implements StartedTestContainer {
     client: ContainerRuntimeClient;
   }): Promise<string> {
     const { deleteOnExit, client } = options;
-    const changes = options.changes || [];
+    const changes = options.changes ?? [];
     if (deleteOnExit) {
       let sessionId = this.getLabels()[LABEL_TESTCONTAINERS_SESSION_ID];
       if (!sessionId) {

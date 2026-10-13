@@ -20,7 +20,7 @@ const SELENIUM_PORT = 4444;
 const VNC_PORT = 5900;
 const SELENIUM_NETWORK_ALIAS = "selenium";
 
-export const SELENIUM_VIDEO_IMAGE = "selenium/video:ffmpeg-4.3.1-20230508";
+export const SELENIUM_VIDEO_IMAGE = "selenium/video:ffmpeg-8.1-20260909";
 
 export class SeleniumContainer extends GenericContainer {
   constructor(image: string) {
