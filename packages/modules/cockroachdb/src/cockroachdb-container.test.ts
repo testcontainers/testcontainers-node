@@ -2,12 +2,12 @@ import { Client } from "pg";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { CockroachDbContainer } from "./cockroachdb-container";
 
-const IMAGE = getImage(__dirname);
+const IMAGES = ["cockroachdb/cockroach:v24.3.36", "cockroachdb/cockroach:v25.4.17", getImage(__dirname)];
 
-describe("CockroachDbContainer", { timeout: 180_000 }, () => {
-  it("should connect and return a query result", async () => {
+describe.each(IMAGES)("CockroachDbContainer (%s)", { concurrent: false, timeout: 180_000 }, (image) => {
+  it.concurrent("should connect and return a query result", async () => {
     // cockroachConnect {
-    await using container = await new CockroachDbContainer(IMAGE).start();
+    await using container = await new CockroachDbContainer(image).start();
 
     const client = new Client({
       host: container.getHost(),
@@ -26,9 +26,9 @@ describe("CockroachDbContainer", { timeout: 180_000 }, () => {
     // }
   });
 
-  it("should work with database URI", async () => {
+  it.concurrent("should work with database URI", async () => {
     // uriConnect {
-    await using container = await new CockroachDbContainer(IMAGE).start();
+    await using container = await new CockroachDbContainer(image).start();
 
     const client = new Client({
       connectionString: container.getConnectionUri(),
@@ -43,9 +43,9 @@ describe("CockroachDbContainer", { timeout: 180_000 }, () => {
     await client.end();
   });
 
-  it("should set database", async () => {
+  it.concurrent("should set database", async () => {
     // setDatabase {
-    await using container = await new CockroachDbContainer(IMAGE).withDatabase("custom_database").start();
+    await using container = await new CockroachDbContainer(image).withDatabase("custom_database").start();
     // }
 
     const client = new Client({
@@ -63,9 +63,9 @@ describe("CockroachDbContainer", { timeout: 180_000 }, () => {
     await client.end();
   });
 
-  it("should set username", async () => {
+  it.concurrent("should set username", async () => {
     // setUsername {
-    await using container = await new CockroachDbContainer(IMAGE).withUsername("custom_username").start();
+    await using container = await new CockroachDbContainer(image).withUsername("custom_username").start();
     // }
 
     const client = new Client({
@@ -83,8 +83,8 @@ describe("CockroachDbContainer", { timeout: 180_000 }, () => {
     await client.end();
   });
 
-  it("should work with restarted container", async () => {
-    await using container = await new CockroachDbContainer(IMAGE).start();
+  it.concurrent("should work with restarted container", async () => {
+    await using container = await new CockroachDbContainer(image).start();
     await container.restart();
 
     const client = new Client({
@@ -101,8 +101,8 @@ describe("CockroachDbContainer", { timeout: 180_000 }, () => {
     await client.end();
   });
 
-  it("should allow custom healthcheck", async () => {
-    const container = new CockroachDbContainer(IMAGE).withHealthCheck({
+  it.concurrent("should allow custom healthcheck", async () => {
+    const container = new CockroachDbContainer(image).withHealthCheck({
       test: ["CMD-SHELL", "exit 1"],
       interval: 100,
       retries: 0,
