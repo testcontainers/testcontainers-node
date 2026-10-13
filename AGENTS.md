@@ -36,9 +36,7 @@ If a skill or this file turns out to be wrong or incomplete, update it in the sa
 - Fix the root cause. A change that only makes a failure less likely is not a fix.
   - Arbitrary delays (`sleep`), repeating a check, or adding retries do not remove a race; they hide it.
   - For readiness problems, wait on a deterministic signal of the state you need. If no such signal exists, say so rather than shipping a mitigation as a fix.
-- Import boundaries are enforced by Biome (`biome.json`):
-  - Modules import core only from the `testcontainers` entry point. The one allowed exception is the core test helper (`../../../testcontainers/src/utils/test-helper`).
-  - `noImportCycles` is an error. Prefer breaking a new cycle (for example with `import type` or a leaf module) over adding a `biome-ignore` suppression.
+- Fix a lint violation rather than suppressing it with `biome-ignore`.
 
 ### Dependencies
 
