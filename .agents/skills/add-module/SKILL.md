@@ -25,6 +25,7 @@ For the container class, tests and docs page, start from the module closest in s
 - Started-container getters call `getMappedPort()` when they're invoked. A restarted container can get different host ports.
 - Incompatible major versions (different ports, auth or startup) get separate classes, not image-tag parsing.
 - Keep it small: no getters that exist only for tests, and no speculative options.
+- Write the class following `write-code`.
 
 ## Tests
 
