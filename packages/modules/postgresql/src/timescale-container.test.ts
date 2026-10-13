@@ -3,7 +3,7 @@ import { Client } from "pg";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { PostgreSqlContainer } from "./postgresql-container";
 
-const IMAGE = getImage(__dirname);
+const IMAGE = getImage(__dirname, 3);
 const SSL_SERVER_CERT = path.resolve(__dirname, "test-certs/server.crt");
 const SSL_SERVER_KEY = path.resolve(__dirname, "test-certs/server.key");
 

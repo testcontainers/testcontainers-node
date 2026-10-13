@@ -12,6 +12,7 @@ Release Drafter turns PR titles into release notes and labels into the version b
 - Branch from an up-to-date `main`.
 - Run the checks in AGENTS.md "Verification". For bug fixes, keep the red-green output.
 - Check that `git diff --stat main...HEAD` shows only the files you intended, and that the lockfile changes only the entries you intended.
+- If the diff touches `docs/`, AGENTS.md or a skill, check it against AGENTS.md "API and docs": docs only for a user-facing change and only how to use it, and no lines about your own feature in AGENTS.md or a skill.
 
 ## Commit and push
 
