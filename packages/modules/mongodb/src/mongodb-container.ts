@@ -1,4 +1,3 @@
-import { satisfies } from "compare-versions";
 import { AbstractStartedContainer, GenericContainer, type StartedTestContainer, Wait } from "testcontainers";
 
 const MONGODB_PORT = 27017;
@@ -57,27 +56,14 @@ export class MongoDBContainer extends GenericContainer {
   }
 
   private buildMongoEvalCommand(command: string) {
-    const args = [];
-    if (this.isV5OrLater()) args.push("mongosh");
-    else args.push("mongo", "admin");
+    const args = ["mongosh"];
     if (this.username && this.password) args.push("-u", this.username, "-p", this.password);
     args.push("--quiet", "--eval", command);
     return args.join(" ");
   }
 
   private getRsInitCmd() {
-    if (this.isV5OrLater())
-      return `'try { rs.status(); } catch (e) { rs.initiate(); } while (db.runCommand({isMaster: 1}).ismaster==false) { sleep(100); }'`;
-    else
-      return `'try { rs.initiate(); } catch (e) {} while (db.runCommand({isMaster: 1}).ismaster==false) { sleep(100); }'`;
-  }
-
-  private isV5OrLater() {
-    try {
-      return satisfies(this.imageName.tag, ">=5.0.0");
-    } catch {
-      return false;
-    }
+    return `'try { rs.status(); } catch (e) { rs.initiate(); } while (db.runCommand({isMaster: 1}).ismaster==false) { sleep(100); }'`;
   }
 }
 

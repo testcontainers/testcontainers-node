@@ -222,9 +222,9 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
     await assertMessageProducedAndConsumed(container);
   });
 
-  it("should throw an error when using kraft and and confluence platfom below 7.0.0", async () => {
-    expect(() => new KafkaContainer("confluentinc/cp-kafka:6.2.14").withKraft()).toThrow(
-      "Provided Confluent Platform's version 6.2.14 is not supported in Kraft mode (must be 7.0.0 or above)"
+  it("should throw an error when using kraft and and confluence platfom below 7.4.0", async () => {
+    expect(() => new KafkaContainer("confluentinc/cp-kafka:7.3.15").withKraft()).toThrow(
+      "Provided Confluent Platform's version 7.3.15 is not supported in Kraft mode (must be 7.4.0 or above)"
     );
   });
 
