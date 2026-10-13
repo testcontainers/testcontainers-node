@@ -2,10 +2,15 @@ import { Client } from "pg";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { CockroachDbContainer } from "./cockroachdb-container";
 
-const IMAGE = getImage(__dirname);
-const OLDEST_IMAGE = "cockroachdb/cockroach:v24.3.36";
+const IMAGES = [
+  "cockroachdb/cockroach:v24.3.36",
+  "cockroachdb/cockroach:v25.2.24",
+  "cockroachdb/cockroach:v25.4.17",
+  "cockroachdb/cockroach:v26.2.7",
+  getImage(__dirname),
+];
 
-describe.each([IMAGE, OLDEST_IMAGE])("CockroachDbContainer (%s)", { timeout: 180_000 }, (image) => {
+describe.each(IMAGES)("CockroachDbContainer (%s)", { timeout: 180_000 }, (image) => {
   it("should connect and return a query result", async () => {
     // cockroachConnect {
     await using container = await new CockroachDbContainer(image).start();
@@ -112,28 +117,4 @@ describe.each([IMAGE, OLDEST_IMAGE])("CockroachDbContainer (%s)", { timeout: 180
 
     await expect(() => container.start()).rejects.toThrow();
   });
-});
-
-describe("CockroachDbContainer", { timeout: 180_000 }, () => {
-  it.each(["cockroachdb/cockroach:v25.2.24", "cockroachdb/cockroach:v25.4.17", "cockroachdb/cockroach:v26.2.7"])(
-    "should connect and return a query result with %s",
-    async (image) => {
-      await using container = await new CockroachDbContainer(image).start();
-
-      const client = new Client({
-        host: container.getHost(),
-        port: container.getPort(),
-        database: container.getDatabase(),
-        user: container.getUsername(),
-        ssl: false,
-      });
-
-      await client.connect();
-
-      const result = await client.query("SELECT 1");
-      expect(result.rows[0]).toEqual({ "?column?": "1" });
-
-      await client.end();
-    }
-  );
 });

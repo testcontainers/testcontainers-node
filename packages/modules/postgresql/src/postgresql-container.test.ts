@@ -3,13 +3,12 @@ import { Client } from "pg";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { PostgreSqlContainer } from "./postgresql-container";
 
-const IMAGE = getImage(__dirname);
-const OLDEST_IMAGE = "postgres:15.19-alpine";
+const IMAGES = ["postgres:15.19-alpine", "postgres:16.15-alpine", "postgres:17.11-alpine", getImage(__dirname)];
 const SSL_CA_CERT = path.resolve(__dirname, "test-certs/ca.crt");
 const SSL_SERVER_CERT = path.resolve(__dirname, "test-certs/server.crt");
 const SSL_SERVER_KEY = path.resolve(__dirname, "test-certs/server.key");
 
-describe.each([IMAGE, OLDEST_IMAGE])("PostgreSqlContainer (%s)", { timeout: 180_000 }, (image) => {
+describe.each(IMAGES)("PostgreSqlContainer (%s)", { timeout: 180_000 }, (image) => {
   it("should connect and return a query result", async () => {
     // pgConnect {
     await using container = await new PostgreSqlContainer(image).start();
@@ -150,27 +149,4 @@ describe.each([IMAGE, OLDEST_IMAGE])("PostgreSqlContainer (%s)", { timeout: 180_
       "SSL CA certificate file should not be empty."
     );
   });
-});
-
-describe("PostgreSqlContainer", { timeout: 180_000 }, () => {
-  it.each(["postgres:16.15-alpine", "postgres:17.11-alpine"])(
-    "should connect and return a query result with %s",
-    async (image) => {
-      await using container = await new PostgreSqlContainer(image).start();
-
-      const client = new Client({
-        host: container.getHost(),
-        port: container.getPort(),
-        database: container.getDatabase(),
-        user: container.getUsername(),
-        password: container.getPassword(),
-      });
-      await client.connect();
-
-      const result = await client.query("SELECT 1");
-      expect(result.rows[0]).toEqual({ "?column?": 1 });
-
-      await client.end();
-    }
-  );
 });

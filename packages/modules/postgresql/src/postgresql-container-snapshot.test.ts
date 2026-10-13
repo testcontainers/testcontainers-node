@@ -2,10 +2,9 @@ import { Client } from "pg";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { PostgreSqlContainer } from "./postgresql-container";
 
-const IMAGE = getImage(__dirname);
-const OLDEST_IMAGE = "postgres:15.19-alpine";
+const IMAGES = ["postgres:15.19-alpine", "postgres:16.15-alpine", "postgres:17.11-alpine", getImage(__dirname)];
 
-describe.each([IMAGE, OLDEST_IMAGE])("PostgreSqlContainer snapshot and restore (%s)", { timeout: 180_000 }, (image) => {
+describe.each(IMAGES)("PostgreSqlContainer snapshot and restore (%s)", { timeout: 180_000 }, (image) => {
   it("should create and restore from snapshot", async () => {
     // createAndRestoreFromSnapshot {
     await using container = await new PostgreSqlContainer(image).start();

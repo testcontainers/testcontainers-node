@@ -2,10 +2,9 @@ import { createConnection } from "mariadb";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { MariaDbContainer } from "./mariadb-container";
 
-const IMAGE = getImage(__dirname);
-const OLDEST_IMAGE = "mariadb:10.11.19";
+const IMAGES = ["mariadb:10.11.19", "mariadb:11.4.13", "mariadb:11.8.9", "mariadb:12.3.3", getImage(__dirname)];
 
-describe.each([IMAGE, OLDEST_IMAGE])("MariaDbContainer (%s)", { timeout: 240_000 }, (image) => {
+describe.each(IMAGES)("MariaDbContainer (%s)", { timeout: 240_000 }, (image) => {
   it("should connect and execute query", async () => {
     // mariaDbConnect {
     await using container = await new MariaDbContainer(image).start();
@@ -109,26 +108,4 @@ describe.each([IMAGE, OLDEST_IMAGE])("MariaDbContainer (%s)", { timeout: 240_000
 
     await client.end();
   });
-});
-
-describe("MariaDbContainer", { timeout: 240_000 }, () => {
-  it.each(["mariadb:11.4.13", "mariadb:11.8.9", "mariadb:12.3.3"])(
-    "should connect and execute query with %s",
-    async (image) => {
-      await using container = await new MariaDbContainer(image).start();
-
-      const client = await createConnection({
-        host: container.getHost(),
-        port: container.getPort(),
-        database: container.getDatabase(),
-        user: container.getUsername(),
-        password: container.getUserPassword(),
-      });
-
-      const rows = await client.query("SELECT 1 as res");
-      expect(rows).toEqual([{ res: 1 }]);
-
-      await client.end();
-    }
-  );
 });
