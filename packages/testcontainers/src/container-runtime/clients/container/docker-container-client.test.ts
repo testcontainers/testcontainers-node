@@ -1,6 +1,6 @@
 import { PassThrough, type Readable } from "node:stream";
+import { text } from "node:stream/consumers";
 import type Dockerode from "dockerode";
-import { streamToString } from "../../../common";
 import { DockerContainerClient } from "./docker-container-client";
 
 describe("DockerContainerClient", () => {
@@ -38,7 +38,7 @@ describe("DockerContainerClient", () => {
 
       const stream = await client.logs(container as unknown as Dockerode.Container, { follow: false });
 
-      expect(await streamToString(stream)).toBe("first line\nsecond line\n");
+      expect(await text(stream)).toBe("first line\nsecond line\n");
       expect(container.logs).toHaveBeenCalledWith(expect.objectContaining({ follow: false }));
     });
 
@@ -56,7 +56,7 @@ describe("DockerContainerClient", () => {
 
       const stream = await client.logs(container as unknown as Dockerode.Container, { follow: false });
 
-      expect(await streamToString(stream)).toBe('{"level":"fatal"}');
+      expect(await text(stream)).toBe('{"level":"fatal"}');
     });
   });
 

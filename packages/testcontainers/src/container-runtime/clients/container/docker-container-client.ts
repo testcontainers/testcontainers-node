@@ -1,5 +1,5 @@
 import type { IncomingMessage } from "node:http";
-import { PassThrough, type Readable } from "node:stream";
+import { PassThrough, Readable } from "node:stream";
 import { finished } from "node:stream/promises";
 import type Dockerode from "dockerode";
 import type {

@@ -1,5 +1,6 @@
+import { text } from "node:stream/consumers";
 import type { Container } from "dockerode";
-import { log, streamToString } from "../common";
+import { log } from "../common";
 import type { ContainerRuntimeClient } from "../container-runtime";
 import type { BoundPorts } from "../utils/bound-ports";
 import type { WaitStrategy } from "./wait-strategy";
@@ -47,7 +48,7 @@ const appendContainerLogs = async (
       tail: LOG_TAIL,
       since: startTime ? startTime.getTime() / 1000 : 0,
     });
-    const logs = (await streamToString(stream)).trimEnd();
+    const logs = (await text(stream)).trimEnd();
 
     if (logs.length === 0 || withoutWhitespace(err.message).includes(withoutWhitespace(logs))) {
       return;
