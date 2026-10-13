@@ -6,8 +6,8 @@ import { ValkeyContainer } from "./valkey-container";
 
 const IMAGES = ["valkey/valkey:7.2.14", "valkey/valkey:8.1.10", getImage(__dirname)];
 
-describe.each(IMAGES)("ValkeyContainer (%s)", { timeout: 240_000 }, (image) => {
-  it("should connect and execute set-get", async () => {
+describe.each(IMAGES)("ValkeyContainer (%s)", { concurrent: false, timeout: 240_000 }, (image) => {
+  it.concurrent("should connect and execute set-get", async () => {
     // valkeyStartContainer {
     await using container = await new ValkeyContainer(image).start();
 
@@ -21,7 +21,7 @@ describe.each(IMAGES)("ValkeyContainer (%s)", { timeout: 240_000 }, (image) => {
     // }
   });
 
-  it("should connect with password and execute set-get", async () => {
+  it.concurrent("should connect with password and execute set-get", async () => {
     await using container = await new ValkeyContainer(image).withPassword("test").start();
 
     const client = createClient({ url: container.getConnectionUrl() });
@@ -33,7 +33,7 @@ describe.each(IMAGES)("ValkeyContainer (%s)", { timeout: 240_000 }, (image) => {
     client.destroy();
   });
 
-  it("should reconnect with volume and persistence data", async () => {
+  it.concurrent("should reconnect with volume and persistence data", async () => {
     // valkeyWithPersistentData {
     const sourcePath = fs.mkdtempSync("valkey-");
 
@@ -56,7 +56,7 @@ describe.each(IMAGES)("ValkeyContainer (%s)", { timeout: 240_000 }, (image) => {
     // }
   });
 
-  it("should load initial data and can read it", async () => {
+  it.concurrent("should load initial data and can read it", async () => {
     // valkeyWithPredefinedData {
     await using container = await new ValkeyContainer(image)
       .withPassword("test")
@@ -77,7 +77,7 @@ describe.each(IMAGES)("ValkeyContainer (%s)", { timeout: 240_000 }, (image) => {
     // }
   });
 
-  it("should start with username and password", async () => {
+  it.concurrent("should start with username and password", async () => {
     // valkeyWithUsernameAndPassword {
     const username = "testUser";
     const password = "testPassword";
@@ -98,7 +98,7 @@ describe.each(IMAGES)("ValkeyContainer (%s)", { timeout: 240_000 }, (image) => {
     client.destroy();
   });
 
-  it("should start with password only", async () => {
+  it.concurrent("should start with password only", async () => {
     // valkeyWithPassword {
     const password = "testPassword";
 
@@ -116,7 +116,7 @@ describe.each(IMAGES)("ValkeyContainer (%s)", { timeout: 240_000 }, (image) => {
     client.destroy();
   });
 
-  it("should execute container cmd and return the result", async () => {
+  it.concurrent("should execute container cmd and return the result", async () => {
     // valkeyExecuteCommand {
     await using container = await new ValkeyContainer(image).start();
 

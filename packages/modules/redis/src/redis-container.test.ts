@@ -7,8 +7,8 @@ import { RedisContainer } from "./redis-container";
 const IMAGES = ["redis:6.2.24", "redis:7.4.11", getImage(__dirname)];
 const REDISSTACK_IMAGE = getImage(__dirname, 1);
 
-describe.each(IMAGES)("RedisContainer (%s)", { timeout: 240_000 }, (image) => {
-  it("should connect and execute set-get", async () => {
+describe.each(IMAGES)("RedisContainer (%s)", { concurrent: false, timeout: 240_000 }, (image) => {
+  it.concurrent("should connect and execute set-get", async () => {
     // redisStartContainer {
     await using container = await new RedisContainer(image).start();
 
@@ -22,7 +22,7 @@ describe.each(IMAGES)("RedisContainer (%s)", { timeout: 240_000 }, (image) => {
     // }
   });
 
-  it("should connect with password and execute set-get", async () => {
+  it.concurrent("should connect with password and execute set-get", async () => {
     await using container = await new RedisContainer(image).withPassword("test").start();
 
     const client = createClient({ url: container.getConnectionUrl() });
@@ -34,7 +34,7 @@ describe.each(IMAGES)("RedisContainer (%s)", { timeout: 240_000 }, (image) => {
     client.destroy();
   });
 
-  it("should reconnect with volume and persistence data", async () => {
+  it.concurrent("should reconnect with volume and persistence data", async () => {
     // persistentData {
     const sourcePath = fs.mkdtempSync("redis-");
 
@@ -56,7 +56,7 @@ describe.each(IMAGES)("RedisContainer (%s)", { timeout: 240_000 }, (image) => {
     // }
   });
 
-  it("should load initial data and can read it", async () => {
+  it.concurrent("should load initial data and can read it", async () => {
     // withPredefinedData {
     await using container = await new RedisContainer(image)
       .withPassword("test")
@@ -77,7 +77,7 @@ describe.each(IMAGES)("RedisContainer (%s)", { timeout: 240_000 }, (image) => {
     // }
   });
 
-  it("should load initial data once", async () => {
+  it.concurrent("should load initial data once", async () => {
     await using container = await new RedisContainer(image)
       .withInitialData(path.join(__dirname, "initCount.redis"))
       .start();
@@ -90,7 +90,7 @@ describe.each(IMAGES)("RedisContainer (%s)", { timeout: 240_000 }, (image) => {
     client.destroy();
   });
 
-  it("should start with credentials and login", async () => {
+  it.concurrent("should start with credentials and login", async () => {
     // redisStartWithCredentials {
     const password = "testPassword";
 
@@ -108,7 +108,7 @@ describe.each(IMAGES)("RedisContainer (%s)", { timeout: 240_000 }, (image) => {
     client.destroy();
   });
 
-  it("should execute container cmd and return the result", async () => {
+  it.concurrent("should execute container cmd and return the result", async () => {
     // executeCommand {
     await using container = await new RedisContainer(image).start();
 
@@ -118,7 +118,7 @@ describe.each(IMAGES)("RedisContainer (%s)", { timeout: 240_000 }, (image) => {
     // }
   });
 
-  it("should start redis with custom command", async () => {
+  it.concurrent("should start redis with custom command", async () => {
     const container = new RedisContainer(image).withCommand(["redis-server", "--loglevel", "verbose"]);
     await using startedContainer = await container.start();
 
@@ -134,7 +134,7 @@ describe.each(IMAGES)("RedisContainer (%s)", { timeout: 240_000 }, (image) => {
     client.destroy();
   });
 
-  it("should start redis with custom command and keeping default args", async () => {
+  it.concurrent("should start redis with custom command and keeping default args", async () => {
     const sourcePath = fs.mkdtempSync("redis-");
 
     const container = new RedisContainer(image)
