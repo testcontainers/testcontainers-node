@@ -438,7 +438,7 @@ export class GenericContainer implements TestContainer {
         portBindings[`${exposedPort.container}/${protocol}`] = [{ HostPort: exposedPort.host.toString() }];
       } else {
         const containerPort = getContainerPort(exposedPort);
-        portBindings[`${containerPort}/${protocol}`] = [{ HostPort: isInContainer() ? "0" : "" }];
+        portBindings[`${containerPort}/${protocol}`] = [{ HostPort: protocol === "udp" || isInContainer() ? "0" : "" }];
       }
     }
 
