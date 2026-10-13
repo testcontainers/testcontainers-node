@@ -20,9 +20,9 @@ export const waitForContainer = async (
     log.info(`Container is ready`, { containerId: container.id });
   } catch (err) {
     log.error(`Container failed to be ready: ${err}`, { containerId: container.id });
+    await appendContainerLogs(client, container, err, startTime);
     try {
       await client.container.stop(container, { timeout: 0 });
-      await appendContainerLogs(client, container, err, startTime);
       await client.container.remove(container, { removeVolumes: true });
     } catch (stopErr) {
       log.error(`Failed to stop container after it failed to be ready: ${stopErr}`, { containerId: container.id });
@@ -43,6 +43,7 @@ const appendContainerLogs = async (
 
   try {
     const stream = await client.container.logs(container, {
+      follow: false,
       tail: LOG_TAIL,
       since: startTime ? startTime.getTime() / 1000 : 0,
     });

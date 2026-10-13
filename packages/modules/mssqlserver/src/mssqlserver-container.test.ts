@@ -58,7 +58,7 @@ describe("MSSQLServerContainer", { timeout: 180_000 }, () => {
   it("should throw error with invalid password", async () => {
     const container = new MSSQLServerContainer(IMAGE).acceptLicense().withPassword("password");
     await expect(container.start()).rejects.toThrow(
-      Error('Log stream ended and message "/.*Recovery is complete.*/" was not received')
+      'Log stream ended and message "/.*Recovery is complete.*/" was not received'
     );
   });
 
