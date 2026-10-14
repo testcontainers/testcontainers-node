@@ -442,6 +442,8 @@ const container = await new GenericContainer("alpine").start();
 await container.restart();
 ```
 
+The container is stopped and then started again. A mapped port can change across a restart unless you set its host port, so call `getMappedPort` again afterwards.
+
 ## Committing a container to an image
 
 ```js
