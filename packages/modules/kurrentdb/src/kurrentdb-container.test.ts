@@ -2,12 +2,12 @@ import { KurrentDBClient, type StreamSubscription } from "@kurrent/kurrentdb-cli
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { KurrentDbContainer } from "./kurrentdb-container";
 
-const IMAGE = getImage(__dirname);
+const IMAGES = ["kurrentplatform/kurrentdb:25.0.1", getImage(__dirname)];
 
-describe("KurrentDbContainer", { concurrent: false, timeout: 240_000 }, () => {
+describe.each(IMAGES)("KurrentDbContainer (%s)", { concurrent: false, timeout: 240_000 }, (image) => {
   it("should execute write and read", async () => {
     // startContainer {
-    await using container = await new KurrentDbContainer(IMAGE).start();
+    await using container = await new KurrentDbContainer(image).start();
 
     const client = KurrentDBClient.connectionString(container.getConnectionString());
 
@@ -49,7 +49,7 @@ describe("KurrentDbContainer", { concurrent: false, timeout: 240_000 }, () => {
 
   it("should use built-in projections", async () => {
     // usingStandardProjections {
-    await using container = await new KurrentDbContainer(IMAGE).start();
+    await using container = await new KurrentDbContainer(image).start();
     const client = KurrentDBClient.connectionString(container.getConnectionString());
 
     await client.appendToStream("Todo-1", [

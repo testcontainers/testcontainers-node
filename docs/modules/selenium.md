@@ -17,10 +17,8 @@ These examples use the following libraries:
 
 Choose an image from the container registry and substitute `IMAGE`:
 
-- [AMD Standalone Chrome](https://hub.docker.com/r/selenium/standalone-chrome)
-- [AMD Standalone Firefox](https://hub.docker.com/r/selenium/standalone-firefox)
-- [ARM Standalone Chromium](https://hub.docker.com/r/seleniarm/standalone-chromium)
-- [ARM Standalone Firefox](https://hub.docker.com/r/seleniarm/standalone-firefox)
+- [Standalone Chrome](https://hub.docker.com/r/selenium/standalone-chrome)
+- [Standalone Firefox](https://hub.docker.com/r/selenium/standalone-firefox)
 
 ### Navigate to a page
 
