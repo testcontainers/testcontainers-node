@@ -1,7 +1,6 @@
-import { text } from "node:stream/consumers";
 import type Dockerode from "dockerode";
 import { Agent, request } from "undici";
-import { IntervalRetry, log } from "../common";
+import { log } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
 import type { BoundPorts } from "../utils/bound-ports";
 import { undiciResponseToFetchResponse } from "./utils/undici-response-parser";
@@ -22,9 +21,12 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
   constructor(
     private readonly path: string,
     private readonly port: number,
-    private readonly options: HttpWaitStrategyOptions
+    options: HttpWaitStrategyOptions
   ) {
     super();
+    if (options.abortOnContainerExit !== undefined) {
+      this.withAbortOnContainerExit(options.abortOnContainerExit);
+    }
   }
 
   public forStatusCode(statusCode: number): this {
@@ -76,58 +78,36 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
   public async waitUntilReady(container: Dockerode.Container, boundPorts: BoundPorts): Promise<void> {
     log.debug(`Waiting for HTTP...`, { containerId: container.id });
 
-    const exitStatus = "exited";
-    let containerExited = false;
     const client = await getContainerRuntimeClient();
-    const abortOnContainerExit = this.options.abortOnContainerExit ?? true;
     // Scoped per invocation: one strategy instance can drive concurrent waits, so a shared
     // agent would let one finished wait destroy a dispatcher another is still using.
     const agent = this.createInsecureAgent();
 
     try {
-      await new IntervalRetry<Response | undefined, Error>(this.readTimeoutMs).retryUntil(
+      await this.retryUntil(
+        container,
+        this.readTimeoutMs,
         async () => {
           try {
             const url = `${this.protocol}://${client.info.containerRuntime.host}:${boundPorts.getBinding(this.port)}${
               this.path
             }`;
-
-            if (abortOnContainerExit) {
-              const containerStatus = (await client.container.inspect(container)).State.Status;
-
-              if (containerStatus === exitStatus) {
-                containerExited = true;
-                return;
-              }
-            }
-
             return await this.sendRequest(url, agent);
           } catch {
             return undefined;
           }
         },
-        async (response) => {
-          if (abortOnContainerExit && containerExited) {
-            return true;
-          }
-
-          return this.matchesPredicates(response);
-        },
+        (response) => this.matchesPredicates(response),
         () => {
           const message = `URL ${this.path} not accessible after ${this.startupTimeoutMs}ms`;
           log.error(message, { containerId: container.id });
           throw new Error(message);
-        },
-        this.startupTimeoutMs
+        }
       );
     } finally {
       // Force-close: status-only predicates never read the body, so a graceful close() could
       // hang waiting on unreleased connections. Nothing left to drain once the wait is done.
       await agent?.destroy();
-    }
-
-    if (abortOnContainerExit && containerExited) {
-      return this.handleContainerExit(container);
     }
 
     log.debug(`HTTP wait strategy complete`, { containerId: container.id });
@@ -158,24 +138,6 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
       }
     }
     return true;
-  }
-
-  private async handleContainerExit(container: Dockerode.Container) {
-    const tail = 50;
-    const client = await getContainerRuntimeClient();
-    let message: string;
-
-    try {
-      const lastLogs = await text(await client.container.logs(container, { tail }));
-
-      message = `Container exited during HTTP healthCheck, last ${tail} logs: ${lastLogs.trim()}`;
-    } catch (_err) {
-      message = "Container exited during HTTP healthCheck, failed to get last logs";
-    }
-
-    log.error(message, { containerId: container.id });
-
-    throw new Error(message);
   }
 
   private createInsecureAgent(): Agent | undefined {

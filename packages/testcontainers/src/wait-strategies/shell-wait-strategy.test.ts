@@ -17,4 +17,13 @@ describe("ShellWaitStrategy", { timeout: 180_000 }, () => {
         .start()
     ).rejects.toThrowError(`Shell command "stat /tmp/test.lock" not successful`);
   });
+
+  it("should fail when the container exits", async () => {
+    await expect(() =>
+      new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+        .withEntrypoint(["/bin/sh", "-c", "exit 1"])
+        .withWaitStrategy(Wait.forSuccessfulCommand("stat /tmp/test.lock"))
+        .start()
+    ).rejects.toThrowError("Container exited with code 1");
+  });
 });
