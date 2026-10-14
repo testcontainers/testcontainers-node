@@ -23,7 +23,7 @@ export default defineConfig({
       concurrent: true,
     },
     alias: {
-      testcontainers: path.resolve(__dirname, "packages/testcontainers/src"),
+      testcontainers: path.resolve(import.meta.dirname, "packages/testcontainers/src"),
     },
     coverage: {
       include: ["packages/**/*.ts"],
