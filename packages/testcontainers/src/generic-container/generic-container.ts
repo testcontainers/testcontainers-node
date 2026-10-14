@@ -134,13 +134,12 @@ export class GenericContainer implements TestContainer {
 
   protected async selectWaitStrategy(
     client: ContainerRuntimeClient,
-    inspectResult: ContainerInspectInfo,
-    waitStrategy: WaitStrategy | undefined = this.waitStrategy
+    inspectResult: ContainerInspectInfo
   ): Promise<WaitStrategy> {
     return selectWaitStrategy({
       client,
       inspectResult,
-      waitStrategy,
+      waitStrategy: this.waitStrategy,
       healthCheck: this.healthCheck,
       imageNames: [this.imageName.string],
     });

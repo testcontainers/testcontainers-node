@@ -60,7 +60,18 @@ Wrong or incomplete means a rule misled you, or a mistake keeps recurring that n
   - Every extra image increases how long the tests take to run and how much storage they need.
   - Reuse an image the tests already use, for example `cristianrgreco/testcontainer:1.1.14` in `packages/testcontainers`, or the module's own image.
 - Module tests read their images from `packages/modules/<module>/Dockerfile` (one `FROM` line per image) with `getImage(__dirname, index)`, so Dependabot can bump them. Do not hardcode images in module source or tests.
-  - Exception: a second version of the *same* image must be hardcoded in its test file (for example `influxdb1-container.test.ts`, `kafka-container-7.test.ts`). Dependabot treats same-image `FROM` lines as one dependency and bumps them all to the newest tag.
+  - Exception: a second version of the *same* image must be hardcoded in its test file. Dependabot treats same-image `FROM` lines as one dependency and bumps them all to the newest tag.
+- A module's tests cover every major version the vendor still supports, so a change can't silently break one that users still run. This is the one case where a suite pulls extra images.
+  - Keep one `IMAGES` list in the test file: the latest release of each older supported major, oldest first, as an exact tag, then the `Dockerfile` image. Don't list other minors or patches of a major, and don't use rolling tags such as `redis:7`.
+  - This applies to every image the module itself runs, so a second class, edition or variant with its own image gets its own list. Images that only help the tests, such as a CLI or the database behind an emulator, are exempt.
+  - Loop the whole suite over the list with `describe.each(IMAGES)`, so every test runs on every major.
+  - Run the majors one after another and each major's tests concurrently, as a single-image suite runs: pass `{ concurrent: false }` to `describe.each` and declare the tests with `it.concurrent`.
+  - A major is supported while the vendor's free or community support covers it. Leave out a major that ends within 60 days. If the vendor publishes no lifecycle, test only the `Dockerfile` image.
+  - Where a test only applies to some of the images, select it by matching the image with `it.skipIf` or `it.runIf`, and add a comment when the reason isn't obvious.
+  - A major that needs its own class or setup gets its own test file named after it, such as `<module>-container-v<N>.test.ts`.
+  - A suite too heavy to run on every major may loop a representative part of itself. Say which part in the PR.
+  - If a looped suite still overloads the test runner (tests far slower than locally, connection timeouts, passing only on retry), consider running its tests sequentially too, with plain `it`, and point the change out to the user.
+  - Versions past the vendor's end of life are out of scope. Remove their tests and the module code that exists only for them. Removing that code is a breaking change, so it goes in its own PR.
 - Vitest runs tests concurrently by default (`sequence.concurrent: true` in `vitest.config.ts`).
   - Tests that rely on shared/global mocks (for example `vi.spyOn` on shared loggers/singletons) can be flaky due to interleaving or automatic mock resets.
   - Prefer asserting observable behavior instead of shared global mock state when possible.
