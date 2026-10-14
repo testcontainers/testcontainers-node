@@ -4,20 +4,20 @@ import { log } from "../../common";
 import type { ContainerRuntimeClient } from "../../container-runtime";
 
 export interface PortCheck {
-  isBound(port: number | string): Promise<boolean>;
+  isBound(port: number | string, signal?: AbortSignal): Promise<boolean>;
 }
 
 export class HostPortCheck implements PortCheck {
   constructor(private readonly client: ContainerRuntimeClient) {}
 
-  public isBound(port: number | string): Promise<boolean> {
+  public isBound(port: number | string, signal?: AbortSignal): Promise<boolean> {
     if (typeof port === "string" && port.toLowerCase().endsWith("/udp")) {
       log.debug(`Skipping host port check for UDP port ${port} (UDP port checks not supported)`);
       return Promise.resolve(true);
     }
 
     return new Promise((resolve) => {
-      const socket = new Socket();
+      const socket = new Socket({ signal });
       const portNumber = typeof port === "string" ? parseInt(port.split("/")[0], 10) : port;
       socket
         .setTimeout(1000)
@@ -46,7 +46,7 @@ export class InternalPortCheck implements PortCheck {
     private readonly container: Dockerode.Container
   ) {}
 
-  public async isBound(port: number | string): Promise<boolean> {
+  public async isBound(port: number | string, signal?: AbortSignal): Promise<boolean> {
     if (typeof port === "string" && port.toLowerCase().includes("/udp")) {
       log.debug(`Skipping internal port check for UDP port ${port} (UDP port checks not supported)`, {
         containerId: this.container.id,
@@ -63,7 +63,7 @@ export class InternalPortCheck implements PortCheck {
     ];
 
     const commandResults = await Promise.all(
-      commands.map((command) => this.client.container.exec(this.container, command, { log: false }))
+      commands.map((command) => this.client.container.exec(this.container, command, { log: false, signal }))
     );
     const isBound = commandResults.some((result) => result.exitCode === 0);
 
