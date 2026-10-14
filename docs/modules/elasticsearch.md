@@ -8,13 +8,15 @@ npm install @testcontainers/elasticsearch --save-dev
 
 ## Examples
 
-These examples use the following libraries:
+These examples use the following libraries. Use the client major that matches your Elasticsearch major:
 
-- [@elastic/elasticsearch](https://www.npmjs.com/package/@elastic/elasticsearch)
+- [@elastic/elasticsearch 9](https://www.npmjs.com/package/@elastic/elasticsearch) for Elasticsearch 9
 
-        npm install @elastic/elasticsearch
+        npm install @elastic/elasticsearch@9
 
-Use the client major that matches your Elasticsearch major. A 9.x client can't talk to Elasticsearch 8.
+- [@elastic/elasticsearch 8](https://www.npmjs.com/package/@elastic/elasticsearch/v/8.19.2) for Elasticsearch 8
+
+        npm install @elastic/elasticsearch@8
 
 Choose an image from the [container registry](https://hub.docker.com/_/elasticsearch) and substitute `IMAGE`.
 
