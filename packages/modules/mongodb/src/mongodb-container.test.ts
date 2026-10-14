@@ -2,10 +2,10 @@ import mongoose from "mongoose";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { MongoDBContainer } from "./mongodb-container";
 
-const IMAGE = getImage(__dirname);
+const IMAGES = ["mongo:7.0.43", "mongo:8.3.11", getImage(__dirname)];
 
-describe("MongoDBContainer", { timeout: 240_000 }, () => {
-  it.each([IMAGE, "mongo:6.0.25", "mongo:4.4.29"])("should work with %s", async (image) => {
+describe.each(IMAGES)("MongoDBContainer (%s)", { concurrent: false, timeout: 240_000 }, (image) => {
+  it.concurrent("should connect", async () => {
     // connectMongo {
     await using container = await new MongoDBContainer(image).start();
 
@@ -22,9 +22,9 @@ describe("MongoDBContainer", { timeout: 240_000 }, () => {
     // }
   });
 
-  it("should connect with credentials", async () => {
+  it.concurrent("should connect with credentials", async () => {
     // connectWithCredentials {
-    await using container = await new MongoDBContainer(IMAGE)
+    await using container = await new MongoDBContainer(image)
       .withUsername("customUsername")
       .withPassword("customPassword")
       .start();

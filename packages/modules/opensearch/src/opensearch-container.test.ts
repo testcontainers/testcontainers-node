@@ -2,11 +2,10 @@ import { Client } from "@opensearch-project/opensearch";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { OpenSearchContainer } from "./opensearch-container";
 
-const IMAGE = getImage(__dirname);
-const images = ["opensearchproject/opensearch:2.19.2", IMAGE];
+const IMAGES = ["opensearchproject/opensearch:2.19.6", getImage(__dirname)];
 
-describe("OpenSearchContainer", { timeout: 180_000 }, () => {
-  it.each(images)("should create an index with %s", async (image) => {
+describe.each(IMAGES)("OpenSearchContainer (%s)", { concurrent: false, timeout: 180_000 }, (image) => {
+  it.concurrent("should create an index", async () => {
     // opensearchCreateIndex {
     await using container = await new OpenSearchContainer(image).start();
 
@@ -28,9 +27,9 @@ describe("OpenSearchContainer", { timeout: 180_000 }, () => {
     // }
   });
 
-  it("should index a document", async () => {
+  it.concurrent("should index a document", async () => {
     // opensearchIndexDocument {
-    await using container = await new OpenSearchContainer(IMAGE).start();
+    await using container = await new OpenSearchContainer(image).start();
 
     const client = new Client({
       node: container.getHttpUrl(),
@@ -56,8 +55,8 @@ describe("OpenSearchContainer", { timeout: 180_000 }, () => {
     // }
   });
 
-  it("should work with restarted container", async () => {
-    await using container = await new OpenSearchContainer(IMAGE).start();
+  it.concurrent("should work with restarted container", async () => {
+    await using container = await new OpenSearchContainer(image).start();
     await container.restart();
 
     const client = new Client({
@@ -77,13 +76,13 @@ describe("OpenSearchContainer", { timeout: 180_000 }, () => {
     expect(existsResponse.body).toBe(true);
   });
 
-  it("should throw when given an invalid password", () => {
-    expect(() => new OpenSearchContainer(IMAGE).withPassword("weakpwd")).toThrowError(/Password "weakpwd" is too weak/);
+  it.concurrent("should throw when given an invalid password", () => {
+    expect(() => new OpenSearchContainer(image).withPassword("weakpwd")).toThrowError(/Password "weakpwd" is too weak/);
   });
 
-  it("should set custom password", async () => {
+  it.concurrent("should set custom password", async () => {
     // opensearchCustomPassword {
-    await using container = await new OpenSearchContainer(IMAGE).withPassword("Str0ng!Passw0rd2025").start();
+    await using container = await new OpenSearchContainer(image).withPassword("Str0ng!Passw0rd2025").start();
     // }
 
     const client = new Client({
@@ -103,9 +102,9 @@ describe("OpenSearchContainer", { timeout: 180_000 }, () => {
     expect(body).toBe(true);
   });
 
-  it("should be reachable with security disabled", async () => {
+  it.concurrent("should be reachable with security disabled", async () => {
     // opensearchDisableSecurity {
-    await using container = await new OpenSearchContainer(IMAGE).withSecurityEnabled(false).start();
+    await using container = await new OpenSearchContainer(image).withSecurityEnabled(false).start();
 
     const client = new Client({
       node: container.getHttpUrl(),

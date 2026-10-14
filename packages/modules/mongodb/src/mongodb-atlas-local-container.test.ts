@@ -3,7 +3,7 @@ import { IntervalRetry } from "testcontainers";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { MongoDBAtlasLocalContainer } from "./mongodb-atlas-local-container";
 
-const IMAGE = getImage(__dirname, 1);
+const IMAGES = ["mongodb/mongodb-atlas-local:7.0.43", getImage(__dirname, 1)];
 const ATLAS_SEARCH_INDEX = {
   mappings: {
     dynamic: false,
@@ -23,18 +23,18 @@ const ATLAS_SEARCH_INDEX = {
   },
 };
 
-describe("MongoDBAtlasLocalContainer", { timeout: 240_000 }, () => {
-  it("should provide a connection string", async () => {
+describe.each(IMAGES)("MongoDBAtlasLocalContainer (%s)", { concurrent: false, timeout: 240_000 }, (image) => {
+  it.concurrent("should provide a connection string", async () => {
     // connectAtlasLocal {
-    await using container = await new MongoDBAtlasLocalContainer(IMAGE).start();
+    await using container = await new MongoDBAtlasLocalContainer(image).start();
     // }
 
     expect(container.getConnectionString()).toBe(`mongodb://${container.getHost()}:${container.getMappedPort(27017)}/`);
   });
 
-  it("should provide a database connection string", async () => {
+  it.concurrent("should provide a database connection string", async () => {
     // connectAtlasLocalDatabase {
-    await using container = await new MongoDBAtlasLocalContainer(IMAGE).start();
+    await using container = await new MongoDBAtlasLocalContainer(image).start();
     // }
 
     expect(container.getDatabaseConnectionString()).toBe(
@@ -42,9 +42,9 @@ describe("MongoDBAtlasLocalContainer", { timeout: 240_000 }, () => {
     );
   });
 
-  it("should provide connection strings with credentials", async () => {
+  it.concurrent("should provide connection strings with credentials", async () => {
     // connectAtlasLocalWithCredentials {
-    await using container = await new MongoDBAtlasLocalContainer(IMAGE)
+    await using container = await new MongoDBAtlasLocalContainer(image)
       .withUsername("customUsername")
       .withPassword("customPassword")
       .start();
@@ -58,8 +58,8 @@ describe("MongoDBAtlasLocalContainer", { timeout: 240_000 }, () => {
     );
   });
 
-  it("should connect to mongodb atlas local", async () => {
-    await using container = await new MongoDBAtlasLocalContainer(IMAGE).start();
+  it.concurrent("should connect to mongodb atlas local", async () => {
+    await using container = await new MongoDBAtlasLocalContainer(image).start();
 
     const db = await mongoose.createConnection(container.getConnectionString(), { directConnection: true }).asPromise();
 
@@ -73,8 +73,8 @@ describe("MongoDBAtlasLocalContainer", { timeout: 240_000 }, () => {
     await db.close();
   });
 
-  it("should connect to mongodb atlas local with credentials", async () => {
-    await using container = await new MongoDBAtlasLocalContainer(IMAGE)
+  it.concurrent("should connect to mongodb atlas local with credentials", async () => {
+    await using container = await new MongoDBAtlasLocalContainer(image)
       .withUsername("customUsername")
       .withPassword("customPassword")
       .start();
@@ -93,9 +93,9 @@ describe("MongoDBAtlasLocalContainer", { timeout: 240_000 }, () => {
     await db.close();
   });
 
-  it("should create an atlas search index and search it", async () => {
+  it.concurrent("should create an atlas search index and search it", async () => {
     // createAtlasIndexAndSearchIt {
-    await using atlasLocalContainer = await new MongoDBAtlasLocalContainer(IMAGE).start();
+    await using atlasLocalContainer = await new MongoDBAtlasLocalContainer(image).start();
 
     const db = await mongoose
       .createConnection(atlasLocalContainer.getConnectionString(), {

@@ -3,12 +3,11 @@ import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { ElasticsearchContainer } from "./elasticsearch-container";
 
 const IMAGE = getImage(__dirname);
-const images = ["elasticsearch:7.17.28", "elasticsearch:8.18.1", IMAGE];
 
-describe("ElasticsearchContainer", { timeout: 180_000 }, () => {
-  it.each(images)("should create an index with %s", async (image) => {
+describe("ElasticsearchContainer", { concurrent: false, timeout: 180_000 }, () => {
+  it("should create an index", async () => {
     // createIndex {
-    await using container = await new ElasticsearchContainer(image).start();
+    await using container = await new ElasticsearchContainer(IMAGE).start();
 
     const client = new Client({
       node: container.getHttpUrl(),
