@@ -1,6 +1,6 @@
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
-import lockFile from "proper-lockfile";
+import lockFile from "@bybrave/proper-lockfile2";
 import tmp from "tmp";
 import { log } from "./logger";
 
