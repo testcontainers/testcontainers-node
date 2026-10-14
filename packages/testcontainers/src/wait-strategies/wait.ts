@@ -13,15 +13,15 @@ export class Wait {
     return new CompositeWaitStrategy(waitStrategies);
   }
 
-  public static forListeningPorts(): WaitStrategy {
+  public static forListeningPorts(): HostPortWaitStrategy {
     return new HostPortWaitStrategy();
   }
 
-  public static forLogMessage(message: Log | RegExp, times = 1): WaitStrategy {
+  public static forLogMessage(message: Log | RegExp, times = 1): LogWaitStrategy {
     return new LogWaitStrategy(message, times);
   }
 
-  public static forHealthCheck(): WaitStrategy {
+  public static forHealthCheck(): HealthCheckWaitStrategy {
     return new HealthCheckWaitStrategy();
   }
 
@@ -29,11 +29,7 @@ export class Wait {
     return new OneShotStartupCheckStrategy();
   }
 
-  public static forHttp(
-    path: string,
-    port: number,
-    options: HttpWaitStrategyOptions = { abortOnContainerExit: false }
-  ): HttpWaitStrategy {
+  public static forHttp(path: string, port: number, options: HttpWaitStrategyOptions = {}): HttpWaitStrategy {
     return new HttpWaitStrategy(path, port, options);
   }
 

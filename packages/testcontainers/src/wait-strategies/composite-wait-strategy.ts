@@ -48,6 +48,15 @@ export class CompositeWaitStrategy extends AbstractWaitStrategy {
     return this;
   }
 
+  public override withAbortOnContainerExit(abortOnContainerExit: boolean): this {
+    this.waitStrategies.forEach((waitStrategy) => {
+      if (waitStrategy instanceof AbstractWaitStrategy) {
+        waitStrategy.withAbortOnContainerExit(abortOnContainerExit);
+      }
+    });
+    return this;
+  }
+
   public withDeadline(deadline: number): this {
     this.deadline = deadline;
     return this;
