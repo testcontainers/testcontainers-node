@@ -1,8 +1,10 @@
 import path from "node:path";
 import archiver from "archiver";
+import type { Container } from "dockerode";
 import getPort from "get-port";
 import { RandomUuid } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
+import type { BoundPorts } from "../utils/bound-ports";
 import { PullPolicy } from "../utils/pull-policy";
 import {
   checkContainerIsHealthy,
@@ -13,6 +15,7 @@ import {
   waitForDockerEvent,
 } from "../utils/test-helper";
 import { Wait } from "../wait-strategies/wait";
+import { AbstractWaitStrategy } from "../wait-strategies/wait-strategy";
 import { GenericContainer } from "./generic-container";
 
 describe("GenericContainer", { timeout: 180_000 }, () => {
@@ -690,6 +693,22 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
       .start();
 
     expect(container.getHostname()).toEqual("hostname");
+  });
+
+  it("should include the container logs in the error when the container fails to become ready", async () => {
+    const waitStrategy = new (class extends AbstractWaitStrategy {
+      public async waitUntilReady(container: Container, boundPorts: BoundPorts): Promise<void> {
+        await Wait.forLogMessage("connecting to database").waitUntilReady(container, boundPorts);
+        throw new Error("Container is not ready");
+      }
+    })();
+
+    await expect(
+      new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+        .withCommand(["/bin/sh", "-c", "echo 'connecting to database'; sleep infinity"])
+        .withWaitStrategy(waitStrategy)
+        .start()
+    ).rejects.toThrow(new Error("Container is not ready\nContainer logs (last 50 lines):\nconnecting to database"));
   });
 
   // failing to build an image hangs within the DockerImageClient.build method,
