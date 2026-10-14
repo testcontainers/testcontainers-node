@@ -71,10 +71,9 @@ export class Neo4jContainer extends GenericContainer {
         .join(",");
 
       this.withEnvironment({
-        NEO4JLABS_PLUGINS: JSON.stringify(this.plugins), // Older variant for older images.
         NEO4J_PLUGINS: JSON.stringify(this.plugins),
         NEO4J_dbms_security_procedures_unrestricted: whitelists,
-        NEO4J_dbms_security_procedures_whitelist: whitelists,
+        NEO4J_dbms_security_procedures_allowlist: whitelists,
       });
     }
     return new StartedNeo4jContainer(await super.start(), this.password);
