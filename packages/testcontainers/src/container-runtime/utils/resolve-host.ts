@@ -1,9 +1,9 @@
-import { existsSync } from "node:fs";
 import { URL } from "node:url";
 import type Dockerode from "dockerode";
 import type { NetworkInspectInfo } from "dockerode";
 import { log } from "../../common";
 import type { ContainerRuntimeClientStrategyResult } from "../strategies/types";
+import { isInContainer } from "./is-in-container";
 import { runInContainer } from "./run-in-container";
 
 export const resolveHost = async (
@@ -59,5 +59,3 @@ const findDefaultGateway = async (dockerode: Dockerode, indexServerAddress: stri
     "ip route|awk '/default/ { print $3 }'",
   ]);
 };
-
-const isInContainer = () => existsSync("/.dockerenv");

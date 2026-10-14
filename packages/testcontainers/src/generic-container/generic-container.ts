@@ -6,6 +6,7 @@ import type { Container, ContainerCreateOptions, ContainerInspectInfo, HostConfi
 import { containerLog, hash, log, toNanos } from "../common";
 import { type ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "../container-runtime";
 import { CONTAINER_STATUSES } from "../container-runtime/clients/container/types";
+import { isInContainer } from "../container-runtime/utils/is-in-container";
 import type { StartedNetwork } from "../network/network";
 // biome-ignore lint/suspicious/noImportCycles: Ryuk and sshd run as GenericContainers; only dereferenced at runtime
 import { PortForwarderInstance, SSHD_IMAGE } from "../port-forwarder/port-forwarder";
@@ -436,7 +437,7 @@ export class GenericContainer implements TestContainer {
         portBindings[`${exposedPort.container}/${protocol}`] = [{ HostPort: exposedPort.host.toString() }];
       } else {
         const containerPort = getContainerPort(exposedPort);
-        portBindings[`${containerPort}/${protocol}`] = [{ HostPort: "0" }];
+        portBindings[`${containerPort}/${protocol}`] = [{ HostPort: protocol === "udp" || isInContainer() ? "0" : "" }];
       }
     }
 
