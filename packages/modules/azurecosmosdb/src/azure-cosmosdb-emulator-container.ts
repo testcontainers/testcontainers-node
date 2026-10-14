@@ -17,11 +17,11 @@ const DEFAULT_EXPLORER_ENABLED = false;
 const COSMOS_READY_LOG_MESSAGE = "Now listening on: ";
 
 export class AzureCosmosDbEmulatorContainer extends GenericContainer {
-  private key = DEFAULT_KEY;
+  private readonly key = DEFAULT_KEY;
   private protocol: Protocol = DEFAULT_PROTOCOL;
   private telemetryEnabled = DEFAULT_TELEMETRY_ENABLED;
-  private explorerEnabled = DEFAULT_EXPLORER_ENABLED;
-  private portGenerator: PortGenerator;
+  private readonly explorerEnabled = DEFAULT_EXPLORER_ENABLED;
+  private readonly portGenerator: PortGenerator;
 
   constructor(image: string) {
     super(image);

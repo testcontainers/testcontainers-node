@@ -1,3 +1,4 @@
+import { text } from "node:stream/consumers";
 import type Dockerode from "dockerode";
 import { Agent, request } from "undici";
 import { IntervalRetry, log } from "../common";
@@ -100,14 +101,7 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
               }
             }
 
-            return undiciResponseToFetchResponse(
-              await request(url, {
-                method: this.method,
-                signal: AbortSignal.timeout(this.readTimeoutMs),
-                headers: this.headers,
-                dispatcher: agent,
-              })
-            );
+            return await this.sendRequest(url, agent);
           } catch {
             return undefined;
           }
@@ -117,19 +111,7 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
             return true;
           }
 
-          if (response === undefined) {
-            return false;
-          } else if (!this.predicates.length) {
-            return response.ok;
-          } else {
-            for (const predicate of this.predicates) {
-              const result = await predicate(response);
-              if (!result) {
-                return false;
-              }
-            }
-            return true;
-          }
+          return this.matchesPredicates(response);
         },
         () => {
           const message = `URL ${this.path} not accessible after ${this.startupTimeoutMs}ms`;
@@ -151,20 +133,42 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
     log.debug(`HTTP wait strategy complete`, { containerId: container.id });
   }
 
+  private async sendRequest(url: string, agent: Agent | undefined): Promise<Response> {
+    return undiciResponseToFetchResponse(
+      await request(url, {
+        method: this.method,
+        signal: AbortSignal.timeout(this.readTimeoutMs),
+        headers: this.headers,
+        dispatcher: agent,
+      })
+    );
+  }
+
+  private async matchesPredicates(response: Response | undefined): Promise<boolean> {
+    if (response === undefined) {
+      return false;
+    }
+    if (!this.predicates.length) {
+      return response.ok;
+    }
+    for (const predicate of this.predicates) {
+      const result = await predicate(response);
+      if (!result) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   private async handleContainerExit(container: Dockerode.Container) {
     const tail = 50;
-    const lastLogs: string[] = [];
     const client = await getContainerRuntimeClient();
     let message: string;
 
     try {
-      const stream = await client.container.logs(container, { tail });
+      const lastLogs = await text(await client.container.logs(container, { tail }));
 
-      await new Promise((res) => {
-        stream.on("data", (d) => lastLogs.push(d.trim())).on("end", res);
-      });
-
-      message = `Container exited during HTTP healthCheck, last ${tail} logs: ${lastLogs.join("\n")}`;
+      message = `Container exited during HTTP healthCheck, last ${tail} logs: ${lastLogs.trim()}`;
     } catch (_err) {
       message = "Container exited during HTTP healthCheck, failed to get last logs";
     }

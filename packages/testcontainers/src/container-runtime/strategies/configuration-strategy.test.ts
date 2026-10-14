@@ -69,9 +69,15 @@ describe("ConfigurationStrategy", { concurrent: false }, () => {
       dockerCertPath: "/certs",
     });
     mockReadFile.mockImplementation(async (path) => {
-      if (path === "/certs/ca.pem") return "ca";
-      if (path === "/certs/cert.pem") return "cert";
-      if (path === "/certs/key.pem") return "key";
+      if (path === "/certs/ca.pem") {
+        return "ca";
+      }
+      if (path === "/certs/cert.pem") {
+        return "cert";
+      }
+      if (path === "/certs/key.pem") {
+        return "key";
+      }
       throw new Error(`Unexpected path: ${path}`);
     });
 

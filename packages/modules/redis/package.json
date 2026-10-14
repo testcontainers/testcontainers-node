@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/redis",
-  "version": "12.2.0",
+  "version": "12.2.1",
   "license": "MIT",
   "keywords": [
     "redis",
@@ -30,9 +30,9 @@
     "postbuild": "shx cp src/import.sh build"
   },
   "devDependencies": {
-    "redis": "^6.2.1"
+    "redis": "^6.3.0"
   },
   "dependencies": {
-    "testcontainers": "^12.2.0"
+    "testcontainers": "^12.2.1"
   }
 }

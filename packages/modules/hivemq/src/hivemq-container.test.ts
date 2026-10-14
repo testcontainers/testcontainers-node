@@ -13,7 +13,7 @@ describe("HiveMQContainer", { timeout: 240_000 }, () => {
     const mqttClient = await mqtt.connectAsync(container.getConnectionString());
 
     const firstMessagePromise = new Promise<{ topic: string; message: Buffer }>((resolve, reject) => {
-      mqttClient.once("message", (topic, message) => resolve({ topic, message }));
+      mqttClient.once("message", (topic, payload) => resolve({ topic, message: payload }));
       mqttClient.once("error", (err) => reject(err));
     });
 

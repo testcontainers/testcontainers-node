@@ -15,13 +15,17 @@ export class MongoDBAtlasLocalContainer extends GenericContainer {
   }
 
   public withUsername(username: string): this {
-    if (!username) throw new Error("Username should not be empty.");
+    if (!username) {
+      throw new Error("Username should not be empty.");
+    }
     this.username = username;
     return this;
   }
 
   public withPassword(password: string): this {
-    if (!password) throw new Error("Password should not be empty.");
+    if (!password) {
+      throw new Error("Password should not be empty.");
+    }
     this.password = password;
     return this;
   }

@@ -1,5 +1,6 @@
 import { copyFile } from "node:fs/promises";
 import path from "node:path";
+import { pipeline } from "node:stream/promises";
 import tar from "tar-fs";
 import {
   AbstractStartedContainer,
@@ -19,7 +20,7 @@ const SELENIUM_PORT = 4444;
 const VNC_PORT = 5900;
 const SELENIUM_NETWORK_ALIAS = "selenium";
 
-export const SELENIUM_VIDEO_IMAGE = "selenium/video:ffmpeg-4.3.1-20230508";
+export const SELENIUM_VIDEO_IMAGE = "selenium/video:ffmpeg-8.1-20260909";
 
 export class SeleniumContainer extends GenericContainer {
   constructor(image: string) {
@@ -140,10 +141,6 @@ export class StoppedSeleniumRecordingContainer extends StoppedSeleniumContainer 
   }
 
   private async extractTarStreamToDest(tarStream: NodeJS.ReadableStream, dest: string): Promise<void> {
-    await new Promise<void>((resolve) => {
-      const destination = tar.extract(dest);
-      tarStream.pipe(destination);
-      destination.on("finish", resolve);
-    });
+    await pipeline(tarStream, tar.extract(dest));
   }
 }

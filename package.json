@@ -13,14 +13,16 @@
     "format": "biome format --write .",
     "lint": "biome check --write .",
     "lint:ci": "biome ci --error-on-warnings .",
+    "knip": "knip",
     "update-deps": "npm-check-updates --workspaces --root -u",
     "check-engines:root": "npm exec --yes --package=ls-engines@0.10.1 -- ls-engines --mode ideal --dev --no-current",
     "check-engines:testcontainers": "npm exec --yes --workspace=testcontainers --package=ls-engines@0.10.1 -- ls-engines --mode ideal --no-current",
     "check-compiles": "tsc -b packages/testcontainers packages/modules/*"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.14",
-    "@vitest/coverage-v8": "^5.0.2",
+    "@biomejs/biome": "^2.5.15",
+    "@vitest/coverage-v8": "^5.0.3",
+    "knip": "^6.39.0",
     "npm-check-updates": "^23.1.0",
     "shx": "^0.4.0",
     "typescript": "^7.0.2",

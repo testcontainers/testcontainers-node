@@ -9,9 +9,14 @@ export class EmulatorFlagsManager {
    * @returns this instance for chaining.
    */
   public withFlag(name: string, value: string): this {
-    if (!name) throw new Error("Flag name must be set.");
-    if (name.startsWith("--")) this.flags[name] = value;
-    else this.flags[`--${name}`] = value;
+    if (!name) {
+      throw new Error("Flag name must be set.");
+    }
+    if (name.startsWith("--")) {
+      this.flags[name] = value;
+    } else {
+      this.flags[`--${name}`] = value;
+    }
     return this;
   }
 

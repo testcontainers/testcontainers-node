@@ -11,7 +11,7 @@ export type ComposeOptions = {
   executable?: ComposeExecutableOptions;
 };
 
-export type ComposeExecutableOptions =
+type ComposeExecutableOptions =
   | {
       executablePath: string;
       options?: string[] | (string | string[])[];

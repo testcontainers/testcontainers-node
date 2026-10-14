@@ -16,15 +16,15 @@ const dockerConfigFile = path.resolve(dockerConfigLocation, "config.json");
 const readDockerConfig = async (): Promise<ContainerRuntimeConfig> => {
   if (process.env.DOCKER_AUTH_CONFIG) {
     return parseDockerConfig(process.env.DOCKER_AUTH_CONFIG);
-  } else if (existsSync(dockerConfigFile)) {
-    return parseDockerConfig((await readFile(dockerConfigFile)).toString());
-  } else {
-    return Promise.resolve({});
   }
+  if (existsSync(dockerConfigFile)) {
+    return parseDockerConfig((await readFile(dockerConfigFile)).toString());
+  }
+  return Promise.resolve({});
 };
 
-function parseDockerConfig(dockerConfig: string) {
-  const object = JSON.parse(dockerConfig);
+function parseDockerConfig(json: string) {
+  const object = JSON.parse(json);
 
   return {
     credsStore: object.credsStore,

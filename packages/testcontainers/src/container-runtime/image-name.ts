@@ -36,26 +36,30 @@ export class ImageName {
       }
       log.info(message);
     }
+    this.string = this.buildString();
+  }
+
+  private buildString(): string {
     const tagAndDigest = this.digest ? `${this.tag}@${this.digest}` : this.tag;
     if (this.registry) {
       if (this.tag.startsWith("sha256:")) {
-        this.string = `${this.registry}/${this.image}@${this.tag}`;
-      } else {
-        this.string = `${this.registry}/${this.image}:${tagAndDigest}`;
+        return `${this.registry}/${this.image}@${this.tag}`;
       }
-    } else if (this.tag === "latest" && ImageName.hexRE.test(this.image)) {
+      return `${this.registry}/${this.image}:${tagAndDigest}`;
+    }
+    if (this.tag === "latest" && ImageName.hexRE.test(this.image)) {
       // 64 byte hex string. This refers to an image sha256 directly.
       // Do not put the tag as the docker does not accept it.
       // It will fail with:
       //
       //    invalid repository name (<image>), cannot specify 64-byte hexadecimal strings.
       //
-      this.string = this.image;
-    } else if (this.tag.startsWith("sha256:")) {
-      this.string = `${this.image}@${this.tag}`;
-    } else {
-      this.string = `${this.image}:${tagAndDigest}`;
+      return this.image;
     }
+    if (this.tag.startsWith("sha256:")) {
+      return `${this.image}@${this.tag}`;
+    }
+    return `${this.image}:${tagAndDigest}`;
   }
 
   public equals(other: ImageName): boolean {
@@ -76,11 +80,11 @@ export class ImageName {
     if (imageAndTag.includes(":")) {
       const [image, tag] = imageAndTag.split(":");
       return new ImageName(registry, image, tag, digest);
-    } else if (digest) {
-      return new ImageName(registry, imageAndTag, digest);
-    } else {
-      return new ImageName(registry, imageAndTag, "latest");
     }
+    if (digest) {
+      return new ImageName(registry, imageAndTag, digest);
+    }
+    return new ImageName(registry, imageAndTag, "latest");
   }
 
   private static getRegistry(string: string): string | undefined {

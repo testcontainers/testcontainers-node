@@ -6,8 +6,8 @@ import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { SELENIUM_VIDEO_IMAGE, SeleniumContainer } from "./selenium-container";
 
 const browsers = [
-  ["CHROME", process.arch === "arm64" ? getImage(__dirname, 1) : getImage(__dirname, 0)],
-  ["FIREFOX", process.arch === "arm64" ? getImage(__dirname, 3) : getImage(__dirname, 2)],
+  ["CHROME", getImage(__dirname, 0)],
+  ["FIREFOX", getImage(__dirname, 1)],
 ] as const;
 
 describe.for(browsers)("SeleniumContainer", { timeout: 240_000 }, ([browser, image]) => {
@@ -41,7 +41,16 @@ describe.for(browsers)("SeleniumContainer", { timeout: 240_000 }, ([browser, ima
       .withCommand(["sleep", "infinity"])
       .start();
     await ffmpegContainer.copyFilesToContainer([{ source: videoFilePath, target: `/tmp/${videoFileName}` }]);
-    const { exitCode } = await ffmpegContainer.exec(["ffprobe", `/tmp/${videoFileName}`]);
+    const { exitCode } = await ffmpegContainer.exec([
+      "ffmpeg",
+      "-v",
+      "error",
+      "-i",
+      `/tmp/${videoFileName}`,
+      "-f",
+      "null",
+      "-",
+    ]);
     expect(exitCode).toBe(0);
     // }
   });

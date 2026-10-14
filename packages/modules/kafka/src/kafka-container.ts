@@ -193,7 +193,8 @@ export class KafkaContainer extends GenericContainer {
     const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, inspectResult).filter(
       this.exposedPorts
     );
-    const waitStrategy = await this.selectWaitStrategy(client, dockerInspectResult, this.originalWaitStrategy);
+    this.waitStrategy = this.originalWaitStrategy;
+    const waitStrategy = await this.selectWaitStrategy(client, dockerInspectResult);
     if (this.startupTimeoutMs !== undefined) {
       waitStrategy.withStartupTimeout(this.startupTimeoutMs);
     }

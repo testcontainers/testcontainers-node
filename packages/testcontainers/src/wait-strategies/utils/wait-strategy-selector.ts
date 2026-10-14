@@ -26,11 +26,21 @@ export const selectWaitStrategy = async ({
   healthCheck,
   imageNames = getImageNames(inspectResult),
 }: WaitStrategySelectorOptions): Promise<WaitStrategy> => {
-  if (waitStrategy) return waitStrategy;
-  if (hasHealthCheck(healthCheck)) return Wait.forHealthCheck();
-  if (hasDisabledHealthCheckConfig(inspectResult)) return Wait.forListeningPorts();
-  if (hasHealthCheckConfig(inspectResult) || hasHealthCheckStatus(inspectResult)) return Wait.forHealthCheck();
-  if (await imageHasHealthCheck(client, imageNames)) return Wait.forHealthCheck();
+  if (waitStrategy) {
+    return waitStrategy;
+  }
+  if (hasHealthCheck(healthCheck)) {
+    return Wait.forHealthCheck();
+  }
+  if (hasDisabledHealthCheckConfig(inspectResult)) {
+    return Wait.forListeningPorts();
+  }
+  if (hasHealthCheckConfig(inspectResult) || hasHealthCheckStatus(inspectResult)) {
+    return Wait.forHealthCheck();
+  }
+  if (await imageHasHealthCheck(client, imageNames)) {
+    return Wait.forHealthCheck();
+  }
   return Wait.forListeningPorts();
 };
 

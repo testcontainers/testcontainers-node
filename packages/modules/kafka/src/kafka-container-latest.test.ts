@@ -18,6 +18,14 @@ describe("KafkaContainer", { timeout: 240_000 }, () => {
     // }
   });
 
+  it("should be listening when started", async () => {
+    await using container = await new KafkaContainer(IMAGE).start();
+
+    const { exitCode } = await container.exec(["bash", "-c", "</dev/tcp/localhost/9093"]);
+
+    expect(exitCode).toBe(0);
+  });
+
   it("should connect with custom network", async () => {
     await using network = await new Network().start();
     await using container = await new KafkaContainer(IMAGE).withNetwork(network).start();
