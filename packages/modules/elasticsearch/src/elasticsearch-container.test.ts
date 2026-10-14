@@ -4,7 +4,7 @@ import { ElasticsearchContainer } from "./elasticsearch-container";
 
 const IMAGE = getImage(__dirname);
 
-describe("ElasticsearchContainer", { timeout: 180_000 }, () => {
+describe("ElasticsearchContainer", { concurrent: false, timeout: 180_000 }, () => {
   it("should create an index", async () => {
     // createIndex {
     await using container = await new ElasticsearchContainer(IMAGE).start();
