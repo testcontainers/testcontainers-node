@@ -33,6 +33,6 @@
     "testcontainers": "^12.2.1"
   },
   "devDependencies": {
-    "@azure/service-bus": "^7.9.5"
+    "@azure/service-bus": "^7.10.0"
   }
 }
