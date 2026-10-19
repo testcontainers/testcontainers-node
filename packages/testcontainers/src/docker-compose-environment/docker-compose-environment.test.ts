@@ -311,4 +311,14 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
 
     expect(await getRunningContainerNames()).toContain(`${customProjectName}-container-1`);
   });
+
+  it("should keep a custom project name when no recreate option is set", async () => {
+    const customProjectName = `custom-${new RandomUuid().nextUuid()}`;
+    await using _ = await new DockerComposeEnvironment(fixtures, "docker-compose.yml")
+      .withProjectName(customProjectName)
+      .withNoRecreate()
+      .up();
+
+    expect(await getRunningContainerNames()).toContain(`${customProjectName}-container-1`);
+  });
 });
