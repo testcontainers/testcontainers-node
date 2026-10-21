@@ -64,6 +64,7 @@ nav:
       - CosmosDB: modules/cosmosdb.md
       - Couchbase: modules/couchbase.md
       - CouchDB: modules/couchdb.md
+      - DynamoDB: modules/dynamodb.md
       - Elasticsearch: modules/elasticsearch.md
       - Etcd: modules/etcd.md
       - GCloud: modules/gcloud.md
