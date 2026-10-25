@@ -28,7 +28,10 @@ export abstract class CredentialProvider implements RegistryAuthLocator {
 
   private runCredentialProvider(registry: string, providerName: string): Promise<AuthConfig | undefined> {
     return new Promise((resolve, reject) => {
-      const sink = spawn(providerName, ["get"]);
+      // On Windows a credential helper can be a .cmd script (e.g. docker-credential-gcloud.cmd), which Node only runs
+      // through a shell: https://nodejs.org/api/child_process.html#spawning-bat-and-cmd-files-on-windows
+      const sink =
+        process.platform === "win32" ? spawn(`${providerName} get`, { shell: true }) : spawn(providerName, ["get"]);
 
       const chunks: string[] = [];
       sink.stdout.on("data", (chunk) => chunks.push(chunk));
