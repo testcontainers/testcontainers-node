@@ -133,8 +133,6 @@ const environment = await new DockerComposeEnvironment(composeFilePath, composeF
   .up();
 ```
 
-Unless a project name is set with `withProjectName`, the environment uses the fixed project name `testcontainers-node` so that the containers are found again on the next run.
-
 ### With environment
 
 Bind environment variables to the docker-compose file:
