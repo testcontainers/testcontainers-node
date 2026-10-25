@@ -33,6 +33,6 @@
     "testcontainers": "^12.2.1"
   },
   "devDependencies": {
-    "node-vault": "^0.12.0"
+    "node-vault": "^0.13.0"
   }
 }

@@ -37,16 +37,16 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "dependencies": {
-    "@grpc/grpc-js": "^1.14.5",
+    "@grpc/grpc-js": "^1.14.6",
     "testcontainers": "^12.2.1"
   },
   "devDependencies": {
-    "@google-cloud/bigquery": "^9.1.0",
-    "@google-cloud/datastore": "^11.1.0",
-    "@google-cloud/pubsub": "^6.1.0",
+    "@google-cloud/bigquery": "^9.2.0",
+    "@google-cloud/datastore": "^11.2.0",
+    "@google-cloud/pubsub": "^6.2.0",
     "@google-cloud/spanner": "^9.0.0",
-    "@google-cloud/storage": "^8.2.0",
+    "@google-cloud/storage": "^8.4.0",
     "firebase-admin": "14.5.0",
-    "msw": "^3.0.2"
+    "msw": "^3.0.3"
   }
 }
