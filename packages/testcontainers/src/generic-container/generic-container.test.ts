@@ -163,6 +163,25 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     expect(responseBody.customKey).toBe("customValue");
   });
 
+  it("should replace an environment variable that is set twice", async () => {
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withEnvironment({ customKey: "first", otherKey: "otherValue" })
+      .withEnvironment({ customKey: "second" })
+      .withExposedPorts(8080)
+      .start();
+
+    const client = await getContainerRuntimeClient();
+    const dockerContainer = client.container.getById(container.getId());
+    const containerInfo = await dockerContainer.inspect();
+    expect(containerInfo.Config.Env.filter((env) => env.startsWith("customKey="))).toEqual(["customKey=second"]);
+    expect(containerInfo.Config.Env).toContain("otherKey=otherValue");
+
+    const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
+    const response = await fetch(`${url}/env`);
+    const responseBody = (await response.json()) as { [key: string]: string };
+    expect(responseBody.customKey).toBe("second");
+  });
+
   it("should set command", async () => {
     await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withCommand(["node", "index.js", "one", "two", "three"])
