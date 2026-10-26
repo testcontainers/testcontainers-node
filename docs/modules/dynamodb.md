@@ -18,10 +18,6 @@ Choose an image from the [container registry](https://hub.docker.com/r/amazon/dy
 
 ### Connect to local endpoint
 
-In order to use a DynamoDB Client we have to specify
-at least `region`, `credentials` and `endpoint` eventhough `region` and `credentials`
-will not be used:
-
 <!--codeinclude-->
 [](../../packages/modules/dynamodb/src/dynamodb-container.test.ts) inside_block:connectEndpoint
 <!--/codeinclude-->
