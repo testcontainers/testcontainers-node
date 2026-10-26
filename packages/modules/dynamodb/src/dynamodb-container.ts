@@ -1,4 +1,4 @@
-import { AbstractStartedContainer, GenericContainer } from "testcontainers";
+import { AbstractStartedContainer, GenericContainer, Wait } from "testcontainers";
 
 // https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.UsageNotes.html#DynamoDBLocal.Endpoint
 const DYNAMODB_PORT = 8000;
@@ -10,7 +10,7 @@ export class DynamoDBContainer extends GenericContainer {
 
   constructor(image: string) {
     super(image);
-    this.withExposedPorts(DYNAMODB_PORT).withStartupTimeout(120_000);
+    this.withExposedPorts(DYNAMODB_PORT).withWaitStrategy(Wait.forHttp("/", DYNAMODB_PORT).forStatusCode(400));
   }
 
   /**
