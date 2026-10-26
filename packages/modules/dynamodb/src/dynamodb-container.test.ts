@@ -231,11 +231,9 @@ describe("DynamoDBContainer", { timeout: 180_000 }, () => {
     });
   });
 
-  it("stores data only in memory when requested", async () => {
-    // withInMemory {
-    await using container = await new DynamoDBContainer(IMAGE).withInMemory().start();
+  it("stores data in memory when no dbPath set", async () => {
+    await using container = await new DynamoDBContainer(IMAGE).start();
     const client = new DynamoDBClient(container.clientConfig());
-    // }
 
     const { addUser } = await createDummyTable(client, "users");
     await addUser(1, "Bob");
