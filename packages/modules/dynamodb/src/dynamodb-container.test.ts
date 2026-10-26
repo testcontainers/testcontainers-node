@@ -283,7 +283,13 @@ describe("DynamoDBContainer", { timeout: 180_000 }, () => {
      */
 
     // disabledTelemetry {
-    await using container = await new DynamoDBContainer(IMAGE).withDisableTelemetry().start();
+    const container = new DynamoDBContainer(IMAGE).withDisableTelemetry();
+    await using startedContainer = await container.start();
+    // }
+
+    // @ts-expect-error - accessing private property for testing
+    expect(container.createOpts.Cmd).toEqual(["-jar", "DynamoDBLocal.jar", "-inMemory", "-disableTelemetry"]);
+
     const client = new DynamoDBClient({
       region: "us-east-1",
       credentials: {
@@ -291,9 +297,8 @@ describe("DynamoDBContainer", { timeout: 180_000 }, () => {
         accessKeyId: "AKIAIOSFODNN7EXAMPLE",
         secretAccessKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
       },
-      endpoint: container.getEndpoint(),
+      endpoint: startedContainer.getEndpoint(),
     });
-    // }
 
     const command = new ListTablesCommand({});
     const result = await client.send(command);
