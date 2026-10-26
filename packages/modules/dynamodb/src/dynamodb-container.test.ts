@@ -8,7 +8,6 @@ import {
   waitUntilTableExists,
   waitUntilTableNotExists,
 } from "@aws-sdk/client-dynamodb";
-import { describe, it } from "vitest";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { DynamoDBContainer } from "./dynamodb-container";
 
