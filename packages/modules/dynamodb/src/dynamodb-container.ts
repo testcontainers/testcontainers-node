@@ -24,7 +24,6 @@ type DynamoDBLocalClientConfig = {
 
 export class DynamoDBContainer extends GenericContainer {
   private sharedDB: boolean = false;
-  private inMemory: boolean = false;
   private disableTelemetry: boolean = false;
   private dbPath?: string;
 
@@ -67,19 +66,6 @@ export class DynamoDBContainer extends GenericContainer {
   }
 
   /**
-   * Ensure the database is kept in memory
-   *
-   * Use this option to keep the complete database in memory. This will
-   * pass `-inMemory` to the container.
-   * Fore more information please read
-   * https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.UsageNotes.html#DynamoDBLocal.CommandLineOptions
-   */
-  public withInMemory(): this {
-    this.inMemory = true;
-    return this;
-  }
-
-  /**
    * Do not sent any telemetry
    *
    * By default the AWS DynamoDB container will sent telemetry information.
@@ -107,26 +93,25 @@ export class DynamoDBContainer extends GenericContainer {
 
   private createCommand(): string[] | null {
     const command: string[] = [];
+    let skipInMemory = false;
     if (this.sharedDB) {
       command.push("-sharedDb");
-    }
-    if (this.inMemory) {
-      command.push("-inMemory");
     }
     if (this.disableTelemetry) {
       command.push("-disableTelemetry");
     }
     if (this.dbPath) {
       command.push("-dbPath", this.dbPath);
+      skipInMemory = true;
     }
 
     if (command.length === 0) {
       return null;
     }
 
-    // If we pass arguments we also have to pass
-    // -jar DynamoDBLocal.jar
-    return ["-jar", "DynamoDBLocal.jar", ...command];
+    // The defaut command is
+    // -jar DynamoDBLocal.jar -inMemory
+    return ["-jar", "DynamoDBLocal.jar", ...(skipInMemory ? [] : ["-inMemory"]), ...command];
   }
 }
 
