@@ -26,14 +26,6 @@ will not be used:
 [](../../packages/modules/dynamodb/src/dynamodb-container.test.ts) inside_block:connectEndpoint
 <!--/codeinclude-->
 
-### Connect via client config
-
-The above can also be written as
-
-<!--codeinclude-->
-[](../../packages/modules/dynamodb/src/dynamodb-container.test.ts) inside_block:connectClientConfig
-<!--/codeinclude-->
- 
 ### Use a shared database
 
 <!--codeinclude-->
