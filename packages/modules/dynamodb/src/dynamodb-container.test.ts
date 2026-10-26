@@ -1,38 +1,22 @@
 import {
   CreateTableCommand,
-  DeleteTableCommand,
   DynamoDBClient,
   GetItemCommand,
   ListTablesCommand,
   PutItemCommand,
   waitUntilTableExists,
-  waitUntilTableNotExists,
 } from "@aws-sdk/client-dynamodb";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { DynamoDBContainer } from "./dynamodb-container";
 
 const IMAGE = getImage(__dirname);
 
-/**
- * Create an empty dummy user table
- *
- * This function can be used in test cases
- * to easily add a new table.
- *
- * @param client - DynamoDBClient pointing to the container
- * @param tableName - The desired table name
- * @returns - Three functions: teardown, addUser, getUser
- */
-async function createDummyTable(
-  client: DynamoDBClient,
-  tableName: string
-): Promise<{
-  teardown: () => Promise<void>;
+async function createTestTable(client: DynamoDBClient): Promise<{
   addUser: (userId: number, name: string) => Promise<void>;
   getUser: (userId: number) => Promise<string | null>;
 }> {
   const command = new CreateTableCommand({
-    TableName: tableName,
+    TableName: "users",
     BillingMode: "PAY_PER_REQUEST",
     AttributeDefinitions: [
       {
@@ -49,17 +33,12 @@ async function createDummyTable(
   });
 
   await client.send(command);
-  await waitUntilTableExists({ client, maxWaitTime: 30 }, { TableName: tableName });
+  await waitUntilTableExists({ client, maxWaitTime: 30 }, { TableName: "users" });
 
   return {
-    teardown: async (): Promise<void> => {
-      const deleteCommand = new DeleteTableCommand({ TableName: tableName });
-      await client.send(deleteCommand);
-      await waitUntilTableNotExists({ client, maxWaitTime: 30 }, { TableName: tableName });
-    },
     addUser: async (userId, name) => {
       const putCommand = new PutItemCommand({
-        TableName: tableName,
+        TableName: "users",
         Item: {
           userId: { N: userId.toString() },
           name: { S: name },
@@ -69,17 +48,14 @@ async function createDummyTable(
     },
     getUser: async (userId) => {
       const getCommand = new GetItemCommand({
-        TableName: tableName,
+        TableName: "users",
         Key: {
           userId: { N: userId.toString() },
         },
         ConsistentRead: true,
       });
-      const response = await client.send(getCommand);
-      if (response.Item?.name?.S) {
-        return response.Item.name.S;
-      }
-      return null;
+      const result = await client.send(getCommand);
+      return result.Item?.name?.S ?? null;
     },
   };
 }
@@ -117,8 +93,7 @@ describe("DynamoDBContainer", { timeout: 180_000 }, () => {
       endpoint: container.getEndpoint(),
     });
 
-    const { teardown, addUser, getUser } = await createDummyTable(client, "users");
-
+    const { addUser, getUser } = await createTestTable(client);
     await addUser(1, "Bob");
     await addUser(2, "Alice");
 
@@ -126,8 +101,6 @@ describe("DynamoDBContainer", { timeout: 180_000 }, () => {
     const userB = await getUser(2);
     expect(userA).toBe("Bob");
     expect(userB).toBe("Alice");
-
-    await teardown();
   });
 
   it("separates data by client by default", async () => {
@@ -154,7 +127,7 @@ describe("DynamoDBContainer", { timeout: 180_000 }, () => {
       },
     });
 
-    await createDummyTable(clientA, "users");
+    await createTestTable(clientA);
 
     const resultA = await clientA.send(new ListTablesCommand());
     const resultB = await clientB.send(new ListTablesCommand());
@@ -189,7 +162,7 @@ describe("DynamoDBContainer", { timeout: 180_000 }, () => {
     });
     // }
 
-    await createDummyTable(clientA, "users");
+    await createTestTable(clientA);
 
     const resultA = await clientA.send(new ListTablesCommand());
     const resultB = await clientB.send(new ListTablesCommand());
@@ -214,7 +187,7 @@ describe("DynamoDBContainer", { timeout: 180_000 }, () => {
     });
     // }
 
-    const { addUser } = await createDummyTable(client, "users");
+    const { addUser } = await createTestTable(client);
     await addUser(1, "Bob");
 
     await container.restart();
@@ -255,7 +228,7 @@ describe("DynamoDBContainer", { timeout: 180_000 }, () => {
       endpoint: container.getEndpoint(),
     });
 
-    const { addUser } = await createDummyTable(client, "users");
+    const { addUser } = await createTestTable(client);
     await addUser(1, "Bob");
 
     await container.restart();
