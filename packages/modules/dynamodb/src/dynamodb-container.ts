@@ -92,6 +92,19 @@ export class DynamoDBContainer extends GenericContainer {
     return this;
   }
 
+  /**
+   * Start the DynamoDB container
+   */
+  public override async start(): Promise<StartedDynamoDBContainer> {
+    const command = this.createCommand();
+    if (command) {
+      this.withCommand(command);
+    }
+
+    const started = await super.start();
+    return new StartedDynamoDBContainer(started);
+  }
+
   private createCommand(): string[] | null {
     const command: string[] = [];
     if (this.sharedDB) {
@@ -114,19 +127,6 @@ export class DynamoDBContainer extends GenericContainer {
     // If we pass arguments we also have to pass
     // -jar DynamoDBLocal.jar
     return ["-jar", "DynamoDBLocal.jar", ...command];
-  }
-
-  /**
-   * Start the DynamoDB container
-   */
-  public override async start(): Promise<StartedDynamoDBContainer> {
-    const command = this.createCommand();
-    if (command) {
-      this.withCommand(command);
-    }
-
-    const started = await super.start();
-    return new StartedDynamoDBContainer(started);
   }
 }
 
