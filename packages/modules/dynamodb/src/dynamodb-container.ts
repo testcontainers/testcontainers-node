@@ -109,9 +109,7 @@ export class StartedDynamoDBContainer extends AbstractStartedContainer {
    * client configuration suitable for most usecases
    */
   public getEndpoint(): string {
-    const hostname = this.getHost();
-    const url = new URL(`http://${hostname}`);
-    url.port = this.getPort().toString();
-    return url.toString();
+    const url = `http://${this.getHost()}:${this.getPort().toString()}`;
+    return url;
   }
 }
