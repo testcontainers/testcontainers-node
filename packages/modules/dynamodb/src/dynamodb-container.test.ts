@@ -86,24 +86,13 @@ async function createDummyTable(
 }
 
 describe("DynamoDBContainer", { timeout: 180_000 }, () => {
-  it("starts a container", async () => {
-    // connectClientConfig {
-    await using container = await new DynamoDBContainer(IMAGE).start();
-    const client = new DynamoDBClient(container.clientConfig());
-
-    const command = new ListTablesCommand({});
-    const result = await client.send(command);
-
-    expect(result.TableNames).toStrictEqual([]);
-    // }
-  });
-
   it("connects with endpoint", async () => {
     // connectEndpoint {
     await using container = await new DynamoDBContainer(IMAGE).start();
     const client = new DynamoDBClient({
       region: "us-east-1",
       credentials: {
+        // use any credentials
         accessKeyId: "AKIAIOSFODNN7EXAMPLE",
         secretAccessKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
       },
@@ -119,7 +108,15 @@ describe("DynamoDBContainer", { timeout: 180_000 }, () => {
 
   it("stores data", async () => {
     await using container = await new DynamoDBContainer(IMAGE).start();
-    const client = new DynamoDBClient(container.clientConfig());
+    const client = new DynamoDBClient({
+      region: "us-east-1",
+      credentials: {
+        // use any credentials
+        accessKeyId: "AKIAIOSFODNN7EXAMPLE",
+        secretAccessKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+      },
+      endpoint: container.getEndpoint(),
+    });
 
     const { teardown, addUser, getUser } = await createDummyTable(client, "users");
 
@@ -207,7 +204,15 @@ describe("DynamoDBContainer", { timeout: 180_000 }, () => {
   it("persists data when dbPath is set", async () => {
     // persistWithDbPath {
     await using container = await new DynamoDBContainer(IMAGE).withDbPath(".").start();
-    const client = new DynamoDBClient(container.clientConfig());
+    const client = new DynamoDBClient({
+      region: "us-east-1",
+      credentials: {
+        // use any credentials
+        accessKeyId: "AKIAIOSFODNN7EXAMPLE",
+        secretAccessKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+      },
+      endpoint: container.getEndpoint(),
+    });
     // }
 
     const { addUser } = await createDummyTable(client, "users");
@@ -216,7 +221,15 @@ describe("DynamoDBContainer", { timeout: 180_000 }, () => {
     await container.restart();
 
     // restarting will change the mapped port so we need a new client
-    const clientAfterRestart = new DynamoDBClient(container.clientConfig());
+    const clientAfterRestart = new DynamoDBClient({
+      region: "us-east-1",
+      credentials: {
+        // use any credentials
+        accessKeyId: "AKIAIOSFODNN7EXAMPLE",
+        secretAccessKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+      },
+      endpoint: container.getEndpoint(),
+    });
 
     // The table should still be there including its content
     const command = new GetItemCommand({
@@ -233,7 +246,15 @@ describe("DynamoDBContainer", { timeout: 180_000 }, () => {
 
   it("stores data in memory when no dbPath set", async () => {
     await using container = await new DynamoDBContainer(IMAGE).start();
-    const client = new DynamoDBClient(container.clientConfig());
+    const client = new DynamoDBClient({
+      region: "us-east-1",
+      credentials: {
+        // use any credentials
+        accessKeyId: "AKIAIOSFODNN7EXAMPLE",
+        secretAccessKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+      },
+      endpoint: container.getEndpoint(),
+    });
 
     const { addUser } = await createDummyTable(client, "users");
     await addUser(1, "Bob");
@@ -241,7 +262,15 @@ describe("DynamoDBContainer", { timeout: 180_000 }, () => {
     await container.restart();
 
     // restarting will change the mapped port so we need a new client
-    const clientAfterRestart = new DynamoDBClient(container.clientConfig());
+    const clientAfterRestart = new DynamoDBClient({
+      region: "us-east-1",
+      credentials: {
+        // use any credentials
+        accessKeyId: "AKIAIOSFODNN7EXAMPLE",
+        secretAccessKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+      },
+      endpoint: container.getEndpoint(),
+    });
 
     // We should not be able to see the table anymore
     const result = await clientAfterRestart.send(new ListTablesCommand());
@@ -255,7 +284,15 @@ describe("DynamoDBContainer", { timeout: 180_000 }, () => {
 
     // disabledTelemetry {
     await using container = await new DynamoDBContainer(IMAGE).withDisableTelemetry().start();
-    const client = new DynamoDBClient(container.clientConfig());
+    const client = new DynamoDBClient({
+      region: "us-east-1",
+      credentials: {
+        // use any credentials
+        accessKeyId: "AKIAIOSFODNN7EXAMPLE",
+        secretAccessKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+      },
+      endpoint: container.getEndpoint(),
+    });
     // }
 
     const command = new ListTablesCommand({});

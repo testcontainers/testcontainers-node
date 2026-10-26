@@ -3,25 +3,6 @@ import { AbstractStartedContainer, GenericContainer } from "testcontainers";
 // https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.UsageNotes.html#DynamoDBLocal.Endpoint
 const DYNAMODB_PORT = 8000;
 
-/* When running in AWS we do not have to pass any client configuration:
- *
- * * The default endpoint will be used
- * * The region will be inferred from the lambda region
- * * The credentials are taken from the lambda IAM role
- *
- * When connecting locally, we have to provide all three eventhough region
- * and credentials are not really relevant. We want to help the user with
- * a minimal configuration that works
- */
-type DynamoDBLocalClientConfig = {
-  endpoint: string;
-  region: string;
-  credentials: {
-    readonly accessKeyId: string;
-    readonly secretAccessKey: string;
-  };
-};
-
 export class DynamoDBContainer extends GenericContainer {
   private sharedDB: boolean = false;
   private disableTelemetry: boolean = false;
@@ -132,36 +113,5 @@ export class StartedDynamoDBContainer extends AbstractStartedContainer {
     const url = new URL(`http://${hostname}`);
     url.port = this.getPort().toString();
     return url.toString();
-  }
-
-  /**
-   * Returns a partial DynamoDBConfig
-   *
-   * When intializing a DynamoDB client inside AWS itself (e.g. inside a
-   * lambda) we do not have to pass any configuration settings. When
-   * connecting locally, we have to set at least `endpoint`,
-   * `region` (can be a dummy) and `credentials` (can also be a dummy).
-   *
-   * `clientConfig` will return minimal configuration with `endpoint`, a dummy
-   * `region` of `us-east-1` and dummy credentials.
-   *
-   * This allows you to intialize a client through
-   *
-   * ```js
-   * const client = new DynamoDBClient(container.clientConfig());
-   * ```
-   */
-  public clientConfig(): DynamoDBLocalClientConfig {
-    // The AWS credentials you see here are fake credentials and taken from the
-    // following example:
-    // https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html
-    return {
-      endpoint: this.getEndpoint(),
-      region: "us-east-1",
-      credentials: {
-        accessKeyId: "AKIAIOSFODNN7EXAMPLE",
-        secretAccessKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
-      },
-    };
   }
 }
