@@ -26,6 +26,7 @@ export {
   ContentToCopy,
   CopyToContainerOptions,
   Environment,
+  EnvironmentInput,
   ExecOptions,
   ExecResult,
   FileToCopy,
