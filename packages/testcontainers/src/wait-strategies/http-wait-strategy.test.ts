@@ -13,6 +13,24 @@ describe("HttpWaitStrategy", { timeout: 180_000 }, () => {
     await checkContainerIsHealthy(container);
   });
 
+  it("should wait on the first exposed port when no port is given", async () => {
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withExposedPorts(8080)
+      .withWaitStrategy(Wait.forHttp("/hello-world"))
+      .start();
+
+    await checkContainerIsHealthy(container);
+  });
+
+  it("should wait on the port set with forPort", async () => {
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withExposedPorts(8080)
+      .withWaitStrategy(Wait.forHttp("/hello-world").forPort(8080))
+      .start();
+
+    await checkContainerIsHealthy(container);
+  });
+
   it("should wait for status code", async () => {
     await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
@@ -110,6 +128,20 @@ describe("HttpWaitStrategy", { timeout: 180_000 }, () => {
 
       await expect(stopStartingContainer(container, name)).rejects.toThrowError(
         new Error(`Container exited during HTTP healthCheck, last ${tail} logs: ${lastLogs}`)
+      );
+    });
+
+    it("should accept options without a port", async () => {
+      const name = `container-name-${new RandomUuid().nextUuid()}`;
+      const container = new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+        .withExposedPorts(8080)
+        .withStartupTimeout(20000)
+        .withEntrypoint(["/bin/sh", "-c", "echo 1 && sleep infinity"])
+        .withWaitStrategy(Wait.forHttp("/hello-world", { abortOnContainerExit: true }))
+        .withName(name);
+
+      await expect(stopStartingContainer(container, name)).rejects.toThrowError(
+        new Error("Container exited during HTTP healthCheck, last 50 logs: 1")
       );
     });
   });
