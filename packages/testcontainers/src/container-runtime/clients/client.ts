@@ -6,6 +6,7 @@ import { NpipeSocketStrategy } from "../strategies/npipe-socket-strategy";
 import { RootlessUnixSocketStrategy } from "../strategies/rootless-unix-socket-strategy";
 import type { ContainerRuntimeClientStrategy } from "../strategies/strategy";
 import { TestcontainersHostStrategy } from "../strategies/testcontainers-host-strategy";
+import type { ContainerRuntimeClientStrategyResult } from "../strategies/types";
 import { UnixSocketStrategy } from "../strategies/unix-socket-strategy";
 import { lookupHostIps } from "../utils/lookup-host-ips";
 import { getRemoteContainerRuntimeSocketPath } from "../utils/remote-container-runtime-socket-path";
@@ -17,6 +18,7 @@ import { DockerImageClient } from "./image/docker-image-client";
 import type { ImageClient } from "./image/image-client";
 import { DockerNetworkClient } from "./network/docker-network-client";
 import type { NetworkClient } from "./network/network-client";
+import { createNoWorkingStrategyError, type StrategyAttempt } from "./no-working-strategy-error";
 import type { ContainerRuntimeInfo, HostIp, Info, NodeInfo } from "./types";
 
 type DockerodeInfo = Awaited<ReturnType<Dockerode["info"]>>;
@@ -46,33 +48,34 @@ export async function getContainerRuntimeClient(): Promise<ContainerRuntimeClien
     new NpipeSocketStrategy(),
   ];
 
+  const attempts: StrategyAttempt[] = [];
+
   for (const strategy of strategies) {
+    const name = strategy.getName();
     try {
-      log.debug(`Checking container runtime strategy "${strategy.getName()}"...`);
-      const client = await initStrategy(strategy);
-      if (client) {
-        log.debug(`Container runtime strategy "${strategy.getName()}" works`);
-        containerRuntimeClient = client;
-        return client;
+      log.debug(`Checking container runtime strategy "${name}"...`);
+      const result = await strategy.getResult();
+      if ("notApplicable" in result) {
+        log.debug(`Container runtime strategy "${name}" is not applicable: ${result.notApplicable}`);
+        attempts.push({ name, reason: `not applicable: ${result.notApplicable}` });
+        continue;
       }
+      const client = await initStrategy(result);
+      log.debug(`Container runtime strategy "${name}" works`);
+      containerRuntimeClient = client;
+      return client;
     } catch (err) {
-      log.debug(`Container runtime strategy "${strategy.getName()}" does not work: "${err}"`);
+      log.debug(`Container runtime strategy "${name}" does not work: "${err}"`);
       if (err !== null && typeof err === "object" && "stack" in err && typeof err.stack === "string") {
         log.debug(err.stack);
       }
+      attempts.push({ name, reason: `failed: ${err instanceof Error ? err.message : String(err)}`, error: err });
     }
   }
-  throw new Error("Could not find a working container runtime strategy");
+  throw createNoWorkingStrategyError(attempts);
 }
 
-async function initStrategy(strategy: ContainerRuntimeClientStrategy): Promise<ContainerRuntimeClient | undefined> {
-  const result = await strategy.getResult();
-
-  if (!result) {
-    log.debug(`Container runtime strategy "${strategy.getName()}" is not applicable`);
-    return undefined;
-  }
-
+async function initStrategy(result: ContainerRuntimeClientStrategyResult): Promise<ContainerRuntimeClient> {
   const dockerodeOptions: DockerOptions = {
     ...result.dockerOptions,
     headers: { ...result.dockerOptions.headers, "User-Agent": `tc-node/${LIB_VERSION}` },

@@ -6,22 +6,22 @@ vi.mock("./utils/config", () => ({
 }));
 
 describe("TestcontainersHostStrategy", { concurrent: false }, () => {
-  it("should return undefined when tc.host property is not set", async () => {
+  it("should not apply when tc.host property is not set", async () => {
     mockGetContainerRuntimeConfig.mockResolvedValue({});
 
     const strategy = new TestcontainersHostStrategy();
     const result = await strategy.getResult();
 
-    expect(result).toBeUndefined();
+    expect(result).toEqual({ notApplicable: "tc.host is not set in ~/.testcontainers.properties" });
   });
 
-  it("should be defined when tc.host property is set", async () => {
+  it("should apply when tc.host property is set", async () => {
     mockGetContainerRuntimeConfig.mockResolvedValue({ tcHost: "tcp://tc:2375" });
 
     const strategy = new TestcontainersHostStrategy();
     const result = await strategy.getResult();
 
-    expect(result).toBeDefined();
+    expect(result).not.toHaveProperty("notApplicable");
   });
 
   it("should return relevant fields", async () => {
@@ -29,9 +29,10 @@ describe("TestcontainersHostStrategy", { concurrent: false }, () => {
 
     const strategy = new TestcontainersHostStrategy();
     const result = await strategy.getResult();
+    assert(!("notApplicable" in result));
 
-    expect(result?.uri).toEqual("tcp://tc:2375");
-    expect(result?.composeEnvironment).toEqual({ DOCKER_HOST: "tcp://tc:2375" });
-    expect(result?.allowUserOverrides).toBe(false);
+    expect(result.uri).toEqual("tcp://tc:2375");
+    expect(result.composeEnvironment).toEqual({ DOCKER_HOST: "tcp://tc:2375" });
+    expect(result.allowUserOverrides).toBe(false);
   });
 });
