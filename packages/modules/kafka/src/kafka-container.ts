@@ -22,10 +22,6 @@ const DEFAULT_CLUSTER_ID = "4L6g3nShT-eMCtK--X86sw";
 const STARTER_SCRIPT = "/tmp/testcontainers_start.sh";
 const WAIT_FOR_SCRIPT_MESSAGE = "Waiting for script...";
 
-// https://docs.confluent.io/platform/7.0.0/release-notes/index.html#ak-raft-kraft
-const MIN_KRAFT_VERSION = "7.0.0";
-const MIN_KRAFT_SASL_VERSION = "7.5.0";
-
 export interface SaslSslListenerOptions {
   sasl: SaslOptions;
   port: number;
@@ -93,7 +89,6 @@ export class KafkaContainer extends GenericContainer {
   }
 
   public withKraft(): this {
-    this.verifyMinKraftVersion();
     this.mode = KafkaMode.KRAFT;
     this.zooKeeperHost = undefined;
     this.zooKeeperPort = undefined;
@@ -147,15 +142,6 @@ export class KafkaContainer extends GenericContainer {
   }
 
   public override async start(): Promise<StartedKafkaContainer> {
-    if (
-      this.mode === KafkaMode.KRAFT &&
-      this.saslSslConfig &&
-      satisfies(this.imageName.tag, `<${MIN_KRAFT_SASL_VERSION}`)
-    ) {
-      throw new Error(
-        `Provided Confluent Platform's version ${this.imageName.tag} is not supported in Kraft mode with sasl (must be ${MIN_KRAFT_SASL_VERSION} or above)`
-      );
-    }
     return new StartedKafkaContainer(await super.start());
   }
 
@@ -168,16 +154,13 @@ export class KafkaContainer extends GenericContainer {
     // exporting KAFKA_ADVERTISED_LISTENERS with the container hostname
     command += `export KAFKA_ADVERTISED_LISTENERS=${advertisedListeners}\n`;
 
-    if (this.mode !== KafkaMode.KRAFT || satisfies(this.imageName.tag, "<7.4.0")) {
+    if (this.mode !== KafkaMode.KRAFT) {
       // Optimization: skip the checks
       command += "echo '' > /etc/confluent/docker/ensure \n";
     }
     if (this.mode === KafkaMode.KRAFT) {
       if (this.saslSslConfig) {
         command += this.commandKraftCreateUser(this.saslSslConfig);
-      }
-      if (satisfies(this.imageName.tag, "<7.4.0")) {
-        command += this.commandKraft();
       }
     } else if (this.mode === KafkaMode.EMBEDDED_ZOOKEEPER) {
       command += this.commandZookeeper();
@@ -275,14 +258,6 @@ export class KafkaContainer extends GenericContainer {
     }
   }
 
-  private verifyMinKraftVersion() {
-    if (satisfies(this.imageName.tag, `<${MIN_KRAFT_VERSION}`)) {
-      throw new Error(
-        `Provided Confluent Platform's version ${this.imageName.tag} is not supported in Kraft mode (must be ${MIN_KRAFT_VERSION} or above)`
-      );
-    }
-  }
-
   private commandKraftCreateUser(saslOptions: SaslSslListenerOptions): string {
     return (
       "echo 'kafka-storage format --ignore-formatted " +
@@ -290,15 +265,6 @@ export class KafkaContainer extends GenericContainer {
       "-c /etc/kafka/kafka.properties " +
       `--add-scram "${saslOptions.sasl.mechanism}=[name=${saslOptions.sasl.user.name},password=${saslOptions.sasl.user.password}]"' >> /etc/confluent/docker/configure\n`
     );
-  }
-
-  private commandKraft(): string {
-    let command = "sed -i '/KAFKA_ZOOKEEPER_CONNECT/d' /etc/confluent/docker/configure\n";
-    command +=
-      "echo 'kafka-storage format --ignore-formatted " +
-      `-t "${this.environment.CLUSTER_ID}" ` +
-      "-c /etc/kafka/kafka.properties' >> /etc/confluent/docker/configure\n";
-    return command;
   }
 
   private commandZookeeper(): string {
