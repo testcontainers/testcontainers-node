@@ -8,22 +8,22 @@ vi.mock("node:fs", () => ({ existsSync: vi.fn() }));
 describe("RootlessUnixSocketStrategy", { concurrent: false }, () => {
   const mockExistsSync = vi.mocked(existsSync);
 
-  it("should return undefined for non-linux and non-darwin platforms", async () => {
+  it("should not apply for non-linux and non-darwin platforms", async () => {
     mockExistsSync.mockReturnValue(true);
 
     const strategy = new RootlessUnixSocketStrategy("win32", {});
     const result = await strategy.getResult();
 
-    expect(result).toBeUndefined();
+    expect(result).toEqual({ notApplicable: "only used on Linux and macOS" });
   });
 
-  it("should return undefined when socket does not exist", async () => {
+  it("should not apply when socket does not exist", async () => {
     mockExistsSync.mockReturnValue(false);
 
     const strategy = new RootlessUnixSocketStrategy("linux", {});
     const result = await strategy.getResult();
 
-    expect(result).toBeUndefined();
+    expect(result).toEqual({ notApplicable: expect.stringMatching(/^no socket found at /) });
   });
 
   it("should return client for socket from XDG_RUNTIME_DIR", async () => {
@@ -32,8 +32,9 @@ describe("RootlessUnixSocketStrategy", { concurrent: false }, () => {
 
     const strategy = new RootlessUnixSocketStrategy("linux", { XDG_RUNTIME_DIR: "/tmp" });
     const result = await strategy.getResult();
+    assert(!("notApplicable" in result));
 
-    expect(result?.uri).toEqual(`unix://${socketPath}`);
+    expect(result.uri).toEqual(`unix://${socketPath}`);
   });
 
   it("should return client for socket from home run dir", async () => {
@@ -42,8 +43,9 @@ describe("RootlessUnixSocketStrategy", { concurrent: false }, () => {
 
     const strategy = new RootlessUnixSocketStrategy("linux", {});
     const result = await strategy.getResult();
+    assert(!("notApplicable" in result));
 
-    expect(result?.uri).toEqual(`unix://${socketPath}`);
+    expect(result.uri).toEqual(`unix://${socketPath}`);
   });
 
   it("should return Docker client for socket from home desktop dir", async () => {
@@ -52,8 +54,9 @@ describe("RootlessUnixSocketStrategy", { concurrent: false }, () => {
 
     const strategy = new RootlessUnixSocketStrategy("linux", {});
     const result = await strategy.getResult();
+    assert(!("notApplicable" in result));
 
-    expect(result?.uri).toEqual(`unix://${socketPath}`);
+    expect(result.uri).toEqual(`unix://${socketPath}`);
   });
 
   it("should return Docker client for socket from run dir", async () => {
@@ -62,7 +65,8 @@ describe("RootlessUnixSocketStrategy", { concurrent: false }, () => {
 
     const strategy = new RootlessUnixSocketStrategy("linux", {});
     const result = await strategy.getResult();
+    assert(!("notApplicable" in result));
 
-    expect(result?.uri).toEqual(`unix://${socketPath}`);
+    expect(result.uri).toEqual(`unix://${socketPath}`);
   });
 });
