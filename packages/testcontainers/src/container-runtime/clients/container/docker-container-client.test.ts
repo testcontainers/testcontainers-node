@@ -1,4 +1,5 @@
 import { PassThrough, type Readable } from "node:stream";
+import { text } from "node:stream/consumers";
 import type Dockerode from "dockerode";
 import { DockerContainerClient } from "./docker-container-client";
 
@@ -21,6 +22,41 @@ describe("DockerContainerClient", () => {
       stream.destroy();
 
       await vi.waitFor(() => expect(actualLogStream.destroyed).toBe(true));
+    });
+
+    it("should end the log stream after the current logs when not following", async () => {
+      const container = {
+        id: "container-id",
+        logs: vi.fn(async () => Buffer.from("first line\nsecond line\n")),
+      };
+      const dockerode = {
+        modem: {
+          demuxStream: (raw: Readable, stdout: PassThrough) => raw.on("data", (chunk) => stdout.write(chunk)),
+        },
+      } as unknown as Dockerode;
+      const client = new DockerContainerClient(dockerode);
+
+      const stream = await client.logs(container as unknown as Dockerode.Container, { follow: false });
+
+      expect(await text(stream)).toBe("first line\nsecond line\n");
+      expect(container.logs).toHaveBeenCalledWith(expect.objectContaining({ follow: false }));
+    });
+
+    it("should return logs that docker-modem parsed as JSON when not following", async () => {
+      const container = {
+        id: "container-id",
+        logs: vi.fn(async () => ({ level: "fatal" })),
+      };
+      const dockerode = {
+        modem: {
+          demuxStream: (raw: Readable, stdout: PassThrough) => raw.on("data", (chunk) => stdout.write(chunk)),
+        },
+      } as unknown as Dockerode;
+      const client = new DockerContainerClient(dockerode);
+
+      const stream = await client.logs(container as unknown as Dockerode.Container, { follow: false });
+
+      expect(await text(stream)).toBe('{"level":"fatal"}');
     });
   });
 
