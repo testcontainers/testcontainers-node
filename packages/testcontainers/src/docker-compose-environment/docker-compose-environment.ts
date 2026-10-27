@@ -8,8 +8,9 @@ import {
 } from "../container-runtime";
 import { StartedGenericContainer } from "../generic-container/started-generic-container";
 import { getReaper } from "../reaper/reaper";
-import type { Environment } from "../types";
+import type { Environment, EnvironmentInput } from "../types";
 import { BoundPorts } from "../utils/bound-ports";
+import { toEnvironment } from "../utils/environment";
 import { mapInspectResult } from "../utils/map-inspect-result";
 import { type ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
 import { selectWaitStrategy } from "../wait-strategies/utils/wait-strategy-selector";
@@ -51,8 +52,8 @@ export class DockerComposeEnvironment {
     return this;
   }
 
-  public withEnvironment(environment: Environment): this {
-    this.environment = { ...this.environment, ...environment };
+  public withEnvironment(environment: EnvironmentInput): this {
+    this.environment = { ...this.environment, ...toEnvironment(environment) };
     return this;
   }
 
