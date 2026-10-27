@@ -1,5 +1,5 @@
 import type Dockerode from "dockerode";
-import { IntervalRetry, log } from "../common";
+import { log } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
 import type { BoundPorts } from "../utils/bound-ports";
 import { HostPortCheck, InternalPortCheck, type PortCheck } from "./utils/port-check";
@@ -60,15 +60,16 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
     port: number | string,
     portCheck: PortCheck
   ): Promise<void> {
-    await new IntervalRetry<boolean, Error>(100).retryUntil(
+    await this.retryUntil(
+      container,
+      100,
       () => portCheck.isBound(port),
       (isBound) => isBound,
       () => {
         const message = `Port ${port} not bound after ${this.startupTimeoutMs}ms`;
         log.error(message, { containerId: container.id });
         throw new Error(message);
-      },
-      this.startupTimeoutMs
+      }
     );
   }
 }

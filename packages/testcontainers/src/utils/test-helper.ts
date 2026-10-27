@@ -6,10 +6,8 @@ import path from "node:path";
 import type { Readable } from "node:stream";
 import type { GetEventsOptions, ImageInspectInfo } from "dockerode";
 import { Agent, request } from "undici";
-import { IntervalRetry } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
 import type { StartedDockerComposeEnvironment } from "../docker-compose-environment/started-docker-compose-environment";
-import type { GenericContainer } from "../generic-container/generic-container";
 import type { StartedTestContainer } from "../test-container";
 import type { HealthCheckStatus } from "../types";
 import { getHealthCheckStatusFromInspect } from "../wait-strategies/utils/health-check";
@@ -140,30 +138,6 @@ export async function getImageLabelsByName(imageName: string): Promise<{ [label:
 export async function deleteImageByName(imageName: string): Promise<void> {
   const dockerode = (await getContainerRuntimeClient()).container.dockerode;
   await dockerode.getImage(imageName).remove();
-}
-
-export async function stopStartingContainer(container: GenericContainer, name: string) {
-  const client = await getContainerRuntimeClient();
-  const containerStartPromise = container.start();
-
-  const status = await new IntervalRetry<boolean, boolean>(500).retryUntil(
-    () =>
-      client.container
-        .getById(name)
-        .inspect()
-        .then((i) => i.State.Running)
-        .catch(() => false),
-    (running) => running,
-    () => false,
-    10000
-  );
-
-  if (!status) {
-    throw Error("failed start container");
-  }
-
-  await client.container.getById(name).stop();
-  await containerStartPromise;
 }
 
 export async function createTestServer(port: number): Promise<Server> {

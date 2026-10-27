@@ -66,6 +66,16 @@ describe("HealthCheckWaitStrategy", { timeout: 180_000 }, () => {
     expect(await getRunningContainerNames()).not.toContain(containerName);
   });
 
+  it("should fail when the container exits", async () => {
+    await expect(() =>
+      new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+        .withEntrypoint(["/bin/sh", "-c", "exit 1"])
+        .withHealthCheck({ test: ["CMD-SHELL", "exit 0"] })
+        .withWaitStrategy(Wait.forHealthCheck())
+        .start()
+    ).rejects.toThrowError("Container exited with code 1");
+  });
+
   it("should wait for custom health check using CMD to run the command directly without a shell", async () => {
     await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)

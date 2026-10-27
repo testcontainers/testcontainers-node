@@ -34,6 +34,22 @@ describe("LogWaitStrategy", { timeout: 180_000 }, () => {
     expect(Date.now() - start.getTime()).toBeGreaterThanOrEqual(4_000);
   });
 
+  it("should wait for a log message from a container that then exits", async () => {
+    await using _ = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withEntrypoint(["/bin/sh", "-c", "echo Ready"])
+      .withWaitStrategy(Wait.forLogMessage("Ready"))
+      .start();
+  });
+
+  it("should fail when the container exits before logging the message", async () => {
+    await expect(() =>
+      new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+        .withEntrypoint(["/bin/sh", "-c", "exit 1"])
+        .withWaitStrategy(Wait.forLogMessage("Ready"))
+        .start()
+    ).rejects.toThrowError("Container exited with code 1");
+  });
+
   it("should stop the container when the log message wait strategy times out", async () => {
     const containerName = `container-${new RandomUuid().nextUuid()}`;
 
