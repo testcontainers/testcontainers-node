@@ -1,1 +1,1 @@
-FROM scylladb/scylla:2026.3.3
+FROM scylladb/scylla:2026.3.4
