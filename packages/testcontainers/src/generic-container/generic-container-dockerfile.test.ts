@@ -36,6 +36,24 @@ describe("GenericContainer Dockerfile", { timeout: 180_000 }, () => {
     });
   }
 
+  it("should include the build output when the build fails", async () => {
+    const context = path.resolve(fixtures, "docker-with-failing-build");
+
+    await expect(GenericContainer.fromDockerfile(context).build()).rejects.toThrow(
+      /^Failed to build image: .*No such file or directory/s
+    );
+  });
+
+  if (!process.env.CI_PODMAN) {
+    it("should include the build output when the build fails with buildkit", async () => {
+      const context = path.resolve(fixtures, "docker-with-failing-build");
+
+      await expect(GenericContainer.fromDockerfile(context).withBuildkit().build()).rejects.toThrow(
+        /^Failed to build image: .*No such file or directory/s
+      );
+    });
+  }
+
   it("should have a session ID label to be cleaned up by the Reaper", async () => {
     const context = path.resolve(fixtures, "docker");
     const imageName = `${uuidGen.nextUuid()}:${uuidGen.nextUuid()}`;
