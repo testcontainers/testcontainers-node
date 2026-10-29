@@ -115,6 +115,17 @@ describe("GenericContainer Dockerfile", { timeout: 180_000 }, () => {
     await checkContainerIsHealthy(startedContainer);
   });
 
+  it("should add build arguments when called more than once", async () => {
+    const context = path.resolve(fixtures, "docker-with-buildargs");
+    const container = await GenericContainer.fromDockerfile(context)
+      .withBuildArgs({ VERSION: "10-alpine" })
+      .withBuildArgs({ UNUSED: "value" })
+      .build();
+    await using startedContainer = await container.withExposedPorts(8080).start();
+
+    await checkContainerIsHealthy(startedContainer);
+  });
+
   it("should exit immediately and stop without exception", async () => {
     const message = "This container will exit immediately.";
     const context = path.resolve(fixtures, "docker-exit-immediately");
