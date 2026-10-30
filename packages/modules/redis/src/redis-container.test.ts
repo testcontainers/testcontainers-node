@@ -77,6 +77,19 @@ describe.each(IMAGES)("RedisContainer (%s)", { concurrent: false, timeout: 240_0
     // }
   });
 
+  it.concurrent("should copy the initial data files readable by a non-root user", async () => {
+    await using container = await new RedisContainer(image)
+      .withInitialData(path.join(__dirname, "initData.redis"))
+      .start();
+
+    const { exitCode } = await container.exec(
+      ["sh", "-c", "test -r /tmp/import.redis && test -r /tmp/import.sh && test -x /tmp/import.sh"],
+      { user: "redis" }
+    );
+
+    expect(exitCode).toBe(0);
+  });
+
   it.concurrent("should load initial data once", async () => {
     await using container = await new RedisContainer(image)
       .withInitialData(path.join(__dirname, "initCount.redis"))

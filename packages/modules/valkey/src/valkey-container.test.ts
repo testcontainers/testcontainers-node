@@ -77,6 +77,19 @@ describe.each(IMAGES)("ValkeyContainer (%s)", { concurrent: false, timeout: 240_
     // }
   });
 
+  it.concurrent("should copy the initial data files readable by a non-root user", async () => {
+    await using container = await new ValkeyContainer(image)
+      .withInitialData(path.join(__dirname, "initData.valkey"))
+      .start();
+
+    const { exitCode } = await container.exec(
+      ["sh", "-c", "test -r /tmp/import.valkey && test -r /tmp/import.sh && test -x /tmp/import.sh"],
+      { user: "valkey" }
+    );
+
+    expect(exitCode).toBe(0);
+  });
+
   it.concurrent("should start with username and password", async () => {
     // valkeyWithUsernameAndPassword {
     const username = "testUser";

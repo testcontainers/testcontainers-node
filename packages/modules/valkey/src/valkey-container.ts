@@ -61,12 +61,12 @@ export class ValkeyContainer extends GenericContainer {
     if (this.initialImportScriptFile) {
       this.withCopyFilesToContainer([
         {
-          mode: 666,
+          mode: 0o644,
           source: this.initialImportScriptFile,
           target: this.importFilePath,
         },
         {
-          mode: 777,
+          mode: 0o755,
           source: path.join(__dirname, "import.sh"),
           target: "/tmp/import.sh",
         },
