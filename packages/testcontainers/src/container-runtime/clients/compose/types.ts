@@ -24,6 +24,7 @@ type ComposeExecutableOptions =
     };
 
 export type ComposeDownOptions = {
+  /** Compose down timeout in milliseconds. */
   timeout: number;
   removeVolumes: boolean;
 };

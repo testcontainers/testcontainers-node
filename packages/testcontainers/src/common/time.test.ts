@@ -1,4 +1,4 @@
-import { toNanos, toSeconds } from "./time";
+import { toNanos, toSeconds, toUnixSeconds } from "./time";
 
 test.for([
   [0, 0],
@@ -22,4 +22,12 @@ test.for([
   [-1, -1_000_000],
 ])("should convert %i ms to %i ns", ([ms, ns]) => {
   expect(toNanos(ms)).toEqual(ns);
+});
+
+test("toUnixSeconds leaves a Unix-seconds number unchanged", () => {
+  expect(toUnixSeconds(1_700_000_000)).toEqual(1_700_000_000);
+});
+
+test("toUnixSeconds converts a Date to Unix seconds", () => {
+  expect(toUnixSeconds(new Date(1_700_000_000_123))).toEqual(1_700_000_000);
 });
