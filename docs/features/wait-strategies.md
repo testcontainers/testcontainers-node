@@ -37,6 +37,17 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+To wait for only some of the exposed ports, pass them. Each one must also be exposed:
+
+```js
+const { GenericContainer, Wait } = require("testcontainers");
+
+const container = await new GenericContainer("alpine")
+  .withExposedPorts(6379, 9121)
+  .withWaitStrategy(Wait.forListeningPorts(6379))
+  .start();
+```
+
 ## Log output
 
 Wait until the container has logged a message:

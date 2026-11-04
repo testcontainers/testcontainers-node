@@ -1,3 +1,4 @@
+import type { PortWithOptionalBinding } from "../utils/port";
 import { CompositeWaitStrategy } from "./composite-wait-strategy";
 import { HealthCheckWaitStrategy } from "./health-check-wait-strategy";
 import { HostPortWaitStrategy } from "./host-port-wait-strategy";
@@ -13,8 +14,8 @@ export class Wait {
     return new CompositeWaitStrategy(waitStrategies);
   }
 
-  public static forListeningPorts(): WaitStrategy {
-    return new HostPortWaitStrategy();
+  public static forListeningPorts(...ports: PortWithOptionalBinding[]): WaitStrategy {
+    return new HostPortWaitStrategy(ports);
   }
 
   public static forLogMessage(message: Log | RegExp, times = 1): WaitStrategy {
