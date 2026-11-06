@@ -104,7 +104,11 @@ export class GenericContainerBuilder {
       buildOptions.pull = true;
     }
 
-    await client.image.build(this.context, buildOptions);
+    try {
+      await client.image.build(this.context, buildOptions);
+    } catch (err) {
+      throw new Error(`Failed to build image: ${err instanceof Error ? err.message : err}`, { cause: err });
+    }
 
     const container = new GenericContainer(imageName.string);
     if (!(await client.image.exists(imageName))) {
