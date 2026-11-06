@@ -17,8 +17,12 @@ export class OneShotStartupCheckStrategy extends StartupCheckStrategy {
     return this.isDockerTimestampNonEmpty(state.StartedAt) && this.isDockerTimestampNonEmpty(state.FinishedAt);
   }
 
-  public async checkStartupState(dockerClient: Dockerode, containerId: string): Promise<StartupStatus> {
-    const info = await dockerClient.getContainer(containerId).inspect();
+  public async checkStartupState(
+    dockerClient: Dockerode,
+    containerId: string,
+    signal?: AbortSignal
+  ): Promise<StartupStatus> {
+    const info = await dockerClient.getContainer(containerId).inspect(signal && { abortSignal: signal });
 
     if (!this.isContainerStopped(info)) {
       return "PENDING";

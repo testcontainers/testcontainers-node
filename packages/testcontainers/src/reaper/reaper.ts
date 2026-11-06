@@ -1,7 +1,7 @@
 import { Socket } from "node:net";
 import { userInfo } from "node:os";
 import type { ContainerInfo } from "dockerode";
-import { IntervalRetry, log, RandomUuid, withFileLock } from "../common";
+import { log, poll, RandomUuid, withFileLock } from "../common";
 import { type ContainerRuntimeClient, ImageName } from "../container-runtime";
 // biome-ignore lint/suspicious/noImportCycles: Ryuk and sshd run as GenericContainers; only dereferenced at runtime
 import { GenericContainer } from "../generic-container/generic-container";
@@ -133,22 +133,25 @@ async function createNewReaper(sessionId: string, remoteSocketPath: string): Pro
 }
 
 async function connectToReaperSocket(host: string, port: number, containerId: string): Promise<Socket> {
-  const retryResult = await new IntervalRetry<Socket | undefined, Error>(1000).retryUntil(
-    (attempt) => {
-      return new Promise((resolve) => {
-        log.debug(`Connecting to Reaper (attempt ${attempt + 1}) on "${host}:${port}"...`, { containerId });
-        const socket = new Socket();
+  return poll(
+    ({ attempt, signal }) => {
+      return new Promise<Socket>((resolve, reject) => {
+        log.debug(`Connecting to Reaper (attempt ${attempt}) on "${host}:${port}"...`, { containerId });
+        const socket = new Socket({ signal });
         socket
           .unref()
           .on("timeout", () => log.error(`Reaper ${containerId} socket timed out`))
-          .on("error", (err) => log.error(`Reaper ${containerId} socket error: ${err}`))
+          .on("error", (err) => {
+            log.error(`Reaper ${containerId} socket error: ${err}`);
+            reject(err);
+          })
           .on("close", (hadError) => {
             if (hadError) {
               log.error(`Connection to Reaper closed with error`, { containerId });
             } else {
               log.warn(`Connection to Reaper closed`, { containerId });
             }
-            resolve(undefined);
+            reject(new Error(`Connection to Reaper closed`));
           })
           .connect(port, host, () => {
             log.debug(`Connected to Reaper`, { containerId });
@@ -156,19 +159,8 @@ async function connectToReaperSocket(host: string, port: number, containerId: st
           });
       });
     },
-    (result) => result !== undefined,
-    () => {
-      const message = `Failed to connect to Reaper`;
-      log.error(message, { containerId });
-      return new Error(message);
-    },
-    4000
+    { intervalMs: 1000, timeoutMs: 4000, timeoutMessage: `Failed to connect to Reaper` }
   );
-
-  if (retryResult instanceof Socket) {
-    return retryResult;
-  }
-  throw retryResult;
 }
 
 class RyukReaper implements Reaper {

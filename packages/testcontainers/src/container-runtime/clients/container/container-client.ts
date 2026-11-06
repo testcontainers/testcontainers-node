@@ -32,7 +32,7 @@ export interface ContainerClient {
   list(): Promise<ContainerInfo[]>;
   create(opts: ContainerCreateOptions): Promise<Container>;
   start(container: Container): Promise<void>;
-  inspect(container: Container): Promise<ContainerInspectInfo>;
+  inspect(container: Container, opts?: { signal?: AbortSignal }): Promise<ContainerInspectInfo>;
   stop(container: Container, opts?: { timeout: number }): Promise<void>;
   attach(container: Container): Promise<Readable>;
   logs(container: Container, opts?: ContainerLogsOptions): Promise<Readable>;

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { IntervalRetry } from "testcontainers";
+import { poll } from "testcontainers";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { MongoDBAtlasLocalContainer } from "./mongodb-atlas-local-container";
 
@@ -114,19 +114,22 @@ describe.each(IMAGES)("MongoDBAtlasLocalContainer (%s)", { concurrent: false, ti
         definition: ATLAS_SEARCH_INDEX,
       });
 
-      await new IntervalRetry<string | undefined, Error>(10).retryUntil(
+      await poll(
         async () => {
           const searchIndexes = await collection.listSearchIndexes("AtlasSearchIndex").toArray();
           return (searchIndexes[0] as { status?: string } | undefined)?.status;
         },
-        (status) => status?.toUpperCase() === "READY",
-        () => new Error("Atlas Search index did not become ready in time"),
-        5_000
+        {
+          until: (status) => status?.toUpperCase() === "READY",
+          intervalMs: 10,
+          timeoutMs: 5_000,
+          timeoutMessage: "Atlas Search index did not become ready in time",
+        }
       );
 
       await collection.insertOne({ test: "tests", test2: 123, test3: true });
 
-      const found = await new IntervalRetry<Record<string, unknown> | null, Error>(10).retryUntil(
+      const found = await poll(
         async () =>
           collection
             .aggregate([
@@ -142,14 +145,13 @@ describe.each(IMAGES)("MongoDBAtlasLocalContainer (%s)", { concurrent: false, ti
               },
             ])
             .next(),
-        (result) => result !== null,
-        () => new Error("Atlas Search did not return a result in time"),
-        5_000
+        {
+          until: (result) => result !== null,
+          intervalMs: 10,
+          timeoutMs: 5_000,
+          timeoutMessage: "Atlas Search did not return a result in time",
+        }
       );
-
-      if (found instanceof Error) {
-        throw found;
-      }
 
       expect(found).toMatchObject({ test: "tests", test2: 123, test3: true });
     } finally {

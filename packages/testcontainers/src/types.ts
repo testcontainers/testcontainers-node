@@ -91,7 +91,7 @@ export type RegistryConfig = {
 
 export type BuildArgs = { [key in string]: string };
 
-export type ExecOptions = { workingDir: string; user: string; env: Environment };
+export type ExecOptions = { workingDir: string; user: string; env: Environment; signal: AbortSignal };
 
 export type ExecResult = { output: string; stdout: string; stderr: string; exitCode: number };
 
