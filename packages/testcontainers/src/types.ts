@@ -14,6 +14,8 @@ export type InspectResult = {
 
 export type Environment = { [key in string]: string };
 
+export type EnvironmentInput = { [key in string]: string | number | boolean | undefined };
+
 export type BindMode = "rw" | "ro" | "z" | "Z";
 
 export type BindMount = {

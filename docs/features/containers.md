@@ -85,6 +85,14 @@ const container = await new GenericContainer("alpine")
 
 Calling `withEnvironment` more than once adds to the variables set before. Setting a key again replaces its value.
 
+Numbers and booleans are converted to strings, and keys whose value is `undefined` are skipped:
+
+```js
+const container = await new GenericContainer("alpine")
+  .withEnvironment({ PORT: 8080, DEBUG: true, TOKEN: process.env.TOKEN })
+  .start();
+```
+
 ### With a platform
 
 ```js
