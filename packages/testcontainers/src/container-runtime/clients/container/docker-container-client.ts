@@ -1,5 +1,5 @@
 import type { IncomingMessage } from "node:http";
-import { type Duplex, PassThrough, type Readable } from "node:stream";
+import { type Duplex, PassThrough, Readable } from "node:stream";
 import { finished } from "node:stream/promises";
 import type Dockerode from "dockerode";
 import type {
@@ -176,18 +176,22 @@ export class DockerContainerClient implements ContainerClient {
     const proxyStream = new PassThrough();
     proxyStream.setEncoding("utf8");
 
-    container
-      .logs({
-        follow: true,
-        stdout: true,
-        stderr: true,
-        tail: opts?.tail ?? -1,
-        since: opts?.since ?? 0,
-      })
-      .then(async (stream) => {
-        const actualLogStream = stream as IncomingMessage;
-        actualLogStream.socket?.unref();
+    const logsOpts = { stdout: true, stderr: true, tail: opts?.tail ?? -1, since: opts?.since ?? 0 };
+    // docker-modem parses a non-streamed body that is valid JSON, which unframed (TTY) logs can be.
+    const toBuffer = (logs: unknown) => (Buffer.isBuffer(logs) ? logs : Buffer.from(JSON.stringify(logs)));
+    const logStream: Promise<Readable> =
+      opts?.follow === false
+        ? container
+            .logs({ ...logsOpts, follow: false })
+            .then((logs) => Readable.from([toBuffer(logs)], { objectMode: false }))
+        : container.logs({ ...logsOpts, follow: true }).then((stream) => {
+            const actualLogStream = stream as IncomingMessage;
+            actualLogStream.socket?.unref();
+            return actualLogStream;
+          });
 
+    logStream
+      .then(async (actualLogStream) => {
         const demuxedStream = await this.demuxStream(container.id, actualLogStream);
         if (proxyStream.destroyed) {
           demuxedStream.destroy();
