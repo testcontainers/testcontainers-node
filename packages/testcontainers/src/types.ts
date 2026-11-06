@@ -63,15 +63,21 @@ export type TmpFs = { [dir in string]: string };
 export type Ulimits = { [name: string]: { hard: number | undefined; soft: number | undefined } };
 
 export type ResourcesQuota = {
-  memory?: number; // Memory limit in Gigabytes
-  cpu?: number; // CPU quota in units of CPUs
+  /** Memory limit in gigabytes (e.g. `0.5` is 512 MiB). */
+  memory?: number;
+  /** CPU quota in CPUs (e.g. `1` is one CPU). */
+  cpu?: number;
 };
 
 export type HealthCheck = {
   test: ["CMD-SHELL", string] | ["CMD", ...string[]];
+  /** Interval between checks, in milliseconds. */
   interval?: number;
+  /** Maximum time to allow one check to run, in milliseconds. */
   timeout?: number;
+  /** Consecutive failures before the container is marked unhealthy. */
   retries?: number;
+  /** Grace period before failed checks count, in milliseconds. */
   startPeriod?: number;
 };
 

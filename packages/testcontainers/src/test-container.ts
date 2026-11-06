@@ -34,6 +34,7 @@ export interface TestContainer {
   withExposedPorts(...ports: PortWithOptionalBinding[]): this;
   withBindMounts(bindMounts: BindMount[]): this;
   withWaitStrategy(waitStrategy: WaitStrategy): this;
+  /** Container startup timeout in milliseconds. */
   withStartupTimeout(startupTimeoutMs: number): this;
   withNetwork(network: StartedNetwork): this;
   withNetworkMode(networkMode: string): this;
@@ -52,17 +53,21 @@ export interface TestContainer {
   withCopyArchivesToContainer(archivesToCopy: ArchiveToCopy[]): this;
   withCopyToContainerOptions(copyToContainerOptions: CopyToContainerOptions): this;
   withWorkingDir(workingDir: string): this;
+  /** Resource limits. `memory` is gigabytes; `cpu` is CPUs. */
   withResourcesQuota(resourcesQuota: ResourcesQuota): this;
+  /** `/dev/shm` size in bytes. */
   withSharedMemorySize(bytes: number): this;
   withLogConsumer(logConsumer: (stream: Readable) => unknown): this;
   withHostname(hostname: string): this;
 }
 
 export interface RestartOptions {
+  /** Stop timeout before restart, in milliseconds. */
   timeout: number;
 }
 
 export interface StopOptions {
+  /** Stop timeout in milliseconds. */
   timeout: number;
   remove: boolean;
   removeVolumes: boolean;
@@ -89,7 +94,12 @@ export interface StartedTestContainer extends AsyncDisposable {
   copyFilesToContainer(filesToCopy: FileToCopy[]): Promise<void>;
   copyContentToContainer(contentsToCopy: ContentToCopy[]): Promise<void>;
   exec(command: string | string[], opts?: Partial<ExecOptions>): Promise<ExecResult>;
-  logs(opts?: { since?: number; tail?: number }): Promise<Readable>;
+  /**
+   * Stream container logs.
+   * @param opts.since Unix timestamp in **seconds**, or a `Date` (converted to seconds). Millisecond values such as `Date.now()` are far in the future for Docker.
+   * @param opts.tail Number of lines from the end of the logs, or omit for the full stream.
+   */
+  logs(opts?: { since?: number | Date; tail?: number }): Promise<Readable>;
 }
 
 export interface StoppedTestContainer {
