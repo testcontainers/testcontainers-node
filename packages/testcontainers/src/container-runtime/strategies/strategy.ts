@@ -1,6 +1,6 @@
-import type { ContainerRuntimeClientStrategyResult } from "./types";
+import type { ContainerRuntimeClientStrategyNotApplicable, ContainerRuntimeClientStrategyResult } from "./types";
 
 export interface ContainerRuntimeClientStrategy {
   getName(): string;
-  getResult(): Promise<ContainerRuntimeClientStrategyResult | undefined>;
+  getResult(): Promise<ContainerRuntimeClientStrategyResult | ContainerRuntimeClientStrategyNotApplicable>;
 }
