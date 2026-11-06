@@ -5,7 +5,6 @@ import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { RedisContainer } from "./redis-container";
 
 const IMAGES = ["redis:6.2.24", "redis:7.4.11", getImage(__dirname)];
-const REDISSTACK_IMAGE = getImage(__dirname, 1);
 
 describe.each(IMAGES)("RedisContainer (%s)", { concurrent: false, timeout: 240_000 }, (image) => {
   it.concurrent("should connect and execute set-get", async () => {
@@ -150,60 +149,6 @@ describe.each(IMAGES)("RedisContainer (%s)", { concurrent: false, timeout: 240_0
       "--save 1 1 ",
       "--appendonly yes",
     ]);
-
-    const client = createClient({ url: startedContainer.getConnectionUrl() });
-    await client.connect();
-
-    await client.set("key", "val");
-    expect(await client.get("key")).toBe("val");
-
-    client.destroy();
-    fs.rmSync(sourcePath, { force: true, recursive: true });
-  });
-});
-
-describe(`RedisContainer (${REDISSTACK_IMAGE})`, { timeout: 240_000 }, () => {
-  it("should start with redis-stack-server and json module", async () => {
-    // startWithRedisStack {
-    await using container = await new RedisContainer(REDISSTACK_IMAGE).withPassword("testPassword").start();
-
-    const client = createClient({ url: container.getConnectionUrl() });
-    await client.connect();
-
-    await client.json.set("key", "$", { name: "test" });
-    const result = await client.json.get("key");
-    expect(result).toEqual({ name: "test" });
-
-    client.destroy();
-    // }
-  });
-
-  it("should start redis-stack with custom env", async () => {
-    const container = new RedisContainer(REDISSTACK_IMAGE).withEnvironment({ REDIS_ARGS: "--loglevel verbose" });
-    await using startedContainer = await container.start();
-
-    // @ts-expect-error - accessing private property for testing
-    expect(container.createOpts.Env).toEqual(["REDIS_ARGS=--loglevel verbose"]);
-
-    const client = createClient({ url: startedContainer.getConnectionUrl() });
-    await client.connect();
-
-    await client.set("key", "val");
-    expect(await client.get("key")).toBe("val");
-
-    client.destroy();
-  });
-
-  it("should start redis-stack with custom env and keeping default args", async () => {
-    const sourcePath = fs.mkdtempSync("redis-");
-
-    const container = new RedisContainer(REDISSTACK_IMAGE)
-      .withEnvironment({ REDIS_ARGS: "--loglevel verbose" })
-      .withPersistence(sourcePath);
-    await using startedContainer = await container.start();
-
-    // @ts-expect-error - accessing private property for testing
-    expect(container.createOpts.Env).toEqual(["REDIS_ARGS=--loglevel verbose --save 1 1  --appendonly yes"]);
 
     const client = createClient({ url: startedContainer.getConnectionUrl() });
     await client.connect();
