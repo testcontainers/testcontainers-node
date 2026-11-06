@@ -71,6 +71,9 @@ export interface StopOptions {
 export interface StartedTestContainer extends AsyncDisposable {
   stop(options?: Partial<StopOptions>): Promise<StoppedTestContainer>;
   restart(options?: Partial<RestartOptions>): Promise<void>;
+  pause(): Promise<void>;
+  unpause(): Promise<void>;
+  kill(signal?: string): Promise<void>;
   commit(options: CommitOptions): Promise<string>;
   getHost(): string;
   getHostname(): string;

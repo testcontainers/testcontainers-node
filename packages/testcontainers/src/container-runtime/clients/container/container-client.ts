@@ -38,6 +38,9 @@ export interface ContainerClient {
   logs(container: Container, opts?: ContainerLogsOptions): Promise<Readable>;
   exec(container: Container, command: string[], opts?: Partial<ExecOptions>): Promise<ExecResult>;
   restart(container: Container, opts?: { timeout: number }): Promise<void>;
+  pause(container: Container): Promise<void>;
+  unpause(container: Container): Promise<void>;
+  kill(container: Container, opts: { signal: string }): Promise<void>;
   commit(container: Container, opts: ContainerCommitOptions): Promise<string>;
   events(container: Container, eventNames: string[]): Promise<Readable>;
   remove(container: Container, opts?: { removeVolumes: boolean }): Promise<void>;
