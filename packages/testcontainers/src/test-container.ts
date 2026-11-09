@@ -73,7 +73,6 @@ export interface StartedTestContainer extends AsyncDisposable {
   restart(options?: Partial<RestartOptions>): Promise<void>;
   pause(): Promise<void>;
   unpause(): Promise<void>;
-  kill(signal?: string): Promise<void>;
   commit(options: CommitOptions): Promise<string>;
   getHost(): string;
   getHostname(): string;

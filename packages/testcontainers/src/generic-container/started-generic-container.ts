@@ -128,11 +128,6 @@ export class StartedGenericContainer implements StartedTestContainer {
     await client.container.unpause(this.container);
   }
 
-  public async kill(signal = "SIGKILL"): Promise<void> {
-    const client = await getContainerRuntimeClient();
-    await client.container.kill(this.container, { signal });
-  }
-
   private async stopContainer(options: Partial<StopOptions> = {}): Promise<StoppedGenericContainer> {
     log.info(`Stopping container...`, { containerId: this.container.id });
     const client = await getContainerRuntimeClient();

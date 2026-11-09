@@ -444,16 +444,13 @@ const container = await new GenericContainer("alpine").start();
 await container.restart();
 ```
 
-## Pausing and killing a container
+## Pausing a container
 
 ```js
 const container = await new GenericContainer("alpine").start();
 
 await container.pause();
 await container.unpause();
-
-await container.kill(); // SIGKILL by default
-await container.kill("SIGTERM");
 ```
 
 ## Committing a container to an image

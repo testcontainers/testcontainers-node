@@ -332,17 +332,6 @@ export class DockerContainerClient implements ContainerClient {
     }
   }
 
-  async kill(container: Container, opts: { signal: string }): Promise<void> {
-    try {
-      log.debug(`Killing container with ${opts.signal}...`, { containerId: container.id });
-      await container.kill({ signal: opts.signal });
-      log.debug(`Killed container`, { containerId: container.id });
-    } catch (err) {
-      log.error(`Failed to kill container: ${err}`, { containerId: container.id });
-      throw err;
-    }
-  }
-
   async commit(container: Container, opts: ContainerCommitOptions): Promise<string> {
     try {
       log.debug(`Committing container...`, { containerId: container.id });
