@@ -32,7 +32,7 @@
     "testcontainers": "^12.2.1"
   },
   "devDependencies": {
-    "couchbase": "^4.7.1",
+    "couchbase": "^4.7.2",
     "get-port": "^5.1.1"
   }
 }

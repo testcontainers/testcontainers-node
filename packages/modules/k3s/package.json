@@ -33,6 +33,6 @@
     "testcontainers": "^12.2.1"
   },
   "devDependencies": {
-    "@kubernetes/client-node": "^2.0.0"
+    "@kubernetes/client-node": "^2.0.1"
   }
 }
