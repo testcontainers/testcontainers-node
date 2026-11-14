@@ -1,5 +1,5 @@
 import type Dockerode from "dockerode";
-import { IntervalRetry, log } from "../common";
+import { log, poll } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
 import type { BoundPorts } from "../utils/bound-ports";
 import { HostPortCheck, InternalPortCheck, type PortCheck } from "./utils/port-check";
@@ -30,7 +30,7 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
         continue;
       }
       log.debug(`Waiting for host port ${hostPort}...`, { containerId: container.id });
-      await this.waitForPort(container, hostPort, portCheck);
+      await this.waitForPort(hostPort, portCheck);
       log.debug(`Host port ${hostPort} ready`, { containerId: container.id });
     }
     log.debug(`Host port wait strategy complete`, { containerId: container.id });
@@ -49,26 +49,19 @@ export class HostPortWaitStrategy extends AbstractWaitStrategy {
         continue;
       }
       log.debug(`Waiting for internal port ${internalPort}...`, { containerId: container.id });
-      await this.waitForPort(container, internalPort, portCheck);
+      await this.waitForPort(internalPort, portCheck);
       log.debug(`Internal port ${internalPort} ready`, { containerId: container.id });
     }
     log.debug(`Internal port wait strategy complete`, { containerId: container.id });
   }
 
-  private async waitForPort(
-    container: Dockerode.Container,
-    port: number | string,
-    portCheck: PortCheck
-  ): Promise<void> {
-    await new IntervalRetry<boolean, Error>(100).retryUntil(
-      () => portCheck.isBound(port),
-      (isBound) => isBound,
-      () => {
-        const message = `Port ${port} not bound after ${this.startupTimeoutMs}ms`;
-        log.error(message, { containerId: container.id });
-        throw new Error(message);
-      },
-      this.startupTimeoutMs
-    );
+  private async waitForPort(port: number | string, portCheck: PortCheck): Promise<void> {
+    await poll(({ signal }) => portCheck.isBound(port, signal), {
+      until: (isBound) => isBound,
+      intervalMs: 100,
+      timeoutMs: this.startupTimeoutMs,
+      timeoutMessage: `Port ${port} not bound after ${this.startupTimeoutMs}ms`,
+      retryOnError: false,
+    });
   }
 }

@@ -95,7 +95,7 @@ export class StartedGenericContainer implements StartedTestContainer {
     await client.container.restart(this.container, resolvedOptions);
 
     this.inspectResult = await inspectContainerUntilPortsExposed(
-      () => client.container.inspect(this.container),
+      (signal) => client.container.inspect(this.container, { signal }),
       this.container.id
     );
     const mappedInspectResult = mapInspectResult(this.inspectResult);

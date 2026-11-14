@@ -66,6 +66,28 @@ describe("inspectContainerUntilPortsExposed", { concurrent: false }, () => {
     );
   });
 
+  it("throws an error at the timeout when the inspect never resolves", { timeout: 1000 }, async () => {
+    const inspectFn = vi.fn(() => new Promise<ContainerInspectInfo>(() => {}));
+
+    await expect(inspectContainerUntilPortsExposed(inspectFn, "container-id", 10)).rejects.toThrow(
+      "Timed out after 10ms while waiting for container ports to be bound to the host"
+    );
+  });
+
+  it("aborts the inspect at the timeout", async () => {
+    const signals: AbortSignal[] = [];
+    const inspectFn = (signal: AbortSignal) =>
+      new Promise<ContainerInspectInfo>((_, reject) => {
+        signals.push(signal);
+        signal.addEventListener("abort", () => reject(signal.reason));
+      });
+
+    await expect(inspectContainerUntilPortsExposed(inspectFn, "container-id", 10)).rejects.toThrow(
+      "Timed out after 10ms while waiting for container ports to be bound to the host"
+    );
+    expect(signals.map((signal) => signal.aborted)).toEqual([true]);
+  });
+
   it("throws an error when container ports not exposed within timeout", async () => {
     const data = mockInspectResult({ "8080/tcp": [] }, {});
     const inspectFn = vi.fn().mockResolvedValue(data);

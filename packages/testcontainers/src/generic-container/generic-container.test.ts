@@ -132,6 +132,18 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     expect(output).toEqual(stderr);
   });
 
+  it("should abort a command when the signal aborts", async () => {
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withExposedPorts(8080)
+      .start();
+    const controller = new AbortController();
+
+    const result = container.exec(["sleep", "30"], { signal: controller.signal });
+    setTimeout(() => controller.abort(new Error("aborted")), 500);
+
+    await expect(result).rejects.toThrow("aborted");
+  });
+
   it("should capture stdout and stderr in the correct order", async () => {
     await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
