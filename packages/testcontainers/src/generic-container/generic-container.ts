@@ -1,9 +1,10 @@
 import { promises as fs } from "node:fs";
+import path from "node:path";
 import type { Readable } from "node:stream";
 import archiver from "archiver";
 import AsyncLock from "async-lock";
 import type { Container, ContainerCreateOptions, ContainerInspectInfo, HostConfig } from "dockerode";
-import { containerLog, hash, log, toNanos } from "../common";
+import { containerLog, hash, hashFile, log, toNanos } from "../common";
 import { type ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "../container-runtime";
 import { CONTAINER_STATUSES } from "../container-runtime/clients/container/types";
 import type { StartedNetwork } from "../network/network";
@@ -109,10 +110,12 @@ export class GenericContainer implements TestContainer {
       await this.beforeContainerCreated();
     }
 
+    // The reuse hash leaves out the host.testcontainers.internal entry: the port forwarder's IP changes every session.
+    const extraHosts = this.hostConfig.ExtraHosts;
     if (!this.isHelperContainer() && PortForwarderInstance.isRunning()) {
       const portForwarder = await PortForwarderInstance.getInstance();
       this.hostConfig.ExtraHosts = [
-        ...(this.hostConfig.ExtraHosts ?? []),
+        ...(extraHosts ?? []),
         `host.testcontainers.internal:${portForwarder.getIpAddress()}`,
       ];
     }
@@ -121,7 +124,7 @@ export class GenericContainer implements TestContainer {
     this.createOpts.Labels = { ...createLabels(), ...this.createOpts.Labels };
 
     if (process.env.TESTCONTAINERS_REUSE_ENABLE !== "false" && this.reuse) {
-      return this.reuseOrStartContainer(client);
+      return this.reuseOrStartContainer(client, extraHosts);
     }
 
     if (!this.isReaper() && this.autoCleanup) {
@@ -145,8 +148,8 @@ export class GenericContainer implements TestContainer {
     });
   }
 
-  private async reuseOrStartContainer(client: ContainerRuntimeClient) {
-    const containerHash = hash(JSON.stringify(this.createOpts));
+  private async reuseOrStartContainer(client: ContainerRuntimeClient, extraHosts: string[] | undefined) {
+    const containerHash = await this.createContainerHash(extraHosts);
     this.createOpts.Labels = { ...this.createOpts.Labels, [LABEL_TESTCONTAINERS_CONTAINER_HASH]: containerHash };
     log.debug(`Container reuse has been enabled with hash "${containerHash}"`);
 
@@ -163,6 +166,38 @@ export class GenericContainer implements TestContainer {
       log.debug("No container found to reuse");
       return this.startContainer(client);
     });
+  }
+
+  private async createContainerHash(extraHosts: string[] | undefined): Promise<string> {
+    return hash(
+      JSON.stringify({
+        ...this.createOpts,
+        HostConfig: { ...this.hostConfig, ExtraHosts: extraHosts },
+        networkMode: this.networkMode,
+        networkAliases: this.networkAliases,
+        filesToCopy: await Promise.all(
+          this.filesToCopy.map(async ({ source, target, mode }) => ({
+            target,
+            mode,
+            ...(await hashCopiedFile(source)),
+          }))
+        ),
+        directoriesToCopy: await Promise.all(
+          this.directoriesToCopy.map(async ({ source, target, mode }) => ({
+            target,
+            mode,
+            entries: await hashCopiedDirectory(source),
+          }))
+        ),
+        contentsToCopy: this.contentsToCopy.map(({ content, target, mode }) => ({
+          target,
+          mode,
+          content: typeof content === "string" || Buffer.isBuffer(content) ? hash(content) : undefined,
+        })),
+        archivesToCopy: this.archivesToCopy.map(({ target }) => ({ target })),
+        copyToContainerOptions: this.copyToContainerOptions,
+      })
+    );
   }
 
   private async reuseContainer(client: ContainerRuntimeClient, container: Container) {
@@ -578,4 +613,25 @@ export class GenericContainer implements TestContainer {
     this.createOpts.Hostname = hostname;
     return this;
   }
+}
+
+async function hashCopiedFile(source: string) {
+  const stats = await fs.stat(source);
+  return { fileMode: stats.mode, content: await hashFile(source) };
+}
+
+async function hashCopiedDirectory(directory: string) {
+  const entries = [];
+  for (const entry of (await fs.readdir(directory, { recursive: true })).sort()) {
+    const entryPath = path.join(directory, entry);
+    const stats = await fs.lstat(entryPath);
+    let content: string | undefined;
+    if (stats.isFile()) {
+      content = await hashFile(entryPath);
+    } else if (stats.isSymbolicLink()) {
+      content = await fs.readlink(entryPath);
+    }
+    entries.push({ path: entry, fileMode: stats.mode, content });
+  }
+  return entries;
 }
