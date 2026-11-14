@@ -6,7 +6,7 @@ export class ScyllaContainer extends GenericContainer {
   constructor(image: string) {
     super(image);
     this.withExposedPorts(SCYLLA_PORT);
-    this.withCommand(["--skip-wait-for-gossip-to-settle=0"]);
+    this.withCommand(["--skip-wait-for-gossip-to-settle=0", "--smp=1", "--memory=512M"]);
   }
 
   public override async start(): Promise<StartedScyllaContainer> {
