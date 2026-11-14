@@ -35,23 +35,23 @@ Link the run in the PR body. Dispatching needs write access to the repo. Without
 
 Write it as an imperative release-note line about the user-visible change. Don't use conventional-commit prefixes, agent names or branch names.
 
-| Good | Bad |
-| --- | --- |
-| `Add Mosquitto module` | `Adding module mosquitto`, `feat(mosquitto): add module` |
-| `Fix container exec output truncation` | `Fixed exec truncation`, `fix: exec` |
+| Good                                   | Bad                                                      |
+| -------------------------------------- | -------------------------------------------------------- |
+| `Add Mosquitto module`                 | `Adding module mosquitto`, `feat(mosquitto): add module` |
+| `Fix container exec output truncation` | `Fixed exec truncation`, `fix: exec`                     |
 
 ## Labels
 
 Every PR gets exactly one change-type label and one semver label.
 
-| Change | Labels |
-| --- | --- |
-| Feature or new module | `enhancement` + `minor` |
-| Bug fix | `bug` + `patch` |
-| Breaking change (removed or renamed export, changed default, ESM-only runtime dependency, higher Node floor) | type label + `major` |
-| Docs only | `documentation` + `patch` |
-| Dependency update | `dependencies` + its user-facing impact |
-| CI, tooling, tests, refactors | `maintenance` + `patch` |
+| Change                                                                                                       | Labels                                  |
+| ------------------------------------------------------------------------------------------------------------ | --------------------------------------- |
+| Feature or new module                                                                                        | `enhancement` + `minor`                 |
+| Bug fix                                                                                                      | `bug` + `patch`                         |
+| Breaking change (removed or renamed export, changed default, ESM-only runtime dependency, higher Node floor) | type label + `major`                    |
+| Docs only                                                                                                    | `documentation` + `patch`               |
+| Dependency update                                                                                            | `dependencies` + its user-facing impact |
+| CI, tooling, tests, refactors                                                                                | `maintenance` + `patch`                 |
 
 ## Body
 
