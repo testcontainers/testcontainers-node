@@ -6,3 +6,5 @@ export type ContainerRuntimeClientStrategyResult = {
   composeEnvironment: NodeJS.ProcessEnv;
   allowUserOverrides: boolean;
 };
+
+export type ContainerRuntimeClientStrategyNotApplicable = { notApplicable: string };

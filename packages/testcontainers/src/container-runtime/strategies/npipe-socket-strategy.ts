@@ -1,5 +1,5 @@
 import type { ContainerRuntimeClientStrategy } from "./strategy";
-import type { ContainerRuntimeClientStrategyResult } from "./types";
+import type { ContainerRuntimeClientStrategyNotApplicable, ContainerRuntimeClientStrategyResult } from "./types";
 
 export class NpipeSocketStrategy implements ContainerRuntimeClientStrategy {
   constructor(private readonly platform: NodeJS.Platform = process.platform) {}
@@ -8,9 +8,9 @@ export class NpipeSocketStrategy implements ContainerRuntimeClientStrategy {
     return "NpipeSocketStrategy";
   }
 
-  async getResult(): Promise<ContainerRuntimeClientStrategyResult | undefined> {
+  async getResult(): Promise<ContainerRuntimeClientStrategyResult | ContainerRuntimeClientStrategyNotApplicable> {
     if (this.platform !== "win32") {
-      return;
+      return { notApplicable: "only used on Windows" };
     }
 
     return {
