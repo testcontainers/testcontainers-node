@@ -1,5 +1,5 @@
 import type Dockerode from "dockerode";
-import { IntervalRetry, log } from "../common";
+import { log } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
 import { getHealthCheckStatusFromInspect } from "./utils/health-check";
 import { AbstractWaitStrategy } from "./wait-strategy";
@@ -9,7 +9,9 @@ export class HealthCheckWaitStrategy extends AbstractWaitStrategy {
     log.debug(`Waiting for health check...`, { containerId: container.id });
     const client = await getContainerRuntimeClient();
 
-    const status = await new IntervalRetry<string | undefined, Error>(100).retryUntil(
+    const status = await this.retryUntil(
+      container,
+      100,
       async () => getHealthCheckStatusFromInspect(await client.container.inspect(container)),
       (healthCheckStatus) => healthCheckStatus === "healthy" || healthCheckStatus === "unhealthy",
       () => {
@@ -17,11 +19,11 @@ export class HealthCheckWaitStrategy extends AbstractWaitStrategy {
         const message = `Health check not healthy after ${timeout}ms`;
         log.error(message, { containerId: container.id });
         throw new Error(message);
-      },
-      this.startupTimeoutMs
+      }
     );
 
     if (status !== "healthy") {
+      await this.throwIfContainerExited(container);
       const message = `Health check failed: ${status}`;
       log.error(message, { containerId: container.id });
       throw new Error(message);

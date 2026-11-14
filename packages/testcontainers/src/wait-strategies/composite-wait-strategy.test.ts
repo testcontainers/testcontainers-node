@@ -35,6 +35,16 @@ describe("CompositeWaitStrategy", { timeout: 180_000 }, () => {
     await expect(container.start()).rejects.toThrowError(`Shell command "exit 1" not successful after 100ms`);
   });
 
+  it("should apply abortOnContainerExit to its wait strategies", async () => {
+    const container = new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withEntrypoint(["/bin/sh", "-c", "exit 1"])
+      .withWaitStrategy(
+        Wait.forAll([Wait.forSuccessfulCommand("stat /tmp/never.sock")]).withAbortOnContainerExit(false)
+      );
+
+    await expect(container.start()).rejects.not.toThrowError("Container exited");
+  });
+
   it("should work with maximum outer timeout", async () => {
     const container = new GenericContainer("cristianrgreco/testcontainer:1.1.14").withWaitStrategy(
       Wait.forAll([
