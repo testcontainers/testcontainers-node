@@ -36,6 +36,14 @@ export class AbstractStartedContainer implements StartedTestContainer {
     return this.startedTestContainer.restart(options);
   }
 
+  public async pause(): Promise<void> {
+    return this.startedTestContainer.pause();
+  }
+
+  public async unpause(): Promise<void> {
+    return this.startedTestContainer.unpause();
+  }
+
   public async commit(options: CommitOptions): Promise<string> {
     return this.startedTestContainer.commit(options);
   }
