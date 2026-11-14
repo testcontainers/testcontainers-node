@@ -25,6 +25,7 @@ export type BindMount = {
 export type FileToCopy = {
   source: string;
   target: string;
+  /** File permissions as an octal number, for example `0o644`. */
   mode?: number;
 };
 
@@ -35,6 +36,7 @@ export type Content = string | Buffer | Readable;
 export type ContentToCopy = {
   content: Content;
   target: string;
+  /** File permissions as an octal number, for example `0o644`. */
   mode?: number;
 };
 
