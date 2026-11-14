@@ -71,4 +71,19 @@ describe("GenericContainer resources quota", { timeout: 180_000 }, () => {
       expect(containerInfo.HostConfig.NanoCpus).toEqual(1000000000);
     });
   }
+
+  if (!process.env.CI_ROOTLESS) {
+    it("should only change the quotas given when called more than once", async () => {
+      await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+        .withResourcesQuota({ memory: 0.5 })
+        .withResourcesQuota({ cpu: 1 })
+        .start();
+
+      const dockerContainer = await client.container.getById(container.getId());
+      const containerInfo = await dockerContainer.inspect();
+
+      expect(containerInfo.HostConfig.Memory).toEqual(536870912);
+      expect(containerInfo.HostConfig.NanoCpus).toEqual(1000000000);
+    });
+  }
 });

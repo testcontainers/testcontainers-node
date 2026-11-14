@@ -78,6 +78,8 @@ const container = await GenericContainer
   .build();
 ```
 
+Calling `withBuildArgs` more than once adds to the arguments set before. Setting an argument again replaces its value.
+
 ### With target
 
 Stop the build at a specific stage by specifying a target:

@@ -264,6 +264,19 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     expect(output).toContain("hello world");
   });
 
+  it("should add bind mounts when called more than once", async () => {
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withBindMounts([{ source: path.resolve(fixtures, "docker", "test.txt"), target: "/tmp/test.txt" }])
+      .withBindMounts([{ source: path.resolve(fixtures, "docker", "index.js"), target: "/tmp/index.js" }])
+      .withExposedPorts(8080)
+      .start();
+
+    const { output: firstOutput } = await container.exec(["cat", "/tmp/test.txt"]);
+    expect(firstOutput).toContain("hello world");
+    const { output: secondOutput } = await container.exec(["cat", "/tmp/index.js"]);
+    expect(secondOutput).toContain('require("express")');
+  });
+
   it("should set tmpfs", async () => {
     await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withTmpFs({ "/testtmpfs": "rw" })

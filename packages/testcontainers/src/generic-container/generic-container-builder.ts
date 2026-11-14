@@ -30,8 +30,8 @@ export class GenericContainerBuilder {
     private readonly uuid: Uuid = new RandomUuid()
   ) {}
 
-  public withBuildArgs(buildArgs: BuildArgs): GenericContainerBuilder {
-    this.buildArgs = buildArgs;
+  public withBuildArgs(buildArgs: BuildArgs): this {
+    this.buildArgs = { ...this.buildArgs, ...buildArgs };
     return this;
   }
 

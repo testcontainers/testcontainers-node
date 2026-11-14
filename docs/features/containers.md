@@ -16,6 +16,8 @@ To use a specific image version:
 const container = await new GenericContainer("alpine:3.10").start();
 ```
 
+Calling `withEnvironment`, `withLabels`, `withBindMounts`, `withExposedPorts` or the `withCopy*ToContainer` methods again adds to the earlier values. Calling `withCommand`, `withEntrypoint`, `withName` or `withWaitStrategy` again replaces the earlier value.
+
 ### With a pull policy
 
 Testcontainers will automatically pull an image if it doesn't exist. This is configurable:
@@ -111,6 +113,8 @@ const container = await new GenericContainer("alpine")
   }])
   .start();
 ```
+
+Calling `withBindMounts` more than once adds to the mounts set before. Mounting the same target twice fails when the container starts.
 
 ### With labels
 
@@ -353,6 +357,8 @@ const container = await new GenericContainer("alpine")
   .withResourcesQuota({ memory: 0.5, cpu: 1 })
   .start();
 ```
+
+Calling `withResourcesQuota` more than once changes only the quotas passed in.
 
 ### With shared memory size
 
