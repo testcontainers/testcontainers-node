@@ -163,6 +163,20 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     expect(responseBody.customKey).toBe("customValue");
   });
 
+  it("should set numeric and boolean environment variables and skip undefined ones", async () => {
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withEnvironment({ numberKey: 8080, booleanKey: false, undefinedKey: undefined })
+      .withExposedPorts(8080)
+      .start();
+
+    const url = `http://${container.getHost()}:${container.getMappedPort(8080)}`;
+    const response = await fetch(`${url}/env`);
+    const responseBody = (await response.json()) as { [key: string]: string };
+    expect(responseBody.numberKey).toBe("8080");
+    expect(responseBody.booleanKey).toBe("false");
+    expect(responseBody).not.toHaveProperty("undefinedKey");
+  });
+
   it("should replace an environment variable that is set twice", async () => {
     await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withEnvironment({ customKey: "first", otherKey: "otherValue" })
