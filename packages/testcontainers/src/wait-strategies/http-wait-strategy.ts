@@ -21,10 +21,15 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
 
   constructor(
     private readonly path: string,
-    private readonly port: number,
+    private port: number | undefined,
     private readonly options: HttpWaitStrategyOptions
   ) {
     super();
+  }
+
+  public forPort(port: number): this {
+    this.port = port;
+    return this;
   }
 
   public forStatusCode(statusCode: number): this {
@@ -88,9 +93,8 @@ export class HttpWaitStrategy extends AbstractWaitStrategy {
       await new IntervalRetry<Response | undefined, Error>(this.readTimeoutMs).retryUntil(
         async () => {
           try {
-            const url = `${this.protocol}://${client.info.containerRuntime.host}:${boundPorts.getBinding(this.port)}${
-              this.path
-            }`;
+            const hostPort = this.port === undefined ? boundPorts.getFirstBinding() : boundPorts.getBinding(this.port);
+            const url = `${this.protocol}://${client.info.containerRuntime.host}:${hostPort}${this.path}`;
 
             if (abortOnContainerExit) {
               const containerStatus = (await client.container.inspect(container)).State.Status;

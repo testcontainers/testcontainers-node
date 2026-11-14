@@ -125,6 +125,14 @@ const container = await new GenericContainer("redis")
   .start();
 ```
 
+The port is optional. Without one, the first exposed port is used. You can also set it with `forPort`:
+
+```js
+.withWaitStrategy(Wait.forHttp("/health"))
+
+.withWaitStrategy(Wait.forHttp("/health").forPort(8080))
+```
+
 Stop waiting after container exited if waiting for container restart not needed.
 
 ```js
@@ -133,6 +141,12 @@ const { GenericContainer, Wait } = require("testcontainers");
 const container = await new GenericContainer("redis")
   .withWaitStrategy(Wait.forHttp("/health", 8080, { abortOnContainerExit: true }))
   .start();
+```
+
+Options can be passed without a port:
+
+```js
+.withWaitStrategy(Wait.forHttp("/health", { abortOnContainerExit: true }))
 ```
 
 ### For status code
