@@ -49,6 +49,29 @@ describe("GenericContainer logs", { timeout: 180_000 }, () => {
     expect(log).toBe(logAfterSleep);
   });
 
+  it("should stream logs with since as a Date from a started container", async () => {
+    const pauseMs = 5 * 1000;
+    const logBeforeSleep = "first";
+    const logAfterSleep = "second";
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withEntrypoint([
+        "/bin/sh",
+        "-c",
+        `echo ${logBeforeSleep} && sleep ${pauseMs / 1000} && echo ${logAfterSleep} && sleep infinity`,
+      ])
+      .withWaitStrategy(Wait.forLogMessage(logBeforeSleep))
+      .start();
+
+    await new Promise((resolve) => setTimeout(resolve, pauseMs));
+
+    const since = new Date(Date.now() - pauseMs + 1000);
+
+    const stream = await container.logs({ since });
+    const log: string = await new Promise((resolve) => stream.on("data", (line) => resolve(line.trim())));
+
+    expect(log).toBe(logAfterSleep);
+  });
+
   it("should stream logs from a running container after restart", async () => {
     const containerLogTraceSpy = vi.spyOn(containerLog, "trace");
     await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
