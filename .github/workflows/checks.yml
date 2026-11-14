@@ -107,19 +107,26 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [22.x, 24.x]
+        node-version: [22.22.0, 22.x, 24.0.0, 24.x, 26.0.0, 26.x]
     runs-on: ubuntu-24.04
     steps:
       - name: Code checkout
         uses: actions/checkout@v7
-      - name: Install Node ${{ matrix.node-version }} and Dependencies
+      - name: Install Node and Dependencies
         uses: ./.github/actions/npm-setup
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 24.x
       - name: Build testcontainers
         run: npm run build --workspace packages/testcontainers
       - name: Remove dev dependencies
         run: npm prune --omit=dev --workspace packages/testcontainers
+      # Dev dependencies may require a newer Node than the engines floor, so
+      # install and build on 24.x and only run the library on the matrix version.
+      - name: Install Node ${{ matrix.node-version }}
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node-version }}
+          package-manager-cache: false
       - name: Run CommonJS module smoke test
         run: node packages/testcontainers/smoke-test.js
         env:
