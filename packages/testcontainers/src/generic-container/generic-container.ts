@@ -18,7 +18,7 @@ import type {
   ContentToCopy,
   CopyToContainerOptions,
   DirectoryToCopy,
-  Environment,
+  EnvironmentInput,
   ExtraHost,
   FileToCopy,
   HealthCheck,
@@ -29,6 +29,7 @@ import type {
   Ulimits,
 } from "../types";
 import { BoundPorts } from "../utils/bound-ports";
+import { toEnvironment } from "../utils/environment";
 import { createLabels, LABEL_TESTCONTAINERS_CONTAINER_HASH, LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
 import { mapInspectResult } from "../utils/map-inspect-result";
 import { getContainerPort, getProtocol, hasHostBinding, type PortWithOptionalBinding } from "../utils/port";
@@ -346,8 +347,8 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
-  public withEnvironment(environment: Environment): this {
-    this.environment = { ...this.environment, ...environment };
+  public withEnvironment(environment: EnvironmentInput): this {
+    this.environment = { ...this.environment, ...toEnvironment(environment) };
     this.createOpts.Env = Object.entries(this.environment).map(([key, value]) => `${key}=${value}`);
     return this;
   }

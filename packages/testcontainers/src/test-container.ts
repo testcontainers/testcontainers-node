@@ -7,7 +7,7 @@ import type {
   ContentToCopy,
   CopyToContainerOptions,
   DirectoryToCopy,
-  Environment,
+  EnvironmentInput,
   ExecOptions,
   ExecResult,
   ExtraHost,
@@ -23,7 +23,7 @@ import type { WaitStrategy } from "./wait-strategies/wait-strategy";
 
 export interface TestContainer {
   start(): Promise<StartedTestContainer>;
-  withEnvironment(environment: Environment): this;
+  withEnvironment(environment: EnvironmentInput): this;
   withCommand(command: string[]): this;
   withEntrypoint(entrypoint: string[]): this;
   withTmpFs(tmpFs: TmpFs): this;
