@@ -267,3 +267,5 @@ const container = await new GenericContainer("alpine")
   .withWaitStrategy(new ReadyAfterDelayWaitStrategy())
   .start();
 ```
+
+`checkStartupState` is passed an `AbortSignal` as a third argument. It aborts when the startup timeout is reached, so pass it to Dockerode calls as `abortSignal` to cancel them.

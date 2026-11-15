@@ -1,5 +1,5 @@
 import type Dockerode from "dockerode";
-import { IntervalRetry, log } from "../common";
+import { log, poll } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
 import { AbstractWaitStrategy } from "./wait-strategy";
 
@@ -12,20 +12,21 @@ export class ShellWaitStrategy extends AbstractWaitStrategy {
     log.debug(`Waiting for successful shell command "${this.command}"...`, { containerId: container.id });
     const client = await getContainerRuntimeClient();
 
-    await new IntervalRetry<number, Error>(100).retryUntil(
-      async () => {
+    await poll(
+      async ({ signal }) => {
         const { exitCode } = await client.container.exec(container, ["/bin/sh", "-c", this.command], {
           log: false,
+          signal,
         });
         return exitCode;
       },
-      (exitCode) => exitCode === 0,
-      () => {
-        const message = `Shell command "${this.command}" not successful after ${this.startupTimeoutMs}ms`;
-        log.error(message, { containerId: container.id });
-        throw new Error(message);
-      },
-      this.startupTimeoutMs
+      {
+        until: (exitCode) => exitCode === 0,
+        intervalMs: 100,
+        timeoutMs: this.startupTimeoutMs,
+        timeoutMessage: `Shell command "${this.command}" not successful after ${this.startupTimeoutMs}ms`,
+        retryOnError: false,
+      }
     );
 
     log.debug(`Shell wait strategy complete`, { containerId: container.id });

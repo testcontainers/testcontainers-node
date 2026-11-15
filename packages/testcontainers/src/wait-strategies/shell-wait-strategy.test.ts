@@ -17,4 +17,13 @@ describe("ShellWaitStrategy", { timeout: 180_000 }, () => {
         .start()
     ).rejects.toThrowError(`Shell command "stat /tmp/test.lock" not successful`);
   });
+
+  it("should timeout when command is still running", async () => {
+    await expect(() =>
+      new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+        .withWaitStrategy(Wait.forSuccessfulCommand("sleep 30"))
+        .withStartupTimeout(1000)
+        .start()
+    ).rejects.toThrowError(`Shell command "sleep 30" not successful after 1000ms`);
+  });
 });
