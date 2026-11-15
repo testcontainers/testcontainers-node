@@ -35,7 +35,7 @@ gh run list --workflow npm-publish.yml --event workflow_dispatch --branch main -
 gh run watch <run-id>
 ```
 
-Check that the run is named `Dry run publish <x.y.z>` and passes. A warning that a package isn't on npm yet means the release adds a module, whose first version the maintainer publishes by hand after the release (`RELEASING.md`).
+Check that the run is named `Dry run publish <x.y.z>` and passes.
 
 ## 4. Report
 
