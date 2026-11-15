@@ -56,7 +56,11 @@ describe("DockerfileParser", () => {
   it("should work with line continuations", async () => {
     const dockerfile = path.resolve(dockerfileParserFixtures, "line-continuation.Dockerfile");
     const images = await getDockerfileImages(dockerfile, {});
-    expect(images).toEqual([ImageName.fromString("ghcr.io/org/app:2"), ImageName.fromString("private.io/x/y:3")]);
+    expect(images).toEqual([
+      ImageName.fromString("ghcr.io/org/app:2"),
+      ImageName.fromString("private.io/team/base:1"),
+      ImageName.fromString("private.io/x/y:3"),
+    ]);
   });
 
   it("should use the escape character from the escape parser directive", async () => {

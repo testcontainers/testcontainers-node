@@ -21,16 +21,17 @@ export async function getDockerfileImages(dockerfile: string, buildArgs: BuildAr
 function parseImages(dockerfile: string): { images: string[]; argDefaults: BuildArgs } {
   const images = new Set<string>();
   const argDefaults: BuildArgs = {};
+  let beforeFirstFrom = true;
 
   for (const [instruction, ...args] of parseInstructions(dockerfile)) {
     const keyword = instruction.toUpperCase();
     if (keyword === "FROM") {
+      beforeFirstFrom = false;
       const image = args.find((arg) => !arg.startsWith("--"));
       if (image) {
         images.add(image);
       }
-    } else if (keyword === "ARG" && images.size === 0) {
-      // Only ARGs declared before the first FROM can be used in FROM lines
+    } else if (keyword === "ARG" && beforeFirstFrom) {
       Object.assign(argDefaults, parseArgDefaults(args));
     }
   }
@@ -50,20 +51,21 @@ function parseArgDefaults(args: string[]): BuildArgs {
 }
 
 function parseInstructions(dockerfile: string): string[][] {
-  const lines = dockerfile.split(/\r?\n/).map((line) => line.trim());
-  const escapeCharacter = getEscapeCharacter(lines);
+  const rawLines = dockerfile.split(/\r?\n/);
+  const escapeCharacter = getEscapeCharacter(rawLines.map((line) => line.trim()));
   const instructions: string[] = [];
   let continued = "";
 
-  for (const line of lines) {
+  for (const rawLine of rawLines) {
+    const line = rawLine.trim();
     if (line === "" || line.startsWith("#")) {
       continue;
     }
     if (line.endsWith(escapeCharacter)) {
-      continued += `${line.slice(0, -1)} `;
+      continued += rawLine.trimEnd().slice(0, -1);
       continue;
     }
-    instructions.push(`${continued}${line}`);
+    instructions.push(`${continued}${rawLine}`);
     continued = "";
   }
   if (continued !== "") {
