@@ -17,9 +17,10 @@ import { DockerImageClient } from "./image/docker-image-client";
 import type { ImageClient } from "./image/image-client";
 import { DockerNetworkClient } from "./network/docker-network-client";
 import type { NetworkClient } from "./network/network-client";
-import type { ContainerRuntimeInfo, HostIp, Info, NodeInfo } from "./types";
+import type { ContainerRuntimeInfo, ContainerRuntimeName, HostIp, Info, NodeInfo } from "./types";
 
 type DockerodeInfo = Awaited<ReturnType<Dockerode["info"]>>;
+type DockerodeVersion = Awaited<ReturnType<Dockerode["version"]>>;
 
 export class ContainerRuntimeClient {
   constructor(
@@ -79,8 +80,8 @@ async function initStrategy(strategy: ContainerRuntimeClientStrategy): Promise<C
   };
   const dockerode = new Dockerode(dockerodeOptions);
 
-  log.trace("Fetching Docker info...");
-  const dockerodeInfo = await dockerode.info();
+  log.trace("Fetching Docker info and version...");
+  const [dockerodeInfo, dockerodeVersion] = await Promise.all([dockerode.info(), dockerode.version()]);
 
   const indexServerAddress =
     !isDefined(dockerodeInfo.IndexServerAddress) || isEmptyString(dockerodeInfo.IndexServerAddress)
@@ -104,7 +105,14 @@ async function initStrategy(strategy: ContainerRuntimeClientStrategy): Promise<C
   const imageClient = new DockerImageClient(dockerode, indexServerAddress);
   const networkClient = new DockerNetworkClient(dockerode);
 
-  const info = createInfo(dockerodeInfo, host, hostIps, remoteContainerRuntimeSocketPath, indexServerAddress);
+  const info = createInfo(
+    dockerodeInfo,
+    dockerodeVersion,
+    host,
+    hostIps,
+    remoteContainerRuntimeSocketPath,
+    indexServerAddress
+  );
 
   log.trace(`Container runtime info:\n${JSON.stringify(info, null, 2)}`);
   return new ContainerRuntimeClient(info, composeClient, containerClient, imageClient, networkClient);
@@ -112,6 +120,7 @@ async function initStrategy(strategy: ContainerRuntimeClientStrategy): Promise<C
 
 function createInfo(
   dockerodeInfo: DockerodeInfo,
+  dockerodeVersion: DockerodeVersion,
   host: string,
   hostIps: HostIp[],
   remoteSocketPath: string,
@@ -124,6 +133,7 @@ function createInfo(
   };
 
   const containerRuntimeInfo: ContainerRuntimeInfo = {
+    name: getContainerRuntimeName(dockerodeVersion),
     host,
     hostIps,
     remoteSocketPath,
@@ -139,4 +149,9 @@ function createInfo(
   };
 
   return { node: nodeInfo, containerRuntime: containerRuntimeInfo };
+}
+
+function getContainerRuntimeName(dockerodeVersion: DockerodeVersion): ContainerRuntimeName {
+  const isPodman = dockerodeVersion.Components?.some((component) => component.Name === "Podman Engine");
+  return isPodman ? "podman" : "docker";
 }

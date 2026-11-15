@@ -9,7 +9,10 @@ export type NodeInfo = {
   platform: string;
 };
 
+export type ContainerRuntimeName = "docker" | "podman";
+
 export type ContainerRuntimeInfo = {
+  name: ContainerRuntimeName;
   host: string;
   hostIps: HostIp[];
   remoteSocketPath: string;
