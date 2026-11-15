@@ -38,6 +38,15 @@ Or add one from the command line. `npx npm@latest` runs a recent npm without cha
 npx npm@latest trust github <package> --file npm-publish.yml --repo testcontainers/testcontainers-node --allow-publish --yes
 ```
 
+To add several in a row, tick "skip two-factor authentication for the next 5 minutes" when npm first asks for 2FA in the browser, and wait 2 seconds between packages to avoid npm's rate limit:
+
+```bash
+for name in $(jq -r .name packages/testcontainers/package.json packages/modules/*/package.json); do
+  npx npm@latest trust github "$name" --file npm-publish.yml --repo testcontainers/testcontainers-node --allow-publish --yes
+  sleep 2
+done
+```
+
 To see a package's trusted publishers:
 
 ```bash
@@ -50,7 +59,7 @@ npm deletes a trusted publisher that hasn't published anything within 2 days of 
 
 npm trusted publishing can't create a package, so a new module's first version is published by hand from the tarball the release builds:
 
-1. Publish the release as usual. The workflow publishes every other package, then fails because the new module isn't on npm yet. Its tarball is in the run's `unpublished-packages` artifact.
+1. Publish the release as usual. The workflow publishes every other package and warns that the new module isn't on npm yet. Its tarball is in the run's `unpublished-packages` artifact.
 2. Log in with `npm login`, then download and publish the tarball. Nothing is built locally.
 
    ```bash

@@ -86,7 +86,7 @@ jobs:
               fi
               npm pack -w "$dir" --pack-destination "$RUNNER_TEMP/unpublished"
               echo "::endgroup::"
-              echo "::warning::$name is not on npm yet, see RELEASING.md"
+              echo "::warning::$name is not on npm yet. Its tarball is in the unpublished-packages artifact, see RELEASING.md"
               continue
             fi
 
@@ -113,17 +113,17 @@ jobs:
       - name: Publish packages to NPM
         if: ${{ github.event_name == 'release' }}
         run: |
+          status=0
+
           for dir in $(cat "$RUNNER_TEMP/publish-dirs.txt"); do
             if ! npm publish -w "$dir"; then
-              echo "::error::Failed to publish $dir"
               npm pack -w "$dir" --pack-destination "$RUNNER_TEMP/unpublished"
+              echo "::error::Failed to publish $(jq -r .name "$dir/package.json"). Its tarball is in the unpublished-packages artifact, see RELEASING.md"
+              status=1
             fi
           done
 
-          if ls "$RUNNER_TEMP"/unpublished/*.tgz > /dev/null 2>&1; then
-            echo "::error::Some packages are not on npm. Publish them from the unpublished-packages artifact, see RELEASING.md"
-            exit 1
-          fi
+          exit "$status"
 
       - name: Upload unpublished packages
         if: ${{ !cancelled() }}
