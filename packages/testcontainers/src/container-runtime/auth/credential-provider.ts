@@ -11,15 +11,6 @@ import type {
   UsernamePasswordAuthConfig,
 } from "./types";
 
-// The lookup cmd does for a bare command name: the current directory, then PATH, with each PATHEXT extension.
-function isOnWindowsPath(command: string): boolean {
-  const directories = [process.cwd(), ...(process.env.PATH ?? "").split(path.delimiter)].filter(Boolean);
-  const extensions = (process.env.PATHEXT ?? ".COM;.EXE;.BAT;.CMD").split(";").filter(Boolean);
-  return directories.some((directory) =>
-    extensions.some((extension) => existsSync(path.join(directory, `${command}${extension}`)))
-  );
-}
-
 export abstract class CredentialProvider implements RegistryAuthLocator {
   abstract getName(): string;
 
@@ -100,4 +91,13 @@ export abstract class CredentialProvider implements RegistryAuthLocator {
       identityToken: config.Secret,
     };
   }
+}
+
+// The lookup cmd does for a bare command name: the current directory, then PATH, with each PATHEXT extension.
+function isOnWindowsPath(command: string): boolean {
+  const directories = [process.cwd(), ...(process.env.PATH ?? "").split(path.delimiter)].filter(Boolean);
+  const extensions = (process.env.PATHEXT ?? ".COM;.EXE;.BAT;.CMD").split(";").filter(Boolean);
+  return directories.some((directory) =>
+    extensions.some((extension) => existsSync(path.join(directory, `${command}${extension}`)))
+  );
 }
