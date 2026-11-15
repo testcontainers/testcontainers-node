@@ -68,4 +68,6 @@ gh api --method POST repos/testcontainers/testcontainers-node/pulls/<N>/reviews 
 # {"event":"COMMENT","body":"...","comments":[{"path":"...","line":42,"side":"RIGHT","body":"..."}]}
 ```
 
+When nothing is left to raise on someone else's PR, including a later round where every requested change was made, and CI is green, offer to approve it. Approve only on the user's yes, with `"event":"APPROVE"` and a short body.
+
 **As the `@claude` GitHub Action:** the triggering comment is the approval, so post the inline comments directly. Put any title or label suggestions in your reply; never change labels, approve or merge.

@@ -35,23 +35,25 @@ Link the run in the PR body. Dispatching needs write access to the repo. Without
 
 Write it as an imperative release-note line about the user-visible change. Don't use conventional-commit prefixes, agent names or branch names.
 
-| Good | Bad |
-| --- | --- |
-| `Add Mosquitto module` | `Adding module mosquitto`, `feat(mosquitto): add module` |
-| `Fix container exec output truncation` | `Fixed exec truncation`, `fix: exec` |
+| Good                                   | Bad                                                      |
+| -------------------------------------- | -------------------------------------------------------- |
+| `Add Mosquitto module`                 | `Adding module mosquitto`, `feat(mosquitto): add module` |
+| `Fix container exec output truncation` | `Fixed exec truncation`, `fix: exec`                     |
 
 ## Labels
 
 Every PR gets exactly one change-type label and one semver label.
 
-| Change | Labels |
-| --- | --- |
-| Feature or new module | `enhancement` + `minor` |
-| Bug fix | `bug` + `patch` |
-| Breaking change (removed or renamed export, changed default, ESM-only runtime dependency, higher Node floor) | type label + `major` |
-| Docs only | `documentation` + `patch` |
-| Dependency update | `dependencies` + its user-facing impact |
-| CI, tooling, tests, refactors | `maintenance` + `patch` |
+| Change                                                                                                       | Labels                                  |
+| ------------------------------------------------------------------------------------------------------------ | --------------------------------------- |
+| Feature or new module                                                                                        | `enhancement` + `minor`                 |
+| Bug fix                                                                                                      | `bug` + `patch`                         |
+| Breaking change (removed or renamed export, changed default, ESM-only runtime dependency, higher Node floor) | type label + `major`                    |
+| Docs only                                                                                                    | `documentation` + `patch`               |
+| Dependency update                                                                                            | `dependencies` + its user-facing impact |
+| CI, tooling, tests, refactors                                                                                | `maintenance` + `patch`                 |
+
+Setting labels needs triage access or higher. Check with `gh repo view testcontainers/testcontainers-node --json viewerPermission`: `ADMIN`, `MAINTAIN`, `WRITE` and `TRIAGE` can set them. Without it, for example from a fork, leave out `--label` and suggest the labels in the PR body, so a maintainer can apply them.
 
 ## Body
 
@@ -66,4 +68,4 @@ Include:
 gh pr create --draft --base main --title "<title>" --body "<body>" --label <type> --label <semver>
 ```
 
-Open it as a draft. Drop `--draft` only if the user asks for a PR that is ready for review. Afterwards, give the user the PR link, title and labels so they can ask for changes.
+Open it as a draft. Drop `--draft` only if the user asks for a PR that is ready for review. Afterwards, give the user the PR link, title and labels so they can ask for changes. Tell them maintainers wait for a draft to be marked ready before reviewing it, and that `gh pr ready <N>` does that.
