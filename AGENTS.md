@@ -60,7 +60,7 @@ Wrong or incomplete means a rule misled you, or a mistake keeps recurring that n
   - Every extra image increases how long the tests take to run and how much storage they need.
   - Reuse an image the tests already use, for example `cristianrgreco/testcontainer:1.1.14` in `packages/testcontainers`, or the module's own image.
 - Module tests read their images from `packages/modules/<module>/Dockerfile` (one `FROM` line per image) with `getImage(__dirname, index)`, so Dependabot can bump them. Do not hardcode images in module source or tests.
-  - Exception: a second version of the *same* image must be hardcoded in its test file. Dependabot treats same-image `FROM` lines as one dependency and bumps them all to the newest tag.
+  - Exception: a second version of the _same_ image must be hardcoded in its test file. Dependabot treats same-image `FROM` lines as one dependency and bumps them all to the newest tag.
 - A module's tests cover every major version the vendor still supports, so a change can't silently break one that users still run. This is the one case where a suite pulls extra images.
   - Keep one `IMAGES` list in the test file: the latest release of each older supported major, oldest first, as an exact tag, then the `Dockerfile` image. Don't list other minors or patches of a major, and don't use rolling tags such as `redis:7`.
   - This applies to every image the module itself runs, so a second class, edition or variant with its own image gets its own list. Images that only help the tests, such as a CLI or the database behind an emulator, are exempt.
@@ -135,6 +135,7 @@ reviewers can follow the reasoning.
 - Commit, push, or open a PR only when the user asks for it.
   - Do only the steps asked for. "Commit this" is not a request to push or open a PR.
   - Open PRs as drafts unless the user asks for one that is ready for review.
+    Maintainers wait for a draft to be marked ready before reviewing it, so tell the user to do that (`gh pr ready <N>`) when they want a review.
 - Before doing anything on GitHub that affects someone else, share the proposed content and get explicit user approval. Examples: commenting on, reviewing, editing or pushing to someone else's PR, and commenting on, labelling or closing someone else's issue.
   - This holds even when explicitly asked to review a PR: present the full set of comments first.
 - Never bypass commit signing (for example `--no-gpg-sign`). If signing fails, stop and ask the user to resolve it.
