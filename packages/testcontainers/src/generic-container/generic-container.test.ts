@@ -12,6 +12,7 @@ import {
   getRunningContainerNames,
   waitForDockerEvent,
 } from "../utils/test-helper";
+import { HostPortCheck } from "../wait-strategies/utils/port-check";
 import { Wait } from "../wait-strategies/wait";
 import { GenericContainer } from "./generic-container";
 
@@ -674,6 +675,16 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     expect(stopped.getId()).toBeTruthy();
     const lowerLevelContainer = dockerode.getContainer(stopped.getId());
     expect((await lowerLevelContainer.inspect()).State.Status).toEqual("exited");
+  });
+
+  it("should release the mapped port before stop resolves when the container is not removed", async () => {
+    const container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").withExposedPorts(8080).start();
+    const mappedPort = container.getMappedPort(8080);
+
+    await container.stop({ remove: false });
+
+    const client = await getContainerRuntimeClient();
+    expect(await new HostPortCheck(client).isBound(mappedPort)).toBe(false);
   });
 
   it("should stop and override .withAutoRemove", async () => {
