@@ -38,15 +38,6 @@ Or add one from the command line. `npx npm@latest` runs a recent npm without cha
 npx npm@latest trust github <package> --file npm-publish.yml --repo testcontainers/testcontainers-node --allow-publish --yes
 ```
 
-To add several in a row, tick "skip two-factor authentication for the next 5 minutes" when npm first asks for 2FA in the browser, and wait 2 seconds between packages to avoid npm's rate limit:
-
-```bash
-for name in $(jq -r .name packages/testcontainers/package.json packages/modules/*/package.json); do
-  npx npm@latest trust github "$name" --file npm-publish.yml --repo testcontainers/testcontainers-node --allow-publish --yes
-  sleep 2
-done
-```
-
 To see a package's trusted publishers:
 
 ```bash
@@ -72,3 +63,20 @@ npm trusted publishing can't create a package, so a new module's first version i
 ## If a package fails to publish
 
 If a package fails to publish during a release, the workflow puts its tarball in the `unpublished-packages` artifact as well. Publish it the same way as a new module, and check its trusted publisher before the next release.
+
+## First-time setup
+
+These steps move releases from an npm token to trusted publishing. They only need doing once.
+
+1. In the 2 days before the first release, log in with `npm login` and add a trusted publisher to every package. When npm first asks for 2FA in the browser, tick "skip two-factor authentication for the next 5 minutes" so the rest go through without asking. The 2-second sleep keeps the loop under npm's rate limit.
+
+   ```bash
+   for name in $(jq -r .name packages/testcontainers/package.json packages/modules/*/package.json); do
+     npx npm@latest trust github "$name" --file npm-publish.yml --repo testcontainers/testcontainers-node --allow-publish --yes
+     sleep 2
+   done
+   ```
+
+2. Dry-run `main` with the draft release's version. It should pass with no trusted publisher errors.
+3. Publish the draft release.
+4. Once the release run passes, delete the `npm_token` repository secret and delete the token on npmjs.com.
