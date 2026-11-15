@@ -42,6 +42,15 @@ describe("CredHelpers", () => {
       }
     });
 
+    it("should throw when the cred helper is not installed", async () => {
+      const containerRuntimeConfig: ContainerRuntimeConfig = {
+        credHelpers: { "registry.example.com": "tc-missing-helper" },
+      };
+      await expect(locator.getAuthConfig("registry.example.com", containerRuntimeConfig)).rejects.toThrow(
+        "Error from Docker credential provider: Error: spawn docker-credential-tc-missing-helper ENOENT"
+      );
+    });
+
     it.skip("should work", async () => {
       const containerRuntimeConfig: ContainerRuntimeConfig = { credHelpers: { "index.docker.io": "desktop" } };
       const authConfig: AuthConfig = {
