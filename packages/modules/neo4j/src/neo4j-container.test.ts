@@ -2,7 +2,7 @@ import neo4j from "neo4j-driver";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { Neo4jContainer, Neo4jPlugin } from "./neo4j-container";
 
-const IMAGES = ["neo4j:5.26.31", getImage(__dirname)];
+const IMAGES = ["neo4j:5.26.33", getImage(__dirname)];
 
 describe.each(IMAGES)("Neo4jContainer (%s)", { concurrent: false, timeout: 180_000 }, (image) => {
   it.concurrent("should create a person node", async () => {

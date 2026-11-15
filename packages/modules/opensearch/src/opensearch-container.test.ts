@@ -2,7 +2,7 @@ import { Client } from "@opensearch-project/opensearch";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { OpenSearchContainer } from "./opensearch-container";
 
-const IMAGES = ["opensearchproject/opensearch:2.19.6", getImage(__dirname)];
+const IMAGES = ["opensearchproject/opensearch:2.19.7", getImage(__dirname)];
 
 describe.each(IMAGES)("OpenSearchContainer (%s)", { concurrent: false, timeout: 180_000 }, (image) => {
   it.concurrent("should create an index", async () => {
