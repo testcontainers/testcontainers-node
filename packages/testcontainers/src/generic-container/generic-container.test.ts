@@ -1,12 +1,14 @@
 import path from "node:path";
-import archiver from "archiver";
+import { Readable } from "node:stream";
 import getPort from "get-port";
+import tarStream from "tar-stream";
 import { RandomUuid } from "../common";
 import { getContainerRuntimeClient } from "../container-runtime";
 import { PullPolicy } from "../utils/pull-policy";
 import {
   checkContainerIsHealthy,
   checkContainerIsHealthyUdp,
+  createTempDirectoryTree,
   createTempSymlinkedFile,
   getDockerEventStream,
   getRunningContainerNames,
@@ -519,6 +521,44 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     expect((await container.exec("cat /tmp/test.txt")).output).toEqual(expect.stringContaining("hello world"));
   });
 
+  it("should copy directory with hidden files, empty directories and symlinks to container", async () => {
+    if (process.platform === "win32") {
+      return;
+    }
+
+    await using tree = await createTempDirectoryTree();
+    const target = "/tmp/tree";
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withCopyDirectoriesToContainer([{ source: tree.directory, target }])
+      .withExposedPorts(8080)
+      .start();
+
+    expect((await container.exec(["cat", `${target}/.hidden`, `${target}/nested/file.txt`])).output).toBe(
+      "hiddennested"
+    );
+    expect((await container.exec(["sh", "-c", `[ -d ${target}/empty ]`])).exitCode).toBe(0);
+    expect((await container.exec(["readlink", `${target}/link.txt`])).output.trim()).toBe("file.txt");
+    expect((await container.exec(["stat", "-c", "%a", `${target}/writable.txt`])).output.trim()).toBe("666");
+  });
+
+  it("should not change permissions of the target directory when copying directory to started container", async () => {
+    if (process.platform === "win32") {
+      return;
+    }
+
+    await using tree = await createTempDirectoryTree();
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withExposedPorts(8080)
+      .start();
+    const targetMode = async () => (await container.exec(["stat", "-c", "%a", "/tmp"])).output.trim();
+    const modeBeforeCopy = await targetMode();
+
+    await container.copyDirectoriesToContainer([{ source: tree.directory, target: "/tmp" }]);
+
+    expect(await targetMode()).toBe(modeBeforeCopy);
+    expect((await container.exec(["cat", "/tmp/file.txt"])).output).toBe("file");
+  });
+
   it("should copy content to container", async () => {
     const content = "hello world";
     const target = "/tmp/test.txt";
@@ -544,6 +584,17 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     expect((await container.exec(`stat -c "%a %n" ${target}`)).output).toContain("777");
   });
 
+  it("should copy readable content to container", async () => {
+    const target = "/tmp/test.txt";
+
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withCopyContentToContainer([{ content: Readable.from(["hello ", "world"]), target }])
+      .withExposedPorts(8080)
+      .start();
+
+    expect((await container.exec(["cat", target])).output).toBe("hello world");
+  });
+
   it("should copy content to started container", async () => {
     const content = "hello world";
     const target = "/tmp/test.txt";
@@ -567,11 +618,11 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
         .withExposedPorts(8080)
         .start();
 
-      const tar = archiver("tar");
-      tar.append("hello world", { name: targetWithCopyOwnership.slice(1), uid, gid } as archiver.EntryData);
+      const tar = tarStream.pack();
+      tar.entry({ name: targetWithCopyOwnership.slice(1), uid, gid }, "hello world");
       tar.finalize();
 
-      await container.copyArchiveToContainer(tar, "/", { copyUIDGID: true });
+      await container.copyArchiveToContainer(Readable.from(tar), "/", { copyUIDGID: true });
 
       expect((await container.exec(["stat", "-c", "%u:%g", targetWithCopyOwnership])).output.trim()).toEqual(
         `${uid}:${gid}`
@@ -582,14 +633,14 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
       const uid = 4242;
       const gid = 4343;
       const targetWithCopyOwnership = "/tmp/with-copy-archives-copyuidgid.txt";
-      const tar = archiver("tar");
-      tar.append("hello world", { name: targetWithCopyOwnership.slice(1), uid, gid } as archiver.EntryData);
+      const tar = tarStream.pack();
+      tar.entry({ name: targetWithCopyOwnership.slice(1), uid, gid }, "hello world");
       tar.finalize();
 
       await using containerWithCopyOwnership = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
         .withCopyArchivesToContainer([
           {
-            tar,
+            tar: Readable.from(tar),
             target: "/",
           },
         ])
