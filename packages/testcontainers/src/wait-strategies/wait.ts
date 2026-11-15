@@ -29,12 +29,17 @@ export class Wait {
     return new OneShotStartupCheckStrategy();
   }
 
+  public static forHttp(path: string, options?: HttpWaitStrategyOptions): HttpWaitStrategy;
+  public static forHttp(path: string, port: number, options?: HttpWaitStrategyOptions): HttpWaitStrategy;
   public static forHttp(
     path: string,
-    port: number,
+    portOrOptions?: number | HttpWaitStrategyOptions,
     options: HttpWaitStrategyOptions = { abortOnContainerExit: false }
   ): HttpWaitStrategy {
-    return new HttpWaitStrategy(path, port, options);
+    if (typeof portOrOptions === "object") {
+      return new HttpWaitStrategy(path, undefined, portOrOptions);
+    }
+    return new HttpWaitStrategy(path, portOrOptions, options);
   }
 
   public static forSuccessfulCommand(command: string): ShellWaitStrategy {
