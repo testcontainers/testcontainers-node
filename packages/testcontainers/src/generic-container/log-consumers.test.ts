@@ -47,4 +47,15 @@ describe("LogConsumers", () => {
     await finished(stream);
     expect(received).toEqual(["a", "b"]);
   });
+
+  it("should call fn for an empty line", async () => {
+    const stream = new PassThrough({ encoding: "utf8" });
+
+    const received: string[] = [];
+    LogConsumers.lines((line) => received.push(line))(stream);
+    stream.write("a\n\nb\n");
+    stream.end();
+    await finished(stream);
+    expect(received).toEqual(["a", "", "b"]);
+  });
 });
