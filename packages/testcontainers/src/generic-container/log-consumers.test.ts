@@ -2,7 +2,7 @@ import { PassThrough } from "node:stream";
 import { finished } from "node:stream/promises";
 import { LogConsumers } from "./log-consumers";
 
-describe("LogConsumers", () => {
+describe("LogConsumers.lines", () => {
   it("should call fn once per line when one chunk holds two lines", async () => {
     const stream = new PassThrough({ encoding: "utf8" });
 
@@ -57,5 +57,18 @@ describe("LogConsumers", () => {
     stream.end();
     await finished(stream);
     expect(received).toEqual(["a", "", "b"]);
+  });
+});
+
+describe("LogConsumers.toConsole", () => {
+  it("should print each line with the prefix in brackets", async () => {
+    const stream = new PassThrough({ encoding: "utf8" });
+    const log = vi.spyOn(console, "log");
+
+    LogConsumers.toConsole({ prefix: "redis" })(stream);
+    stream.write("hi\n");
+    stream.end();
+    await finished(stream);
+    expect(log).toHaveBeenCalledWith("[redis] hi");
   });
 });
