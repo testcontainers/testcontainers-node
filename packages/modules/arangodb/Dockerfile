@@ -1,1 +1,1 @@
-FROM arangodb:3.12.12
+FROM arangodb:3.12.13
