@@ -16,8 +16,6 @@ To use a specific image version:
 const container = await new GenericContainer("alpine:3.10").start();
 ```
 
-Calling `withEnvironment`, `withLabels`, `withBindMounts`, `withExposedPorts` or the `withCopy*ToContainer` methods again adds to the earlier values. Calling `withCommand`, `withEntrypoint`, `withName` or `withWaitStrategy` again replaces the earlier value.
-
 ### With a pull policy
 
 Testcontainers will automatically pull an image if it doesn't exist. This is configurable:
