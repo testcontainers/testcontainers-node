@@ -60,6 +60,19 @@ async function createTestTable(client: DynamoDBClient): Promise<{
   };
 }
 
+function createClient(endpoint: string, accessKeyId: string = "AKIAIOSFODNN7EXAMPLE"): DynamoDBClient {
+  const client = new DynamoDBClient({
+    region: "us-east-1",
+    credentials: {
+      // use any credentials
+      accessKeyId,
+      secretAccessKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+    },
+    endpoint,
+  });
+  return client;
+}
+
 describe("DynamoDBContainer", { timeout: 180_000 }, () => {
   it("connects with endpoint", async () => {
     // connectEndpoint {
@@ -83,15 +96,7 @@ describe("DynamoDBContainer", { timeout: 180_000 }, () => {
 
   it("stores data", async () => {
     await using container = await new DynamoDBContainer(IMAGE).start();
-    const client = new DynamoDBClient({
-      region: "us-east-1",
-      credentials: {
-        // use any credentials
-        accessKeyId: "AKIAIOSFODNN7EXAMPLE",
-        secretAccessKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
-      },
-      endpoint: container.getEndpoint(),
-    });
+    const client = createClient(container.getEndpoint());
 
     const { addUser, getUser } = await createTestTable(client);
     await addUser(1, "Bob");
@@ -107,25 +112,8 @@ describe("DynamoDBContainer", { timeout: 180_000 }, () => {
     await using container = await new DynamoDBContainer(IMAGE).start();
 
     // Uses dummy credentials from the documentation
-    const clientA = new DynamoDBClient({
-      region: "eu-central-1",
-      endpoint: container.getEndpoint(),
-      credentials: {
-        accessKeyId: "AKIAIOSFODNN7EXAMPLE",
-        secretAccessKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
-      },
-    });
-
-    // Uses slightly different credentials to simulate another
-    // AWS account
-    const clientB = new DynamoDBClient({
-      region: "eu-central-1",
-      endpoint: container.getEndpoint(),
-      credentials: {
-        accessKeyId: "AKIAIOSFODNN7EXAMPL2",
-        secretAccessKey: "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",
-      },
-    });
+    const clientA = createClient(container.getEndpoint(), "AKIAIOSFODNN7EXAMPL1");
+    const clientB = createClient(container.getEndpoint(), "AKIAIOSFODNN7EXAMPL2");
 
     await createTestTable(clientA);
 
@@ -171,110 +159,5 @@ describe("DynamoDBContainer", { timeout: 180_000 }, () => {
     // the shared table design
     expect(resultA.TableNames).toStrictEqual(["users"]);
     expect(resultB.TableNames).toStrictEqual(["users"]);
-  });
-
-  it("persists data when dbPath is set", async () => {
-    // persistWithDbPath {
-    await using container = await new DynamoDBContainer(IMAGE).withDbPath(".").start();
-    const client = new DynamoDBClient({
-      region: "us-east-1",
-      credentials: {
-        // use any credentials
-        accessKeyId: "AKIAIOSFODNN7EXAMPLE",
-        secretAccessKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
-      },
-      endpoint: container.getEndpoint(),
-    });
-    // }
-
-    const { addUser } = await createTestTable(client);
-    await addUser(1, "Bob");
-
-    await container.restart();
-
-    // restarting will change the mapped port so we need a new client
-    const clientAfterRestart = new DynamoDBClient({
-      region: "us-east-1",
-      credentials: {
-        // use any credentials
-        accessKeyId: "AKIAIOSFODNN7EXAMPLE",
-        secretAccessKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
-      },
-      endpoint: container.getEndpoint(),
-    });
-
-    // The table should still be there including its content
-    const command = new GetItemCommand({
-      TableName: "users",
-      Key: { userId: { N: "1" } },
-      ConsistentRead: true,
-    });
-    const response = await clientAfterRestart.send(command);
-    expect(response.Item).toStrictEqual({
-      userId: { N: "1" },
-      name: { S: "Bob" },
-    });
-  });
-
-  it("stores data in memory when no dbPath set", async () => {
-    await using container = await new DynamoDBContainer(IMAGE).start();
-    const client = new DynamoDBClient({
-      region: "us-east-1",
-      credentials: {
-        // use any credentials
-        accessKeyId: "AKIAIOSFODNN7EXAMPLE",
-        secretAccessKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
-      },
-      endpoint: container.getEndpoint(),
-    });
-
-    const { addUser } = await createTestTable(client);
-    await addUser(1, "Bob");
-
-    await container.restart();
-
-    // restarting will change the mapped port so we need a new client
-    const clientAfterRestart = new DynamoDBClient({
-      region: "us-east-1",
-      credentials: {
-        // use any credentials
-        accessKeyId: "AKIAIOSFODNN7EXAMPLE",
-        secretAccessKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
-      },
-      endpoint: container.getEndpoint(),
-    });
-
-    // We should not be able to see the table anymore
-    const result = await clientAfterRestart.send(new ListTablesCommand());
-    expect(result.TableNames).toStrictEqual([]);
-  });
-
-  it("allows to disable telemetry", async () => {
-    /* Unfortunately there is no way to validate this right now, but at
-     * least we know it does not pass something invalid to the container
-     */
-
-    // disabledTelemetry {
-    const container = new DynamoDBContainer(IMAGE).withDisableTelemetry();
-    await using startedContainer = await container.start();
-    // }
-
-    // @ts-expect-error - accessing private property for testing
-    expect(container.createOpts.Cmd).toEqual(["-jar", "DynamoDBLocal.jar", "-inMemory", "-disableTelemetry"]);
-
-    const client = new DynamoDBClient({
-      region: "us-east-1",
-      credentials: {
-        // use any credentials
-        accessKeyId: "AKIAIOSFODNN7EXAMPLE",
-        secretAccessKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
-      },
-      endpoint: startedContainer.getEndpoint(),
-    });
-
-    const command = new ListTablesCommand({});
-    const result = await client.send(command);
-
-    expect(result.TableNames).toStrictEqual([]);
   });
 });

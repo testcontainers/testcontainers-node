@@ -27,9 +27,3 @@ Choose an image from the [container registry](https://hub.docker.com/r/amazon/dy
 <!--codeinclude-->
 [](../../packages/modules/dynamodb/src/dynamodb-container.test.ts) inside_block:sharedDB
 <!--/codeinclude-->
-
-### Disable telemetry
-
-<!--codeinclude-->
-[](../../packages/modules/dynamodb/src/dynamodb-container.test.ts) inside_block:disabledTelemetry
-<!--/codeinclude-->
