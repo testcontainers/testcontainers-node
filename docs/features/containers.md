@@ -758,6 +758,22 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+The `data` event delivers chunks, not lines: one chunk can contain several lines or a part of one. You can stream logs line by line using the `LogConsumers.lines` helper:
+
+```js
+const container = await new GenericContainer("alpine")
+  .withLogConsumer(LogConsumers.lines(line => console.log(line)))
+  .start();
+```
+
+You can print logs to the console line by line with a `prefix` label using the `LogConsumers.toConsole` helper:
+
+```js
+const container = await new GenericContainer("alpine")
+  .withLogConsumer(LogConsumers.toConsole({ prefix: "alpine" })) // [alpine] <log line>
+  .start();
+```
+
 You can specify a point in time as a UNIX timestamp from which you want the logs to start:
 
 ```js
