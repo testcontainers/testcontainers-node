@@ -766,14 +766,6 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
-You can print logs to the console line by line with a `prefix` label using the `LogConsumers.toConsole` helper:
-
-```js
-const container = await new GenericContainer("alpine")
-  .withLogConsumer(LogConsumers.toConsole({ prefix: "alpine" })) // [alpine] <log line>
-  .start();
-```
-
 You can specify a point in time as a UNIX timestamp from which you want the logs to start:
 
 ```js

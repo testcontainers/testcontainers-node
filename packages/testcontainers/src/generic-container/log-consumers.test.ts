@@ -59,16 +59,3 @@ describe("LogConsumers.lines", () => {
     expect(received).toEqual(["a", "", "b"]);
   });
 });
-
-describe("LogConsumers.toConsole", () => {
-  it("should print each line with the prefix in brackets", async () => {
-    const stream = new PassThrough({ encoding: "utf8" });
-    const log = vi.spyOn(console, "log");
-
-    LogConsumers.toConsole({ prefix: "redis" })(stream);
-    stream.write("hi\n");
-    stream.end();
-    await finished(stream);
-    expect(log).toHaveBeenCalledWith("[redis] hi");
-  });
-});

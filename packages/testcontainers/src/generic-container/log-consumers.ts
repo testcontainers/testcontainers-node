@@ -21,10 +21,4 @@ const lines =
     });
   };
 
-const toConsole = ({ prefix }: { prefix: string }): ((stream: Readable) => void) =>
-  lines((line) => {
-    // biome-ignore lint/suspicious/noConsole: this consumer's purpose is to print logs to the console.
-    console.log(`[${prefix}] ${line}`);
-  });
-
-export const LogConsumers = { lines, toConsole };
+export const LogConsumers = { lines };
