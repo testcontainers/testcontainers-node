@@ -1,4 +1,5 @@
 import { promises as fs } from "node:fs";
+import path from "node:path";
 import type { Readable } from "node:stream";
 import archiver from "archiver";
 import AsyncLock from "async-lock";
@@ -109,13 +110,6 @@ export class GenericContainer implements TestContainer {
       await this.beforeContainerCreated();
     }
 
-    if (!this.isHelperContainer() && PortForwarderInstance.isRunning()) {
-      const portForwarder = await PortForwarderInstance.getInstance();
-      this.hostConfig.ExtraHosts = [
-        ...(this.hostConfig.ExtraHosts ?? []),
-        `host.testcontainers.internal:${portForwarder.getIpAddress()}`,
-      ];
-    }
     this.hostConfig.NetworkMode = this.networkAliases.length > 0 ? undefined : this.networkMode;
 
     this.createOpts.Labels = { ...createLabels(), ...this.createOpts.Labels };
@@ -146,7 +140,7 @@ export class GenericContainer implements TestContainer {
   }
 
   private async reuseOrStartContainer(client: ContainerRuntimeClient) {
-    const containerHash = hash(JSON.stringify(this.createOpts));
+    const containerHash = await this.createContainerHash();
     this.createOpts.Labels = { ...this.createOpts.Labels, [LABEL_TESTCONTAINERS_CONTAINER_HASH]: containerHash };
     log.debug(`Container reuse has been enabled with hash "${containerHash}"`);
 
@@ -163,6 +157,38 @@ export class GenericContainer implements TestContainer {
       log.debug("No container found to reuse");
       return this.startContainer(client);
     });
+  }
+
+  private async createContainerHash(): Promise<string> {
+    return hash(
+      JSON.stringify({
+        ...this.createOpts,
+        HostConfig: this.hostConfig,
+        networkMode: this.networkMode,
+        networkAliases: this.networkAliases,
+        filesToCopy: await Promise.all(
+          this.filesToCopy.map(async ({ source, target, mode }) => ({
+            target,
+            mode,
+            ...(await hashCopiedFile(source)),
+          }))
+        ),
+        directoriesToCopy: await Promise.all(
+          this.directoriesToCopy.map(async ({ source, target, mode }) => ({
+            target,
+            mode,
+            entries: await hashCopiedDirectory(source),
+          }))
+        ),
+        contentsToCopy: this.contentsToCopy.map(({ content, target, mode }) => ({
+          target,
+          mode,
+          content: typeof content === "string" || Buffer.isBuffer(content) ? hash(content) : undefined,
+        })),
+        archivesToCopy: this.archivesToCopy.map(({ target }) => ({ target })),
+        copyToContainerOptions: this.copyToContainerOptions,
+      })
+    );
   }
 
   private async reuseContainer(client: ContainerRuntimeClient, container: Container) {
@@ -196,7 +222,8 @@ export class GenericContainer implements TestContainer {
   }
 
   private async startContainer(client: ContainerRuntimeClient): Promise<StartedTestContainer> {
-    const container = await client.container.create({ ...this.createOpts, HostConfig: this.hostConfig });
+    const hostConfig = await this.createHostConfig();
+    const container = await client.container.create({ ...this.createOpts, HostConfig: hostConfig });
 
     await this.connectContainerToNetworks(client, container);
     await this.copyToCreatedContainer(client, container);
@@ -246,6 +273,19 @@ export class GenericContainer implements TestContainer {
     }
 
     return startedContainer;
+  }
+
+  // The port forwarder entry is added here, not to this.hostConfig, so the reuse hash does not change with its IP.
+  private async createHostConfig(): Promise<HostConfig> {
+    const hostConfig = { ...this.hostConfig };
+    if (!this.isHelperContainer() && PortForwarderInstance.isRunning()) {
+      const portForwarder = await PortForwarderInstance.getInstance();
+      hostConfig.ExtraHosts = [
+        ...(hostConfig.ExtraHosts ?? []),
+        `host.testcontainers.internal:${portForwarder.getIpAddress()}`,
+      ];
+    }
+    return hostConfig;
   }
 
   private async connectContainerToNetworks(client: ContainerRuntimeClient, container: Container): Promise<void> {
@@ -578,4 +618,25 @@ export class GenericContainer implements TestContainer {
     this.createOpts.Hostname = hostname;
     return this;
   }
+}
+
+async function hashCopiedFile(source: string) {
+  const stats = await fs.stat(source);
+  return { fileMode: stats.mode, content: hash(await fs.readFile(source)) };
+}
+
+async function hashCopiedDirectory(directory: string) {
+  const entries = [];
+  for (const entry of (await fs.readdir(directory, { recursive: true })).sort()) {
+    const entryPath = path.join(directory, entry);
+    const stats = await fs.lstat(entryPath);
+    let content: string | undefined;
+    if (stats.isFile()) {
+      content = hash(await fs.readFile(entryPath));
+    } else if (stats.isSymbolicLink()) {
+      content = await fs.readlink(entryPath);
+    }
+    entries.push({ path: entry, fileMode: stats.mode, content });
+  }
+  return entries;
 }

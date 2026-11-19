@@ -487,6 +487,9 @@ const container2 = await new GenericContainer("alpine")
 expect(container1.getId()).toBe(container2.getId());
 ```
 
+The configuration includes the network and network aliases. A container started on a newly created `Network` is not re-used, as every new network has a different name. Re-used containers are not removed when the session ends, so each run then leaves another container running. To re-use a container on a network, use a network with a fixed name (`withNetworkMode`).
+Files, directories and content copied into the container are compared by their content, except readable streams and archives, which are compared by their target only.
+
 You can also re-use stopped but not removed containers.
 
 ```js
