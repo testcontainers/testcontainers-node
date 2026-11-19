@@ -4,7 +4,7 @@ import { createClient } from "redis";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { ValkeyContainer } from "./valkey-container";
 
-const IMAGES = ["valkey/valkey:7.2.14", "valkey/valkey:8.1.10", getImage(__dirname)];
+const IMAGES = ["valkey/valkey:7.2.15", "valkey/valkey:8.1.11", getImage(__dirname)];
 
 describe.each(IMAGES)("ValkeyContainer (%s)", { concurrent: false, timeout: 240_000 }, (image) => {
   it.concurrent("should connect and execute set-get", async () => {
@@ -75,6 +75,25 @@ describe.each(IMAGES)("ValkeyContainer (%s)", { concurrent: false, timeout: 240_
 
     client.destroy();
     // }
+  });
+
+  it.concurrent("should load initial data when running as a non-root user", async () => {
+    await using container = await new ValkeyContainer(image)
+      .withUser("valkey")
+      .withInitialData(path.join(__dirname, "initData.valkey"))
+      .start();
+
+    const client = createClient({ url: container.getConnectionUrl() });
+    await client.connect();
+
+    const user = {
+      first_name: "David",
+      last_name: "Bloom",
+      dob: "03-MAR-1981",
+    };
+    expect(await client.get("user:002")).toBe(JSON.stringify(user));
+
+    client.destroy();
   });
 
   it.concurrent("should start with username and password", async () => {
