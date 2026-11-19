@@ -310,6 +310,28 @@ export class DockerContainerClient implements ContainerClient {
     }
   }
 
+  async pause(container: Container): Promise<void> {
+    try {
+      log.debug(`Pausing container...`, { containerId: container.id });
+      await container.pause();
+      log.debug(`Paused container`, { containerId: container.id });
+    } catch (err) {
+      log.error(`Failed to pause container: ${err}`, { containerId: container.id });
+      throw err;
+    }
+  }
+
+  async unpause(container: Container): Promise<void> {
+    try {
+      log.debug(`Unpausing container...`, { containerId: container.id });
+      await container.unpause();
+      log.debug(`Unpaused container`, { containerId: container.id });
+    } catch (err) {
+      log.error(`Failed to unpause container: ${err}`, { containerId: container.id });
+      throw err;
+    }
+  }
+
   async commit(container: Container, opts: ContainerCommitOptions): Promise<string> {
     try {
       log.debug(`Committing container...`, { containerId: container.id });

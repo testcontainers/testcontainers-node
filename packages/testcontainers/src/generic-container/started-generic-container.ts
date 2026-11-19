@@ -118,6 +118,16 @@ export class StartedGenericContainer implements StartedTestContainer {
     log.info(`Restarted container`, { containerId: this.container.id });
   }
 
+  public async pause(): Promise<void> {
+    const client = await getContainerRuntimeClient();
+    await client.container.pause(this.container);
+  }
+
+  public async unpause(): Promise<void> {
+    const client = await getContainerRuntimeClient();
+    await client.container.unpause(this.container);
+  }
+
   private async stopContainer(options: Partial<StopOptions> = {}): Promise<StoppedGenericContainer> {
     log.info(`Stopping container...`, { containerId: this.container.id });
     const client = await getContainerRuntimeClient();

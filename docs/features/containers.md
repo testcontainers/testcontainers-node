@@ -444,6 +444,15 @@ const container = await new GenericContainer("alpine").start();
 await container.restart();
 ```
 
+## Pausing a container
+
+```js
+const container = await new GenericContainer("alpine").start();
+
+await container.pause();
+await container.unpause();
+```
+
 ## Committing a container to an image
 
 ```js
