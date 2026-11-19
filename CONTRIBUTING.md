@@ -3,6 +3,7 @@
 [Create an issue](https://github.com/testcontainers/testcontainers-node/issues) if you find any bugs.
 
 [Create a pull request](https://github.com/testcontainers/testcontainers-node/pulls) if you wish to fix an issue or provide an enhancement. Please be sure to:
+
 - Discuss with the authors via an issue or discussion prior to doing anything big.
 - Follow the style, structure and naming conventions of the rest of the project.
 - Make commits atomic and easy to merge.
@@ -25,6 +26,7 @@ The documentation is a static site built with [MkDocs](https://www.mkdocs.org/) 
 ### Updating the docs
 
 To update the docs for your new module, you'll have to:
+
 - add a markdown file for your module in the docs/modules/ directory.
 - add a reference to your new markdown file in the mkdocs.yml file.
 
