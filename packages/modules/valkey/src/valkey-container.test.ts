@@ -77,6 +77,25 @@ describe.each(IMAGES)("ValkeyContainer (%s)", { concurrent: false, timeout: 240_
     // }
   });
 
+  it.concurrent("should load initial data when running as a non-root user", async () => {
+    await using container = await new ValkeyContainer(image)
+      .withUser("valkey")
+      .withInitialData(path.join(__dirname, "initData.valkey"))
+      .start();
+
+    const client = createClient({ url: container.getConnectionUrl() });
+    await client.connect();
+
+    const user = {
+      first_name: "David",
+      last_name: "Bloom",
+      dob: "03-MAR-1981",
+    };
+    expect(await client.get("user:002")).toBe(JSON.stringify(user));
+
+    client.destroy();
+  });
+
   it.concurrent("should start with username and password", async () => {
     // valkeyWithUsernameAndPassword {
     const username = "testUser";
