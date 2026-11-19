@@ -3,7 +3,7 @@ import { IntervalRetry } from "testcontainers";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { MongoDBAtlasLocalContainer } from "./mongodb-atlas-local-container";
 
-const IMAGES = ["mongodb/mongodb-atlas-local:7.0.43", getImage(__dirname, 1)];
+const IMAGES = ["mongodb/mongodb-atlas-local:7.0.43", "mongodb/mongodb-atlas-local:8.3.17", getImage(__dirname, 1)];
 const ATLAS_SEARCH_INDEX = {
   mappings: {
     dynamic: false,
