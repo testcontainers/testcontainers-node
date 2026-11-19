@@ -76,14 +76,18 @@ describe("GenericContainer Dockerfile", { timeout: 180_000 }, () => {
     });
 
     it("should not pull existing image without pull policy", async () => {
+      // Uses its own base image and only watches pull events for it, so other tests running at the same time
+      // (such as "should use pull policy", which always pulls node:10-alpine) cannot trigger a pull event here.
       const client = await getContainerRuntimeClient();
-      await client.image.pull(new ImageName("docker.io", "node", "10-alpine"));
+      await client.image.pull(new ImageName("docker.io", "node", "12-alpine"));
 
-      const dockerfile = path.resolve(fixtures, "docker");
-      const containerSpec = GenericContainer.fromDockerfile(dockerfile);
+      const dockerfile = path.resolve(fixtures, "docker-with-buildargs");
+      const containerSpec = GenericContainer.fromDockerfile(dockerfile).withBuildArgs({ VERSION: "12-alpine" });
 
       await containerSpec.build();
-      await using dockerEventStream = await getDockerEventStream();
+      await using dockerEventStream = await getDockerEventStream({
+        filters: { type: ["image"], event: ["pull"], image: ["node:12-alpine"] },
+      });
       const dockerPullEventPromise = waitForDockerEvent(dockerEventStream.events, "pull");
       let hasResolved = false;
       void dockerPullEventPromise.then(() => (hasResolved = true));
@@ -110,6 +114,17 @@ describe("GenericContainer Dockerfile", { timeout: 180_000 }, () => {
   it("should set build arguments", async () => {
     const context = path.resolve(fixtures, "docker-with-buildargs");
     const container = await GenericContainer.fromDockerfile(context).withBuildArgs({ VERSION: "10-alpine" }).build();
+    await using startedContainer = await container.withExposedPorts(8080).start();
+
+    await checkContainerIsHealthy(startedContainer);
+  });
+
+  it("should add build arguments when called more than once", async () => {
+    const context = path.resolve(fixtures, "docker-with-buildargs");
+    const container = await GenericContainer.fromDockerfile(context)
+      .withBuildArgs({ VERSION: "10-alpine" })
+      .withBuildArgs({ UNUSED: "value" })
+      .build();
     await using startedContainer = await container.withExposedPorts(8080).start();
 
     await checkContainerIsHealthy(startedContainer);

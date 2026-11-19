@@ -453,9 +453,12 @@ export class GenericContainer implements TestContainer {
   }
 
   public withBindMounts(bindMounts: BindMount[]): this {
-    this.hostConfig.Binds = bindMounts
-      .map((bindMount) => ({ mode: "rw", ...bindMount }))
-      .map(({ source, target, mode }) => `${source}:${target}:${mode}`);
+    this.hostConfig.Binds = [
+      ...(this.hostConfig.Binds ?? []),
+      ...bindMounts
+        .map((bindMount) => ({ mode: "rw", ...bindMount }))
+        .map(({ source, target, mode }) => `${source}:${target}:${mode}`),
+    ];
     return this;
   }
 
@@ -559,8 +562,12 @@ export class GenericContainer implements TestContainer {
   }
 
   public withResourcesQuota({ memory, cpu }: ResourcesQuota): this {
-    this.hostConfig.Memory = memory !== undefined ? Math.ceil(memory * 1024 ** 3) : undefined;
-    this.hostConfig.NanoCpus = cpu !== undefined ? Math.ceil(cpu * 10 ** 9) : undefined;
+    if (memory !== undefined) {
+      this.hostConfig.Memory = Math.ceil(memory * 1024 ** 3);
+    }
+    if (cpu !== undefined) {
+      this.hostConfig.NanoCpus = Math.ceil(cpu * 10 ** 9);
+    }
     return this;
   }
 

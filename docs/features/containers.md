@@ -112,6 +112,8 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+Calling `withBindMounts` more than once adds to the mounts set before. Mounting the same target twice fails when the container starts.
+
 ### With labels
 
 ```js
@@ -353,6 +355,8 @@ const container = await new GenericContainer("alpine")
   .withResourcesQuota({ memory: 0.5, cpu: 1 })
   .start();
 ```
+
+Calling `withResourcesQuota` more than once changes only the quotas passed in.
 
 ### With shared memory size
 
