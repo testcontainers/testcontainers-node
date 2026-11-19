@@ -3,7 +3,7 @@ import path from "node:path";
 import { URL } from "node:url";
 import type { DockerOptions } from "dockerode";
 import type { ContainerRuntimeClientStrategy } from "./strategy";
-import type { ContainerRuntimeClientStrategyResult } from "./types";
+import type { ContainerRuntimeClientStrategyNotApplicable, ContainerRuntimeClientStrategyResult } from "./types";
 import { getContainerRuntimeConfig } from "./utils/config";
 
 export class ConfigurationStrategy implements ContainerRuntimeClientStrategy {
@@ -11,11 +11,11 @@ export class ConfigurationStrategy implements ContainerRuntimeClientStrategy {
     return "ConfigurationStrategy";
   }
 
-  async getResult(): Promise<ContainerRuntimeClientStrategyResult | undefined> {
+  async getResult(): Promise<ContainerRuntimeClientStrategyResult | ContainerRuntimeClientStrategyNotApplicable> {
     const { dockerHost, dockerTlsVerify, dockerCertPath } = await getContainerRuntimeConfig();
 
     if (!dockerHost) {
-      return undefined;
+      return { notApplicable: "DOCKER_HOST is not set in the environment or ~/.testcontainers.properties" };
     }
 
     const dockerOptions: DockerOptions = {};

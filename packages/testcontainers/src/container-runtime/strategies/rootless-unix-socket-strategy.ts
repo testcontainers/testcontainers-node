@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { isDefined } from "../../common";
 import type { ContainerRuntimeClientStrategy } from "./strategy";
-import type { ContainerRuntimeClientStrategyResult } from "./types";
+import type { ContainerRuntimeClientStrategyNotApplicable, ContainerRuntimeClientStrategyResult } from "./types";
 
 export class RootlessUnixSocketStrategy implements ContainerRuntimeClientStrategy {
   constructor(
@@ -15,22 +15,21 @@ export class RootlessUnixSocketStrategy implements ContainerRuntimeClientStrateg
     return "RootlessUnixSocketStrategy";
   }
 
-  async getResult(): Promise<ContainerRuntimeClientStrategyResult | undefined> {
+  async getResult(): Promise<ContainerRuntimeClientStrategyResult | ContainerRuntimeClientStrategyNotApplicable> {
     if (this.platform !== "linux" && this.platform !== "darwin") {
-      return;
+      return { notApplicable: "only used on Linux and macOS" };
     }
 
-    const socketPath = [
+    const candidateSocketPaths = [
       this.getSocketPathFromEnv(),
       this.getSocketPathFromHomeRunDir(),
       this.getSocketPathFromHomeDesktopDir(),
       this.getSocketPathFromRunDir(),
-    ]
-      .filter(isDefined)
-      .find((candidateSocketPath) => existsSync(candidateSocketPath));
+    ].filter(isDefined);
+    const socketPath = candidateSocketPaths.find((candidateSocketPath) => existsSync(candidateSocketPath));
 
     if (!socketPath) {
-      return;
+      return { notApplicable: `no socket found at ${candidateSocketPaths.join(", ")}` };
     }
 
     return {

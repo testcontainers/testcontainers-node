@@ -9,12 +9,14 @@ const mockGetContainerRuntimeConfig = vi.mocked(getContainerRuntimeConfig);
 const mockReadFile = vi.mocked(readFile);
 
 describe("ConfigurationStrategy", { concurrent: false }, () => {
-  it("should return undefined if no docker host is set", async () => {
+  it("should not apply if no docker host is set", async () => {
     mockGetContainerRuntimeConfig.mockResolvedValueOnce({ dockerHost: undefined });
 
     const result = await new ConfigurationStrategy().getResult();
 
-    expect(result).toBeUndefined();
+    expect(result).toEqual({
+      notApplicable: "DOCKER_HOST is not set in the environment or ~/.testcontainers.properties",
+    });
   });
 
   it("should set host and port when docker host is a URL", async () => {
@@ -22,14 +24,16 @@ describe("ConfigurationStrategy", { concurrent: false }, () => {
 
     const result = await new ConfigurationStrategy().getResult();
 
-    expect(result?.uri).toEqual("tcp://docker:8025");
-    expect(result?.dockerOptions).toEqual(
+    assert(!("notApplicable" in result));
+
+    expect(result.uri).toEqual("tcp://docker:8025");
+    expect(result.dockerOptions).toEqual(
       expect.objectContaining({
         host: "docker",
         port: "8025",
       })
     );
-    expect(result?.composeEnvironment).toEqual(
+    expect(result.composeEnvironment).toEqual(
       expect.objectContaining({
         DOCKER_HOST: "tcp://docker:8025",
       })
@@ -41,13 +45,15 @@ describe("ConfigurationStrategy", { concurrent: false }, () => {
 
     const result = await new ConfigurationStrategy().getResult();
 
-    expect(result?.uri).toEqual("unix:///var/run/docker.sock");
-    expect(result?.dockerOptions).toEqual(
+    assert(!("notApplicable" in result));
+
+    expect(result.uri).toEqual("unix:///var/run/docker.sock");
+    expect(result.dockerOptions).toEqual(
       expect.objectContaining({
         socketPath: "/var/run/docker.sock",
       })
     );
-    expect(result?.composeEnvironment).toEqual(
+    expect(result.composeEnvironment).toEqual(
       expect.objectContaining({
         DOCKER_HOST: "unix:///var/run/docker.sock",
       })
@@ -59,7 +65,9 @@ describe("ConfigurationStrategy", { concurrent: false }, () => {
 
     const result = await new ConfigurationStrategy().getResult();
 
-    expect(result?.allowUserOverrides).toEqual(true);
+    assert(!("notApplicable" in result));
+
+    expect(result.allowUserOverrides).toEqual(true);
   });
 
   it("should set SSL options when TLS is enabled", async () => {
@@ -83,15 +91,17 @@ describe("ConfigurationStrategy", { concurrent: false }, () => {
 
     const result = await new ConfigurationStrategy().getResult();
 
-    expect(result?.uri).toEqual("tcp://docker:8025");
-    expect(result?.dockerOptions).toEqual(
+    assert(!("notApplicable" in result));
+
+    expect(result.uri).toEqual("tcp://docker:8025");
+    expect(result.dockerOptions).toEqual(
       expect.objectContaining({
         ca: "ca",
         cert: "cert",
         key: "key",
       })
     );
-    expect(result?.composeEnvironment).toEqual(
+    expect(result.composeEnvironment).toEqual(
       expect.objectContaining({
         DOCKER_TLS_VERIFY: "1",
         DOCKER_CERT_PATH: "/certs",
