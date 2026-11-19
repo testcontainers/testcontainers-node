@@ -221,19 +221,6 @@ export class GenericContainer implements TestContainer {
     );
   }
 
-  // The port forwarder entry is added here, not to this.hostConfig, so the reuse hash does not change with its IP.
-  private async createHostConfig(): Promise<HostConfig> {
-    const hostConfig = { ...this.hostConfig };
-    if (!this.isHelperContainer() && PortForwarderInstance.isRunning()) {
-      const portForwarder = await PortForwarderInstance.getInstance();
-      hostConfig.ExtraHosts = [
-        ...(hostConfig.ExtraHosts ?? []),
-        `host.testcontainers.internal:${portForwarder.getIpAddress()}`,
-      ];
-    }
-    return hostConfig;
-  }
-
   private async startContainer(client: ContainerRuntimeClient): Promise<StartedTestContainer> {
     const hostConfig = await this.createHostConfig();
     const container = await client.container.create({ ...this.createOpts, HostConfig: hostConfig });
@@ -286,6 +273,19 @@ export class GenericContainer implements TestContainer {
     }
 
     return startedContainer;
+  }
+
+  // The port forwarder entry is added here, not to this.hostConfig, so the reuse hash does not change with its IP.
+  private async createHostConfig(): Promise<HostConfig> {
+    const hostConfig = { ...this.hostConfig };
+    if (!this.isHelperContainer() && PortForwarderInstance.isRunning()) {
+      const portForwarder = await PortForwarderInstance.getInstance();
+      hostConfig.ExtraHosts = [
+        ...(hostConfig.ExtraHosts ?? []),
+        `host.testcontainers.internal:${portForwarder.getIpAddress()}`,
+      ];
+    }
+    return hostConfig;
   }
 
   private async connectContainerToNetworks(client: ContainerRuntimeClient, container: Container): Promise<void> {
