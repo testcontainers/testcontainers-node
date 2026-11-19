@@ -560,6 +560,15 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     expect((await container.exec(["cat", "/tmp/file.txt"])).output).toBe("file");
   });
 
+  it("should reject when directory to copy to started container does not exist", async () => {
+    const source = path.resolve(fixtures, "does-not-exist");
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withExposedPorts(8080)
+      .start();
+
+    await expect(container.copyDirectoriesToContainer([{ source, target: "/tmp" }])).rejects.toThrow("ENOENT");
+  });
+
   it("should copy content to container", async () => {
     const content = "hello world";
     const target = "/tmp/test.txt";
