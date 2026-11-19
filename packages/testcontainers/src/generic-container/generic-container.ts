@@ -558,12 +558,14 @@ export class GenericContainer implements TestContainer {
     return this;
   }
 
+  /** Resource limits. `memory` is gigabytes; `cpu` is CPUs. */
   public withResourcesQuota({ memory, cpu }: ResourcesQuota): this {
     this.hostConfig.Memory = memory !== undefined ? Math.ceil(memory * 1024 ** 3) : undefined;
     this.hostConfig.NanoCpus = cpu !== undefined ? Math.ceil(cpu * 10 ** 9) : undefined;
     return this;
   }
 
+  /** `/dev/shm` size in bytes. */
   public withSharedMemorySize(bytes: number): this {
     this.hostConfig.ShmSize = bytes;
     return this;

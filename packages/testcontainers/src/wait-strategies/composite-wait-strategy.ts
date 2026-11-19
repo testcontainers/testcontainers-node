@@ -48,6 +48,7 @@ export class CompositeWaitStrategy extends AbstractWaitStrategy {
     return this;
   }
 
+  /** Overall deadline for all composed strategies, in milliseconds. */
   public withDeadline(deadline: number): this {
     this.deadline = deadline;
     return this;

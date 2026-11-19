@@ -4,7 +4,7 @@ import archiver from "archiver";
 import AsyncLock from "async-lock";
 import type Dockerode from "dockerode";
 import type { ContainerInspectInfo } from "dockerode";
-import { containerLog, log } from "../common";
+import { containerLog, log, toUnixSeconds } from "../common";
 import { type ContainerRuntimeClient, getContainerRuntimeClient } from "../container-runtime";
 // biome-ignore lint/suspicious/noImportCycles: Ryuk and sshd run as GenericContainers; only dereferenced at runtime
 import { getReaper } from "../reaper/reaper";
@@ -257,10 +257,11 @@ export class StartedGenericContainer implements StartedTestContainer {
     return output;
   }
 
-  public async logs(opts?: { since?: number; tail?: number }): Promise<Readable> {
+  public async logs(opts?: { since?: number | Date; tail?: number }): Promise<Readable> {
     const client = await getContainerRuntimeClient();
+    const since = opts?.since !== undefined ? toUnixSeconds(opts.since) : undefined;
 
-    return client.container.logs(this.container, opts);
+    return client.container.logs(this.container, { ...opts, since });
   }
 
   async [Symbol.asyncDispose]() {
