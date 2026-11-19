@@ -27,7 +27,7 @@ Don't publish or edit the release, run `npm publish` without `--dry-run`, re-run
 
 ## 3. Dry run
 
-If you have permission to dispatch workflows, dry-run the publish on `main` with the draft's version. A manual dispatch builds every package and runs `npm publish --ws --dry-run`. It doesn't commit, push or publish.
+If you have permission to dispatch workflows, dry-run the publish on `main` with the draft's version. A manual dispatch builds every package and dry-runs `npm publish` for each one. It doesn't commit, push or publish.
 
 ```bash
 gh workflow run npm-publish.yml --ref main -f version=<x.y.z>

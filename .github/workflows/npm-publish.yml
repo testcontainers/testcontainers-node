@@ -15,6 +15,9 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      id-token: write
     steps:
       - uses: actions/checkout@v7
         with:
@@ -67,6 +70,38 @@ jobs:
           npm ci
           npm run build --ws
 
+      - name: Check packages
+        run: |
+          mkdir "$RUNNER_TEMP/unpublished"
+          status=0
+
+          for dir in packages/testcontainers packages/modules/*; do
+            name=$(jq -r .name "$dir/package.json")
+            echo "::group::$name"
+
+            if ! npm view "$name" name > /dev/null 2> "$RUNNER_TEMP/npm-view.log"; then
+              if ! grep -q E404 "$RUNNER_TEMP/npm-view.log"; then
+                cat "$RUNNER_TEMP/npm-view.log"
+                exit 1
+              fi
+              npm pack -w "$dir" --pack-destination "$RUNNER_TEMP/unpublished"
+              echo "::endgroup::"
+              echo "::warning::$name is not on npm yet. Its tarball is in the unpublished-packages artifact, see RELEASING.md"
+              continue
+            fi
+
+            npm publish -w "$dir" --dry-run --loglevel verbose 2>&1 | tee "$RUNNER_TEMP/npm-publish.log"
+            echo "::endgroup::"
+            if grep -q "oidc Successfully retrieved and set token" "$RUNNER_TEMP/npm-publish.log"; then
+              echo "$dir" >> "$RUNNER_TEMP/publish-dirs.txt"
+            else
+              echo "::error::$name has no trusted publisher for this workflow, see RELEASING.md"
+              status=1
+            fi
+          done
+
+          exit "$status"
+
       - name: Git commit
         if: ${{ github.event_name == 'release' }}
         run: git commit -am "${{ steps.version.outputs.tag }}"
@@ -75,12 +110,25 @@ jobs:
         if: ${{ github.event_name == 'release' }}
         run: git push
 
-      - name: Dry run publish
-        if: ${{ github.event_name == 'workflow_dispatch' }}
-        run: npm publish --ws --dry-run
-
       - name: Publish packages to NPM
         if: ${{ github.event_name == 'release' }}
-        run: npm publish --ws
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
+        run: |
+          status=0
+
+          for dir in $(cat "$RUNNER_TEMP/publish-dirs.txt"); do
+            if ! npm publish -w "$dir"; then
+              npm pack -w "$dir" --pack-destination "$RUNNER_TEMP/unpublished"
+              echo "::error::Failed to publish $(jq -r .name "$dir/package.json"). Its tarball is in the unpublished-packages artifact, see RELEASING.md"
+              status=1
+            fi
+          done
+
+          exit "$status"
+
+      - name: Upload unpublished packages
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: unpublished-packages
+          path: ${{ runner.temp }}/unpublished/*.tgz
+          if-no-files-found: ignore
