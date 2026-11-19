@@ -521,7 +521,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     expect((await container.exec("cat /tmp/test.txt")).output).toEqual(expect.stringContaining("hello world"));
   });
 
-  it("should copy directory with hidden files, empty directories and symlinks to container", async () => {
+  it("should copy directory with hidden files, empty directories and symlinks to container, skipping fifos", async () => {
     if (process.platform === "win32") {
       return;
     }
@@ -539,6 +539,7 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     expect((await container.exec(["sh", "-c", `[ -d ${target}/empty ]`])).exitCode).toBe(0);
     expect((await container.exec(["readlink", `${target}/link.txt`])).output.trim()).toBe("file.txt");
     expect((await container.exec(["stat", "-c", "%a", `${target}/writable.txt`])).output.trim()).toBe("666");
+    expect((await container.exec(["sh", "-c", `[ -e ${target}/fifo ]`])).exitCode).toBe(1);
   });
 
   it("should not change permissions of the target directory when copying directory to started container", async () => {
@@ -593,6 +594,21 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
       .start();
 
     expect((await container.exec(["cat", target])).output).toBe("hello world");
+  });
+
+  it("should reject when content to copy to started container fails to read", async () => {
+    const content = new Readable({
+      read() {
+        this.destroy(new Error("read failed"));
+      },
+    });
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withExposedPorts(8080)
+      .start();
+
+    await expect(container.copyContentToContainer([{ content, target: "/tmp/test.txt" }])).rejects.toThrow(
+      "read failed"
+    );
   });
 
   it("should copy content to started container", async () => {

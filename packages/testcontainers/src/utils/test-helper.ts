@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { createSocket } from "node:dgram";
 import fs from "node:fs";
 import { createServer, type Server } from "node:http";
@@ -203,6 +204,7 @@ export const createTempDirectoryTree = async (): Promise<{ directory: string } &
   await fs.promises.mkdir(path.join(directory, "nested"));
   await fs.promises.writeFile(path.join(directory, "nested", "file.txt"), "nested");
   await fs.promises.symlink("file.txt", path.join(directory, "link.txt"));
+  execFileSync("mkfifo", [path.join(directory, "fifo")]);
 
   return {
     directory,

@@ -17,14 +17,16 @@ export function createArchive({ files = [], directories = [], contents = [] }: A
 
   (async () => {
     for (const { source, target, mode } of files) {
-      await packFromFs(pack, path.dirname(source), [path.basename(source)], () => target, mode, true);
-    }
-    for (const { source, target, mode } of directories) {
-      await packFromFs(pack, source, await fs.readdir(source), (name) => path.posix.join(target, name), mode, false);
+      const options = { entries: [path.basename(source)], dereference: true, ignore: () => true };
+      await packFromFs(pack, path.dirname(source), options, () => target, mode);
     }
     for (const { content, target, mode } of contents) {
       const data = typeof content === "string" || Buffer.isBuffer(content) ? content : await buffer(content);
       pack.entry({ name: toEntryName(target), mode }, data);
+    }
+    for (const { source, target, mode } of directories) {
+      const options = { entries: await fs.readdir(source) };
+      await packFromFs(pack, source, options, (name) => path.posix.join(target, name), mode);
     }
     pack.finalize();
   })().catch((err) => pack.destroy(err));
@@ -35,16 +37,15 @@ export function createArchive({ files = [], directories = [], contents = [] }: A
 function packFromFs(
   pack: tar.Pack,
   cwd: string,
-  entries: string[],
+  sourceOptions: Pick<tarFs.PackOptions, "entries" | "dereference" | "ignore">,
   toTarget: (name: string) => string,
-  mode: number | undefined,
-  dereference: boolean
+  mode: number | undefined
 ): Promise<void> {
   return new Promise((resolve) => {
     const options: tarFs.PackOptions & { umask: number } = {
+      ...sourceOptions,
       pack,
-      entries,
-      dereference,
+      strict: false,
       finalize: false,
       finish: () => resolve(),
       umask: 0,
