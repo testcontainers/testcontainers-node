@@ -2,7 +2,7 @@ import { createConnection } from "mysql2/promise";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { MySqlContainer } from "./mysql-container";
 
-const IMAGES = ["mysql:8.4.11", "mysql:9.7.2", getImage(__dirname)];
+const IMAGES = ["mysql:8.4.13", "mysql:9.7.4", getImage(__dirname)];
 
 describe.each(IMAGES)("MySqlContainer (%s)", { concurrent: false, timeout: 240_000 }, (image) => {
   it.concurrent("should connect and execute query", async () => {

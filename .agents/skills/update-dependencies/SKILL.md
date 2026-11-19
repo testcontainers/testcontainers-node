@@ -32,7 +32,7 @@ The AGENTS.md rules on runtime dependencies and on module images apply to every 
 A module's tests run against every major version the vendor still supports, from the `IMAGES` list in its test file (AGENTS.md "Tests"). Dependabot only bumps the `Dockerfile`, so the older majors in that list are kept current here. Do this on every image bump for a module, and when changing a module for any other reason:
 
 1. List the supported major versions from the vendor's lifecycle page or endoflife.date.
-2. Compare them with the module's `IMAGES` list:
+2. Compare them with the module's `IMAGES` lists and with any test file for a single major, which pins its image as `IMAGE` (for example `elasticsearch-container-v8.test.ts`, `kafka-container-7.test.ts`):
    - **A listed major is past end of life:** remove it from the list. Remove the module code that exists only for it in a separate PR, since that is a breaking change.
    - **A supported major is missing:** add the exact tag of its latest release.
    - **A listed major has a newer minor or patch:** move it to that tag.

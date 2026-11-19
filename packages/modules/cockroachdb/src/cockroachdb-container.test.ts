@@ -2,7 +2,7 @@ import { Client } from "pg";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { CockroachDbContainer } from "./cockroachdb-container";
 
-const IMAGES = ["cockroachdb/cockroach:v24.3.36", "cockroachdb/cockroach:v25.4.17", getImage(__dirname)];
+const IMAGES = ["cockroachdb/cockroach:v24.3.37", "cockroachdb/cockroach:v25.4.20", getImage(__dirname)];
 
 describe.each(IMAGES)("CockroachDbContainer (%s)", { concurrent: false, timeout: 180_000 }, (image) => {
   it.concurrent("should connect and return a query result", async () => {
