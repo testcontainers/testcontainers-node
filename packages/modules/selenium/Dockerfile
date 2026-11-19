@@ -1,2 +1,2 @@
-FROM selenium/standalone-chrome:155.0
-FROM selenium/standalone-firefox:158.0
+FROM selenium/standalone-chrome:157.0
+FROM selenium/standalone-firefox:159.0
