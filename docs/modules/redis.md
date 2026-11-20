@@ -40,12 +40,6 @@ Choose an image from the [container registry](https://hub.docker.com/_/redis) an
 [](../../packages/modules/redis/src/redis-container.test.ts) inside_block:withPredefinedData
 <!--/codeinclude-->
 
-### Redis stack
-
-<!--codeinclude-->
-[](../../packages/modules/redis/src/redis-container.test.ts) inside_block:startWithRedisStack
-<!--/codeinclude-->
-
 ### Execute a command inside the container
 
 <!--codeinclude-->
