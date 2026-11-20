@@ -24,6 +24,8 @@ const container = await GenericContainer
   .build("my-custom-image", { deleteOnExit: false });
 ```
 
+If the build fails, the error includes the reason and the last lines of the build output.
+
 ### With buildkit
 
 ```js
