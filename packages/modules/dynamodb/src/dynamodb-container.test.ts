@@ -64,7 +64,6 @@ function createClient(endpoint: string, accessKeyId: string = "AKIAIOSFODNN7EXAM
   const client = new DynamoDBClient({
     region: "us-east-1",
     credentials: {
-      // use any credentials
       accessKeyId,
       secretAccessKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
     },
@@ -111,7 +110,6 @@ describe("DynamoDBContainer", { timeout: 180_000 }, () => {
   it("separates data by client by default", async () => {
     await using container = await new DynamoDBContainer(IMAGE).start();
 
-    // Uses dummy credentials from the documentation
     const clientA = createClient(container.getEndpoint(), "AKIAIOSFODNN7EXAMPL1");
     const clientB = createClient(container.getEndpoint(), "AKIAIOSFODNN7EXAMPL2");
 
@@ -120,7 +118,6 @@ describe("DynamoDBContainer", { timeout: 180_000 }, () => {
     const resultA = await clientA.send(new ListTablesCommand());
     const resultB = await clientB.send(new ListTablesCommand());
 
-    // Since clientA created the table, only clientA should see it
     expect(resultA.TableNames).toStrictEqual(["users"]);
     expect(resultB.TableNames).toStrictEqual([]);
   });
@@ -155,8 +152,6 @@ describe("DynamoDBContainer", { timeout: 180_000 }, () => {
     const resultA = await clientA.send(new ListTablesCommand());
     const resultB = await clientB.send(new ListTablesCommand());
 
-    // Eventhough clientA created the table, both should see it due to
-    // the shared table design
     expect(resultA.TableNames).toStrictEqual(["users"]);
     expect(resultB.TableNames).toStrictEqual(["users"]);
   });
