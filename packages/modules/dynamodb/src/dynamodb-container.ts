@@ -10,7 +10,10 @@ export class DynamoDBContainer extends GenericContainer {
     super(image);
     this.withExposedPorts(DYNAMODB_PORT)
       .withStartupTimeout(120_000)
-      .withWaitStrategy(Wait.forHttp("/", DYNAMODB_PORT).forStatusCode(400));
+      .withWaitStrategy(Wait.forHttp("/", DYNAMODB_PORT).forStatusCode(400))
+      .withEnvironment({
+        DDB_LOCAL_TELEMETRY: "0",
+      });
   }
 
   public withSharedDB(): this {
@@ -20,9 +23,6 @@ export class DynamoDBContainer extends GenericContainer {
 
   public override async start(): Promise<StartedDynamoDBContainer> {
     this.withCommand(["-jar", "DynamoDBLocal.jar", "-inMemory", ...(this.sharedDB ? ["-sharedDb"] : [])]);
-    this.withEnvironment({
-      DDB_LOCAL_TELEMETRY: "0",
-    });
 
     const started = await super.start();
     return new StartedDynamoDBContainer(started);
