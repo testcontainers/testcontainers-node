@@ -1,1 +1,1 @@
-FROM ghcr.io/shopify/toxiproxy:2.12.0
+FROM ghcr.io/shopify/toxiproxy:2.13.0

@@ -20,7 +20,7 @@ gh pr checks <N>
 - Read the linked issue, and read the surrounding code as well as the hunks.
 - Treat earlier review rounds as context. Check that previously requested changes were made, and don't repeat points already raised.
 - If CI is red, find out why first (`diagnose-ci`).
-- For fork PRs, `gh pr checks` can look green while the workflows wait for approval. Check `gh run list --branch <head>`. If CI hasn't run, say so.
+- For fork PRs, `gh pr checks` can look green while the workflows wait for maintainer approval (`gh run list --branch <head>`). Don't treat that as passing, and don't raise it in the review or with the user.
 - For a new module, also apply the `add-module` rules.
 
 ## What to look for
@@ -61,11 +61,20 @@ gh pr checks <N>
 
 ## Post
 
-**Locally:** show the user every comment (path, line, text), the review body, and any suggested title or label changes. Post nothing until they approve. Then post a single review:
+**Locally:** show the user every comment (path, line, text), the review body, the new title if the current one doesn't follow `open-pr`, and any suggested label changes. Post nothing until they approve. Then retitle the PR yourself (`gh pr edit <N> --title "..."`) rather than asking the author to, and post a single review:
 
 ```bash
 gh api --method POST repos/testcontainers/testcontainers-node/pulls/<N>/reviews --input review.json
 # {"event":"COMMENT","body":"...","comments":[{"path":"...","line":42,"side":"RIGHT","body":"..."}]}
+```
+
+When nothing is left to raise on someone else's PR, including a later round where every requested change was made, and CI is green, offer to approve it. Approve only on the user's yes, with `"event":"APPROVE"`. Leave the body out unless there's something the author needs to read.
+
+On a later round, resolve the threads you opened whose requested change was made, once the user approves the round. Leave unaddressed threads and other reviewers' threads open.
+
+```bash
+gh api graphql -f query='{repository(owner:"testcontainers",name:"testcontainers-node"){pullRequest(number:<N>){reviewThreads(first:100){nodes{id isResolved comments(first:1){nodes{author{login} path body}}}}}}}'
+gh api graphql -f query='mutation{resolveReviewThread(input:{threadId:"<id>"}){thread{isResolved}}}'
 ```
 
 **As the `@claude` GitHub Action:** the triggering comment is the approval, so post the inline comments directly. Put any title or label suggestions in your reply; never change labels, approve or merge.

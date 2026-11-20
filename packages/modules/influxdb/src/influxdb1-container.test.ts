@@ -1,6 +1,6 @@
 import { InfluxDB1Container } from "./influxdb1-container";
 
-const IMAGE = "influxdb:1.13";
+const IMAGE = "influxdb:1.13.2";
 
 const basicAuth = (username: string, password: string) =>
   `Basic ${Buffer.from(`${username}:${password}`).toString("base64")}`;

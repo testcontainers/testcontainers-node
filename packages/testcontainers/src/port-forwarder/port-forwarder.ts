@@ -1,6 +1,8 @@
+import { once } from "node:events";
+import net from "node:net";
 import type Dockerode from "dockerode";
 import type { ContainerInfo } from "dockerode";
-import { createSshConnection, type SshConnection } from "ssh-remote-port-forward";
+import { Client } from "ssh2";
 import { log, withFileLock } from "../common";
 import { type ContainerRuntimeClient, getContainerRuntimeClient, ImageName } from "../container-runtime";
 // biome-ignore lint/suspicious/noImportCycles: Ryuk and sshd run as GenericContainers; only dereferenced at runtime
@@ -16,7 +18,7 @@ export const SSHD_IMAGE = process.env.SSHD_CONTAINER_IMAGE
 
 class PortForwarder {
   constructor(
-    private readonly sshConnection: SshConnection,
+    private readonly sshClient: Client,
     private readonly containerId: string,
     private readonly networkId: string,
     private readonly ipAddress: string
@@ -24,7 +26,9 @@ class PortForwarder {
 
   public async exposeHostPort(port: number): Promise<void> {
     log.info(`Exposing host port ${port}...`);
-    await this.sshConnection.remoteForward("localhost", port);
+    await new Promise<void>((resolve, reject) =>
+      this.sshClient.forwardIn("localhost", port, (err) => (err ? reject(err) : resolve()))
+    );
     log.info(`Exposed host port ${port}`);
   }
 
@@ -102,16 +106,7 @@ export class PortForwarderInstance {
       throw new Error("Expected PortForwarder to map exposed port 22");
     }
 
-    log.debug(`Connecting to Port Forwarder on "${host}:${port}"...`);
-    const connection = await createSshConnection({
-      host,
-      port,
-      username: "root",
-      password: "root",
-      readyTimeout: 100_000,
-    });
-    log.debug(`Connected to Port Forwarder on "${host}:${port}"`);
-    connection.unref();
+    const sshClient = await PortForwarderInstance.connect(host, port, 100_000);
 
     const containerId = container.Id;
     const networks = Object.entries(container.NetworkSettings.Networks);
@@ -119,7 +114,7 @@ export class PortForwarderInstance {
     const networkId = container.NetworkSettings.Networks[networkName].NetworkID;
     const ipAddress = container.NetworkSettings.Networks[networkName].IPAddress;
 
-    return new PortForwarder(connection, containerId, networkId, ipAddress);
+    return new PortForwarder(sshClient, containerId, networkId, ipAddress);
   }
 
   private static async createInstance(): Promise<PortForwarder> {
@@ -142,21 +137,39 @@ export class PortForwarderInstance {
     const host = client.info.containerRuntime.host;
     const port = container.getMappedPort(22);
 
-    log.debug(`Connecting to Port Forwarder on "${host}:${port}"...`);
-    const connection = await createSshConnection({
-      host,
-      port,
-      username: PortForwarderInstance.USERNAME,
-      password: PortForwarderInstance.PASSWORD,
-    });
-    log.debug(`Connected to Port Forwarder on "${host}:${port}"`);
-    connection.unref();
+    const sshClient = await PortForwarderInstance.connect(host, port);
 
     const containerId = container.getId();
     const networkName = container.getNetworkNames()[0];
     const networkId = container.getNetworkId(networkName);
     const ipAddress = container.getIpAddress(networkName);
 
-    return new PortForwarder(connection, containerId, networkId, ipAddress);
+    return new PortForwarder(sshClient, containerId, networkId, ipAddress);
+  }
+
+  private static async connect(host: string, port: number, readyTimeout?: number): Promise<Client> {
+    log.debug(`Connecting to Port Forwarder on "${host}:${port}"...`);
+    const sock = net.connect(port, host);
+    const sshClient = new Client().on("tcp connection", (info, accept) => {
+      const stream = accept();
+      stream.pause();
+      const socket = net.connect(info.destPort, info.destIP, () => {
+        stream.pipe(socket);
+        socket.pipe(stream);
+        stream.resume();
+      });
+      socket.on("error", () => stream.close());
+      stream.on("error", () => socket.destroy());
+    });
+    sshClient.connect({
+      sock,
+      username: PortForwarderInstance.USERNAME,
+      password: PortForwarderInstance.PASSWORD,
+      readyTimeout,
+    });
+    await once(sshClient, "ready");
+    sock.unref();
+    log.debug(`Connected to Port Forwarder on "${host}:${port}"`);
+    return sshClient;
   }
 }

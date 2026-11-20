@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/couchbase",
-  "version": "12.2.1",
+  "version": "12.2.2",
   "license": "MIT",
   "keywords": [
     "couchbase",
@@ -29,10 +29,10 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "dependencies": {
-    "testcontainers": "^12.2.1"
+    "testcontainers": "^12.2.2"
   },
   "devDependencies": {
-    "couchbase": "^4.7.1",
+    "couchbase": "^4.7.2",
     "get-port": "^5.1.1"
   }
 }

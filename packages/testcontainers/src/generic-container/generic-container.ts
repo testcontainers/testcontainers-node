@@ -348,10 +348,7 @@ export class GenericContainer implements TestContainer {
 
   public withEnvironment(environment: Environment): this {
     this.environment = { ...this.environment, ...environment };
-    this.createOpts.Env = [
-      ...(this.createOpts.Env ?? []),
-      ...Object.entries(environment).map(([key, value]) => `${key}=${value}`),
-    ];
+    this.createOpts.Env = Object.entries(this.environment).map(([key, value]) => `${key}=${value}`);
     return this;
   }
 

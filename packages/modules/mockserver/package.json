@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/mockserver",
-  "version": "12.2.1",
+  "version": "12.2.2",
   "description": "Mockserver module for Testcontainers",
   "main": "build/index.js",
   "scripts": {
@@ -29,11 +29,11 @@
     "access": "public"
   },
   "dependencies": {
-    "testcontainers": "^12.2.1"
+    "testcontainers": "^12.2.2"
   },
   "devDependencies": {
     "@types/superagent": "^8.1.11",
-    "mockserver-client": "^8.0.0",
-    "superagent": "^10.4.1"
+    "mockserver-client": "^9.2.0",
+    "superagent": "^10.4.2"
   }
 }

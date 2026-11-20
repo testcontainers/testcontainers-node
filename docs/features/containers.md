@@ -83,6 +83,8 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+Calling `withEnvironment` more than once adds to the variables set before. Setting a key again replaces its value.
+
 ### With a platform
 
 ```js

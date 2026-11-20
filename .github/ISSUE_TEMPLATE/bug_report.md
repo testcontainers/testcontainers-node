@@ -1,10 +1,9 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-title: ''
-labels: ''
-assignees: ''
-
+title: ""
+labels: ""
+assignees: ""
 ---
 
 **Expected Behaviour**
@@ -25,12 +24,14 @@ https://node.testcontainers.org/configuration/#logs
 ```
 
 **Steps to Reproduce**
+
 1. In this environment...
 2. With this config...
 3. Run '...'
 4. See error...
 
 **Environment Information**
+
 - Operating System:
 - Container runtime and version (e.g. Docker Engine 29.1, Docker Desktop 4.50, Podman 5.6, Colima, OrbStack, Rancher Desktop):
 - Node version (or Bun/Deno version):

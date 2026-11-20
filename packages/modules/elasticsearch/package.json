@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/elasticsearch",
-  "version": "12.2.1",
+  "version": "12.2.2",
   "license": "MIT",
   "keywords": [
     "elasticsearch",
@@ -33,6 +33,6 @@
     "@elastic/elasticsearch-8": "npm:@elastic/elasticsearch@^8.19.2"
   },
   "dependencies": {
-    "testcontainers": "^12.2.1"
+    "testcontainers": "^12.2.2"
   }
 }

@@ -18,6 +18,22 @@ describe("PortForwarder", { timeout: 180_000 }, () => {
     expect(output).toEqual(expect.stringContaining("hello world"));
   });
 
+  it("should close the connection when nothing listens on the exposed host port", async () => {
+    const randomPort = await portGen.generatePort();
+    await TestContainers.exposeHostPorts(randomPort);
+
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14").start();
+
+    const { exitCode } = await container.exec([
+      "curl",
+      "-s",
+      "--max-time",
+      "10",
+      `http://host.testcontainers.internal:${randomPort}`,
+    ]);
+    expect(exitCode).toBe(52);
+  });
+
   it("should expose host ports to the container with custom network", async () => {
     const randomPort = await portGen.generatePort();
     await using _ = await createTestServer(randomPort);

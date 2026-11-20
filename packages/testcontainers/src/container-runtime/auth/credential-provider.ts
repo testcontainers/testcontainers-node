@@ -1,4 +1,6 @@
 import { spawn } from "node:child_process";
+import { existsSync } from "node:fs";
+import path from "node:path";
 import { log } from "../../common";
 import type { RegistryAuthLocator } from "./registry-auth-locator";
 import type {
@@ -28,7 +30,14 @@ export abstract class CredentialProvider implements RegistryAuthLocator {
 
   private runCredentialProvider(registry: string, providerName: string): Promise<AuthConfig | undefined> {
     return new Promise((resolve, reject) => {
-      const sink = spawn(providerName, ["get"]);
+      // On Windows a credential helper can be a .cmd script (e.g. docker-credential-gcloud.cmd), which Node only runs
+      // through a shell: https://nodejs.org/api/child_process.html#spawning-bat-and-cmd-files-on-windows
+      // Use the shell only when the helper exists. Through the shell, a missing helper is just a failing cmd, which
+      // would read as "no credentials"; spawning it directly fails with ENOENT, as on other platforms.
+      const sink =
+        process.platform === "win32" && isOnWindowsPath(providerName)
+          ? spawn(`${providerName} get`, { shell: true })
+          : spawn(providerName, ["get"]);
 
       const chunks: string[] = [];
       sink.stdout.on("data", (chunk) => chunks.push(chunk));
@@ -82,4 +91,13 @@ export abstract class CredentialProvider implements RegistryAuthLocator {
       identityToken: config.Secret,
     };
   }
+}
+
+// The lookup cmd does for a bare command name: the current directory, then PATH, with each PATHEXT extension.
+function isOnWindowsPath(command: string): boolean {
+  const directories = [process.cwd(), ...(process.env.PATH ?? "").split(path.delimiter)].filter(Boolean);
+  const extensions = (process.env.PATHEXT ?? ".COM;.EXE;.BAT;.CMD").split(";").filter(Boolean);
+  return directories.some((directory) =>
+    extensions.some((extension) => existsSync(path.join(directory, `${command}${extension}`)))
+  );
 }

@@ -12,6 +12,7 @@ import type {
   ExecResult,
   ExtraHost,
   FileToCopy,
+  HealthCheck,
   Labels,
   ResourcesQuota,
   TmpFs,
@@ -26,6 +27,8 @@ export interface TestContainer {
   withEnvironment(environment: Environment): this;
   withCommand(command: string[]): this;
   withEntrypoint(entrypoint: string[]): this;
+  withName(name: string): this;
+  withLabels(labels: Labels): this;
   withTmpFs(tmpFs: TmpFs): this;
   withUlimits(ulimits: Ulimits): this;
   withSecurityOpt(...securityOptions: string[]): this;
@@ -33,16 +36,19 @@ export interface TestContainer {
   withDroppedCapabilities(...capabilities: string[]): this;
   withExposedPorts(...ports: PortWithOptionalBinding[]): this;
   withBindMounts(bindMounts: BindMount[]): this;
+  withHealthCheck(healthCheck: HealthCheck): this;
   withWaitStrategy(waitStrategy: WaitStrategy): this;
   withStartupTimeout(startupTimeoutMs: number): this;
   withNetwork(network: StartedNetwork): this;
   withNetworkMode(networkMode: string): this;
+  withNetworkAliases(...networkAliases: string[]): this;
   withExtraHosts(extraHosts: ExtraHost[]): this;
   withDefaultLogDriver(): this;
   withPrivilegedMode(): this;
   withPlatform(platform: string): this;
   withUser(user: string): this;
   withPullPolicy(pullPolicy: ImagePullPolicy): this;
+  withIpcMode(ipcMode: string): this;
   withReuse(): this;
   withAutoCleanup(autoCleanup: boolean): this;
   withAutoRemove(autoRemove: boolean): this;

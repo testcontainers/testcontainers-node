@@ -1,6 +1,6 @@
 {
   "name": "@testcontainers/hivemq",
-  "version": "12.2.1",
+  "version": "12.2.2",
   "license": "MIT",
   "keywords": [
     "hivemq",
@@ -29,9 +29,9 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "mqtt": "^5.16.0"
+    "mqtt": "^5.16.1"
   },
   "dependencies": {
-    "testcontainers": "^12.2.1"
+    "testcontainers": "^12.2.2"
   }
 }

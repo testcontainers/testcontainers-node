@@ -20,8 +20,9 @@ import { StartedDockerComposeEnvironment } from "./started-docker-compose-enviro
 export class DockerComposeEnvironment {
   private readonly composeFilePath: string;
   private readonly composeFiles: string | string[];
+  private readonly defaultProjectName: string;
 
-  private projectName: string;
+  private projectName?: string;
   private build = false;
   private autoCleanup = true;
   private recreate = true;
@@ -37,7 +38,7 @@ export class DockerComposeEnvironment {
   constructor(composeFilePath: string, composeFiles: string | string[], uuid: Uuid = new RandomUuid()) {
     this.composeFilePath = composeFilePath;
     this.composeFiles = composeFiles;
-    this.projectName = `testcontainers-${uuid.nextUuid()}`;
+    this.defaultProjectName = `testcontainers-${uuid.nextUuid()}`;
   }
 
   public withBuild(): this {
@@ -67,7 +68,6 @@ export class DockerComposeEnvironment {
 
   public withNoRecreate(): this {
     this.recreate = false;
-    this.projectName = "testcontainers-node";
     return this;
   }
 
@@ -104,11 +104,12 @@ export class DockerComposeEnvironment {
   }
 
   public async up(services?: Array<string>): Promise<StartedDockerComposeEnvironment> {
-    log.info(`Starting DockerCompose environment "${this.projectName}"...`);
+    const projectName = this.getProjectName();
+    log.info(`Starting DockerCompose environment "${projectName}"...`);
     const client = await getContainerRuntimeClient();
     if (this.autoCleanup) {
       const reaper = await getReaper(client);
-      reaper.addComposeProject(this.projectName);
+      reaper.addComposeProject(projectName);
     }
 
     const {
@@ -121,7 +122,7 @@ export class DockerComposeEnvironment {
       ...remainingClientOptions,
       filePath: this.composeFilePath,
       files: this.composeFiles,
-      projectName: this.projectName,
+      projectName,
     };
 
     const shouldPull = this.pullPolicy.shouldPull();
@@ -150,6 +151,13 @@ export class DockerComposeEnvironment {
       composeOptions,
       environment: this.environment,
     });
+  }
+
+  private getProjectName(): string {
+    if (this.projectName !== undefined) {
+      return this.projectName;
+    }
+    return this.recreate ? this.defaultProjectName : "testcontainers-node";
   }
 
   private createCommandOptions(clientCommandOptions: string[], shouldPull: boolean | "never"): string[] {
@@ -185,7 +193,7 @@ export class DockerComposeEnvironment {
     options: ComposeOptions
   ): Promise<{ [containerName: string]: StartedGenericContainer }> {
     const startedContainers = (await client.container.list()).filter(
-      (container) => container.Labels["com.docker.compose.project"] === this.projectName
+      (container) => container.Labels["com.docker.compose.project"] === options.projectName
     );
     const startedContainerNames = startedContainers.map((startedContainer: ContainerInfo) =>
       startedContainer.Names.join(", ")
@@ -194,7 +202,7 @@ export class DockerComposeEnvironment {
 
     const startedContainerNameSet = new Set(
       startedContainers.map((startedContainer) =>
-        parseComposeContainerName(this.projectName, startedContainer.Names[0])
+        parseComposeContainerName(options.projectName, startedContainer.Names[0])
       )
     );
     this.warnForUnusedWaitStrategies(startedContainerNameSet);
@@ -222,7 +230,7 @@ export class DockerComposeEnvironment {
     startedContainer: ContainerInfo
   ): Promise<StartedGenericContainer> {
     const container = client.container.getById(startedContainer.Id);
-    const containerName = parseComposeContainerName(this.projectName, startedContainer.Names[0]);
+    const containerName = parseComposeContainerName(options.projectName, startedContainer.Names[0]);
 
     const inspectResult = await client.container.inspect(container);
     const mappedInspectResult = mapInspectResult(inspectResult);
