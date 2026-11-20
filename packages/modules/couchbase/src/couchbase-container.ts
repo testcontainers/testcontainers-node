@@ -616,8 +616,13 @@ export class CouchbaseContainer extends GenericContainer {
 
   protected override async containerStarted(
     startedTestContainer: StartedTestContainer,
-    inspectResult: InspectResult
+    inspectResult: InspectResult,
+    reused: boolean
   ): Promise<void> {
+    if (reused) {
+      return;
+    }
+
     const deadline = this.startupTimeoutMs === undefined ? undefined : Date.now() + this.startupTimeoutMs;
     const remainingStartupMs = () => (deadline === undefined ? 60_000 : Math.max(deadline - Date.now(), 0));
     const client = await getContainerRuntimeClient();

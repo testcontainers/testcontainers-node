@@ -1,5 +1,11 @@
 import path from "node:path";
-import { AbstractStartedContainer, GenericContainer, type StartedTestContainer, Wait } from "testcontainers";
+import {
+  AbstractStartedContainer,
+  GenericContainer,
+  type InspectResult,
+  type StartedTestContainer,
+  Wait,
+} from "testcontainers";
 
 const VALKEY_PORT = 6379;
 
@@ -37,8 +43,12 @@ export class ValkeyContainer extends GenericContainer {
     return this;
   }
 
-  protected override async containerStarted(container: StartedTestContainer): Promise<void> {
-    if (this.initialImportScriptFile) {
+  protected override async containerStarted(
+    container: StartedTestContainer,
+    _inspectResult: InspectResult,
+    reused: boolean
+  ): Promise<void> {
+    if (this.initialImportScriptFile && !reused) {
       await this.importInitialData(container);
     }
   }

@@ -1,3 +1,4 @@
+import type { Readable } from "node:stream";
 import { randomUuid } from "../common/uuid";
 import { checkContainerIsHealthy } from "../utils/test-helper";
 import { GenericContainer } from "./generic-container";
@@ -160,6 +161,30 @@ describe("GenericContainer reuse", { concurrent: false, timeout: 180_000 }, () =
       .start();
 
     expect(container.getLabels()).toEqual(expect.objectContaining({ test: "foo" }));
+  });
+
+  it("should pass the logs of a reused container to the log consumer", async () => {
+    const name = `there_can_only_be_one_${randomUuid()}`;
+    await using container1 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withName(name)
+      .withExposedPorts(8080)
+      .withReuse()
+      .start();
+
+    const logConsumer = vi.fn<(stream: Readable) => void>();
+    const container2 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withName(name)
+      .withExposedPorts(8080)
+      .withReuse()
+      .withLogConsumer(logConsumer)
+      .start();
+
+    expect(container2.getId()).toBe(container1.getId());
+    expect(logConsumer).toHaveBeenCalledOnce();
+    const [stream] = logConsumer.mock.calls[0];
+    const line = await new Promise((resolve) => stream.on("data", resolve));
+    expect(line).toContain("Listening on port 8080");
+    stream.destroy();
   });
 
   it("should not create multiple reusable containers if called in parallel", async () => {

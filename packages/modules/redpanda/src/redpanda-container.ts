@@ -57,8 +57,13 @@ export class RedpandaContainer extends GenericContainer {
 
   protected override async containerStarted(
     container: StartedTestContainer,
-    inspectResult: InspectResult
+    inspectResult: InspectResult,
+    reused: boolean
   ): Promise<void> {
+    if (reused) {
+      return;
+    }
+
     // Docker writes a copied file in place, so the starter could read the marker before the rest.
     // A rename on the same filesystem publishes the whole file at once.
     await container.copyContentToContainer([

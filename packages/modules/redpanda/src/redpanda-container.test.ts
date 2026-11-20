@@ -10,7 +10,8 @@ const IMAGE = getImage(__dirname);
 class SlowCopyRedpandaContainer extends RedpandaContainer {
   protected override async containerStarted(
     container: StartedTestContainer,
-    inspectResult: InspectResult
+    inspectResult: InspectResult,
+    reused: boolean
   ): Promise<void> {
     const copyContentToContainer = container.copyContentToContainer.bind(container);
     container.copyContentToContainer = async (contentsToCopy) => {
@@ -21,7 +22,7 @@ class SlowCopyRedpandaContainer extends RedpandaContainer {
         await copyContentToContainer([{ content, target, mode }]);
       }
     };
-    await super.containerStarted(container, inspectResult);
+    await super.containerStarted(container, inspectResult, reused);
   }
 }
 

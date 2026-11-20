@@ -173,26 +173,7 @@ export class GenericContainer implements TestContainer {
       inspectResult = await inspectContainerUntilPortsExposed(() => client.container.inspect(container), container.id);
     }
 
-    const mappedInspectResult = mapInspectResult(inspectResult);
-    const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, mappedInspectResult).filter(
-      this.exposedPorts
-    );
-    const waitStrategy = await this.selectWaitStrategy(client, inspectResult);
-    if (this.startupTimeoutMs !== undefined) {
-      waitStrategy.withStartupTimeout(this.startupTimeoutMs);
-    }
-
-    await waitForContainer(client, container, waitStrategy, boundPorts);
-
-    return new StartedGenericContainer(
-      container,
-      client.info.containerRuntime.host,
-      inspectResult,
-      boundPorts,
-      inspectResult.Name,
-      waitStrategy,
-      this.autoRemove
-    );
+    return this.finishStart(client, container, inspectResult, true);
   }
 
   private async startContainer(client: ContainerRuntimeClient): Promise<StartedTestContainer> {
@@ -213,6 +194,16 @@ export class GenericContainer implements TestContainer {
       () => client.container.inspect(container),
       container.id
     );
+
+    return this.finishStart(client, container, inspectResult, false);
+  }
+
+  private async finishStart(
+    client: ContainerRuntimeClient,
+    container: Container,
+    inspectResult: ContainerInspectInfo,
+    reused: boolean
+  ): Promise<StartedTestContainer> {
     const mappedInspectResult = mapInspectResult(inspectResult);
     const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, mappedInspectResult).filter(
       this.exposedPorts
@@ -221,7 +212,7 @@ export class GenericContainer implements TestContainer {
     await this.consumeContainerLogs(client, container);
 
     if (this.containerStarting) {
-      await this.containerStarting(mappedInspectResult, false);
+      await this.containerStarting(mappedInspectResult, reused);
     }
 
     const waitStrategy = await this.selectWaitStrategy(client, inspectResult);
@@ -242,7 +233,7 @@ export class GenericContainer implements TestContainer {
     );
 
     if (this.containerStarted) {
-      await this.containerStarted(startedContainer, mappedInspectResult, false);
+      await this.containerStarted(startedContainer, mappedInspectResult, reused);
     }
 
     return startedContainer;

@@ -599,6 +599,8 @@ class CustomStartedContainer extends AbstractStartedContainer {
 }
 ```
 
+When [`withReuse()`](#reusing-a-container) finds an existing container, `containerCreated` is not called, and `containerStarting` and `containerStarted` are called with `reused` set to `true`. Skip one-off setup in them, such as importing initial data, when `reused` is `true`.
+
 ## Exposing container ports
 
 Specify which container ports you want accessible by the host:

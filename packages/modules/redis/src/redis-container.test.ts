@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { createClient } from "redis";
+import { randomUuid } from "testcontainers";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { RedisContainer } from "./redis-container";
 
@@ -102,6 +103,28 @@ describe.each(IMAGES)("RedisContainer (%s)", { concurrent: false, timeout: 240_0
       .start();
 
     const client = createClient({ url: container.getConnectionUrl() });
+    await client.connect();
+
+    expect(await client.get("import-count")).toBe("1");
+
+    client.destroy();
+  });
+
+  it.concurrent("should not load initial data again when the container is reused", async () => {
+    const name = `redis-reuse-${randomUuid()}`;
+    await using container1 = await new RedisContainer(image)
+      .withName(name)
+      .withInitialData(path.join(__dirname, "initCount.redis"))
+      .withReuse()
+      .start();
+    const container2 = await new RedisContainer(image)
+      .withName(name)
+      .withInitialData(path.join(__dirname, "initCount.redis"))
+      .withReuse()
+      .start();
+    expect(container2.getId()).toBe(container1.getId());
+
+    const client = createClient({ url: container2.getConnectionUrl() });
     await client.connect();
 
     expect(await client.get("import-count")).toBe("1");
