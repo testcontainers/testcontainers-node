@@ -61,7 +61,7 @@ async function createTestTable(client: DynamoDBClient): Promise<{
 }
 
 function createClient(endpoint: string, accessKeyId: string = "AKIAIOSFODNN7EXAMPLE"): DynamoDBClient {
-  const client = new DynamoDBClient({
+  return new DynamoDBClient({
     region: "us-east-1",
     credentials: {
       accessKeyId,
@@ -69,7 +69,6 @@ function createClient(endpoint: string, accessKeyId: string = "AKIAIOSFODNN7EXAM
     },
     endpoint,
   });
-  return client;
 }
 
 describe("DynamoDBContainer", { timeout: 180_000 }, () => {
@@ -126,7 +125,7 @@ describe("DynamoDBContainer", { timeout: 180_000 }, () => {
     // sharedDB {
     await using container = await new DynamoDBContainer(IMAGE).withSharedDB().start();
 
-    // Both clients will see the same data eventhough the
+    // Both clients will see the same data even though the
     // ACCESS_KEY_ID differ
     const clientA = new DynamoDBClient({
       region: "us-east-1",
