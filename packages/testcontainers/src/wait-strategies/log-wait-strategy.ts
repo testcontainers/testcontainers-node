@@ -58,9 +58,11 @@ export class LogWaitStrategy extends AbstractWaitStrategy {
         .on("end", () => {
           stream.destroy();
           clearTimeout(timeout);
-          const message = `Log stream ended and message "${this.message}" was not received`;
-          log.error(message, { containerId: container.id });
-          reject(new Error(message));
+          this.throwIfContainerExited(container).then(() => {
+            const message = `Log stream ended and message "${this.message}" was not received`;
+            log.error(message, { containerId: container.id });
+            reject(new Error(message));
+          }, reject);
         });
     });
   }

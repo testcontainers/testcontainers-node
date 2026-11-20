@@ -26,7 +26,7 @@ vi.mock("../container-runtime", async (importOriginal) => {
     ...actual,
     getContainerRuntimeClient: async () => ({
       info: { containerRuntime: { host: "localhost" } },
-      container: { inspect: vi.fn() },
+      container: { inspect: async () => ({ State: { Status: "running" } }) },
     }),
   };
 });

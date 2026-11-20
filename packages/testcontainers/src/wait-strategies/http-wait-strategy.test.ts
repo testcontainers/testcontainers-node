@@ -1,7 +1,8 @@
-import { RandomUuid } from "../common";
 import { GenericContainer } from "../generic-container/generic-container";
-import { checkContainerIsHealthy, checkContainerIsHealthyTls, stopStartingContainer } from "../utils/test-helper";
+import { checkContainerIsHealthy, checkContainerIsHealthyTls } from "../utils/test-helper";
 import { Wait } from "./wait";
+
+const exitAfterFirstRequest = ["/bin/sh", "-c", "nc -l -p 8080; exit 1"];
 
 describe("HttpWaitStrategy", { timeout: 180_000 }, () => {
   it("should wait for 200", async () => {
@@ -76,42 +77,25 @@ describe("HttpWaitStrategy", { timeout: 180_000 }, () => {
     ).rejects.toThrowError("URL /hello-world not accessible after 3000ms");
   });
 
-  describe("when options.abortOnContainerExit is true", () => {
-    it("should fail if container exited before waiting pass", async () => {
-      const name = `container-name-${new RandomUuid().nextUuid()}`;
-      const data = [1, 2, 3];
-      const tail = 50;
-      const echoCmd = data.map((i) => `echo ${i}`).join(" && ");
-      const lastLogs = data.join("\n");
-      const container = new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+  it("should fail when the container exits before the wait succeeds", async () => {
+    await expect(() =>
+      new GenericContainer("cristianrgreco/testcontainer:1.1.14")
         .withExposedPorts(8080)
-        .withStartupTimeout(20000)
-        .withEntrypoint(["/bin/sh", "-c", `${echoCmd} && sleep infinity`])
-        .withWaitStrategy(Wait.forHttp("/hello-world", 8080, { abortOnContainerExit: true }))
-        .withName(name);
+        .withEntrypoint(exitAfterFirstRequest)
+        .withWaitStrategy(Wait.forHttp("/hello-world", 8080))
+        .start()
+    ).rejects.toThrowError("Container exited with code 1");
+  });
 
-      await expect(stopStartingContainer(container, name)).rejects.toThrowError(
-        new Error(`Container exited during HTTP healthCheck, last ${tail} logs: ${lastLogs}`)
-      );
-    });
-
-    it("should log only $tail logs if container exited before waiting pass", async () => {
-      const name = `container-name-${new RandomUuid().nextUuid()}`;
-      const tail = 50;
-      const data = [...Array(tail + 5).keys()];
-      const echoCmd = data.map((i) => `echo ${i}`).join(" && ");
-      const lastLogs = data.slice(tail * -1).join("\n");
-      const container = new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+  it("should keep waiting after the container exits when abortOnContainerExit is false", async () => {
+    await expect(() =>
+      new GenericContainer("cristianrgreco/testcontainer:1.1.14")
         .withExposedPorts(8080)
-        .withStartupTimeout(20000)
-        .withEntrypoint(["/bin/sh", "-c", `${echoCmd} && sleep infinity`])
-        .withWaitStrategy(Wait.forHttp("/hello-world", 8080, { abortOnContainerExit: true }))
-        .withName(name);
-
-      await expect(stopStartingContainer(container, name)).rejects.toThrowError(
-        new Error(`Container exited during HTTP healthCheck, last ${tail} logs: ${lastLogs}`)
-      );
-    });
+        .withStartupTimeout(3000)
+        .withEntrypoint(exitAfterFirstRequest)
+        .withWaitStrategy(Wait.forHttp("/hello-world", 8080, { abortOnContainerExit: false }))
+        .start()
+    ).rejects.toThrowError("URL /hello-world not accessible after 3000ms");
   });
 
   it("should set method", async () => {

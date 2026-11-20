@@ -10,6 +10,16 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+To keep waiting after the container has exited, for example when something other than a restart policy starts it again:
+
+```js
+const { GenericContainer, Wait } = require("testcontainers");
+
+const container = await new GenericContainer("alpine")
+  .withWaitStrategy(Wait.forListeningPorts().withAbortOnContainerExit(false))
+  .start();
+```
+
 ## Default wait strategy
 
 By default, Testcontainers waits for a container health check when one is defined by the image or configured with `withHealthCheck`. If no health check is defined, or the image disables health checks with `HEALTHCHECK NONE`, it waits up to 60 seconds for mapped network ports to be bound.
@@ -125,16 +135,6 @@ const container = await new GenericContainer("redis")
   .start();
 ```
 
-Stop waiting after container exited if waiting for container restart not needed.
-
-```js
-const { GenericContainer, Wait } = require("testcontainers");
-
-const container = await new GenericContainer("redis")
-  .withWaitStrategy(Wait.forHttp("/health", 8080, { abortOnContainerExit: true }))
-  .start();
-```
-
 ### For status code
 
 ```js
@@ -174,7 +174,7 @@ const container = await new GenericContainer("redis")
 ```js
 .withWaitStrategy(Wait.forHttp("/health", 8443)
   .usingTls()
-  .insecureTls())
+  .allowInsecure())
 ```
 
 ## Shell command
