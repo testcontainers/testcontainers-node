@@ -33,7 +33,7 @@ describe("GenericContainer lifecycle", { concurrent: false, timeout: 180_000 }, 
     expect(containerStopped).toHaveBeenCalled();
   });
 
-  it("should not call lifecycle callbacks for a reused, generic container", async () => {
+  it("should call starting and started callbacks with reused for a reused, generic container", async () => {
     await using container1 = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
       .withReuse()
@@ -46,8 +46,8 @@ describe("GenericContainer lifecycle", { concurrent: false, timeout: 180_000 }, 
     expect(container1.getId()).toEqual(container2.getId());
     expect(beforeContainerCreated).toHaveBeenCalled();
     expect(containerCreated).not.toHaveBeenCalled();
-    expect(containerStarting).not.toHaveBeenCalled();
-    expect(containerStarted).not.toHaveBeenCalled();
+    expect(containerStarting).toHaveBeenCalledExactlyOnceWith(true);
+    expect(containerStarted).toHaveBeenCalledExactlyOnceWith(true);
   });
 
   class CustomContainer extends GenericContainer {

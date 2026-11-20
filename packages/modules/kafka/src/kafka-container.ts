@@ -161,8 +161,13 @@ export class KafkaContainer extends GenericContainer {
 
   protected override async containerStarted(
     container: StartedTestContainer,
-    inspectResult: InspectResult
+    inspectResult: InspectResult,
+    reused: boolean
   ): Promise<void> {
+    if (reused) {
+      return;
+    }
+
     let command = "#!/bin/bash\n";
     const advertisedListeners = this.updateAdvertisedListeners(container, inspectResult);
     // exporting KAFKA_ADVERTISED_LISTENERS with the container hostname

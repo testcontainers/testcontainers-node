@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { createClient } from "redis";
+import { randomUuid } from "testcontainers";
 import { getImage } from "../../../testcontainers/src/utils/test-helper";
 import { ValkeyContainer } from "./valkey-container";
 
@@ -75,6 +76,33 @@ describe.each(IMAGES)("ValkeyContainer (%s)", { concurrent: false, timeout: 240_
 
     client.destroy();
     // }
+  });
+
+  it.concurrent("should not load initial data again when the container is reused", async () => {
+    const name = `valkey-reuse-${randomUuid()}`;
+    await using container1 = await new ValkeyContainer(image)
+      .withName(name)
+      .withInitialData(path.join(__dirname, "initData.valkey"))
+      .withReuse()
+      .start();
+    const client1 = createClient({ url: container1.getConnectionUrl() });
+    await client1.connect();
+    await client1.set("user:002", "changed");
+    client1.destroy();
+
+    const container2 = await new ValkeyContainer(image)
+      .withName(name)
+      .withInitialData(path.join(__dirname, "initData.valkey"))
+      .withReuse()
+      .start();
+    expect(container2.getId()).toBe(container1.getId());
+
+    const client2 = createClient({ url: container2.getConnectionUrl() });
+    await client2.connect();
+
+    expect(await client2.get("user:002")).toBe("changed");
+
+    client2.destroy();
   });
 
   it.concurrent("should load initial data when running as a non-root user", async () => {
