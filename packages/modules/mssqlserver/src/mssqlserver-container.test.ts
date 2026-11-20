@@ -58,7 +58,7 @@ describe.each(IMAGES)("MSSQLServerContainer (%s)", { concurrent: false, timeout:
   it.concurrent("should throw error with invalid password", async () => {
     const container = new MSSQLServerContainer(image).acceptLicense().withPassword("password");
     await expect(container.start()).rejects.toThrow(
-      Error('Log stream ended and message "/.*Recovery is complete.*/" was not received')
+      'Log stream ended and message "/.*Recovery is complete.*/" was not received'
     );
   });
 
