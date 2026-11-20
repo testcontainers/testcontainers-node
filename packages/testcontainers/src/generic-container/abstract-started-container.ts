@@ -8,6 +8,7 @@ import type {
   ExecOptions,
   ExecResult,
   FileToCopy,
+  InspectResult,
   Labels,
 } from "../types";
 
@@ -111,6 +112,18 @@ export class AbstractStartedContainer implements StartedTestContainer {
 
   public logs(opts?: { since?: number; tail?: number }): Promise<Readable> {
     return this.startedTestContainer.logs(opts);
+  }
+
+  public inspect(): Promise<InspectResult> {
+    return this.startedTestContainer.inspect();
+  }
+
+  public isRunning(): Promise<boolean> {
+    return this.startedTestContainer.isRunning();
+  }
+
+  public getExitCode(): Promise<number | undefined> {
+    return this.startedTestContainer.getExitCode();
   }
 
   async [Symbol.asyncDispose]() {

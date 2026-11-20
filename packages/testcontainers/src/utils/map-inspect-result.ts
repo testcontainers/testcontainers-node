@@ -14,6 +14,7 @@ export function mapInspectResult(inspectResult: ContainerInspectInfo): InspectRe
     state: {
       status: inspectResult.State.Status,
       running: inspectResult.State.Running,
+      exitCode: inspectResult.State.ExitCode,
       startedAt: new Date(inspectResult.State.StartedAt),
       finishedAt: finishedAt.getTime() < 0 ? undefined : finishedAt,
     },

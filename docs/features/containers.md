@@ -444,6 +444,18 @@ const container = await new GenericContainer("alpine").start();
 await container.restart();
 ```
 
+## Inspecting a container
+
+The getters on a started container return what was inspected when it was started or last restarted. To read its current state:
+
+```js
+const container = await new GenericContainer("alpine").withCommand(["sleep", "infinity"]).start();
+
+const { state, healthCheckStatus } = await container.inspect();
+const running = await container.isRunning();
+const exitCode = await container.getExitCode(); // undefined while the container is running
+```
+
 ## Committing a container to an image
 
 ```js
