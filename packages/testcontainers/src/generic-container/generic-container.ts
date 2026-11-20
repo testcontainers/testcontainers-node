@@ -1,6 +1,4 @@
-import { promises as fs } from "node:fs";
 import type { Readable } from "node:stream";
-import archiver from "archiver";
 import AsyncLock from "async-lock";
 import type { Container, ContainerCreateOptions, ContainerInspectInfo, HostConfig } from "dockerode";
 import { containerLog, hash, log, toNanos } from "../common";
@@ -36,6 +34,7 @@ import { type ImagePullPolicy, PullPolicy } from "../utils/pull-policy";
 import { selectWaitStrategy } from "../wait-strategies/utils/wait-strategy-selector";
 import { waitForContainer } from "../wait-strategies/wait-for-container";
 import type { WaitStrategy } from "../wait-strategies/wait-strategy";
+import { createArchive } from "./create-archive";
 // biome-ignore lint/suspicious/noImportCycles: fromDockerfile() and build() construct each other; only dereferenced at runtime
 import { GenericContainerBuilder } from "./generic-container-builder";
 import { inspectContainerUntilPortsExposed } from "./inspect-container-util-ports-exposed";
@@ -272,38 +271,17 @@ export class GenericContainer implements TestContainer {
 
   private async copyToCreatedContainer(client: ContainerRuntimeClient, container: Container): Promise<void> {
     if (this.filesToCopy.length > 0 || this.directoriesToCopy.length > 0 || this.contentsToCopy.length > 0) {
-      const archive = await this.createArchiveToCopyToContainer();
-      await Promise.all([
-        archive.finalize(),
-        client.container.putArchive(container, archive, "/", this.copyToContainerOptions),
-      ]);
+      const archive = createArchive({
+        files: this.filesToCopy,
+        directories: this.directoriesToCopy,
+        contents: this.contentsToCopy,
+      });
+      await client.container.putArchive(container, archive, "/", this.copyToContainerOptions);
     }
 
     for (const archive of this.archivesToCopy) {
       await client.container.putArchive(container, archive.tar, archive.target, this.copyToContainerOptions);
     }
-  }
-
-  private async createArchiveToCopyToContainer(): Promise<archiver.Archiver> {
-    const tar = archiver("tar");
-    const filesToCopyWithStats = await Promise.all(
-      this.filesToCopy.map(async (fileToCopy) => ({
-        ...fileToCopy,
-        stats: await fs.stat(fileToCopy.source),
-      }))
-    );
-
-    for (const { source, target, mode, stats } of filesToCopyWithStats) {
-      tar.file(source, { name: target, mode, stats });
-    }
-    for (const { source, target, mode } of this.directoriesToCopy) {
-      tar.directory(source, target, { mode });
-    }
-    for (const { content, target, mode } of this.contentsToCopy) {
-      tar.append(content, { name: target, mode });
-    }
-
-    return tar;
   }
 
   private async consumeContainerLogs(client: ContainerRuntimeClient, container: Container): Promise<void> {

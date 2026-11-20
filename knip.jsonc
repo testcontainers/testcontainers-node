@@ -9,7 +9,9 @@
       // Run by Jest in the Checks workflow via `--testMatch`, which knip can't trace back to a file.
       "entry": ["smoke-test.jest.js"],
       // Docker build contexts that tests copy into images, never imported.
-      "ignoreFiles": ["fixtures/**"]
+      "ignoreFiles": ["fixtures/**"],
+      // System binary called from a test helper, not an npm package.
+      "ignoreBinaries": ["mkfifo"]
     }
   }
 }

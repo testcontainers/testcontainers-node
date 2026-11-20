@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { createSocket } from "node:dgram";
 import fs from "node:fs";
 import { createServer, type Server } from "node:http";
@@ -187,6 +188,26 @@ export const createTempSymlinkedFile = async (
   return {
     source,
     symlink,
+    [Symbol.asyncDispose]: async () => {
+      await fs.promises.rm(directory, { recursive: true, force: true });
+    },
+  };
+};
+
+export const createTempDirectoryTree = async (): Promise<{ directory: string } & AsyncDisposable> => {
+  const directory = await fs.promises.mkdtemp(path.join(tmpdir(), "testcontainers-"));
+  await fs.promises.writeFile(path.join(directory, "file.txt"), "file");
+  await fs.promises.writeFile(path.join(directory, ".hidden"), "hidden");
+  await fs.promises.writeFile(path.join(directory, "writable.txt"), "writable");
+  await fs.promises.chmod(path.join(directory, "writable.txt"), 0o666);
+  await fs.promises.mkdir(path.join(directory, "empty"));
+  await fs.promises.mkdir(path.join(directory, "nested"));
+  await fs.promises.writeFile(path.join(directory, "nested", "file.txt"), "nested");
+  await fs.promises.symlink("file.txt", path.join(directory, "link.txt"));
+  execFileSync("mkfifo", [path.join(directory, "fifo")]);
+
+  return {
+    directory,
     [Symbol.asyncDispose]: async () => {
       await fs.promises.rm(directory, { recursive: true, force: true });
     },
