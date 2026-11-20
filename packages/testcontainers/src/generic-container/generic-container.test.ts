@@ -466,6 +466,39 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     expect((await container.exec(["cat", target])).output).toEqual(expect.stringContaining("hello world"));
   });
 
+  it("should copy file to started container with a Windows-style target", async () => {
+    const source = path.resolve(fixtures, "docker", "test.txt");
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withExposedPorts(8080)
+      .start();
+
+    await container.copyFilesToContainer([
+      { source, target: path.win32.join("/tmp", "nested", "test.txt") },
+      { source, target: "C:\\tmp\\drive\\test.txt" },
+    ]);
+
+    const { output, exitCode } = await container.exec(["cat", "/tmp/nested/test.txt", "/tmp/drive/test.txt"]);
+    expect(exitCode).toBe(0);
+    expect(output).toEqual(expect.stringContaining("hello world"));
+  });
+
+  it("should reject copying a file or content to a target ending with a slash", async () => {
+    const source = path.resolve(fixtures, "docker", "test.txt");
+    const target = "/tmp/dir/";
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withExposedPorts(8080)
+      .start();
+    await container.exec(["sh", "-c", "mkdir /tmp/dir && touch /tmp/dir/keep"]);
+
+    await expect(container.copyFilesToContainer([{ source, target }])).rejects.toThrow(
+      'Target "/tmp/dir/" must be a file path'
+    );
+    await expect(container.copyContentToContainer([{ content: "hello world", target }])).rejects.toThrow(
+      'Target "/tmp/dir/" must be a file path'
+    );
+    expect((await container.exec(["sh", "-c", "[ -f /tmp/dir/keep ]"])).exitCode).toBe(0);
+  });
+
   it("should follow symlink when copying file to started container", async () => {
     if (process.platform === "win32") {
       return;

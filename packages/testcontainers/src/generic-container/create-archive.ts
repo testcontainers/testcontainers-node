@@ -17,12 +17,14 @@ export function createArchive({ files = [], directories = [], contents = [] }: A
 
   (async () => {
     for (const { source, target, mode } of files) {
+      const name = toFileEntryName(target);
       const options = { entries: [path.basename(source)], dereference: true, ignore: () => true };
-      await packFromFs(pack, path.dirname(source), options, () => target, mode);
+      await packFromFs(pack, path.dirname(source), options, () => name, mode);
     }
     for (const { content, target, mode } of contents) {
+      const name = toFileEntryName(target);
       const data = typeof content === "string" || Buffer.isBuffer(content) ? content : await buffer(content);
-      pack.entry({ name: toEntryName(target), mode }, data);
+      pack.entry({ name, mode }, data);
     }
     for (const { source, target, mode } of directories) {
       const options = { entries: await fs.readdir(source) };
@@ -68,6 +70,15 @@ function defaultMode(header: tarFs.Headers): number {
   return process.platform === "win32" && header.type === "directory" ? 0o755 : header.mode;
 }
 
+function toFileEntryName(target: string): string {
+  const name = toEntryName(target);
+  if (name === "" || name.endsWith("/")) {
+    throw new Error(`Target "${target}" must be a file path`);
+  }
+  return name;
+}
+
+// Targets built with path functions on Windows use backslashes and can start with a drive letter
 function toEntryName(target: string): string {
-  return target.replace(/^\/+/, "");
+  return path.posix.join("/", target.replace(/\\/g, "/").replace(/^[a-z]:/i, "")).slice(1);
 }
