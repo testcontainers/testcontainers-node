@@ -8,6 +8,7 @@ export { AbstractStartedContainer } from "./generic-container/abstract-started-c
 export { AbstractStoppedContainer } from "./generic-container/abstract-stopped-container";
 export { GenericContainer } from "./generic-container/generic-container";
 export { BuildOptions, GenericContainerBuilder } from "./generic-container/generic-container-builder";
+export { LogConsumers } from "./generic-container/log-consumers";
 export { Network, StartedNetwork, StoppedNetwork } from "./network/network";
 export { getReaper } from "./reaper/reaper";
 export { SocatContainer, StartedSocatContainer } from "./socat/socat-container";

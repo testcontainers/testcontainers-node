@@ -1,6 +1,7 @@
 import { containerLog } from "../common";
 import { Wait } from "../wait-strategies/wait";
 import { GenericContainer } from "./generic-container";
+import { LogConsumers } from "./log-consumers";
 
 describe("GenericContainer logs", { timeout: 180_000 }, () => {
   it("should stream logs from a container before start", async () => {
@@ -59,5 +60,17 @@ describe("GenericContainer logs", { timeout: 180_000 }, () => {
 
     const logs = containerLogTraceSpy.mock.calls;
     expect(logs.some((line) => line.includes("Listening on port 8080"))).toBe(true);
+  });
+
+  it("should consume logs line by line", async ({ expect }) => {
+    const received: string[] = [];
+
+    await using _container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withLogConsumer(LogConsumers.lines((line) => received.push(line)))
+      .withEntrypoint(["/bin/sh", "-c", "echo a; echo b; echo c; sleep infinity"])
+      .withWaitStrategy(Wait.forLogMessage("c"))
+      .start();
+
+    await expect.poll(() => received).toEqual(["a", "b", "c"]);
   });
 });
