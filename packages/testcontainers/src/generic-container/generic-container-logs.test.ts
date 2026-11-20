@@ -67,7 +67,7 @@ describe("GenericContainer logs", { timeout: 180_000 }, () => {
 
     await using _container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withLogConsumer(LogConsumers.lines((line) => received.push(line)))
-      .withEntrypoint(["/bin/sh", "-c", `echo a; echo b; echo c; sleep infinity`])
+      .withEntrypoint(["/bin/sh", "-c", "echo a; echo b; echo c; sleep infinity"])
       .withWaitStrategy(Wait.forLogMessage("c"))
       .start();
 
