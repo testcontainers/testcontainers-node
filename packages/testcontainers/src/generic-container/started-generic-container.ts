@@ -17,6 +17,7 @@ import type {
   ExecOptions,
   ExecResult,
   FileToCopy,
+  InspectResult,
   Labels,
 } from "../types";
 import { BoundPorts } from "../utils/bound-ports";
@@ -255,6 +256,21 @@ export class StartedGenericContainer implements StartedTestContainer {
     log.debug(`Executed command "${commandStr}"...`, { containerId: this.container.id });
 
     return output;
+  }
+
+  public async inspect(): Promise<InspectResult> {
+    const client = await getContainerRuntimeClient();
+    return mapInspectResult(await client.container.inspect(this.container));
+  }
+
+  public async isRunning(): Promise<boolean> {
+    return (await this.inspect()).state.running;
+  }
+
+  public async getExitCode(): Promise<number | undefined> {
+    const { state } = await this.inspect();
+    // A container that is running, or has never run, has no exit code yet
+    return state.running || state.finishedAt === undefined ? undefined : state.exitCode;
   }
 
   public async logs(opts?: { since?: number; tail?: number }): Promise<Readable> {

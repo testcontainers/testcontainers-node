@@ -13,6 +13,7 @@ import type {
   ExtraHost,
   FileToCopy,
   HealthCheck,
+  InspectResult,
   Labels,
   ResourcesQuota,
   TmpFs,
@@ -96,6 +97,12 @@ export interface StartedTestContainer extends AsyncDisposable {
   copyContentToContainer(contentsToCopy: ContentToCopy[]): Promise<void>;
   exec(command: string | string[], opts?: Partial<ExecOptions>): Promise<ExecResult>;
   logs(opts?: { since?: number; tail?: number }): Promise<Readable>;
+  /** Inspects the container now; the other getters return what was inspected when it was started or last restarted. */
+  inspect(): Promise<InspectResult>;
+  /** Whether the container is running now. */
+  isRunning(): Promise<boolean>;
+  /** The exit code of the container's main process, or `undefined` while the container is running. */
+  getExitCode(): Promise<number | undefined>;
 }
 
 export interface StoppedTestContainer {

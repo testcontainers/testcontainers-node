@@ -8,7 +8,7 @@ export type InspectResult = {
   ports: Ports;
   healthCheckStatus: HealthCheckStatus;
   networkSettings: { [networkName: string]: NetworkSettings };
-  state: { status: string; running: boolean; startedAt: Date; finishedAt: Date | undefined };
+  state: { status: string; running: boolean; exitCode: number; startedAt: Date; finishedAt: Date | undefined };
   labels: Labels;
 };
 
