@@ -28,4 +28,19 @@ describe("GenericContainer restart", { timeout: 180_000 }, () => {
     await checkContainerIsHealthy(container);
     expect((await container.exec(["cat", "config.txt"])).output).toEqual(expect.stringContaining("testconfig"));
   });
+
+  it("should keep streaming logs to the log consumer after restart", async () => {
+    const lines: string[] = [];
+    await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+      .withExposedPorts(8080)
+      .withLogConsumer((stream) => stream.on("data", (line) => lines.push(line)))
+      .start();
+    await vi.waitFor(() => expect(lines.filter((l) => l.includes("Listening on port 8080"))).toHaveLength(1));
+
+    await container.restart();
+
+    await vi.waitFor(() => expect(lines.filter((l) => l.includes("Listening on port 8080"))).toHaveLength(2), {
+      timeout: 10_000,
+    });
+  });
 });

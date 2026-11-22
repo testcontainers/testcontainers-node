@@ -758,6 +758,8 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+When the container is restarted, the stream ends and the consumer is called again with a new stream for the restarted container's logs.
+
 You can specify a point in time as a UNIX timestamp from which you want the logs to start:
 
 ```js
