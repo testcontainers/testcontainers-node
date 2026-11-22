@@ -191,7 +191,8 @@ export class GenericContainer implements TestContainer {
       boundPorts,
       inspectResult.Name,
       waitStrategy,
-      this.autoRemove
+      this.autoRemove,
+      this.logConsumer
     );
   }
 
@@ -238,7 +239,8 @@ export class GenericContainer implements TestContainer {
       boundPorts,
       inspectResult.Name,
       waitStrategy,
-      this.autoRemove
+      this.autoRemove,
+      this.logConsumer
     );
 
     if (this.containerStarted) {

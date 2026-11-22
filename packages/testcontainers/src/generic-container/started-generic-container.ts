@@ -39,7 +39,8 @@ export class StartedGenericContainer implements StartedTestContainer {
     private boundPorts: BoundPorts,
     private readonly name: string,
     private readonly waitStrategy: WaitStrategy,
-    private readonly autoRemove: boolean
+    private readonly autoRemove: boolean,
+    private readonly logConsumer?: (stream: Readable) => unknown
   ) {}
 
   protected containerIsStopping?(): Promise<void>;
@@ -100,6 +101,10 @@ export class StartedGenericContainer implements StartedTestContainer {
     );
     const mappedInspectResult = mapInspectResult(this.inspectResult);
     const startTime = new Date(this.inspectResult.State.StartedAt);
+
+    if (this.logConsumer !== undefined) {
+      this.logConsumer(await client.container.logs(this.container, { since: startTime.getTime() / 1000 }));
+    }
 
     if (containerLog.enabled()) {
       (await client.container.logs(this.container, { since: startTime.getTime() / 1000 }))
