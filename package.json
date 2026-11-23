@@ -20,7 +20,7 @@
     "check-compiles": "tsc -b packages/testcontainers packages/modules/*"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.6.7",
+    "@biomejs/biome": "^2.6.8",
     "@vitest/coverage-v8": "^5.1.0",
     "knip": "^6.45.1",
     "npm-check-updates": "^23.1.1",
