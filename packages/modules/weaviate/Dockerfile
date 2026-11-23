@@ -1,1 +1,1 @@
-FROM semitechnologies/weaviate:1.40.5
+FROM semitechnologies/weaviate:1.40.6

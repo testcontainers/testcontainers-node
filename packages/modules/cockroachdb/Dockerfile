@@ -1,1 +1,1 @@
-FROM cockroachdb/cockroach:v26.4.0
+FROM cockroachdb/cockroach:v26.4.1

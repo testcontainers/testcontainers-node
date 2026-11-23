@@ -1,1 +1,1 @@
-FROM qdrant/qdrant:v1.20.0
+FROM qdrant/qdrant:v1.20.2
