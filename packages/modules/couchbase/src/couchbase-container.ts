@@ -5,8 +5,8 @@ import {
   GenericContainer,
   getContainerRuntimeClient,
   type InspectResult,
-  IntervalRetry,
   log,
+  poll,
   type StartedTestContainer,
   Wait,
   type WaitStrategy,
@@ -402,13 +402,13 @@ export class CouchbaseContainer extends GenericContainer {
       await this.waitUntilBucketIsHealthy(client, inspectResult, startedTestContainer, bucket, remainingStartupMs());
 
       if (this.enabledServices.has(CouchbaseService.QUERY)) {
-        await this.waitUntilKeyspaceIsPresent(client, startedTestContainer, bucket, remainingStartupMs());
+        await this.waitUntilKeyspaceIsPresent(startedTestContainer, bucket, remainingStartupMs());
       }
 
       if (bucket.hasPrimaryIndex()) {
         if (this.enabledServices.has(CouchbaseService.QUERY)) {
           await this.createPrimaryIndex(startedTestContainer, bucket);
-          await this.waitUntilPrimaryIndexIsOnline(client, startedTestContainer, bucket, remainingStartupMs());
+          await this.waitUntilPrimaryIndexIsOnline(startedTestContainer, bucket, remainingStartupMs());
         } else {
           log.info(
             `Primary index creation for bucket ${bucket.getName()} ignored, since QUERY service is not present.`
@@ -503,12 +503,11 @@ export class CouchbaseContainer extends GenericContainer {
   }
 
   private async waitUntilKeyspaceIsPresent(
-    client: ContainerRuntimeClient,
     startedTestContainer: StartedTestContainer,
     bucket: BucketDefinition,
     timeoutMs: number
   ) {
-    await new IntervalRetry<Response | undefined, Error>(1000).retryUntil(
+    await poll(
       async () => {
         try {
           const body = new URLSearchParams();
@@ -533,20 +532,18 @@ export class CouchbaseContainer extends GenericContainer {
           return undefined;
         }
       },
-      async (response) => {
-        if (response === undefined) {
-          return false;
-        }
-        const jsonResponse = (await response.json()) as { results: Array<{ present: boolean }> };
-        return jsonResponse.results[0].present;
-      },
-      () => {
-        const message = `URL /query/service not accessible after ${timeoutMs}ms`;
-        log.error(message, { containerId: client.container.getById(startedTestContainer.getId()).id });
-
-        throw new Error(message);
-      },
-      timeoutMs
+      {
+        until: async (response) => {
+          if (response === undefined) {
+            return false;
+          }
+          const jsonResponse = (await response.json()) as { results: Array<{ present: boolean }> };
+          return jsonResponse.results[0].present;
+        },
+        intervalMs: 1000,
+        timeoutMs,
+        timeoutMessage: `URL /query/service not accessible after ${timeoutMs}ms`,
+      }
     );
   }
 
@@ -567,12 +564,11 @@ export class CouchbaseContainer extends GenericContainer {
   }
 
   private async waitUntilPrimaryIndexIsOnline(
-    client: ContainerRuntimeClient,
     startedTestContainer: StartedTestContainer,
     bucket: BucketDefinition,
     timeoutMs: number
   ) {
-    await new IntervalRetry<Response | undefined, Error>(1000).retryUntil(
+    await poll(
       async () => {
         try {
           const body = new URLSearchParams();
@@ -597,20 +593,18 @@ export class CouchbaseContainer extends GenericContainer {
           return undefined;
         }
       },
-      async (response) => {
-        if (response === undefined) {
-          return false;
-        }
-        const jsonResponse = (await response.json()) as { results: Array<{ online: boolean }> };
-        return jsonResponse.results[0].online;
-      },
-      () => {
-        const message = `URL /query/service not accessible after ${timeoutMs}ms`;
-        log.error(message, { containerId: client.container.getById(startedTestContainer.getId()).id });
-
-        throw new Error(message);
-      },
-      timeoutMs
+      {
+        until: async (response) => {
+          if (response === undefined) {
+            return false;
+          }
+          const jsonResponse = (await response.json()) as { results: Array<{ online: boolean }> };
+          return jsonResponse.results[0].online;
+        },
+        intervalMs: 1000,
+        timeoutMs,
+        timeoutMessage: `URL /query/service not accessible after ${timeoutMs}ms`,
+      }
     );
   }
 
@@ -658,22 +652,21 @@ export class CouchbaseContainer extends GenericContainer {
   }
 
   private async waitUntilKvAcceptsCredentials(container: StartedTestContainer, timeoutMs: number) {
-    await new IntervalRetry<number, Error>(100).retryUntil(
-      async () => {
+    await poll(
+      async ({ signal }) => {
         const { exitCode } = await container.exec(
           ["/opt/couchbase/bin/mcstat", "--host", `127.0.0.1:${PORTS.KV_PORT}`, "--user", this.username, "connections"],
-          { env: { CB_PASSWORD: this.password } }
+          { env: { CB_PASSWORD: this.password }, signal }
         );
         return exitCode;
       },
-      (exitCode) => exitCode === 0,
-      () => {
-        const message = `KV service did not accept credentials after ${timeoutMs}ms`;
-        log.error(message, { containerId: container.getId() });
-
-        throw new Error(message);
-      },
-      timeoutMs
+      {
+        until: (exitCode) => exitCode === 0,
+        intervalMs: 100,
+        timeoutMs,
+        timeoutMessage: `KV service did not accept credentials after ${timeoutMs}ms`,
+        retryOnError: false,
+      }
     );
   }
 
