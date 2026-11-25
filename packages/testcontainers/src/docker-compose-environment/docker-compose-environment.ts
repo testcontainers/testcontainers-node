@@ -235,13 +235,13 @@ export class DockerComposeEnvironment {
     const inspectResult = await client.container.inspect(container);
     const mappedInspectResult = mapInspectResult(inspectResult);
     const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, mappedInspectResult);
-    const waitStrategy = await selectWaitStrategy({
+    let waitStrategy = await selectWaitStrategy({
       client,
       inspectResult,
       waitStrategy: this.waitStrategy[containerName] ?? this.defaultWaitStrategy,
     });
     if (this.startupTimeoutMs !== undefined) {
-      waitStrategy.withStartupTimeout(this.startupTimeoutMs);
+      waitStrategy = waitStrategy.withDefaultStartupTimeout(this.startupTimeoutMs);
     }
 
     if (containerLog.enabled()) {

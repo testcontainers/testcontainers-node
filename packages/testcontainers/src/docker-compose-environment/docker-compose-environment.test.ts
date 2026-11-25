@@ -151,6 +151,22 @@ describe("DockerComposeEnvironment", { timeout: 180_000 }, () => {
     expect(await getRunningContainerNames()).not.toContain(name);
   });
 
+  it("should respect the wait strategy's own startup timeout over the environment's startup timeout", async () => {
+    const name = `custom_container_name_${randomUuid()}`;
+    const waitStrategy = Wait.forLogMessage("unexpected").withStartupTimeout(1_000);
+
+    await expect(
+      new DockerComposeEnvironment(fixtures, "docker-compose-with-name.yml")
+        .withEnvironment({ CONTAINER_NAME: name })
+        .withWaitStrategy(name, waitStrategy)
+        .withStartupTimeout(60_000)
+        .up()
+    ).rejects.toThrow(`Log message "unexpected" not received after 1000ms`);
+
+    expect(await getRunningContainerNames()).not.toContain(name);
+    expect(waitStrategy.getStartupTimeout()).toBe(1_000);
+  });
+
   it("should support health check wait strategy", async () => {
     await using startedEnvironment = await new DockerComposeEnvironment(fixtures, "docker-compose-with-healthcheck.yml")
       .withWaitStrategy("container-1", Wait.forHealthCheck())
