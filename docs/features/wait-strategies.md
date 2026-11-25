@@ -10,6 +10,17 @@ const container = await new GenericContainer("alpine")
   .start();
 ```
 
+`GenericContainer.withStartupTimeout` only applies to a wait strategy that has not set its own startup timeout. A timeout set explicitly on the wait strategy itself always takes precedence:
+
+```js
+const { GenericContainer, Wait } = require("testcontainers");
+
+const container = await new GenericContainer("alpine")
+  .withWaitStrategy(Wait.forLogMessage("READY").withStartupTimeout(5_000)) // wins
+  .withStartupTimeout(120_000) // only applies to strategies without their own timeout
+  .start();
+```
+
 ## Default wait strategy
 
 By default, Testcontainers waits for a container health check when one is defined by the image or configured with `withHealthCheck`. If no health check is defined, or the image disables health checks with `HEALTHCHECK NONE`, it waits up to 60 seconds for mapped network ports to be bound.

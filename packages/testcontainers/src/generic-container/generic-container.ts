@@ -177,9 +177,9 @@ export class GenericContainer implements TestContainer {
     const boundPorts = BoundPorts.fromInspectResult(client.info.containerRuntime.hostIps, mappedInspectResult).filter(
       this.exposedPorts
     );
-    const waitStrategy = await this.selectWaitStrategy(client, inspectResult);
+    let waitStrategy = await this.selectWaitStrategy(client, inspectResult);
     if (this.startupTimeoutMs !== undefined) {
-      waitStrategy.withStartupTimeout(this.startupTimeoutMs);
+      waitStrategy = waitStrategy.withDefaultStartupTimeout(this.startupTimeoutMs);
     }
 
     await waitForContainer(client, container, waitStrategy, boundPorts);
@@ -224,9 +224,9 @@ export class GenericContainer implements TestContainer {
       await this.containerStarting(mappedInspectResult, false);
     }
 
-    const waitStrategy = await this.selectWaitStrategy(client, inspectResult);
+    let waitStrategy = await this.selectWaitStrategy(client, inspectResult);
     if (this.startupTimeoutMs !== undefined) {
-      waitStrategy.withStartupTimeout(this.startupTimeoutMs);
+      waitStrategy = waitStrategy.withDefaultStartupTimeout(this.startupTimeoutMs);
     }
 
     await waitForContainer(client, container, waitStrategy, boundPorts);

@@ -9,6 +9,8 @@ export interface WaitStrategy {
   isStartupTimeoutSet(): boolean;
 
   getStartupTimeout(): number;
+
+  withDefaultStartupTimeout(startupTimeoutMs: number): WaitStrategy;
 }
 
 export abstract class AbstractWaitStrategy implements WaitStrategy {
@@ -33,5 +35,13 @@ export abstract class AbstractWaitStrategy implements WaitStrategy {
 
   public getStartupTimeout(): number {
     return this.startupTimeoutMs;
+  }
+
+  public withDefaultStartupTimeout(startupTimeoutMs: number): WaitStrategy {
+    if (this.startupTimeoutSet) {
+      return this;
+    }
+    const clone: this = Object.assign(Object.create(Object.getPrototypeOf(this)), this);
+    return clone.withStartupTimeout(startupTimeoutMs);
   }
 }

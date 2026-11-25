@@ -66,6 +66,44 @@ describe("GenericContainer", { timeout: 180_000 }, () => {
     expect(container.getMappedPort(5005, "udp")).toBe(hostPort);
   });
 
+  it("should respect the wait strategy's own startup timeout over the container's startup timeout", async () => {
+    const waitStrategy = Wait.forLogMessage("this never appears").withStartupTimeout(1_000);
+
+    await expect(
+      new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+        .withExposedPorts(8080)
+        .withWaitStrategy(waitStrategy)
+        .withStartupTimeout(6_000)
+        .start()
+    ).rejects.toThrow(`Log message "this never appears" not received after 1000ms`);
+
+    expect(waitStrategy.getStartupTimeout()).toBe(1_000);
+  });
+
+  it("should not mutate a reused wait strategy's own startup timeout when applying the container's default", async () => {
+    const waitStrategy = Wait.forLogMessage("this never appears");
+
+    await expect(
+      new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+        .withExposedPorts(8080)
+        .withWaitStrategy(waitStrategy)
+        .withStartupTimeout(1_000)
+        .start()
+    ).rejects.toThrow(`Log message "this never appears" not received after 1000ms`);
+
+    expect(waitStrategy.isStartupTimeoutSet()).toBe(false);
+
+    await expect(
+      new GenericContainer("cristianrgreco/testcontainer:1.1.14")
+        .withExposedPorts(8080)
+        .withWaitStrategy(waitStrategy)
+        .withStartupTimeout(2_000)
+        .start()
+    ).rejects.toThrow(`Log message "this never appears" not received after 2000ms`);
+
+    expect(waitStrategy.isStartupTimeoutSet()).toBe(false);
+  });
+
   it("should execute a command on a running container", async () => {
     await using container = await new GenericContainer("cristianrgreco/testcontainer:1.1.14")
       .withExposedPorts(8080)
