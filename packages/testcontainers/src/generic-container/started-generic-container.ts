@@ -23,10 +23,12 @@ import { BoundPorts } from "../utils/bound-ports";
 import { LABEL_TESTCONTAINERS_SESSION_ID } from "../utils/labels";
 import { mapInspectResult } from "../utils/map-inspect-result";
 import type { PortWithOptionalBinding } from "../utils/port";
+import { HostPortCheck } from "../wait-strategies/utils/port-check";
 import { waitForContainer } from "../wait-strategies/wait-for-container";
 import type { WaitStrategy } from "../wait-strategies/wait-strategy";
 import { inspectContainerUntilPortsExposed } from "./inspect-container-util-ports-exposed";
 import { StoppedGenericContainer } from "./stopped-generic-container";
+import { waitUntilHostPortsReleased } from "./wait-until-host-ports-released";
 
 export class StartedGenericContainer implements StartedTestContainer {
   private stoppedContainer?: StoppedTestContainer;
@@ -92,7 +94,9 @@ export class StartedGenericContainer implements StartedTestContainer {
     log.info(`Restarting container...`, { containerId: this.container.id });
     const client = await getContainerRuntimeClient();
     const resolvedOptions: RestartOptions = { timeout: 0, ...options };
-    await client.container.restart(this.container, resolvedOptions);
+    await client.container.stop(this.container, resolvedOptions);
+    await waitUntilHostPortsReleased(new HostPortCheck(client), this.boundPorts, this.container.id);
+    await client.container.start(this.container);
 
     this.inspectResult = await inspectContainerUntilPortsExposed(
       () => client.container.inspect(this.container),
@@ -130,6 +134,8 @@ export class StartedGenericContainer implements StartedTestContainer {
     await client.container.stop(this.container, { timeout: resolvedOptions.timeout });
     if (resolvedOptions.remove) {
       await client.container.remove(this.container, { removeVolumes: resolvedOptions.removeVolumes });
+    } else {
+      await waitUntilHostPortsReleased(new HostPortCheck(client), this.boundPorts, this.container.id);
     }
     log.info(`Stopped container`, { containerId: this.container.id });
 
